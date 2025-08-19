@@ -1,4 +1,4 @@
-import { adminAuth } from '$lib/server/firebase';
+import { adminAuth, adminDb } from '$lib/server/firebase';
 import { fail } from '@sveltejs/kit';
 import type { Actions } from './$types';
 
@@ -18,11 +18,18 @@ export const actions: Actions = {
 
 		try {
 			console.log(`[+page.server.ts] Attempting to create user: ${email}`);
-			await adminAuth.createUser({
+			const userRecord = await adminAuth.createUser({
 				email: email.toString(),
 				password: password.toString()
 			});
-			console.log(`[+page.server.ts] User created successfully: ${email}`);
+
+			const userDocRef = adminDb.collection('users').doc(userRecord.uid);
+			await userDocRef.set({
+				email: userRecord.email,
+				createdAt: new Date().toISOString()
+			});
+
+			console.log(`[+page.server.ts] User created and profile stored successfully: ${email}`);
 		} catch (error: any) {
 			console.error(`[+page.server.ts] Error creating user ${email}:`, error);
 			return fail(400, {

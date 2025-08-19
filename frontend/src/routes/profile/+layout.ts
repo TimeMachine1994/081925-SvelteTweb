@@ -1,9 +1,1 @@
-import { user } from '$lib/auth';
-import { redirect } from '@sveltejs/kit';
-import { get } from 'svelte/store';
-
-export const load = async () => {
-	if (!get(user)) {
-		throw redirect(307, '/login');
-	}
-};
+// This file is no longer needed as the authentication check is now handled by +layout.server.ts.
