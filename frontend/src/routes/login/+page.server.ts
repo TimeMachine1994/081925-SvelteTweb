@@ -1,0 +1,33 @@
+import { adminAuth } from '$lib/server/firebase';
+import { fail, redirect } from '@sveltejs/kit';
+import type { Actions } from './$types';
+
+export const actions: Actions = {
+	login: async ({ request, cookies }) => {
+		console.log('Starting login action...');
+		const data = await request.formData();
+		const idToken = data.get('idToken');
+		console.log('[+page.server.ts] Received idToken:', idToken);
+
+		if (typeof idToken !== 'string' || !idToken) {
+			console.error('idToken is missing or not a string');
+			return fail(400, { message: 'idToken is required' });
+		}
+
+		const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
+
+		try {
+			console.log('Creating session cookie...');
+			const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
+			const options = { maxAge: expiresIn, httpOnly: true, secure: true, path: '/' };
+			cookies.set('session', sessionCookie, options);
+			console.log('Session cookie created and set successfully.');
+		} catch (error: any) {
+			console.error('Session cookie creation failed:', error);
+			return fail(401, { message: 'Could not create session cookie.' });
+		}
+
+		console.log('Redirecting to /my-portal...');
+		redirect(303, '/my-portal');
+	}
+};

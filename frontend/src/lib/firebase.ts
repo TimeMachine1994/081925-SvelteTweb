@@ -34,9 +34,9 @@ if (browser) {
 
 	if (dev) {
 		console.log('Connecting to Auth emulator');
-		connectAuthEmulator(auth, 'http://127.0.0.1:5002');
+		connectAuthEmulator(auth, 'http://127.0.0.1:9099');
 		console.log('Connecting to Firestore emulator');
-		connectFirestoreEmulator(db, '127.0.0.1', 8081);
+		connectFirestoreEmulator(db, '127.0.0.1', 8080);
 		console.log('Connecting to Storage emulator');
 		connectStorageEmulator(storage, '127.0.0.1', 9199);
 	}

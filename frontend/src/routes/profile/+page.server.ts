@@ -1,6 +1,19 @@
 import { adminDb } from '$lib/server/firebase';
-import { fail } from '@sveltejs/kit';
-import type { Actions } from './$types';
+import { fail, redirect } from '@sveltejs/kit';
+import type { Actions, PageServerLoad } from './$types';
+
+export const load: PageServerLoad = async ({ locals }) => {
+	if (!locals.user) {
+		redirect(302, '/login');
+	}
+
+	const userDoc = await adminDb.collection('users').doc(locals.user.uid).get();
+	const profile = userDoc.data();
+
+	return {
+		profile
+	};
+};
 
 export const actions: Actions = {
 	updateProfile: async ({ request, locals }) => {

@@ -10,7 +10,7 @@ if (!admin.apps.length) {
 		delete process.env['GOOGLE_APPLICATION_CREDENTIALS'];
 		// Setting these environment variables is the most reliable way to
 		// ensure the Admin SDK connects to the emulators.
-		process.env['FIREBASE_AUTH_EMULATOR_HOST'] = '127.0.0.1:5002';
+		process.env['FIREBASE_AUTH_EMULATOR_HOST'] = '127.0.0.1:9099';
 		process.env['FIRESTORE_EMULATOR_HOST'] = '127.0.0.1:8080';
 		admin.initializeApp({
 			projectId: 'fir-tweb'

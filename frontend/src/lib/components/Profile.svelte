@@ -4,17 +4,6 @@
 	let { data, form } = $props();
 	let displayName = $state(data.profile?.displayName || '');
 
-	async function logout() {
-		const response = await fetch('/api/session', {
-			method: 'DELETE'
-		});
-
-		if (response.ok) {
-			await goto('/login');
-		} else {
-			console.error('Logout failed');
-		}
-	}
 </script>
 
 {#if data.profile}
@@ -34,7 +23,9 @@
 		<p>{form.message}</p>
 	{/if}
 
-	<button onclick={logout}>Logout</button>
+	<form method="POST" action="/logout">
+		<button type="submit">Logout</button>
+	</form>
 {:else}
 	<p>Loading profile...</p>
 {/if}

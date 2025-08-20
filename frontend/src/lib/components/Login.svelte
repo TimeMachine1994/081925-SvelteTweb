@@ -1,43 +1,38 @@
 <script lang="ts">
 	import { signInWithEmailAndPassword } from 'firebase/auth';
 	import { auth } from '$lib/firebase';
-	import { goto } from '$app/navigation';
-
+	import type { ActionData } from '../../routes/login/$types';
+	import { tick } from 'svelte';
+	
+	let { form }: { form: ActionData } = $props();
+	
 	let email = $state('');
 	let password = $state('');
+	let idToken = $state('');
 	let error: string | null = $state(null);
 	let loading = $state(false);
-
-	async function login() {
+	let formElement: HTMLFormElement;
+	
+	async function handleSubmit(event: SubmitEvent) {
+		event.preventDefault();
 		console.log('[Login.svelte] Starting login process...');
 		loading = true;
 		error = null;
+	
 		try {
 			console.log('[Login.svelte] Calling signInWithEmailAndPassword...');
 			const userCredential = await signInWithEmailAndPassword(auth, email, password);
 			console.log('[Login.svelte] Sign-in successful, user:', userCredential.user.uid);
-
+	
 			console.log('[Login.svelte] Getting ID token...');
-			const idToken = await userCredential.user.getIdToken();
-			console.log('[Login.svelte] Got ID token.');
+			idToken = await userCredential.user.getIdToken();
+			console.log('[Login.svelte] Got ID token. Token:', idToken);
 
-			console.log('[Login.svelte] Sending ID token to /api/session...');
-			const response = await fetch('/api/session', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({ idToken })
-			});
-
-			if (response.ok) {
-				console.log('[Login.svelte] Session cookie created successfully. Redirecting to /profile...');
-				await goto('/profile');
-			} else {
-				const data = await response.json();
-				error = data.message || 'Login failed.';
-				console.error('[Login.svelte] Failed to create session cookie:', error);
-			}
+			// Wait for the DOM to update with the new idToken value
+			await tick();
+	
+			// Submit the form programmatically
+			formElement.submit();
 		} catch (e: any) {
 			error = e.message;
 			console.error('[Login.svelte] An error occurred during login:', e);
@@ -46,28 +41,34 @@
 			console.log('[Login.svelte] Login process finished.');
 		}
 	}
-</script>
-
-<div class="login-container">
-	<h2>Login</h2>
-
-	<form on:submit|preventDefault={login}>
-		<div class="form-group">
-			<label for="email">Email:</label>
-			<input id="email" type="email" bind:value={email} required />
-		</div>
-		<div class="form-group">
-			<label for="password">Password:</label>
-			<input id="password" type="password" bind:value={password} required />
-		</div>
-		<button type="submit" disabled={loading}>
-			{#if loading}Logging in...{:else}Login{/if}
-		</button>
-	</form>
-
-	{#if error}
-		<p class="error">{error}</p>
-	{/if}
+	</script>
+	
+	<div class="login-container">
+		<h2>Login</h2>
+	
+		<form
+			method="POST"
+			action="?/login"
+			bind:this={formElement}
+			onsubmit={handleSubmit}
+		>
+			<input type="hidden" name="idToken" bind:value={idToken} />
+			<div class="form-group">
+				<label for="email">Email:</label>
+				<input id="email" type="email" bind:value={email} required />
+			</div>
+			<div class="form-group">
+				<label for="password">Password:</label>
+				<input id="password" type="password" bind:value={password} required />
+			</div>
+			<button type="submit" disabled={loading}>
+				{#if loading}Logging in...{:else}Login{/if}
+			</button>
+		</form>
+	
+		{#if error || form?.message}
+			<p class="error">{error || form?.message}</p>
+		{/if}
 
 	<p>
 		Don't have an account? <a href="/register">Register here</a>

@@ -1,3 +1,8 @@
 import { writable } from 'svelte/store';
 
-export const user = writable<App.PageData['user']>(null);
+export interface User {
+	uid: string;
+	email: string | undefined;
+}
+
+export const user = writable<User | null>(null);
