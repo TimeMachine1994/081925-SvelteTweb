@@ -26,7 +26,7 @@
 	
 			console.log('[Login.svelte] Getting ID token...');
 			idToken = await userCredential.user.getIdToken();
-			console.log('[Login.svelte] Got ID token. Token:', idToken);
+			console.log('[Login.svelte] Got ID token.');
 
 			// Wait for the DOM to update with the new idToken value
 			await tick();

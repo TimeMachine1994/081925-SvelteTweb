@@ -7,7 +7,6 @@ export const actions: Actions = {
 		console.log('Starting login action...');
 		const data = await request.formData();
 		const idToken = data.get('idToken');
-		console.log('[+page.server.ts] Received idToken:', idToken);
 
 		if (typeof idToken !== 'string' || !idToken) {
 			console.error('idToken is missing or not a string');
