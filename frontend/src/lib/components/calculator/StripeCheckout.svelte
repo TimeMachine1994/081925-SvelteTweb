@@ -3,16 +3,25 @@
 	import { onMount } from 'svelte';
 	import { loadStripe, type Stripe } from '@stripe/stripe-js';
 
-	let { options, total } = $props<{ options: LivestreamOptions; total: number }>();
+	let {
+		options,
+		total,
+		memorialId
+	} = $props<{ options: LivestreamOptions; total: number; memorialId: string | null }>();
 	let stripe: Stripe | null;
 	let cardElement: any;
 
 	onMount(async () => {
-		stripe = await loadStripe('pk_test_...'); // Add your publishable key
+		stripe = await loadStripe('pk_test_51RygFQFfUFvnTxoO0Iq7qkz1W57cljvO8rEYkXSJiFR3AXh6uiwnFxdn1PynsczCJ1yMxVdHqO1jEpnKj6ku7yll00JWICxK4T');
+		if (stripe) {
+			const elements = stripe.elements();
+			cardElement = elements.create('card');
+			cardElement.mount('#card-element');
+		}
 	});
 
 	async function handleCheckout() {
-		if (!stripe) {
+		if (!stripe || !cardElement) {
 			return;
 		}
 
@@ -21,22 +30,26 @@
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ options, total })
+			body: JSON.stringify({ options, total, memorialId })
 		});
 
-		const { clientSecret, error } = await response.json();
+		const { clientSecret, error, configId } = await response.json();
 
 		if (error) {
 			alert(error);
 			return;
 		}
 
-		const { error: stripeError } = await stripe.confirmCardPayment(clientSecret);
+		const { error: stripeError } = await stripe.confirmCardPayment(clientSecret, {
+			payment_method: {
+				card: cardElement
+			}
+		});
 
 		if (stripeError) {
 			alert(stripeError.message);
 		} else {
-			alert('Payment successful!');
+			window.location.href = `/app/checkout/success?configId=${configId}`;
 		}
 	}
 </script>

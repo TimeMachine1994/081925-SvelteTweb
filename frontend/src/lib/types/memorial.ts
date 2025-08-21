@@ -22,4 +22,5 @@ export interface Memorial {
 	imageUrl?: string; // Adding optional fields that might be missing from schema but used in code
 	birthDate?: string;
 	deathDate?: string;
+	livestreamConfig?: any;
 }

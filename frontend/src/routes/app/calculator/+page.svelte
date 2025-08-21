@@ -1,5 +1,8 @@
 <script lang="ts">
 	import Calculator from '$lib/components/calculator/Calculator.svelte';
+	import { page } from '$app/stores';
+
+	const memorialId = $page.url.searchParams.get('memorialId');
 </script>
 
 <svelte:head>
@@ -9,5 +12,5 @@
 
 <div class="container">
 	<h1>Livestream Calculator</h1>
-	<Calculator />
+	<Calculator {memorialId} />
 </div>

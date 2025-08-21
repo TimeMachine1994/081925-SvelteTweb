@@ -4,6 +4,8 @@
 	import StripeCheckout from './StripeCheckout.svelte';
 	import type { LivestreamOptions } from '$lib/types/livestream';
 
+	let { memorialId }: { memorialId: string | null } = $props();
+
 	let options = $state<LivestreamOptions>({
 		basePackage: 'standard',
 		duration: 60,
@@ -35,7 +37,7 @@
 <div class="calculator">
 	<Options bind:options />
 	<Summary {options} {total} />
-	<StripeCheckout {options} {total} />
+	<StripeCheckout {options} {total} {memorialId} />
 </div>
 
 <style>

@@ -13,17 +13,30 @@ export const load = async ({ locals }) => {
         return { memorials: [] };
     }
 
-    const memorials = snapshot.docs.map(doc => {
+    const memorialsData = await Promise.all(snapshot.docs.map(async (doc) => {
         const data = doc.data();
+        const configSnapshot = await adminDb.collection('livestreamConfigurations').where('memorialId', '==', doc.id).limit(1).get();
+        
+        let livestreamConfig = null;
+        if (!configSnapshot.empty) {
+            const configData = configSnapshot.docs[0].data();
+            livestreamConfig = {
+                id: configSnapshot.docs[0].id,
+                ...configData,
+                createdAt: configData.createdAt?.toDate ? configData.createdAt.toDate().toISOString() : null,
+            };
+        }
+
         return {
             id: doc.id,
             ...data,
             createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : null,
             updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : null,
+            livestreamConfig
         };
-    }) as Memorial[];
+    }));
 
     return {
-        memorials
+        memorials: memorialsData as Memorial[]
     };
 };

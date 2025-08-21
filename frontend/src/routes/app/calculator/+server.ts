@@ -9,9 +9,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return json({ error: 'Unauthorized' }, { status: 401 });
 	}
 
-	const { options, total } = (await request.json()) as {
+	const { options, total, memorialId } = (await request.json()) as {
 		options: LivestreamOptions;
 		total: number;
+		memorialId: string;
 	};
 
 	try {
@@ -21,6 +22,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			...options,
 			total,
 			userId: locals.user.uid,
+			memorialId,
 			createdAt: new Date()
 		});
 
@@ -34,7 +36,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		});
 
 		return json({
-			clientSecret: paymentIntent.client_secret
+			clientSecret: paymentIntent.client_secret,
+			configId: configRef.id
 		});
 	} catch (error) {
 		console.error('Error processing payment:', error);

@@ -13,6 +13,11 @@
 				<div class="card">
 					<h2 class="text-xl font-semibold">{memorial.lovedOneName}</h2>
 					<a href="/tributes/{memorial.slug}" class="btn btn-primary mt-4">View Memorial</a>
+					{#if memorial.livestreamConfig}
+						<a href="/app/checkout/success?configId={memorial.livestreamConfig.id}" class="btn btn-secondary mt-2">View Livestream Details</a>
+					{:else}
+						<a href="/app/calculator?memorialId={memorial.id}" class="btn btn-secondary mt-2">Schedule Livestream</a>
+					{/if}
 				</div>
 			{/each}
 		</div>
