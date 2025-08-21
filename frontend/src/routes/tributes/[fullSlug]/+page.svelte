@@ -1,28 +1,35 @@
 <script lang="ts">
-    import type { PageData } from './$types';
+	import PhotoGallery from '$lib/components/PhotoGallery.svelte';
+	import type { PageData } from './$types';
 
-    export let data: PageData;
+	export let data: PageData;
 
-    const { memorial } = data;
+	const { memorial } = data;
 </script>
 
 <div class="tribute-page">
-    <header>
-        <h1>In Loving Memory of {memorial.lovedOneName}</h1>
-        {#if memorial.birthDate && memorial.deathDate}
-            <p>{new Date(memorial.birthDate).toLocaleDateString()} - {new Date(memorial.deathDate).toLocaleDateString()}</p>
-        {/if}
-    </header>
+	<header>
+		<h1>In Loving Memory of {memorial.lovedOneName}</h1>
+		{#if memorial.birthDate && memorial.deathDate}
+			<p>
+				{new Date(memorial.birthDate).toLocaleDateString()} - {new Date(
+					memorial.deathDate
+				).toLocaleDateString()}
+			</p>
+		{/if}
+	</header>
 
-    <main>
-        {#if memorial.imageUrl}
-            <img src={memorial.imageUrl} alt={memorial.lovedOneName} class="tribute-image" />
-        {/if}
+	<main>
+		{#if memorial.imageUrl}
+			<img src={memorial.imageUrl} alt={memorial.lovedOneName} class="tribute-image" />
+		{/if}
 
-        <section class="content">
-            {@html memorial.content}
-        </section>
-    </main>
+		<section class="content">
+			{@html memorial.content}
+		</section>
+
+		<PhotoGallery photos={memorial.photos || []} />
+	</main>
 </div>
 
 <style>

@@ -56,3 +56,4 @@ console.log('--- SERVER FIREBASE INITIALIZATION END ---');
 
 export const adminAuth = admin.auth();
 export const adminDb = admin.firestore();
+export const adminStorage = admin.storage();

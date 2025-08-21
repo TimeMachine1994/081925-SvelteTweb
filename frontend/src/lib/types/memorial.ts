@@ -23,4 +23,5 @@ export interface Memorial {
 	birthDate?: string;
 	deathDate?: string;
 	livestreamConfig?: any;
+	photos?: string[];
 }

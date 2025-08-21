@@ -1,24 +1,27 @@
 <script lang="ts">
-    import type { PageData, ActionData } from './$types';
+	import PhotoUploader from '$lib/components/PhotoUploader.svelte';
+	import type { PageData, ActionData } from './$types';
 
-    export let data: PageData;
-    export let form: ActionData;
+	export let data: PageData;
+	export let form: ActionData;
 
-    const { memorial } = data;
+	const { memorial } = data;
 </script>
 
 <div class="editor-container">
-    <h2>Edit Tribute for {memorial.lovedOneName}</h2>
+	<h2>Edit Tribute for {memorial.lovedOneName}</h2>
 
-    <form method="POST">
-        <textarea name="content" rows="20">{memorial.content || ''}</textarea>
+	<form method="POST">
+		<textarea name="content" rows="20">{memorial.content || ''}</textarea>
 
-        {#if form?.missing}
-            <p class="error">Content cannot be empty.</p>
-        {/if}
+		{#if form?.missing}
+			<p class="error">Content cannot be empty.</p>
+		{/if}
 
-        <button type="submit">Save Changes</button>
-    </form>
+		<button type="submit">Save Changes</button>
+	</form>
+
+	<PhotoUploader memorialId={memorial.id} />
 </div>
 
 <style>
