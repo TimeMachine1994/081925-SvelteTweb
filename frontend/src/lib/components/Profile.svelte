@@ -2,14 +2,14 @@
 	import { goto } from '$app/navigation';
 
 	let { data, form } = $props();
-	let displayName = $state(data.profile?.displayName || '');
+	let displayName = $state(data.user?.displayName || '');
 
 </script>
 
-{#if data.profile}
+{#if data.user}
 	<h2>Profile</h2>
-	<p>Email: {data.profile.email}</p>
-	<p>Created At: {new Date(data.profile.createdAt).toLocaleDateString()}</p>
+	<p>Email: {data.user.email}</p>
+	<p>Created At: {new Date(data.user.createdAt).toLocaleDateString()}</p>
 
 	<form method="POST" action="?/updateProfile">
 		<label>

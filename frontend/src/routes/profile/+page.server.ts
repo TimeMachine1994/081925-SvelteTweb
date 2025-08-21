@@ -8,10 +8,16 @@ export const load: PageServerLoad = async ({ locals }) => {
 	}
 
 	const userDoc = await adminDb.collection('users').doc(locals.user.uid).get();
-	const profile = userDoc.data();
+	const profileData = userDoc.data();
+
+	// Combine the basic user object with the detailed profile data
+	const userProfile = {
+		...locals.user,
+		...profileData
+	};
 
 	return {
-		profile
+		user: userProfile
 	};
 };
 

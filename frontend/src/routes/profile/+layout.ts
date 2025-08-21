@@ -1,1 +1,0 @@
-// This file is no longer needed as the authentication check is now handled by +layout.server.ts.
