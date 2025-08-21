@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { signInWithEmailAndPassword } from 'firebase/auth';
+	import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 	import { auth } from '$lib/firebase';
 	import type { ActionData } from '../../routes/login/$types';
 	import { tick } from 'svelte';
@@ -41,6 +41,30 @@
 			console.log('[Login.svelte] Login process finished.');
 		}
 	}
+
+	async function handleGoogleSignIn() {
+		console.log('[Login.svelte] Starting Google sign-in process...');
+		loading = true;
+		error = null;
+
+		try {
+			const provider = new GoogleAuthProvider();
+			const userCredential = await signInWithPopup(auth, provider);
+			console.log('[Login.svelte] Google sign-in successful, user:', userCredential.user.uid);
+
+			idToken = await userCredential.user.getIdToken();
+			console.log('[Login.svelte] Got ID token from Google sign-in.');
+
+			await tick();
+			formElement.submit();
+		} catch (e: any) {
+			error = e.message;
+			console.error('[Login.svelte] An error occurred during Google sign-in:', e);
+		} finally {
+			loading = false;
+			console.log('[Login.svelte] Google sign-in process finished.');
+		}
+	}
 	</script>
 	
 	<div class="login-container">
@@ -65,6 +89,12 @@
 				{#if loading}Logging in...{:else}Login{/if}
 			</button>
 		</form>
+
+		<div class="divider">OR</div>
+
+		<button class="google-signin" onclick={handleGoogleSignIn} disabled={loading}>
+			Sign in with Google
+		</button>
 	
 		{#if error || form?.message}
 			<p class="error">{error || form?.message}</p>
@@ -127,5 +157,16 @@
 	p {
 		margin-top: 1.5rem;
 		text-align: center;
+	}
+	.divider {
+		text-align: center;
+		margin: 1.5rem 0;
+		font-weight: bold;
+	}
+	.google-signin {
+		background-color: #db4437;
+	}
+	.google-signin:hover:not(:disabled) {
+		background-color: #c33d2e;
 	}
 </style>

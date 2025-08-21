@@ -3,4 +3,4 @@
 	let { data, form } = $props();
 </script>
 
-<Profile {data} {form} />
+<Profile data={data} form={form} />
