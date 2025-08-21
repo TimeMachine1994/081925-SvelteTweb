@@ -9,11 +9,18 @@ export const load: PageServerLoad = async ({ locals }) => {
     const userDoc = await adminDb.collection('users').doc(locals.user.uid).get();
     const profileData = userDoc.data();
 
+    const memorialsQuery = await adminDb.collection('memorials').where('creatorUid', '==', locals.user.uid).get();
+    const memorials = memorialsQuery.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+    }));
+
     return {
         profile: {
             email: locals.user.email,
             displayName: profileData?.displayName,
-        }
+        },
+        memorials
     };
 };
 

@@ -1,6 +1,8 @@
 <script lang="ts">
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
+	import Navbar from '$lib/components/Navbar.svelte';
+	import Footer from '$lib/components/Footer.svelte';
 
 	import { user } from '$lib/auth';
 	import type { LayoutData } from './$types';
@@ -9,6 +11,7 @@
 	let { children, data }: { children: Snippet; data: LayoutData } = $props();
 
 	$effect(() => {
+		console.log('📝 Layout effect triggered');
 		user.set(data.user);
 	});
 </script>
@@ -17,4 +20,26 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-{@render children?.()}
+<div class="app-container">
+	<Navbar />
+	<main class="main-content">
+		{@render children?.()}
+	</main>
+	<Footer />
+</div>
+
+<style>
+	.app-container {
+		display: flex;
+		flex-direction: column;
+		min-height: 100vh;
+	}
+
+	.main-content {
+		flex: 1;
+		width: 100%;
+		max-width: 1500px;
+		margin: 0 auto;
+		padding: 20px;
+	}
+</style>

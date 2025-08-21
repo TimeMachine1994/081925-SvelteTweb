@@ -25,6 +25,17 @@
 	<form method="POST" action="/logout">
 		<button type="submit">Logout</button>
 	</form>
+
+	{#if data.memorials && data.memorials.length > 0}
+		<h3>Your Tributes</h3>
+		<ul>
+			{#each data.memorials as memorial}
+				<li>
+					<a href="/tributes/{memorial.slug}">{memorial.lovedOneName}</a>
+				</li>
+			{/each}
+		</ul>
+	{/if}
 {:else}
 	<p>Loading profile...</p>
 {/if}

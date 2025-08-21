@@ -7,7 +7,7 @@ export const load: PageServerLoad = async ({ params }) => {
     const { fullSlug } = params;
 
     const memorialsRef = adminDb.collection('memorials');
-    const snapshot = await memorialsRef.where('fullSlug', '==', fullSlug).limit(1).get();
+    const snapshot = await memorialsRef.where('slug', '==', fullSlug).limit(1).get();
 
     if (snapshot.empty) {
         throw error(404, 'Not Found');

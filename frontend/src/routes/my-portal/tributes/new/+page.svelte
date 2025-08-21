@@ -1,43 +1,33 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
-	import { getFunctions, httpsCallable } from 'firebase/functions';
+	import { enhance } from '$app/forms';
+	import type { ActionData } from './$types';
 
-	let lovedOneName = '';
-	let errorMessage = '';
-	let loading = false;
+	let { form }: { form: ActionData } = $props();
+	let enhancing = false;
 
-	async function createMemorial() {
-		loading = true;
-		errorMessage = '';
-		try {
-			const functions = getFunctions();
-			const createMemorial = httpsCallable(functions, 'createMemorial');
-			await createMemorial({
-				lovedOneName,
-				creatorEmail: $page.data.user?.email,
-				creatorName: $page.data.user?.displayName
-			});
-			goto('/my-portal');
-		} catch (error) {
-			console.error('Error creating memorial:', error);
-			errorMessage = 'There was an error creating the memorial. Please try again.';
-		} finally {
-			loading = false;
-		}
-	}
+	// Cast the form to a type that includes the optional error property to resolve the type error.
+	const typedForm = form as { error?: string };
 </script>
 
 <div class="container">
 	<h1>Create a new Tribute</h1>
-	<form on:submit|preventDefault={createMemorial}>
+	<form
+		method="POST"
+		use:enhance={() => {
+			enhancing = true;
+			return async ({ update }) => {
+				await update();
+				enhancing = false;
+			};
+		}}
+	>
 		<label for="lovedOneName">Loved One's Name</label>
-		<input type="text" id="lovedOneName" bind:value={lovedOneName} required />
+		<input type="text" id="lovedOneName" name="lovedOneName" required />
 
-		<button type="submit" disabled={loading}>{loading ? 'Creating...' : 'Create Tribute'}</button>
+		<button type="submit" disabled={enhancing}>{enhancing ? 'Creating...' : 'Create Tribute'}</button>
 	</form>
-	{#if errorMessage}
-		<p class="error">{errorMessage}</p>
+	{#if typedForm?.error}
+		<p class="error">{typedForm.error}</p>
 	{/if}
 </div>
 
