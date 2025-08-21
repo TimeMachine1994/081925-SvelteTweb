@@ -47,3 +47,11 @@ export interface LivestreamBooking {
 	updatedAt: Date;
 	userId: string;
 }
+export interface LivestreamDetails {
+  title: string;
+  description: string;
+  streamDate: Date | null;
+  isLive: boolean;
+  streamUrl?: string;
+  thumbnailUrl?: string;
+}
