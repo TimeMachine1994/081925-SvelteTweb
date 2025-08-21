@@ -1,32 +1,32 @@
-[debug] [2025-08-21T19:51:49.601Z] ----------------------------------------------------------------------
-[debug] [2025-08-21T19:51:49.602Z] Command:       /home/austin/.nvm/versions/node/v24.4.1/bin/node /home/austin/.nvm/versions/node/v24.4.1/bin/firebase emulators:start
-[debug] [2025-08-21T19:51:49.602Z] CLI Version:   14.13.0
-[debug] [2025-08-21T19:51:49.602Z] Platform:      linux
-[debug] [2025-08-21T19:51:49.603Z] Node Version:  v24.4.1
-[debug] [2025-08-21T19:51:49.603Z] Time:          Thu Aug 21 2025 15:51:49 GMT-0400 (Eastern Daylight Time)
-[debug] [2025-08-21T19:51:49.603Z] ----------------------------------------------------------------------
+[debug] [2025-08-21T20:16:09.479Z] ----------------------------------------------------------------------
+[debug] [2025-08-21T20:16:09.481Z] Command:       /home/austin/.nvm/versions/node/v24.4.1/bin/node /home/austin/.nvm/versions/node/v24.4.1/bin/firebase emulators:start
+[debug] [2025-08-21T20:16:09.481Z] CLI Version:   14.13.0
+[debug] [2025-08-21T20:16:09.481Z] Platform:      linux
+[debug] [2025-08-21T20:16:09.481Z] Node Version:  v24.4.1
+[debug] [2025-08-21T20:16:09.481Z] Time:          Thu Aug 21 2025 16:16:09 GMT-0400 (Eastern Daylight Time)
+[debug] [2025-08-21T20:16:09.481Z] ----------------------------------------------------------------------
 [debug] 
-[debug] [2025-08-21T19:51:49.768Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
-[debug] [2025-08-21T19:51:49.769Z] > authorizing via signed-in user (austinbryanfilm@gmail.com)
-[debug] [2025-08-21T19:51:49.802Z] openjdk version "21.0.8" 2025-07-15
+[debug] [2025-08-21T20:16:09.658Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-08-21T20:16:09.658Z] > authorizing via signed-in user (austinbryanfilm@gmail.com)
+[debug] [2025-08-21T20:16:09.686Z] openjdk version "21.0.8" 2025-07-15
 OpenJDK Runtime Environment (build 21.0.8+9-Ubuntu-0ubuntu124.04.1)
 
-[debug] [2025-08-21T19:51:49.803Z] OpenJDK 64-Bit Server VM (build 21.0.8+9-Ubuntu-0ubuntu124.04.1, mixed mode, sharing)
+[debug] [2025-08-21T20:16:09.686Z] OpenJDK 64-Bit Server VM (build 21.0.8+9-Ubuntu-0ubuntu124.04.1, mixed mode, sharing)
 
-[debug] [2025-08-21T19:51:49.807Z] Parsed Java major version: 21
+[debug] [2025-08-21T20:16:09.699Z] Parsed Java major version: 21
 [info] i  emulators: Starting emulators: auth, firestore, hosting, storage {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth, firestore, hosting, storage"}}
-[debug] [2025-08-21T19:51:49.810Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"firestore":[{"address":"127.0.0.1","family":"IPv4","port":8080}],"firestore.websocket":[{"address":"127.0.0.1","family":"IPv4","port":9150}],"hosting":[{"address":"127.0.0.1","family":"IPv4","port":5000}],"storage":[{"address":"127.0.0.1","family":"IPv4","port":9199}]},"metadata":{"message":"assigned listening specs for emulators"}}
-[debug] [2025-08-21T19:51:49.814Z] [hub] writing locator at /tmp/hub-fir-tweb.json
-[debug] [2025-08-21T19:51:49.818Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: auto_download"}}
-[debug] [2025-08-21T19:51:49.819Z] Ignoring unsupported arg: single_project_mode_error {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: single_project_mode_error"}}
-[debug] [2025-08-21T19:51:49.819Z] Starting Firestore Emulator with command {"binary":"java","args":["-Djava.net.preferIPv4Stack=true","-Dgoogle.cloud_firestore.debug_log_level=FINE","-Duser.language=en","-jar","/home/austin/.cache/firebase/emulators/cloud-firestore-emulator-v1.19.8.jar","--host","127.0.0.1","--port",8080,"--websocket_port",9150,"--project_id","fir-tweb","--rules","/home/austin/SvelteKit Projects Q3 2025/081925 SvelteTweb/firestore.rules","--single_project_mode",true],"optionalArgs":["port","webchannel_port","host","rules","websocket_port","functions_emulator","seed_from_export","project_id","single_project_mode"],"joinArgs":false,"shell":false,"port":8080} {"metadata":{"emulator":{"name":"firestore"},"message":"Starting Firestore Emulator with command {\"binary\":\"java\",\"args\":[\"-Djava.net.preferIPv4Stack=true\",\"-Dgoogle.cloud_firestore.debug_log_level=FINE\",\"-Duser.language=en\",\"-jar\",\"/home/austin/.cache/firebase/emulators/cloud-firestore-emulator-v1.19.8.jar\",\"--host\",\"127.0.0.1\",\"--port\",8080,\"--websocket_port\",9150,\"--project_id\",\"fir-tweb\",\"--rules\",\"/home/austin/SvelteKit Projects Q3 2025/081925 SvelteTweb/firestore.rules\",\"--single_project_mode\",true],\"optionalArgs\":[\"port\",\"webchannel_port\",\"host\",\"rules\",\"websocket_port\",\"functions_emulator\",\"seed_from_export\",\"project_id\",\"single_project_mode\"],\"joinArgs\":false,\"shell\":false,\"port\":8080}"}}
+[debug] [2025-08-21T20:16:09.703Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"firestore":[{"address":"127.0.0.1","family":"IPv4","port":8080}],"firestore.websocket":[{"address":"127.0.0.1","family":"IPv4","port":9150}],"hosting":[{"address":"127.0.0.1","family":"IPv4","port":5000}],"storage":[{"address":"127.0.0.1","family":"IPv4","port":9199}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[debug] [2025-08-21T20:16:09.706Z] [hub] writing locator at /tmp/hub-fir-tweb.json
+[debug] [2025-08-21T20:16:09.711Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2025-08-21T20:16:09.712Z] Ignoring unsupported arg: single_project_mode_error {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: single_project_mode_error"}}
+[debug] [2025-08-21T20:16:09.712Z] Starting Firestore Emulator with command {"binary":"java","args":["-Djava.net.preferIPv4Stack=true","-Dgoogle.cloud_firestore.debug_log_level=FINE","-Duser.language=en","-jar","/home/austin/.cache/firebase/emulators/cloud-firestore-emulator-v1.19.8.jar","--host","127.0.0.1","--port",8080,"--websocket_port",9150,"--project_id","fir-tweb","--rules","/home/austin/SvelteKit Projects Q3 2025/081925 SvelteTweb/firestore.rules","--single_project_mode",true],"optionalArgs":["port","webchannel_port","host","rules","websocket_port","functions_emulator","seed_from_export","project_id","single_project_mode"],"joinArgs":false,"shell":false,"port":8080} {"metadata":{"emulator":{"name":"firestore"},"message":"Starting Firestore Emulator with command {\"binary\":\"java\",\"args\":[\"-Djava.net.preferIPv4Stack=true\",\"-Dgoogle.cloud_firestore.debug_log_level=FINE\",\"-Duser.language=en\",\"-jar\",\"/home/austin/.cache/firebase/emulators/cloud-firestore-emulator-v1.19.8.jar\",\"--host\",\"127.0.0.1\",\"--port\",8080,\"--websocket_port\",9150,\"--project_id\",\"fir-tweb\",\"--rules\",\"/home/austin/SvelteKit Projects Q3 2025/081925 SvelteTweb/firestore.rules\",\"--single_project_mode\",true],\"optionalArgs\":[\"port\",\"webchannel_port\",\"host\",\"rules\",\"websocket_port\",\"functions_emulator\",\"seed_from_export\",\"project_id\",\"single_project_mode\"],\"joinArgs\":false,\"shell\":false,\"port\":8080}"}}
 [info] i  firestore: Firestore Emulator logging to firestore-debug.log {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator logging to \u001b[1mfirestore-debug.log\u001b[22m"}}
-[debug] [2025-08-21T19:51:50.646Z] Aug 21, 2025 3:51:50 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketServer start
+[debug] [2025-08-21T20:16:10.545Z] Aug 21, 2025 4:16:10 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketServer start
 INFO: Started WebSocket server on ws://127.0.0.1:9150
- {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 3:51:50 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketServer start\nINFO: Started WebSocket server on ws://127.0.0.1:9150\n"}}
-[debug] [2025-08-21T19:51:50.685Z] API endpoint: http://127.0.0.1:8080
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:16:10 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketServer start\nINFO: Started WebSocket server on ws://127.0.0.1:9150\n"}}
+[debug] [2025-08-21T20:16:10.575Z] API endpoint: http://127.0.0.1:8080
  {"metadata":{"emulator":{"name":"firestore"},"message":"API endpoint: http://127.0.0.1:8080\n"}}
-[debug] [2025-08-21T19:51:50.686Z] If you are using a library that supports the FIRESTORE_EMULATOR_HOST environment variable, run:
+[debug] [2025-08-21T20:16:10.576Z] If you are using a library that supports the FIRESTORE_EMULATOR_HOST environment variable, run:
 
    export FIRESTORE_EMULATOR_HOST=127.0.0.1:8080
 
@@ -39,27 +39,27 @@ Dev App Server is now running.
 
  {"metadata":{"emulator":{"name":"firestore"},"message":"If you are using a library that supports the FIRESTORE_EMULATOR_HOST environment variable, run:\n\n   export FIRESTORE_EMULATOR_HOST=127.0.0.1:8080\n\nIf you are running a Firestore in Datastore Mode project, run:\n\n   export DATASTORE_EMULATOR_HOST=127.0.0.1:8080\n\nNote: Support for Datastore Mode is in preview. If you encounter any bugs please file at https://github.com/firebase/firebase-tools/issues.\nDev App Server is now running.\n\n"}}
 [info] ✔  firestore: Firestore Emulator UI websocket is running on 9150. {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator UI websocket is running on 9150."}}
-[debug] [2025-08-21T19:51:54.792Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"storage"},"message":"Ignoring unsupported arg: port"}}
-[debug] [2025-08-21T19:51:55.420Z] Temp file directory for storage emulator: /tmp/firebase/storage/blobs {"metadata":{"emulator":{"name":"storage"},"message":"Temp file directory for storage emulator: /tmp/firebase/storage/blobs"}}
-[debug] [2025-08-21T19:51:55.427Z] Checked if tokens are valid: true, expires at: 1755809322724
-[debug] [2025-08-21T19:51:55.427Z] Checked if tokens are valid: true, expires at: 1755809322724
-[debug] [2025-08-21T19:51:55.428Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/fir-tweb/sites 
-[debug] [2025-08-21T19:51:55.882Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/fir-tweb/sites 200
-[debug] [2025-08-21T19:51:55.882Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/fir-tweb/sites {"sites":[{"name":"projects/fir-tweb/sites/fir-tweb","defaultUrl":"https://fir-tweb.web.app","appId":"1:509455146790:web:7ec99527214b05d7b9ebe7","type":"DEFAULT_SITE"}]}
-[debug] [2025-08-21T19:51:55.883Z] Checked if tokens are valid: true, expires at: 1755809322724
-[debug] [2025-08-21T19:51:55.883Z] Checked if tokens are valid: true, expires at: 1755809322724
-[debug] [2025-08-21T19:51:55.883Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/webApps/1:509455146790:web:7ec99527214b05d7b9ebe7/config [none]
-[debug] [2025-08-21T19:51:56.392Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/webApps/1:509455146790:web:7ec99527214b05d7b9ebe7/config 200
-[debug] [2025-08-21T19:51:56.392Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/webApps/1:509455146790:web:7ec99527214b05d7b9ebe7/config {"projectId":"fir-tweb","appId":"1:509455146790:web:7ec99527214b05d7b9ebe7","storageBucket":"fir-tweb.firebasestorage.app","apiKey":"AIzaSyAXmTxzYRc-LhMEW75nZjjjQCZov1gpiw0","authDomain":"fir-tweb.firebaseapp.com","messagingSenderId":"509455146790","measurementId":"G-NLY7K5GGYQ"}
-[debug] [2025-08-21T19:51:56.412Z] Checked if tokens are valid: true, expires at: 1755809322724
-[debug] [2025-08-21T19:51:56.412Z] Checked if tokens are valid: true, expires at: 1755809322724
-[debug] [2025-08-21T19:51:56.412Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb [none]
-[debug] [2025-08-21T19:51:56.688Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb 200
-[debug] [2025-08-21T19:51:56.688Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb {"projectId":"fir-tweb","projectNumber":"509455146790","displayName":"firebaseTweb","name":"projects/fir-tweb","resources":{"hostingSite":"fir-tweb"},"state":"ACTIVE","etag":"1_eda3b9a6-9426-458e-9d85-dc6d9d48f0a8"}
-[debug] [2025-08-21T19:51:56.689Z] Specified "public" directory "frontend/build" does not exist; Deploy to Hosting site "fir-tweb" may fail or be empty.
+[debug] [2025-08-21T20:16:14.993Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"storage"},"message":"Ignoring unsupported arg: port"}}
+[debug] [2025-08-21T20:16:15.531Z] Temp file directory for storage emulator: /tmp/firebase/storage/blobs {"metadata":{"emulator":{"name":"storage"},"message":"Temp file directory for storage emulator: /tmp/firebase/storage/blobs"}}
+[debug] [2025-08-21T20:16:15.535Z] Checked if tokens are valid: true, expires at: 1755809322724
+[debug] [2025-08-21T20:16:15.535Z] Checked if tokens are valid: true, expires at: 1755809322724
+[debug] [2025-08-21T20:16:15.536Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/fir-tweb/sites 
+[debug] [2025-08-21T20:16:15.952Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/fir-tweb/sites 200
+[debug] [2025-08-21T20:16:15.952Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/fir-tweb/sites {"sites":[{"name":"projects/fir-tweb/sites/fir-tweb","defaultUrl":"https://fir-tweb.web.app","appId":"1:509455146790:web:7ec99527214b05d7b9ebe7","type":"DEFAULT_SITE"}]}
+[debug] [2025-08-21T20:16:15.952Z] Checked if tokens are valid: true, expires at: 1755809322724
+[debug] [2025-08-21T20:16:15.952Z] Checked if tokens are valid: true, expires at: 1755809322724
+[debug] [2025-08-21T20:16:15.953Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/webApps/1:509455146790:web:7ec99527214b05d7b9ebe7/config [none]
+[debug] [2025-08-21T20:16:16.280Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/webApps/1:509455146790:web:7ec99527214b05d7b9ebe7/config 200
+[debug] [2025-08-21T20:16:16.281Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/webApps/1:509455146790:web:7ec99527214b05d7b9ebe7/config {"projectId":"fir-tweb","appId":"1:509455146790:web:7ec99527214b05d7b9ebe7","storageBucket":"fir-tweb.firebasestorage.app","apiKey":"AIzaSyAXmTxzYRc-LhMEW75nZjjjQCZov1gpiw0","authDomain":"fir-tweb.firebaseapp.com","messagingSenderId":"509455146790","measurementId":"G-NLY7K5GGYQ"}
+[debug] [2025-08-21T20:16:16.290Z] Checked if tokens are valid: true, expires at: 1755809322724
+[debug] [2025-08-21T20:16:16.290Z] Checked if tokens are valid: true, expires at: 1755809322724
+[debug] [2025-08-21T20:16:16.290Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb [none]
+[debug] [2025-08-21T20:16:16.479Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb 200
+[debug] [2025-08-21T20:16:16.479Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb {"projectId":"fir-tweb","projectNumber":"509455146790","displayName":"firebaseTweb","name":"projects/fir-tweb","resources":{"hostingSite":"fir-tweb"},"state":"ACTIVE","etag":"1_eda3b9a6-9426-458e-9d85-dc6d9d48f0a8"}
+[debug] [2025-08-21T20:16:16.479Z] Specified "public" directory "frontend/build" does not exist; Deploy to Hosting site "fir-tweb" may fail or be empty.
 [info] i  hosting[fir-tweb]: Serving hosting files from: frontend/build {"metadata":{"emulator":{"name":"hosting"},"message":"Serving hosting files from: \u001b[1mfrontend/build\u001b[22m"}}
 [info] ✔  hosting[fir-tweb]: Local server: http://127.0.0.1:5000 {"metadata":{"emulator":{"name":"hosting"},"message":"Local server: \u001b[4m\u001b[1mhttp://127.0.0.1:5000\u001b[22m\u001b[24m"}}
-[debug] [2025-08-21T19:51:56.704Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: connect ECONNREFUSED 127.0.0.1:40001. If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
+[debug] [2025-08-21T20:16:16.491Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: connect ECONNREFUSED 127.0.0.1:40001. If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
 [info] 
 ┌─────────────────────────────────────────────────────────────┐
 │ ✔  All emulators ready! It is now safe to connect your app. │
@@ -82,36 +82,93 @@ Dev App Server is now running.
 
 Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
  
-[debug] [2025-08-21T19:51:57.544Z] Aug 21, 2025 3:51:57 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel
+[debug] [2025-08-21T20:16:55.887Z] Aug 21, 2025 4:16:55 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel
 INFO: Connected to new websocket client
- {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 3:51:57 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel\nINFO: Connected to new websocket client\n"}}
-[debug] [2025-08-21T19:56:43.790Z] Aug 21, 2025 3:56:43 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:16:55 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel\nINFO: Connected to new websocket client\n"}}
+[debug] [2025-08-21T20:16:55.887Z] Aug 21, 2025 4:16:55 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel
+INFO: Connected to new websocket client
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:16:55 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel\nINFO: Connected to new websocket client\n"}}
+[debug] [2025-08-21T20:19:37.890Z] Aug 21, 2025 4:19:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 3:56:43 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
-[debug] [2025-08-21T19:56:57.467Z] Aug 21, 2025 3:56:57 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:19:37 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
+[debug] [2025-08-21T20:19:40.564Z] Aug 21, 2025 4:19:40 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler channelClosed
+INFO: Websocket client disconnected
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:19:40 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler channelClosed\nINFO: Websocket client disconnected\n"}}
+[debug] [2025-08-21T20:19:40.565Z] Aug 21, 2025 4:19:40 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel
+INFO: Connected to new websocket client
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:19:40 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel\nINFO: Connected to new websocket client\n"}}
+[debug] [2025-08-21T20:19:41.567Z] Aug 21, 2025 4:19:41 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler channelClosed
+INFO: Websocket client disconnected
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:19:41 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler channelClosed\nINFO: Websocket client disconnected\n"}}
+[debug] [2025-08-21T20:19:41.703Z] Aug 21, 2025 4:19:41 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel
+INFO: Connected to new websocket client
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:19:41 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel\nINFO: Connected to new websocket client\n"}}
+[debug] [2025-08-21T20:19:42.407Z] Aug 21, 2025 4:19:42 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler channelClosed
+INFO: Websocket client disconnected
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:19:42 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler channelClosed\nINFO: Websocket client disconnected\n"}}
+[debug] [2025-08-21T20:19:42.455Z] Aug 21, 2025 4:19:42 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel
+INFO: Connected to new websocket client
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:19:42 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel\nINFO: Connected to new websocket client\n"}}
+[debug] [2025-08-21T20:19:42.579Z] Aug 21, 2025 4:19:42 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler channelClosed
+INFO: Websocket client disconnected
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:19:42 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler channelClosed\nINFO: Websocket client disconnected\n"}}
+[debug] [2025-08-21T20:19:42.630Z] Aug 21, 2025 4:19:42 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel
+INFO: Connected to new websocket client
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:19:42 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel\nINFO: Connected to new websocket client\n"}}
+[debug] [2025-08-21T20:19:42.739Z] Aug 21, 2025 4:19:42 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler channelClosed
+INFO: Websocket client disconnected
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:19:42 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler channelClosed\nINFO: Websocket client disconnected\n"}}
+[debug] [2025-08-21T20:19:42.789Z] Aug 21, 2025 4:19:42 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel
+INFO: Connected to new websocket client
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:19:42 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel\nINFO: Connected to new websocket client\n"}}
+[debug] [2025-08-21T20:19:44.182Z] Aug 21, 2025 4:19:44 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected non-HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 3:56:57 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
-[debug] [2025-08-21T19:56:57.483Z] Aug 21, 2025 3:56:57 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
-INFO: Detected non-HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 3:56:57 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
-[debug] [2025-08-21T19:56:57.521Z] Aug 21, 2025 3:56:57 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:19:44 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[debug] [2025-08-21T20:19:44.225Z] Aug 21, 2025 4:19:44 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 3:56:57 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
-[debug] [2025-08-21T19:56:57.651Z] Aug 21, 2025 3:56:57 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:19:44 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
+[debug] [2025-08-21T20:19:44.297Z] Aug 21, 2025 4:19:44 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected non-HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 3:56:57 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
-[debug] [2025-08-21T19:56:57.688Z] Aug 21, 2025 3:56:57 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:19:44 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[debug] [2025-08-21T20:19:44.469Z] Aug 21, 2025 4:19:44 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected non-HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 3:56:57 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
-[debug] [2025-08-21T19:56:57.690Z] Aug 21, 2025 3:56:57 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:19:44 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[debug] [2025-08-21T20:19:44.541Z] Aug 21, 2025 4:19:44 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected non-HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 3:56:57 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
-[debug] [2025-08-21T19:56:58.796Z] Aug 21, 2025 3:56:58 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:19:44 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[debug] [2025-08-21T20:20:29.588Z] Aug 21, 2025 4:20:29 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected non-HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 3:56:58 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
-[debug] [2025-08-21T19:56:58.801Z] Aug 21, 2025 3:56:58 PM com.google.cloud.datastore.emulator.firestore.webchannel.FirestoreV1WebChannelAdapter$FirestoreListenHandler onClose
-INFO: channel closed
- {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 3:56:58 PM com.google.cloud.datastore.emulator.firestore.webchannel.FirestoreV1WebChannelAdapter$FirestoreListenHandler onClose\nINFO: channel closed\n"}}
-[debug] [2025-08-21T20:01:45.619Z] Aug 21, 2025 4:01:45 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
-INFO: Detected HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:01:45 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:20:29 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[debug] [2025-08-21T20:21:04.671Z] Aug 21, 2025 4:21:04 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:21:04 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[debug] [2025-08-21T20:21:14.577Z] Aug 21, 2025 4:21:14 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:21:14 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[debug] [2025-08-21T20:21:59.608Z] Aug 21, 2025 4:21:59 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:21:59 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[debug] [2025-08-21T20:22:44.628Z] Aug 21, 2025 4:22:44 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:22:44 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[debug] [2025-08-21T20:23:29.647Z] Aug 21, 2025 4:23:29 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:23:29 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[debug] [2025-08-21T20:24:14.670Z] Aug 21, 2025 4:24:14 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:24:14 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[debug] [2025-08-21T20:24:59.872Z] Aug 21, 2025 4:24:59 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:24:59 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[debug] [2025-08-21T20:25:44.191Z] Aug 21, 2025 4:25:44 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:25:44 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[debug] [2025-08-21T20:25:44.886Z] Aug 21, 2025 4:25:44 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:25:44 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[debug] [2025-08-21T20:26:30.875Z] Aug 21, 2025 4:26:30 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:26:30 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[debug] [2025-08-21T20:27:16.886Z] Aug 21, 2025 4:27:16 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Aug 21, 2025 4:27:16 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}

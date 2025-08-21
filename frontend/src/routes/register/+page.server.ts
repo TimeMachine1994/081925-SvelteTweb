@@ -31,23 +31,18 @@ export const actions: Actions = {
 
 			console.log(`[+page.server.ts] User created and profile stored successfully: ${email}`);
 
-			// Create a session cookie
 			const customToken = await adminAuth.createCustomToken(userRecord.uid);
-			// Note: You'll need a client-side mechanism to exchange this for an ID token
-			// and then post it back to a server endpoint to create the session cookie.
-			// This example simplifies by directly returning a success message.
-			// For a real app, you would redirect to a page that handles the token exchange.
 
+			return {
+				status: 201,
+				message: 'Account created successfully.',
+				customToken: customToken
+			};
 		} catch (error: any) {
 			console.error(`[+page.server.ts] Error creating user ${email}:`, error);
 			return fail(400, {
 				message: error.message
 			});
 		}
-
-		return {
-			status: 201,
-			message: 'Account created successfully. Please log in.'
-		};
 	}
 };

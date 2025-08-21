@@ -8,7 +8,7 @@
 
 <div class="tribute-page">
     <header>
-        <h1>In Loving Memory of {memorial.name}</h1>
+        <h1>In Loving Memory of {memorial.lovedOneName}</h1>
         {#if memorial.birthDate && memorial.deathDate}
             <p>{new Date(memorial.birthDate).toLocaleDateString()} - {new Date(memorial.deathDate).toLocaleDateString()}</p>
         {/if}
@@ -16,7 +16,7 @@
 
     <main>
         {#if memorial.imageUrl}
-            <img src={memorial.imageUrl} alt={memorial.name} class="tribute-image" />
+            <img src={memorial.imageUrl} alt={memorial.lovedOneName} class="tribute-image" />
         {/if}
 
         <section class="content">

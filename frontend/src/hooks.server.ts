@@ -7,9 +7,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 	if (sessionCookie) {
 		try {
 			const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
+			const userRecord = await adminAuth.getUser(decodedClaims.uid);
 			event.locals.user = {
-				uid: decodedClaims.uid,
-				email: decodedClaims.email
+				uid: userRecord.uid,
+				email: userRecord.email,
+				displayName: userRecord.displayName
 			};
 		} catch (error) {
 			event.locals.user = null;

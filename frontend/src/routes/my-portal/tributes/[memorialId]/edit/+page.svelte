@@ -8,7 +8,7 @@
 </script>
 
 <div class="editor-container">
-    <h2>Edit Tribute for {memorial.name}</h2>
+    <h2>Edit Tribute for {memorial.lovedOneName}</h2>
 
     <form method="POST">
         <textarea name="content" rows="20">{memorial.content || ''}</textarea>

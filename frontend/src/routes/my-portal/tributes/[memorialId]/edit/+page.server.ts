@@ -1,6 +1,7 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
 import type { PageServerLoad, Actions } from './$types';
+import type { Memorial } from '$lib/types/memorial';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
     if (!locals.user) {
@@ -17,7 +18,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
     const memorialData = memorialDoc.data();
 
-    if (!memorialData || memorialData.creatorId !== locals.user.uid) {
+    if (!memorialData || memorialData.createdByUserId !== locals.user.uid) {
         throw error(403, 'Forbidden');
     }
     
@@ -26,7 +27,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
         ...memorialData,
         createdAt: memorialData.createdAt?.toDate ? memorialData.createdAt.toDate().toISOString() : null,
         updatedAt: memorialData.updatedAt?.toDate ? memorialData.updatedAt.toDate().toISOString() : null,
-    };
+    } as Memorial;
 
     return {
         memorial
@@ -52,7 +53,7 @@ export const actions: Actions = {
 
         const memorialData = memorialDoc.data();
 
-        if (!memorialData || memorialData.creatorId !== locals.user.uid) {
+        if (!memorialData || memorialData.createdByUserId !== locals.user.uid) {
             return fail(403, { message: 'Forbidden' });
         }
 

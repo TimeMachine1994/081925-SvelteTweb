@@ -1,6 +1,7 @@
 import { error } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
 import type { PageServerLoad } from './$types';
+import type { Memorial } from '$lib/types/memorial';
 
 export const load: PageServerLoad = async ({ params }) => {
     const { fullSlug } = params;
@@ -21,7 +22,7 @@ export const load: PageServerLoad = async ({ params }) => {
         ...memorialData,
         createdAt: memorialData.createdAt?.toDate ? memorialData.createdAt.toDate().toISOString() : null,
         updatedAt: memorialData.updatedAt?.toDate ? memorialData.updatedAt.toDate().toISOString() : null,
-    };
+    } as Memorial;
 
     return {
         memorial

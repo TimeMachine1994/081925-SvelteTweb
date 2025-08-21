@@ -7,12 +7,14 @@ declare global {
 			user: {
 				uid: string;
 				email: string | null | undefined;
+				displayName: string | undefined;
 			} | null;
 		}
 		interface PageData {
 			user: {
 				uid: string;
 				email: string | null | undefined;
+				displayName: string | undefined;
 			} | null;
 		}
 		// interface PageState {}
