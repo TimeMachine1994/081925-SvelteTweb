@@ -15,22 +15,24 @@ if (admin.apps.length) {
 		// In development, we use the emulators.
 		// Unset GOOGLE_APPLICATION_CREDENTIALS to ensure the Admin SDK
 		// connects to the emulators when running locally.
-		console.log('Deleting GOOGLE_APPLICATION_CREDENTIALS env var.');
+		console.log('Running in development mode. Connecting to emulators.');
+		// Unset GOOGLE_APPLICATION_CREDENTIALS to prioritize emulators.
 		delete process.env['GOOGLE_APPLICATION_CREDENTIALS'];
 
-		// Setting these environment variables is the most reliable way to
-		// ensure the Admin SDK connects to the emulators.
-		const authHost = '127.0.0.1:9099';
-		const firestoreHost = '127.0.0.1:8080';
-		console.log(`Setting FIREBASE_AUTH_EMULATOR_HOST to ${authHost}`);
-		process.env['FIREBASE_AUTH_EMULATOR_HOST'] = authHost;
-		console.log(`Setting FIRESTORE_EMULATOR_HOST to ${firestoreHost}`);
-		process.env['FIRESTORE_EMULATOR_HOST'] = firestoreHost;
+		// Set Auth emulator host via environment variable, which is the required method for the Admin SDK.
+		process.env['FIREBASE_AUTH_EMULATOR_HOST'] = '127.0.0.1:9099';
 
-		console.log("Initializing admin app with projectId: 'fir-tweb'");
 		admin.initializeApp({
 			projectId: 'fir-tweb'
 		});
+
+		// For Firestore, we can use the settings() method for a more direct connection.
+		const firestore = admin.firestore();
+		firestore.settings({
+			host: '127.0.0.1:8080',
+			ssl: false
+		});
+		console.log('✅ Firebase Admin initialized for local development with emulators.');
 		console.log('✅ Firebase Admin initialized for local development with emulators.');
 	} else {
 		console.log('Running in production mode.');

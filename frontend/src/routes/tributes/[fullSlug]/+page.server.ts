@@ -5,7 +5,6 @@ import type { Memorial } from '$lib/types/memorial';
 
 export const load: PageServerLoad = async ({ params }) => {
     const { fullSlug } = params;
-
     const memorialsRef = adminDb.collection('memorials');
     const snapshot = await memorialsRef.where('slug', '==', fullSlug).limit(1).get();
 

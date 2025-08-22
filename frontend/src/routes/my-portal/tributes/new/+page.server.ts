@@ -15,7 +15,11 @@ export const actions: Actions = {
 			return fail(400, { error: "Loved one's name is required." });
 		}
 
-		const slug = `celebration-of-life-for-${lovedOneName.trim().toLowerCase().replace(/\s+/g, '-')}`;
+		const slug = `celebration-of-life-for-${lovedOneName
+			.trim()
+			.toLowerCase()
+			.replace(/\s+/g, '-')
+			.replace(/[^a-z0-9-]/g, '')}`;
 
 		try {
 			console.log(`📝 Creating new tribute for: ${lovedOneName}`);
@@ -31,6 +35,6 @@ export const actions: Actions = {
 			return fail(500, { error: 'An error occurred while creating the tribute.' });
 		}
 
-		redirect(303, '/my-portal');
+		redirect(303, `/tributes/${slug}`);
 	}
 };
