@@ -46,3 +46,15 @@ export interface BookingItem {
 	price: number;
 	quantity: number;
 }
+export interface LivestreamConfig {
+	id: string;
+	basePackage: string;
+	duration: number;
+	platform: string;
+	addObs: boolean;
+	addExtraCameras: number;
+	addExtraMicrophones: number;
+	total: number;
+	userId: string;
+	createdAt: any;
+}

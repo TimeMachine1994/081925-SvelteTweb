@@ -2,6 +2,7 @@ import { adminDb } from '$lib/server/firebase';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { sendReceiptEmail } from '$lib/server/email';
+import type { LivestreamConfig } from '$lib/types/livestream';
 
 export const load: PageServerLoad = async ({ url, locals }) => {
 	if (!locals.user) {
@@ -25,10 +26,10 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 		throw error(403, 'Forbidden');
 	}
 
-	const config = {
+	const config: LivestreamConfig = {
 		id: configDoc.id,
-		...configData,
-		createdAt: configData.createdAt?.toDate ? configData.createdAt.toDate().toISOString() : null
+		...(configData as Omit<LivestreamConfig, 'id' | 'createdAt'>),
+		createdAt: configData?.createdAt?.toDate ? configData.createdAt.toDate().toISOString() : null
 	};
 
 	if (locals.user.email) {
