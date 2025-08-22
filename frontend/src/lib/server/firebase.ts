@@ -1,6 +1,6 @@
 import admin from 'firebase-admin';
 import { dev } from '$app/environment';
-import { GOOGLE_APPLICATION_CREDENTIALS } from '$env/static/private';
+import { GOOGLE_APPLICATION_CREDENTIALS, PRIVATE_FIREBASE_STORAGE_BUCKET } from '$env/static/private';
 
 console.log('--- SERVER FIREBASE INITIALIZATION START ---');
 
@@ -23,7 +23,8 @@ if (admin.apps.length) {
 		process.env['FIREBASE_AUTH_EMULATOR_HOST'] = '127.0.0.1:9099';
 
 		admin.initializeApp({
-			projectId: 'fir-tweb'
+			projectId: 'fir-tweb',
+			storageBucket: PRIVATE_FIREBASE_STORAGE_BUCKET
 		});
 
 		// For Firestore, we can use the settings() method for a more direct connection.
@@ -42,7 +43,8 @@ if (admin.apps.length) {
 			console.log('Found GOOGLE_APPLICATION_CREDENTIALS. Initializing with service account.');
 			const serviceAccount = JSON.parse(GOOGLE_APPLICATION_CREDENTIALS);
 			admin.initializeApp({
-				credential: admin.credential.cert(serviceAccount)
+				credential: admin.credential.cert(serviceAccount),
+				storageBucket: PRIVATE_FIREBASE_STORAGE_BUCKET
 			});
 			console.log('✅ Firebase Admin initialized for production.');
 		} else {

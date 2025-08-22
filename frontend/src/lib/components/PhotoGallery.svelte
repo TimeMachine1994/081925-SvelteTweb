@@ -1,5 +1,12 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+
 	export let photos: string[] = [];
+
+	onMount(() => {
+		console.log('🏞️ PhotoGallery component mounted.');
+		console.log(`Displaying ${photos.length} photos.`);
+	});
 </script>
 
 <div class="gallery-container">
@@ -8,7 +15,7 @@
 		<div class="photo-grid">
 			{#each photos as photo}
 				<div class="photo-item">
-					<img src={photo} alt="Tribute gallery photo" />
+					<img src={photo} alt="Tribute gallery" />
 				</div>
 			{/each}
 		</div>

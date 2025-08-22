@@ -15,7 +15,9 @@
 					<a href="/my-portal" class="nav-links" class:active={$page.url.pathname === '/my-portal'}>My Portal</a>
 				</li>
 				<li class="nav-item">
-					<a href="/logout" class="nav-links">Logout</a>
+					<form action="/logout" method="POST" style="height: 100%;">
+						<button type="submit" class="nav-links btn-link">Logout</button>
+					</form>
 				</li>
 			{:else}
 				<li class="nav-item">
@@ -90,5 +92,14 @@
 
 	.nav-links.active {
 		border-bottom: 4px solid #1888ff;
+	}
+
+	.btn-link {
+		background: none;
+		border: none;
+		cursor: pointer;
+		font-family: inherit;
+		width: 100%;
+		font-size: 1.2rem;
 	}
 </style>

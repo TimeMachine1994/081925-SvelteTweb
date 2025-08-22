@@ -17,9 +17,14 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     }
 
     const memorialData = memorialDoc.data();
-
-    if (!memorialData || memorialData.createdByUserId !== locals.user.uid) {
-        throw error(403, 'Forbidden');
+    const isOwner = memorialData?.creatorUid === locals.user.uid || memorialData?.createdByUserId === locals.user.uid;
+   
+    if (memorialData?.createdByUserId) {
+    	console.warn(`Memorial ${memorialId} is using the deprecated "createdByUserId" field. Please migrate to "creatorUid".`);
+    }
+   
+    if (!memorialData || !isOwner) {
+    	throw error(403, 'Forbidden');
     }
     
     const memorial = {
@@ -52,9 +57,10 @@ export const actions: Actions = {
         }
 
         const memorialData = memorialDoc.data();
-
-        if (!memorialData || memorialData.createdByUserId !== locals.user.uid) {
-            return fail(403, { message: 'Forbidden' });
+        const isOwner = memorialData?.creatorUid === locals.user.uid || memorialData?.createdByUserId === locals.user.uid;
+      
+        if (!memorialData || !isOwner) {
+        	return fail(403, { message: 'Forbidden' });
         }
 
         if (!content) {

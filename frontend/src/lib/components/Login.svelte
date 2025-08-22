@@ -1,38 +1,46 @@
 <script lang="ts">
 	import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 	import { auth } from '$lib/firebase';
-	import type { ActionData } from '../../routes/login/$types';
-	import { tick } from 'svelte';
-	
-	let { form }: { form: ActionData } = $props();
-	
+	import { goto } from '$app/navigation';
+
 	let email = $state('');
 	let password = $state('');
-	let idToken = $state('');
 	let error: string | null = $state(null);
 	let loading = $state(false);
-	let formElement: HTMLFormElement;
-	
+
+	async function createSession(idToken: string) {
+		const response = await fetch('/api/session', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ idToken })
+		});
+
+		if (response.ok) {
+			console.log('[Login.svelte] Session created successfully.');
+			goto('/my-portal');
+		} else {
+			throw new Error('Failed to create session.');
+		}
+	}
+
 	async function handleSubmit(event: SubmitEvent) {
 		event.preventDefault();
 		console.log('[Login.svelte] Starting login process...');
 		loading = true;
 		error = null;
-	
+
 		try {
 			console.log('[Login.svelte] Calling signInWithEmailAndPassword...');
 			const userCredential = await signInWithEmailAndPassword(auth, email, password);
 			console.log('[Login.svelte] Sign-in successful, user:', userCredential.user.uid);
-	
+
 			console.log('[Login.svelte] Getting ID token...');
-			idToken = await userCredential.user.getIdToken();
+			const idToken = await userCredential.user.getIdToken();
 			console.log('[Login.svelte] Got ID token.');
 
-			// Wait for the DOM to update with the new idToken value
-			await tick();
-	
-			// Submit the form programmatically
-			formElement.submit();
+			await createSession(idToken);
 		} catch (e: any) {
 			error = e.message;
 			console.error('[Login.svelte] An error occurred during login:', e);
@@ -52,11 +60,10 @@
 			const userCredential = await signInWithPopup(auth, provider);
 			console.log('[Login.svelte] Google sign-in successful, user:', userCredential.user.uid);
 
-			idToken = await userCredential.user.getIdToken();
+			const idToken = await userCredential.user.getIdToken();
 			console.log('[Login.svelte] Got ID token from Google sign-in.');
 
-			await tick();
-			formElement.submit();
+			await createSession(idToken);
 		} catch (e: any) {
 			error = e.message;
 			console.error('[Login.svelte] An error occurred during Google sign-in:', e);
@@ -70,13 +77,7 @@
 	<div class="login-container">
 		<h2>Login</h2>
 	
-		<form
-			method="POST"
-			action="?/login"
-			bind:this={formElement}
-			onsubmit={handleSubmit}
-		>
-			<input type="hidden" name="idToken" bind:value={idToken} />
+		<form onsubmit={handleSubmit}>
 			<div class="form-group">
 				<label for="email">Email:</label>
 				<input id="email" type="email" bind:value={email} required />
@@ -96,8 +97,8 @@
 			Sign in with Google
 		</button>
 	
-		{#if error || form?.message}
-			<p class="error">{error || form?.message}</p>
+		{#if error}
+			<p class="error">{error}</p>
 		{/if}
 
 	<p>

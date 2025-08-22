@@ -3,7 +3,7 @@
 	import type { ActionData } from './$types';
 
 	let { form }: { form: ActionData } = $props();
-	let enhancing = false;
+	let enhancing = $state(false);
 
 	// Cast the form to a type that includes the optional error property to resolve the type error.
 	const typedForm = form as { error?: string };

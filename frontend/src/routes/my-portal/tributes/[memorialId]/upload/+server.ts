@@ -21,8 +21,14 @@ export async function POST({ request, params, locals }) {
 	}
 
 	const memorialData = memorialDoc.data();
-	if (!memorialData || memorialData.creatorUid !== locals.user.uid) {
-		console.log(`🚫 Forbidden upload attempt by user ${locals.user.uid} for memorial owned by ${memorialData?.creatorUid}`);
+	const isOwner = memorialData?.creatorUid === locals.user.uid || memorialData?.createdByUserId === locals.user.uid;
+
+	if (memorialData?.createdByUserId) {
+		console.warn(`Memorial ${memorialId} is using the deprecated "createdByUserId" field. Please migrate to "creatorUid".`);
+	}
+
+	if (!memorialData || !isOwner) {
+		console.log(`🚫 Forbidden upload attempt by user ${locals.user.uid} for memorial owned by ${memorialData?.creatorUid || memorialData?.createdByUserId}`);
 		return json({ error: 'Forbidden' }, { status: 403 });
 	}
 

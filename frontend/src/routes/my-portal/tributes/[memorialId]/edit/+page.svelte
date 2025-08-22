@@ -1,11 +1,18 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import PhotoUploader from '$lib/components/PhotoUploader.svelte';
+	import PhotoGallery from '$lib/components/PhotoGallery.svelte';
 	import type { PageData, ActionData } from './$types';
 
 	export let data: PageData;
 	export let form: ActionData;
 
 	const { memorial } = data;
+
+	onMount(() => {
+		console.log('🖼️ Photo editor page mounted for memorial:', memorial.id);
+		console.log('Memorial data:', memorial);
+	});
 </script>
 
 <div class="editor-container">
@@ -22,6 +29,8 @@
 	</form>
 
 	<PhotoUploader memorialId={memorial.id} />
+
+	<PhotoGallery photos={memorial.photos || []} />
 </div>
 
 <style>
