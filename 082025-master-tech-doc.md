@@ -37,7 +37,7 @@ The application will continue to use Firestore as its primary database. The exis
 -   **Data Duplication:** To improve performance, some data may be duplicated (e.g., adding `creatorDisplayName` to the `memorials` collection).
 -   **Collection Consolidation:** The `userEventConfigurations`, `eventConfigs`, and `privateNotes` collections may be consolidated to simplify queries.
 -   **Indexing Review:** Firestore indexes will be reviewed and optimized for SvelteKit's data fetching patterns.
--   **Memorial Photos:** A `photos` field (array of strings) has been added to the `memorials` collection to store URLs of uploaded images.
+-   **Memorial Photos:** A `photos` field (array of strings) has been added to the `memorials` collection. This array stores the public download URLs for each image uploaded to a specific memorial, linking the Firestore document to the files in Firebase Storage.
 
 ## 4. Authentication and Authorization
 
@@ -45,14 +45,14 @@ User authentication and authorization will be managed using Firebase Auth, with 
 
 -   **Authentication Flow:** User registration, login, and password reset will be handled via the Firebase Auth SDK on the client, with session management using secure, `HttpOnly` cookies set by the SvelteKit server.
 -   **Authorization:** Access control will be implemented on both the client-side (conditional rendering) and server-side (in `load` functions and API endpoints) based on the user's authentication state and custom claims.
--   **Storage Rules:** Firebase Storage rules have been configured to allow users to upload photos only to memorials they have created. Photos are publicly readable.
+-   **Storage Rules:** Firebase Storage rules have been configured to enforce that users can only write to paths corresponding to memorials they own (`creatorUid`). This prevents unauthorized uploads. All photos are publicly readable to allow for easy display in the tribute gallery.
 
 ## 5. API Service Contract
 
 Backend interactions will be handled by a combination of SvelteKit server endpoints and Firebase Cloud Functions.
 
 -   **SvelteKit Endpoints:** Existing Next.js API routes for admin functionality, login, and search will be re-implemented as SvelteKit `+server.ts` endpoints.
-    -   A new endpoint at `/my-portal/tributes/[memorialId]/upload` handles photo uploads for memorials.
+    -   A new endpoint at `/my-portal/tributes/[memorialId]/upload` handles photo uploads. It accepts `multipart/form-data`, validates user ownership of the memorial, uploads the file to a structured path in Firebase Storage, and updates the corresponding memorial document in Firestore with the new photo's URL.
 -   **Cloud Functions:** Existing callable Cloud Functions for creating memorials, saving calculator configurations, and processing payments will be maintained.
 
 ## 6. Component Migration Plan
@@ -63,7 +63,7 @@ React components will be migrated to Svelte, leveraging Svelte's features to sim
 -   **Layout Components:** Next.js layout components will be migrated to SvelteKit layouts (`+layout.svelte`).
 -   **UI Components:** The `shadcn/ui` React components will be replaced with a Svelte-native UI library like `shadcn-svelte` or `bits-ui`.
 -   **Complex Patterns:** React HOCs, render props, and custom hooks will be re-architected using Svelte snippets, composition, and runes in `.svelte.js` files.
--   **Photo Feature Components:** The `PhotoUploader.svelte` and `PhotoGallery.svelte` components have been implemented and integrated to provide photo upload and viewing functionality.
+-   **Photo Feature Components:** The `PhotoUploader.svelte` and `PhotoGallery.svelte` components provide the core user interface for photo management. `PhotoUploader` uses SvelteKit's progressive enhancement (`use:enhance`) to handle form submission. Upon a successful upload, it calls `invalidateAll()` to trigger a server-side data refresh, ensuring the `PhotoGallery` component automatically displays the new image without a full page reload.
 
 ## 7. State Management
 
@@ -71,7 +71,7 @@ Application state will be managed using Svelte's built-in features.
 
 -   **Global State:** Svelte stores (`writable`, `readable`, `derived`) will be used for global state, such as the user's authentication status.
 -   **Local State:** Svelte 5 runes (`$state`, `$derived`) will be used for local component state.
--   **Data Fetching:** Data will be fetched primarily on the server using SvelteKit's `load` functions, with client-side fetching for real-time updates.
+-   **Data Fetching & Invalidation:** Data is fetched on the server via `load` functions. For client-side actions that modify data (like photo uploads), the `invalidateAll()` function from `$app/navigation` is used to programmatically refetch server data, keeping the UI in sync with the backend state.
 
 ## 8. Deployment and CI/CD
 
