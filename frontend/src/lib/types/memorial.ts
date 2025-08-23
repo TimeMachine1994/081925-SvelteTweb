@@ -1,4 +1,5 @@
 import type { Timestamp } from 'firebase/firestore';
+import type { CloudflareStream } from './livestream';
 
 export interface Memorial {
 	id: string;
@@ -22,6 +23,6 @@ export interface Memorial {
 	imageUrl?: string; // Adding optional fields that might be missing from schema but used in code
 	birthDate?: string;
 	deathDate?: string;
-	livestreamConfig?: any;
+	livestream?: CloudflareStream;
 	photos?: string[];
 }

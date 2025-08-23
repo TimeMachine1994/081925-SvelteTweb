@@ -30,11 +30,41 @@
 
 	<PhotoUploader memorialId={memorial.id} />
 
+	<div class="livestream-section">
+		{#if memorial.livestream}
+			<h3>Livestream Details</h3>
+			<p><strong>Name:</strong> {memorial.livestream.name}</p>
+			<p><strong>RTMP URL:</strong> {memorial.livestream.rtmpsUrl}</p>
+			<p><strong>Stream Key:</strong> {memorial.livestream.streamKey}</p>
+		{:else}
+			<a href="/my-portal/tributes/{memorial.id}/livestream/new" class="btn-secondary">Create Livestream</a>
+		{/if}
+	</div>
+
 	<PhotoGallery photos={memorial.photos || []} />
 </div>
 
 <style>
-    .editor-container {
+	   .livestream-section {
+	       margin: 2rem 0;
+	       padding: 1rem;
+	       border: 1px solid #eee;
+	       border-radius: 8px;
+	   }
+
+	   .btn-secondary {
+	       display: inline-block;
+	       padding: 0.75rem 1.5rem;
+	       font-size: 1rem;
+	       background-color: #6c757d;
+	       color: white;
+	       border: none;
+	       border-radius: 4px;
+	       cursor: pointer;
+	       text-align: center;
+	       text-decoration: none;
+	   }
+	   .editor-container {
         max-width: 800px;
         margin: 2rem auto;
         padding: 2rem;

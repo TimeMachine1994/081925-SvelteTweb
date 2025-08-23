@@ -24,6 +24,17 @@
 			<img src={memorial.imageUrl} alt={memorial.lovedOneName} class="tribute-image" />
 		{/if}
 
+		{#if memorial.livestream?.uid}
+			<div class="livestream-player">
+				<iframe
+					src="https://customer-j17w42139d580s8b.cloudflarestream.com/{memorial.livestream.uid}/iframe"
+					style="border: none; position: absolute; top: 0; left: 0; height: 100%; width: 100%;"
+					allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+					allowfullscreen={true}
+				></iframe>
+			</div>
+		{/if}
+
 		<section class="content">
 			{@html memorial.content}
 		</section>
@@ -54,5 +65,10 @@
 
     .content {
         line-height: 1.6;
+    }
+    .livestream-player {
+        position: relative;
+        padding-top: 56.25%; /* 16:9 aspect ratio */
+        margin-bottom: 2rem;
     }
 </style>

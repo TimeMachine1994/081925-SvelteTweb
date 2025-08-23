@@ -4,9 +4,7 @@ import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	console.log('Starting session creation...');
-	const data = await request.formData();
-	const idToken = data.get('idToken');
-	const slug = data.get('slug');
+	const { idToken, slug } = await request.json();
 
 	if (typeof idToken !== 'string' || !idToken) {
 		console.error('idToken is missing or not a string');

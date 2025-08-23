@@ -1,6 +1,6 @@
 import admin from 'firebase-admin';
 import { dev } from '$app/environment';
-import { GOOGLE_APPLICATION_CREDENTIALS, PRIVATE_FIREBASE_STORAGE_BUCKET } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 
 console.log('--- SERVER FIREBASE INITIALIZATION START ---');
 
@@ -24,7 +24,7 @@ if (admin.apps.length) {
 
 		admin.initializeApp({
 			projectId: 'fir-tweb',
-			storageBucket: PRIVATE_FIREBASE_STORAGE_BUCKET
+			storageBucket: env.PRIVATE_FIREBASE_STORAGE_BUCKET
 		});
 
 		// For Firestore, we can use the settings() method for a more direct connection.
@@ -38,19 +38,21 @@ if (admin.apps.length) {
 	} else {
 		console.log('Running in production mode.');
 		// In production, we use the service account credentials.
-		// The GOOGLE_APPLICATION_CREDENTIALS env var is only available in production.
-		if (GOOGLE_APPLICATION_CREDENTIALS) {
-			console.log('Found GOOGLE_APPLICATION_CREDENTIALS. Initializing with service account.');
-			const serviceAccount = JSON.parse(GOOGLE_APPLICATION_CREDENTIALS);
+		const serviceAccountJson = env.PRIVATE_FIREBASE_SERVICE_ACCOUNT_KEY;
+		const storageBucket = env.PRIVATE_FIREBASE_STORAGE_BUCKET;
+
+		if (serviceAccountJson) {
+			console.log('Found service account key. Initializing with service account.');
+			const serviceAccount = JSON.parse(serviceAccountJson);
 			admin.initializeApp({
 				credential: admin.credential.cert(serviceAccount),
-				storageBucket: PRIVATE_FIREBASE_STORAGE_BUCKET
+				storageBucket: storageBucket
 			});
 			console.log('✅ Firebase Admin initialized for production.');
 		} else {
 			// This case should ideally not be reached in a properly configured production environment.
 			console.error(
-				'❌ ERROR: Production environment detected, but GOOGLE_APPLICATION_CREDENTIALS are not set.'
+				'❌ ERROR: Production environment detected, but PRIVATE_FIREBASE_SERVICE_ACCOUNT_KEY is not set.'
 			);
 		}
 	}

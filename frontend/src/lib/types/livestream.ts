@@ -60,3 +60,10 @@ export interface LivestreamConfig {
 	userId: string;
 	createdAt: any;
 }
+
+export interface CloudflareStream {
+	uid: string;
+	rtmpsUrl: string;
+	streamKey: string;
+	name: string;
+}
