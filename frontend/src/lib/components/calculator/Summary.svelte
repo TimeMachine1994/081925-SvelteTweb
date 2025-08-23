@@ -71,10 +71,8 @@
 		transition: all 0.3s ease;
 	}
 	.summary.sticky {
-		position: fixed;
+		position: sticky;
 		top: 20px; /* Adjust as needed */
-		width: calc(33.333% - 3rem); /* Corresponds to 1/3 width minus gap */
-		max-width: 400px; /* Optional: prevent it from getting too wide */
 		padding: 1rem;
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 	}

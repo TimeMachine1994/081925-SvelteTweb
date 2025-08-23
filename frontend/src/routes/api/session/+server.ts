@@ -1,26 +1,31 @@
 import { adminAuth } from '$lib/server/firebase';
-import { json } from '@sveltejs/kit';
+import { json, redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
-	const { idToken } = await request.json();
+	console.log('Starting session creation...');
+	const data = await request.formData();
+	const idToken = data.get('idToken');
+	const slug = data.get('slug');
+
+	if (typeof idToken !== 'string' || !idToken || typeof slug !== 'string' || !slug) {
+		console.error('idToken or slug is missing or not a string');
+		return json({ message: 'idToken and slug are required' }, { status: 400 });
+	}
+
+	const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
 
 	try {
-		const decodedToken = await adminAuth.verifyIdToken(idToken);
-		const sessionCookie = await adminAuth.createSessionCookie(idToken, {
-			expiresIn: 60 * 60 * 24 * 5 * 1000 // 5 days
-		});
-
-		cookies.set('session', sessionCookie, {
-			path: '/',
-			httpOnly: true,
-			secure: process.env.NODE_ENV === 'production',
-			maxAge: 60 * 60 * 24 * 5
-		});
-
-		return json({ status: 'signedIn' });
-	} catch (error) {
-		console.error('Error verifying ID token or creating session cookie:', error);
-		return json({ status: 'error', message: 'Failed to create session.' }, { status: 401 });
+		console.log('Creating session cookie...');
+		const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
+		const options = { maxAge: expiresIn, httpOnly: true, secure: true, path: '/' };
+		cookies.set('session', sessionCookie, options);
+		console.log('Session cookie created and set successfully.');
+	} catch (error: any) {
+		console.error('Session cookie creation failed:', error);
+		return json({ message: 'Could not create session cookie.' }, { status: 401 });
 	}
+
+	console.log(`Redirecting to /tributes/${slug}...`);
+	redirect(303, `/tributes/${slug}`);
 };

@@ -60,11 +60,6 @@
 			{#if form?.error}
 				<p class="mt-4 text-sm text-red-600">{form.error}</p>
 			{/if}
-			{#if form?.success}
-				<p class="mt-4 text-sm text-green-600">
-					Success! Please check your email for your login details.
-				</p>
-			{/if}
 
 			<div class="mt-6">
 				<button
