@@ -1,5 +1,5 @@
 import { adminAuth, adminDb } from '$lib/server/firebase';
-import { fail, redirect } from '@sveltejs/kit';
+import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import { sendRegistrationEmail } from '$lib/server/email';
 
@@ -66,8 +66,17 @@ export const actions: Actions = {
 			// 4. Send registration email
 			await sendRegistrationEmail(email, password);
 
-			return { success: true };
+			// 5. Create a custom token for auto-login
+			const customToken = await adminAuth.createCustomToken(userRecord.uid);
+			console.log(`Custom token created for ${email} 🎟️`);
+
+			// 6. Redirect to the session creation page
+			const redirectUrl = `/auth/session?token=${customToken}&slug=${slug}`;
+			redirect(303, redirectUrl);
 		} catch (error: any) {
+			if (isRedirect(error)) {
+				throw error;
+			}
 			console.error('Error during registration process:', error);
 			return fail(500, { error: error.message });
 		}

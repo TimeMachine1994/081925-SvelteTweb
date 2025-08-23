@@ -1,5 +1,5 @@
 import { adminAuth, adminDb } from '$lib/server/firebase';
-import { fail } from '@sveltejs/kit';
+import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 
 export const actions: Actions = {
@@ -33,12 +33,13 @@ export const actions: Actions = {
 
 			const customToken = await adminAuth.createCustomToken(userRecord.uid);
 
-			return {
-				status: 201,
-				message: 'Account created successfully.',
-				customToken: customToken
-			};
+			// Redirect to the session creation page
+			const redirectUrl = `/auth/session?token=${customToken}`;
+			redirect(303, redirectUrl);
 		} catch (error: any) {
+			if (isRedirect(error)) {
+				throw error;
+			}
 			console.error(`[+page.server.ts] Error creating user ${email}:`, error);
 			return fail(400, {
 				message: error.message

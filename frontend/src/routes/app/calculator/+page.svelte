@@ -5,6 +5,8 @@
 	let { data } = $props();
 
 	const memorialId = $page.url.searchParams.get('memorialId');
+
+	console.log('👽 Calculator Page Initializing...', { memorialId, data });
 </script>
 
 <svelte:head>

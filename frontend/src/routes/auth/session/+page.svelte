@@ -10,8 +10,8 @@
 		const token = $page.url.searchParams.get('token');
 		const slug = $page.url.searchParams.get('slug');
 
-		if (!token || !slug) {
-			error = 'Missing token or slug.';
+		if (!token) {
+			error = 'Missing token.';
 			return;
 		}
 
@@ -27,7 +27,9 @@
 
 			if (form && idTokenInput && slugInput) {
 				idTokenInput.value = idToken;
-				slugInput.value = slug;
+				if (slug) {
+					slugInput.value = slug;
+				}
 				form.submit();
 			}
 		} catch (e: any) {

@@ -6,6 +6,26 @@
 
 	let { bookingItems, total } = $props<{ bookingItems: BookingItem[]; total: number }>();
 
+	console.log('🧾 Summary Component Initializing...', { bookingItems, total });
+	$inspect(bookingItems, total);
+
+	let groupedItems = $derived.by(() => {
+		console.log('🔄 Recalculating grouped items...');
+		const result = bookingItems.reduce(
+			(acc: Record<string, BookingItem[]>, item: BookingItem) => {
+				const pkg = item.package;
+				if (!acc[pkg]) {
+					acc[pkg] = [];
+				}
+				acc[pkg].push(item);
+				return acc;
+			},
+			{}
+		);
+		console.log('📦 Grouped items:', result);
+		return result;
+	});
+
 	let isSticky = $state(false);
 	let sentinel: HTMLDivElement;
 	let summaryEl;
@@ -16,7 +36,7 @@
 		const observer = new IntersectionObserver(
 			([entry]) => {
 				isSticky = !entry.isIntersecting;
-				console.log('Intersection observer triggered. Is sticky:', !entry.isIntersecting);
+				console.log('📝 Intersection observer triggered. Is sticky:', !entry.isIntersecting);
 			},
 			{ threshold: 0 }
 		);
@@ -43,10 +63,16 @@
 		<p class="empty-state">Please select a package to begin.</p>
 	{:else}
 		<div class="items">
-			{#each bookingItems as item}
-				<div class="item">
-					<span>{item.name} {#if item.quantity > 1}(x{item.quantity}){/if}</span>
-					<span class="price">${item.price * item.quantity}</span>
+			{#each Object.entries(groupedItems) as [pkg, items]}
+				{@const typedItems = items as BookingItem[]}
+				<div class="package-group">
+					<h4>{pkg}</h4>
+					{#each typedItems as item}
+						<div class="item">
+							<span>{item.name} {#if item.quantity > 1}(x{item.quantity}){/if}</span>
+							<span class="price">${item.total}</span>
+						</div>
+					{/each}
 				</div>
 			{/each}
 		</div>
@@ -57,8 +83,8 @@
 		</div>
 	{/if}
 	<div class="actions">
-		<button class="action-btn secondary" onclick={() => dispatch('save')}>Save and Pay Later</button>
-		<button class="action-btn primary" onclick={() => dispatch('pay')}>Continue to Payment</button>
+		<button class="action-btn secondary" onclick={() => { console.log('💾 Dispatching save event'); dispatch('save'); }}>Save and Pay Later</button>
+		<button class="action-btn primary" onclick={() => { console.log('💳 Dispatching pay event'); dispatch('pay'); }}>Continue to Payment</button>
 	</div>
 </div>
 
@@ -95,7 +121,19 @@
 	.items {
 		display: flex;
 		flex-direction: column;
+		gap: 1.5rem;
+	}
+	.package-group {
+		display: flex;
+		flex-direction: column;
 		gap: 0.75rem;
+	}
+	.package-group h4 {
+		margin: 0;
+		font-weight: 500;
+		color: #333;
+		border-bottom: 1px solid #eee;
+		padding-bottom: 0.5rem;
 	}
 	.item {
 		display: flex;

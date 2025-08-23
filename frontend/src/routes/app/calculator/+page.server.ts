@@ -25,7 +25,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		}
 
 		const memorial = snapshot.docs[0].data() as Memorial;
-		console.log('Found memorial for user:', memorial);
+		console.log('✅ Found memorial for user:', memorial);
 		return { memorial };
 	} catch (error) {
 		console.error('Error fetching memorial:', error);
@@ -36,46 +36,52 @@ export const load: PageServerLoad = async ({ locals }) => {
 export const actions: Actions = {
 	saveAndPayLater: async ({ request, locals }) => {
 		if (!locals.user) {
+			console.error('🚨 Unauthorized attempt to save!');
 			return fail(401, { error: 'Unauthorized' });
 		}
-		const data = await request.formData();
-		const formData = JSON.parse(data.get('formData') as string) as CalculatorFormData;
 
-		// TODO: Add validation
 		try {
+			const payload = await request.json();
+			console.log('💾 Received save payload:', payload);
+
+			// TODO: Add validation
 			const db = getFirestore();
 			await db.collection('livestreamConfigurations').add({
-				...formData,
+				...payload,
 				userId: locals.user.uid,
 				status: 'saved',
 				createdAt: new Date()
 			});
-			return { success: true, action: 'saved' };
+
+			console.log('✅ Configuration saved successfully!');
+			return json({ success: true, action: 'saved' });
 		} catch (error) {
-			console.error('Error saving configuration:', error);
+			console.error('🔥 Error saving configuration:', error);
 			return fail(500, { error: 'Internal Server Error' });
 		}
 	},
 	continueToPayment: async ({ request, locals }) => {
 		if (!locals.user) {
+			console.error('🚨 Unauthorized attempt to pay!');
 			return fail(401, { error: 'Unauthorized' });
 		}
 
-		const data = await request.formData();
-		const formData = JSON.parse(data.get('formData') as string) as CalculatorFormData;
-		const total = parseFloat(data.get('total') as string);
-		const memorialId = data.get('memorialId') as string | null;
-
 		try {
+			const { formData, total, memorialId, bookingItems } = await request.json();
+			console.log('💳 Received payment payload:', { formData, total, memorialId, bookingItems });
+
 			const db = getFirestore();
 			const configRef = await db.collection('livestreamConfigurations').add({
-				...formData,
+				formData,
+				bookingItems,
 				total,
 				userId: locals.user.uid,
 				memorialId,
 				status: 'pending_payment',
 				createdAt: new Date()
 			});
+
+			console.log('📄 Created config document:', configRef.id);
 
 			const paymentIntent = await stripe.paymentIntents.create({
 				amount: total * 100,
@@ -85,14 +91,16 @@ export const actions: Actions = {
 				}
 			});
 
-			return {
+			console.log('💳 Created Payment Intent:', paymentIntent.id);
+
+			return json({
 				success: true,
 				action: 'paymentInitiated',
 				clientSecret: paymentIntent.client_secret,
 				configId: configRef.id
-			};
+			});
 		} catch (error) {
-			console.error('Error processing payment:', error);
+			console.error('🔥 Error processing payment:', error);
 			return fail(500, { error: 'Internal Server Error' });
 		}
 	}

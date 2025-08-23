@@ -8,9 +8,9 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 	const idToken = data.get('idToken');
 	const slug = data.get('slug');
 
-	if (typeof idToken !== 'string' || !idToken || typeof slug !== 'string' || !slug) {
-		console.error('idToken or slug is missing or not a string');
-		return json({ message: 'idToken and slug are required' }, { status: 400 });
+	if (typeof idToken !== 'string' || !idToken) {
+		console.error('idToken is missing or not a string');
+		return json({ message: 'idToken is required' }, { status: 400 });
 	}
 
 	const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
@@ -26,6 +26,11 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		return json({ message: 'Could not create session cookie.' }, { status: 401 });
 	}
 
-	console.log(`Redirecting to /tributes/${slug}...`);
-	redirect(303, `/tributes/${slug}`);
+	if (slug && typeof slug === 'string') {
+		console.log(`Redirecting to /tributes/${slug}...`);
+		redirect(303, `/tributes/${slug}`);
+	} else {
+		console.log('Redirecting to /my-portal...');
+		redirect(303, '/my-portal');
+	}
 };

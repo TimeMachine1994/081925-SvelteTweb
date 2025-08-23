@@ -5,7 +5,10 @@
 	let { selectedTier } = $props<{ selectedTier: Tier }>();
 	const dispatch = createEventDispatcher<{ change: Tier }>();
 
+	console.log('👑 TierSelector Initializing...', { selectedTier });
+
 	function selectTier(tier: Tier) {
+		console.log('👑 Tier selected:', tier);
 		// Don't update the prop directly, just dispatch the event
 		dispatch('change', tier);
 	}
@@ -13,6 +16,7 @@
 	const tiers = [
 		{
 			name: 'Tributestream Solo',
+			alias: 'solo',
 			price: 599,
 			features: [
 				'2 Hours of Broadcast Time',
@@ -24,6 +28,7 @@
 		},
 		{
 			name: 'Tributestream Live',
+			alias: 'live',
 			price: 1299,
 			features: [
 				'2 Hours of Broadcast Time',
@@ -36,6 +41,7 @@
 		},
 		{
 			name: 'Tributestream Legacy',
+			alias: 'legacy',
 			price: 1599,
 			features: [
 				'2 Hours of Broadcast Time',

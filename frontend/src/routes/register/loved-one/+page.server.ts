@@ -1,5 +1,5 @@
 import { adminAuth, adminDb } from '$lib/server/firebase';
-import { fail, redirect } from '@sveltejs/kit';
+import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import { sendRegistrationEmail } from '$lib/server/email';
 
@@ -72,6 +72,9 @@ export const actions: Actions = {
 			const redirectUrl = `/auth/session?token=${customToken}&slug=${slug}`;
 			redirect(303, redirectUrl);
 		} catch (error: any) {
+			if (isRedirect(error)) {
+				throw error;
+			}
 			console.error('Error during registration process:', error);
 			return fail(500, { error: error.message });
 		}

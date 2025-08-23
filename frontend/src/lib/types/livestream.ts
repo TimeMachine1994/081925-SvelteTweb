@@ -43,8 +43,10 @@ export interface CalculatorFormData {
 export interface BookingItem {
 	id: string;
 	name: string;
+	package: string;
 	price: number;
 	quantity: number;
+	total: number;
 }
 export interface LivestreamConfig {
 	id: string;

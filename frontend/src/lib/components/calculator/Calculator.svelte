@@ -10,6 +10,8 @@
 	let { memorialId, data }: { memorialId: string | null; data: { memorial: Memorial | null } } =
 		$props();
 
+	console.log('🧮 Calculator Component Initializing...', { memorialId, data });
+
 	let currentStep = $state<'booking' | 'payment'>('booking');
 	let clientSecret = $state<string | null>(null);
 	let configId = $state<string | null>(null);
@@ -52,10 +54,12 @@
 		}
 	});
 
+	$inspect(formData, selectedTier, currentStep, clientSecret, configId);
+
 	const TIER_PRICES: Record<string, number> = {
-		Solo: 599,
-		Live: 1299,
-		Legacy: 1599
+		solo: 599,
+		live: 1299,
+		legacy: 1599
 	};
 
 	const ADDON_PRICES = {
@@ -73,11 +77,14 @@
 
 		// 1. Base Package
 		if (selectedTier) {
+			const price = TIER_PRICES[selectedTier];
 			items.push({
 				id: selectedTier.toLowerCase(),
-				name: `Tributestream ${selectedTier}`,
-				price: TIER_PRICES[selectedTier],
-				quantity: 1
+				name: selectedTier,
+				package: selectedTier,
+				price: price,
+				quantity: 1,
+				total: price
 			});
 		}
 
@@ -87,8 +94,10 @@
 			items.push({
 				id: 'main_overage',
 				name: 'Main Location Overage',
+				package: 'Add-on',
 				price: HOURLY_OVERAGE_RATE,
-				quantity: mainOverageHours
+				quantity: mainOverageHours,
+				total: HOURLY_OVERAGE_RATE * mainOverageHours
 			});
 		}
 
@@ -97,16 +106,20 @@
 			items.push({
 				id: 'addl_location_fee',
 				name: 'Additional Location Fee',
+				package: 'Add-on',
 				price: ADDITIONAL_SERVICE_FEE,
-				quantity: 1
+				quantity: 1,
+				total: ADDITIONAL_SERVICE_FEE
 			});
 			const addlLocationOverage = Math.max(0, formData.additionalLocation.hours - 2);
 			if (addlLocationOverage > 0) {
 				items.push({
 					id: 'addl_location_overage',
 					name: 'Add. Location Overage',
+					package: 'Add-on',
 					price: HOURLY_OVERAGE_RATE,
-					quantity: addlLocationOverage
+					quantity: addlLocationOverage,
+					total: HOURLY_OVERAGE_RATE * addlLocationOverage
 				});
 			}
 		}
@@ -116,16 +129,20 @@
 			items.push({
 				id: 'addl_day_fee',
 				name: 'Additional Day Fee',
+				package: 'Add-on',
 				price: ADDITIONAL_SERVICE_FEE,
-				quantity: 1
+				quantity: 1,
+				total: ADDITIONAL_SERVICE_FEE
 			});
 			const addlDayOverage = Math.max(0, formData.additionalDay.hours - 2);
 			if (addlDayOverage > 0) {
 				items.push({
 					id: 'addl_day_overage',
 					name: 'Add. Day Overage',
+					package: 'Add-on',
 					price: HOURLY_OVERAGE_RATE,
-					quantity: addlDayOverage
+					quantity: addlDayOverage,
+					total: HOURLY_OVERAGE_RATE * addlDayOverage
 				});
 			}
 		}
@@ -135,24 +152,30 @@
 			items.push({
 				id: 'photography',
 				name: 'Photography',
+				package: 'Add-on',
 				price: ADDON_PRICES.photography,
-				quantity: 1
+				quantity: 1,
+				total: ADDON_PRICES.photography
 			});
 		}
 		if (formData.addons.audioVisualSupport) {
 			items.push({
 				id: 'av_support',
 				name: 'Audio/Visual Support',
+				package: 'Add-on',
 				price: ADDON_PRICES.audioVisualSupport,
-				quantity: 1
+				quantity: 1,
+				total: ADDON_PRICES.audioVisualSupport
 			});
 		}
 		if (formData.addons.liveMusician) {
 			items.push({
 				id: 'live_musician',
 				name: 'Live Musician',
+				package: 'Add-on',
 				price: ADDON_PRICES.liveMusician,
-				quantity: 1
+				quantity: 1,
+				total: ADDON_PRICES.liveMusician
 			});
 		}
 		if (formData.addons.woodenUsbDrives > 0) {
@@ -167,32 +190,41 @@
 					items.push({
 						id: 'usb_drive_first',
 						name: 'Wooden USB Drive',
+						package: 'Add-on',
 						price: ADDON_PRICES.woodenUsbDrives,
-						quantity: 1
+						quantity: 1,
+						total: ADDON_PRICES.woodenUsbDrives
 					});
 					if (billableDrives > 1) {
 						items.push({
 							id: 'usb_drive_additional',
 							name: 'Additional Wooden USB Drives',
+							package: 'Add-on',
 							price: 100,
-							quantity: billableDrives - 1
+							quantity: billableDrives - 1,
+							total: 100 * (billableDrives - 1)
 						});
 					}
 				} else {
 					items.push({
 						id: 'usb_drive_additional',
 						name: 'Additional Wooden USB Drives',
+						package: 'Add-on',
 						price: 100,
-						quantity: billableDrives
+						quantity: billableDrives,
+						total: 100 * billableDrives
 					});
 				}
 			}
 		}
 
+		console.log('📝 Booking items recalculated:', items);
 		return items;
 	});
 
-	let total = $derived(bookingItems.reduce((acc, item) => acc + item.price * item.quantity, 0));
+	let total = $derived(bookingItems.reduce((acc, item) => acc + item.total, 0));
+
+	$inspect(bookingItems, total);
 
 	function handleTierChange(tier: Tier) {
 		console.log('✨ Tier selected:', tier);
@@ -207,14 +239,23 @@
 	}
 
 	async function saveAndPayLater() {
-		const formDataObj = new FormData();
-		formDataObj.append('formData', JSON.stringify(formData));
+		console.log('💾 Saving and paying later...');
+		const payload = {
+			formData: formData,
+			bookingItems: bookingItems,
+			total: total
+		};
+		console.log('📦 Payload:', payload);
 
-		const response = await fetch('?/saveAndPayLater', {
+		const response = await fetch('/app/calculator?/saveAndPayLater', {
 			method: 'POST',
-			body: formDataObj
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(payload)
 		});
+
 		const result = await response.json();
+		console.log('✅ Save response:', result);
+
 		if (result.success) {
 			// TODO: Show success message
 			console.log('✅ Configuration saved!');
@@ -222,16 +263,24 @@
 	}
 
 	async function continueToPayment() {
-		const formDataObj = new FormData();
-		formDataObj.append('formData', JSON.stringify(formData));
-		formDataObj.append('total', total.toString());
-		formDataObj.append('memorialId', memorialId || '');
+		console.log('💳 Continuing to payment...');
+		const payload = {
+			formData: formData,
+			bookingItems: bookingItems,
+			total: total,
+			memorialId: memorialId
+		};
+		console.log('📦 Payload:', payload);
 
-		const response = await fetch('?/continueToPayment', {
+		const response = await fetch('/app/calculator?/continueToPayment', {
 			method: 'POST',
-			body: formDataObj
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(payload)
 		});
+
 		const result = await response.json();
+		console.log('💳 Payment response:', result);
+
 		if (result.success) {
 			console.log('💳 Payment initiated!', result);
 			clientSecret = result.clientSecret;

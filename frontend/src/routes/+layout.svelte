@@ -5,6 +5,7 @@
 	import Footer from '$lib/components/Footer.svelte';
 
 	import { user } from '$lib/auth';
+	import { page } from '$app/stores';
 	import type { LayoutData } from './$types';
 	import type { Snippet } from 'svelte';
 
@@ -22,7 +23,7 @@
 
 <div class="app-container">
 	<Navbar />
-	<main class="main-content">
+	<main class="main-content" class:full-width={$page.route.id?.includes('/app/calculator')}>
 		{@render children?.()}
 	</main>
 	<Footer />
@@ -41,5 +42,9 @@
 		max-width: 1500px;
 		margin: 0 auto;
 		padding: 20px;
+	}
+
+	.main-content.full-width {
+		max-width: none;
 	}
 </style>

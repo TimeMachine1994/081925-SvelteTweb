@@ -2,6 +2,9 @@
 	import type { CalculatorFormData } from '$lib/types/livestream';
 
 	let { formData = $bindable() } = $props<{ formData: CalculatorFormData }>();
+
+	console.log('📝 BookingForm Initializing...', { formData });
+	$inspect(formData);
 </script>
 
 <div class="booking-form">
