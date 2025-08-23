@@ -1,14 +1,24 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // Helper function to check for admin custom claim
+    function isAdmin() {
+      return request.auth.token.admin == true;
+    }
+
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      // Admins can read/write any user document.
+      // Regular users can only read/write their own.
+      allow read, write: if isAdmin() || (request.auth != null && request.auth.uid == userId);
     }
 
     match /memorials/{memorialId} {
-      allow read: if resource.data.isPublic == true || request.auth.uid == resource.data.creatorUid;
+      // Admins can read/write any memorial.
+      // Otherwise, apply existing logic.
+      allow read: if isAdmin() || resource.data.isPublic == true || request.auth.uid == resource.data.creatorUid;
       allow create: if request.auth != null;
-      allow update: if request.auth != null && request.resource.data.creatorUid == request.auth.uid;
+      allow update, delete: if isAdmin() || (request.auth != null && request.auth.uid == request.resource.data.creatorUid);
     }
   }
 }
