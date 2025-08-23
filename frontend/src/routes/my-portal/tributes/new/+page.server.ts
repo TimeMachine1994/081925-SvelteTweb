@@ -1,11 +1,20 @@
 import { adminDb } from '$lib/server/firebase';
-import { fail, redirect } from '@sveltejs/kit';
-import type { Actions } from './$types';
+import { error, fail, redirect } from '@sveltejs/kit';
+import type { Actions, PageServerLoad } from './$types';
+
+export const load: PageServerLoad = async ({ locals }) => {
+    if (!locals.user) {
+        throw redirect(303, '/login');
+    }
+    if (locals.user.role !== 'owner') {
+        throw error(403, 'Forbidden: You do not have permission to create a new memorial.');
+    }
+};
 
 export const actions: Actions = {
 	default: async ({ request, locals }) => {
-		if (!locals.user) {
-			return fail(401, { error: 'You must be logged in to create a tribute.' });
+		if (!locals.user || locals.user.role !== 'owner') {
+			return fail(403, { error: 'Forbidden: You do not have permission to create a new memorial.' });
 		}
 
 		const data = await request.formData();

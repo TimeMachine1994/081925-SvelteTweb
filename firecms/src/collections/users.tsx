@@ -1,7 +1,7 @@
 // firecms/src/collections/users.tsx
 
 import { buildCollection, buildProperty } from "@firecms/core";
-import { User } from "../types/user.ts"; // We will create this type definition next
+import { User, UserRole } from "../types/user";
 
 console.log("Initializing Users Collection Schema");
 
@@ -43,6 +43,20 @@ export const usersCollection = buildCollection<User>({
             name: "Created at",
             autoValue: "on_create",
             readOnly: true
+        }),
+        // User's role
+        role: buildProperty({
+            dataType: "string",
+            name: "Role",
+            description: "The user's role in the system",
+            enumValues: {
+                family_member: "Family Member",
+                viewer: "Viewer",
+                owner: "Owner",
+                funeral_director: "Funeral Director",
+                remote_producer: "Remote Producer",
+                onsite_videographer: "Onsite Videographer"
+            }
         })
     }
 });

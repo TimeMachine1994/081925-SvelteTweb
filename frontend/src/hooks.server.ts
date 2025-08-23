@@ -11,7 +11,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 			event.locals.user = {
 				uid: userRecord.uid,
 				email: userRecord.email,
-				displayName: userRecord.displayName
+				displayName: userRecord.displayName,
+				role: userRecord.customClaims?.role,
+				admin: userRecord.customClaims?.admin
 			};
 		} catch (error) {
 			event.locals.user = null;

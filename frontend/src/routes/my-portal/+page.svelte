@@ -1,29 +1,36 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+    import RolePreviewer from '$lib/components/RolePreviewer.svelte';
+    import OwnerPortal from '$lib/components/portals/OwnerPortal.svelte';
+    import FuneralDirectorPortal from '$lib/components/portals/FuneralDirectorPortal.svelte';
+    import FamilyMemberPortal from '$lib/components/portals/FamilyMemberPortal.svelte';
+    import ViewerPortal from '$lib/components/portals/ViewerPortal.svelte';
+    import RemoteProducerPortal from '$lib/components/portals/RemoteProducerPortal.svelte';
+    import OnsiteVideographerPortal from '$lib/components/portals/OnsiteVideographerPortal.svelte';
 
 	export let data: PageData;
 </script>
 
+<RolePreviewer user={data.user} />
+
 <div class="container mx-auto p-8">
 	<h1 class="text-2xl font-bold mb-4">My Portal</h1>
+    <p class="mb-6">Welcome, {data.user?.displayName}! Your role is: <strong>{data.user?.role ?? 'Not Assigned'}</strong></p>
 
-	{#if data.memorials && data.memorials.length > 0}
-		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-			{#each data.memorials as memorial}
-				<div class="card">
-					<h2 class="text-xl font-semibold">{memorial.lovedOneName}</h2>
-					<a href="/tributes/{memorial.slug}" class="btn btn-primary mt-4">View Memorial</a>
-					<a href="/my-portal/tributes/{memorial.id}/edit" class="btn btn-secondary mt-2">Edit / Manage Photos</a>
-					{#if memorial.livestreamConfig}
-						<a href="/app/checkout/success?configId={memorial.livestreamConfig.id}" class="btn btn-secondary mt-2">View Livestream Details</a>
-					{:else}
-						<a href="/app/calculator?memorialId={memorial.id}" class="btn btn-secondary mt-2">Schedule Livestream</a>
-					{/if}
-				</div>
-			{/each}
-		</div>
-	{:else}
-		<p>You have not created any memorials yet.</p>
-	{/if}
-	<a href="/my-portal/tributes/new" class="btn btn-primary mt-4">Create a New Memorial</a>
+    {#if data.user?.role === 'owner'}
+        <OwnerPortal memorials={data.memorials} />
+    {:else if data.user?.role === 'funeral_director'}
+        <FuneralDirectorPortal />
+    {:else if data.user?.role === 'family_member'}
+        <FamilyMemberPortal />
+    {:else if data.user?.role === 'viewer'}
+        <ViewerPortal />
+    {:else if data.user?.role === 'remote_producer'}
+        <RemoteProducerPortal />
+    {:else if data.user?.role === 'onsite_videographer'}
+        <OnsiteVideographerPortal />
+    {:else}
+        <!-- Fallback for users with no role or an unrecognized role -->
+        <OwnerPortal memorials={data.memorials} />
+    {/if}
 </div>

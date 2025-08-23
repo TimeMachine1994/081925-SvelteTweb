@@ -1,7 +1,7 @@
 // firecms/src/collections/memorials.tsx
 
 import { buildCollection, buildProperty } from "@firecms/core";
-import { Memorial } from "../types/memorial.ts"; // We will create this type definition next
+import { Memorial } from "../types/memorial"; // We will create this type definition next
 
 console.log("Initializing Memorials Collection Schema");
 

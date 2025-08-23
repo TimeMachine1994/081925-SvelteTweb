@@ -8,6 +8,8 @@ declare global {
 				uid: string;
 				email: string | null | undefined;
 				displayName: string | undefined;
+				role?: string;
+				admin?: boolean;
 			} | null;
 		}
 		interface PageData {
@@ -15,6 +17,8 @@ declare global {
 				uid: string;
 				email: string | null | undefined;
 				displayName: string | undefined;
+				role?: string;
+				admin?: boolean;
 			} | null;
 		}
 		// interface PageState {}

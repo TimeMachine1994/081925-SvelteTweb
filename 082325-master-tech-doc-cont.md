@@ -38,13 +38,14 @@ The application will continue to use Firestore as its primary database. The exis
 -   **Collection Consolidation:** The `userEventConfigurations`, `eventConfigs`, and `privateNotes` collections may be consolidated to simplify queries.
 -   **Indexing Review:** Firestore indexes will be reviewed and optimized for SvelteKit's data fetching patterns.
 -   **Memorial Photos:** A `photos` field (array of strings) has been added to the `memorials` collection. This array stores the public download URLs for each image uploaded to a specific memorial, linking the Firestore document to the files in Firebase Storage.
+-   **User Roles:** A `role` field (string) has been added to the `users` collection to support role-based access control. This field is managed via FireCMS and corresponds to a custom claim on the user's Firebase Auth token.
 
 ## 4. Authentication and Authorization
 
 User authentication and authorization will be managed using Firebase Auth, with a secure flow integrated into SvelteKit.
 
 -   **Authentication Flow:** User registration, login, and password reset will be handled via the Firebase Auth SDK on the client, with session management using secure, `HttpOnly` cookies set by the SvelteKit server.
--   **Authorization:** Access control will be implemented on both the client-side (conditional rendering) and server-side (in `load` functions and API endpoints) based on the user's authentication state and custom claims.
+-   **Authorization:** Access control is implemented using Firebase Auth custom claims. A user's `role` (e.g., `owner`, `viewer`) and `admin` status are set as custom claims on their token. The SvelteKit server hook (`hooks.server.ts`) verifies the session cookie on every request and attaches the user's identity, including their role and admin status, to the `event.locals` object. This allows for granular, server-side permission checks in `load` functions and API endpoints.
 -   **Storage Rules:** Firebase Storage rules have been configured to enforce that users can only write to paths corresponding to memorials they own (`creatorUid`). This prevents unauthorized uploads. All photos are publicly readable to allow for easy display in the tribute gallery.
 
 ## 5. API Service Contract
@@ -53,6 +54,7 @@ Backend interactions will be handled by a combination of SvelteKit server endpoi
 
 -   **SvelteKit Endpoints:** Existing Next.js API routes for admin functionality, login, and search will be re-implemented as SvelteKit `+server.ts` endpoints.
     -   A new endpoint at `/my-portal/tributes/[memorialId]/upload` handles photo uploads. It accepts `multipart/form-data`, validates user ownership of the memorial, uploads the file to a structured path in Firebase Storage, and updates the corresponding memorial document in Firestore with the new photo's URL.
+    -   New endpoints at `/api/set-admin-claim` and `/api/set-role-claim` have been created to allow administrators to manage user permissions via Firebase custom claims.
 -   **Cloud Functions:** Existing callable Cloud Functions for creating memorials, saving calculator configurations, and processing payments will be maintained.
 
 ## 6. Component Migration Plan
@@ -64,6 +66,7 @@ React components will be migrated to Svelte, leveraging Svelte's features to sim
 -   **UI Components:** The `shadcn/ui` React components will be replaced with a Svelte-native UI library like `shadcn-svelte` or `bits-ui`.
 -   **Complex Patterns:** React HOCs, render props, and custom hooks will be re-architected using Svelte snippets, composition, and runes in `.svelte.js` files.
 -   **Photo Feature Components:** The `PhotoUploader.svelte` and `PhotoGallery.svelte` components provide the core user interface for photo management. `PhotoUploader` uses SvelteKit's progressive enhancement (`use:enhance`) to handle form submission. Upon a successful upload, it calls `invalidateAll()` to trigger a server-side data refresh, ensuring the `PhotoGallery` component automatically displays the new image without a full page reload.
+-   **User Portal Components:** The `/my-portal` page has been refactored into a hub that dynamically renders role-specific dashboard components (e.g., `OwnerPortal.svelte`, `FuneralDirectorPortal.svelte`). An admin-only `RolePreviewer.svelte` component has been added to facilitate testing of the different portal views.
 
 ## 7. State Management
 
@@ -118,5 +121,38 @@ The project utilizes FireCMS, a headless CMS and admin panel built for Firebase,
 ### 11.4. Data Management and Schema
 
 -   **UI Generation:** FireCMS dynamically generates a user interface based on collection schemas defined as code. This provides a type-safe and version-controlled way to manage the admin panel's structure.
--   **Current State:** The current implementation includes a `demoCollection` as a placeholder and example.
--   **Required Work:** To manage the application's actual data, schemas for collections such as `memorials`, `users`, and `livestreams` must be created and added to the FireCMS configuration. This will enable administrators to create, read, update, and delete records through the generated UI.
+-   **Current State:** The current implementation includes schemas for the `memorials` and `users` collections. The `users` schema includes a `role` field to allow for role-based access control management directly from the admin panel.
+
+## 12. User Roles and Portals
+
+A role-based access control (RBAC) system has been implemented to provide tailored experiences and permissions for different user types.
+
+### 12.1. Defined Roles
+
+The following user roles have been established:
+- `family_member`
+- `viewer`
+- `owner`
+- `funeral_director`
+- `remote_producer`
+- `onsite_videographer`
+
+### 12.2. Role Permissions
+
+This table outlines the intended abilities for each role.
+
+| Role | Target Abilities (What they SHOULD be able to do) |
+| :--- | :--- |
+| **owner** | Create new memorials. Edit, manage photos for, and delete memorials they own. Invite other users (family, viewers). |
+| **family_member** | View memorials they are invited to. Potentially upload photos or leave comments (if allowed by the owner). |
+| **viewer** | View memorials they are invited to (read-only access). |
+| **funeral_director**| View all memorials associated with their funeral home. Potentially manage livestream details or assist owners. |
+| **remote_producer**| Access technical details and controls for livestreams they are assigned to. |
+| **onsite_videographer**| View event details, schedules, and contact information for assigned memorials. |
+
+### 12.3. Admin Preview Functionality
+
+To facilitate development and testing, a role preview feature has been implemented for administrators.
+-   **Mechanism:** When an admin is logged in, they can append a `?preview_role=<role_name>` query parameter to the `/my-portal` URL.
+-   **Logic:** The server-side `load` function for the portal page detects this parameter, verifies the user is an admin, and then temporarily overrides their role for that page view.
+-   **UI:** A `RolePreviewer.svelte` component is displayed only to admins, providing a simple dropdown to switch between different role views without needing to log out or change data.
