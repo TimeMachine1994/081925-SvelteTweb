@@ -63,8 +63,8 @@
 		{#each tiers as tier}
 			<button
 				class="tier"
-				class:selected={selectedTier === tier.name}
-				onclick={() => dispatch('change', tier.name as Tier)}
+				class:selected={selectedTier === tier.alias}
+				onclick={() => dispatch('change', tier.alias as Tier)}
 			>
 				<h3>{tier.name}</h3>
 				<p class="price">${tier.price}</p>

@@ -39,16 +39,21 @@ export const actions: Actions = {
 			});
 			console.log(`User created successfully: ${userRecord.uid}`);
 
-			// 2. Create user profile in Firestore
+			// 2. Set custom claim for owner role
+			await adminAuth.setCustomUserClaims(userRecord.uid, { role: 'owner' });
+			console.log(`Custom claim 'owner' set for ${email} 👑`);
+
+			// 3. Create user profile in Firestore
 			await adminDb.collection('users').doc(userRecord.uid).set({
 				email,
 				displayName: name,
 				phone,
+				role: 'owner',
 				createdAt: new Date()
 			});
-			console.log(`User profile created for ${email} 📝`);
+			console.log(`User profile created for ${email} with owner role 📝`);
 
-			// 3. Create memorial
+			// 4. Create memorial
 			const slug = `celebration-of-life-for-${lovedOneName
 				.trim()
 				.toLowerCase()
@@ -61,14 +66,14 @@ export const actions: Actions = {
 			});
 			console.log(`Memorial created for ${lovedOneName} with slug: ${slug} 🕊️`);
 
-			// 4. Send registration email
+			// 5. Send registration email
 			await sendRegistrationEmail(email, password);
 
-			// 5. Create a custom token for auto-login
+			// 6. Create a custom token for auto-login
 			const customToken = await adminAuth.createCustomToken(userRecord.uid);
 			console.log(`Custom token created for ${email} 🎟️`);
 
-			// 6. Redirect to the session creation page
+			// 7. Redirect to the session creation page
 			const redirectUrl = `/auth/session?token=${customToken}&slug=${slug}`;
 			redirect(303, redirectUrl);
 		} catch (error: any) {

@@ -48,7 +48,7 @@
                 {#if memorial.livestream}
                     <a href="/my-portal/tributes/{memorial.id}/edit" class="btn btn-secondary mt-2">View Livestream Details</a>
                 {:else}
-                    <a href="/my-portal/tributes/{memorial.id}/livestream/new" class="btn btn-accent mt-2">Create Livestream</a>
+                    <a href="/app/calculator?memorialId={memorial.id}&lovedOneName={encodeURIComponent(memorial.lovedOneName)}" class="btn btn-accent mt-2">Schedule Livestream</a>
                 {/if}
 
                 <!-- Invitation Section -->

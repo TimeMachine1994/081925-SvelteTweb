@@ -49,7 +49,7 @@
 
 <div bind:this={sentinel}></div>
 <div class="summary" class:sticky={isSticky} bind:this={summaryEl}>
-	{#if isSticky}
+	{#if isSticky && bookingItems.length > 0}
 		<div class="condensed-summary">
 			<h3>Total: <span class="price">${total}</span></h3>
 			{#if bookingItems[0]}
@@ -84,6 +84,7 @@
 	{/if}
 	<div class="actions">
 		<button class="action-btn secondary" onclick={() => { console.log('💾 Dispatching save event'); dispatch('save'); }}>Save and Pay Later</button>
+		<button class="action-btn" onclick={() => { console.log('💳 Dispatching payNow event'); dispatch('payNow'); }}>Pay Now</button>
 		<button class="action-btn primary" onclick={() => { console.log('💳 Dispatching pay event'); dispatch('pay'); }}>Continue to Payment</button>
 	</div>
 </div>
@@ -158,9 +159,12 @@
 	}
 	.actions {
 		margin-top: 1.5rem;
-		display: flex;
-		flex-direction: column;
+		display: grid;
+		grid-template-columns: 1fr 1fr;
 		gap: 0.75rem;
+	}
+	.actions .primary {
+		grid-column: 1 / -1;
 	}
 	.action-btn {
 		padding: 0.75rem;

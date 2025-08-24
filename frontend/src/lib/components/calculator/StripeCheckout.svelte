@@ -1,89 +1,86 @@
 <script lang="ts">
-	import type { CalculatorFormData } from '$lib/types/livestream';
 	import { onMount } from 'svelte';
-	import { loadStripe, type Stripe } from '@stripe/stripe-js';
-
-	let {
-		clientSecret,
-		configId
-	} = $props<{ clientSecret: string; configId: string }>();
-
-	let stripe: Stripe | null;
-	let cardElement: any;
+	import { loadStripe, type Stripe, type StripeElements, type StripeCardElement } from '@stripe/stripe-js';
+	
+	let { amount, memorialId, lovedOneName } = $props<{ amount: number, memorialId: string, lovedOneName: string }>();
+	let stripe: Stripe | null = $state(null);
+	let elements: StripeElements | null = $state(null);
+	let cardElement: StripeCardElement | null = $state(null);
 	let processing = $state(false);
-	let errorMessage = $state('');
-
+	let error: string | null = $state(null);
+	let clientSecret: string | null = $state(null);
+	
 	onMount(async () => {
-		stripe = await loadStripe('pk_test_51RygFQFfUFvnTxoO0Iq7qkz1W57cljvO8rEYkXSJiFR3AXh6uiwnFxdn1PynsczCJ1yMxVdHqO1jEpnKj6ku7yll00JWICxK4T');
-		if (stripe) {
-			const elements = stripe.elements();
+		console.log('StripeCheckout component mounted 💳');
+		const stripeKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
+		if (!stripeKey) {
+			console.error('Stripe public key not found!');
+			return;
+		}
+		stripe = await loadStripe(stripeKey);
+
+		const res = await fetch('/app/calculator', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ amount, memorialId, lovedOneName })
+		});
+
+		const data = await res.json();
+		clientSecret = data.clientSecret;
+
+		if (stripe && clientSecret) {
+			elements = stripe.elements({ clientSecret });
 			cardElement = elements.create('card');
 			cardElement.mount('#card-element');
 		}
 	});
 
-	async function handlePayment() {
-		if (!stripe || !cardElement) return;
+	async function handleSubmit() {
+		if (!stripe || !elements || !cardElement || !clientSecret) {
+			return;
+		}
 
 		processing = true;
-		errorMessage = '';
 
-		const { error: stripeError } = await stripe.confirmCardPayment(clientSecret, {
+		const { error: submitError } = await stripe.confirmCardPayment(clientSecret, {
 			payment_method: {
 				card: cardElement
 			}
 		});
 
-		if (stripeError) {
-			errorMessage = stripeError.message ?? 'An unknown error occurred.';
+		if (submitError) {
+			error = submitError.message ?? 'An unknown error occurred.';
 			processing = false;
-		} else {
-			console.log('✅ Payment successful!');
-			window.location.href = `/app/checkout/success?configId=${configId}`;
+			return;
 		}
+
+		// Payment successful
+		window.location.href = `/app/checkout/success?memorialId=${memorialId}`;
 	}
 </script>
 
-<div class="checkout-container">
-	<h2>Complete Your Payment</h2>
-	<div id="card-element" class="stripe-card-element"></div>
-	{#if errorMessage}
-		<p class="error-message">{errorMessage}</p>
-	{/if}
-	<button onclick={handlePayment} disabled={processing}>
-		{processing ? 'Processing...' : 'Pay Now'}
+<div class="stripe-checkout">
+	<h3>Complete Your Payment</h3>
+	<div id="card-element"></div>
+	<button onclick={handleSubmit} disabled={processing || !stripe}>
+		{processing ? 'Processing...' : `Pay $${amount}`}
 	</button>
+	{#if error}
+		<p class="error">{error}</p>
+	{/if}
 </div>
 
 <style>
-	.checkout-container {
-		padding: 2rem;
+	.stripe-checkout {
+		padding: 1.5rem;
 		border: 1px solid #e0e0e0;
 		border-radius: 8px;
-		background: #fff;
+		background-color: #fafafa;
 	}
-	.stripe-card-element {
-		padding: 1rem;
-		border: 1px solid #ccc;
-		border-radius: 4px;
+	#card-element {
 		margin-bottom: 1rem;
 	}
-	.error-message {
+	.error {
 		color: red;
-		margin-bottom: 1rem;
-	}
-	button {
-		width: 100%;
-		padding: 0.75rem;
-		border-radius: 4px;
-		font-size: 1rem;
-		cursor: pointer;
-		border: 1px solid transparent;
-		background-color: var(--color-primary);
-		color: white;
-	}
-	button:disabled {
-		background-color: #ccc;
-		cursor: not-allowed;
 	}
 </style>

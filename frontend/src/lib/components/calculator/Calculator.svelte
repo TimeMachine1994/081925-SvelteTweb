@@ -6,13 +6,14 @@
 	import type { CalculatorFormData, Tier, BookingItem } from '$lib/types/livestream';
 	import type { Memorial } from '$lib/types/memorial';
 	import { onMount } from 'svelte';
-
+	import { auth } from '$lib/firebase';
+	
 	let { memorialId, data }: { memorialId: string | null; data: { memorial: Memorial | null } } =
 		$props();
 
 	console.log('🧮 Calculator Component Initializing...', { memorialId, data });
 
-	let currentStep = $state<'booking' | 'payment'>('booking');
+	let currentStep = $state<'booking' | 'payment' | 'payNow'>('booking');
 	let clientSecret = $state<string | null>(null);
 	let configId = $state<string | null>(null);
 	let selectedTier = $state<Tier>(null);
@@ -78,10 +79,11 @@
 		// 1. Base Package
 		if (selectedTier) {
 			const price = TIER_PRICES[selectedTier];
+			console.log(`Tier: ${selectedTier}, Price: ${price}`);
 			items.push({
-				id: selectedTier.toLowerCase(),
-				name: selectedTier,
-				package: selectedTier,
+				id: selectedTier,
+				name: `Tributestream ${selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)}`,
+				package: `Tributestream ${selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)}`,
 				price: price,
 				quantity: 1,
 				total: price
@@ -239,38 +241,136 @@
 	}
 
 	async function saveAndPayLater() {
-		console.log('💾 Saving and paying later...');
-		const payload = {
-			formData: formData,
-			bookingItems: bookingItems,
-			total: total
-		};
-		console.log('📦 Payload:', payload);
-
-		const response = await fetch('/app/calculator?/saveAndPayLater', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(payload)
-		});
-
-		const result = await response.json();
-		console.log('✅ Save response:', result);
-
-		if (result.success) {
-			// TODO: Show success message
-			console.log('✅ Configuration saved!');
+		console.log('🚀 saveAndPayLater function called');
+		console.log('📊 Current state check:');
+		console.log('  - selectedTier:', selectedTier);
+		console.log('  - formData:', formData);
+		console.log('  - bookingItems:', bookingItems);
+		console.log('  - total:', total);
+		console.log('  - auth.currentUser:', auth.currentUser);
+		
+		try {
+			console.log('💾 Starting save and pay later process...');
+			
+			// Validate required data
+			if (!selectedTier) {
+				console.error('❌ No tier selected!');
+				return;
+			}
+			
+			if (bookingItems.length === 0) {
+				console.error('❌ No booking items found!');
+				return;
+			}
+			
+			if (total <= 0) {
+				console.error('❌ Invalid total amount:', total);
+				return;
+			}
+			
+			console.log('✅ Data validation passed');
+			
+			// Prepare form data
+			console.log('📦 Preparing FormData...');
+			const formDataToSend = new FormData();
+			
+			const formDataJson = JSON.stringify(formData);
+			const bookingItemsJson = JSON.stringify(bookingItems);
+			const totalString = total.toString();
+			
+			console.log('📝 Data to send:');
+			console.log('  - formData JSON length:', formDataJson.length);
+			console.log('  - bookingItems JSON length:', bookingItemsJson.length);
+			console.log('  - total string:', totalString);
+			
+			formDataToSend.append('formData', formDataJson);
+			formDataToSend.append('bookingItems', bookingItemsJson);
+			formDataToSend.append('total', totalString);
+			
+			console.log('✅ FormData prepared successfully');
+			
+			// Make the request
+			console.log('🌐 Making fetch request to /app/calculator?/saveAndPayLater');
+			const response = await fetch('/app/calculator?/saveAndPayLater', {
+				method: 'POST',
+				body: formDataToSend
+			});
+			
+			console.log('📡 Response received:');
+			console.log('  - status:', response.status);
+			console.log('  - statusText:', response.statusText);
+			console.log('  - ok:', response.ok);
+			console.log('  - headers:', Object.fromEntries(response.headers.entries()));
+			
+			if (!response.ok) {
+				console.error('❌ Response not OK:', response.status, response.statusText);
+				const errorText = await response.text();
+				console.error('❌ Error response body:', errorText);
+				return;
+			}
+			
+			console.log('🔄 Parsing JSON response...');
+			const result = await response.json();
+			console.log('✅ Save response parsed:', result);
+			
+			// Handle SvelteKit form action response format
+			if (result.type === 'success' && result.status === 200) {
+				console.log('🎉 SvelteKit form action succeeded!');
+				console.log('📄 Raw response data:', result.data);
+				
+				// Parse the serialized data array
+				try {
+					const parsedData = JSON.parse(result.data);
+					console.log('📊 Parsed data array:', parsedData);
+					
+					// Extract the actual response object (first element of the array)
+					const actionResult = parsedData[0];
+					console.log('📋 Action result:', actionResult);
+					
+					if (actionResult && actionResult.success) {
+						console.log('🎉 Configuration saved successfully!');
+						console.log('📄 Save action:', actionResult.action);
+						console.log('📄 Document ID:', actionResult.docId);
+						// TODO: Show success message to user
+						alert('Configuration saved successfully!');
+					} else {
+						console.error('❌ Save failed - action result indicates failure:', actionResult);
+						// TODO: Show error message to user
+						alert('Save failed. Please try again.');
+					}
+				} catch (parseError) {
+					console.error('❌ Failed to parse response data:', parseError);
+					console.error('📍 Raw data:', result.data);
+					// TODO: Show error message to user
+					alert('Save failed due to response parsing error.');
+				}
+			} else {
+				console.error('❌ Save failed - unexpected response format:', result);
+				// TODO: Show error message to user
+				alert('Save failed. Please try again.');
+			}
+			
+		} catch (error) {
+			console.error('💥 Error in saveAndPayLater function:', error);
+			console.error('📍 Error stack:', error instanceof Error ? error.stack : 'No stack trace available');
+			// TODO: Show error message to user
 		}
 	}
 
-	async function continueToPayment() {
-		console.log('💳 Continuing to payment...');
+	async function proceedToPayment() {
+		console.log('💳 Proceeding to payment...');
+		if (!memorialId) {
+			console.error('Memorial ID is required to proceed to payment.');
+			// Optionally, display an error to the user
+			return;
+		}
 		const payload = {
 			formData: formData,
 			bookingItems: bookingItems,
 			total: total,
 			memorialId: memorialId
 		};
-		console.log('📦 Payload:', payload);
+		console.log('📦 Payload for payment:', payload);
 
 		const response = await fetch('/app/calculator?/continueToPayment', {
 			method: 'POST',
@@ -279,14 +379,22 @@
 		});
 
 		const result = await response.json();
-		console.log('💳 Payment response:', result);
+		console.log('💳 Payment initiation response:', result);
 
 		if (result.success) {
-			console.log('💳 Payment initiated!', result);
+			console.log('✅ Payment initiated successfully!', result);
 			clientSecret = result.clientSecret;
 			configId = result.configId;
 			currentStep = 'payment';
+		} else {
+			console.error('🔥 Failed to initiate payment:', result);
+			// Optionally, display an error to the user
 		}
+	}
+
+	function handlePayNow() {
+		console.log('💰 Pay Now button clicked!');
+		currentStep = 'payNow';
 	}
 </script>
 
@@ -298,10 +406,26 @@
 				<BookingForm bind:formData />
 			{/if}
 		</div>
-		<Summary {bookingItems} {total} on:save={saveAndPayLater} on:pay={continueToPayment} />
+		<Summary {bookingItems} {total} on:save={saveAndPayLater} on:pay={proceedToPayment} on:payNow={handlePayNow} />
+	{:else if currentStep === 'payNow'}
+		<div class="booking-flow">
+			{#if memorialId}
+				<StripeCheckout amount={total} {memorialId} lovedOneName={formData.lovedOneName} />
+			{/if}
+		</div>
+		<Summary {bookingItems} {total} on:save={saveAndPayLater} on:pay={proceedToPayment} on:payNow={handlePayNow} />
 	{:else}
-		{#if clientSecret && configId}
-			<StripeCheckout {clientSecret} {configId} />
+		{#if clientSecret && configId && memorialId}
+			<StripeCheckout
+				amount={total}
+				{memorialId}
+				lovedOneName={formData.lovedOneName}
+			/>
+		{:else}
+			<div>
+				<p>There was an error preparing the payment form. Please try again.</p>
+				<button onclick={() => currentStep = 'booking'}>Go Back</button>
+			</div>
 		{/if}
 	{/if}
 </div>
