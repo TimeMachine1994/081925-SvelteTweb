@@ -7,8 +7,9 @@
     import ViewerPortal from '$lib/components/portals/ViewerPortal.svelte';
     import RemoteProducerPortal from '$lib/components/portals/RemoteProducerPortal.svelte';
     import OnsiteVideographerPortal from '$lib/components/portals/OnsiteVideographerPortal.svelte';
+    import AdminPortal from '$lib/components/portals/AdminPortal.svelte';
 
-	export let data: PageData;
+export let data: PageData;
 
 	   async function makeAdmin() {
 	       if (!data.user?.email) {
@@ -55,40 +56,30 @@
 	   }
 </script>
 
-<RolePreviewer user={data.user} />
+{#if data.user?.admin}
+    <RolePreviewer user={data.user} />
+{/if}
 
 <div class="container mx-auto p-8">
 	<h1 class="text-2xl font-bold mb-4">My Portal</h1>
-    <p class="mb-6">Welcome, {data.user?.displayName}! Your role is: <strong>{data.user?.role ?? 'Not Assigned'}</strong></p>
+    <p class="mb-6">Welcome, {data.user?.displayName}! Your role is: <strong>{data.previewingRole ? data.previewingRole.replace(/_/g, ' ') : (data.user?.admin ? 'Admin' : (data.user?.role ?? 'Not Assigned'))}</strong></p>
 
-    <!-- Temporary Admin Controls -->
-    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">
-        <p class="font-bold">🛠️ Dev Controls</p>
-        <p>These buttons are for development purposes to set user roles.</p>
-        <div class="mt-4">
-            <button on:click={makeAdmin} class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2">
-                Make Admin
-            </button>
-            <button on:click={setOwnerRole} class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                Set Role to Owner
-            </button>
-        </div>
-    </div>
-
-    {#if data.user?.role === 'owner'}
-        <OwnerPortal memorials={data.memorials} />
-    {:else if data.user?.role === 'funeral_director'}
+    {#if data.previewingRole === 'admin' || (!data.previewingRole && data.user?.admin)}
+        <AdminPortal memorials={data.memorials} allUsers={data.allUsers || []} />
+    {:else if data.previewingRole === 'owner' || (!data.previewingRole && data.user?.role === 'owner')}
+        <OwnerPortal memorials={data.memorials} invitations={data.invitations || []} />
+    {:else if data.previewingRole === 'funeral_director' || (!data.previewingRole && data.user?.role === 'funeral_director')}
         <FuneralDirectorPortal />
-    {:else if data.user?.role === 'family_member'}
-        <FamilyMemberPortal />
-    {:else if data.user?.role === 'viewer'}
-        <ViewerPortal />
+    {:else if data.previewingRole === 'family_member' || (!data.previewingRole && data.user?.role === 'family_member')}
+        <FamilyMemberPortal memorials={data.memorials} />
+    {:else if data.previewingRole === 'viewer' || (!data.previewingRole && data.user?.role === 'viewer')}
+        <ViewerPortal memorials={data.memorials} />
     {:else if data.user?.role === 'remote_producer'}
         <RemoteProducerPortal />
     {:else if data.user?.role === 'onsite_videographer'}
         <OnsiteVideographerPortal />
     {:else}
         <!-- Fallback for users with no role or an unrecognized role -->
-        <OwnerPortal memorials={data.memorials} />
+        <p>You do not have a role assigned. Please contact support.</p>
     {/if}
 </div>

@@ -23,7 +23,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         }
 
         const user = await adminAuth.getUserByEmail(email);
-        await adminAuth.setCustomUserClaims(user.uid, { admin: true });
+        const existingClaims = (await adminAuth.getUser(user.uid)).customClaims;
+        await adminAuth.setCustomUserClaims(user.uid, {
+            ...existingClaims,
+            admin: true
+        });
 
         return json({ success: true, message: `Admin claim set for ${email}` });
 

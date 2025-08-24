@@ -1,5 +1,4 @@
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '$lib/server/firebase';
+import { adminDb as db } from '$lib/server/firebase';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import type { Memorial } from '$lib/types/memorial';
@@ -12,15 +11,25 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		throw error(403, 'Permission denied');
 	}
 
-	const memorialRef = doc(db, 'memorials', params.memorialId);
-	const memorialSnap = await getDoc(memorialRef);
+	const memorialRef = db.collection('memorials').doc(params.memorialId);
+	const memorialSnap = await memorialRef.get();
 
-	if (!memorialSnap.exists()) {
+	if (!memorialSnap.exists) {
 		console.error('Memorial not found with ID:', params.memorialId);
 		throw error(404, 'Memorial not found');
 	}
 
-	const memorial = { id: memorialSnap.id, ...memorialSnap.data() } as Memorial;
+	const data = memorialSnap.data();
+	if (!data) {
+		console.error('Memorial document exists, but has no data:', params.memorialId);
+		throw error(404, 'Memorial data not found');
+	}
+	const memorial = {
+		id: memorialSnap.id,
+		...data,
+		createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : null,
+		updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : null,
+	} as Memorial;
 	console.log('Memorial data loaded successfully 👍');
 	return { memorial };
 };
@@ -68,8 +77,8 @@ export const actions: Actions = {
 			};
 
 			console.log('Updating memorial document in Firestore... 🔥');
-			const memorialRef = doc(db, 'memorials', memorialId);
-			await updateDoc(memorialRef, { livestream: livestreamData });
+			const memorialRef = db.collection('memorials').doc(memorialId);
+			await memorialRef.update({ livestream: livestreamData });
 			console.log('Firestore document updated successfully 👍');
 
 		} catch (err: any) {

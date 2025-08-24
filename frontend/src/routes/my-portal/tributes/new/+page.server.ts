@@ -6,14 +6,14 @@ export const load: PageServerLoad = async ({ locals }) => {
     if (!locals.user) {
         throw redirect(303, '/login');
     }
-    if (locals.user.role !== 'owner') {
+    if (locals.user.role !== 'owner' && !locals.user.admin) {
         throw error(403, 'Forbidden: You do not have permission to create a new memorial.');
     }
 };
 
 export const actions: Actions = {
 	default: async ({ request, locals }) => {
-		if (!locals.user || locals.user.role !== 'owner') {
+		if (!locals.user || (locals.user.role !== 'owner' && !locals.user.admin)) {
 			return fail(403, { error: 'Forbidden: You do not have permission to create a new memorial.' });
 		}
 

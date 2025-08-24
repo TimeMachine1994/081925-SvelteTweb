@@ -2,12 +2,23 @@ rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
-    // Memorial photos: only the memorial creator can upload photos.
-    // Photos are publically readable.
+
+    function isOwner(memorialId) {
+      return firestore.get(/databases/(default)/documents/memorials/$(memorialId)).data.creatorUid == request.auth.uid;
+    }
+
+    function isFamilyMember(memorialId) {
+      // Check if an accepted invitation exists for this user and memorial
+      return firestore.exists(/databases/(default)/documents/invitations/$(request.auth.uid)_$(memorialId)) &&
+             firestore.get(/databases/(default)/documents/invitations/$(request.auth.uid)_$(memorialId)).data.status == 'accepted';
+    }
+
+    // Memorial photos:
+    // - Publicly readable.
+    // - Writable by the memorial owner OR an invited family member.
     match /memorials/{memorialId}/{allPaths=**} {
       allow read;
-      allow write: if request.auth != null && 
-                    firestore.get(/databases/(default)/documents/memorials/$(memorialId)).data.creatorUid == request.auth.uid;
+      allow write: if request.auth != null && (isOwner(memorialId) || isFamilyMember(memorialId));
     }
   }
 }

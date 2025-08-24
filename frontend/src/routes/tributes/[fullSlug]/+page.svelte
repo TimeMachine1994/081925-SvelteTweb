@@ -2,14 +2,39 @@
 	import PhotoGallery from '$lib/components/PhotoGallery.svelte';
 	import type { PageData } from './$types';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 
-	const { memorial } = data;
+	const { memorial, user, isOwner, isFollowing: initialIsFollowing } = data;
+
+	let isFollowing = $state(initialIsFollowing);
+
+	async function toggleFollow() {
+		if (!user) {
+			window.location.href = '/login';
+			return;
+		}
+
+		const method = isFollowing ? 'DELETE' : 'POST';
+		const response = await fetch(`/api/memorials/${memorial.id}/follow`, { method });
+
+		if (response.ok) {
+			isFollowing = !isFollowing;
+		} else {
+			alert('Something went wrong. Please try again.');
+		}
+	}
 </script>
 
 <div class="tribute-page">
 	<header>
-		<h1>In Loving Memory of {memorial.lovedOneName}</h1>
+		<div class="header-content">
+			<h1>In Loving Memory of {memorial.lovedOneName}</h1>
+			{#if user && !isOwner}
+				<button onclick={toggleFollow} class="follow-btn {isFollowing ? 'following' : ''}">
+					{isFollowing ? 'Unfollow' : 'Follow'}
+				</button>
+			{/if}
+		</div>
 		{#if memorial.birthDate && memorial.deathDate}
 			<p>
 				{new Date(memorial.birthDate).toLocaleDateString()} - {new Date(
@@ -54,6 +79,27 @@
     header {
         text-align: center;
         margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .header-content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .follow-btn {
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        cursor: pointer;
+        border: 1px solid #ccc;
+        background-color: #f0f0f0;
+    }
+
+    .follow-btn.following {
+        background-color: #e0e0e0;
+        color: #333;
     }
 
     .tribute-image {
