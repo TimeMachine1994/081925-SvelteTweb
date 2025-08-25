@@ -1,4 +1,5 @@
-<div class="p-4 border rounded-lg bg-gray-50">
-    <h2 class="text-xl font-semibold">Onsite Videographer Dashboard</h2>
+<!-- TODO: Remove Tailwind CSS classes and replace with styles from tribute-theme.css -->
+<div class="TODO: replace-with-theme-class">
+    <h2 class="TODO: replace-with-theme-class">Onsite Videographer Dashboard</h2>
     <p>Here are your assigned events and technical details.</p>
 </div>

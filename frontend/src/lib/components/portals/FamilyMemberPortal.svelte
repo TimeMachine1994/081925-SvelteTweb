@@ -1,18 +1,19 @@
+<!-- TODO: Remove Tailwind CSS classes and replace with styles from tribute-theme.css -->
 <script lang="ts">
     import type { Memorial } from '$lib/types/memorial';
 
     let { memorials }: { memorials: Memorial[] } = $props();
 </script>
 
-<div class="p-4 border rounded-lg bg-gray-50">
-    <h2 class="text-xl font-semibold mb-4">Memorials You've Been Invited To</h2>
+<div class="TODO: replace-with-theme-class">
+    <h2 class="TODO: replace-with-theme-class">Memorials You've Been Invited To</h2>
     {#if memorials && memorials.length > 0}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="TODO: replace-with-theme-class">
             {#each memorials as memorial}
-                <div class="card">
-                    <h2 class="text-xl font-semibold">{memorial.lovedOneName}</h2>
-                    <a href="/tributes/{memorial.slug}" class="btn btn-primary mt-4">View Memorial</a>
-                    <a href="/my-portal/tributes/{memorial.id}/edit" class="btn btn-secondary mt-2">Add Photos</a>
+                <div class="TODO: replace-with-theme-class">
+                    <h2 class="TODO: replace-with-theme-class">{memorial.lovedOneName}</h2>
+                    <a href="/tributes/{memorial.slug}" class="TODO: replace-with-theme-class">View Memorial</a>
+                    <a href="/my-portal/tributes/{memorial.id}/edit" class="TODO: replace-with-theme-class">Add Photos</a>
                 </div>
             {/each}
         </div>

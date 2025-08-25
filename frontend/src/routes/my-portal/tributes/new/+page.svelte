@@ -30,16 +30,3 @@
 		<p class="error">{typedForm.error}</p>
 	{/if}
 </div>
-
-<style>
-	.container {
-		max-width: 600px;
-		margin: 2rem auto;
-		padding: 2rem;
-		border: 1px solid #ccc;
-		border-radius: 8px;
-	}
-	.error {
-		color: red;
-	}
-</style>

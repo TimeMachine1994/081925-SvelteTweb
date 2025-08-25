@@ -45,10 +45,6 @@
 	</header>
 
 	<main>
-		{#if memorial.imageUrl}
-			<img src={memorial.imageUrl} alt={memorial.lovedOneName} class="tribute-image" />
-		{/if}
-
 		{#if memorial.livestream?.uid}
 			<div class="livestream-player">
 				<iframe
@@ -58,63 +54,69 @@
 					allowfullscreen={true}
 				></iframe>
 			</div>
+		{:else}
+			<div class="livestream-player blank">
+				<p>No livestream available</p>
+			</div>
 		{/if}
-
-		<section class="content">
-			{@html memorial.content}
-		</section>
 
 		<PhotoGallery photos={memorial.photos || []} />
 	</main>
 </div>
 
 <style>
-    .tribute-page {
-        font-family: sans-serif;
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 2rem;
-    }
+	.tribute-page {
+		font-family: sans-serif;
+	}
 
-    header {
-        text-align: center;
-        margin-bottom: 2rem;
-        position: relative;
-    }
+	header {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		height: 33vh;
+		text-align: center;
+		background-color: #f0f0f0; /* Added a background for visibility */
+	}
 
-    .header-content {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 1rem;
-    }
+	.header-content {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		gap: 1rem;
+	}
 
-    .follow-btn {
-        padding: 0.5rem 1rem;
-        border-radius: 5px;
-        cursor: pointer;
-        border: 1px solid #ccc;
-        background-color: #f0f0f0;
-    }
+	.follow-btn {
+		padding: 0.5rem 1rem;
+		border-radius: 5px;
+		cursor: pointer;
+		border: 1px solid #ccc;
+		background-color: #f0f0f0;
+	}
 
-    .follow-btn.following {
-        background-color: #e0e0e0;
-        color: #333;
-    }
+	.follow-btn.following {
+		background-color: #e0e0e0;
+		color: #333;
+	}
 
-    .tribute-image {
-        max-width: 100%;
-        height: auto;
-        display: block;
-        margin: 0 auto 2rem;
-    }
+	main {
+		max-width: 800px;
+		margin: 0 auto;
+		padding: 2rem;
+	}
 
-    .content {
-        line-height: 1.6;
-    }
-    .livestream-player {
-        position: relative;
-        padding-top: 56.25%; /* 16:9 aspect ratio */
-        margin-bottom: 2rem;
-    }
+	.livestream-player {
+		position: relative;
+		padding-top: 56.25%; /* 16:9 aspect ratio */
+		margin-bottom: 2rem;
+		background-color: #000;
+	}
+
+	.livestream-player.blank {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		color: white;
+		font-size: 1.5rem;
+	}
 </style>

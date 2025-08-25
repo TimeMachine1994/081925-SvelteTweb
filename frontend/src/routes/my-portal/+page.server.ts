@@ -83,7 +83,13 @@ export const load = async ({ locals, url }) => {
         const configSnapshot = await adminDb.collection('livestreamConfigurations').where('memorialId', '==', doc.id).limit(1).get();
         let livestreamConfig = null;
         if (!configSnapshot.empty) {
-            livestreamConfig = { id: configSnapshot.docs[0].id, ...configSnapshot.docs[0].data() };
+            const configDoc = configSnapshot.docs[0];
+            const configData = configDoc.data();
+            livestreamConfig = {
+                id: configDoc.id,
+                ...configData,
+                createdAt: configData.createdAt?.toDate ? configData.createdAt.toDate().toISOString() : null
+            };
         }
 
         // Manually construct the Memorial object to ensure type safety

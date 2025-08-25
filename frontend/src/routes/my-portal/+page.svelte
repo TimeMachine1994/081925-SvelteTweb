@@ -1,3 +1,4 @@
+<!-- TODO: Remove Tailwind CSS classes and replace with styles from tribute-theme.css -->
 <script lang="ts">
 	import type { PageData } from './$types';
     import RolePreviewer from '$lib/components/RolePreviewer.svelte';
@@ -60,9 +61,9 @@ export let data: PageData;
     <RolePreviewer user={data.user} />
 {/if}
 
-<div class="container mx-auto p-8">
-	<h1 class="text-2xl font-bold mb-4">My Portal</h1>
-    <p class="mb-6">Welcome, {data.user?.displayName}! Your role is: <strong>{data.previewingRole ? data.previewingRole.replace(/_/g, ' ') : (data.user?.admin ? 'Admin' : (data.user?.role ?? 'Not Assigned'))}</strong></p>
+<div class="TODO: replace-with-theme-class">
+	<h1 class="TODO: replace-with-theme-class">My Portal</h1>
+    <p class="TODO: replace-with-theme-class">Welcome, {data.user?.displayName}! Your role is: <strong>{data.previewingRole ? data.previewingRole.replace(/_/g, ' ') : (data.user?.admin ? 'Admin' : (data.user?.role ?? 'Not Assigned'))}</strong></p>
 
     {#if data.previewingRole === 'admin' || (!data.previewingRole && data.user?.admin)}
         <AdminPortal memorials={data.memorials} allUsers={data.allUsers || []} />

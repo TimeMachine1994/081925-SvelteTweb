@@ -1,3 +1,4 @@
+<!-- TODO: Remove Tailwind CSS classes and replace with styles from tribute-theme.css -->
 <script lang="ts">
 	import type { Memorial } from '$lib/types/memorial';
 	import { invalidateAll } from '$app/navigation';
@@ -109,74 +110,74 @@
 	}
 </script>
 
-<div class="admin-portal">
-	<h2 class="text-xl font-semibold mb-4">Admin Dashboard</h2>
+<div class="TODO: replace-with-theme-class">
+	<h2 class="TODO: replace-with-theme-class">Admin Dashboard</h2>
 	<p>Welcome to the admin dashboard. All memorials are listed below.</p>
 
-	<div class="my-4">
-		<a href="/my-portal/tributes/new" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+	<div class="TODO: replace-with-theme-class">
+		<a href="/my-portal/tributes/new" class="TODO: replace-with-theme-class">
 			Create New Memorial
 		</a>
 	</div>
 	
 	<!-- Memorials Table -->
-	<div class="mt-6 overflow-x-auto">
-		<table class="min-w-full bg-white">
-			<thead class="bg-gray-800 text-white">
+	<div class="TODO: replace-with-theme-class">
+		<table class="TODO: replace-with-theme-class">
+			<thead class="TODO: replace-with-theme-class">
 				<tr>
-					<th class="w-1/3 px-4 py-2 text-left">Loved One</th>
-					<th class="w-1/3 px-4 py-2 text-left">Creator Email</th>
-					<th class="px-4 py-2 text-left">Livestream Status</th>
-					<th class="px-4 py-2 text-left">Actions</th>
+					<th class="TODO: replace-with-theme-class">Loved One</th>
+					<th class="TODO: replace-with-theme-class">Creator Email</th>
+					<th class="TODO: replace-with-theme-class">Livestream Status</th>
+					<th class="TODO: replace-with-theme-class">Actions</th>
 				</tr>
 			</thead>
 			<tbody>
 				{#if memorials && memorials.length > 0}
 					{#each memorials as memorial}
-						<tr class="border-b">
-							<td class="px-4 py-2">{memorial.lovedOneName}</td>
-							<td class="px-4 py-2">{memorial.creatorEmail}</td>
-							<td class="px-4 py-2">
+						<tr class="TODO: replace-with-theme-class">
+							<td class="TODO: replace-with-theme-class">{memorial.lovedOneName}</td>
+							<td class="TODO: replace-with-theme-class">{memorial.creatorEmail}</td>
+							<td class="TODO: replace-with-theme-class">
 								{#if memorial.livestream}
-									<span class="inline-block bg-green-200 text-green-800 text-xs px-2 rounded-full uppercase font-semibold tracking-wide">Active</span>
+									<span class="TODO: replace-with-theme-class">Active</span>
 								{:else}
-									<span class="inline-block bg-gray-200 text-gray-800 text-xs px-2 rounded-full uppercase font-semibold tracking-wide">None</span>
+									<span class="TODO: replace-with-theme-class">None</span>
 								{/if}
 							</td>
 							<td class="px-4 py-2 space-x-2">
-								<a href="/my-portal/tributes/{memorial.id}/edit" class="bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold py-1 px-2 rounded">Edit / Photos</a>
+								<a href="/my-portal/tributes/{memorial.id}/edit" class="TODO: replace-with-theme-class">Edit / Photos</a>
 								
 								<!-- Technical Livestream Action -->
 								{#if memorial.livestream}
-									<span class="bg-gray-400 text-white text-xs font-semibold py-1 px-2 rounded cursor-not-allowed" title="RTMP details have been generated">RTMP Active</span>
+									<span class="TODO: replace-with-theme-class" title="RTMP details have been generated">RTMP Active</span>
 								{:else}
-									<a href="/my-portal/tributes/{memorial.id}/livestream/new" class="bg-green-500 hover:bg-green-600 text-white text-xs font-semibold py-1 px-2 rounded">Create Livestream RTMP</a>
+									<a href="/my-portal/tributes/{memorial.id}/livestream/new" class="TODO: replace-with-theme-class">Create Livestream RTMP</a>
 								{/if}
 
 								<!-- Scheduling Action -->
 								{#if memorial.livestreamConfig}
-									<a href="/app/calculator?memorialId={memorial.id}" class="bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-semibold py-1 px-2 rounded">Manage Schedule</a>
+									<a href="/app/calculator?memorialId={memorial.id}" class="TODO: replace-with-theme-class">Manage Schedule</a>
 								{:else}
-									<a href="/app/calculator?memorialId={memorial.id}" class="bg-cyan-500 hover:bg-cyan-600 text-white text-xs font-semibold py-1 px-2 rounded">Schedule Livestream</a>
+									<a href="/app/calculator?memorialId={memorial.id}" class="TODO: replace-with-theme-class">Schedule Livestream</a>
 								{/if}
 
-								<button onclick={() => handleReassignClick(memorial.id)} class="bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-semibold py-1 px-2 rounded">Reassign Owner</button>
-								<button onclick={() => handleManageEmbedsClick(memorial)} class="bg-purple-500 hover:bg-purple-600 text-white text-xs font-semibold py-1 px-2 rounded">Manage Embeds</button>
+								<button onclick={() => handleReassignClick(memorial.id)} class="TODO: replace-with-theme-class">Reassign Owner</button>
+								<button onclick={() => handleManageEmbedsClick(memorial)} class="TODO: replace-with-theme-class">Manage Embeds</button>
 							</td>
 						</tr>
 						{#if reassigningMemorialId === memorial.id}
-							<tr class="border-b bg-gray-100">
-								<td colspan="4" class="px-4 py-2">
-									<div class="flex items-center">
-										<span class="mr-2 font-semibold">Reassign to:</span>
-										<select bind:value={selectedOwnerUid} class="border rounded px-2 py-1">
+							<tr class="TODO: replace-with-theme-class">
+								<td colspan="4" class="TODO: replace-with-theme-class">
+									<div class="TODO: replace-with-theme-class">
+										<span class="TODO: replace-with-theme-class">Reassign to:</span>
+										<select bind:value={selectedOwnerUid} class="TODO: replace-with-theme-class">
 											<option value={null} disabled>Select a user</option>
 											{#each allUsers as user}
 												<option value={user.uid}>{user.displayName || user.email}</option>
 											{/each}
 										</select>
-										<button onclick={() => handleConfirmReassign(memorial.id)} class="ml-2 bg-green-500 hover:bg-green-600 text-white text-xs font-semibold py-1 px-2 rounded">Confirm</button>
-										<button onclick={() => reassigningMemorialId = null} class="ml-2 bg-red-500 hover:bg-red-600 text-white text-xs font-semibold py-1 px-2 rounded">Cancel</button>
+										<button onclick={() => handleConfirmReassign(memorial.id)} class="TODO: replace-with-theme-class">Confirm</button>
+										<button onclick={() => reassigningMemorialId = null} class="TODO: replace-with-theme-class">Cancel</button>
 									</div>
 								</td>
 							</tr>
@@ -184,7 +185,7 @@
 					{/each}
 				{:else}
 					<tr>
-						<td colspan="4" class="text-center py-4">No memorials found.</td>
+						<td colspan="4" class="TODO: replace-with-theme-class">No memorials found.</td>
 					</tr>
 				{/if}
 			</tbody>
@@ -192,31 +193,22 @@
 	</div>
 </div>
 
-<style>
-	/* Scoped styles for the admin portal table */
-	.admin-portal {
-		padding: 2rem;
-		background-color: #f9fafb;
-		border: 1px solid #e5e7eb;
-		border-radius: 8px;
-	}
-</style>
 
 {#if managingEmbedsMemorial}
-	<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-		<div class="bg-white rounded-lg p-8 max-w-3xl w-full">
-			<h3 class="text-2xl font-bold mb-6">Manage Embeds for {managingEmbedsMemorial.lovedOneName}</h3>
+	<div class="TODO: replace-with-theme-class">
+		<div class="TODO: replace-with-theme-class">
+			<h3 class="TODO: replace-with-theme-class">Manage Embeds for {managingEmbedsMemorial.lovedOneName}</h3>
 
 			<!-- List of existing embeds -->
-			<div class="mb-6">
-				<h4 class="text-xl font-semibold mb-2">Existing Embeds</h4>
+			<div class="TODO: replace-with-theme-class">
+				<h4 class="TODO: replace-with-theme-class">Existing Embeds</h4>
 				{#if managingEmbedsMemorial.embeds && managingEmbedsMemorial.embeds.length > 0}
 					<ul>
 						{#each managingEmbedsMemorial.embeds as embed}
-							<li class="flex justify-between items-center p-2 border-b">
+							<li class="TODO: replace-with-theme-class">
 								<span>{embed.title} ({embed.type})</span>
 								<button
-									class="bg-red-500 hover:bg-red-600 text-white text-xs font-semibold py-1 px-2 rounded"
+									class="TODO: replace-with-theme-class"
 									onclick={() => handleDeleteEmbed(embed.id)}
 								>
 									Delete
@@ -230,34 +222,34 @@
 			</div>
 
 			<!-- Form to add a new embed -->
-			<div class="border-t pt-6">
-				<h4 class="text-xl font-semibold mb-4">Add New Embed</h4>
-				<div class="grid grid-cols-1 gap-4">
+			<div class="TODO: replace-with-theme-class">
+				<h4 class="TODO: replace-with-theme-class">Add New Embed</h4>
+				<div class="TODO: replace-with-theme-class">
 					<div>
-						<label for="embedTitle" class="block text-sm font-medium text-gray-700">Title</label>
-						<input type="text" id="embedTitle" bind:value={newEmbedTitle} class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+						<label for="embedTitle" class="TODO: replace-with-theme-class">Title</label>
+						<input type="text" id="embedTitle" bind:value={newEmbedTitle} class="TODO: replace-with-theme-class" />
 					</div>
 					<div>
-						<label for="embedType" class="block text-sm font-medium text-gray-700">Type</label>
-						<select id="embedType" bind:value={newEmbedType} class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+						<label for="embedType" class="TODO: replace-with-theme-class">Type</label>
+						<select id="embedType" bind:value={newEmbedType} class="TODO: replace-with-theme-class">
 							<option value="youtube">YouTube</option>
 							<option value="vimeo">Vimeo</option>
 						</select>
 					</div>
 					<div>
-						<label for="embedUrl" class="block text-sm font-medium text-gray-700">Embed URL</label>
-						<input type="text" id="embedUrl" bind:value={newEmbedUrl} class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+						<label for="embedUrl" class="TODO: replace-with-theme-class">Embed URL</label>
+						<input type="text" id="embedUrl" bind:value={newEmbedUrl} class="TODO: replace-with-theme-class" />
 					</div>
 				</div>
-				<div class="mt-6 flex justify-end gap-4">
+				<div class="TODO: replace-with-theme-class">
 					<button
-						class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
+						class="TODO: replace-with-theme-class"
 						onclick={() => (managingEmbedsMemorial = null)}
 					>
 						Close
 					</button>
 					<button
-						class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+						class="TODO: replace-with-theme-class"
 						onclick={handleAddEmbed}
 					>
 						Add Embed

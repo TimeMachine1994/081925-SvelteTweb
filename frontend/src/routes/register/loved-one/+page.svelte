@@ -1,19 +1,20 @@
+e tr<!-- TODO: Remove Tailwind CSS classes and replace with styles from tribute-theme.css -->
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	
 	let { form }: { form?: import('./$types').ActionData } = $props();
 </script>
 
-<div class="flex items-center justify-center min-h-screen bg-gray-100">
-	<div class="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-		<h2 class="text-2xl font-bold text-center text-gray-900">Create a Memorial</h2>
-		<p class="text-center text-gray-600">
+<div class="TODO: replace-with-theme-class">
+	<div class="TODO: replace-with-theme-class">
+		<h2 class="TODO: replace-with-theme-class">Create a Memorial</h2>
+		<p class="TODO: replace-with-theme-class">
 			Enter your loved one's name to create a beautiful memorial page.
 		</p>
 		<form method="POST" use:enhance>
-			<div class="space-y-4">
+			<div class="TODO: replace-with-theme-class">
 				<div>
-					<label for="lovedOneName" class="block text-sm font-medium text-gray-700"
+					<label for="lovedOneName" class="TODO: replace-with-theme-class"
 						>Loved One's Name</label
 					>
 					<input
@@ -21,50 +22,50 @@
 						name="lovedOneName"
 						type="text"
 						required
-						class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+						class="TODO: replace-with-theme-class"
 					/>
 				</div>
 				<div>
-					<label for="name" class="block text-sm font-medium text-gray-700">Your Name</label>
+					<label for="name" class="TODO: replace-with-theme-class">Your Name</label>
 					<input
 						id="name"
 						name="name"
 						type="text"
 						required
-						class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+						class="TODO: replace-with-theme-class"
 					/>
 				</div>
 				<div>
-					<label for="email" class="block text-sm font-medium text-gray-700">Your Email</label>
+					<label for="email" class="TODO: replace-with-theme-class">Your Email</label>
 					<input
 						id="email"
 						name="email"
 						type="email"
 						required
-						class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+						class="TODO: replace-with-theme-class"
 					/>
 				</div>
 				<div>
-					<label for="phone" class="block text-sm font-medium text-gray-700"
+					<label for="phone" class="TODO: replace-with-theme-class"
 						>Your Phone Number</label
 					>
 					<input
 						id="phone"
 						name="phone"
 						type="tel"
-						class="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+						class="TODO: replace-with-theme-class"
 					/>
 				</div>
 			</div>
 
 			{#if form?.error}
-				<p class="mt-4 text-sm text-red-600">{form.error}</p>
+				<p class="TODO: replace-with-theme-class">{form.error}</p>
 			{/if}
 
-			<div class="mt-6">
+			<div class="TODO: replace-with-theme-class">
 				<button
 					type="submit"
-					class="w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+					class="TODO: replace-with-theme-class"
 				>
 					Create Memorial
 				</button>

@@ -333,30 +333,27 @@
 			console.log('🔄 Parsing JSON response...');
 			const result = await response.json();
 			console.log('✅ Save response parsed:', result);
-			
-			if (response.redirected && !isPayNowFlow) {
-				window.location.href = response.url;
+
+			if (result.type === 'redirect' && !isPayNowFlow) {
+				console.log(`🔀 Server initiated redirect to: ${result.location}`);
+				window.location.href = result.location;
 				return;
 			}
 
-			if (!response.ok) {
-				const errorResult = await response.json();
-				console.error('❌ Save failed:', errorResult);
-				alert(`Save failed: ${errorResult.details || errorResult.error || 'Unknown error'}`);
+			if (result.type === 'failure') {
+				console.error('❌ Save failed:', result.data);
+				alert(`Save failed: ${result.data?.details || result.data?.error || 'Unknown error'}`);
 				return;
 			}
 
-			const successResult = await response.json();
-			console.log('✅ Save response parsed:', successResult);
-
-			if (successResult.success) {
-				console.log('🎉 Configuration saved successfully!');
+			if (result.type === 'success' && result.data?.success) {
+				console.log('🎉 Configuration saved successfully!', result.data);
 				if (!isPayNowFlow) {
 					alert('Configuration saved successfully!');
 				}
 			} else {
-				console.error('❌ Save failed:', result);
-				alert('Save failed. Please try again.');
+				console.error('❌ An unexpected error occurred:', result);
+				alert('An unexpected error occurred. Please try again.');
 			}
 			
 		} catch (error) {

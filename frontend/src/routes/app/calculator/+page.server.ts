@@ -37,6 +37,13 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			console.log('✅ Found memorial for user:', memorialSnap.id);
 			const memorialData = memorialSnap.data();
 			if (memorialData) {
+				// Convert Firestore Timestamps to serializable format
+				if (memorialData.createdAt && typeof memorialData.createdAt.toDate === 'function') {
+					(memorialData.createdAt as any) = memorialData.createdAt.toDate().toISOString();
+				}
+				if (memorialData.updatedAt && typeof memorialData.updatedAt.toDate === 'function') {
+					(memorialData.updatedAt as any) = memorialData.updatedAt.toDate().toISOString();
+				}
 				memorial = { ...(memorialData as Omit<Memorial, 'id'>), id: memorialSnap.id };
 			}
 		}
@@ -197,25 +204,26 @@ export const actions: Actions = {
 			console.log('📍 Document path:', docRef.path);
 
 			const response = { success: true, action: 'saved', docId: docRef.id };
-			console.log('🎉 Returning success response:', response);
-
-			redirect(303, '/my-portal');
+			console.log('🎉 Configuration saved, preparing to redirect...', response);
 		} catch (error) {
 			console.error('💥 Error in saveAndPayLater action:', error);
 			console.error('📍 Error name:', error instanceof Error ? error.name : 'Unknown');
 			console.error('📍 Error message:', error instanceof Error ? error.message : String(error));
 			console.error('📍 Error stack:', error instanceof Error ? error.stack : 'No stack trace');
-			
+
 			// Log additional error context
 			if (error instanceof Error) {
 				console.error('🔍 Error details:');
 				console.error('  - constructor:', error.constructor.name);
 				console.error('  - cause:', error.cause);
 			}
-			
+
 			const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
 			return fail(500, { error: 'Internal Server Error', details: errorMessage });
 		}
+
+		// Redirect after the try...catch block to avoid catching the redirect throw
+		redirect(303, '/my-portal');
 	},
 	continueToPayment: async ({ request, locals }) => {
 		if (!locals.user) {

@@ -19,17 +19,3 @@
 		<button type="submit">Create Livestream</button>
 	</form>
 </div>
-
-<style>
-	.container {
-		max-width: 600px;
-		margin: 2rem auto;
-		padding: 2rem;
-		border: 1px solid #ccc;
-		border-radius: 8px;
-	}
-	.error {
-		color: red;
-	}
-	/* Add other styles as needed */
-</style>
