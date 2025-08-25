@@ -19,18 +19,21 @@
 			const userCredential = await signInWithCustomToken(auth, token);
 			const idToken = await userCredential.user.getIdToken();
 
-			// This form will auto-submit, sending the idToken to the server
-			// to create the session cookie.
-			const form = document.getElementById('session-form') as HTMLFormElement;
-			const idTokenInput = document.getElementById('idToken-input') as HTMLInputElement;
-			const slugInput = document.getElementById('slug-input') as HTMLInputElement;
+			const response = await fetch('/api/session', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ idToken, slug })
+			});
 
-			if (form && idTokenInput && slugInput) {
-				idTokenInput.value = idToken;
-				if (slug) {
-					slugInput.value = slug;
-				}
-				form.submit();
+			if (response.ok) {
+				// The server will handle the redirect, but we can also redirect client-side
+				// as a fallback. The response.url will be the final destination after redirects.
+				window.location.href = response.url;
+			} else {
+				const result = await response.json();
+				error = result.message || 'Failed to create session.';
 			}
 		} catch (e: any) {
 			error = 'Failed to sign in. Please try again.';
@@ -46,8 +49,3 @@
 {:else}
 	<p>Please wait while we securely sign you in.</p>
 {/if}
-
-<form id="session-form" method="POST" action="/api/session" style="display: none;">
-	<input type="hidden" name="idToken" id="idToken-input" />
-	<input type="hidden" name="slug" id="slug-input" />
-</form>

@@ -57,18 +57,18 @@
 	];
 </script>
 
-<div class="tier-selector">
-	<h2>Choose Your Package</h2>
-	<div class="tiers">
+<div class="card p-4 md:p-6">
+	<h2 class="h2 text-center mb-6">Choose Your Package</h2>
+	<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 		{#each tiers as tier}
 			<button
-				class="tier"
-				class:selected={selectedTier === tier.alias}
+				class="card preset-filled-surface-200-800 p-4 text-left space-y-4 transition-all duration-200 card-hover"
+				class:preset-outlined-primary-500={selectedTier === tier.alias}
 				onclick={() => dispatch('change', tier.alias as Tier)}
 			>
-				<h3>{tier.name}</h3>
-				<p class="price">${tier.price}</p>
-				<ul>
+				<h3 class="h3">{tier.name}</h3>
+				<p class="h1 font-bold text-primary-500">${tier.price}</p>
+				<ul class="list-disc list-inside space-y-2">
 					{#each tier.features as feature}
 						<li>{feature}</li>
 					{/each}
@@ -77,47 +77,3 @@
 		{/each}
 	</div>
 </div>
-
-<style>
-	.tier-selector {
-		text-align: center;
-	}
-	.tiers {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-		gap: 1rem;
-		margin-top: 1rem;
-	}
-	.tier {
-		border: 1px solid #ccc;
-		padding: 1rem;
-		border-radius: 5px;
-		text-align: left;
-		background: #f9f9f9;
-		cursor: pointer;
-		transition:
-			transform 0.2s,
-			box-shadow 0.2s;
-	}
-	.tier:hover {
-		transform: translateY(-5px);
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-	}
-	.tier.selected {
-		border-color: var(--color-primary);
-		box-shadow: 0 0 10px rgba(var(--color-primary-rgb), 0.5);
-	}
-	.price {
-		font-size: 1.5rem;
-		font-weight: bold;
-		margin: 0.5rem 0;
-	}
-	ul {
-		list-style: none;
-		padding: 0;
-		margin: 0;
-	}
-	li {
-		margin-bottom: 0.5rem;
-	}
-</style>

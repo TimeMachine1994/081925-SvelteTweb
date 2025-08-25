@@ -1,36 +1,48 @@
-import { getFirestore } from 'firebase-admin/firestore';
+import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import type { PageServerLoad, Actions } from './$types';
 import type { Memorial } from '$lib/types/memorial';
-import { fail, json } from '@sveltejs/kit';
+import { fail, json, redirect } from '@sveltejs/kit';
 import { stripe } from '$lib/server/stripe';
-import type { CalculatorFormData } from '$lib/types/livestream';
+import type { LivestreamConfig } from '$lib/types/livestream';
 
-export const load: PageServerLoad = async ({ locals }) => {
-	if (!locals.user) {
-		return { memorial: null };
-	}
+export const load: PageServerLoad = async ({ locals, url }) => {
+	const db = getFirestore();
+	let memorial: Memorial | null = null;
+	let config: LivestreamConfig | null = null;
 
-	try {
-		const db = getFirestore();
-		const memorialsRef = db
-			.collection('memorials')
-			.where('userId', '==', locals.user.uid)
-			.orderBy('createdAt', 'desc')
-			.limit(1);
+	const memorialId = url.searchParams.get('memorialId');
 
-		const snapshot = await memorialsRef.get();
+	if (locals.user && memorialId) {
+		// First, try to load an existing livestream configuration
+		const configRef = db.collection('livestreamConfigurations').doc(memorialId);
+		const configSnap = await configRef.get();
 
-		if (snapshot.empty) {
-			return { memorial: null };
+		if (configSnap.exists) {
+			console.log('✅ Found existing livestream config:', configSnap.id);
+			const configData = configSnap.data();
+			if (configData) {
+				// Convert Firestore Timestamps to serializable format
+				if (configData.createdAt && typeof configData.createdAt.toDate === 'function') {
+					(configData.createdAt as any) = configData.createdAt.toDate().toISOString();
+				}
+				config = { ...(configData as Omit<LivestreamConfig, 'id'>), id: configSnap.id };
+			}
 		}
 
-		const memorial = snapshot.docs[0].data() as Memorial;
-		console.log('✅ Found memorial for user:', memorial);
-		return { memorial };
-	} catch (error) {
-		console.error('Error fetching memorial:', error);
-		return { memorial: null };
+		// Then, load the memorial data
+		const memorialRef = db.collection('memorials').doc(memorialId);
+		const memorialSnap = await memorialRef.get();
+
+		if (memorialSnap.exists) {
+			console.log('✅ Found memorial for user:', memorialSnap.id);
+			const memorialData = memorialSnap.data();
+			if (memorialData) {
+				memorial = { ...(memorialData as Omit<Memorial, 'id'>), id: memorialSnap.id };
+			}
+		}
 	}
+
+	return { memorial, config };
 };
 
 export const actions: Actions = {
@@ -67,7 +79,8 @@ export const actions: Actions = {
 			const formDataRaw = data.get('formData') as string;
 			const bookingItemsRaw = data.get('bookingItems') as string;
 			const totalRaw = data.get('total') as string;
-			
+			const memorialId = data.get('memorialId') as string;
+
 			console.log('📊 Raw field data:');
 			console.log('  - formData type:', typeof formDataRaw);
 			console.log('  - formData length:', formDataRaw?.length);
@@ -90,6 +103,11 @@ export const actions: Actions = {
 			if (!totalRaw) {
 				console.error('❌ Missing total field');
 				return fail(400, { error: 'Missing total' });
+			}
+
+			if (!memorialId) {
+				console.error('❌ Missing memorialId field');
+				return fail(400, { error: 'Missing memorialId' });
 			}
 			
 			console.log('✅ All required fields present');
@@ -159,7 +177,8 @@ export const actions: Actions = {
 				total: payload.total,
 				userId: locals.user.uid,
 				status: 'saved',
-				createdAt: new Date()
+				createdAt: Timestamp.now(),
+				memorialId: memorialId
 			};
 			
 			console.log('📄 Document data prepared:');
@@ -171,15 +190,16 @@ export const actions: Actions = {
 
 			// Save to Firestore
 			console.log('💾 Saving to Firestore collection: livestreamConfigurations');
-			const docRef = await db.collection('livestreamConfigurations').add(docData);
+			const docRef = db.collection('livestreamConfigurations').doc(memorialId);
+			await docRef.set(docData, { merge: true });
 			console.log('✅ Configuration saved successfully!');
 			console.log('📄 Document ID:', docRef.id);
 			console.log('📍 Document path:', docRef.path);
 
 			const response = { success: true, action: 'saved', docId: docRef.id };
 			console.log('🎉 Returning success response:', response);
-			return response;
-			
+
+			redirect(303, '/my-portal');
 		} catch (error) {
 			console.error('💥 Error in saveAndPayLater action:', error);
 			console.error('📍 Error name:', error instanceof Error ? error.name : 'Unknown');
@@ -193,7 +213,8 @@ export const actions: Actions = {
 				console.error('  - cause:', error.cause);
 			}
 			
-			return fail(500, { error: 'Internal Server Error', details: error instanceof Error ? error.message : String(error) });
+			const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+			return fail(500, { error: 'Internal Server Error', details: errorMessage });
 		}
 	},
 	continueToPayment: async ({ request, locals }) => {
@@ -207,23 +228,28 @@ export const actions: Actions = {
 			console.log('💳 Received payment payload:', { formData, total, memorialId, bookingItems });
 
 			const db = getFirestore();
-			const configRef = await db.collection('livestreamConfigurations').add({
+			const configData = {
 				formData,
 				bookingItems,
 				total,
 				userId: locals.user.uid,
 				memorialId,
 				status: 'pending_payment',
-				createdAt: new Date()
-			});
+				createdAt: Timestamp.now()
+			};
 
-			console.log('📄 Created config document:', configRef.id);
+			// Use memorialId as the document ID for the livestream configuration
+			const configRef = db.collection('livestreamConfigurations').doc(memorialId);
+			await configRef.set(configData, { merge: true });
+
+			console.log('📄 Created/Updated config document:', configRef.id);
 
 			const paymentIntent = await stripe.paymentIntents.create({
 				amount: total * 100,
 				currency: 'usd',
 				metadata: {
-					configId: configRef.id
+					configId: configRef.id,
+					memorialId: memorialId
 				}
 			});
 

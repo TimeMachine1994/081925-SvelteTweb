@@ -3,13 +3,23 @@
 	import Summary from './Summary.svelte';
 	import StripeCheckout from './StripeCheckout.svelte';
 	import TierSelector from './TierSelector.svelte';
-	import type { CalculatorFormData, Tier, BookingItem } from '$lib/types/livestream';
+	import type {
+		CalculatorFormData,
+		Tier,
+		BookingItem,
+		LivestreamConfig
+	} from '$lib/types/livestream';
 	import type { Memorial } from '$lib/types/memorial';
 	import { onMount } from 'svelte';
 	import { auth } from '$lib/firebase';
-	
-	let { memorialId, data }: { memorialId: string | null; data: { memorial: Memorial | null } } =
-		$props();
+
+	let {
+		memorialId,
+		data
+	}: {
+		memorialId: string | null;
+		data: { memorial: Memorial | null; config: LivestreamConfig | null };
+	} = $props();
 
 	console.log('🧮 Calculator Component Initializing...', { memorialId, data });
 
@@ -48,10 +58,18 @@
 	});
 
 	onMount(() => {
-		if (data.memorial) {
+		if (data.config) {
+			console.log('📝 Pre-filling form with existing config data:', data.config);
+			formData = data.config.formData;
+			const basePackage = data.config.bookingItems.find(
+				(item) => item.package.includes('Tributestream')
+			);
+			if (basePackage) {
+				selectedTier = basePackage.id as Tier;
+			}
+		} else if (data.memorial) {
 			console.log('📝 Pre-filling form with memorial data:', data.memorial);
 			formData.lovedOneName = data.memorial.lovedOneName;
-			// You can pre-fill other fields here as they become available in the memorial data type
 		}
 	});
 
@@ -181,7 +199,7 @@
 			});
 		}
 		if (formData.addons.woodenUsbDrives > 0) {
-			const isLegacy = selectedTier === 'Legacy';
+			const isLegacy = selectedTier === 'legacy';
 			const usbDrives = formData.addons.woodenUsbDrives;
 			const includedDrives = isLegacy ? 1 : 0;
 
@@ -240,7 +258,7 @@
 		};
 	}
 
-	async function saveAndPayLater() {
+	async function saveAndPayLater(isPayNowFlow = false) {
 		console.log('🚀 saveAndPayLater function called');
 		console.log('📊 Current state check:');
 		console.log('  - selectedTier:', selectedTier);
@@ -286,6 +304,9 @@
 			formDataToSend.append('formData', formDataJson);
 			formDataToSend.append('bookingItems', bookingItemsJson);
 			formDataToSend.append('total', totalString);
+			if (memorialId) {
+				formDataToSend.append('memorialId', memorialId);
+			}
 			
 			console.log('✅ FormData prepared successfully');
 			
@@ -313,40 +334,28 @@
 			const result = await response.json();
 			console.log('✅ Save response parsed:', result);
 			
-			// Handle SvelteKit form action response format
-			if (result.type === 'success' && result.status === 200) {
-				console.log('🎉 SvelteKit form action succeeded!');
-				console.log('📄 Raw response data:', result.data);
-				
-				// Parse the serialized data array
-				try {
-					const parsedData = JSON.parse(result.data);
-					console.log('📊 Parsed data array:', parsedData);
-					
-					// Extract the actual response object (first element of the array)
-					const actionResult = parsedData[0];
-					console.log('📋 Action result:', actionResult);
-					
-					if (actionResult && actionResult.success) {
-						console.log('🎉 Configuration saved successfully!');
-						console.log('📄 Save action:', actionResult.action);
-						console.log('📄 Document ID:', actionResult.docId);
-						// TODO: Show success message to user
-						alert('Configuration saved successfully!');
-					} else {
-						console.error('❌ Save failed - action result indicates failure:', actionResult);
-						// TODO: Show error message to user
-						alert('Save failed. Please try again.');
-					}
-				} catch (parseError) {
-					console.error('❌ Failed to parse response data:', parseError);
-					console.error('📍 Raw data:', result.data);
-					// TODO: Show error message to user
-					alert('Save failed due to response parsing error.');
+			if (response.redirected && !isPayNowFlow) {
+				window.location.href = response.url;
+				return;
+			}
+
+			if (!response.ok) {
+				const errorResult = await response.json();
+				console.error('❌ Save failed:', errorResult);
+				alert(`Save failed: ${errorResult.details || errorResult.error || 'Unknown error'}`);
+				return;
+			}
+
+			const successResult = await response.json();
+			console.log('✅ Save response parsed:', successResult);
+
+			if (successResult.success) {
+				console.log('🎉 Configuration saved successfully!');
+				if (!isPayNowFlow) {
+					alert('Configuration saved successfully!');
 				}
 			} else {
-				console.error('❌ Save failed - unexpected response format:', result);
-				// TODO: Show error message to user
+				console.error('❌ Save failed:', result);
 				alert('Save failed. Please try again.');
 			}
 			
@@ -392,55 +401,41 @@
 		}
 	}
 
-	function handlePayNow() {
-		console.log('💰 Pay Now button clicked!');
+	async function handlePayNow() {
+		console.log('💰 Pay Now button clicked, attempting to save data first...');
+		await saveAndPayLater(true); // Pass a flag to indicate this is part of the "Pay Now" flow
 		currentStep = 'payNow';
 	}
 </script>
 
-<div class="calculator">
-	{#if currentStep === 'booking'}
-		<div class="booking-flow">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+	<div class="lg:col-span-2 space-y-8">
+		{#if currentStep === 'booking'}
 			<TierSelector {selectedTier} on:change={(e) => handleTierChange(e.detail)} />
 			{#if selectedTier}
 				<BookingForm bind:formData />
 			{/if}
-		</div>
-		<Summary {bookingItems} {total} on:save={saveAndPayLater} on:pay={proceedToPayment} on:payNow={handlePayNow} />
-	{:else if currentStep === 'payNow'}
-		<div class="booking-flow">
+		{:else if currentStep === 'payNow'}
 			{#if memorialId}
 				<StripeCheckout amount={total} {memorialId} lovedOneName={formData.lovedOneName} />
 			{/if}
-		</div>
-		<Summary {bookingItems} {total} on:save={saveAndPayLater} on:pay={proceedToPayment} on:payNow={handlePayNow} />
-	{:else}
-		{#if clientSecret && configId && memorialId}
-			<StripeCheckout
-				amount={total}
-				{memorialId}
-				lovedOneName={formData.lovedOneName}
-			/>
 		{:else}
-			<div>
-				<p>There was an error preparing the payment form. Please try again.</p>
-				<button onclick={() => currentStep = 'booking'}>Go Back</button>
-			</div>
+			{#if clientSecret && configId && memorialId}
+				<StripeCheckout
+					amount={total}
+					{memorialId}
+					lovedOneName={formData.lovedOneName}
+				/>
+			{:else}
+				<div class="card p-4 text-center">
+					<p>There was an error preparing the payment form. Please try again.</p>
+					<button class="btn preset-filled-primary mt-4" onclick={() => currentStep = 'booking'}>Go Back</button>
+				</div>
+			{/if}
 		{/if}
-	{/if}
+	</div>
+
+	<div class="lg:col-span-1">
+		<Summary {bookingItems} {total} on:save={() => saveAndPayLater()} on:pay={proceedToPayment} on:payNow={handlePayNow} />
+	</div>
 </div>
-
-<style>
-	.calculator {
-		display: grid;
-		grid-template-columns: 2fr 1fr;
-		gap: 2rem;
-		align-items: start;
-	}
-
-	.booking-flow {
-		display: flex;
-		flex-direction: column;
-		gap: 1.5rem;
-	}
-</style>

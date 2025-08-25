@@ -7,65 +7,69 @@
 	$inspect(formData);
 </script>
 
-<div class="booking-form">
-	<div class="form-section">
-		<h3>In Loving Memory Of</h3>
-		<label>
+<div class="space-y-8">
+	<div class="card p-4 md:p-6 space-y-4">
+		<h3 class="h3">In Loving Memory Of</h3>
+		<label class="label">
 			<span>Your Loved One's Name</span>
-			<input type="text" bind:value={formData.lovedOneName} placeholder="e.g., Jane Doe" />
+			<input class="input" type="text" bind:value={formData.lovedOneName} placeholder="e.g., Jane Doe" />
 		</label>
 	</div>
 
-	<div class="form-section">
-		<h3>Main Service Details</h3>
-		<div class="form-group">
-			<label>
+	<div class="card p-4 md:p-6 space-y-4">
+		<h3 class="h3">Main Service Details</h3>
+		<div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+			<label class="label">
 				<span>Date of Service</span>
 				<input
+					class="input"
 					type="date"
 					bind:value={formData.mainService.time.date}
 					disabled={formData.mainService.time.isUnknown}
 				/>
 			</label>
-			<label>
+			<label class="label">
 				<span>Time of Livestream</span>
 				<input
+					class="input"
 					type="time"
 					bind:value={formData.mainService.time.time}
 					disabled={formData.mainService.time.isUnknown}
 				/>
 			</label>
 			<button
-				class:toggled={formData.mainService.time.isUnknown}
+				class="btn {formData.mainService.time.isUnknown ? 'preset-filled-primary' : 'preset-tonal-surface'}"
 				onclick={() => (formData.mainService.time.isUnknown = !formData.mainService.time.isUnknown)}
 			>
 				Unknown
 			</button>
 		</div>
-		<label>
-			<span>Number of Hours (Main Location)</span>
+		<label class="label">
+			<span>Number of Hours (Main Location): <strong>{formData.mainService.hours}</strong></span>
 			<input
 				type="range"
 				bind:value={formData.mainService.hours}
 				min="1"
 				max="8"
 				step="1"
+				class="range"
 			/>
-			<span>{formData.mainService.hours} hour(s)</span>
 		</label>
-		<div class="form-group">
-			<label>
+		<div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+			<label class="label md:col-span-2">
 				<span>Location Name</span>
 				<input
+					class="input"
 					type="text"
 					bind:value={formData.mainService.location.name}
 					disabled={formData.mainService.location.isUnknown}
 					placeholder="e.g., St. Mary's Church"
 				/>
 			</label>
-			<label>
+			<label class="label md:col-span-3">
 				<span>Location Address</span>
 				<input
+					class="input"
 					type="text"
 					bind:value={formData.mainService.location.address}
 					disabled={formData.mainService.location.isUnknown}
@@ -73,7 +77,7 @@
 				/>
 			</label>
 			<button
-				class:toggled={formData.mainService.location.isUnknown}
+				class="btn {formData.mainService.location.isUnknown ? 'preset-filled-primary' : 'preset-tonal-surface'} md:col-start-3"
 				onclick={() =>
 					(formData.mainService.location.isUnknown = !formData.mainService.location.isUnknown)}
 			>
@@ -82,33 +86,33 @@
 		</div>
 	</div>
 
-	<div class="form-section">
-		<h3>Funeral Professional Information (Optional)</h3>
-		<div class="form-group">
-			<label>
+	<div class="card p-4 md:p-6 space-y-4">
+		<h3 class="h3">Funeral Professional Information (Optional)</h3>
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+			<label class="label">
 				<span>Funeral Director Name</span>
-				<input type="text" bind:value={formData.funeralDirectorName} />
+				<input class="input" type="text" bind:value={formData.funeralDirectorName} />
 			</label>
-			<label>
+			<label class="label">
 				<span>Funeral Home</span>
-				<input type="text" bind:value={formData.funeralHome} />
+				<input class="input" type="text" bind:value={formData.funeralHome} />
 			</label>
 		</div>
 	</div>
 
-	<div class="form-section">
-		<h3>Additional Services</h3>
-		<div class="toggle-group">
+	<div class="card p-4 md:p-6 space-y-6">
+		<h3 class="h3">Additional Services</h3>
+		<div class="flex justify-between items-center">
 			<span>Add a second location for the same day?</span>
-			<div>
+			<div class="btn-group">
 				<button
-					class:toggled={formData.additionalLocation.enabled}
+					class="btn {formData.additionalLocation.enabled ? 'preset-filled-primary' : 'preset-tonal-surface'}"
 					onclick={() => (formData.additionalLocation.enabled = true)}
 				>
 					Yes
 				</button>
 				<button
-					class:toggled={!formData.additionalLocation.enabled}
+					class="btn {!formData.additionalLocation.enabled ? 'preset-filled-primary' : 'preset-tonal-surface'}"
 					onclick={() => (formData.additionalLocation.enabled = false)}
 				>
 					No
@@ -117,161 +121,118 @@
 		</div>
 
 		{#if formData.additionalLocation.enabled}
-			<div class="sub-section">
-				<h4>Additional Location Details</h4>
-				<div class="form-group">
-					<label>
+			<div class="card preset-tonal-surface p-4 space-y-4">
+				<h4 class="h4">Additional Location Details</h4>
+				<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+					<label class="label">
 						<span>Location Name</span>
-						<input type="text" bind:value={formData.additionalLocation.location.name} />
+						<input class="input" type="text" bind:value={formData.additionalLocation.location.name} />
 					</label>
-					<label>
+					<label class="label">
 						<span>Location Address</span>
-						<input type="text" bind:value={formData.additionalLocation.location.address} />
+						<input class="input" type="text" bind:value={formData.additionalLocation.location.address} />
 					</label>
-					<label>
+					<label class="label">
 						<span>Start Time</span>
-						<input type="time" bind:value={formData.additionalLocation.startTime} />
+						<input class="input" type="time" bind:value={formData.additionalLocation.startTime} />
 					</label>
 				</div>
-				<label>
-					<span>Number of Hours</span>
+				<label class="label">
+					<span>Number of Hours: <strong>{formData.additionalLocation.hours}</strong></span>
 					<input
 						type="range"
 						bind:value={formData.additionalLocation.hours}
 						min="1"
 						max="8"
 						step="1"
+						class="range"
 					/>
-					<span>{formData.additionalLocation.hours} hour(s)</span>
 				</label>
 			</div>
 		{/if}
 
-		<div class="toggle-group">
+		<div class="flex justify-between items-center">
 			<span>Add another day of service?</span>
-			<div>
+			<div class="btn-group">
 				<button
-					class:toggled={formData.additionalDay.enabled}
+					class="btn {formData.additionalDay.enabled ? 'preset-filled-primary' : 'preset-tonal-surface'}"
 					onclick={() => (formData.additionalDay.enabled = true)}>Yes</button
 				>
 				<button
-					class:toggled={!formData.additionalDay.enabled}
+					class="btn {!formData.additionalDay.enabled ? 'preset-filled-primary' : 'preset-tonal-surface'}"
 					onclick={() => (formData.additionalDay.enabled = false)}>No</button
 				>
 			</div>
 		</div>
 
 		{#if formData.additionalDay.enabled}
-			<div class="sub-section">
-				<h4>Additional Day Details</h4>
-				<div class="form-group">
-					<label>
+			<div class="card preset-tonal-surface p-4 space-y-4">
+				<h4 class="h4">Additional Day Details</h4>
+				<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+					<label class="label">
 						<span>Location Name</span>
-						<input type="text" bind:value={formData.additionalDay.location.name} />
+						<input class="input" type="text" bind:value={formData.additionalDay.location.name} />
 					</label>
-					<label>
+					<label class="label">
 						<span>Location Address</span>
-						<input type="text" bind:value={formData.additionalDay.location.address} />
+						<input class="input" type="text" bind:value={formData.additionalDay.location.address} />
 					</label>
-					<label>
+					<label class="label">
 						<span>Start Time</span>
-						<input type="time" bind:value={formData.additionalDay.startTime} />
+						<input class="input" type="time" bind:value={formData.additionalDay.startTime} />
 					</label>
 				</div>
-				<label>
-					<span>Number of Hours</span>
+				<label class="label">
+					<span>Number of Hours: <strong>{formData.additionalDay.hours}</strong></span>
 					<input
 						type="range"
 						bind:value={formData.additionalDay.hours}
 						min="1"
 						max="8"
 						step="1"
+						class="range"
 					/>
-					<span>{formData.additionalDay.hours} hour(s)</span>
 				</label>
 			</div>
 		{/if}
 	</div>
 
-	<div class="form-section">
-		<h3>Add-ons</h3>
-		<div class="addons-grid">
-			<label class="addon-card">
-				<input type="checkbox" bind:checked={formData.addons.photography} />
-				<span>Photography</span>
-				<span class="price">$400</span>
+	<div class="card p-4 md:p-6 space-y-4">
+		<h3 class="h3">Add-ons</h3>
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+			<label class="card preset-tonal-surface p-4 flex items-center space-x-4">
+				<input class="checkbox" type="checkbox" bind:checked={formData.addons.photography} />
+				<div class="flex-1">
+					<span>Photography</span>
+					<span class="text-sm opacity-75 block">$400</span>
+				</div>
 			</label>
-			<label class="addon-card">
-				<input type="checkbox" bind:checked={formData.addons.audioVisualSupport} />
-				<span>Audio/Visual Support</span>
-				<span class="price">$200</span>
+			<label class="card preset-tonal-surface p-4 flex items-center space-x-4">
+				<input class="checkbox" type="checkbox" bind:checked={formData.addons.audioVisualSupport} />
+				<div class="flex-1">
+					<span>Audio/Visual Support</span>
+					<span class="text-sm opacity-75 block">$200</span>
+				</div>
 			</label>
-			<label class="addon-card">
-				<input type="checkbox" bind:checked={formData.addons.liveMusician} />
-				<span>Live Musician</span>
-				<span class="price">$500</span>
+			<label class="card preset-tonal-surface p-4 flex items-center space-x-4">
+				<input class="checkbox" type="checkbox" bind:checked={formData.addons.liveMusician} />
+				<div class="flex-1">
+					<span>Live Musician</span>
+					<span class="text-sm opacity-75 block">$500</span>
+				</div>
 			</label>
-			<label class="addon-card">
+			<label class="card preset-tonal-surface p-4 flex items-center space-x-4">
 				<input
 					type="number"
 					bind:value={formData.addons.woodenUsbDrives}
 					min="0"
-					class="addon-quantity"
+					class="input w-20 text-center"
 				/>
-				<span>Wooden USB Drive</span>
-				<span class="price">$300 (first) / $100 (each add'l)</span>
+				<div class="flex-1">
+					<span>Wooden USB Drive</span>
+					<span class="text-sm opacity-75 block">$300 (first) / $100 (each add'l)</span>
+				</div>
 			</label>
 		</div>
 	</div>
 </div>
-
-<style>
-	.booking-form {
-		display: flex;
-		flex-direction: column;
-		gap: 2rem;
-	}
-	.form-section {
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-		padding: 1.5rem;
-		border: 1px solid #e0e0e0;
-		border-radius: 8px;
-	}
-	.form-group {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-		gap: 1rem;
-		align-items: end;
-	}
-	label {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-		font-weight: 500;
-	}
-	input,
-	button {
-		padding: 0.75rem;
-		border: 1px solid #ccc;
-		border-radius: 4px;
-		font-size: 1rem;
-	}
-	button {
-		cursor: pointer;
-		background-color: #f0f0f0;
-		transition: background-color 0.2s;
-	}
-	button:hover {
-		background-color: #e0e0e0;
-	}
-	button.toggled {
-		background-color: var(--color-primary);
-		color: white;
-		border-color: var(--color-primary);
-	}
-	input[type='range'] {
-		padding: 0;
-	}
-</style>

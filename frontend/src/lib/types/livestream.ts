@@ -1,4 +1,31 @@
-export type Tier = 'Solo' | 'Live' | 'Legacy' | null;
+import type { Timestamp } from 'firebase/firestore';
+
+export type Tier = 'solo' | 'live' | 'legacy' | null;
+
+export interface LocationInfo {
+	name: string;
+	address: string;
+	isUnknown: boolean;
+}
+
+export interface TimeInfo {
+	date: string | null;
+	time: string | null;
+	isUnknown: boolean;
+}
+
+export interface ServiceDetails {
+	location: LocationInfo;
+	time: TimeInfo;
+	hours: number;
+}
+
+export interface AdditionalServiceDetails {
+	enabled: boolean;
+	location: LocationInfo;
+	startTime: string | null;
+	hours: number;
+}
 
 export interface Addons {
 	photography: boolean;
@@ -7,34 +34,11 @@ export interface Addons {
 	woodenUsbDrives: number;
 }
 
-export interface ServiceLocation {
-	name: string;
-	address: string;
-	isUnknown: boolean;
-}
-
-export interface ServiceTime {
-	date: string | null;
-	time: string | null;
-	isUnknown: boolean;
-}
-
-export interface AdditionalService {
-	enabled: boolean;
-	location: ServiceLocation;
-	startTime: string | null;
-	hours: number;
-}
-
 export interface CalculatorFormData {
 	lovedOneName: string;
-	mainService: {
-		location: ServiceLocation;
-		time: ServiceTime;
-		hours: number;
-	};
-	additionalLocation: AdditionalService;
-	additionalDay: AdditionalService;
+	mainService: ServiceDetails;
+	additionalLocation: AdditionalServiceDetails;
+	additionalDay: AdditionalServiceDetails;
 	funeralDirectorName: string;
 	funeralHome: string;
 	addons: Addons;
@@ -48,22 +52,15 @@ export interface BookingItem {
 	quantity: number;
 	total: number;
 }
+
 export interface LivestreamConfig {
 	id: string;
-	basePackage: string;
-	duration: number;
-	platform: string;
-	addObs: boolean;
-	addExtraCameras: number;
-	addExtraMicrophones: number;
+	formData: CalculatorFormData;
+	bookingItems: BookingItem[];
 	total: number;
 	userId: string;
-	createdAt: any;
-}
-
-export interface CloudflareStream {
-	uid: string;
-	rtmpsUrl: string;
-	streamKey: string;
-	name: string;
+	memorialId: string;
+	status: 'saved' | 'pending_payment' | 'paid';
+	createdAt: Timestamp;
+	paymentIntentId?: string;
 }
