@@ -12,7 +12,6 @@
 	let { children, data }: { children: Snippet; data: LayoutData } = $props();
 
 	$effect(() => {
-		console.log('📝 Layout effect triggered');
 		user.set(data.user);
 	});
 </script>
@@ -23,7 +22,11 @@
 
 <div class="app-container">
 	<Navbar />
-	<main class="main-content" class:full-width={$page.route.id?.includes('/app/calculator')}>
+	<main
+		class="main-content"
+		class:full-width={$page.route.id?.includes('/app/calculator')}
+		class:homepage={$page.route.id === '/'}
+	>
 		{@render children?.()}
 	</main>
 	<Footer />
@@ -47,4 +50,10 @@
 	.main-content.full-width {
 		max-width: none;
 	}
+
+	.main-content.homepage {
+		max-width: none;
+		padding: 0;
+	}
+
 </style>
