@@ -1,5 +1,5 @@
 import type { Timestamp } from 'firebase/firestore';
-import type { CloudflareStream } from './livestream';
+// import type { CloudflareStream } from './livestream'; // Commented out until livestream types are available
 
 export interface Embed {
 	id: string;
@@ -32,8 +32,20 @@ export interface Memorial {
 	imageUrl?: string; // Adding optional fields that might be missing from schema but used in code
 	birthDate?: string;
 	deathDate?: string;
-	livestream?: CloudflareStream;
+	livestream?: any; // CloudflareStream when available
 	livestreamConfig?: any; // Holds data from the calculator/booking form
 	photos?: string[];
 	embeds?: Embed[];
+	
+	// New fields for Phase 1 refactoring - Family contact information
+	familyContactName?: string;
+	familyContactEmail?: string;
+	familyContactPhone?: string;
+	familyContactPreference?: 'phone' | 'email';
+	
+	// New fields for Phase 1 refactoring - Director information
+	directorEmail?: string;
+	
+	// New fields for Phase 1 refactoring - Additional notes
+	additionalNotes?: string;
 }
