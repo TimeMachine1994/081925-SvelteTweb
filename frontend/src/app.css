@@ -9,3 +9,12 @@
 @source '../node_modules/@skeletonlabs/skeleton-svelte/dist';
 
 @import '../tribute-theme.css';
+
+/* Shared gold button style */
+.btn-gold {
+  @apply bg-[#D5BA7F] text-black font-semibold rounded-md px-4 py-2 transition-colors;
+}
+
+.btn-gold:hover {
+  @apply bg-[#D5BA7F]/80;
+}

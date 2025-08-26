@@ -54,11 +54,11 @@
 			/>
 			<div class="flex gap-4">
 				<button
-					class="btn bg-amber-400 text-black font-bold py-3 px-6 rounded-md text-lg"
+					class="btn-gold text-lg"
 					onclick={handleCreateTribute}>Create Tribute</button
 				>
 				<button
-					class="btn bg-amber-400 text-black font-bold py-3 px-6 rounded-md text-lg"
+					class="btn-gold text-lg"
 					onclick={handleSearchTributes}>Search Tributes</button
 				>
 			</div>
