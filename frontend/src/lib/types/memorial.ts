@@ -37,6 +37,15 @@ export interface Memorial {
 	photos?: string[];
 	embeds?: Embed[];
 	
+	// Photo metadata for slideshow settings (Phase 2 refactoring)
+	photoMetadata?: Record<string, {
+		caption?: string;
+		displayDuration?: number;
+		transitionEffect?: string;
+		updatedAt?: string;
+		[key: string]: any;
+	}>;
+	
 	// New fields for Phase 1 refactoring - Family contact information
 	familyContactName?: string;
 	familyContactEmail?: string;
