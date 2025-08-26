@@ -3,6 +3,8 @@ import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import { sendEnhancedRegistrationEmail } from '$lib/server/email';
 import type { EnhancedRegistrationEmailData } from '$lib/server/email';
+import { indexMemorial } from '$lib/server/algolia-indexing';
+import type { Memorial } from '$lib/types/memorial';
 
 // Helper function to generate a random password
 function generateRandomPassword(length = 12) {
@@ -179,6 +181,9 @@ export const actions: Actions = {
 			const memorialRef = await adminDb.collection('memorials').add(memorialData);
 			console.log(`✅ Comprehensive memorial created for ${lovedOneName} with ID: ${memorialRef.id}`);
 			console.log(`🔗 Memorial slug: ${slug}, Full slug: ${fullSlug}`);
+
+			// Index the new memorial in Algolia
+			await indexMemorial({ ...memorialData, id: memorialRef.id } as Memorial);
 
 			// 5. Send enhanced registration email
 			console.log('📧 Sending enhanced registration email...');

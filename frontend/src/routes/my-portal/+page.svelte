@@ -62,7 +62,12 @@ export let data: PageData;
 {/if}
 
 <div class="TODO: replace-with-theme-class">
-	<h1 class="TODO: replace-with-theme-class">My Portal</h1>
+	<div class="flex justify-between items-center">
+		<h1 class="TODO: replace-with-theme-class">My Portal</h1>
+		<form action="/logout" method="POST">
+			<button type="submit" class="btn btn-sm btn-outline-primary">Logout</button>
+		</form>
+	</div>
     <p class="TODO: replace-with-theme-class">Welcome, {data.user?.displayName}! Your role is: <strong>{data.previewingRole ? data.previewingRole.replace(/_/g, ' ') : (data.user?.admin ? 'Admin' : (data.user?.role ?? 'Not Assigned'))}</strong></p>
 
     {#if data.previewingRole === 'admin' || (!data.previewingRole && data.user?.admin)}

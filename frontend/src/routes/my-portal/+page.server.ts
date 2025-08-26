@@ -88,8 +88,12 @@ export const load = async ({ locals, url }) => {
             livestreamConfig = {
                 id: configDoc.id,
                 ...configData,
+                paymentStatus: configData.status === 'paid' ? 'complete' : 'incomplete',
                 createdAt: configData.createdAt?.toDate ? configData.createdAt.toDate().toISOString() : null
             };
+            console.log('💳 Payment status for memorial', doc.id, ':', livestreamConfig.paymentStatus);
+        } else {
+            console.log('📋 No livestream config found for memorial', doc.id);
         }
 
         // Manually construct the Memorial object to ensure type safety
@@ -118,8 +122,17 @@ export const load = async ({ locals, url }) => {
             livestream: data.livestream,
             livestreamConfig,
             photos: data.photos || [],
-            embeds: embeds || []
+            embeds: embeds || [],
+            // Add service coordination fields from master tech doc
+            familyContactName: data.familyContactName,
+            familyContactEmail: data.familyContactEmail,
+            familyContactPhone: data.familyContactPhone,
+            familyContactPreference: data.familyContactPreference,
+            directorEmail: data.directorEmail,
+            additionalNotes: data.additionalNotes
         };
+        
+        console.log('🏛️ Memorial processed:', memorial.lovedOneName, 'Payment status:', livestreamConfig?.paymentStatus || 'none');
         return memorial;
     }));
 
@@ -146,4 +159,13 @@ export const load = async ({ locals, url }) => {
         allUsers: locals.user.admin ? allUsers : [],
         previewingRole: previewRole // Pass the preview role to the page
     };
+};
+
+export const actions = {
+    logout: async ({ cookies }) => {
+        console.log('Logging out user...');
+        cookies.delete('session', { path: '/' });
+        console.log('Session cookie deleted.');
+        throw redirect(303, '/login');
+    }
 };
