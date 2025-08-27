@@ -4,44 +4,164 @@ import type { PageServerLoad, Actions } from './$types';
 import type { Memorial } from '$lib/types/memorial';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
+    console.log('🔍 Edit page: Loading memorial edit page', params.memorialId);
+    
     if (!locals.user) {
+        console.log('❌ Edit page: No authenticated user');
         throw redirect(302, '/login');
     }
 
     const { memorialId } = params;
-    const memorialRef = adminDb.collection('memorials').doc(memorialId);
-    const memorialDoc = await memorialRef.get();
-
-    if (!memorialDoc.exists) {
-        throw error(404, 'Not Found');
-    }
-
-    const memorialData = memorialDoc.data();
-    const isOwner = memorialData?.creatorUid === locals.user.uid || memorialData?.createdByUserId === locals.user.uid;
-   
-    if (memorialData?.createdByUserId) {
-    	console.warn(`Memorial ${memorialId} is using the deprecated "createdByUserId" field. Please migrate to "creatorUid".`);
-    }
-   
-    if (!memorialData || !isOwner) {
-    	throw error(403, 'Forbidden');
-    }
+    const userId = locals.user.uid;
+    const isAdmin = locals.user?.admin === true;
     
-    const memorial = {
-        id: memorialDoc.id,
-        ...memorialData,
-        createdAt: memorialData.createdAt?.toDate ? memorialData.createdAt.toDate().toISOString() : null,
-        updatedAt: memorialData.updatedAt?.toDate ? memorialData.updatedAt.toDate().toISOString() : null,
-    } as Memorial;
+    console.log('👤 Edit page: Checking user permissions', {
+        userId,
+        memorialId,
+        isAdmin
+    });
 
-    return {
-        memorial
-    };
+    try {
+        // Get the memorial document
+        const memorialRef = adminDb.collection('memorials').doc(memorialId);
+        const memorialDoc = await memorialRef.get();
+
+        if (!memorialDoc.exists) {
+            console.log('❌ Edit page: Memorial not found');
+            throw error(404, 'Memorial not found');
+        }
+
+        const memorialData = memorialDoc.data();
+        
+        // Check if user is the owner (handle both field names for backward compatibility)
+        const isOwner = memorialData?.creatorUid === userId || memorialData?.createdByUserId === userId;
+        
+        if (memorialData?.createdByUserId) {
+            console.warn(`Memorial ${memorialId} is using the deprecated "createdByUserId" field. Please migrate to "creatorUid".`);
+        }
+
+        // Check if user is a family member
+        let isFamilyMember = false;
+        let familyMemberPermissions = null;
+        
+        console.log('🔍 Edit page: Checking family member status');
+        const familyMemberRef = adminDb
+            .collection('memorials')
+            .doc(memorialId)
+            .collection('familyMembers')
+            .doc(userId);
+        
+        const familyMemberDoc = await familyMemberRef.get();
+        
+        if (familyMemberDoc.exists) {
+            const familyMemberData = familyMemberDoc.data();
+            // Check if active and not pending
+            if (familyMemberData?.status === 'active') {
+                isFamilyMember = true;
+                familyMemberPermissions = familyMemberData;
+                console.log('✅ Edit page: User is an active family member', {
+                    role: familyMemberData.role,
+                    permissions: familyMemberData.permissions
+                });
+            } else {
+                console.log('⚠️ Edit page: User is a family member but not active', {
+                    status: familyMemberData?.status
+                });
+            }
+        }
+
+        // Determine user role and access
+        let userRole: 'owner' | 'family_member' | 'admin' | null = null;
+        let hasAccess = false;
+
+        if (isOwner) {
+            userRole = 'owner';
+            hasAccess = true;
+            console.log('✅ Edit page: User is the owner');
+        } else if (isFamilyMember) {
+            userRole = 'family_member';
+            hasAccess = true;
+            console.log('✅ Edit page: User is a family member with access');
+        } else if (isAdmin) {
+            userRole = 'admin';
+            hasAccess = true;
+            console.log('✅ Edit page: User is an admin');
+        }
+
+        if (!hasAccess) {
+            console.log('🚫 Edit page: User does not have access', {
+                isOwner,
+                isFamilyMember,
+                isAdmin
+            });
+            throw error(403, 'You do not have permission to edit this memorial');
+        }
+
+        // Determine permissions based on role
+        const canDelete = userRole === 'owner' || userRole === 'admin';
+        const canManageSettings = userRole === 'owner' || userRole === 'admin';
+        const canUploadPhotos = true; // All authorized users can upload photos
+        const canEditPhotos = userRole === 'owner' || userRole === 'admin' || 
+            (userRole === 'family_member' && familyMemberPermissions?.permissions?.canEditPhotos === true);
+        const canInviteOthers = userRole === 'owner' || userRole === 'admin' ||
+            (userRole === 'family_member' && familyMemberPermissions?.permissions?.canInvite === true);
+
+        // Prepare memorial data with permissions
+        const memorial = {
+            id: memorialDoc.id,
+            ...memorialData,
+            createdAt: memorialData?.createdAt?.toDate ? memorialData.createdAt.toDate().toISOString() : null,
+            updatedAt: memorialData?.updatedAt?.toDate ? memorialData.updatedAt.toDate().toISOString() : null,
+            // Add role and permission flags
+            userRole,
+            canDelete,
+            canManageSettings,
+            canUploadPhotos,
+            canEditPhotos,
+            canInviteOthers,
+            // Include family member details if applicable
+            ...(isFamilyMember && {
+                familyMemberRole: familyMemberPermissions?.role,
+                familyMemberPermissions: familyMemberPermissions?.permissions
+            })
+        } as Memorial & {
+            userRole: string;
+            canDelete: boolean;
+            canManageSettings: boolean;
+            canUploadPhotos: boolean;
+            canEditPhotos: boolean;
+            canInviteOthers: boolean;
+            familyMemberRole?: string;
+            familyMemberPermissions?: any;
+        };
+
+        console.log('✅ Edit page: Successfully loaded memorial with permissions', {
+            memorialId,
+            userRole,
+            permissions: {
+                canDelete,
+                canManageSettings,
+                canUploadPhotos,
+                canEditPhotos,
+                canInviteOthers
+            }
+        });
+
+        return {
+            memorial
+        };
+    } catch (err) {
+        console.error('🔥 Edit page: Error loading memorial', err);
+        if (err instanceof Error && 'status' in err) {
+            throw err; // Re-throw SvelteKit errors
+        }
+        throw error(500, 'Failed to load memorial');
+    }
 };
 
-// Helper function to validate memorial ownership
-async function validateMemorialOwnership(memorialId: string, userId: string) {
-    console.log(`🔍 Validating ownership for memorial ${memorialId} by user ${userId}`);
+// Helper function to validate memorial access and permissions
+async function validateMemorialAccess(memorialId: string, userId: string, requiredPermission?: string) {
+    console.log(`🔍 Validating access for memorial ${memorialId} by user ${userId}`);
     
     const memorialRef = adminDb.collection('memorials').doc(memorialId);
     const memorialDoc = await memorialRef.get();
@@ -58,13 +178,51 @@ async function validateMemorialOwnership(memorialId: string, userId: string) {
         console.warn(`Memorial ${memorialId} is using the deprecated "createdByUserId" field. Please migrate to "creatorUid".`);
     }
 
-    if (!isOwner) {
-        console.log(`🚫 User ${userId} is not the owner of memorial ${memorialId}`);
-        return { valid: false, error: 'Forbidden', status: 403 };
+    // Owner always has full access
+    if (isOwner) {
+        console.log(`✅ User ${userId} is the owner of memorial ${memorialId}`);
+        return { valid: true, memorialRef, memorialData, userRole: 'owner' };
     }
 
-    console.log(`✅ Ownership validated for memorial ${memorialId}`);
-    return { valid: true, memorialRef, memorialData };
+    // Check if user is an admin (would need to be passed in or checked via claims)
+    // For now, we'll skip admin check in this helper
+
+    // Check if user is a family member
+    const familyMemberRef = adminDb
+        .collection('memorials')
+        .doc(memorialId)
+        .collection('familyMembers')
+        .doc(userId);
+    
+    const familyMemberDoc = await familyMemberRef.get();
+    
+    if (familyMemberDoc.exists) {
+        const familyMemberData = familyMemberDoc.data();
+        
+        // Check if active
+        if (familyMemberData?.status !== 'active') {
+            console.log(`⚠️ User ${userId} is a family member but not active (status: ${familyMemberData?.status})`);
+            return { valid: false, error: 'Your family member access is pending or inactive', status: 403 };
+        }
+
+        // Check specific permission if required
+        if (requiredPermission && !familyMemberData?.permissions?.[requiredPermission]) {
+            console.log(`🚫 Family member ${userId} lacks required permission: ${requiredPermission}`);
+            return { valid: false, error: 'You do not have permission to perform this action', status: 403 };
+        }
+
+        console.log(`✅ Family member ${userId} has access to memorial ${memorialId}`);
+        return { 
+            valid: true, 
+            memorialRef, 
+            memorialData, 
+            userRole: 'family_member',
+            permissions: familyMemberData.permissions 
+        };
+    }
+
+    console.log(`🚫 User ${userId} does not have access to memorial ${memorialId}`);
+    return { valid: false, error: 'You do not have permission to access this memorial', status: 403 };
 }
 
 export const actions: Actions = {
@@ -77,7 +235,8 @@ export const actions: Actions = {
         }
 
         const { memorialId } = params;
-        const validation = await validateMemorialOwnership(memorialId, locals.user.uid);
+        // Photo reordering requires edit permission
+        const validation = await validateMemorialAccess(memorialId, locals.user.uid, 'canEditPhotos');
         
         if (!validation.valid) {
             return fail(validation.status!, { error: validation.error });
@@ -128,7 +287,7 @@ export const actions: Actions = {
                 updatedAt: new Date()
             });
 
-            console.log(`✅ Photos reordered successfully for memorial ${memorialId}`);
+            console.log(`✅ Photos reordered successfully for memorial ${memorialId} by ${validation.userRole}`);
             return {
                 success: true,
                 message: 'Photos reordered successfully',
@@ -150,10 +309,17 @@ export const actions: Actions = {
         }
 
         const { memorialId } = params;
-        const validation = await validateMemorialOwnership(memorialId, locals.user.uid);
+        // Photo deletion requires edit permission (or owner/admin)
+        const validation = await validateMemorialAccess(memorialId, locals.user.uid, 'canEditPhotos');
         
         if (!validation.valid) {
             return fail(validation.status!, { error: validation.error });
+        }
+
+        // Additional check: only owners and admins can delete photos
+        if (validation.userRole === 'family_member') {
+            console.log('🚫 Family members cannot delete photos');
+            return fail(403, { error: 'Only memorial owners can delete photos' });
         }
 
         try {
@@ -182,7 +348,7 @@ export const actions: Actions = {
                 updatedAt: new Date()
             });
 
-            console.log(`✅ Photo deleted successfully from memorial ${memorialId}`);
+            console.log(`✅ Photo deleted successfully from memorial ${memorialId} by ${validation.userRole}`);
 
             // Optional: Delete the actual file from Firebase Storage
             // This is commented out for safety - you may want to keep files for recovery
@@ -223,7 +389,8 @@ export const actions: Actions = {
         }
 
         const { memorialId } = params;
-        const validation = await validateMemorialOwnership(memorialId, locals.user.uid);
+        // Metadata update requires edit permission
+        const validation = await validateMemorialAccess(memorialId, locals.user.uid, 'canEditPhotos');
         
         if (!validation.valid) {
             return fail(validation.status!, { error: validation.error });
@@ -268,7 +435,9 @@ export const actions: Actions = {
                 [photoUrl]: {
                     ...currentMetadata[photoUrl],
                     ...metadata,
-                    updatedAt: new Date().toISOString()
+                    updatedAt: new Date().toISOString(),
+                    updatedBy: locals.user.uid,
+                    updatedByRole: validation.userRole
                 }
             };
 
@@ -278,7 +447,7 @@ export const actions: Actions = {
                 updatedAt: new Date()
             });
 
-            console.log(`✅ Photo metadata updated successfully for memorial ${memorialId}`);
+            console.log(`✅ Photo metadata updated successfully for memorial ${memorialId} by ${validation.userRole}`);
 
             return {
                 success: true,
@@ -302,10 +471,17 @@ export const actions: Actions = {
         }
 
         const { memorialId } = params;
-        const validation = await validateMemorialOwnership(memorialId, locals.user.uid);
+        // Slideshow settings update requires owner or admin only
+        const validation = await validateMemorialAccess(memorialId, locals.user.uid);
         
         if (!validation.valid) {
             return fail(validation.status!, { error: validation.error });
+        }
+
+        // Only owners and admins can manage slideshow settings
+        if (validation.userRole === 'family_member') {
+            console.log('🚫 Family members cannot update slideshow settings');
+            return fail(403, { error: 'Only memorial owners can manage slideshow settings' });
         }
 
         try {
@@ -344,7 +520,7 @@ export const actions: Actions = {
                 updatedAt: new Date()
             });
 
-            console.log(`✅ Slideshow settings updated successfully for memorial ${memorialId}`);
+            console.log(`✅ Slideshow settings updated successfully for memorial ${memorialId} by ${validation.userRole}`);
 
             return {
                 success: true,

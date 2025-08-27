@@ -1,41 +1,185 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Helper function to check for admin custom claim
+    
+    // ============================================
+    // 🔧 HELPER FUNCTIONS
+    // ============================================
+    
+    // Check if user is authenticated
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    // Check for admin custom claim
     function isAdmin() {
-      return request.auth.token.admin == true;
+      return request.auth != null && request.auth.token.admin == true;
     }
-
+    
+    // Check if user owns the memorial (creator or createdBy)
+    function isOwner(memorialId) {
+      return request.auth != null && (
+        request.auth.uid == get(/databases/$(database)/documents/memorials/$(memorialId)).data.creatorUid ||
+        request.auth.uid == get(/databases/$(database)/documents/memorials/$(memorialId)).data.createdByUserId
+      );
+    }
+    
+    // Check if user is a family member of the memorial
+    function isFamilyMember(memorialId) {
+      return request.auth != null && 
+        exists(/databases/$(database)/documents/memorials/$(memorialId)/familyMembers/$(request.auth.uid));
+    }
+    
+    // Combined check for edit permissions
+    function canEditMemorial(memorialId) {
+      return isAdmin() || isOwner(memorialId) || isFamilyMember(memorialId);
+    }
+    
+    // Check if only updating allowed photo fields
+    function onlyUpdatingPhotoFields() {
+      let changedFields = request.resource.data.diff(resource.data).affectedKeys();
+      // Allow updates to photos, photoMetadata, and updatedAt fields
+      return changedFields.hasOnly(['photos', 'photoMetadata', 'updatedAt']);
+    }
+    
+    // Check if memorial is public
+    function isPublicMemorial() {
+      return resource.data.isPublic == true;
+    }
+    
+    // ============================================
+    // 👥 USER DOCUMENTS
+    // ============================================
+    
     match /users/{userId} {
-      // Admins can read/write any user document.
-      // Regular users can only read/write their own.
-      allow read, write: if isAdmin() || (request.auth != null && request.auth.uid == userId);
+      // Admins can read/write any user document
+      // Regular users can only read/write their own
+      allow read, write: if isAdmin() || (isSignedIn() && request.auth.uid == userId);
     }
-
+    
+    // ============================================
+    // 🕯️ MEMORIAL DOCUMENTS
+    // ============================================
+    
     match /memorials/{memorialId} {
-      // Admins can read/write any memorial.
-      // Otherwise, apply existing logic.
-      allow read: if isAdmin() || resource.data.isPublic == true || request.auth.uid == resource.data.creatorUid;
-      allow create: if request.auth != null;
-      allow update, delete: if isAdmin() || (request.auth != null && request.auth.uid == resource.data.creatorUid);
+      // Read access: public memorials, owners, family members, or admins
+      allow read: if isPublicMemorial() || canEditMemorial(memorialId);
+      
+      // Create: any authenticated user can create a memorial
+      allow create: if isSignedIn();
+      
+      // Update: differentiated by user role
+      allow update: if canEditMemorial(memorialId) && (
+        // Owners and admins can update anything
+        isAdmin() || isOwner(memorialId) ||
+        // Family members can only update photo-related fields
+        (isFamilyMember(memorialId) && onlyUpdatingPhotoFields())
+      );
+      
+      // Delete: only owners and admins
+      allow delete: if isAdmin() || isOwner(memorialId);
+      
+      // ============================================
+      // 👨‍👩‍👧‍👦 FAMILY MEMBERS SUBCOLLECTION
+      // ============================================
+      
+      match /familyMembers/{userId} {
+        // Read: owners, admins, and the family member themselves
+        allow read: if canEditMemorial(memorialId) || request.auth.uid == userId;
+        
+        // Write: only owners and admins can add/remove family members
+        allow create, update, delete: if isOwner(memorialId) || isAdmin();
+      }
+      
+      // ============================================
+      // 👥 FOLLOWERS SUBCOLLECTION
+      // ============================================
       
       match /followers/{userId} {
-        // A user can only follow/unfollow for themselves.
-        allow read, create, delete: if request.auth != null && request.auth.uid == userId;
-        allow update: if false; // No updates allowed.
+        // Users can only manage their own follow status
+        allow read, create, delete: if isSignedIn() && request.auth.uid == userId;
+        // No updates allowed once following
+        allow update: if false;
       }
     }
-
+    
+    // ============================================
+    // ✉️ INVITATION DOCUMENTS
+    // ============================================
+    
     match /invitations/{invitationId} {
-      // Read: Allowed if you sent the invitation or if you are the recipient.
-      allow read: if request.auth != null && (request.auth.uid == resource.data.invitedByUid || request.auth.token.email == resource.data.inviteeEmail);
-      // Create: Allowed if you are the sender.
-      allow create: if request.auth != null && request.resource.data.invitedByUid == request.auth.uid;
-      // Update: Allowed only by the recipient to accept it.
-      allow update: if request.auth != null && request.auth.token.email == resource.data.inviteeEmail;
-      // Delete: Not allowed for clients.
+      // Read access: admins, sender, or recipient
+      allow read: if isAdmin() ||
+        (isSignedIn() && request.auth.uid == resource.data.invitedByUid) ||
+        (isSignedIn() && request.auth.token.email == resource.data.inviteeEmail);
+      
+      // Create: only memorial owners can send invitations
+      allow create: if isSignedIn() && 
+        request.auth.uid == request.resource.data.invitedByUid &&
+        isOwner(request.resource.data.memorialId);
+      
+      // Update: only recipients can accept invitations
+      allow update: if isSignedIn() && 
+        request.auth.token.email == resource.data.inviteeEmail &&
+        request.resource.data.status == 'accepted' &&
+        // Ensure only status and acceptedAt fields are being updated
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'acceptedAt']);
+      
+      // Delete: disabled for security (maintain audit trail)
       allow delete: if false;
+    }
+    
+    // ============================================
+    // 📊 LIVESTREAM CONFIGURATIONS
+    // ============================================
+    
+    match /livestreamConfigurations/{configId} {
+      // Read: public for memorials that are public, otherwise restricted
+      allow read: if isAdmin() || 
+        (resource.data.memorialId != null && 
+          (get(/databases/$(database)/documents/memorials/$(resource.data.memorialId)).data.isPublic == true ||
+           canEditMemorial(resource.data.memorialId)));
+      
+      // Write: only owners and admins
+      allow create, update: if isSignedIn() && 
+        (isAdmin() || isOwner(request.resource.data.memorialId));
+      
+      allow delete: if isAdmin() || 
+        (resource.data.memorialId != null && isOwner(resource.data.memorialId));
+    }
+    
+    // ============================================
+    // 📸 PHOTO UPLOAD LOGS
+    // ============================================
+    
+    match /photoUploads/{uploadId} {
+      // Read: admins and memorial editors
+      allow read: if isAdmin() || 
+        (resource.data.memorialId != null && canEditMemorial(resource.data.memorialId));
+      
+      // Create: handled by server-side functions only
+      allow create: if false;
+      
+      // No updates or deletes allowed (audit trail)
+      allow update, delete: if false;
+    }
+    
+    // ============================================
+    // 📈 ANALYTICS (read-only for clients)
+    // ============================================
+    
+    match /analytics/{docId} {
+      allow read: if isAdmin();
+      allow write: if false; // Server-side only
+    }
+    
+    // ============================================
+    // 🔍 AUDIT LOGS (read-only for clients)
+    // ============================================
+    
+    match /auditLogs/{logId} {
+      allow read: if isAdmin();
+      allow write: if false; // Server-side only
     }
   }
 }
