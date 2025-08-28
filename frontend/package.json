@@ -52,6 +52,7 @@
 		"algoliasearch": "^5.35.0",
 		"firebase": "^12.1.0",
 		"firebase-admin": "^13.4.0",
+		"git-filter-repo": "^0.0.30",
 		"stripe": "^18.4.0"
 	}
 }

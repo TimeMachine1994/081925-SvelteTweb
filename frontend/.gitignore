@@ -12,6 +12,7 @@ node_modules
 # OS
 .DS_Store
 Thumbs.db
+/scripts/fir-tweb-firebase-adminsdk-fbsvc-5ff490e0ea.json
 
 # Env
 .env

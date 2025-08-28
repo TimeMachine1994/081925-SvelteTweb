@@ -19,7 +19,6 @@ firestore-debug.log*
 .env*.local
 !/.env.example
 !/.env.template
-
 # IDE config
 .idea
 .vscode/*
