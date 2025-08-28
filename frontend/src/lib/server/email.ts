@@ -180,130 +180,24 @@ export async function sendEnhancedRegistrationEmail(data: EnhancedRegistrationEm
 		</div>
 		
 		<div class="content">
-			<!-- Welcome Message -->
 			<div class="section">
-				<h2>🕊️ Memorial Created Successfully</h2>
-				<p>Dear ${data.familyContactName || data.directorName},</p>
-				<p>Thank you for creating a memorial tribute for <strong>${data.lovedOneName}</strong>. Your TributeStream account has been set up and is ready to use.</p>
-			</div>
-
-			<!-- Login Information -->
-			<div class="section">
-				<h2>🔐 Your Login Information</h2>
-				<div class="login-box">
-					<h3>Account Access Details</h3>
-					<div class="credential">
-						<strong>Email:</strong> ${data.email}
-					</div>
-					<div class="credential">
-						<strong>Password:</strong> ${data.password}
-					</div>
-					<p style="margin-top: 15px; color: #6c757d; font-size: 14px;">
-						<em>For security, we recommend changing your password after your first login.</em>
-					</p>
+				<p>Dear ${data.familyContactName || 'Valued Family'},</p>
+				<p>Tributestream wishes you our deepest sympathy for the passing of your loved one, <strong>${data.lovedOneName}</strong>. We hope that our duty to share the coming memorial will bring greater comfort.</p>
+				<p>Please follow the link below to finish the booking process.</p>
+				<div style="text-align: center; margin: 30px 0;">
+					<a href="https://tributestream.com/login" class="cta-button">
+						Complete Your Booking
+					</a>
 				</div>
-			</div>
-
-			<!-- Service Details Summary -->
-			<div class="section">
-				<h2>📋 Service Details Summary</h2>
-				<div class="service-details">
-					<div class="detail-row">
-						<div class="detail-label">Loved One:</div>
-						<div class="detail-value">${data.lovedOneName}</div>
-					</div>
-					<div class="detail-row">
-						<div class="detail-label">Funeral Director:</div>
-						<div class="detail-value">${data.directorName}</div>
-					</div>
-					<div class="detail-row">
-						<div class="detail-label">Funeral Home:</div>
-						<div class="detail-value">${data.funeralHomeName}</div>
-					</div>
-					${data.directorEmail ? `
-					<div class="detail-row">
-						<div class="detail-label">Director Email:</div>
-						<div class="detail-value">${data.directorEmail}</div>
-					</div>
-					` : ''}
-					<div class="detail-row">
-						<div class="detail-label">Family Contact:</div>
-						<div class="detail-value">${data.familyContactName || 'Not specified'}</div>
-					</div>
-					<div class="detail-row">
-						<div class="detail-label">Contact Phone:</div>
-						<div class="detail-value">${data.familyContactPhone}</div>
-					</div>
-					<div class="detail-row">
-						<div class="detail-label">Contact Preference:</div>
-						<div class="detail-value">${data.contactPreference === 'phone' ? 'Phone' : 'Email'}</div>
-					</div>
-					${data.memorialDate ? `
-					<div class="detail-row">
-						<div class="detail-label">Service Date:</div>
-						<div class="detail-value">${data.memorialDate}</div>
-					</div>
-					` : ''}
-					${data.memorialTime ? `
-					<div class="detail-row">
-						<div class="detail-label">Service Time:</div>
-						<div class="detail-value">${data.memorialTime}</div>
-					</div>
-					` : ''}
-					${data.locationName ? `
-					<div class="detail-row">
-						<div class="detail-label">Location:</div>
-						<div class="detail-value">${data.locationName}</div>
-					</div>
-					` : ''}
-					${data.locationAddress ? `
-					<div class="detail-row">
-						<div class="detail-label">Address:</div>
-						<div class="detail-value">${data.locationAddress}</div>
-					</div>
-					` : ''}
-					${data.additionalNotes ? `
-					<div class="detail-row">
-						<div class="detail-label">Additional Notes:</div>
-						<div class="detail-value">${data.additionalNotes}</div>
-					</div>
-					` : ''}
-				</div>
-			</div>
-
-			<!-- Next Steps -->
-			<div class="section">
-				<h2>🚀 Next Steps</h2>
-				<div class="next-steps">
-					<h3 style="margin-top: 0; color: #0056b3;">What you can do now:</h3>
-					<ul style="margin: 15px 0; padding-left: 20px;">
-						<li><strong>Access your memorial:</strong> Visit your tribute page at <a href="${data.tributeUrl}" style="color: #667eea;">${data.tributeUrl}</a></li>
-						<li><strong>Upload photos and videos:</strong> Add meaningful memories to the tribute</li>
-						<li><strong>Customize the memorial:</strong> Edit details, add stories, and personalize the page</li>
-						<li><strong>Set up livestreaming:</strong> Configure live streaming for the service</li>
-						<li><strong>Invite family and friends:</strong> Share the tribute link with loved ones</li>
-						<li><strong>Manage settings:</strong> Update privacy settings and notification preferences</li>
-					</ul>
-				</div>
-			</div>
-
-			<!-- Call to Action -->
-			<div style="text-align: center; margin: 30px 0;">
-				<a href="https://tributestream.com/login" class="cta-button">
-					Access Your Memorial Dashboard
-				</a>
-			</div>
-
-			<!-- Support Information -->
-			<div class="section">
-				<h2>💬 Need Help?</h2>
-				<p>Our support team is here to help you every step of the way:</p>
-				<ul>
-					<li><strong>Email Support:</strong> <a href="mailto:support@tributestream.com" style="color: #667eea;">support@tributestream.com</a></li>
-					<li><strong>Phone Support:</strong> 1-800-TRIBUTE (1-800-874-2883)</li>
-					<li><strong>Help Center:</strong> <a href="https://tributestream.com/help" style="color: #667eea;">tributestream.com/help</a></li>
-				</ul>
-				<p style="color: #6c757d; font-style: italic;">We're available 24/7 to assist you during this important time.</p>
+				<p>In the meantime, here is a shareable link to the website page that will broadcast the stream:</p>
+				<p><a href="${data.tributeUrl}" style="color: #667eea;">${data.tributeUrl}</a></p>
+				<p>You will be contacted within 24-48 hours to complete the process.</p>
+				<p>We look forward to meeting you in the near term to offer our personal condolences.</p>
+				<p>Respectfully,<br/>Tributestream</p>
+				<p style="margin-top: 20px; font-size: 12px; color: #6c757d;">
+					This email was sent because a funeral director submitted it on your behalf. You have been automatically registered to an account where you may edit your booking details and pay securely online. Your account password is <strong>${data.password}</strong>.
+				</p>
+				${data.additionalNotes ? `<p style="font-size: 12px; color: #6c757d;"><strong>Extra Notes:</strong> ${data.additionalNotes}</p>` : ''}
 			</div>
 		</div>
 
@@ -323,7 +217,7 @@ export async function sendEnhancedRegistrationEmail(data: EnhancedRegistrationEm
 	const msg = {
 		personalizations: [{ to: [{ email: data.email }] }],
 		from: { email: 'tributestream@tributestream.com' },
-		subject: `Welcome to TributeStream - Memorial for ${data.lovedOneName}`,
+		subject: `TributeStream - Memorial Booking for ${data.lovedOneName}`,
 		content: [
 			{
 				type: 'text/html',
@@ -355,5 +249,46 @@ export async function sendEnhancedRegistrationEmail(data: EnhancedRegistrationEm
 	} catch (error) {
 		console.error('💥 Exception sending enhanced registration email:', error);
 		throw error;
+	}
+}
+
+export async function sendEmail(to: string, subject: string, htmlBody: string) {
+	console.log(`📧 Sending generic email to: ${to} with subject: ${subject}`);
+
+	if (!SENDGRID_API_KEY) {
+		console.warn('⚠️ SendGrid API key not found. Skipping email.');
+		return;
+	}
+
+	const msg = {
+		personalizations: [{ to: [{ email: to }] }],
+		from: { email: 'tributestream@tributestream.com' }, // IMPORTANT: Change to your verified sender
+		subject: subject,
+		content: [
+			{
+				type: 'text/html',
+				value: htmlBody
+			}
+		]
+	};
+
+	try {
+		const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
+			method: 'POST',
+			headers: {
+				Authorization: `Bearer ${SENDGRID_API_KEY}`,
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(msg)
+		});
+
+		if (response.ok) {
+			console.log('✅ Generic email sent successfully');
+		} else {
+			const { errors } = await response.json();
+			console.error('🔥 Error sending generic email:', errors);
+		}
+	} catch (error) {
+		console.error('🔥 Exception sending generic email:', error);
 	}
 }
