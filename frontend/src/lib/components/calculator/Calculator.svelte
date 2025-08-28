@@ -12,6 +12,7 @@
 	import type { Memorial } from '$lib/types/memorial';
 	import { onMount } from 'svelte';
 	import { auth } from '$lib/firebase';
+	import { goto } from '$app/navigation'; // Import goto
 
 	let {
 		memorialId,
@@ -336,7 +337,7 @@
 
 			if (result.type === 'redirect' && !isPayNowFlow) {
 				console.log(`🔀 Server initiated redirect to: ${result.location}`);
-				window.location.href = result.location;
+				await goto(result.location); // Use goto for SvelteKit-aware navigation
 				return;
 			}
 

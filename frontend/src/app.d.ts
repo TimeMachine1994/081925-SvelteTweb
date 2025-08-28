@@ -11,6 +11,7 @@ declare global {
 				role?: string;
 				admin?: boolean;
 			} | null;
+			showFirstVisitPopup?: boolean; // Added for first-time visit tracking
 		}
 		interface PageData {
 			user: {
@@ -20,6 +21,7 @@ declare global {
 				role?: string;
 				admin?: boolean;
 			} | null;
+			showFirstVisitPopup?: boolean; // Added for first-time visit tracking
 		}
 		// interface PageState {}
 		// interface Platform {}

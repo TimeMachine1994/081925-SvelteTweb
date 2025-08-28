@@ -88,7 +88,7 @@ export const load = async ({ locals, url }) => {
             livestreamConfig = {
                 id: configDoc.id,
                 ...configData,
-                paymentStatus: configData.status === 'paid' ? 'complete' : 'incomplete',
+                paymentStatus: configData.status === 'paid' ? 'complete' : (configData.status === 'saved' ? 'saved_pending_payment' : 'incomplete'),
                 createdAt: configData.createdAt?.toDate ? configData.createdAt.toDate().toISOString() : null
             };
             console.log('💳 Payment status for memorial', doc.id, ':', livestreamConfig.paymentStatus);
@@ -135,6 +135,28 @@ export const load = async ({ locals, url }) => {
         console.log('🏛️ Memorial processed:', memorial.lovedOneName, 'Payment status:', livestreamConfig?.paymentStatus || 'none');
         return memorial;
     }));
+
+    // Redirection logic for owners without schedule data
+    if (locals.user.role === 'owner' && memorialsData.length > 0) {
+        console.log('🧐 Checking owner memorials for schedule data...');
+        const allMemorialsLackSchedule = memorialsData.every(memorial =>
+            !memorial.livestreamConfig || !memorial.livestreamConfig.bookingItems || memorial.livestreamConfig.bookingItems.length === 0
+        );
+
+        if (allMemorialsLackSchedule) {
+            console.log('➡️ All owner memorials lack complete schedule data. Redirecting to calculator page.');
+            // Assuming we want to pass the memorialId of the first memorial found
+            const firstMemorialId = memorialsData[0]?.id;
+            if (firstMemorialId) {
+                throw redirect(303, `/app/calculator/?memorialId=${firstMemorialId}`);
+            } else {
+                // Fallback if for some reason no memorialId is found (shouldn't happen if memorialsData.length > 0)
+                throw redirect(303, '/app/calculator/');
+            }
+        } else {
+            console.log('✅ At least one owner memorial has complete schedule data. No redirection needed.');
+        }
+    }
 
     // Fetch invitations for the memorials
     let invitations: Invitation[] = [];

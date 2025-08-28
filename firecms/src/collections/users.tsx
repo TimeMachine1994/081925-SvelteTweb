@@ -57,6 +57,13 @@ export const usersCollection = buildCollection<User>({
                 remote_producer: "Remote Producer",
                 onsite_videographer: "Onsite Videographer"
             }
+        }),
+        // Flag to track if the user is visiting a memorial page for the first time post-registration
+        firstTimeMemorialVisit: buildProperty({
+            dataType: "boolean",
+            name: "First Time Memorial Visit",
+            description: "True if the user is visiting a memorial page for the first time post-registration",
+            defaultValue: true
         })
     }
 });

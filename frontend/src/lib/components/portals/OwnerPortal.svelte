@@ -1,24 +1,17 @@
 <script lang="ts">
 	import type { Memorial } from '$lib/types/memorial';
-	import type { Invitation } from '$lib/types/invitation';
 	import { getPaymentStatus, getDefaultMemorial } from '$lib/utils/payment';
-	
-	// Import new UI components
-	import PaymentWarningBanner from '$lib/components/ui/PaymentWarningBanner.svelte';
-	import MemorialSelector from '$lib/components/ui/MemorialSelector.svelte';
-	import MemorialCard from '$lib/components/ui/MemorialCard.svelte';
-	import ActionButtons from '$lib/components/ui/ActionButtons.svelte';
-	import LivestreamScheduleTable from '$lib/components/ui/LivestreamScheduleTable.svelte';
+	import PaymentStatusBadge from '$lib/components/ui/PaymentStatusBadge.svelte';
 	import PayNowButton from '$lib/components/ui/PayNowButton.svelte';
+	import LivestreamScheduleTable from '$lib/components/ui/LivestreamScheduleTable.svelte';
+	import Calculator from '$lib/components/calculator/Calculator.svelte';
 
-	let { memorials, invitations }: { memorials: Memorial[], invitations: Invitation[] } = $props();
+	let { memorials }: { memorials: Memorial[] } = $props();
 
 	console.log('👑 OwnerPortal rendering with', memorials.length, 'memorials');
 
-	// State for selected memorial
 	let selectedMemorialId = $state('');
-	
-	// Initialize with default memorial
+
 	$effect(() => {
 		if (memorials.length > 0 && !selectedMemorialId) {
 			const defaultMemorial = getDefaultMemorial(memorials);
@@ -29,127 +22,97 @@
 		}
 	});
 
-	// Get currently selected memorial
 	const selectedMemorial = $derived(() => {
 		return memorials.find(m => m.id === selectedMemorialId) || null;
 	});
 
-	// Get payment status for selected memorial
 	const paymentStatus = $derived(() => {
 		const memorial = selectedMemorial();
 		return memorial ? getPaymentStatus(memorial) : 'none';
 	});
 
-	// Handle memorial selection change
-	function handleMemorialChange(memorialId: string) {
-		console.log('🔄 Memorial selection changed to:', memorialId);
-		selectedMemorialId = memorialId;
-	}
-
-	// Legacy invitation functionality (keeping for backward compatibility)
-	let inviteEmails = $state<{ [key: string]: string }>({});
-
-	function getInvitationsForMemorial(memorialId: string) {
-		return invitations.filter(inv => inv.memorialId === memorialId);
-	}
-
-	async function handleInvite(memorialId: string) {
-		const email = inviteEmails[memorialId];
-		if (!email) {
-			alert('Please enter an email address.');
-			return;
+	const memorialUrl = $derived(() => {
+		const memorial = selectedMemorial();
+		if (memorial) {
+			// Assuming memorial.slug is available and forms part of the URL
+			// This needs to be adjusted based on the actual URL structure
+			return `${window.location.origin}/tributes/${memorial.slug}`;
 		}
+		return '';
+	});
 
-		console.log(`📨 Inviting ${email} to memorial ${memorialId}`);
+	let showCalculator = $state(false);
 
-		const response = await fetch(`/api/memorials/${memorialId}/invite`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				inviteeEmail: email,
-				roleToAssign: 'family_member'
-			})
-		});
-
-		if (response.ok) {
-			alert('Invitation sent successfully!');
-			inviteEmails[memorialId] = ''; // Clear the input
-		} else {
-			const errorData = await response.json();
-			alert(`Failed to send invitation: ${errorData.error}`);
-		}
+	function toggleCalculator() {
+		showCalculator = !showCalculator;
 	}
 </script>
 
-<div class="max-w-6xl mx-auto px-4 py-6">
-	<h2 class="text-2xl font-bold text-gray-900 mb-6">Memorials You Own</h2>
-	
+<div class="mx-auto px-4 py-8 {showCalculator ? 'max-w-6xl' : 'max-w-4xl'}">
 	{#if memorials && memorials.length > 0}
 		{@const currentMemorial = selectedMemorial()}
 		{@const currentPaymentStatus = paymentStatus()}
-		
+
 		{#if currentMemorial}
-			<!-- Payment Warning Banner (only show if payment incomplete) -->
-			{#if currentPaymentStatus === 'incomplete'}
-				<PaymentWarningBanner memorial={currentMemorial} />
-			{/if}
-
-			<!-- Memorial Selector (only show if multiple memorials) -->
-			<MemorialSelector 
-				{memorials} 
-				{selectedMemorialId}
-				onSelectionChange={handleMemorialChange}
-			/>
-
-			<!-- Memorial Card -->
-			<MemorialCard memorial={currentMemorial} />
-
-			<!-- Action Buttons -->
-			<ActionButtons memorial={currentMemorial} />
-
-			<!-- Livestream Schedule Table -->
-			<LivestreamScheduleTable memorial={currentMemorial} />
-
-			<!-- Legacy Invitation Section (keeping for now) -->
-			<div class="mt-8 bg-white rounded-lg border border-gray-200 p-6">
-				<h3 class="text-lg font-medium text-gray-900 mb-4">Invite Family Members</h3>
-				<div class="flex gap-3 mb-4">
-					<input 
-						type="email" 
-						placeholder="family@example.com" 
-						bind:value={inviteEmails[currentMemorial.id]}
-						class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-					/>
-					<button 
-						onclick={() => handleInvite(currentMemorial.id)}
-						class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
-					>
-						Invite
-					</button>
-				</div>
-				
-				<!-- Display Invitations -->
-				{#if getInvitationsForMemorial(currentMemorial.id).length > 0}
-					<div class="space-y-2">
-						<h4 class="text-sm font-medium text-gray-700">Pending Invitations:</h4>
-						{#each getInvitationsForMemorial(currentMemorial.id) as invitation}
-							<div class="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
-								<span class="text-sm text-gray-900">{invitation.inviteeEmail}</span>
-								<span class="text-xs px-2 py-1 rounded-full {invitation.status === 'accepted' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}">
-									{invitation.status}
-								</span>
-							</div>
-						{/each}
-					</div>
-				{/if}
+			<!-- Loved One's URL Card -->
+			<div class="bg-white shadow-lg rounded-lg p-6 mb-8 text-center">
+				<h3 class="text-xl font-semibold text-gray-800 mb-4">Your Loved One's Memorial Page</h3>
+				<p class="text-purple-600 text-lg font-medium break-all mb-4">
+					<a href={memorialUrl()} target="_blank" rel="noopener noreferrer">
+						{memorialUrl()}
+					</a>
+				</p>
+				<button
+					onclick={() => navigator.clipboard.writeText(memorialUrl())}
+					class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 002-2h2a2 2 0 002 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+					</svg>
+					Copy Link
+				</button>
 			</div>
 
-			<!-- Bottom Pay Now Button (only show if payment incomplete) -->
-			{#if currentPaymentStatus === 'incomplete'}
-				<div class="mt-6 flex justify-center">
-					<PayNowButton memorial={currentMemorial} variant="primary" />
+			<!-- Payment Status -->
+			<div class="mb-8 text-center">
+				<h3 class="text-xl font-semibold text-gray-800 mb-4">Payment Status</h3>
+				<PaymentStatusBadge status={currentPaymentStatus} />
+			</div>
+
+			<!-- Schedule Now / Calculator Button -->
+			<div class="mb-8 text-center">
+				<button
+					onclick={toggleCalculator}
+					class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+				>
+					{#if showCalculator}
+						Hide Calculator
+					{:else}
+						Schedule Now / View Calculator
+					{/if}
+				</button>
+			</div>
+
+			{#if showCalculator}
+				<div class="mb-8">
+					<Calculator memorialId={currentMemorial.id} data={{ memorial: currentMemorial, config: currentMemorial.livestreamConfig }} />
 				</div>
 			{/if}
+
+			<!-- Schedule -->
+			<div class="bg-white shadow-lg rounded-lg p-6">
+				<h3 class="text-xl font-semibold text-gray-800 mb-4">Livestream Schedule</h3>
+				{#if currentMemorial.livestreamConfig}
+					<LivestreamScheduleTable memorial={currentMemorial} />
+				{:else}
+					<p class="text-gray-600">No livestream schedule available. Please use the calculator to set up a livestream package.</p>
+				{/if}
+			</div>
+		{:else}
+			<!-- No memorial selected state (should not happen if default is set) -->
+			<div class="text-center py-12">
+				<p class="text-gray-600">Please select a memorial.</p>
+			</div>
 		{/if}
 	{:else}
 		<!-- No memorials state -->

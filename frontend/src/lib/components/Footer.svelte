@@ -7,7 +7,7 @@
 				families and friends to a celebration of life.
 			</p>
 			<p>We don't make videos, we make documentaries.</p>
-			<a href="/funeral-director-form" class="footer-link">Funeral Director Form</a>
+			<a href="/register/funeral-director" class="footer-link">Funeral Director Form</a>
 		</div>
 		<div class="footer-section">
 			<h3 class="footer-heading">COVERAGE LOCATIONS</h3>

@@ -4,7 +4,7 @@ import type { Memorial } from '$lib/types/memorial';
  * 🎯 Payment status utility functions for Owner Portal
  */
 
-export type PaymentStatus = 'complete' | 'incomplete' | 'none';
+export type PaymentStatus = 'complete' | 'incomplete' | 'saved_pending_payment' | 'none';
 
 /**
  * 💳 Determines the payment status for a memorial based on livestream configuration
@@ -23,7 +23,10 @@ export function getPaymentStatus(memorial: Memorial): PaymentStatus {
 	if (status === 'paid') {
 		console.log('✅ Payment complete!');
 		return 'complete';
-	} else if (status === 'pending_payment' || status === 'saved') {
+	} else if (status === 'saved') {
+		console.log('💾 Payment saved, pending payment!');
+		return 'saved_pending_payment';
+	} else if (status === 'pending_payment') {
 		console.log('⚠️ Payment incomplete');
 		return 'incomplete';
 	}

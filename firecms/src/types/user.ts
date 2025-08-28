@@ -16,4 +16,5 @@ export type User = {
     email: string;
     createdAt: Date;
     role?: UserRole;
+    firstTimeMemorialVisit?: boolean; // New field for tracking first-time visits
 }

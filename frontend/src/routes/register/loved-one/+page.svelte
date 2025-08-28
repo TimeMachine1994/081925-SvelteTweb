@@ -48,307 +48,114 @@
 	}
 </script>
 
-<div class="registration-container">
-	<div class="registration-card">
-		<div class="form-header">
-			<h1 class="form-title">Create a Memorial</h1>
-			<p class="form-description">
+<!-- PAGE WRAPPER -->
+<div class="min-h-screen bg-gray-50 flex justify-center items-center py-12 px-4">
+	<div class="w-full max-w-5xl bg-white shadow-2xl rounded-2xl overflow-hidden">
+
+		<!-- HEADER -->
+		<header class="text-center px-8 py-10 bg-[#0f0f0f]">
+			<h1 class="text-3xl font-bold mb-4 text-[#D5BA7F]">✨ Create a Memorial</h1>
+			<p class="max-w-2xl mx-auto text-gray-200/90">
 				Enter your loved one's name to create a beautiful memorial page.
 			</p>
-		</div>
+		</header>
 
-		<form method="POST" use:enhance onsubmit={handleSubmit}>
-			<section class="form-section">
+		<form method="POST" use:enhance onsubmit={handleSubmit} class="grid grid-cols-1 md:grid-cols-2 gap-8 p-10">
+
+			<!-- LIVE PREVIEW -->
+			<section class="md:col-span-2">
 				<LiveUrlPreview bind:lovedOneName />
 			</section>
 
-			<section class="form-section">
-				<div class="section-header">
-					<h2 class="section-title">Memorial Details</h2>
+			<!-- MEMORIAL DETAILS -->
+			<section class="bg-gray-50 p-6 rounded-xl shadow-sm space-y-6 md:col-span-2">
+				<div>
+					<h2 class="text-xl font-semibold mb-1 text-[#D5BA7F]">📝 Memorial Details</h2>
+					<p class="text-gray-500 text-sm">Information about the loved one and memorial page creator</p>
 				</div>
-				<div class="form-grid">
-					<div class="form-group">
-						<label for="lovedOneName" class="form-label">Loved One's Name *</label>
+
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<div>
+						<label for="lovedOneName" class="block text-sm font-medium mb-1">Loved One's Full Name *</label>
 						<input
 							id="lovedOneName"
 							name="lovedOneName"
 							type="text"
 							required
 							bind:value={lovedOneName}
-							class="form-input"
-						/>
+							placeholder="Enter the full name of the deceased"
+							class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#D5BA7F] focus:border-[#D5BA7F]" />
 					</div>
-					<div class="form-group">
-						<label for="name" class="form-label">Your Name *</label>
-						<input id="name" name="name" type="text" required bind:value={name} class="form-input" />
+					<div>
+						<label for="name" class="block text-sm font-medium mb-1">Your Name *</label>
+						<input
+							id="name"
+							name="name"
+							type="text"
+							required
+							bind:value={name}
+							placeholder="Your full name"
+							class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#D5BA7F] focus:border-[#D5BA7F]" />
 					</div>
-					<div class="form-group">
-						<label for="email" class="form-label">Your Email *</label>
+					<div>
+						<label for="email" class="block text-sm font-medium mb-1">Your Email *</label>
 						<input
 							id="email"
 							name="email"
 							type="email"
 							required
 							bind:value={email}
-							class="form-input"
-						/>
+							placeholder="your@example.com"
+							class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#D5BA7F] focus:border-[#D5BA7F]" />
 					</div>
-					<div class="form-group">
-						<label for="phone" class="form-label">Your Phone Number</label>
-						<input id="phone" name="phone" type="tel" bind:value={phone} class="form-input" />
+					<div>
+						<label for="phone" class="block text-sm font-medium mb-1">Your Phone Number</label>
+						<input
+							id="phone"
+							name="phone"
+							type="tel"
+							bind:value={phone}
+							placeholder="(555) 123-4567"
+							class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#D5BA7F] focus:border-[#D5BA7F]" />
 					</div>
 				</div>
 			</section>
 
+			<!-- ERRORS -->
 			{#if validationErrors.length > 0}
-				<div class="error-section">
-					<h3 class="error-title">❌ Please correct the following errors:</h3>
-					<ul class="error-list">
+				<div class="md:col-span-2 bg-red-50 border border-red-300 text-red-700 rounded-lg p-4 space-y-2">
+					<h3 class="font-semibold">❌ Please correct the following errors:</h3>
+					<ul class="list-disc list-inside">
 						{#each validationErrors as error}
-							<li class="error-item">{error}</li>
+							<li>{error}</li>
 						{/each}
 					</ul>
 				</div>
 			{/if}
 
+			<!-- MESSAGES -->
 			{#if form?.error}
-				<div class="form-message error-message">
-					<span class="message-icon">❌</span>
-					<span class="message-text">{form.error}</span>
+				<div class="md:col-span-2 bg-red-100 border border-red-300 text-red-600 p-4 rounded-lg">
+					❌ {form.error}
 				</div>
 			{/if}
-
 			{#if form?.success}
-				<div class="form-message success-message">
-					<span class="message-icon">✅</span>
-					<span class="message-text">
-						Success! Please check your email for your login details and memorial setup information.
-					</span>
+				<div class="md:col-span-2 bg-green-100 border border-green-300 text-green-700 p-4 rounded-lg">
+					✅ Success! Please check your email for login details and memorial setup info.
 				</div>
 			{/if}
 
-			<div class="submit-section">
-				<button type="submit" class="submit-button"> 🚀 Create Memorial </button>
-				<p class="submit-note">
-					By submitting this form, you'll create your account and set up the memorial page. Login
-					credentials will be sent to your email address.
+			<!-- SUBMIT -->
+			<div class="md:col-span-2 text-center space-y-4">
+				<button
+					type="submit"
+					class="bg-[#D5BA7F] hover:bg-[#caa767] text-[#070707] font-semibold px-8 py-3 rounded-lg shadow-md transition">
+					🚀 Create Memorial
+				</button>
+				<p class="text-sm text-gray-500 max-w-prose mx-auto">
+					By submitting this form, you'll create your account and set up the memorial page. Login credentials will be emailed.
 				</p>
 			</div>
 		</form>
 	</div>
 </div>
-
-<style>
-	/* Styles adapted from funeral-director registration */
-	.registration-container {
-		min-height: 100vh;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		padding: 2rem 1rem;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-
-	.registration-card {
-		background: white;
-		border-radius: 16px;
-		box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-		max-width: 800px;
-		width: 100%;
-		overflow: hidden;
-	}
-
-	.form-header {
-		background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
-		color: white;
-		padding: 2rem;
-		text-align: center;
-	}
-
-	.form-title {
-		font-size: 2rem;
-		font-weight: 700;
-		margin: 0 0 1rem 0;
-		line-height: 1.2;
-	}
-
-	.form-description {
-		font-size: 1.1rem;
-		margin: 0;
-		opacity: 0.9;
-		line-height: 1.5;
-	}
-
-	.form-section {
-		padding: 2rem;
-		border-bottom: 1px solid #e5e7eb;
-	}
-
-	.form-section:last-child {
-		border-bottom: none;
-	}
-
-	.section-header {
-		margin-bottom: 1.5rem;
-	}
-
-	.section-title {
-		font-size: 1.5rem;
-		font-weight: 600;
-		color: #1f2937;
-		margin: 0 0 0.5rem 0;
-	}
-
-	.form-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-		gap: 1.5rem;
-	}
-
-	.form-group {
-		display: flex;
-		flex-direction: column;
-	}
-
-	.form-label {
-		font-weight: 600;
-		color: #374151;
-		margin-bottom: 0.5rem;
-		font-size: 0.95rem;
-	}
-
-	.form-input {
-		padding: 0.75rem 1rem;
-		border: 2px solid #d1d5db;
-		border-radius: 8px;
-		font-size: 1rem;
-		transition: all 0.2s ease;
-		background: white;
-	}
-
-	.form-input:focus {
-		outline: none;
-		border-color: #3b82f6;
-		box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-	}
-
-	.error-section {
-		background: #fef2f2;
-		border: 1px solid #fecaca;
-		border-radius: 8px;
-		padding: 1rem;
-		margin: 1rem 2rem;
-	}
-
-	.error-title {
-		color: #dc2626;
-		font-size: 1rem;
-		font-weight: 600;
-		margin: 0 0 0.5rem 0;
-	}
-
-	.error-list {
-		margin: 0;
-		padding-left: 1.5rem;
-		color: #dc2626;
-	}
-
-	.error-item {
-		margin-bottom: 0.25rem;
-	}
-
-	.form-message {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		padding: 1rem;
-		border-radius: 8px;
-		margin: 1rem 2rem;
-		font-weight: 500;
-	}
-
-	.error-message {
-		background: #fef2f2;
-		border: 1px solid #fecaca;
-		color: #dc2626;
-	}
-
-	.success-message {
-		background: #f0fdf4;
-		border: 1px solid #bbf7d0;
-		color: #166534;
-	}
-
-	.message-icon {
-		font-size: 1.25rem;
-	}
-
-	.submit-section {
-		padding: 2rem;
-		background: #f9fafb;
-		text-align: center;
-	}
-
-	.submit-button {
-		background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-		color: white;
-		border: none;
-		padding: 1rem 2rem;
-		border-radius: 12px;
-		font-size: 1.1rem;
-		font-weight: 600;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-		min-width: 250px;
-	}
-
-	.submit-button:hover {
-		background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
-		transform: translateY(-1px);
-		box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1);
-	}
-
-	.submit-button:active {
-		transform: translateY(0);
-	}
-
-	.submit-note {
-		margin: 1rem 0 0 0;
-		color: #6b7280;
-		font-size: 0.9rem;
-		line-height: 1.5;
-		max-width: 500px;
-		margin-left: auto;
-		margin-right: auto;
-	}
-
-	@media (max-width: 768px) {
-		.registration-container {
-			padding: 1rem;
-		}
-		.form-header {
-			padding: 1.5rem;
-		}
-		.form-title {
-			font-size: 1.75rem;
-		}
-		.form-description {
-			font-size: 1rem;
-		}
-		.form-section {
-			padding: 1.5rem;
-		}
-		.form-grid {
-			grid-template-columns: 1fr;
-			gap: 1rem;
-		}
-		.submit-section {
-			padding: 1.5rem;
-		}
-		.submit-button {
-			width: 100%;
-			min-width: auto;
-		}
-	}
-</style>

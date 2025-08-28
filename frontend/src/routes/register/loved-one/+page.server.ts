@@ -4,6 +4,7 @@ import type { Actions } from './$types';
 import { sendRegistrationEmail } from '$lib/server/email';
 import { indexMemorial } from '$lib/server/algolia-indexing';
 import type { Memorial } from '$lib/types/memorial';
+import { Timestamp } from 'firebase-admin/firestore'; // Import Timestamp
 
 // Helper function to generate a random password
 function generateRandomPassword(length = 12) {
@@ -32,7 +33,7 @@ function generateSlug(lovedOneName: string): string {
 }
 
 export const actions: Actions = {
-	default: async ({ request }) => {
+	default: async ({ request, cookies }) => {
 		console.log('Family member registration started 👨‍👩‍👧‍👦');
 		const data = await request.formData();
 		const lovedOneName = (data.get('lovedOneName') as string)?.trim();
@@ -68,21 +69,26 @@ export const actions: Actions = {
 				displayName: name,
 				phone,
 				role: 'owner',
-				createdAt: new Date()
+				createdAt: Timestamp.fromDate(new Date()),
+				firstTimeMemorialVisit: true // Set firstTimeMemorialVisit to true on registration
 			});
-			console.log(`User profile created for ${email} with owner role 📝`);
+			console.log(`User profile created for ${email} with owner role and firstTimeMemorialVisit=true 📝`);
 
 			// 4. Create memorial
-			const memorialData = {
+			const memorialData: Omit<Memorial, 'id'> = {
 				lovedOneName: lovedOneName,
 				slug,
 				fullSlug,
 				createdByUserId: userRecord.uid,
 				creatorEmail: email,
 				familyContactEmail: email,
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				creatorUid: userRecord.uid // for legacy compatibility
+				createdAt: Timestamp.fromDate(new Date()),
+				updatedAt: Timestamp.fromDate(new Date()),
+				creatorUid: userRecord.uid, // for legacy compatibility
+				creatorName: name, // Added missing property
+				isPublic: false, // Added missing property with a default value
+				content: '', // Added missing property with a default value
+				custom_html: '' // Added missing property with a default value
 			};
 			const memorialRef = await adminDb.collection('memorials').add(memorialData);
 			console.log(`Memorial created for ${lovedOneName} with slug: ${slug} 🕊️`);
@@ -98,6 +104,15 @@ export const actions: Actions = {
 			// 6. Create a custom token for auto-login
 			const customToken = await adminAuth.createCustomToken(userRecord.uid);
 			console.log(`Custom token created for ${email} 🎟️`);
+
+			// Set a cookie to indicate first-time memorial visit for the session
+			cookies.set('first_visit_memorial_popup', 'true', {
+				path: '/',
+				httpOnly: true,
+				secure: process.env.NODE_ENV === 'production',
+				maxAge: 60 * 60 * 24 * 7 // 1 week
+			});
+			console.log('🍪 Set first_visit_memorial_popup cookie to true');
 
 			// 7. Redirect to the session creation page
 			const redirectUrl = `/auth/session?token=${customToken}&slug=${slug}`;
