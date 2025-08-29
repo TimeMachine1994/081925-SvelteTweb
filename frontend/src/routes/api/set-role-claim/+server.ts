@@ -1,7 +1,7 @@
 // frontend/src/routes/api/set-role-claim/+server.ts
 
 import { json, type RequestHandler } from '@sveltejs/kit';
-import { adminAuth } from '$lib/server/firebase';
+import { getAdminAuth } from '$lib/server/firebase';
 import { getFirestore } from 'firebase-admin/firestore';
 
 /**
@@ -20,7 +20,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     }
 
     try {
-        const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
+        const decodedClaims = await getAdminAuth().verifySessionCookie(sessionCookie, true);
         if (!decodedClaims.admin) {
             return json({ error: 'Forbidden' }, { status: 403 });
         }
@@ -31,7 +31,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         }
 
         // Set the custom claim
-        await adminAuth.setCustomUserClaims(uid, { role: role });
+        await getAdminAuth().setCustomUserClaims(uid, { role: role });
 
         // Also update the user's document in Firestore
         const db = getFirestore();

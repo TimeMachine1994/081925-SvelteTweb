@@ -1,4 +1,4 @@
-import { adminDb } from '$lib/server/firebase';
+import { getAdminDb } from '$lib/server/firebase';
 import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 export const load: PageServerLoad = async ({ locals }) => {
@@ -6,10 +6,10 @@ export const load: PageServerLoad = async ({ locals }) => {
         throw redirect(303, '/login');
     }
 
-    const userDoc = await adminDb.collection('users').doc(locals.user.uid).get();
+    const userDoc = await getAdminDb().collection('users').doc(locals.user.uid).get();
     const profileData = userDoc.data();
 
-    const memorialsQuery = await adminDb.collection('memorials').where('creatorUid', '==', locals.user.uid).get();
+    const memorialsQuery = await getAdminDb().collection('memorials').where('creatorUid', '==', locals.user.uid).get();
     const memorials = memorialsQuery.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
@@ -38,7 +38,7 @@ export const actions: Actions = {
         }
 
         try {
-            await adminDb.collection('users').doc(locals.user.uid).set({
+            await getAdminDb().collection('users').doc(locals.user.uid).set({
                 displayName: displayName.toString(),
             }, { merge: true });
         } catch (error) {

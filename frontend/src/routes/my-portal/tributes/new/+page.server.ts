@@ -1,4 +1,4 @@
-import { adminDb } from '$lib/server/firebase';
+import { getAdminDb } from '$lib/server/firebase';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { indexMemorial } from '$lib/server/algolia-indexing';
@@ -52,7 +52,7 @@ export const actions: Actions = {
 				content: '',
 				custom_html: null
 			};
-			const memorialRef = await adminDb.collection('memorials').add(memorialData);
+			const memorialRef = await getAdminDb().collection('memorials').add(memorialData);
 			console.log(`✅ Successfully created tribute with slug: ${slug}`);
 
 			// Index the new memorial in Algolia

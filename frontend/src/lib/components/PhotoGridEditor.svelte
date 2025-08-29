@@ -288,9 +288,16 @@
 
 <!-- Delete Confirmation Modal -->
 {#if showDeleteConfirm !== null}
-	<div class="modal-overlay" onclick={cancelDelete}>
-		<div class="modal-content" onclick={(e) => e.stopPropagation()}>
-			<h4>Delete Photo</h4>
+	<div
+		class="modal-overlay"
+		role="button"
+		tabindex="0"
+		aria-label="Close dialog"
+		onclick={cancelDelete}
+		onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') cancelDelete(); }}
+	>
+		<div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modal-title" onclick={(e) => e.stopPropagation()}>
+			<h4 id="modal-title">Delete Photo</h4>
 			<p>Are you sure you want to delete this photo? This action cannot be undone.</p>
 			<div class="modal-actions">
 				<button type="button" class="cancel-btn" onclick={cancelDelete}>

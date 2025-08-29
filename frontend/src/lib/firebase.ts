@@ -36,4 +36,4 @@ if (browser) {
 	}
 }
 
-export { auth, db, storage };
+export { app, auth, db, storage };

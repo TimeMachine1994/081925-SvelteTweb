@@ -27,12 +27,23 @@
 				body: JSON.stringify({ idToken, slug })
 			});
 
+			console.log('📡 Response from /api/session:', response.status, response.statusText);
+
 			if (response.ok) {
-				// The server will handle the redirect, but we can also redirect client-side
-				// as a fallback. The response.url will be the final destination after redirects.
-				window.location.href = response.url;
+				// Session was created successfully, parse the JSON response
+				const data = await response.json();
+				console.log('✅ Session response data:', data);
+				
+				if (data.redirectUrl) {
+					console.log('🚀 Session created successfully. Navigating to:', data.redirectUrl);
+					window.location.href = data.redirectUrl;
+				} else {
+					console.log('⚠️ Session created but no redirectUrl provided. Navigating to /my-portal as fallback.');
+					window.location.href = '/my-portal';
+				}
 			} else {
 				const result = await response.json();
+				console.error('💥 Failed to create session cookie. Server response:', result);
 				error = result.message || 'Failed to create session.';
 			}
 		} catch (e: any) {

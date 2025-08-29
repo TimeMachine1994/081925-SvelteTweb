@@ -1,4 +1,4 @@
-import { adminDb } from '$lib/server/firebase';
+import { getAdminDb } from '$lib/server/firebase';
 import { redirect } from '@sveltejs/kit';
 import type { Memorial } from '$lib/types/memorial';
 import { FieldPath, type Query } from 'firebase-admin/firestore';
@@ -8,7 +8,7 @@ export const load = async ({ locals }) => {
 		throw redirect(303, '/login');
 	}
 
-	const memorialsRef = adminDb.collection('memorials');
+	const memorialsRef = getAdminDb().collection('memorials');
 	let query: Query = memorialsRef;
 
     console.log(`v2 Portal: Fetching memorials for owner: ${locals.user.uid}`);
@@ -26,7 +26,7 @@ export const load = async ({ locals }) => {
     const memorialsData = await Promise.all(snapshot.docs.map(async (doc) => {
         const data = doc.data();
 
-        const configSnapshot = await adminDb.collection('livestreamConfigurations').where('memorialId', '==', doc.id).limit(1).get();
+        const configSnapshot = await getAdminDb().collection('livestreamConfigurations').where('memorialId', '==', doc.id).limit(1).get();
         let livestreamConfig = null;
         if (!configSnapshot.empty) {
             const configDoc = configSnapshot.docs[0];

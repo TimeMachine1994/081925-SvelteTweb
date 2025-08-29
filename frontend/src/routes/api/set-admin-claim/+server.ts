@@ -1,7 +1,7 @@
 // frontend/src/routes/api/set-admin-claim/+server.ts
 
 import { json, type RequestHandler } from '@sveltejs/kit';
-import { adminAuth } from '$lib/server/firebase';
+import { getAdminAuth } from '$lib/server/firebase';
 
 /**
  * Sets a custom claim on a Firebase user to grant them admin privileges.
@@ -22,9 +22,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
             return json({ error: 'Email is required' }, { status: 400 });
         }
 
-        const user = await adminAuth.getUserByEmail(email);
-        const existingClaims = (await adminAuth.getUser(user.uid)).customClaims;
-        await adminAuth.setCustomUserClaims(user.uid, {
+        const user = await getAdminAuth().getUserByEmail(email);
+        const existingClaims = (await getAdminAuth().getUser(user.uid)).customClaims;
+        await getAdminAuth().setCustomUserClaims(user.uid, {
             ...existingClaims,
             admin: true
         });

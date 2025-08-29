@@ -31,7 +31,7 @@
 <div class="app-container">
 	<Navbar />
 	{#if $page.route.id?.includes('/tributes/[fullSlug]') && data.showFirstVisitPopup}
-		<FirstVisitPopup />
+		<svelte:component this={FirstVisitPopup} />
 	{/if}
 	<main
 		class="main-content"

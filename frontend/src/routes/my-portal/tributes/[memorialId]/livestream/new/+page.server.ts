@@ -1,4 +1,4 @@
-import { adminDb as db } from '$lib/server/firebase';
+import { getAdminDb as db } from '$lib/server/firebase';
 import { error, fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import type { Memorial } from '$lib/types/memorial';
@@ -11,7 +11,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		throw error(403, 'Permission denied');
 	}
 
-	const memorialRef = db.collection('memorials').doc(params.memorialId);
+	const memorialRef = db().collection('memorials').doc(params.memorialId);
 	const memorialSnap = await memorialRef.get();
 
 	if (!memorialSnap.exists) {
@@ -77,7 +77,7 @@ export const actions: Actions = {
 			};
 
 			console.log('Updating memorial document in Firestore... 🔥');
-			const memorialRef = db.collection('memorials').doc(memorialId);
+			const memorialRef = db().collection('memorials').doc(memorialId);
 			await memorialRef.update({ livestream: livestreamData });
 			console.log('Firestore document updated successfully 👍');
 

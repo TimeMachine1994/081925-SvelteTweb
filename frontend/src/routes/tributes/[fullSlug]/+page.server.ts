@@ -1,11 +1,11 @@
 import { error } from '@sveltejs/kit';
-import { adminDb } from '$lib/server/firebase';
+import { getAdminDb } from '$lib/server/firebase';
 import type { PageServerLoad } from './$types';
 import type { Memorial } from '$lib/types/memorial';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
     const { fullSlug } = params;
-    const memorialsRef = adminDb.collection('memorials');
+    const memorialsRef = getAdminDb().collection('memorials');
     const snapshot = await memorialsRef.where('slug', '==', fullSlug).limit(1).get();
 
     if (snapshot.empty) {
@@ -29,7 +29,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     if (locals.user) {
         isOwner = locals.user.uid === memorial.createdByUserId;
 
-        const followerDoc = await adminDb.collection('memorials').doc(memorial.id).collection('followers').doc(locals.user.uid).get();
+        const followerDoc = await getAdminDb().collection('memorials').doc(memorial.id).collection('followers').doc(locals.user.uid).get();
         isFollowing = followerDoc.exists;
     }
 

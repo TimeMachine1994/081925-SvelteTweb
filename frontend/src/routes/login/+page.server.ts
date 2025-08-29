@@ -1,4 +1,4 @@
-import { adminAuth } from '$lib/server/firebase';
+import { getAdminAuth } from '$lib/server/firebase';
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 
@@ -17,7 +17,7 @@ export const actions: Actions = {
 
 		try {
 			console.log('Creating session cookie...');
-			const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
+			const sessionCookie = await getAdminAuth().createSessionCookie(idToken, { expiresIn });
 			const options = { maxAge: expiresIn, httpOnly: true, secure: true, path: '/' };
 			cookies.set('session', sessionCookie, options);
 			console.log('Session cookie created and set successfully.');

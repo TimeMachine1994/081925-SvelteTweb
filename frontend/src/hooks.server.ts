@@ -1,4 +1,4 @@
-import { adminAuth } from '$lib/server/firebase';
+import { getAdminAuth } from '$lib/server/firebase';
 import type { Handle } from '@sveltejs/kit';
 
 export const handle: Handle = async ({ event, resolve }) => {
@@ -14,7 +14,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 		
 		try {
 			console.log('🔐 Verifying session cookie with Firebase Admin...');
-			const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
+			const decodedClaims = await getAdminAuth().verifySessionCookie(sessionCookie, true);
 			console.log('✅ Session cookie verified successfully');
 			console.log('👤 Decoded claims:');
 			console.log('  - uid:', decodedClaims.uid);
@@ -23,7 +23,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 			console.log('  - exp:', new Date(decodedClaims.exp * 1000));
 			
 			console.log('👤 Fetching user record...');
-			const userRecord = await adminAuth.getUser(decodedClaims.uid);
+			const userRecord = await getAdminAuth().getUser(decodedClaims.uid);
 			console.log('✅ User record fetched successfully');
 			console.log('👤 User record details:');
 			console.log('  - uid:', userRecord.uid);
@@ -60,6 +60,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 				console.error('⏰ Session cookie has expired');
 			}
 			
+			// Clear the invalid session cookie
+			event.cookies.delete('session', { path: '/' });
+			console.log('🗑️ Invalid session cookie cleared.');
+
 			event.locals.user = null;
 			event.locals.showFirstVisitPopup = false; // Ensure this is false if user is not authenticated
 			console.log('❌ User set to null and showFirstVisitPopup to false due to verification failure');

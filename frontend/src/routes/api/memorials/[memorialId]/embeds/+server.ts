@@ -1,5 +1,5 @@
 import { json, error } from '@sveltejs/kit';
-import { adminDb } from '$lib/server/firebase';
+import { getAdminDb } from '$lib/server/firebase';
 import { FieldValue } from 'firebase-admin/firestore';
 import type { RequestHandler } from './$types';
 
@@ -22,7 +22,7 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 	}
 
 	try {
-		const embedRef = await adminDb.collection('memorials').doc(memorialId).collection('embeds').add({
+		const embedRef = await getAdminDb().collection('memorials').doc(memorialId).collection('embeds').add({
 			title,
 			type,
 			embedUrl,
@@ -50,7 +50,7 @@ export const PUT: RequestHandler = async ({ locals, params, request }) => {
 	}
 
 	try {
-		const embedRef = adminDb.collection('memorials').doc(memorialId).collection('embeds').doc(embedId);
+		const embedRef = getAdminDb().collection('memorials').doc(memorialId).collection('embeds').doc(embedId);
 		await embedRef.update({
 			...data,
 			updatedAt: FieldValue.serverTimestamp()
@@ -76,7 +76,7 @@ export const DELETE: RequestHandler = async ({ locals, params, request }) => {
 	}
 
 	try {
-		await adminDb.collection('memorials').doc(memorialId).collection('embeds').doc(embedId).delete();
+		await getAdminDb().collection('memorials').doc(memorialId).collection('embeds').doc(embedId).delete();
 		return json({ success: true }, { status: 200 });
 	} catch (err) {
 		console.error('Error deleting embed:', err);

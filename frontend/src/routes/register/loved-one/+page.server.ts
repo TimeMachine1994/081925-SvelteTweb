@@ -1,4 +1,4 @@
-import { adminAuth, adminDb } from '$lib/server/firebase';
+import { getAdminAuth, getAdminDb } from '$lib/server/firebase';
 import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import { sendRegistrationEmail } from '$lib/server/email';
@@ -50,21 +50,48 @@ export const actions: Actions = {
 		const fullSlug = `tributes/${slug}`;
 
 		try {
-			// 1. Create user in Firebase Auth
+			// 1. Create user in Firebase Auth with retry logic
 			console.log(`Attempting to create user: ${email} 👤`);
-			const userRecord = await adminAuth.createUser({
-				email,
-				password,
-				displayName: name
-			});
-			console.log(`User created successfully: ${userRecord.uid}`);
+			let userRecord;
+			let retryCount = 0;
+			const maxRetries = 2;
+			
+			while (retryCount <= maxRetries) {
+				try {
+					console.log(`Creating user attempt ${retryCount + 1}/${maxRetries + 1}...`);
+					userRecord = await getAdminAuth().createUser({
+						email,
+						password,
+						displayName: name
+					});
+					console.log(`✅ User created successfully: ${userRecord.uid}`);
+					break; // Success, exit retry loop
+				} catch (authError: any) {
+					console.error(`❌ User creation attempt ${retryCount + 1} failed:`, authError.message);
+					
+					// Check if it's a timeout error and we have retries left
+					if (authError.message?.includes('timeout') && retryCount < maxRetries) {
+						retryCount++;
+						console.log(`⏳ Retrying user creation in 2 seconds...`);
+						await new Promise(resolve => setTimeout(resolve, 2000));
+					} else {
+						// Either not a timeout or no retries left
+						throw authError;
+					}
+				}
+			}
+			
+			if (!userRecord) {
+				throw new Error('Failed to create user after all retry attempts');
+			}
 
 			// 2. Set custom claim for owner role
-			await adminAuth.setCustomUserClaims(userRecord.uid, { role: 'owner' });
+			await getAdminAuth().setCustomUserClaims(userRecord.uid, { role: 'owner' });
 			console.log(`Custom claim 'owner' set for ${email} 👑`);
 
 			// 3. Create user profile in Firestore
-			await adminDb.collection('users').doc(userRecord.uid).set({
+			console.log(`Attempting to create user profile for ${email} (UID: ${userRecord.uid}) in Firestore...`);
+			await getAdminDb().collection('users').doc(userRecord.uid).set({
 				email,
 				displayName: name,
 				phone,
@@ -72,9 +99,10 @@ export const actions: Actions = {
 				createdAt: Timestamp.fromDate(new Date()),
 				firstTimeMemorialVisit: true // Set firstTimeMemorialVisit to true on registration
 			});
-			console.log(`User profile created for ${email} with owner role and firstTimeMemorialVisit=true 📝`);
+			console.log(`✅ User profile created for ${email} with owner role and firstTimeMemorialVisit=true 📝`);
 
 			// 4. Create memorial
+			console.log(`Attempting to create memorial for ${lovedOneName} in Firestore...`);
 			const memorialData: Omit<Memorial, 'id'> = {
 				lovedOneName: lovedOneName,
 				slug,
@@ -90,8 +118,8 @@ export const actions: Actions = {
 				content: '', // Added missing property with a default value
 				custom_html: '' // Added missing property with a default value
 			};
-			const memorialRef = await adminDb.collection('memorials').add(memorialData);
-			console.log(`Memorial created for ${lovedOneName} with slug: ${slug} 🕊️`);
+			const memorialRef = await getAdminDb().collection('memorials').add(memorialData);
+			console.log(`✅ Memorial created for ${lovedOneName} with slug: ${slug} (ID: ${memorialRef.id}) 🕊️`);
 
 			// Index the new memorial in Algolia
 			await indexMemorial({ ...memorialData, id: memorialRef.id } as Memorial);
@@ -102,7 +130,7 @@ export const actions: Actions = {
 			await sendRegistrationEmail(email, password);
 
 			// 6. Create a custom token for auto-login
-			const customToken = await adminAuth.createCustomToken(userRecord.uid);
+			const customToken = await getAdminAuth().createCustomToken(userRecord.uid);
 			console.log(`Custom token created for ${email} 🎟️`);
 
 			// Set a cookie to indicate first-time memorial visit for the session
@@ -114,18 +142,34 @@ export const actions: Actions = {
 			});
 			console.log('🍪 Set first_visit_memorial_popup cookie to true');
 
-			// 7. Redirect to the session creation page
-			const redirectUrl = `/auth/session?token=${customToken}&slug=${slug}`;
+			// 7. Redirect to a client-side page to handle custom token login and session creation
+			const redirectUrl = `/auth/login-with-token?token=${customToken}&slug=${slug}`;
 			redirect(303, redirectUrl);
 		} catch (error: any) {
 			if (isRedirect(error)) {
 				throw error;
 			}
-			console.error('Error during registration process:', error);
+			console.error('❌ Error during registration process:', error);
+			console.error('Error details:', {
+				code: error.code,
+				message: error.message,
+				errorInfo: error.errorInfo
+			});
+			
+			// Provide more specific error messages
 			if (error.code === 'auth/email-already-exists') {
 				return fail(400, { error: `An account with email ${email} already exists.` });
+			} else if (error.code === 'auth/invalid-email') {
+				return fail(400, { error: 'The email address is invalid.' });
+			} else if (error.code === 'auth/weak-password') {
+				return fail(400, { error: 'The password is too weak. Please try again.' });
+			} else if (error.message?.includes('timeout')) {
+				return fail(503, { error: 'Firebase service is temporarily unavailable. Please try again in a few moments.' });
+			} else if (error.code === 'app/network-timeout') {
+				return fail(503, { error: 'Network timeout - Firebase services may be slow. Please try again.' });
 			}
-			return fail(500, { error: error.message });
+			
+			return fail(500, { error: `Registration failed: ${error.message || 'Unknown error occurred'}` });
 		}
 
 		return { success: true };

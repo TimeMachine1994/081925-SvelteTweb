@@ -1,4 +1,4 @@
-import { adminDb } from '$lib/server/firebase';
+import { getAdminDb } from '$lib/server/firebase';
 import { error, redirect } from '@sveltejs/kit';
 import type { Memorial } from '$lib/types/memorial';
 import type { Invitation } from '$lib/types/invitation';
@@ -9,7 +9,7 @@ export const load = async ({ locals, params }) => {
 	}
 
 	const memorialId = params.memorialId;
-	const memorialRef = adminDb.collection('memorials').doc(memorialId);
+	const memorialRef = getAdminDb().collection('memorials').doc(memorialId);
 	const memorialSnap = await memorialRef.get();
 
 	if (!memorialSnap.exists) {
@@ -33,7 +33,7 @@ export const load = async ({ locals, params }) => {
 		throw error(403, 'You do not have permission to manage this memorial');
 	}
 
-	const invitationsRef = adminDb.collection('invitations').where('memorialId', '==', memorialId);
+	const invitationsRef = getAdminDb().collection('invitations').where('memorialId', '==', memorialId);
 	const invitationsSnap = await invitationsRef.get();
 	const invitations = invitationsSnap.docs.map(doc => {
 		const invitationData = doc.data();

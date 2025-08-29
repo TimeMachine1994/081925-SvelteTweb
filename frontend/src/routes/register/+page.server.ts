@@ -1,4 +1,4 @@
-import { adminAuth, adminDb } from '$lib/server/firebase';
+import { getAdminAuth, getAdminDb } from '$lib/server/firebase';
 import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 
@@ -18,12 +18,12 @@ export const actions: Actions = {
 
 		try {
 			console.log(`[+page.server.ts] Attempting to create user: ${email}`);
-			const userRecord = await adminAuth.createUser({
+			const userRecord = await getAdminAuth().createUser({
 				email: email.toString(),
 				password: password.toString()
 			});
 
-			const userDocRef = adminDb.collection('users').doc(userRecord.uid);
+			const userDocRef = getAdminDb().collection('users').doc(userRecord.uid);
 			await userDocRef.set({
 				email: userRecord.email,
 				createdAt: new Date().toISOString()
@@ -31,7 +31,7 @@ export const actions: Actions = {
 
 			console.log(`[+page.server.ts] User created and profile stored successfully: ${email}`);
 
-			const customToken = await adminAuth.createCustomToken(userRecord.uid);
+			const customToken = await getAdminAuth().createCustomToken(userRecord.uid);
 
 			// Redirect to the session creation page
 			const redirectUrl = `/auth/session?token=${customToken}`;
@@ -61,14 +61,14 @@ export const actions: Actions = {
 
 		try {
 			console.log(`[+page.server.ts] Attempting to create admin user: ${email}`);
-			const userRecord = await adminAuth.createUser({
+			const userRecord = await getAdminAuth().createUser({
 				email: email.toString(),
 				password: password.toString()
 			});
 
-			await adminAuth.setCustomUserClaims(userRecord.uid, { isAdmin: true });
+			await getAdminAuth().setCustomUserClaims(userRecord.uid, { isAdmin: true });
 
-			const userDocRef = adminDb.collection('users').doc(userRecord.uid);
+			const userDocRef = getAdminDb().collection('users').doc(userRecord.uid);
 			await userDocRef.set({
 				email: userRecord.email,
 				isAdmin: true,
@@ -77,7 +77,7 @@ export const actions: Actions = {
 
 			console.log(`[+page.server.ts] Admin user created and profile stored successfully: ${email}`);
 
-			const customToken = await adminAuth.createCustomToken(userRecord.uid);
+			const customToken = await getAdminAuth().createCustomToken(userRecord.uid);
 
 			const redirectUrl = `/auth/session?token=${customToken}`;
 			redirect(303, redirectUrl);

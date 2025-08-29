@@ -4,8 +4,6 @@
     import { onMount } from 'svelte';
     import { slide } from 'svelte/transition'; // Import slide transition
 
-    console.log('✨ FirstVisitPopup component initialized!');
-
     let showPopup = $state(false); // Initially hide the popup
 
     async function markVisitComplete() {

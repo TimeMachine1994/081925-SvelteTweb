@@ -1,6 +1,6 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { adminDb } from '$lib/server/firebase';
+import { getAdminDb } from '$lib/server/firebase';
 import { Timestamp } from 'firebase-admin/firestore';
 
 export const POST: RequestHandler = async ({ request, locals, params }) => {
@@ -27,7 +27,7 @@ export const POST: RequestHandler = async ({ request, locals, params }) => {
 
 	try {
 		// 2. Verify Ownership
-		const memorialRef = adminDb.collection('memorials').doc(memorialId);
+		const memorialRef = getAdminDb().collection('memorials').doc(memorialId);
 		const memorialSnap = await memorialRef.get();
 
 		if (!memorialSnap.exists || memorialSnap.data()?.creatorUid !== locals.user.uid) {
@@ -47,7 +47,7 @@ export const POST: RequestHandler = async ({ request, locals, params }) => {
 			updatedAt: Timestamp.now()
 		};
 
-		const newInvitationRef = await adminDb.collection('invitations').add(invitationData);
+		const newInvitationRef = await getAdminDb().collection('invitations').add(invitationData);
 		console.log(`✅ Invitation created with ID: ${newInvitationRef.id}`);
 
 		// TODO: In a real application, send an email to the inviteeEmail here.

@@ -1,4 +1,4 @@
-import { adminDb, adminAuth } from '$lib/server/firebase';
+import { getAdminDb, getAdminAuth } from '$lib/server/firebase';
 import { redirect } from '@sveltejs/kit';
 import type { Memorial } from '$lib/types/memorial';
 import type { Invitation } from '$lib/types/invitation';
@@ -15,7 +15,7 @@ export const load = async ({ locals, url }) => {
         locals.user.role = previewRole;
     }
 
-	const memorialsRef = adminDb.collection('memorials');
+	const memorialsRef = getAdminDb().collection('memorials');
 	let query: Query = memorialsRef;
 	let allUsers: { uid: string; email: string; displayName: string; }[] = [];
 
@@ -24,7 +24,7 @@ export const load = async ({ locals, url }) => {
 		// Admin query remains the same
 		query = memorialsRef;
 		try {
-			const listUsersResult = await adminAuth.listUsers();
+			const listUsersResult = await getAdminAuth().listUsers();
 			allUsers = listUsersResult.users.map(userRecord => ({
 				uid: userRecord.uid,
 				email: userRecord.email || '',
@@ -36,7 +36,7 @@ export const load = async ({ locals, url }) => {
 		}
 	} else if (locals.user.role === 'family_member') {
 		console.log(`👪 Family member detected (${locals.user.email}), fetching invited memorials.`);
-		const invitationsRef = adminDb.collection('invitations');
+		const invitationsRef = getAdminDb().collection('invitations');
 		const invitationsSnap = await invitationsRef.where('inviteeEmail', '==', locals.user.email).where('status', '==', 'accepted').get();
 		const memorialIds = invitationsSnap.docs.map(doc => doc.data().memorialId);
 
@@ -48,7 +48,7 @@ export const load = async ({ locals, url }) => {
 		}
 	} else if (locals.user.role === 'viewer') {
 		console.log(`👁️ Viewer detected (${locals.user.uid}), fetching followed memorials.`);
-		const followsSnap = await adminDb.collectionGroup('followers').where('userId', '==', locals.user.uid).get();
+		const followsSnap = await getAdminDb().collectionGroup('followers').where('userId', '==', locals.user.uid).get();
 		const memorialIds = followsSnap.docs.map(doc => doc.ref.parent.parent!.id);
 
 		if (memorialIds.length > 0) {
@@ -74,13 +74,13 @@ export const load = async ({ locals, url }) => {
     const memorialsData = await Promise.all(snapshot.docs.map(async (doc) => {
         const data = doc.data();
 
-        const embedsSnapshot = await adminDb.collection('memorials').doc(doc.id).collection('embeds').get();
+        const embedsSnapshot = await getAdminDb().collection('memorials').doc(doc.id).collection('embeds').get();
         const embeds = embedsSnapshot.docs.map(embedDoc => ({
             id: embedDoc.id,
             ...embedDoc.data()
         })) as Memorial['embeds'];
 
-        const configSnapshot = await adminDb.collection('livestreamConfigurations').where('memorialId', '==', doc.id).limit(1).get();
+        const configSnapshot = await getAdminDb().collection('livestreamConfigurations').where('memorialId', '==', doc.id).limit(1).get();
         let livestreamConfig = null;
         if (!configSnapshot.empty) {
             const configDoc = configSnapshot.docs[0];
@@ -162,7 +162,7 @@ export const load = async ({ locals, url }) => {
     let invitations: Invitation[] = [];
     if (memorialsData.length > 0) {
         const memorialIds = memorialsData.map(m => m.id);
-        const invitationsSnapshot = await adminDb.collection('invitations').where('memorialId', 'in', memorialIds).get();
+        const invitationsSnapshot = await getAdminDb().collection('invitations').where('memorialId', 'in', memorialIds).get();
         invitations = invitationsSnapshot.docs.map(doc => {
             const data = doc.data();
             return {

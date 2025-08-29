@@ -1,6 +1,6 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { adminDb } from '$lib/server/firebase';
+import { getAdminDb } from '$lib/server/firebase';
 import { Timestamp } from 'firebase-admin/firestore';
 
 // Follow a memorial
@@ -16,7 +16,7 @@ export const POST: RequestHandler = async ({ locals, params }) => {
 	const { uid } = locals.user;
 
 	try {
-		const followerRef = adminDb.collection('memorials').doc(memorialId).collection('followers').doc(uid);
+		const followerRef = getAdminDb().collection('memorials').doc(memorialId).collection('followers').doc(uid);
 
 		await followerRef.set({
 			userId: uid,
@@ -45,7 +45,7 @@ export const DELETE: RequestHandler = async ({ locals, params }) => {
 	const { uid } = locals.user;
 
 	try {
-		const followerRef = adminDb.collection('memorials').doc(memorialId).collection('followers').doc(uid);
+		const followerRef = getAdminDb().collection('memorials').doc(memorialId).collection('followers').doc(uid);
 
 		await followerRef.delete();
 

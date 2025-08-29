@@ -590,8 +590,8 @@
 				<div id="appearance-panel" class="panel-content">
 					<!-- Background Color -->
 					<div class="form-group">
-						<label>Background Color</label>
-						<div class="color-grid">
+						<label id="backgroundColorLabel">Background Color</label>
+						<div class="color-grid" aria-labelledby="backgroundColorLabel">
 							{#each BACKGROUND_COLORS as color}
 								<label class="color-option">
 									<input

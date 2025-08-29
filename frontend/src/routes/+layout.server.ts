@@ -1,5 +1,5 @@
 import type { LayoutServerLoad } from './$types';
-import { adminDb } from '$lib/server/firebase';
+import { getAdminDb } from '$lib/server/firebase';
 import type { User } from 'firecms/src/types/user';
 
 export const load: LayoutServerLoad = async ({ locals }) => {
@@ -10,7 +10,7 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 	if (locals.user && showFirstVisitPopup === undefined) {
 		console.log('🔍 No first-visit cookie, checking Firestore for user:', locals.user.uid);
 		try {
-			const userDoc = await adminDb.collection('users').doc(locals.user.uid).get();
+			const userDoc = await getAdminDb().collection('users').doc(locals.user.uid).get();
 			const userData = userDoc.data() as User | undefined;
 			if (userData?.firstTimeMemorialVisit === true) {
 				showFirstVisitPopup = true;

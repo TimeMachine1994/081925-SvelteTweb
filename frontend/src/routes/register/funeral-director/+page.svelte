@@ -70,35 +70,43 @@
 
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 					<div class="md:col-span-2">
-						<label class="block text-sm font-medium mb-1">Location Name</label>
+						<label for="locationName" class="block text-sm font-medium mb-1">Location Name</label>
 						<input
 							type="text"
+							id="locationName"
+							name="locationName"
 							bind:value={locationName}
 							placeholder="Church, funeral home, or venue"
 							class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#D5BA7F] focus:border-[#D5BA7F]" />
 					</div>
 
 					<div class="md:col-span-2">
-						<label class="block text-sm font-medium mb-1">Location Address</label>
+						<label for="locationAddress" class="block text-sm font-medium mb-1">Location Address</label>
 						<input
 							type="text"
+							id="locationAddress"
+							name="locationAddress"
 							bind:value={locationAddress}
 							placeholder="Full address"
 							class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#D5BA7F] focus:border-[#D5BA7F]" />
 					</div>
 
 					<div>
-						<label class="block text-sm font-medium mb-1">Memorial Date</label>
+						<label for="memorialDate" class="block text-sm font-medium mb-1">Memorial Date</label>
 						<input
 							type="date"
+							id="memorialDate"
+							name="memorialDate"
 							bind:value={memorialDate}
 							class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#D5BA7F] focus:border-[#D5BA7F]" />
 					</div>
 
 					<div>
-						<label class="block text-sm font-medium mb-1">Memorial Time</label>
+						<label for="memorialTime" class="block text-sm font-medium mb-1">Memorial Time</label>
 						<input
 							type="time"
+							id="memorialTime"
+							name="memorialTime"
 							bind:value={memorialTime}
 							class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#D5BA7F] focus:border-[#D5BA7F]" />
 					</div>
@@ -114,9 +122,11 @@
 
 				<div class="grid grid-cols-1 gap-6">
 					<div>
-						<label class="block text-sm font-medium mb-1">Loved One's Full Name *</label>
+						<label for="lovedOneName" class="block text-sm font-medium mb-1">Loved One's Full Name *</label>
 						<input
 							type="text"
+							id="lovedOneName"
+							name="lovedOneName"
 							required
 							bind:value={lovedOneName}
 							placeholder="Enter the full name of the deceased"
@@ -124,9 +134,11 @@
 					</div>
 
 					<div>
-						<label class="block text-sm font-medium mb-1">Family Contact Name *</label>
+						<label for="familyContactName" class="block text-sm font-medium mb-1">Family Contact Name *</label>
 						<input
 							type="text"
+							id="familyContactName"
+							name="familyContactName"
 							required
 							bind:value={familyContactName}
 							placeholder="Primary family contact"
@@ -134,9 +146,11 @@
 					</div>
 
 					<div>
-						<label class="block text-sm font-medium mb-1">Family Contact Email *</label>
+						<label for="familyContactEmail" class="block text-sm font-medium mb-1">Family Contact Email *</label>
 						<input
 							type="email"
+							id="familyContactEmail"
+							name="familyContactEmail"
 							required
 							bind:value={familyContactEmail}
 							placeholder="family@example.com"
@@ -144,9 +158,11 @@
 					</div>
 
 					<div>
-						<label class="block text-sm font-medium mb-1">Family Contact Phone *</label>
+						<label for="familyContactPhone" class="block text-sm font-medium mb-1">Family Contact Phone *</label>
 						<input
 							type="tel"
+							id="familyContactPhone"
+							name="familyContactPhone"
 							required
 							bind:value={familyContactPhone}
 							placeholder="(555) 123-4567"
@@ -166,9 +182,11 @@
 
 				<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 					<div>
-						<label class="block text-sm font-medium mb-1">Director Name *</label>
+						<label for="directorName" class="block text-sm font-medium mb-1">Director Name *</label>
 						<input
 							type="text"
+							id="directorName"
+							name="directorName"
 							required
 							bind:value={directorName}
 							placeholder="Your full name"
@@ -176,9 +194,11 @@
 					</div>
 
 					<div>
-						<label class="block text-sm font-medium mb-1">Director Email *</label>
+						<label for="directorEmail" class="block text-sm font-medium mb-1">Director Email *</label>
 						<input
 							type="email"
+							id="directorEmail"
+							name="directorEmail"
 							required
 							bind:value={directorEmail}
 							placeholder="director@funeralhome.com"
@@ -186,23 +206,25 @@
 					</div>
 
 					<div class="md:col-span-1">
-						<label class="block text-sm font-medium mb-1">Contact Preference</label>
-						<div class="flex items-center gap-6 h-[42px]">
+						<label id="contactPreferenceLabel" class="block text-sm font-medium mb-1">Contact Preference</label>
+						<div class="flex items-center gap-6 h-[42px]" aria-labelledby="contactPreferenceLabel">
 							<label class="flex items-center gap-2 cursor-pointer">
-								<input type="radio" value="email" bind:group={contactPreference} class="accent-[#D5BA7F]" />
+								<input type="radio" value="email" name="contactPreference" bind:group={contactPreference} class="accent-[#D5BA7F]" />
 								<span>Email</span>
 							</label>
 							<label class="flex items-center gap-2 cursor-pointer">
-								<input type="radio" value="phone" bind:group={contactPreference} class="accent-[#D5BA7F]" />
+								<input type="radio" value="phone" name="contactPreference" bind:group={contactPreference} class="accent-[#D5BA7F]" />
 								<span>Phone</span>
 							</label>
 						</div>
 					</div>
 
 					<div class="md:col-span-3">
-						<label class="block text-sm font-medium mb-1">Funeral Home Name *</label>
+						<label for="funeralHomeName" class="block text-sm font-medium mb-1">Funeral Home Name *</label>
 						<input
 							type="text"
+							id="funeralHomeName"
+							name="funeralHomeName"
 							required
 							bind:value={funeralHomeName}
 							placeholder="Name of your funeral home"
@@ -219,6 +241,7 @@
 				</div>
 				<textarea
 					rows="4"
+					name="additionalNotes"
 					bind:value={additionalNotes}
 					placeholder="Any special requests, cultural considerations, or additional info..."
 					class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#D5BA7F] focus:border-[#D5BA7F]"></textarea>

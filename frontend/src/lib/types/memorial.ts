@@ -1,4 +1,4 @@
-import type { Timestamp } from 'firebase/firestore';
+import type { Timestamp } from 'firebase-admin/firestore';
 // import type { CloudflareStream } from './livestream'; // Commented out until livestream types are available
 
 export interface Embed {
@@ -16,6 +16,7 @@ export interface Memorial {
 	slug: string;
 	fullSlug: string;
 	createdByUserId: string;
+	creatorUid?: string; // Added for compatibility
 	creatorEmail: string;
 	creatorName: string;
 	directorFullName?: string;

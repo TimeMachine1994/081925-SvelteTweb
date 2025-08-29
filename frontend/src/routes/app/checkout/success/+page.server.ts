@@ -1,4 +1,4 @@
-import { adminDb } from '$lib/server/firebase';
+import { getAdminDb } from '$lib/server/firebase';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { sendReceiptEmail } from '$lib/server/email';
@@ -14,7 +14,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 		throw error(400, 'Missing configuration ID');
 	}
 
-	const configDoc = await adminDb.collection('livestreamConfigurations').doc(configId).get();
+	const configDoc = await getAdminDb().collection('livestreamConfigurations').doc(configId).get();
 
 	if (!configDoc.exists) {
 		throw error(404, 'Configuration not found');

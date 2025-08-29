@@ -1,4 +1,4 @@
-import { adminDb } from '$lib/server/firebase';
+import { getAdminDb } from '$lib/server/firebase';
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
@@ -16,7 +16,7 @@ export const POST: RequestHandler = async ({ locals, cookies }) => {
     try {
         // 1. Update Firestore: Set firstTimeMemorialVisit to false
         console.log(`🔥 [mark-memorial-visit-complete/+server.ts] Updating Firestore for user ${userId}...`);
-        await adminDb.collection('users').doc(userId).update({
+        await getAdminDb().collection('users').doc(userId).update({
             firstTimeMemorialVisit: false
         });
         console.log(`✅ [mark-memorial-visit-complete/+server.ts] Firestore updated: firstTimeMemorialVisit set to false for user ${userId}.`);

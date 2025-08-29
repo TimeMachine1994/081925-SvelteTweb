@@ -357,7 +357,7 @@
 		{/if}
 
 		<!-- 🎮 Tab Navigation -->
-		<nav class="tab-navigation" role="tablist">
+		<nav class="tab-navigation">
 			<button
 				class="tab-btn"
 				class:active={activeTab === 'edit'}

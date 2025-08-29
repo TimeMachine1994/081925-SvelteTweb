@@ -1,4 +1,4 @@
-import { adminDb } from '$lib/server/firebase';
+import { getAdminDb } from '$lib/server/firebase';
 import { error, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
@@ -10,7 +10,7 @@ export const DELETE: RequestHandler = async ({ locals, params }) => {
 
 	const { memorialId, invitationId } = params;
 
-	const memorialRef = adminDb.collection('memorials').doc(memorialId);
+	const memorialRef = getAdminDb().collection('memorials').doc(memorialId);
 	const memorialSnap = await memorialRef.get();
 
 	if (!memorialSnap.exists) {
@@ -21,7 +21,7 @@ export const DELETE: RequestHandler = async ({ locals, params }) => {
 		throw error(403, 'You do not have permission to manage this memorial');
 	}
 
-	await adminDb.collection('invitations').doc(invitationId).delete();
+	await getAdminDb().collection('invitations').doc(invitationId).delete();
 
 	return json({ success: true });
 };
@@ -34,7 +34,7 @@ export const POST: RequestHandler = async ({ locals, params }) => {
 
 	const { memorialId, invitationId } = params;
 
-	const memorialRef = adminDb.collection('memorials').doc(memorialId);
+	const memorialRef = getAdminDb().collection('memorials').doc(memorialId);
 	const memorialSnap = await memorialRef.get();
 
 	if (!memorialSnap.exists) {
@@ -45,7 +45,7 @@ export const POST: RequestHandler = async ({ locals, params }) => {
 		throw error(403, 'You do not have permission to manage this memorial');
 	}
 
-	const invitationRef = adminDb.collection('invitations').doc(invitationId);
+	const invitationRef = getAdminDb().collection('invitations').doc(invitationId);
 	const invitationSnap = await invitationRef.get();
 
 	if (!invitationSnap.exists) {

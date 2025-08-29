@@ -1,6 +1,6 @@
 import { error, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { adminDb } from '$lib/server/firebase';
+import { getAdminDb } from '$lib/server/firebase';
 
 export const POST: RequestHandler = async ({ locals, request, params }) => {
     console.log('Memorial ownership reassignment request received 🚚');
@@ -29,7 +29,7 @@ export const POST: RequestHandler = async ({ locals, request, params }) => {
         }
 
         // 4. Update the creatorUid field in Firestore
-        const memorialRef = adminDb.collection('memorials').doc(memorialId);
+        const memorialRef = getAdminDb().collection('memorials').doc(memorialId);
         
         console.log(`Updating memorial ${memorialId} in Firestore... 📝`);
         await memorialRef.update({

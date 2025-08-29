@@ -295,14 +295,15 @@
 	});
 </script>
 
-<div 
+<div
 	class="slideshow-preview"
 	class:fullscreen={isFullscreen}
 	class:playing={isPlaying}
 	class:loading={isLoading}
 	bind:this={slideshowContainer}
-	role="region"
+	role="img"
 	aria-label="Photo slideshow"
+	aria-roledescription="slideshow"
 	tabindex="0"
 	ontouchstart={handleTouchStart}
 	ontouchend={handleTouchEnd}

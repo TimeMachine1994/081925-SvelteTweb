@@ -96,7 +96,7 @@
 	</header>
 
 	<!-- 🎯 Main Demo Content -->
-	<main class="demo-main">
+	<main class="demo-main" class:with-log={showEventLog}>
 		<div class="editor-container">
 			<SlideshowEditor
 				{memorialId}

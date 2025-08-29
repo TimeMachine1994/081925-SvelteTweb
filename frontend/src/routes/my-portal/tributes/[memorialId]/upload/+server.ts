@@ -1,5 +1,5 @@
 import { error, json } from '@sveltejs/kit';
-import { adminDb, adminStorage } from '$lib/server/firebase';
+import { getAdminDb, getAdminStorage } from '$lib/server/firebase';
 import { getDownloadURL } from 'firebase-admin/storage';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import type { RequestHandler } from './$types';
@@ -35,7 +35,7 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 
 	try {
 		// Step 2: Retrieve memorial document
-		const memorialRef = adminDb.collection('memorials').doc(memorialId);
+		const memorialRef = getAdminDb().collection('memorials').doc(memorialId);
 		const memorialDoc = await memorialRef.get();
 
 		if (!memorialDoc.exists) {
@@ -149,7 +149,7 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 		console.log(`📝 Uploading to path: ${filePath}`);
 
 		// Step 7: Upload to Firebase Storage with metadata
-		const file = adminStorage.bucket().file(filePath);
+		const file = getAdminStorage().bucket().file(filePath);
 		
 		try {
 			console.log('⏳ Starting file upload to Firebase Storage...');
@@ -218,11 +218,11 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 				isAdminUpload: isAdmin
 			};
 			
-			await adminDb.collection('photoUploads').add(auditLog);
+			await getAdminDb().collection('photoUploads').add(auditLog);
 			console.log('📊 Audit log created for successful upload');
 
 			// Step 11: Also log to general audit collection for comprehensive tracking
-			await adminDb.collection('auditLogs').add({
+			await getAdminDb().collection('auditLogs').add({
 				type: 'photo_upload',
 				success: true,
 				userId: userId,
@@ -288,7 +288,7 @@ async function logUploadAttempt(
 	details: string
 ) {
 	try {
-		await adminDb.collection('uploadAttempts').add({
+		await getAdminDb().collection('uploadAttempts').add({
 			memorialId,
 			userId,
 			status,

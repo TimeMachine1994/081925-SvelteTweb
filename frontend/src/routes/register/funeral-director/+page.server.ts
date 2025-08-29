@@ -1,8 +1,9 @@
-import { adminAuth, adminDb } from '$lib/server/firebase';
+import { getAdminAuth, getAdminDb } from '$lib/server/firebase';
 import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import { sendEnhancedRegistrationEmail } from '$lib/server/email';
 import type { EnhancedRegistrationEmailData } from '$lib/server/email';
+import { Timestamp } from 'firebase-admin/firestore'; // Import Timestamp
 import { indexMemorial } from '$lib/server/algolia-indexing';
 import type { Memorial } from '$lib/types/memorial';
 
@@ -102,7 +103,7 @@ export const actions: Actions = {
 		try {
 			// 1. Create user in Firebase Auth using family contact email as primary
 			console.log(`👤 Creating user account with family contact email: ${familyContactEmail}`);
-			const userRecord = await adminAuth.createUser({
+			const userRecord = await getAdminAuth().createUser({
 				email: familyContactEmail, // Use family contact email as primary
 				password,
 				displayName: familyContactName || directorName // Prefer family contact name
@@ -111,7 +112,7 @@ export const actions: Actions = {
 
 			// 2. Set custom claim for owner role
 			console.log('👑 Setting owner role claim...');
-			await adminAuth.setCustomUserClaims(userRecord.uid, { role: 'owner' });
+			await getAdminAuth().setCustomUserClaims(userRecord.uid, { role: 'owner' });
 			console.log(`✅ Custom claim 'owner' set for ${familyContactEmail}`);
 
 			// 3. Create enhanced user profile in Firestore
@@ -122,7 +123,7 @@ export const actions: Actions = {
 				phone: familyContactPhone,
 				funeralHomeName,
 				role: 'owner',
-				createdAt: new Date(),
+				createdAt: Timestamp.fromDate(new Date()),
 				// Enhanced director information
 				directorEmail: directorEmail || null,
 				directorName: directorName,
@@ -131,7 +132,7 @@ export const actions: Actions = {
 				contactPreference: contactPreference as 'phone' | 'email'
 			};
 
-			await adminDb.collection('users').doc(userRecord.uid).set(userProfile);
+			await getAdminDb().collection('users').doc(userRecord.uid).set(userProfile);
 			console.log(`✅ Enhanced user profile created for ${familyContactEmail}`);
 
 			// 4. Create comprehensive memorial with all service details
@@ -171,14 +172,14 @@ export const actions: Actions = {
 				custom_html: null,
 				
 				// Timestamps
-				createdAt: new Date(),
-				updatedAt: new Date(),
+				createdAt: Timestamp.fromDate(new Date()),
+				updatedAt: Timestamp.fromDate(new Date()),
 				
 				// Legacy compatibility
 				creatorUid: userRecord.uid // Keep for backward compatibility
 			};
 
-			const memorialRef = await adminDb.collection('memorials').add(memorialData);
+			const memorialRef = await getAdminDb().collection('memorials').add(memorialData);
 			console.log(`✅ Comprehensive memorial created for ${lovedOneName} with ID: ${memorialRef.id}`);
 			console.log(`🔗 Memorial slug: ${slug}, Full slug: ${fullSlug}`);
 
@@ -209,7 +210,7 @@ export const actions: Actions = {
 
 			// 6. Create a custom token for auto-login
 			console.log('🎟️ Creating custom token for auto-login...');
-			const customToken = await adminAuth.createCustomToken(userRecord.uid);
+			const customToken = await getAdminAuth().createCustomToken(userRecord.uid);
 			console.log(`✅ Custom token created for ${familyContactEmail}`);
 
 			// 7. Redirect to the session creation page with enhanced parameters

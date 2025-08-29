@@ -1,5 +1,6 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { adminDb, adminStorage } from '$lib/server/firebase';
+import { Timestamp } from 'firebase-admin/firestore'; // Import Timestamp
 import type { PageServerLoad, Actions } from './$types';
 import type { Memorial } from '$lib/types/memorial';
 
@@ -23,7 +24,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
     try {
         // Get the memorial document
-        const memorialRef = adminDb.collection('memorials').doc(memorialId);
+        const memorialRef = getAdminDb().collection('memorials').doc(memorialId);
         const memorialDoc = await memorialRef.get();
 
         if (!memorialDoc.exists) {
@@ -45,7 +46,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
         let familyMemberPermissions = null;
         
         console.log('🔍 Edit page: Checking family member status');
-        const familyMemberRef = adminDb
+        const familyMemberRef = getAdminDb()
             .collection('memorials')
             .doc(memorialId)
             .collection('familyMembers')
@@ -163,7 +164,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 async function validateMemorialAccess(memorialId: string, userId: string, requiredPermission?: string) {
     console.log(`🔍 Validating access for memorial ${memorialId} by user ${userId}`);
     
-    const memorialRef = adminDb.collection('memorials').doc(memorialId);
+    const memorialRef = getAdminDb().collection('memorials').doc(memorialId);
     const memorialDoc = await memorialRef.get();
 
     if (!memorialDoc.exists) {
@@ -188,7 +189,7 @@ async function validateMemorialAccess(memorialId: string, userId: string, requir
     // For now, we'll skip admin check in this helper
 
     // Check if user is a family member
-    const familyMemberRef = adminDb
+    const familyMemberRef = getAdminDb()
         .collection('memorials')
         .doc(memorialId)
         .collection('familyMembers')
@@ -284,7 +285,7 @@ export const actions: Actions = {
             // Update the memorial with the new photo order
             await validation.memorialRef!.update({
                 photos: photoOrder,
-                updatedAt: new Date()
+                updatedAt: Timestamp.fromDate(new Date())
             });
 
             console.log(`✅ Photos reordered successfully for memorial ${memorialId} by ${validation.userRole}`);
@@ -345,7 +346,7 @@ export const actions: Actions = {
             // Update the memorial document
             await validation.memorialRef!.update({
                 photos: updatedPhotos,
-                updatedAt: new Date()
+                updatedAt: Timestamp.fromDate(new Date())
             });
 
             console.log(`✅ Photo deleted successfully from memorial ${memorialId} by ${validation.userRole}`);
@@ -354,7 +355,7 @@ export const actions: Actions = {
             // This is commented out for safety - you may want to keep files for recovery
             /*
             try {
-                const bucket = adminStorage.bucket();
+                const bucket = getAdminStorage().bucket();
                 const fileName = photoUrl.split('/').pop()?.split('?')[0]; // Extract filename from URL
                 if (fileName) {
                     const file = bucket.file(`memorials/${memorialId}/${fileName}`);
@@ -444,7 +445,7 @@ export const actions: Actions = {
             // Update the memorial document
             await validation.memorialRef!.update({
                 photoMetadata: updatedMetadata,
-                updatedAt: new Date()
+                updatedAt: Timestamp.fromDate(new Date())
             });
 
             console.log(`✅ Photo metadata updated successfully for memorial ${memorialId} by ${validation.userRole}`);
@@ -517,7 +518,7 @@ export const actions: Actions = {
             // Update the memorial document with slideshow settings
             await validation.memorialRef!.update({
                 slideshowSettings: validatedSettings,
-                updatedAt: new Date()
+                updatedAt: Timestamp.fromDate(new Date())
             });
 
             console.log(`✅ Slideshow settings updated successfully for memorial ${memorialId} by ${validation.userRole}`);
