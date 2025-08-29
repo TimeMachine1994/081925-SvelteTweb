@@ -1,8 +1,10 @@
 <script lang="ts">
-	import BookingForm from './BookingForm.svelte';
 	import Summary from './Summary.svelte';
 	import StripeCheckout from './StripeCheckout.svelte';
 	import TierSelector from './TierSelector.svelte';
+	import ServiceDetailsForm from './ServiceDetailsForm.svelte';
+	import AdditionalServicesForm from './AdditionalServicesForm.svelte';
+	import ProgressBar from './ProgressBar.svelte';
 	import type {
 		CalculatorFormData,
 		Tier,
@@ -24,7 +26,12 @@
 
 	console.log('🧮 Calculator Component Initializing...', { memorialId, data });
 
-	let currentStep = $state<'booking' | 'payment' | 'payNow'>('booking');
+	type Step = 'tier' | 'details' | 'addons' | 'payment';
+
+	let currentStep = $state<Step>('tier');
+	const steps: Step[] = ['tier', 'details', 'addons', 'payment'];
+	let currentStepIndex = $derived(steps.indexOf(currentStep));
+
 	let clientSecret = $state<string | null>(null);
 	let configId = $state<string | null>(null);
 	let selectedTier = $state<Tier>(null);
@@ -67,6 +74,9 @@
 			);
 			if (basePackage) {
 				selectedTier = basePackage.id as Tier;
+			}
+			if (data.config.currentStep) {
+				currentStep = data.config.currentStep;
 			}
 		} else if (data.memorial) {
 			console.log('📝 Pre-filling form with memorial data:', data.memorial);
@@ -305,6 +315,7 @@
 			formDataToSend.append('formData', formDataJson);
 			formDataToSend.append('bookingItems', bookingItemsJson);
 			formDataToSend.append('total', totalString);
+			formDataToSend.append('currentStep', currentStep);
 			if (memorialId) {
 				formDataToSend.append('memorialId', memorialId);
 			}
@@ -399,41 +410,59 @@
 		}
 	}
 
+	function nextStep() {
+		const currentIndex = steps.indexOf(currentStep);
+		if (currentIndex < steps.length - 1) {
+			currentStep = steps[currentIndex + 1];
+		}
+	}
+
+	function prevStep() {
+		const currentIndex = steps.indexOf(currentStep);
+		if (currentIndex > 0) {
+			currentStep = steps[currentIndex - 1];
+		}
+	}
+
 	async function handlePayNow() {
 		console.log('💰 Pay Now button clicked, attempting to save data first...');
 		await saveAndPayLater(true); // Pass a flag to indicate this is part of the "Pay Now" flow
-		currentStep = 'payNow';
+		currentStep = 'payment';
 	}
 </script>
 
+<ProgressBar {currentStepIndex} />
+
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 	<div class="lg:col-span-2 space-y-8">
-		{#if currentStep === 'booking'}
+		{#if currentStep === 'tier'}
 			<TierSelector {selectedTier} on:change={(e) => handleTierChange(e.detail)} />
-			{#if selectedTier}
-				<BookingForm bind:formData />
-			{/if}
-		{:else if currentStep === 'payNow'}
+		{:else if currentStep === 'details'}
+			<ServiceDetailsForm bind:formData />
+		{:else if currentStep === 'addons'}
+			<AdditionalServicesForm bind:formData />
+		{:else if currentStep === 'payment'}
 			{#if memorialId}
 				<StripeCheckout amount={total} {memorialId} lovedOneName={formData.lovedOneName} />
-			{/if}
-		{:else}
-			{#if clientSecret && configId && memorialId}
-				<StripeCheckout
-					amount={total}
-					{memorialId}
-					lovedOneName={formData.lovedOneName}
-				/>
-			{:else}
-				<div class="card p-4 text-center">
-					<p>There was an error preparing the payment form. Please try again.</p>
-					<button class="btn preset-filled-primary mt-4" onclick={() => currentStep = 'booking'}>Go Back</button>
-				</div>
 			{/if}
 		{/if}
 	</div>
 
 	<div class="lg:col-span-1">
-		<Summary {bookingItems} {total} on:save={() => saveAndPayLater()} on:pay={proceedToPayment} on:payNow={handlePayNow} />
+		<Summary
+			{bookingItems}
+			{total}
+			on:save={() => saveAndPayLater()}
+			on:pay={proceedToPayment}
+			on:payNow={handlePayNow}
+		/>
+		<div class="mt-4 flex justify-between">
+			<button class="btn preset-tonal-surface" onclick={prevStep} disabled={currentStepIndex === 0}>
+				Back
+			</button>
+			<button class="btn preset-filled-primary" onclick={nextStep} disabled={currentStepIndex === steps.length - 1}>
+				Next
+			</button>
+		</div>
 	</div>
 </div>

@@ -49,6 +49,7 @@
 				
 				if (data.redirectUrl) {
 					console.log('🚀 Session created successfully. Navigating to:', data.redirectUrl);
+					console.log('Navigating now...');
 					await goto(data.redirectUrl);
 				} else {
 					console.log('⚠️ Session created but no redirectUrl provided. Navigating to /my-portal as fallback.');

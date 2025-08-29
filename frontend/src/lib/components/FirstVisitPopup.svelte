@@ -47,7 +47,8 @@
 
 {#if showPopup}
     <div class="first-visit-popup" transition:slide>
-        <p>🎉 Welcome! This is your first visit to a memorial page. Explore and connect!</p>
+        <p>Tributestream offers our sincerest condolences for your loss. Click here to</p>
+        <a href="/app/calculator" class="cta-button">schedule your livestream.</a>
         <button onclick={markVisitComplete} aria-label="Dismiss welcome message">
             &times;
         </button>
@@ -76,6 +77,20 @@
         margin: 0;
         flex-grow: 1;
         text-align: center;
+    }
+
+    .cta-button {
+        background-color: var(--color-secondary-500);
+        color: var(--color-text-on-secondary);
+        padding: 0.5rem 1rem;
+        border-radius: 0.25rem;
+        text-decoration: none;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    .cta-button:hover {
+        background-color: var(--color-secondary-600);
     }
 
     .first-visit-popup button {

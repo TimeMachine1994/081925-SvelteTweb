@@ -3,6 +3,7 @@ import type { Handle } from '@sveltejs/kit';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	console.log('🔐 Authentication check for:', event.url.pathname);
+	console.log('----------------------------------------------------');
 	
 	const sessionCookie = event.cookies.get('session');
 	console.log('🍪 Session cookie present:', !!sessionCookie);

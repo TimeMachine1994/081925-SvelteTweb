@@ -22,9 +22,9 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		console.log('✅ Session cookie created and set successfully.');
 
 		// Add a small delay to allow for user record propagation in Firebase
-		console.log('⏳ Adding 1.5s delay for Firebase user propagation...');
-		await new Promise((resolve) => setTimeout(resolve, 1500));
-		console.log('✅ Delay complete.');
+		// console.log('⏳ Adding 1.5s delay for Firebase user propagation...');
+		// await new Promise((resolve) => setTimeout(resolve, 1500));
+		// console.log('✅ Delay complete.');
 	} catch (error: any) {
 		console.error('💥 Session cookie creation failed:', error);
 		return json({ message: 'Could not create session cookie.' }, { status: 401 });

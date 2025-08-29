@@ -7,6 +7,7 @@ if (!ALGOLIA_ADMIN_KEY || !PUBLIC_ALGOLIA_APP_ID) {
 }
 
 const client = algoliasearch(PUBLIC_ALGOLIA_APP_ID, ALGOLIA_ADMIN_KEY);
+const index = client.initIndex('memorials');
 
-export { client };
+export { client, index };
 export default client;

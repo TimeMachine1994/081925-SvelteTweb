@@ -5,6 +5,10 @@
   "storage": {
     "rules": "frontend/storage.rules"
   },
+  "functions": {
+    "source": "functions",
+    "runtime": "nodejs18"
+  },
   "hosting": {
     "public": "frontend/build",
     "ignore": [

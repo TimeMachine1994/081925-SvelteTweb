@@ -63,4 +63,5 @@ export interface LivestreamConfig {
 	status: 'saved' | 'pending_payment' | 'paid';
 	createdAt: Timestamp;
 	paymentIntentId?: string;
+	currentStep?: 'tier' | 'details' | 'addons' | 'payment';
 }

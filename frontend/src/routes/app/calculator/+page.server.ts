@@ -12,6 +12,12 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
 	const memorialId = url.searchParams.get('memorialId');
 
+	if (locals.user && locals.user.role !== 'owner') {
+		const memorialId = url.searchParams.get('memorialId');
+		const redirectUrl = `/app/calculator/register${memorialId ? `?memorialId=${memorialId}` : ''}`;
+		redirect(303, redirectUrl);
+	}
+
 	if (locals.user && memorialId) {
 		// First, try to load an existing livestream configuration
 		const configRef = db.collection('livestreamConfigurations').doc(memorialId);
@@ -26,6 +32,9 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 					(configData.createdAt as any) = configData.createdAt.toDate().toISOString();
 				}
 				config = { ...(configData as Omit<LivestreamConfig, 'id'>), id: configSnap.id };
+				if (configData.currentStep) {
+					config.currentStep = configData.currentStep;
+				}
 			}
 		}
 
@@ -87,6 +96,7 @@ export const actions: Actions = {
 			const bookingItemsRaw = data.get('bookingItems') as string;
 			const totalRaw = data.get('total') as string;
 			const memorialId = data.get('memorialId') as string;
+			const currentStep = data.get('currentStep') as string;
 
 			console.log('📊 Raw field data:');
 			console.log('  - formData type:', typeof formDataRaw);
@@ -185,7 +195,8 @@ export const actions: Actions = {
 				userId: locals.user.uid,
 				status: 'saved',
 				createdAt: Timestamp.now(),
-				memorialId: memorialId
+				memorialId: memorialId,
+				currentStep: currentStep
 			};
 			
 			console.log('📄 Document data prepared:');
