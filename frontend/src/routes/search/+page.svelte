@@ -1,45 +1,74 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	console.log('--- Search Page Component Script ---');
 
 	let { data } = $props();
 	const { query, client, indexName } = data;
+	console.log('Received data from load function:', {
+		query,
+		client: client ? 'AlgoliaClient object' : 'null',
+		indexName
+	});
 
 	let searchQuery = $state(query);
 	let searchResults = $state<any[]>([]);
 	let loading = $state(false);
 
+	console.log('Initial component state:', {
+		searchQuery: searchQuery,
+		searchResults: searchResults,
+		loading: loading
+	});
+
 	async function performSearch() {
+		console.log('--- performSearch triggered ---');
+		console.log('Current searchQuery:', searchQuery);
+
 		if (searchQuery.length < 2) {
+			console.log('Search query is less than 2 characters. Clearing results.');
 			searchResults = [];
 			return;
 		}
 
+		console.log('Setting loading to true.');
 		loading = true;
 		try {
-			// Use Algolia v5 API: client.searchSingleIndex()
+			console.log('Performing Algolia search with:', {
+				indexName,
+				query: searchQuery
+			});
 			const response = await client.searchSingleIndex({
 				indexName,
 				searchParams: {
 					query: searchQuery
 				}
 			});
+			console.log('Algolia API response received:', response);
 			
 			searchResults = response.results?.hits || [];
+			console.log('Updated searchResults:', searchResults);
 		} catch (error) {
 			console.error('Error searching Algolia:', error);
-			console.error('Error details:', error);
 		} finally {
+			console.log('Setting loading to false.');
 			loading = false;
 		}
+		console.log('--- performSearch finished ---');
 	}
 
 	$effect(() => {
+		console.log('$effect triggered for searchQuery:', searchQuery);
 		const debounce = setTimeout(() => {
+			console.log('Debounce timer finished. Calling performSearch.');
 			performSearch();
 		}, 300);
 
-		return () => clearTimeout(debounce);
+		return () => {
+			console.log('Clearing debounce timer.');
+			clearTimeout(debounce);
+		};
 	});
+
+	console.log('--- End Search Page Component Script ---');
 </script>
 
 <div class="container mx-auto p-4 md:p-8 lg:p-12">

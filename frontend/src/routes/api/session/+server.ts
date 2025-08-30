@@ -17,7 +17,12 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 	try {
 		console.log('🍪 Attempting to create session cookie...');
 		const sessionCookie = await getAdminAuth().createSessionCookie(idToken, { expiresIn });
-		const options = { maxAge: expiresIn, httpOnly: true, secure: true, path: '/' };
+		const options = {
+			maxAge: expiresIn,
+			httpOnly: true,
+			secure: process.env.NODE_ENV === 'production',
+			path: '/'
+		};
 		cookies.set('session', sessionCookie, options);
 		console.log('✅ Session cookie created and set successfully.');
 

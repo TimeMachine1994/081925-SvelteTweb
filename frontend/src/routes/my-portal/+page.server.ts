@@ -83,7 +83,7 @@ export const load = async ({ locals, url }) => {
         const configSnapshot = await getAdminDb().collection('livestreamConfigurations').where('memorialId', '==', doc.id).limit(1).get();
         let livestreamConfig = null;
         if (!configSnapshot.empty) {
-            const configDoc = configSnapshot.docs[0];
+            const configDoc = configSnapshot.docs;
             const configData = configDoc.data();
             livestreamConfig = {
                 id: configDoc.id,
@@ -136,51 +136,29 @@ export const load = async ({ locals, url }) => {
         return memorial;
     }));
 
-    // Redirection logic for owners without schedule data
-    if (locals.user.role === 'owner' && memorialsData.length > 0) {
-        console.log('🧐 Checking owner memorials for schedule data...');
-        const allMemorialsLackSchedule = memorialsData.every(memorial =>
-            !memorial.livestreamConfig || !memorial.livestreamConfig.bookingItems || memorial.livestreamConfig.bookingItems.length === 0
-        );
+    // // Fetch invitations for the memorials
+    // let invitations: Invitation[] = [];
+    // if (memorialsData.length > 0) {
+    //     const memorialIds = memorialsData.map(m => m.id);
+    //     const invitationsSnapshot = await getAdminDb().collection('invitations').where('memorialId', 'in', memorialIds).get();
+    //     invitations = invitationsSnapshot.docs.map(doc => {
+    //         const data = doc.data();
+    //         return {
+    //                 id: doc.id,
+    //                 ...data,
+    //                 createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : null,
+    //                 updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : null,
+    //         } as Invitation;
+    //     });
+    // }
 
-        if (allMemorialsLackSchedule) {
-            console.log('➡️ All owner memorials lack complete schedule data. Redirecting to calculator page.');
-            // Assuming we want to pass the memorialId of the first memorial found
-            const firstMemorialId = memorialsData[0]?.id;
-            if (firstMemorialId) {
-                throw redirect(303, `/app/calculator/?memorialId=${firstMemorialId}`);
-            } else {
-                // Fallback if for some reason no memorialId is found (shouldn't happen if memorialsData.length > 0)
-                throw redirect(303, '/app/calculator/');
-            }
-        } else {
-            console.log('✅ At least one owner memorial has complete schedule data. No redirection needed.');
-        }
-    }
-
-    // Fetch invitations for the memorials
-    let invitations: Invitation[] = [];
-    if (memorialsData.length > 0) {
-        const memorialIds = memorialsData.map(m => m.id);
-        const invitationsSnapshot = await getAdminDb().collection('invitations').where('memorialId', 'in', memorialIds).get();
-        invitations = invitationsSnapshot.docs.map(doc => {
-            const data = doc.data();
-            return {
-                id: doc.id,
-                ...data,
-                createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : null,
-                updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : null,
-            } as Invitation;
-        });
-    }
-
-    return {
-        user: locals.user,
-        memorials: memorialsData,
-        invitations,
-        allUsers: locals.user.admin ? allUsers : [],
-        previewingRole: previewRole // Pass the preview role to the page
-    };
+    // return {
+    //     user: locals.user,
+    //     memorials: memorialsData,
+    //     invitations,
+    //     allUsers: locals.user.admin ? allUsers : [],
+    //     previewingRole: previewRole // Pass the preview role to the page
+    // };
 };
 
 export const actions = {

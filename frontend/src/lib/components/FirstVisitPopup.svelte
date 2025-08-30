@@ -36,7 +36,7 @@
         const initialDelayTimer = setTimeout(() => {
             console.log('⏰ Initial delay complete, showing popup. It will remain visible until dismissed.');
             showPopup = true;
-        }, 5000); // Appear after 5 seconds
+        }, 3000); // Appear after 3 seconds
 
         return () => {
             console.log('🧹 Clearing initial delay timer.');
@@ -46,13 +46,12 @@
 </script>
 
 {#if showPopup}
-    <div class="first-visit-popup" transition:slide>
-        <p>Tributestream offers our sincerest condolences for your loss. Click here to</p>
-        <a href="/app/calculator" class="cta-button">schedule your livestream.</a>
+    <a href="/app/calculator" class="first-visit-popup" transition:slide>
+        <p>Tributestream offers our sincerest condolences for your loss. Click here to schedule your livestream.</p>
         <button onclick={markVisitComplete} aria-label="Dismiss welcome message">
             &times;
         </button>
-    </div>
+    </a>
 {/if}
 
 <style>
@@ -71,6 +70,7 @@
         z-index: 40;
         width: 100%;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        text-decoration: none;
     }
 
     .first-visit-popup p {
@@ -79,19 +79,6 @@
         text-align: center;
     }
 
-    .cta-button {
-        background-color: var(--color-secondary-500);
-        color: var(--color-text-on-secondary);
-        padding: 0.5rem 1rem;
-        border-radius: 0.25rem;
-        text-decoration: none;
-        font-weight: bold;
-        white-space: nowrap;
-    }
-
-    .cta-button:hover {
-        background-color: var(--color-secondary-600);
-    }
 
     .first-visit-popup button {
         background: none;
