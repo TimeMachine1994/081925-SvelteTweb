@@ -6,32 +6,49 @@
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
 	import FirstVisitPopup from '$lib/components/FirstVisitPopup.svelte'; // Import FirstVisitPopup
 
-	import { user } from '$lib/auth';
+	import { user, initializeAuth } from '$lib/auth';
 	import { page } from '$app/stores';
+	import { browser } from '$app/environment'; // Import browser environment variable
 	import type { LayoutData } from './$types';
 	import type { Snippet } from 'svelte';
 
 	let { children, data }: { children: Snippet; data: LayoutData } = $props();
 
-	$effect(() => {
-		user.set(data.user);
+	// Initialize the client-side auth listener that syncs with the server session
+	initializeAuth();
+
+	// Initialize the user store immediately with server data to prevent hydration mismatch
+	console.log('🔧 Setting user store from layout data:', data.user);
+	user.set(data.user);
+	
+	// Log for debugging (only in browser)
+	if (browser) {
 		console.log('HTML data-mode:', document.documentElement.getAttribute('data-mode'));
-		console.log('✨ Layout data.showFirstVisitPopup:', data.showFirstVisitPopup);
+	}
+	console.log('✨ Layout data.showFirstVisitPopup:', data.showFirstVisitPopup);
+	
+	// Keep the $effect only if we need to react to data changes
+	$effect(() => {
+		console.log('📊 Layout data updated - user:', data.user?.email, 'showFirstVisitPopup:', data.showFirstVisitPopup);
+		user.set(data.user);
 	});
 </script>
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
 	<script>
-		const mode = localStorage.getItem('mode') || 'light';
-		document.documentElement.setAttribute('data-mode', mode);
+		// Ensure this script only runs in the browser
+		if (typeof document !== 'undefined' && typeof localStorage !== 'undefined') {
+			const mode = localStorage.getItem('mode') || 'light';
+			document.documentElement.setAttribute('data-mode', mode);
+		}
 	</script>
 </svelte:head>
 
 <div class="app-container">
 	<Navbar />
 	{#if $page.route.id?.includes('/tributes/[fullSlug]') && data.showFirstVisitPopup}
-		<svelte:component this={FirstVisitPopup} />
+		<svelte:component this={FirstVisitPopup} initialShow={data.showFirstVisitPopup} />
 	{/if}
 	<main
 		class="main-content"

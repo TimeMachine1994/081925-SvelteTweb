@@ -4,13 +4,21 @@
 	import BookingSummary from '$lib/components/calculator/BookingSummary.svelte';
 	import Input from '$lib/components/calculator/Input.svelte';
 	import Toggle from '$lib/components/calculator/Toggle.svelte';
+	import AssignMemorialModal from '$lib/components/calculator/AssignMemorialModal.svelte';
+	import StaticHeader from '$lib/components/calculator/StaticHeader.svelte';
 	import { PACKAGES, EmptyForm } from '$lib/data/calculator';
 	import type { PackageKey, FormState } from '$lib/types/index';
+	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
+	import { goto, invalidateAll } from '$app/navigation';
 
-	let step = $state(1);
-	let selectedPackage = $state<PackageKey | null>(null);
-	let form = $state<FormState>({ ...EmptyForm });
-	let addOns = $state({
+	let { data } = $page;
+
+	let bookingId = $state<string | null>(data.booking?.id || null);
+	let step = $state(data.booking?.step || 1);
+	let selectedPackage = $state<PackageKey | null>(data.booking?.selectedPackage || null);
+	let form = $state<FormState>(data.booking?.formData || { ...EmptyForm });
+	let addOns = $state(data.booking?.addOns || {
 		extraHours: 0,
 		extraDays: 0,
 		editing: false,
@@ -18,6 +26,7 @@
 		extraVideographer: false,
 		extraTech: false
 	});
+	let showAssignModal = $state(false);
 
 	const canNext = $derived.by(() => {
 		if (step === 1) return !!selectedPackage;
@@ -41,31 +50,99 @@
 		selectedPackage = event.detail;
 	}
 
-	function handleSave() {
-		alert('Booking saved! You can return later to complete your payment.');
+	async function handleSave() {
+		console.log('💾 Attempting to save booking...');
+		if (!bookingId) {
+			alert('Cannot save without a booking ID.');
+			return;
+		}
+
+		const bookingState = {
+			formData: form,
+			bookingItems: [], // This will be calculated in a derived state later
+			total: 0, // This will be calculated in a derived state later
+			step,
+			selectedPackage,
+			addOns
+		};
+
+		try {
+			const response = await fetch(`/api/bookings/${bookingId}`, {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(bookingState)
+			});
+
+			if (response.ok) {
+				alert('✅ Booking progress saved!');
+				console.log('✅ Booking saved successfully.');
+			} else {
+				const errorData = await response.json();
+				alert(`❌ Failed to save booking: ${errorData.message || response.statusText}`);
+				console.error('❌ Failed to save booking:', errorData);
+			}
+		} catch (error) {
+			alert('❌ An unexpected error occurred while saving.');
+			console.error('❌ Error saving booking:', error);
+		}
 	}
 
-	function handlePay() {
-		alert('Proceeding to payment. This is a demo.');
+	async function handlePay() {
+		if (!$page.data.user) {
+			goto(`/login?redirectTo=/app/calculator`);
+			return;
+		}
+		showAssignModal = true;
 	}
+
+	async function onMemorialSelect(memorialId: string) {
+		console.log(`✅ Memorial ${memorialId} selected. Finalizing booking...`);
+		showAssignModal = false;
+		// TODO: Implement Stripe payment flow
+		alert(`Demo: Finalizing booking ${bookingId} for memorial ${memorialId}.`);
+	}
+
+	function onMemorialCreate() {
+		goto(`/my-portal/tributes/new?redirectTo=/app/calculator`);
+	}
+
+	onMount(() => {
+		if (!bookingId) {
+			console.log('✨ No booking found from server, creating a new one...');
+			const createNewBooking = async () => {
+				try {
+					const response = await fetch('/api/bookings', { method: 'POST' });
+					if (response.ok) {
+						const { bookingId: newBookingId } = await response.json();
+						if (newBookingId) {
+							// Go to the new URL and invalidate to re-run the load function
+							await goto(`/app/calculator?bookingId=${newBookingId}`, { invalidateAll: true });
+						}
+					} else {
+						console.error('❌ Failed to create a new booking.');
+					}
+				} catch (error) {
+					console.error('❌ Error creating new booking:', error);
+				}
+			};
+			createNewBooking();
+		}
+	});
 </script>
 
+{#if showAssignModal}
+	<AssignMemorialModal
+		memorials={data.memorials || []}
+		onSelect={onMemorialSelect}
+		onCreate={onMemorialCreate}
+		onCancel={() => showAssignModal = false}
+	/>
+{/if}
+
 <div class="min-h-screen bg-gray-50">
-	<header class="border-b bg-white">
-		<div class="mx-auto max-w-6xl px-4 py-5 flex items-center justify-between">
-			<div>
-				<h1 class="text-2xl font-bold">Livestream Calculator</h1>
-				<p class="text-xs text-gray-600">
-					Example implementation applying the Laws of UX while avoiding dark patterns.
-				</p>
-			</div>
-			<div class="flex gap-2">
-				<button class="border rounded-xl px-3 py-2 text-sm">Copy</button>
-				<button class="border rounded-xl px-3 py-2 text-sm">Share</button>
-				<button class="border rounded-xl px-3 py-2 text-sm">Edit</button>
-			</div>
-		</div>
-	</header>
+	<StaticHeader lovedOneName={form.lovedOneName} {bookingId} />
 
 	<main class="mx-auto max-w-6xl px-4 py-6">
 		<Stepper {step} />

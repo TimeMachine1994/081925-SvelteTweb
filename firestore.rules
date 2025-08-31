@@ -102,6 +102,19 @@ service cloud.firestore {
         allow update: if false;
       }
     }
+      
+      // ============================================
+      // 🛒 BOOKING DOCUMENTS (NEW)
+      // ============================================
+      
+      match /bookings/{bookingId} {
+        // Admins can read any booking
+        // Users can read/write their own bookings
+        allow read, write: if isAdmin() || (isSignedIn() && request.auth.uid == resource.data.userId);
+        
+        // Create: any authenticated user can create a booking
+        allow create: if isSignedIn();
+      }
     
     // ============================================
     // ✉️ INVITATION DOCUMENTS
@@ -130,21 +143,21 @@ service cloud.firestore {
     }
     
     // ============================================
-    // 📊 LIVESTREAM CONFIGURATIONS
+    // 📊 LIVESTREAM CONFIGURATIONS (DEPRECATED)
     // ============================================
     
     match /livestreamConfigurations/{configId} {
       // Read: public for memorials that are public, otherwise restricted
-      allow read: if isAdmin() || 
-        (resource.data.memorialId != null && 
+      allow read: if isAdmin() ||
+        (resource.data.memorialId != null &&
           (get(/databases/$(database)/documents/memorials/$(resource.data.memorialId)).data.isPublic == true ||
            canEditMemorial(resource.data.memorialId)));
       
       // Write: only owners and admins
-      allow create, update: if isSignedIn() && 
+      allow create, update: if isSignedIn() &&
         (isAdmin() || isOwner(request.resource.data.memorialId));
       
-      allow delete: if isAdmin() || 
+      allow delete: if isAdmin() ||
         (resource.data.memorialId != null && isOwner(resource.data.memorialId));
     }
     

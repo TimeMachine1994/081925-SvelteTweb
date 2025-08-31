@@ -1,59 +1,57 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { enhance } from '$app/forms';
 	import { page } from '$app/stores';
-	import type { Memorial } from '$lib/types/memorial';
 
-	let { memorial } = $props<{ memorial: Memorial | null }>();
+	let { lovedOneName, bookingId }: { lovedOneName: string; bookingId: string | null } = $props();
 
-	const fullSlug = memorial ? `${memorial.vanitySlug}/${memorial.shortId}` : '';
-	const tributeUrl = `${$page.url.origin}/tributes/${fullSlug}`;
+	let isEditing = $state(false);
+	let newName = $state(lovedOneName);
 
-	async function copyLink() {
-		try {
-			await navigator.clipboard.writeText(tributeUrl);
-			alert('Link copied to clipboard!');
-		} catch (err) {
-			console.error('Failed to copy: ', err);
-			alert('Failed to copy link.');
+	async function handleNameUpdate() {
+		if (!bookingId || newName === lovedOneName) {
+			isEditing = false;
+			return;
 		}
-	}
 
-	function shareLink() {
-		if (navigator.share) {
-			navigator
-				.share({
-					title: `Tribute for ${memorial?.lovedOneName}`,
-					text: `Join us in remembering ${memorial?.lovedOneName}.`,
-					url: tributeUrl
-				})
-				.catch((error) => console.log('Error sharing', error));
+		const formData = new FormData();
+		formData.append('lovedOneName', newName);
+
+		const response = await fetch(`/api/bookings/${bookingId}`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ formData: { lovedOneName: newName } })
+		});
+
+		if (response.ok) {
+			lovedOneName = newName;
+			isEditing = false;
 		} else {
-			// Fallback for browsers that do not support the Web Share API
-			copyLink();
-		}
-	}
-
-	function editLink() {
-		if (memorial) {
-			goto(`/my-portal/tributes/${memorial.id}/edit`);
+			alert('Failed to update name.');
 		}
 	}
 </script>
 
-{#if memorial}
-	<div class="card p-4 mb-8">
-		<div class="flex flex-wrap justify-between items-center gap-4">
-			<div class="flex-1 min-w-[250px]">
-				<p class="font-semibold">Your Tribute Link:</p>
-				<a href={tributeUrl} target="_blank" class="link text-lg break-all">
-					{tributeUrl}
-				</a>
-			</div>
-			<div class="flex gap-2">
-				<button class="btn preset-tonal-surface" onclick={copyLink}>Copy</button>
-				<button class="btn preset-tonal-surface" onclick={shareLink}>Share</button>
-				<button class="btn preset-tonal-surface" onclick={editLink}>Edit</button>
-			</div>
+<header class="border-b bg-white">
+	<div class="mx-auto max-w-6xl px-4 py-5 flex items-center justify-between">
+		<div>
+			<h1 class="text-2xl font-bold">Livestream Calculator</h1>
+			{#if isEditing}
+				<form use:enhance onsubmit={handleNameUpdate}>
+					<input type="text" bind:value={newName} class="border rounded px-2 py-1" />
+					<button type="submit">Save</button>
+					<button type="button" onclick={() => isEditing = false}>Cancel</button>
+				</form>
+			{:else}
+				<p class="text-xs text-gray-600">
+					Tribute Link: /tributes/celebration-of-life-for-{lovedOneName}
+					<button onclick={() => isEditing = true} class="ml-2 text-blue-500">(edit)</button>
+				</p>
+			{/if}
+		</div>
+		<div class="flex gap-2">
+			<button class="border rounded-xl px-3 py-2 text-sm">Copy</button>
+			<button class="border rounded-xl px-3 py-2 text-sm">Share</button>
+			<button class="border rounded-xl px-3 py-2 text-sm">Edit</button>
 		</div>
 	</div>
-{/if}
+</header>

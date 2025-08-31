@@ -1,29 +1,15 @@
 <script lang="ts">
 	import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 	import { auth } from '$lib/firebase';
-	import { goto } from '$app/navigation';
+	import { enhance } from '$app/forms';
+	import type { ActionData } from '../../routes/login/$types';
+
+	let { form, redirectTo, bookingId }: { form: ActionData, redirectTo: string | null, bookingId: string | null } = $props();
 
 	let email = $state('');
 	let password = $state('');
 	let error: string | null = $state(null);
 	let loading = $state(false);
-
-	async function createSession(idToken: string) {
-		const response = await fetch('/api/session', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({ idToken })
-		});
-
-		if (response.ok) {
-			console.log('[Login.svelte] Session created successfully.');
-			goto('/my-portal');
-		} else {
-			throw new Error('Failed to create session.');
-		}
-	}
 
 	async function handleSubmit(event: SubmitEvent) {
 		event.preventDefault();
@@ -40,7 +26,26 @@
 			const idToken = await userCredential.user.getIdToken();
 			console.log('[Login.svelte] Got ID token.');
 
-			await createSession(idToken);
+			// Submit the token to the server-side form action
+			const formData = new FormData();
+			formData.append('idToken', idToken);
+			if (bookingId) {
+				formData.append('bookingId', bookingId);
+			}
+
+			const actionUrl = `/login${redirectTo ? `?redirectTo=${redirectTo}` : ''}`;
+			const response = await fetch(actionUrl, {
+				method: 'POST',
+				body: formData
+			});
+
+			if (response.redirected) {
+				window.location.href = response.url;
+			} else if (!response.ok) {
+				const result = await response.json();
+				error = result.message;
+			}
+
 		} catch (e: any) {
 			error = e.message;
 			console.error('[Login.svelte] An error occurred during login:', e);
@@ -63,7 +68,25 @@
 			const idToken = await userCredential.user.getIdToken();
 			console.log('[Login.svelte] Got ID token from Google sign-in.');
 
-			await createSession(idToken);
+			// Submit the token to the server-side form action
+			const formData = new FormData();
+			formData.append('idToken', idToken);
+			if (bookingId) {
+				formData.append('bookingId', bookingId);
+			}
+
+			const actionUrl = `/login${redirectTo ? `?redirectTo=${redirectTo}` : ''}`;
+			const response = await fetch(actionUrl, {
+				method: 'POST',
+				body: formData
+			});
+
+			if (response.redirected) {
+				window.location.href = response.url;
+			} else if (!response.ok) {
+				const result = await response.json();
+				error = result.message;
+			}
 		} catch (e: any) {
 			error = e.message;
 			console.error('[Login.svelte] An error occurred during Google sign-in:', e);
@@ -86,7 +109,7 @@
 				</p>
 			</header>
 	
-			<form onsubmit={handleSubmit} class="p-10 space-y-6">
+			<form method="POST" action="/login{redirectTo ? `?redirectTo=${redirectTo}` : ''}" onsubmit={handleSubmit} class="p-10 space-y-6">
 				<div class="space-y-4">
 					<div>
 						<label for="email" class="block text-sm font-medium mb-1">Email:</label>

@@ -4,7 +4,14 @@
     import { onMount } from 'svelte';
     import { slide } from 'svelte/transition'; // Import slide transition
 
-    let showPopup = $state(false); // Initially hide the popup
+    // Accept initialShow prop from parent component
+    interface Props {
+        initialShow?: boolean;
+    }
+    let { initialShow = false }: Props = $props();
+
+    // Initialize showPopup with the prop value
+    let showPopup = $state(initialShow);
 
     async function markVisitComplete() {
         console.log('🚀 Marking first visit complete...');
@@ -30,18 +37,26 @@
         }
     }
 
+    // Modified onMount to optionally add delay based on preference
+    // For immediate display when initialShow is true, we can skip the delay
+    // If you still want a delay, uncomment the setTimeout block
     onMount(() => {
-        console.log('⏳ FirstVisitPopup mounted, setting initial delay timer...');
-        // Delay appearance by 5 seconds
-        const initialDelayTimer = setTimeout(() => {
-            console.log('⏰ Initial delay complete, showing popup. It will remain visible until dismissed.');
-            showPopup = true;
-        }, 3000); // Appear after 3 seconds
+        console.log('📢 FirstVisitPopup mounted with initialShow:', initialShow);
+        
+        // Optional: Add delay even when initialShow is true
+        // If you want immediate display, comment out this block
+        if (initialShow && !showPopup) {
+            console.log('⏳ Adding 3-second delay before showing popup...');
+            const initialDelayTimer = setTimeout(() => {
+                console.log('⏰ Delay complete, showing popup.');
+                showPopup = true;
+            }, 3000); // Appear after 3 seconds
 
-        return () => {
-            console.log('🧹 Clearing initial delay timer.');
-            clearTimeout(initialDelayTimer);
-        };
+            return () => {
+                console.log('🧹 Clearing delay timer.');
+                clearTimeout(initialDelayTimer);
+            };
+        }
     });
 </script>
 

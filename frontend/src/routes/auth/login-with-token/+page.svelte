@@ -33,7 +33,7 @@
 				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ idToken, slug })
+				body: JSON.stringify({ token: idToken, slug })
 			});
 
 			console.log('📡 Response from /api/session:', response.status, response.statusText);

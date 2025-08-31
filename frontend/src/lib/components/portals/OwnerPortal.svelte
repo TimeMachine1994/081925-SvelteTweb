@@ -1,24 +1,18 @@
 <script lang="ts">
 	import type { Memorial } from '$lib/types/memorial';
-	import { getPaymentStatus, getDefaultMemorial } from '$lib/utils/payment';
-	import PaymentStatusBadge from '$lib/components/ui/PaymentStatusBadge.svelte';
-	import PayNowButton from '$lib/components/ui/PayNowButton.svelte';
+	import type { Booking } from '$lib/types/booking';
 	import LivestreamScheduleTable from '$lib/components/ui/LivestreamScheduleTable.svelte';
-	import Calculator from '$lib/components/calculator/Calculator.svelte';
 
-	let { memorials }: { memorials: Memorial[] } = $props();
+	let { memorials, bookings }: { memorials: Memorial[], bookings: Booking[] } = $props();
 
-	console.log('👑 OwnerPortal rendering with', memorials.length, 'memorials');
+	console.log('👑 OwnerPortal rendering with', memorials.length, 'memorials and', bookings.length, 'bookings');
 
 	let selectedMemorialId = $state('');
 
 	$effect(() => {
 		if (memorials.length > 0 && !selectedMemorialId) {
-			const defaultMemorial = getDefaultMemorial(memorials);
-			if (defaultMemorial) {
-				selectedMemorialId = defaultMemorial.id;
-				console.log('🎯 Default memorial selected:', defaultMemorial.lovedOneName);
-			}
+			selectedMemorialId = memorials[0].id;
+			console.log('🎯 Default memorial selected:', memorials[0].lovedOneName);
 		}
 	});
 
@@ -26,9 +20,8 @@
 		return memorials.find(m => m.id === selectedMemorialId) || null;
 	});
 
-	const paymentStatus = $derived(() => {
-		const memorial = selectedMemorial();
-		return memorial ? getPaymentStatus(memorial) : 'none';
+	const bookingForSelectedMemorial = $derived(() => {
+		return bookings.find(b => b.memorialId === selectedMemorialId) || null;
 	});
 
 	const memorialUrl = $derived(() => {
@@ -41,17 +34,12 @@
 		return '';
 	});
 
-	let showCalculator = $state(false);
-
-	function toggleCalculator() {
-		showCalculator = !showCalculator;
-	}
+	// Removed showCalculator state and toggleCalculator function as we're linking to the page
 </script>
 
-<div class="mx-auto px-4 py-8 {showCalculator ? 'max-w-6xl' : 'max-w-4xl'}">
+<div class="mx-auto px-4 py-8 max-w-4xl">
 	{#if memorials && memorials.length > 0}
 		{@const currentMemorial = selectedMemorial()}
-		{@const currentPaymentStatus = paymentStatus()}
 
 		{#if currentMemorial}
 			<!-- Loved One's URL Card -->
@@ -73,39 +61,22 @@
 				</button>
 			</div>
 
-			<!-- Payment Status -->
-			<div class="mb-8 text-center">
-				<h3 class="text-xl font-semibold text-gray-900 mb-4">Payment Status</h3>
-				<PaymentStatusBadge status={currentPaymentStatus} />
-			</div>
-
-			<!-- Schedule Now / Calculator Button -->
-			<div class="mb-8 text-center">
-				<button
-					onclick={toggleCalculator}
-					class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
-				>
-					{#if showCalculator}
-						Hide Calculator
-					{:else}
-						Schedule Now / View Calculator
-					{/if}
-				</button>
-			</div>
-
-			{#if showCalculator}
-				<div class="mb-8">
-					<Calculator memorialId={currentMemorial.id} data={{ memorial: currentMemorial, config: currentMemorial.livestreamConfig }} />
-				</div>
-			{/if}
-
 			<!-- Schedule -->
 			<div class="bg-white shadow-lg rounded-lg p-6">
 				<h3 class="text-xl font-semibold text-gray-900 mb-4">Livestream Schedule</h3>
-				{#if currentMemorial.livestreamConfig}
-					<LivestreamScheduleTable memorial={currentMemorial} />
+				{#if bookingForSelectedMemorial()}
+					{@const booking = bookingForSelectedMemorial()}
+					{#if booking}
+						<p>Status: {booking.status}</p>
+						<a href={`/app/calculator?bookingId=${booking.id}`} class="text-purple-600 hover:underline">
+							View or Edit Booking
+						</a>
+					{/if}
 				{:else}
-					<p class="text-gray-600">No livestream schedule available. Please use the calculator to set up a livestream package.</p>
+					<p class="text-gray-600">No livestream schedule available for this memorial.</p>
+					<a href="/app/calculator" class="text-purple-600 hover:underline">
+						Create a new booking
+					</a>
 				{/if}
 			</div>
 		{:else}
