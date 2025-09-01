@@ -61,7 +61,7 @@ export const load = async ({ locals, url }) => {
 		query = memorialsRef.where('creatorUid', '==', locals.user.uid);
 	}
 	
-    const snapshot = await query.get();
+    const snapshot = await query.orderBy('createdAt', 'desc').get();
 
     if (snapshot.empty) {
 		return {
