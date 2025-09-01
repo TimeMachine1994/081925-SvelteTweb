@@ -25,6 +25,9 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 				if (configData.createdAt && typeof configData.createdAt.toDate === 'function') {
 					(configData.createdAt as any) = configData.createdAt.toDate().toISOString();
 				}
+				if (configData.updatedAt && typeof configData.updatedAt.toDate === 'function') {
+					(configData.updatedAt as any) = configData.updatedAt.toDate().toISOString();
+				}
 				config = { ...(configData as Omit<LivestreamConfig, 'id'>), id: configSnap.id };
 			}
 		}

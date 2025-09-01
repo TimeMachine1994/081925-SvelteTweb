@@ -14,7 +14,7 @@
 	import type { Memorial } from '$lib/types/memorial';
 	import { onMount } from 'svelte';
 	import { auth } from '$lib/firebase';
-	import { goto } from '$app/navigation';
+	import { goto } from '$app/navigation'; // Import goto
 
 	let {
 		memorialId,
@@ -24,12 +24,14 @@
 		data: { memorial: Memorial | null; config: LivestreamConfig | null };
 	} = $props();
 
+	console.log('🧮 Calculator Component Initializing...', { memorialId, data });
 
 	type Step = 'tier' | 'details' | 'addons' | 'payment';
 
 	let currentStep = $state<Step>('tier');
 	const steps: Step[] = ['tier', 'details', 'addons', 'payment'];
 	let currentStepIndex = $derived(steps.indexOf(currentStep));
+
 	let clientSecret = $state<string | null>(null);
 	let configId = $state<string | null>(null);
 	let selectedTier = $state<Tier>(null);
@@ -65,10 +67,13 @@
 
 	onMount(() => {
 		if (data.config) {
+			console.log('📝 Pre-filling form with existing config data:', data.config);
 			formData = data.config.formData;
+			console.log('bookingItems:', data.config.bookingItems);
 			const basePackage = data.config.bookingItems.find(
 				(item) => item.package.includes('Tributestream')
 			);
+			console.log('basePackage:', basePackage);
 			if (basePackage) {
 				selectedTier = basePackage.id as Tier;
 			}
@@ -77,10 +82,12 @@
 			}
 			configId = data.config.id;
 		} else if (data.memorial) {
+			console.log('📝 Pre-filling form with memorial data:', data.memorial);
 			formData.lovedOneName = data.memorial.lovedOneName;
 		}
 	});
 
+	$inspect(formData, selectedTier, currentStep, clientSecret, configId);
 
 	// Debounce function
 	function debounce<T extends (...args: any[]) => any>(func: T, wait: number): (...args: Parameters<T>) => void {
@@ -92,7 +99,8 @@
 	}
 
 	async function saveProgress() {
-		if (!memorialId) return;
+		if (!configId) return;
+		console.log('🔄 Autosaving progress...');
 		const payload = {
 			formData,
 			bookingItems,
@@ -101,18 +109,13 @@
 			selectedTier
 		};
 		try {
-			const formDataToSend = new FormData();
-			formDataToSend.append('formData', JSON.stringify(payload.formData));
-			formDataToSend.append('bookingItems', JSON.stringify(payload.bookingItems));
-			formDataToSend.append('total', payload.total.toString());
-			formDataToSend.append('memorialId', memorialId);
-			
-			await fetch('/app/calculator?/saveAndPayLater', {
+			await fetch(`/api/bookings/${configId}/autosave`, {
 				method: 'POST',
-				body: formDataToSend
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(payload)
 			});
 		} catch (error) {
-			// Silent fail for autosave
+			console.error('🔥 Autosave failed:', error);
 		}
 	}
 
@@ -147,6 +150,7 @@
 		// 1. Base Package
 		if (selectedTier) {
 			const price = TIER_PRICES[selectedTier];
+			console.log(`Tier: ${selectedTier}, Price: ${price}`);
 			items.push({
 				id: selectedTier,
 				name: `Tributestream ${selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)}`,
@@ -287,13 +291,16 @@
 			}
 		}
 
+		console.log('📝 Booking items recalculated:', items);
 		return items;
 	});
 
 	let total = $derived(bookingItems.reduce((acc, item) => acc + item.total, 0));
 
+	$inspect(bookingItems, total);
 
 	function handleTierChange(tier: Tier) {
+		console.log('✨ Tier selected:', tier);
 		selectedTier = tier;
 		// Reset relevant parts of the form when tier changes
 		formData.addons = {
@@ -305,38 +312,49 @@
 	}
 
 	async function saveAndPayLater(isPayNowFlow = false) {
-		if (!memorialId) {
+		console.log('🚀 saveAndPayLater function called');
+		if (!configId) {
+			console.error('❌ Cannot save progress without a booking ID.');
 			alert('An error occurred. Please try again.');
 			return;
 		}
 
+		const payload = {
+			formData,
+			bookingItems,
+			total,
+			currentStep
+		};
+
 		try {
-			const formDataToSend = new FormData();
-			formDataToSend.append('formData', JSON.stringify(formData));
-			formDataToSend.append('bookingItems', JSON.stringify(bookingItems));
-			formDataToSend.append('total', total.toString());
-			formDataToSend.append('memorialId', memorialId);
-			
-			const response = await fetch('/app/calculator?/saveAndPayLater', {
+			const response = await fetch(`/api/bookings/${configId}/save-progress`, {
 				method: 'POST',
-				body: formDataToSend
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(payload)
 			});
 
 			if (response.ok) {
+				console.log('✅ Progress saved successfully!');
 				if (!isPayNowFlow) {
 					alert('Your progress has been saved.');
 					goto('/my-portal');
 				}
 			} else {
+				const error = await response.json();
+				console.error('❌ Failed to save progress:', error);
 				alert('Failed to save progress. Please try again.');
 			}
 		} catch (error) {
+			console.error('💥 Error saving progress:', error);
 			alert('An error occurred while saving. Please check your connection and try again.');
 		}
 	}
 
 	async function proceedToPayment() {
+		console.log('💳 Proceeding to payment...');
 		if (!memorialId) {
+			console.error('Memorial ID is required to proceed to payment.');
+			// Optionally, display an error to the user
 			return;
 		}
 		const payload = {
@@ -345,6 +363,8 @@
 			total: total,
 			memorialId: memorialId
 		};
+		console.log('📦 Payload for payment:', payload);
+
 		const response = await fetch('/app/calculator?/continueToPayment', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
@@ -352,11 +372,16 @@
 		});
 
 		const result = await response.json();
+		console.log('💳 Payment initiation response:', result);
 
 		if (result.success) {
+			console.log('✅ Payment initiated successfully!', result);
 			clientSecret = result.clientSecret;
 			configId = result.configId;
 			currentStep = 'payment';
+		} else {
+			console.error('🔥 Failed to initiate payment:', result);
+			// Optionally, display an error to the user
 		}
 	}
 
