@@ -5,33 +5,67 @@
 
 	let { memorials, bookings }: { memorials: Memorial[], bookings: Booking[] } = $props();
 
+	// Enhanced debugging
 	console.log('👑 OwnerPortal rendering with', memorials.length, 'memorials and', bookings.length, 'bookings');
+	console.log('📋 Full memorials data:', memorials);
+	console.log('📋 Full bookings data:', bookings);
+	
+	// Check if memorials is actually an array
+	console.log('🔍 Is memorials an array?', Array.isArray(memorials));
+	console.log('🔍 Type of memorials:', typeof memorials);
+	
+	if (memorials && memorials.length > 0) {
+		console.log('✅ Memorials exist, first memorial:', memorials[0]);
+		console.log('🆔 First memorial ID:', memorials[0].id);
+		console.log('👤 First memorial name:', memorials[0].lovedOneName);
+	} else {
+		console.log('❌ No memorials found or memorials is falsy');
+		console.log('🔍 Memorials value:', memorials);
+	}
 
 	let selectedMemorialId = $state('');
+	console.log('🎯 Initial selectedMemorialId:', selectedMemorialId);
 
 	$effect(() => {
+		console.log('🔄 Effect running - memorials.length:', memorials.length, 'selectedMemorialId:', selectedMemorialId);
 		if (memorials.length > 0 && !selectedMemorialId) {
 			selectedMemorialId = memorials[0].id;
-			console.log('🎯 Default memorial selected:', memorials[0].lovedOneName);
+			console.log('🎯 Default memorial selected:', memorials[0].lovedOneName, 'with ID:', selectedMemorialId);
 		}
 	});
 
 	const selectedMemorial = $derived(() => {
-		return memorials.find(m => m.id === selectedMemorialId) || null;
+		const found = memorials.find(m => m.id === selectedMemorialId) || null;
+		console.log('🔍 selectedMemorial derived - looking for ID:', selectedMemorialId, 'found:', found);
+		return found;
 	});
 
 	const bookingForSelectedMemorial = $derived(() => {
-		return bookings.find(b => b.memorialId === selectedMemorialId) || null;
+		const found = bookings.find(b => b.memorialId === selectedMemorialId) || null;
+		console.log('📅 bookingForSelectedMemorial derived - looking for memorialId:', selectedMemorialId, 'found:', found);
+		return found;
 	});
 
 	const memorialUrl = $derived(() => {
 		const memorial = selectedMemorial();
+		console.log('🌐 memorialUrl derived - memorial:', memorial);
 		if (memorial) {
 			// Assuming memorial.slug is available and forms part of the URL
 			// This needs to be adjusted based on the actual URL structure
-			return `${window.location.origin}/tributes/${memorial.slug}`;
+			const url = `${window.location.origin}/tributes/${memorial.slug}`;
+			console.log('🌐 Generated URL:', url);
+			return url;
 		}
+		console.log('🌐 No memorial, returning empty URL');
 		return '';
+	});
+
+	// Additional debugging for render conditions
+	$effect(() => {
+		console.log('🎨 Render check - memorials:', memorials);
+		console.log('🎨 Render check - memorials.length:', memorials?.length);
+		console.log('🎨 Render check - selectedMemorial():', selectedMemorial());
+		console.log('🎨 Render check - currentMemorial will be:', selectedMemorial());
 	});
 
 	// Removed showCalculator state and toggleCalculator function as we're linking to the page

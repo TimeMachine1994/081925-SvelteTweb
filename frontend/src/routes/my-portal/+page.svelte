@@ -12,6 +12,24 @@
 
 export let data: PageData;
 
+	// Debug logging for data received from server
+	console.log('🏠 My Portal - Full data object:', data);
+	console.log('🏠 My Portal - User:', data.user);
+	console.log('🏠 My Portal - User role:', data.user?.role);
+	console.log('🏠 My Portal - Memorials:', data.memorials);
+	console.log('🏠 My Portal - Memorials length:', data.memorials?.length);
+	console.log('🏠 My Portal - Bookings:', data.bookings);
+	console.log('🏠 My Portal - Preview role:', data.previewingRole);
+	
+	// Check which portal will be rendered
+	$: {
+		if (data.previewingRole === 'owner' || (!data.previewingRole && data.user?.role === 'owner')) {
+			console.log('✅ Will render OwnerPortal');
+			console.log('📦 Passing to OwnerPortal - memorials:', data.memorials);
+			console.log('📦 Passing to OwnerPortal - bookings:', data.bookings || []);
+		}
+	}
+
 	   async function makeAdmin() {
 	       if (!data.user?.email) {
 	           alert('User email not found!');
@@ -73,7 +91,7 @@ export let data: PageData;
     {#if data.previewingRole === 'admin' || (!data.previewingRole && data.user?.admin)}
         <AdminPortal memorials={data.memorials} allUsers={data.allUsers || []} />
     {:else if data.previewingRole === 'owner' || (!data.previewingRole && data.user?.role === 'owner')}
-        <OwnerPortal memorials={data.memorials} invitations={data.invitations || []} />
+        <OwnerPortal memorials={data.memorials} bookings={data.bookings || []} />
     {:else if data.previewingRole === 'funeral_director' || (!data.previewingRole && data.user?.role === 'funeral_director')}
         <FuneralDirectorPortal />
     {:else if data.previewingRole === 'family_member' || (!data.previewingRole && data.user?.role === 'family_member')}

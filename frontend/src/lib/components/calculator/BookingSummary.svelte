@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import { PACKAGES, RATES } from '$lib/data/calculator';
-	import { cn, fmt, slugify } from '$lib/utils/calculator';
+	import { cn, fmt } from '$lib/utils/calculator';
 
 	// Types
 	export type PackageKey = 'solo' | 'live' | 'legacy';
@@ -18,7 +18,10 @@
 	export type FormState = {
 		lovedOneName: string;
 		memorialDate: string;
-		// ... other form fields
+		memorialTime: string;
+		locationName: string;
+		locationAddress: string;
+		website: string;
 	};
 
 	// Props
@@ -75,14 +78,6 @@
 		return { items, total };
 	});
 
-	const tributeLink = $derived(
-		(() => {
-			const tributeSlug = form.lovedOneName ? slugify(form.lovedOneName) : '';
-			return form.lovedOneName && form.memorialDate
-				? `https://tributestream.com/tributes/${tributeSlug}/${form.memorialDate}`
-				: '—';
-		})()
-	);
 </script>
 
 <div class="sticky top-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
@@ -105,10 +100,6 @@
 			<span class="text-sm font-semibold">Total</span>
 			<span class="text-lg font-bold" style="color: #D5BA7F">{fmt(breakdown.total)}</span>
 		</div>
-	</div>
-	<div class="mt-4">
-		<p class="text-xs text-gray-500">Your Tribute Link</p>
-		<p class="text-sm break-all">{tributeLink}</p>
 	</div>
 	<div class="mt-4 flex gap-2">
 		<button

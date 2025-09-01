@@ -25,6 +25,12 @@ export interface Memorial {
 	memorialTime?: string;
 	memorialLocationName?: string;
 	memorialLocationAddress?: string;
+	website?: string; // Added for calculator compatibility
+	
+	// Alias fields for backward compatibility with calculator
+	locationName?: string; // Alias for memorialLocationName
+	locationAddress?: string; // Alias for memorialLocationAddress
+	
 	isPublic: boolean;
 	content: string;
 	custom_html: string | null;
