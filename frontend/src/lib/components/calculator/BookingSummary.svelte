@@ -75,14 +75,7 @@
 		return { items, total };
 	});
 
-	const tributeLink = $derived(
-		(() => {
-			const tributeSlug = form.lovedOneName ? slugify(form.lovedOneName) : '';
-			return form.lovedOneName && form.memorialDate
-				? `https://tributestream.com/tributes/${tributeSlug}/${form.memorialDate}`
-				: '—';
-		})()
-	);
+	 
 </script>
 
 <div class="sticky top-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
@@ -106,10 +99,7 @@
 			<span class="text-lg font-bold" style="color: #D5BA7F">{fmt(breakdown.total)}</span>
 		</div>
 	</div>
-	<div class="mt-4">
-		<p class="text-xs text-gray-500">Your Tribute Link</p>
-		<p class="text-sm break-all">{tributeLink}</p>
-	</div>
+	 
 	<div class="mt-4 flex gap-2">
 		<button
 			class="flex-1 rounded-xl border px-4 py-2 text-sm"
