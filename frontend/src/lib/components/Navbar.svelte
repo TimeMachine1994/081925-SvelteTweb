@@ -30,7 +30,7 @@
 			</li>
 			<li>
 				{#if $user}
-					<a href="/my-portal" class="btn-gold flex items-center gap-2">
+					<a href="/profile" class="btn-gold flex items-center gap-2">
 						<Grid class="w-4 h-4" />My Portal
 					</a>
 				{:else}

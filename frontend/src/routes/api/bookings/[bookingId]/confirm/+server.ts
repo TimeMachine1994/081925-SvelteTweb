@@ -8,14 +8,14 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
     console.log(`🚀 API POST /api/bookings/${params.bookingId}/confirm: Finalizing booking...`);
 
     if (!locals.user) {
-        throw error(401, 'Unauthorized: You must be logged in to confirm a booking.');
+    	throw error(401, 'Unauthorized: You must be logged in to confirm a booking.');
     }
-
+   
     const db = getAdminDb();
-    const bookingRef = db.collection('bookings').doc(params.bookingId);
-
+    const bookingRef = db.collection('users').doc(locals.user.uid).collection('bookings').doc(params.bookingId);
+   
     try {
-        const { memorialId } = await request.json();
+    	const { memorialId } = await request.json();
         if (!memorialId) {
             throw error(400, 'Bad Request: A memorialId is required to confirm a booking.');
         }

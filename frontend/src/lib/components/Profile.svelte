@@ -1,9 +1,12 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { enhance } from '$app/forms';
+	import type { Memorial } from '$lib/types/memorial';
 
 	let { data, form } = $props();
 	let displayName = $state(data.profile?.displayName || '');
+
+	console.log('👨‍💻 Profile component data:', data);
 </script>
 
 {#if data.profile}
@@ -26,6 +29,8 @@
 		<button type="submit">Logout</button>
 	</form>
 
+	<button onclick={() => goto('/contact')}>Contact Support</button>
+
 	{#if data.memorials && data.memorials.length > 0}
 		<h3>Your Tributes</h3>
 		<ul>
@@ -33,6 +38,20 @@
 				<li>
 					<a href="/tributes/{memorial.slug}">{memorial.lovedOneName}</a>
 				</li>
+			{/each}
+		</ul>
+	{/if}
+
+	{#if data.bookings && data.bookings.length > 0}
+		<h3>Your Bookings</h3>
+		<ul>
+			{#each data.bookings as booking}
+				{@const memorial = data.memorials.find((m: Memorial) => m.id === booking.memorialId)}
+				{#if memorial}
+					<li>
+						<a href="/tributes/{memorial.slug}">{memorial.lovedOneName}</a> - Status: {booking.status}
+					</li>
+				{/if}
 			{/each}
 		</ul>
 	{/if}

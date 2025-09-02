@@ -12,7 +12,8 @@
 		}
 	});
 
-	function handleCreateTribute() {
+	function handleCreateTribute(event: Event) {
+		event.preventDefault();
 		console.log('🎯 Creating tribute for:', lovedOneName);
 		const params = new URLSearchParams();
 		if (lovedOneName.trim()) {
@@ -42,27 +43,25 @@
 	<div class="absolute top-0 left-0 w-full h-full bg-black/50 -z-10"></div>
 	<div class="text-center text-white z-10 p-4">
 		<h1 class="text-5xl font-bold mb-6">Tributestream makes hearts full again</h1>
-		<div class="flex flex-col items-center gap-4">
+		<form onsubmit={handleCreateTribute} class="flex flex-col items-center gap-4">
 			<input
 				type="text"
 				placeholder="Enter a name to search or create"
 				class="w-full max-w-md px-4 py-3 rounded-md border border-gray-300 bg-black/70 text-white placeholder-gray-400 text-lg"
 				bind:value={lovedOneName}
-				onkeydown={(e) => {
-					if (e.key === 'Enter') handleCreateTribute();
-				}}
 			/>
 			<div class="flex gap-4">
 				<button
-					class="btn-gold text-lg"
-					onclick={handleCreateTribute}>Create Tribute</button
+					type="submit"
+					class="btn-gold text-lg">Create Tribute</button
 				>
 				<button
+					type="button"
 					class="btn-gold text-lg"
 					onclick={handleSearchTributes}>Search Tributes</button
 				>
 			</div>
-		</div>
+		</form>
 		<p class="mt-8 text-2xl">Call Us To Book Today 407-221-5922</p>
 	</div>
 </div>

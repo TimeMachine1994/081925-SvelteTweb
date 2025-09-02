@@ -9,12 +9,13 @@ import type { CalculatorFormData, BookingItem } from './livestream';
  */
 export interface Booking {
 	id: string;
-	status: 'draft' | 'pending_payment' | 'confirmed' | 'cancelled';
+	status: 'draft' | 'pending_payment' | 'confirmed' | 'cancelled' | 'completed';
 	
 	// Core booking data from the calculator
 	formData: CalculatorFormData;
 	bookingItems: BookingItem[];
 	total: number;
+	step: number; // Add step to track calculator progress
 	
 	// User and Memorial associations
 	userId: string | null; // Null for anonymous users

@@ -2,6 +2,10 @@
 
 import { buildCollection, buildProperty } from "@firecms/core";
 import { Memorial } from "../types/memorial";
+import { livestreamsCollection } from "./livestreams";
+import { invitationsCollection } from "./invitations";
+import { embedsCollection } from "./embeds";
+import { followersCollection } from "./followers";
 
 console.log("🏗️ Initializing Enhanced Memorials Collection Schema");
 
@@ -229,7 +233,13 @@ export const memorialsCollection = buildCollection<Memorial>({
             name: "Legacy Creator UID",
             description: "Legacy field - maps to createdByUserId"
         })
-    }
+    },
+    subcollections: [
+        livestreamsCollection,
+        invitationsCollection,
+        embedsCollection,
+        followersCollection
+    ]
 });
 
 console.log("✅ Enhanced Memorials Collection Schema initialized successfully");

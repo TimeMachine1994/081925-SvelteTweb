@@ -61,7 +61,7 @@
 </script>
 
 {#if showPopup}
-    <a href="/app/calculator" class="first-visit-popup" transition:slide>
+    <a href="/app/book" class="first-visit-popup" transition:slide>
         <p>Tributestream offers our sincerest condolences for your loss. Click here to schedule your livestream.</p>
         <button onclick={markVisitComplete} aria-label="Dismiss welcome message">
             &times;

@@ -1,26 +1,35 @@
-<script lang="ts">
+<script>
 	import { enhance } from '$app/forms';
 	import LiveUrlPreview from '$lib/components/LiveUrlPreview.svelte';
-	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
 
 	console.log('🎯 Loved-One Registration form initializing');
 
-	let { form }: { form?: { error?: any; success?: boolean } } = $props();
+	let { form } = $props();
 
-	// Pre-fill lovedOneName from URL parameter
-	let lovedOneName = $state($page.url.searchParams.get('name') || '');
+	// Pre-fill lovedOneName from URL parameter on client
+	let lovedOneName = $state('');
 	let name = $state('');
 	let email = $state('');
 	let phone = $state('');
 
+	onMount(() => {
+		const url = new URL(window.location.href);
+		const nameFromUrl = url.searchParams.get('name');
+		if (nameFromUrl) {
+			lovedOneName = nameFromUrl;
+			console.log(`📝 Pre-filled loved one's name from URL: ${nameFromUrl}`);
+		}
+	});
+
 	console.log('📝 Form state initialized with runes');
 
 	// Form validation
-	let validationErrors = $state<string[]>([]);
+	let validationErrors = $state([]);
 
 	function validateForm() {
 		console.log('🔍 Validating form...');
-		const errors: string[] = [];
+		const errors = [];
 
 		if (!lovedOneName.trim()) errors.push("Loved one's name is required");
 		if (!name.trim()) errors.push('Your name is required');
@@ -29,7 +38,7 @@
 		// Email validation
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		if (email && !emailRegex.test(email)) {
-			errors.push('Your email must be valid');
+			errors.push('Your email must be a valid address');
 		}
 
 		validationErrors = errors;
@@ -37,7 +46,7 @@
 		return errors.length === 0;
 	}
 
-	function handleSubmit(event: SubmitEvent) {
+	function handleSubmit(event) {
 		console.log('📤 Form submission started');
 		if (!validateForm()) {
 			event.preventDefault();
@@ -70,13 +79,13 @@
 			<!-- MEMORIAL DETAILS -->
 			<section class="bg-gray-50 p-6 rounded-xl shadow-sm space-y-6 md:col-span-2">
 				<div>
-					<h2 class="text-xl font-semibold mb-1 text-[#D5BA7F]">📝 Memorial Details</h2>
-					<p class="text-gray-500 text-sm">Information about the loved one and memorial page creator</p>
+					<h2 class="text-xl font-semibold mb-1 text-gray-700">📝 Memorial Details</h2>
+					<p class="text-gray-500 text-sm">Information about the loved one and the memorial page creator.</p>
 				</div>
 
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 					<div>
-						<label for="lovedOneName" class="block text-sm font-medium mb-1">Loved One's Full Name *</label>
+						<label for="lovedOneName" class="block text-sm font-medium mb-1 text-gray-600">Loved One's Full Name *</label>
 						<input
 							id="lovedOneName"
 							name="lovedOneName"
@@ -84,10 +93,10 @@
 							required
 							bind:value={lovedOneName}
 							placeholder="Enter the full name of the deceased"
-							class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#D5BA7F] focus:border-[#D5BA7F]" />
+							class="w-full border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
 					</div>
 					<div>
-						<label for="name" class="block text-sm font-medium mb-1">Your Name *</label>
+						<label for="name" class="block text-sm font-medium mb-1 text-gray-600">Your Name *</label>
 						<input
 							id="name"
 							name="name"
@@ -95,10 +104,10 @@
 							required
 							bind:value={name}
 							placeholder="Your full name"
-							class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#D5BA7F] focus:border-[#D5BA7F]" />
+							class="w-full border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
 					</div>
 					<div>
-						<label for="email" class="block text-sm font-medium mb-1">Your Email *</label>
+						<label for="email" class="block text-sm font-medium mb-1 text-gray-600">Your Email *</label>
 						<input
 							id="email"
 							name="email"
@@ -106,17 +115,17 @@
 							required
 							bind:value={email}
 							placeholder="your@example.com"
-							class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#D5BA7F] focus:border-[#D5BA7F]" />
+							class="w-full border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
 					</div>
 					<div>
-						<label for="phone" class="block text-sm font-medium mb-1">Your Phone Number</label>
+						<label for="phone" class="block text-sm font-medium mb-1 text-gray-600">Your Phone Number</label>
 						<input
 							id="phone"
 							name="phone"
 							type="tel"
 							bind:value={phone}
 							placeholder="(555) 123-4567"
-							class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#D5BA7F] focus:border-[#D5BA7F]" />
+							class="w-full border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
 					</div>
 				</div>
 			</section>
@@ -141,7 +150,7 @@
 			{/if}
 			{#if form?.success}
 				<div class="md:col-span-2 bg-green-100 border border-green-300 text-green-700 p-4 rounded-lg">
-					✅ Success! Please check your email for login details and memorial setup info.
+					✅ Success! You will be redirected shortly. Please check your email for login details.
 				</div>
 			{/if}
 
@@ -149,11 +158,11 @@
 			<div class="md:col-span-2 text-center space-y-4">
 				<button
 					type="submit"
-					class="bg-[#D5BA7F] hover:bg-[#caa767] text-[#070707] font-semibold px-8 py-3 rounded-lg shadow-md transition">
+					class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-3 rounded-lg shadow-md transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
 					🚀 Create Memorial
 				</button>
 				<p class="text-sm text-gray-500 max-w-prose mx-auto">
-					By submitting this form, you'll create your account and set up the memorial page. Login credentials will be emailed.
+					By submitting this form, you'll create your account and set up the memorial page. Login credentials will be emailed to you.
 				</p>
 			</div>
 		</form>

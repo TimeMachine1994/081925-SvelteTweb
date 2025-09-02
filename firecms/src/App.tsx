@@ -32,6 +32,7 @@ import { getStorage, connectStorageEmulator } from "firebase/storage";
 import { CenteredView } from "@firecms/ui";
 import { usersCollection } from "./collections/users";
 import { memorialsCollection } from "./collections/memorials";
+import { bookingsCollection } from "./collections/bookings";
 
 import { firebaseConfig } from "./firebase_config";
 
@@ -58,8 +59,8 @@ function App() {
     }, []);
 
     const collections = useMemo(() => {
-        console.log("Loading collections into FireCMS:", ["usersCollection", "memorialsCollection"]);
-        return [usersCollection, memorialsCollection];
+        console.log("Loading collections into FireCMS:", ["usersCollection", "memorialsCollection", "bookingsCollection"]);
+        return [usersCollection, memorialsCollection, bookingsCollection];
     }, []);
 
     const {

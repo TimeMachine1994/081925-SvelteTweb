@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 	import { auth } from '$lib/firebase';
-	import { enhance } from '$app/forms';
 	import type { ActionData } from '../../routes/login/$types';
 
 	let { form, redirectTo, bookingId }: { form: ActionData, redirectTo: string | null, bookingId: string | null } = $props();
@@ -33,7 +32,7 @@
 				formData.append('bookingId', bookingId);
 			}
 
-			const actionUrl = `/login${redirectTo ? `?redirectTo=${redirectTo}` : ''}`;
+			const actionUrl = `/login${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ''}`;
 			const response = await fetch(actionUrl, {
 				method: 'POST',
 				body: formData
@@ -75,7 +74,7 @@
 				formData.append('bookingId', bookingId);
 			}
 
-			const actionUrl = `/login${redirectTo ? `?redirectTo=${redirectTo}` : ''}`;
+			const actionUrl = `/login${redirectTo ? `?redirectTo=${encodeURIComponent(redirectTo)}` : ''}`;
 			const response = await fetch(actionUrl, {
 				method: 'POST',
 				body: formData

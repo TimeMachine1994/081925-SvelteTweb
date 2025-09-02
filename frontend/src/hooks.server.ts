@@ -42,16 +42,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 			
 			console.log('✅ User set in event.locals:', event.locals.user);
 
-			// Check for first-time memorial visit cookie
-			const firstVisitCookie = event.cookies.get('first_visit_memorial_popup');
-			if (firstVisitCookie === 'true') {
-				event.locals.showFirstVisitPopup = true;
-				console.log('🍪 First-time memorial visit cookie found, setting event.locals.showFirstVisitPopup to true');
-			} else {
-				event.locals.showFirstVisitPopup = false;
-				console.log('🚫 First-time memorial visit cookie not found or false');
-			}
-			
 		} catch (error) {
 			console.error('❌ Session verification failed:', error);
 			console.error('📍 Error type:', error instanceof Error ? error.constructor.name : typeof error);
@@ -66,18 +56,15 @@ export const handle: Handle = async ({ event, resolve }) => {
 			console.log('🗑️ Invalid session cookie cleared.');
 
 			event.locals.user = null;
-			event.locals.showFirstVisitPopup = false; // Ensure this is false if user is not authenticated
-			console.log('❌ User set to null and showFirstVisitPopup to false due to verification failure');
+			console.log('❌ User set to null due to verification failure');
 		}
 	} else {
 		console.log('🚫 No session cookie found');
 		event.locals.user = null;
-		event.locals.showFirstVisitPopup = false; // Ensure this is false if no session
 	}
 
 	console.log('🏁 Authentication check complete for:', event.url.pathname);
 	console.log('👤 Final user state:', event.locals.user ? 'authenticated' : 'not authenticated');
-	console.log('✨ Final showFirstVisitPopup state:', event.locals.showFirstVisitPopup);
 	
 	return resolve(event);
 };

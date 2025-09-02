@@ -1,7 +1,7 @@
 import { getAdminAuth, getAdminDb } from '$lib/server/firebase';
 import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
-import { sendRegistrationEmail } from '$lib/server/email';
+import { sendEnhancedRegistrationEmail, type EnhancedRegistrationEmailData } from '$lib/server/email';
 import { indexMemorial } from '$lib/server/algolia-indexing';
 import type { Memorial } from '$lib/types/memorial';
 import { Timestamp } from 'firebase-admin/firestore'; // Import Timestamp
@@ -125,9 +125,20 @@ export const actions: Actions = {
 			await indexMemorial({ ...memorialData, id: memorialRef.id } as Memorial);
 
 			// 5. Send registration email
-			// For now, we'll use the simple registration email.
-			// TODO: In the future, we can expand this to use the enhanced email by collecting more data.
-			await sendRegistrationEmail(email, password);
+			console.log(`Preparing enhanced registration email for: ${email}`);
+			const emailData: EnhancedRegistrationEmailData = {
+				email,
+				password,
+				lovedOneName,
+				tributeUrl: `https://tributestream.com/${fullSlug}`,
+				familyContactName: name,
+				familyContactEmail: email,
+				familyContactPhone: phone || '',
+				contactPreference: 'email',
+				directorName: 'N/A',
+				funeralHomeName: 'N/A',
+			};
+			await sendEnhancedRegistrationEmail(emailData);
 
 			// 6. Create a custom token for auto-login
 			const customToken = await getAdminAuth().createCustomToken(userRecord.uid);
@@ -142,8 +153,9 @@ export const actions: Actions = {
 			});
 			console.log('🍪 Set first_visit_memorial_popup cookie to true');
 
-			// 7. Redirect to a client-side page to handle custom token login and session creation
-			const redirectUrl = `/auth/login-with-token?token=${customToken}&slug=${slug}`;
+			// 7. Redirect to the newly created memorial's booking page
+			const redirectUrl = `/app/book/${memorialRef.id}?token=${customToken}`;
+			console.log(`🚀 Redirecting to booking page for new memorial: ${redirectUrl}`);
 			redirect(303, redirectUrl);
 		} catch (error: any) {
 			if (isRedirect(error)) {

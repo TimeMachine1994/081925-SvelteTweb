@@ -179,7 +179,11 @@ export const actions: Actions = {
 				creatorUid: userRecord.uid // Keep for backward compatibility
 			};
 
-			const memorialRef = await getAdminDb().collection('memorials').add(memorialData);
+			const memorialRef = await getAdminDb()
+				.collection('users')
+				.doc(userRecord.uid)
+				.collection('memorials')
+				.add(memorialData);
 			console.log(`✅ Comprehensive memorial created for ${lovedOneName} with ID: ${memorialRef.id}`);
 			console.log(`🔗 Memorial slug: ${slug}, Full slug: ${fullSlug}`);
 

@@ -10,7 +10,7 @@
 
 	function handlePayNow() {
 		console.log('🚀 Redirecting to payment for memorial:', memorial.id);
-		const paymentUrl = `/app/calculator?memorialId=${memorial.id}&lovedOneName=${encodeURIComponent(memorial.lovedOneName)}`;
+		const paymentUrl = `/app/book/${memorial.id}`;
 		window.location.href = paymentUrl;
 	}
 

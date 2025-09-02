@@ -1,5 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
+import { getAdminDb } from '$lib/server/firebase';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	console.log('💰 Pricing page load function triggered.');
@@ -10,15 +11,18 @@ export const load: PageServerLoad = async ({ locals }) => {
 		redirect(302, '/login');
 	}
 
-	// If user is logged in, check their role
-	// Assuming 'owner' role has access to the calculator page
-	if (locals.user.role === 'owner') {
-		console.log('✅ User is an owner. Redirecting to /app/calculator.');
-		redirect(302, '/app/calculator');
+	// If user is logged in, check if they have any memorials
+	const db = getAdminDb();
+	const memorialsRef = db.collection('memorials');
+	const snapshot = await memorialsRef.where('createdByUserId', '==', locals.user.uid).get();
+
+	if (snapshot.empty) {
+		// If the user has no memorials, redirect them to create one
+		console.log('✅ User is an owner but has no memorials. Redirecting to create one.');
+		redirect(302, '/register/loved-one');
 	} else {
-		// For logged-in users who are not owners, redirect to the calculator page as well.
-		// This can be refined later if different behavior is needed for non-owner logged-in users.
-		console.log('ℹ️ User is logged in but not an owner. Redirecting to /app/calculator.');
-		redirect(302, '/app/calculator');
+		// If the user has memorials, redirect to the booking page to select one
+		console.log('✅ User is an owner and has memorials. Redirecting to /app/book.');
+		redirect(302, '/app/book');
 	}
 };

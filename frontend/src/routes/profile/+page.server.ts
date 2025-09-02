@@ -15,12 +15,21 @@ export const load: PageServerLoad = async ({ locals }) => {
         ...doc.data()
     }));
 
+    console.log('🕵️‍♂️ Fetching bookings for user:', locals.user.uid);
+    const bookingsQuery = await getAdminDb().collection('bookings').where('userId', '==', locals.user.uid).get();
+    const bookings = bookingsQuery.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+    }));
+    console.log('✅ Found bookings:', bookings.length);
+
     return {
         profile: {
             email: locals.user.email,
             displayName: profileData?.displayName,
         },
-        memorials
+        memorials,
+        bookings
     };
 };
 

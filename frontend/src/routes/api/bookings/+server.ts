@@ -3,32 +3,22 @@ import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { Timestamp } from 'firebase-admin/firestore';
 import { EmptyForm } from '$lib/data/calculator';
+import type { Memorial } from '$lib/types/memorial';
 
-export const POST: RequestHandler = async ({ locals }) => {
-    console.log('🚀 API POST /api/bookings: Creating new draft booking...');
+// Helper function to generate slug from loved one's name
+function generateSlug(lovedOneName: string): string {
+	console.log('🔗 Generating slug for:', lovedOneName);
+	const slug = `celebration-of-life-for-${lovedOneName
+		.trim()
+		.toLowerCase()
+		.replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+		.replace(/\s+/g, '-') // Replace spaces with hyphens
+		.replace(/-+/g, '-') // Replace multiple hyphens with single
+		.replace(/^-|-$/g, '')}` // Remove leading/trailing hyphens
+		.substring(0, 100); // Limit length
+	console.log('🔗 Generated slug:', slug);
+	return slug;
+}
 
-    const db = getAdminDb();
-    const bookingsRef = db.collection('bookings');
-
-    try {
-        const newBooking = {
-            status: 'draft',
-            formData: EmptyForm,
-            bookingItems: [],
-            total: 0,
-            userId: locals.user?.uid || null,
-            memorialId: null,
-            createdAt: Timestamp.now(),
-            updatedAt: Timestamp.now()
-        };
-
-        const docRef = await bookingsRef.add(newBooking);
-        console.log(`✅ Draft booking created successfully with ID: ${docRef.id}`);
-
-        return json({ success: true, bookingId: docRef.id });
-
-    } catch (e) {
-        console.error('❌ API POST /api/bookings: Error creating draft booking', e);
-        throw error(500, 'Could not create a new booking.');
-    }
-};
+// The POST handler has been removed to prevent the creation of draft bookings from the calculator.
+// A memorial is already created upon user registration, so this functionality is redundant.

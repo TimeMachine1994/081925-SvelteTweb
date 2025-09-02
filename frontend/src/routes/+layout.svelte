@@ -4,8 +4,6 @@
 	import Navbar from '$lib/components/Navbar.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
-	import FirstVisitPopup from '$lib/components/FirstVisitPopup.svelte'; // Import FirstVisitPopup
-
 	import { user, initializeAuth } from '$lib/auth';
 	import { page } from '$app/stores';
 	import { browser } from '$app/environment'; // Import browser environment variable
@@ -25,11 +23,10 @@
 	if (browser) {
 		console.log('HTML data-mode:', document.documentElement.getAttribute('data-mode'));
 	}
-	console.log('✨ Layout data.showFirstVisitPopup:', data.showFirstVisitPopup);
 	
 	// Keep the $effect only if we need to react to data changes
 	$effect(() => {
-		console.log('📊 Layout data updated - user:', data.user?.email, 'showFirstVisitPopup:', data.showFirstVisitPopup);
+		console.log('📊 Layout data updated - user:', data.user?.email);
 		user.set(data.user);
 	});
 </script>
@@ -47,12 +44,9 @@
 
 <div class="app-container">
 	<Navbar />
-	{#if $page.route.id?.includes('/tributes/[fullSlug]') && data.showFirstVisitPopup}
-		<svelte:component this={FirstVisitPopup} initialShow={data.showFirstVisitPopup} />
-	{/if}
 	<main
 		class="main-content"
-		class:full-width={$page.route.id?.includes('/app/calculator')}
+		class:full-width={$page.route.id?.includes('/app/book')}
 		class:homepage={$page.route.id === '/'}
 	>
 		{@render children?.()}
