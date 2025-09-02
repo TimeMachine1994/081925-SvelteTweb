@@ -1,11 +1,12 @@
 <script lang="ts">
 	import PhotoGallery from '$lib/components/PhotoGallery.svelte';
 	import FakeVideoPlayer from '$lib/components/FakeVideoPlayer.svelte';
+	import FirstVisitPopup from '$lib/components/FirstVisitPopup.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
-	const { memorial, user, isOwner, isFollowing: initialIsFollowing } = data;
+	const { memorial, user, isOwner, isFollowing: initialIsFollowing, showFirstVisitPopup } = data;
 
 	let isFollowing = $state(initialIsFollowing);
 
@@ -26,6 +27,9 @@
 	}
 </script>
 
+{#if showFirstVisitPopup && user}
+	<FirstVisitPopup />
+{/if}
 <div class="tribute-page">
 	<header style={memorial.imageUrl ? `background-image: url(${memorial.imageUrl})` : ''}>
 		<div class="header-content">

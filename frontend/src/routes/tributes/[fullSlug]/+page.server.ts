@@ -25,18 +25,33 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
     let isOwner = false;
     let isFollowing = false;
+    let showFirstVisitPopup = false;
 
     if (locals.user) {
         isOwner = locals.user.uid === memorial.createdByUserId;
 
         const followerDoc = await getAdminDb().collection('memorials').doc(memorial.id).collection('followers').doc(locals.user.uid).get();
         isFollowing = followerDoc.exists;
+
+        const userDoc = await getAdminDb().collection('users').doc(locals.user.uid).get();
+        if (userDoc.exists) {
+            const userData = userDoc.data();
+            if (userData && userData.visitedMemorials && userData.visitedMemorials.includes(memorial.id)) {
+                showFirstVisitPopup = false;
+            } else {
+                showFirstVisitPopup = true;
+            }
+        } else {
+            // If a user doc doesn't exist, it's their first visit to any memorial.
+            showFirstVisitPopup = true;
+        }
     }
 
     return {
         memorial,
         user: locals.user,
         isOwner,
-        isFollowing
+        isFollowing,
+        showFirstVisitPopup
     };
 };
