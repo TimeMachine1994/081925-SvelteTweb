@@ -1,0 +1,193 @@
+[debug] [2025-09-02T10:21:03.467Z] ----------------------------------------------------------------------
+[debug] [2025-09-02T10:21:03.476Z] Command:       /home/austin/.nvm/versions/node/v22.16.0/bin/node /home/austin/.nvm/versions/node/v22.16.0/bin/firebase emulators:start
+[debug] [2025-09-02T10:21:03.478Z] CLI Version:   14.15.1
+[debug] [2025-09-02T10:21:03.479Z] Platform:      linux
+[debug] [2025-09-02T10:21:03.479Z] Node Version:  v22.16.0
+[debug] [2025-09-02T10:21:03.483Z] Time:          Tue Sep 02 2025 06:21:03 GMT-0400 (Eastern Daylight Time)
+[debug] [2025-09-02T10:21:03.484Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-09-02T10:21:03.494Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2025-09-02T10:21:04.886Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-09-02T10:21:04.887Z] > authorizing via signed-in user (austinbryanfilm@gmail.com)
+[debug] [2025-09-02T10:21:05.054Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2025-09-02T10:21:05.056Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[debug] [2025-09-02T10:21:05.309Z] openjdk version "11.0.28" 2025-07-15
+[debug] [2025-09-02T10:21:05.311Z] 
+OpenJDK Runtime Environment (build 11.0.28+6-post-Ubuntu-1ubuntu122.04.1)
+OpenJDK 64-Bit Server VM (build 11.0.28+6-post-Ubuntu-1ubuntu122.04.1, mixed mode, sharing)
+
+[debug] [2025-09-02T10:21:05.320Z] Parsed Java major version: 11
+[info] i  emulators: Starting emulators: auth, functions, firestore, hosting, storage, extensions {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth, functions, firestore, hosting, storage, extensions"}}
+[debug] [2025-09-02T10:21:05.327Z] Checked if tokens are valid: false, expires at: 1756690654219
+[debug] [2025-09-02T10:21:05.327Z] Checked if tokens are valid: false, expires at: 1756690654219
+[debug] [2025-09-02T10:21:05.328Z] > refreshing access token with scopes: []
+[debug] [2025-09-02T10:21:05.331Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-09-02T10:21:05.331Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-09-02T10:21:05.476Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-09-02T10:21:05.476Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-09-02T10:21:05.498Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/fir-tweb [none]
+[debug] [2025-09-02T10:21:05.761Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/fir-tweb 200
+[debug] [2025-09-02T10:21:05.761Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/fir-tweb {"projectNumber":"509455146790","projectId":"fir-tweb","lifecycleState":"ACTIVE","name":"firebaseTweb","labels":{"firebase":"enabled","firebase-core":"disabled"},"createTime":"2025-05-23T20:30:55.850523Z"}
+[debug] [2025-09-02T10:21:05.775Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"firestore":[{"address":"127.0.0.1","family":"IPv4","port":8080}],"firestore.websocket":[{"address":"127.0.0.1","family":"IPv4","port":9150}],"hosting":[{"address":"127.0.0.1","family":"IPv4","port":5000}],"storage":[{"address":"127.0.0.1","family":"IPv4","port":9199}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[warn] ⚠  emulators: It seems that you are running multiple instances of the emulator suite for project fir-tweb. This may result in unexpected behavior. 
+[debug] [2025-09-02T10:21:05.798Z] [hub] writing locator at /tmp/hub-fir-tweb.json
+[debug] [2025-09-02T10:21:05.818Z] [Extensions] Started Extensions emulator, this is a noop.
+[debug] [2025-09-02T10:21:05.821Z] late-assigned ports for functions and eventarc emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"firestore":[{"address":"127.0.0.1","family":"IPv4","port":8080}],"firestore.websocket":[{"address":"127.0.0.1","family":"IPv4","port":9150}],"hosting":[{"address":"127.0.0.1","family":"IPv4","port":5000}],"storage":[{"address":"127.0.0.1","family":"IPv4","port":9199}],"functions":[{"address":"127.0.0.1","family":"IPv4","port":5001}],"eventarc":[{"address":"127.0.0.1","family":"IPv4","port":9299}],"tasks":[{"address":"127.0.0.1","family":"IPv4","port":9499}]},"metadata":{"message":"late-assigned ports for functions and eventarc emulators"}}
+[warn] ⚠  functions: The following emulators are not running, calls to these services from the Functions emulator will affect production: apphosting, database, pubsub, dataconnect {"metadata":{"emulator":{"name":"functions"},"message":"The following emulators are not running, calls to these services from the Functions emulator will affect production: \u001b[1mapphosting, database, pubsub, dataconnect\u001b[22m"}}
+[warn] ⚠  functions: Application Default Credentials detected. Non-emulated services will access production using these credentials. Be careful! {"metadata":{"emulator":{"name":"functions"},"message":"Application Default Credentials detected. Non-emulated services will access production using these credentials. Be careful!"}}
+[debug] [2025-09-02T10:21:09.846Z] Checked if tokens are valid: true, expires at: 1756812064477
+[debug] [2025-09-02T10:21:09.846Z] Checked if tokens are valid: true, expires at: 1756812064477
+[debug] [2025-09-02T10:21:09.847Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/adminSdkConfig [none]
+[debug] [2025-09-02T10:21:10.677Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/adminSdkConfig 200
+[debug] [2025-09-02T10:21:10.677Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/adminSdkConfig {"projectId":"fir-tweb","storageBucket":"fir-tweb.firebasestorage.app"}
+[debug] [2025-09-02T10:21:10.732Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2025-09-02T10:21:10.732Z] Ignoring unsupported arg: single_project_mode_error {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: single_project_mode_error"}}
+[debug] [2025-09-02T10:21:10.732Z] Starting Firestore Emulator with command {"binary":"java","args":["-Djava.net.preferIPv4Stack=true","-Dgoogle.cloud_firestore.debug_log_level=FINE","-Duser.language=en","-jar","/home/austin/.cache/firebase/emulators/cloud-firestore-emulator-v1.19.8.jar","--host","127.0.0.1","--port",8080,"--websocket_port",9150,"--project_id","fir-tweb","--rules","/home/austin/081925-SvelteTweb/firestore.rules","--single_project_mode",true,"--functions_emulator","127.0.0.1:5001"],"optionalArgs":["port","webchannel_port","host","rules","websocket_port","functions_emulator","seed_from_export","project_id","single_project_mode"],"joinArgs":false,"shell":false,"port":8080} {"metadata":{"emulator":{"name":"firestore"},"message":"Starting Firestore Emulator with command {\"binary\":\"java\",\"args\":[\"-Djava.net.preferIPv4Stack=true\",\"-Dgoogle.cloud_firestore.debug_log_level=FINE\",\"-Duser.language=en\",\"-jar\",\"/home/austin/.cache/firebase/emulators/cloud-firestore-emulator-v1.19.8.jar\",\"--host\",\"127.0.0.1\",\"--port\",8080,\"--websocket_port\",9150,\"--project_id\",\"fir-tweb\",\"--rules\",\"/home/austin/081925-SvelteTweb/firestore.rules\",\"--single_project_mode\",true,\"--functions_emulator\",\"127.0.0.1:5001\"],\"optionalArgs\":[\"port\",\"webchannel_port\",\"host\",\"rules\",\"websocket_port\",\"functions_emulator\",\"seed_from_export\",\"project_id\",\"single_project_mode\"],\"joinArgs\":false,\"shell\":false,\"port\":8080}"}}
+[info] i  firestore: Firestore Emulator logging to firestore-debug.log {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator logging to \u001b[1mfirestore-debug.log\u001b[22m"}}
+[debug] [2025-09-02T10:21:14.662Z] Sep 02, 2025 6:21:14 AM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketServer start
+INFO: Started WebSocket server on ws://127.0.0.1:9150
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 02, 2025 6:21:14 AM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketServer start\nINFO: Started WebSocket server on ws://127.0.0.1:9150\n"}}
+[debug] [2025-09-02T10:21:14.795Z] API endpoint: http:// {"metadata":{"emulator":{"name":"firestore"},"message":"API endpoint: http://"}}
+[debug] [2025-09-02T10:21:14.796Z] 127.0.0.1:8080
+If you are using a library that supports the FIRESTORE_EMULATOR_HOST environment variable, run:
+
+   export FIRESTORE_EMULATOR_HOST=127.0.0.1:8080
+
+If you are running a Firestore in Datastore Mode project, run:
+
+   export DATASTORE_EMULATOR_HOST=127.0.0.1:8080
+
+Note: Support for Datastore Mode is in preview. If you encounter any bugs please file at https://github.com/firebase/firebase-tools/issues.
+Dev App Server is now running.
+
+ {"metadata":{"emulator":{"name":"firestore"},"message":"127.0.0.1:8080\nIf you are using a library that supports the FIRESTORE_EMULATOR_HOST environment variable, run:\n\n   export FIRESTORE_EMULATOR_HOST=127.0.0.1:8080\n\nIf you are running a Firestore in Datastore Mode project, run:\n\n   export DATASTORE_EMULATOR_HOST=127.0.0.1:8080\n\nNote: Support for Datastore Mode is in preview. If you encounter any bugs please file at https://github.com/firebase/firebase-tools/issues.\nDev App Server is now running.\n\n"}}
+[info] ✔  firestore: Firestore Emulator UI websocket is running on 9150. {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator UI websocket is running on 9150."}}
+[debug] [2025-09-02T10:21:34.253Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"storage"},"message":"Ignoring unsupported arg: port"}}
+[debug] [2025-09-02T10:21:38.217Z] Temp file directory for storage emulator: /tmp/firebase/storage/blobs {"metadata":{"emulator":{"name":"storage"},"message":"Temp file directory for storage emulator: /tmp/firebase/storage/blobs"}}
+[debug] [2025-09-02T10:21:38.228Z] Checked if tokens are valid: true, expires at: 1756812064477
+[debug] [2025-09-02T10:21:38.229Z] Checked if tokens are valid: true, expires at: 1756812064477
+[debug] [2025-09-02T10:21:38.229Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/fir-tweb/sites 
+[debug] [2025-09-02T10:21:38.724Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/fir-tweb/sites 200
+[debug] [2025-09-02T10:21:38.725Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/fir-tweb/sites {"sites":[{"name":"projects/fir-tweb/sites/fir-tweb","defaultUrl":"https://fir-tweb.web.app","appId":"1:509455146790:web:7ec99527214b05d7b9ebe7","type":"DEFAULT_SITE"}]}
+[debug] [2025-09-02T10:21:38.726Z] Checked if tokens are valid: true, expires at: 1756812064477
+[debug] [2025-09-02T10:21:38.726Z] Checked if tokens are valid: true, expires at: 1756812064477
+[debug] [2025-09-02T10:21:38.726Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/webApps/1:509455146790:web:7ec99527214b05d7b9ebe7/config [none]
+[debug] [2025-09-02T10:21:39.118Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/webApps/1:509455146790:web:7ec99527214b05d7b9ebe7/config 200
+[debug] [2025-09-02T10:21:39.119Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/webApps/1:509455146790:web:7ec99527214b05d7b9ebe7/config {"projectId":"fir-tweb","appId":"1:509455146790:web:7ec99527214b05d7b9ebe7","storageBucket":"fir-tweb.firebasestorage.app","apiKey":"AIzaSyAXmTxzYRc-LhMEW75nZjjjQCZov1gpiw0","authDomain":"fir-tweb.firebaseapp.com","messagingSenderId":"509455146790","measurementId":"G-NLY7K5GGYQ"}
+[debug] [2025-09-02T10:21:39.136Z] Checked if tokens are valid: true, expires at: 1756812064477
+[debug] [2025-09-02T10:21:39.136Z] Checked if tokens are valid: true, expires at: 1756812064477
+[debug] [2025-09-02T10:21:39.137Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb [none]
+[debug] [2025-09-02T10:21:39.375Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb 200
+[debug] [2025-09-02T10:21:39.375Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb {"projectId":"fir-tweb","projectNumber":"509455146790","displayName":"firebaseTweb","name":"projects/fir-tweb","resources":{"hostingSite":"fir-tweb"},"state":"ACTIVE","etag":"1_480c196a-109a-4962-8b79-15e5c5484700"}
+[debug] [2025-09-02T10:21:39.376Z] Specified "public" directory "frontend/build" does not exist; Deploy to Hosting site "fir-tweb" may fail or be empty.
+[info] i  hosting[fir-tweb]: Serving hosting files from: frontend/build {"metadata":{"emulator":{"name":"hosting"},"message":"Serving hosting files from: \u001b[1mfrontend/build\u001b[22m"}}
+[info] ✔  hosting[fir-tweb]: Local server: http://127.0.0.1:5000 {"metadata":{"emulator":{"name":"hosting"},"message":"Local server: \u001b[4m\u001b[1mhttp://127.0.0.1:5000\u001b[22m\u001b[24m"}}
+[debug] [2025-09-02T10:21:39.405Z] [Extensions] Connecting Extensions emulator, this is a noop.
+[info] i  functions: Watching "/home/austin/081925-SvelteTweb/functions" for Cloud Functions... {"metadata":{"emulator":{"name":"functions"},"message":"Watching \"/home/austin/081925-SvelteTweb/functions\" for Cloud Functions..."}}
+[debug] [2025-09-02T10:21:39.413Z] Validating nodejs source
+[debug] [2025-09-02T10:21:40.648Z] > [functions] package.json contents: {
+  "name": "tributestream-functions",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log"
+  },
+  "dependencies": {
+    "algoliasearch": "^4.20.0",
+    "firebase-admin": "^11.11.1",
+    "firebase-functions": "^6.4.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
+[debug] [2025-09-02T10:21:40.648Z] Building nodejs source
+[debug] [2025-09-02T10:21:40.649Z] Failed to find version of module node: reached end of search path /home/austin/081925-SvelteTweb/functions/node_modules
+[warn] ⚠  functions: Your requested "node" version "18" doesn't match your global version "22". Using node@22 from host. 
+[info] i  functions: Loaded environment variables from .env.fir-tweb. 
+[debug] [2025-09-02T10:21:40.657Z] Could not find functions.yaml. Must use http discovery
+[debug] [2025-09-02T10:21:40.663Z] Found firebase-functions binary at '/home/austin/081925-SvelteTweb/functions/node_modules/.bin/firebase-functions'
+[info] Serving at port 8798
+
+[error] {"severity":"WARNING","message":"params.ALGOLIA_APP_ID.value() invoked during function deployment, instead of during runtime."}
+
+[error] {"severity":"WARNING","message":"This is usually a mistake. In configs, use Params directly without calling .value()."}
+
+[error] {"severity":"WARNING","message":"example: { memory: memoryParam } not { memory: memoryParam.value() }"}
+
+[error] {"severity":"WARNING","message":"params.ALGOLIA_API_KEY.value() invoked during function deployment, instead of during runtime."}
+
+[error] {"severity":"WARNING","message":"This is usually a mistake. In configs, use Params directly without calling .value()."}
+{"severity":"WARNING","message":"example: { memory: memoryParam } not { memory: memoryParam.value() }"}
+
+[error] {"severity":"WARNING","message":"params.ALGOLIA_INDEX_NAME.value() invoked during function deployment, instead of during runtime."}
+
+[error] {"severity":"WARNING","message":"This is usually a mistake. In configs, use Params directly without calling .value()."}
+
+[error] {"severity":"WARNING","message":"example: { memory: memoryParam } not { memory: memoryParam.value() }"}
+
+[debug] [2025-09-02T10:21:41.709Z] Got response from /__/functions.yaml {"endpoints":{"onMemorialCreated":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.created","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"memorials/{memorialId}"},"retry":false},"entryPoint":"onMemorialCreated"},"onMemorialUpdated":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.updated","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"memorials/{memorialId}"},"retry":false},"entryPoint":"onMemorialUpdated"},"onMemorialDeleted":{"availableMemoryMb":null,"timeoutSeconds":null,"minInstances":null,"maxInstances":null,"ingressSettings":null,"concurrency":null,"serviceAccountEmail":null,"vpc":null,"platform":"gcfv2","labels":{},"eventTrigger":{"eventType":"google.cloud.firestore.document.v1.deleted","eventFilters":{"database":"(default)","namespace":"(default)"},"eventFilterPathPatterns":{"document":"memorials/{memorialId}"},"retry":false},"entryPoint":"onMemorialDeleted"}},"specVersion":"v1alpha1","requiredAPIs":[],"extensions":{},"params":[{"name":"ALGOLIA_APP_ID","type":"string"},{"name":"ALGOLIA_API_KEY","type":"string"},{"name":"ALGOLIA_INDEX_NAME","type":"string","default":"memorials"}]}
+[warn] ⚠  functions: Application Default Credentials detected. Non-emulated services will access production using these credentials. Be careful! {"metadata":{"emulator":{"name":"functions"},"message":"Application Default Credentials detected. Non-emulated services will access production using these credentials. Be careful!"}}
+[info] ✔  functions: Loaded functions definitions from source: onMemorialCreated, onMemorialUpdated, onMemorialDeleted. {"metadata":{"emulator":{"name":"functions"},"message":"Loaded functions definitions from source: onMemorialCreated, onMemorialUpdated, onMemorialDeleted."}}
+[debug] [2025-09-02T10:21:45.778Z] Found a v2 firestore trigger.
+[debug] [2025-09-02T10:21:45.778Z] addFirestoreTrigger "{\"eventType\":\"google.cloud.firestore.document.v1.created\",\"database\":\"(default)\",\"namespace\":\"(default)\",\"document\":{\"value\":\"memorials/{memorialId}\",\"matchType\":\"PATH_PATTERN\"}}"
+[debug] [2025-09-02T10:21:45.779Z] >>> [apiv2][query] POST http://127.0.0.1:8080/emulator/v1/projects/fir-tweb/eventarcTrigger?eventarcTriggerId=us-central1-onMemorialCreated-0 [none]
+[debug] [2025-09-02T10:21:45.779Z] >>> [apiv2][body] POST http://127.0.0.1:8080/emulator/v1/projects/fir-tweb/eventarcTrigger?eventarcTriggerId=us-central1-onMemorialCreated-0 "{\"eventType\":\"google.cloud.firestore.document.v1.created\",\"database\":\"(default)\",\"namespace\":\"(default)\",\"document\":{\"value\":\"memorials/{memorialId}\",\"matchType\":\"PATH_PATTERN\"}}"
+[debug] [2025-09-02T10:21:45.795Z] Sep 02, 2025 6:21:45 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected non-HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 02, 2025 6:21:45 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
+[debug] [2025-09-02T10:21:46.580Z] Sep 02, 2025 6:21:46 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 02, 2025 6:21:46 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
+[debug] [2025-09-02T10:21:49.739Z] <<< [apiv2][status] POST http://127.0.0.1:8080/emulator/v1/projects/fir-tweb/eventarcTrigger?eventarcTriggerId=us-central1-onMemorialCreated-0 200
+[debug] [2025-09-02T10:21:49.739Z] <<< [apiv2][body] POST http://127.0.0.1:8080/emulator/v1/projects/fir-tweb/eventarcTrigger?eventarcTriggerId=us-central1-onMemorialCreated-0 {"eventType":"google.cloud.firestore.document.v1.created","database":"(default)","namespace":"(default)","document":{"value":"memorials/{memorialId}","matchType":"PATH_PATTERN"}}
+[info] ✔  functions[us-central1-onMemorialCreated]: firestore function initialized. {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mfirestore\u001b[22m function initialized."}}
+[debug] [2025-09-02T10:21:49.741Z] Found a v2 firestore trigger.
+[debug] [2025-09-02T10:21:49.741Z] addFirestoreTrigger "{\"eventType\":\"google.cloud.firestore.document.v1.updated\",\"database\":\"(default)\",\"namespace\":\"(default)\",\"document\":{\"value\":\"memorials/{memorialId}\",\"matchType\":\"PATH_PATTERN\"}}"
+[debug] [2025-09-02T10:21:49.741Z] >>> [apiv2][query] POST http://127.0.0.1:8080/emulator/v1/projects/fir-tweb/eventarcTrigger?eventarcTriggerId=us-central1-onMemorialUpdated-0 [none]
+[debug] [2025-09-02T10:21:49.742Z] >>> [apiv2][body] POST http://127.0.0.1:8080/emulator/v1/projects/fir-tweb/eventarcTrigger?eventarcTriggerId=us-central1-onMemorialUpdated-0 "{\"eventType\":\"google.cloud.firestore.document.v1.updated\",\"database\":\"(default)\",\"namespace\":\"(default)\",\"document\":{\"value\":\"memorials/{memorialId}\",\"matchType\":\"PATH_PATTERN\"}}"
+[debug] [2025-09-02T10:21:49.776Z] <<< [apiv2][status] POST http://127.0.0.1:8080/emulator/v1/projects/fir-tweb/eventarcTrigger?eventarcTriggerId=us-central1-onMemorialUpdated-0 200
+[debug] [2025-09-02T10:21:49.776Z] <<< [apiv2][body] POST http://127.0.0.1:8080/emulator/v1/projects/fir-tweb/eventarcTrigger?eventarcTriggerId=us-central1-onMemorialUpdated-0 {"eventType":"google.cloud.firestore.document.v1.updated","database":"(default)","namespace":"(default)","document":{"value":"memorials/{memorialId}","matchType":"PATH_PATTERN"}}
+[info] ✔  functions[us-central1-onMemorialUpdated]: firestore function initialized. {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mfirestore\u001b[22m function initialized."}}
+[debug] [2025-09-02T10:21:49.778Z] Found a v2 firestore trigger.
+[debug] [2025-09-02T10:21:49.778Z] addFirestoreTrigger "{\"eventType\":\"google.cloud.firestore.document.v1.deleted\",\"database\":\"(default)\",\"namespace\":\"(default)\",\"document\":{\"value\":\"memorials/{memorialId}\",\"matchType\":\"PATH_PATTERN\"}}"
+[debug] [2025-09-02T10:21:49.779Z] >>> [apiv2][query] POST http://127.0.0.1:8080/emulator/v1/projects/fir-tweb/eventarcTrigger?eventarcTriggerId=us-central1-onMemorialDeleted-0 [none]
+[debug] [2025-09-02T10:21:49.779Z] >>> [apiv2][body] POST http://127.0.0.1:8080/emulator/v1/projects/fir-tweb/eventarcTrigger?eventarcTriggerId=us-central1-onMemorialDeleted-0 "{\"eventType\":\"google.cloud.firestore.document.v1.deleted\",\"database\":\"(default)\",\"namespace\":\"(default)\",\"document\":{\"value\":\"memorials/{memorialId}\",\"matchType\":\"PATH_PATTERN\"}}"
+[debug] [2025-09-02T10:21:49.803Z] <<< [apiv2][status] POST http://127.0.0.1:8080/emulator/v1/projects/fir-tweb/eventarcTrigger?eventarcTriggerId=us-central1-onMemorialDeleted-0 200
+[debug] [2025-09-02T10:21:49.803Z] <<< [apiv2][body] POST http://127.0.0.1:8080/emulator/v1/projects/fir-tweb/eventarcTrigger?eventarcTriggerId=us-central1-onMemorialDeleted-0 {"eventType":"google.cloud.firestore.document.v1.deleted","database":"(default)","namespace":"(default)","document":{"value":"memorials/{memorialId}","matchType":"PATH_PATTERN"}}
+[info] ✔  functions[us-central1-onMemorialDeleted]: firestore function initialized. {"metadata":{"emulator":{"name":"functions"},"message":"\u001b[1mfirestore\u001b[22m function initialized."}}
+[debug] [2025-09-02T10:21:49.822Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+│ i  View Emulator UI at http://127.0.0.1:4000/               │
+└─────────────────────────────────────────────────────────────┘
+
+┌────────────────┬────────────────┬──────────────────────────────────┐
+│ Emulator       │ Host:Port      │ View in Emulator UI              │
+├────────────────┼────────────────┼──────────────────────────────────┤
+│ Authentication │ 127.0.0.1:9099 │ http://127.0.0.1:4000/auth       │
+├────────────────┼────────────────┼──────────────────────────────────┤
+│ Functions      │ 127.0.0.1:5001 │ http://127.0.0.1:4000/functions  │
+├────────────────┼────────────────┼──────────────────────────────────┤
+│ Firestore      │ 127.0.0.1:8080 │ http://127.0.0.1:4000/firestore  │
+├────────────────┼────────────────┼──────────────────────────────────┤
+│ Hosting        │ 127.0.0.1:5000 │ n/a                              │
+├────────────────┼────────────────┼──────────────────────────────────┤
+│ Storage        │ 127.0.0.1:9199 │ http://127.0.0.1:4000/storage    │
+├────────────────┼────────────────┼──────────────────────────────────┤
+│ Extensions     │ 127.0.0.1:5001 │ http://127.0.0.1:4000/extensions │
+└────────────────┴────────────────┴──────────────────────────────────┘
+  Emulator Hub host: 127.0.0.1 port: 4400
+  Other reserved ports: 4500, 9150
+┌─────────────────────────┬───────────────┬─────────────────────┐
+│ Extension Instance Name │ Extension Ref │ View in Emulator UI │
+└─────────────────────────┴───────────────┴─────────────────────┘
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 

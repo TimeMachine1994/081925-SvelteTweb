@@ -14,7 +14,12 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 		throw error(400, 'Missing configuration ID');
 	}
 
-	const configDoc = await getAdminDb().collection('livestreamConfigurations').doc(configId).get();
+	const configDoc = await getAdminDb()
+		.collection('memorials')
+		.doc(configId)
+		.collection('livestreamConfiguration')
+		.doc('main')
+		.get();
 
 	if (!configDoc.exists) {
 		throw error(404, 'Configuration not found');

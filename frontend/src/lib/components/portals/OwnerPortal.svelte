@@ -5,6 +5,7 @@
 	import PayNowButton from '$lib/components/ui/PayNowButton.svelte';
 	import LivestreamScheduleTable from '$lib/components/ui/LivestreamScheduleTable.svelte';
 	import Calculator from '$lib/components/calculator/Calculator.svelte';
+	import OwnerDashboard from './OwnerDashboard.svelte';
 
 	let { memorials }: { memorials: Memorial[] } = $props();
 
@@ -54,60 +55,64 @@
 		{@const currentPaymentStatus = paymentStatus()}
 
 		{#if currentMemorial}
-			<!-- Loved One's URL Card -->
-			<div class="bg-white shadow-lg rounded-lg p-6 mb-8 text-center">
-				<h3 class="text-xl font-semibold text-gray-900 mb-4">Your Loved One's Memorial Page</h3>
-				<p class="text-purple-600 text-lg font-medium break-all mb-4">
-					<a href={memorialUrl()} target="_blank" rel="noopener noreferrer">
-						{memorialUrl()}
-					</a>
-				</p>
-				<button
-					onclick={() => navigator.clipboard.writeText(memorialUrl())}
-					class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
-				>
-					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 002-2h2a2 2 0 002 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-					</svg>
-					Copy Link
-				</button>
-			</div>
+			{#if currentPaymentStatus === 'saved_pending_payment'}
+				<OwnerDashboard memorial={currentMemorial} />
+			{:else}
+				<!-- Loved One's URL Card -->
+				<div class="bg-white shadow-lg rounded-lg p-6 mb-8 text-center">
+					<h3 class="text-xl font-semibold text-gray-900 mb-4">Your Loved One's Memorial Page</h3>
+					<p class="text-purple-600 text-lg font-medium break-all mb-4">
+						<a href={memorialUrl()} target="_blank" rel="noopener noreferrer">
+							{memorialUrl()}
+						</a>
+					</p>
+					<button
+						onclick={() => navigator.clipboard.writeText(memorialUrl())}
+						class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 002-2h2a2 2 0 002 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+						</svg>
+						Copy Link
+					</button>
+				</div>
 
-			<!-- Payment Status -->
-			<div class="mb-8 text-center">
-				<h3 class="text-xl font-semibold text-gray-900 mb-4">Payment Status</h3>
-				<PaymentStatusBadge status={currentPaymentStatus} />
-			</div>
+				<!-- Payment Status -->
+				<div class="mb-8 text-center">
+					<h3 class="text-xl font-semibold text-gray-900 mb-4">Payment Status</h3>
+					<PaymentStatusBadge status={currentPaymentStatus} />
+				</div>
 
-			<!-- Schedule Now / Calculator Button -->
-			<div class="mb-8 text-center">
-				<button
-					onclick={toggleCalculator}
-					class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
-				>
-					{#if showCalculator}
-						Hide Calculator
+				<!-- Schedule Now / Calculator Button -->
+				<div class="mb-8 text-center">
+					<button
+						onclick={toggleCalculator}
+						class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+					>
+						{#if showCalculator}
+							Hide Calculator
+						{:else}
+							Schedule Now / View Calculator
+						{/if}
+					</button>
+				</div>
+
+				{#if showCalculator}
+					<div class="mb-8">
+						<Calculator memorialId={currentMemorial.id} data={{ memorial: currentMemorial, config: currentMemorial.livestreamConfig }} />
+					</div>
+				{/if}
+
+				<!-- Schedule -->
+				<div class="bg-white shadow-lg rounded-lg p-6">
+					<h3 class="text-xl font-semibold text-gray-900 mb-4">Livestream Schedule</h3>
+					{#if currentMemorial.livestreamConfig}
+						<LivestreamScheduleTable memorial={currentMemorial} />
 					{:else}
-						Schedule Now / View Calculator
+						<p class="text-gray-600">No livestream schedule available. Please use the calculator to set up a livestream package.</p>
 					{/if}
-				</button>
-			</div>
-
-			{#if showCalculator}
-				<div class="mb-8">
-					<Calculator memorialId={currentMemorial.id} data={{ memorial: currentMemorial, config: currentMemorial.livestreamConfig }} />
 				</div>
 			{/if}
-
-			<!-- Schedule -->
-			<div class="bg-white shadow-lg rounded-lg p-6">
-				<h3 class="text-xl font-semibold text-gray-900 mb-4">Livestream Schedule</h3>
-				{#if currentMemorial.livestreamConfig}
-					<LivestreamScheduleTable memorial={currentMemorial} />
-				{:else}
-					<p class="text-gray-600">No livestream schedule available. Please use the calculator to set up a livestream package.</p>
-				{/if}
-			</div>
 		{:else}
 			<!-- No memorial selected state (should not happen if default is set) -->
 			<div class="text-center py-12">

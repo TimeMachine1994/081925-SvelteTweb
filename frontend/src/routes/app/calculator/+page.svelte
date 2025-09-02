@@ -6,10 +6,17 @@
 	import Toggle from '$lib/components/calculator/Toggle.svelte';
 	import { PACKAGES, EmptyForm } from '$lib/data/calculator';
 	import type { PackageKey, FormState } from '$lib/types/index';
+	import type { PageData } from './$types';
 
-	let step = $state(1);
+	let { data }: { data: PageData } = $props();
+
+	let step = $state(parseInt(data.config?.currentStep || '1', 10));
 	let selectedPackage = $state<PackageKey | null>(null);
-	let form = $state<FormState>({ ...EmptyForm });
+	let form = $state<FormState>(
+		data.config?.formData
+			? { ...EmptyForm, ...data.config.formData, lovedOneName: data.memorial?.lovedOneName || '' }
+			: { ...EmptyForm, lovedOneName: data.memorial?.lovedOneName || '' }
+	);
 	let addOns = $state({
 		extraHours: 0,
 		extraDays: 0,

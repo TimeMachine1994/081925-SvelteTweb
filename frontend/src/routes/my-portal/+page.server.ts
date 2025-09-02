@@ -80,18 +80,20 @@ export const load = async ({ locals, url }) => {
             ...embedDoc.data()
         })) as Memorial['embeds'];
 
-        const configSnapshot = await getAdminDb().collection('livestreamConfigurations').where('memorialId', '==', doc.id).limit(1).get();
+        const configRef = getAdminDb().collection('memorials').doc(doc.id).collection('livestreamConfiguration').doc('main');
+        const configSnap = await configRef.get();
         let livestreamConfig = null;
-        if (!configSnapshot.empty) {
-            const configDoc = configSnapshot.docs;
-            const configData = configDoc.data();
-            livestreamConfig = {
-                id: configDoc.id,
-                ...configData,
-                paymentStatus: configData.status === 'paid' ? 'complete' : (configData.status === 'saved' ? 'saved_pending_payment' : 'incomplete'),
-                createdAt: configData.createdAt?.toDate ? configData.createdAt.toDate().toISOString() : null
-            };
-            console.log('💳 Payment status for memorial', doc.id, ':', livestreamConfig.paymentStatus);
+        if (configSnap.exists) {
+            const configData = configSnap.data();
+            if (configData) {
+                livestreamConfig = {
+                    id: configSnap.id,
+                    ...configData,
+                    paymentStatus: configData.status === 'paid' ? 'complete' : (configData.status === 'saved' ? 'saved_pending_payment' : 'incomplete'),
+                    createdAt: configData.createdAt?.toDate ? configData.createdAt.toDate().toISOString() : null
+                };
+                console.log('💳 Payment status for memorial', doc.id, ':', livestreamConfig.paymentStatus);
+            }
         } else {
             console.log('📋 No livestream config found for memorial', doc.id);
         }
@@ -152,13 +154,13 @@ export const load = async ({ locals, url }) => {
     //     });
     // }
 
-    // return {
-    //     user: locals.user,
-    //     memorials: memorialsData,
-    //     invitations,
-    //     allUsers: locals.user.admin ? allUsers : [],
-    //     previewingRole: previewRole // Pass the preview role to the page
-    // };
+    return {
+        user: locals.user,
+        memorials: memorialsData,
+        invitations: [], // TODO: Re-enable invitations if needed
+        allUsers: locals.user.admin ? allUsers : [],
+        previewingRole: previewRole // Pass the preview role to the page
+    };
 };
 
 export const actions = {
