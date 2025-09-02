@@ -6,8 +6,10 @@
 	import LivestreamScheduleTable from '$lib/components/ui/LivestreamScheduleTable.svelte';
 	import Calculator from '$lib/components/calculator/Calculator.svelte';
 	import OwnerDashboard from './OwnerDashboard.svelte';
+	import { goto } from '$app/navigation';
+	import type { Invitation } from '$lib/types/invitation';
 
-	let { memorials }: { memorials: Memorial[] } = $props();
+	let { memorials, invitations = [] }: { memorials: Memorial[]; invitations?: Invitation[] } = $props();
 
 	console.log('👑 OwnerPortal rendering with', memorials.length, 'memorials');
 
@@ -61,14 +63,14 @@
 				<!-- Loved One's URL Card -->
 				<div class="bg-white shadow-lg rounded-lg p-6 mb-8 text-center">
 					<h3 class="text-xl font-semibold text-gray-900 mb-4">Your Loved One's Memorial Page</h3>
-					<p class="text-purple-600 text-lg font-medium break-all mb-4">
-						<a href={memorialUrl()} target="_blank" rel="noopener noreferrer">
+					<p class="text-[#D5BA7F] text-lg font-medium break-all mb-4">
+						<a href={memorialUrl()} target="_blank" rel="noopener noreferrer" class="hover:underline">
 							{memorialUrl()}
 						</a>
 					</p>
 					<button
 						onclick={() => navigator.clipboard.writeText(memorialUrl())}
-						class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+						class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-black bg-[#D5BA7F] hover:bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D5BA7F]"
 					>
 						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 002-2h2a2 2 0 002 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
@@ -86,14 +88,10 @@
 				<!-- Schedule Now / Calculator Button -->
 				<div class="mb-8 text-center">
 					<button
-						onclick={toggleCalculator}
-						class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+						onclick={() => goto(`/app/calculator?memorialId=${currentMemorial.id}`)}
+						class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D5BA7F]"
 					>
-						{#if showCalculator}
-							Hide Calculator
-						{:else}
-							Schedule Now / View Calculator
-						{/if}
+						Schedule Now / View Calculator
 					</button>
 				</div>
 
@@ -127,7 +125,7 @@
 			<p class="text-gray-600 mb-6">You haven't created any memorials yet. Get started by creating your first memorial.</p>
 			<a
 				href="/my-portal/tributes/new"
-				class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-md shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
+				class="inline-flex items-center px-4 py-2 bg-[#D5BA7F] text-black rounded-md shadow-sm hover:bg-opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D5BA7F] transition-colors"
 			>
 				Create Your First Memorial
 			</a>

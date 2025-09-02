@@ -1,17 +1,19 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import LiveUrlPreview from '$lib/components/LiveUrlPreview.svelte';
+	import type { PageData } from './$types';
 
-	let { form }: { form?: { error?: any; success?: boolean } } = $props();
+	let { form, data }: { form?: { error?: any; success?: boolean }; data: PageData } = $props();
+	let funeralDirector = data.funeralDirector;
 
 	// Svelte 5 runes
 	let lovedOneName = $state('');
 	let familyContactName = $state('');
 	let familyContactEmail = $state('');
 	let familyContactPhone = $state('');
-	let directorName = $state('');
-	let directorEmail = $state('');
-	let funeralHomeName = $state('');
+	let directorName = $state(funeralDirector?.directorName || '');
+	let directorEmail = $state(funeralDirector?.directorEmail || '');
+	let funeralHomeName = $state(funeralDirector?.funeralHomeName || '');
 	let locationName = $state('');
 	let locationAddress = $state('');
 	let memorialDate = $state('');

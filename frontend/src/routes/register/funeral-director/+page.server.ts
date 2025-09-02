@@ -1,11 +1,26 @@
 import { getAdminAuth, getAdminDb } from '$lib/server/firebase';
 import { fail, redirect, isRedirect } from '@sveltejs/kit';
-import type { Actions } from './$types';
+import type { Actions, PageServerLoad } from './$types';
 import { sendEnhancedRegistrationEmail } from '$lib/server/email';
 import type { EnhancedRegistrationEmailData } from '$lib/server/email';
 import { Timestamp } from 'firebase-admin/firestore'; // Import Timestamp
 import { indexMemorial } from '$lib/server/algolia-indexing';
 import type { Memorial } from '$lib/types/memorial';
+
+export const load: PageServerLoad = async ({ locals }) => {
+	console.log('️ funeral-director/+page.server.ts');
+	if (locals.user && locals.user.role === 'funeral_director') {
+		const userDoc = await getAdminDb().collection('users').doc(locals.user.uid).get();
+		if (userDoc.exists) {
+			return {
+				funeralDirector: userDoc.data()
+			};
+		}
+	}
+	return {
+		funeralDirector: null
+	};
+};
 
 // Helper function to generate a random password
 function generateRandomPassword(length = 12) {
@@ -40,8 +55,14 @@ function isValidEmail(email: string): boolean {
 }
 
 export const actions: Actions = {
-	default: async ({ request }) => {
+	default: async ({ request, locals }) => {
 		console.log('🎯 Enhanced funeral director registration started');
+
+		const funeralDirectorId = locals.user?.uid;
+		if (!funeralDirectorId || locals.user?.role !== 'funeral_director') {
+			return fail(401, { error: 'You must be logged in as a funeral director to perform this action.' });
+		}
+
 		const data = await request.formData();
 		
 		// Extract all form fields
@@ -143,6 +164,7 @@ export const actions: Actions = {
 				slug: slug,
 				fullSlug: fullSlug,
 				createdByUserId: userRecord.uid,
+				funeralDirectorId: funeralDirectorId,
 				creatorEmail: familyContactEmail,
 				creatorName: familyContactName || directorName,
 				
@@ -208,18 +230,13 @@ export const actions: Actions = {
 			});
 			console.log('✅ Enhanced registration email sent successfully');
 
-			// 6. Create a custom token for auto-login
-			console.log('🎟️ Creating custom token for auto-login...');
-			const customToken = await getAdminAuth().createCustomToken(userRecord.uid);
-			console.log(`✅ Custom token created for ${familyContactEmail}`);
-
-			// 7. Redirect to the session creation page with enhanced parameters
-			const redirectUrl = `/auth/session?token=${customToken}&slug=${slug}`;
+			// 6. Redirect to the newly created memorial page
+			const redirectUrl = `/tributes/${slug}`;
 			console.log(`🚀 Redirecting to: ${redirectUrl}`);
-			
+
 			console.log('🎉 Enhanced funeral director registration completed successfully!');
 			redirect(303, redirectUrl);
-			
+
 		} catch (error: any) {
 			if (isRedirect(error)) {
 				throw error;

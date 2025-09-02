@@ -27,7 +27,7 @@
 	{/if}
 
 	<div class="flex justify-end">
-		<a href={`/app/calculator?memorialId=${memorial.id}`} class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+		<a href={`/app/calculator?memorialId=${memorial.id}`} class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#D5BA7F]">
 			Continue Booking
 		</a>
 	</div>

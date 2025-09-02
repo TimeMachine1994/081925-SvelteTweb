@@ -46,6 +46,9 @@ export const load = async ({ locals, url }) => {
 			// If no invitations, return empty memorials immediately
 			return { user: locals.user, memorials: [], invitations: [], allUsers: [] };
 		}
+	} else if (locals.user.role === 'funeral_director') {
+		console.log(`⚱️ Funeral director detected (${locals.user.uid}), fetching associated memorials.`);
+		query = memorialsRef.where('funeralDirectorId', '==', locals.user.uid);
 	} else if (locals.user.role === 'viewer') {
 		console.log(`👁️ Viewer detected (${locals.user.uid}), fetching followed memorials.`);
 		const followsSnap = await getAdminDb().collectionGroup('followers').where('userId', '==', locals.user.uid).get();

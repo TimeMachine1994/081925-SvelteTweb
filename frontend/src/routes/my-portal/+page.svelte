@@ -73,9 +73,9 @@ export let data: PageData;
     {#if data.previewingRole === 'admin' || (!data.previewingRole && data.user?.admin)}
         <AdminPortal memorials={data.memorials} allUsers={data.allUsers || []} />
     {:else if data.previewingRole === 'owner' || (!data.previewingRole && data.user?.role === 'owner')}
-        <OwnerPortal memorials={data.memorials} invitations={data.invitations || []} />
+        <OwnerPortal memorials={data.memorials} />
     {:else if data.previewingRole === 'funeral_director' || (!data.previewingRole && data.user?.role === 'funeral_director')}
-        <FuneralDirectorPortal />
+        <FuneralDirectorPortal memorials={data.memorials} />
     {:else if data.previewingRole === 'family_member' || (!data.previewingRole && data.user?.role === 'family_member')}
         <FamilyMemberPortal memorials={data.memorials} />
     {:else if data.previewingRole === 'viewer' || (!data.previewingRole && data.user?.role === 'viewer')}
