@@ -21,16 +21,6 @@ export const POST: RequestHandler = async ({ locals, cookies }) => {
         });
         console.log(`✅ [mark-memorial-visit-complete/+server.ts] Firestore updated: firstTimeMemorialVisit set to false for user ${userId}.`);
 
-        // 2. Expire/Delete the first_visit_memorial_popup cookie
-        console.log('🍪 [mark-memorial-visit-complete/+server.ts] Expiring first_visit_memorial_popup cookie...');
-        cookies.set('first_visit_memorial_popup', 'false', {
-            path: '/',
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            maxAge: 0 // Set maxAge to 0 to immediately expire the cookie
-        });
-        console.log('✅ [mark-memorial-visit-complete/+server.ts] first_visit_memorial_popup cookie expired.');
-
         return json({ success: true });
     } catch (e) {
         console.error('❌ [mark-memorial-visit-complete/+server.ts] Error marking first visit complete:', e);

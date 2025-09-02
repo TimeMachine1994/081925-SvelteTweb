@@ -2,6 +2,13 @@
 	import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 	import { auth } from '$lib/firebase';
 	import { goto } from '$app/navigation';
+	import { browser } from '$app/environment';
+
+	// Debug logging to identify SSR issue
+	console.log('🔍 [Login.svelte] Component initializing...');
+	console.log('  - Running in browser?:', browser);
+	console.log('  - auth object:', auth);
+	console.log('  - auth is undefined?:', auth === undefined);
 
 	let email = $state('');
 	let password = $state('');

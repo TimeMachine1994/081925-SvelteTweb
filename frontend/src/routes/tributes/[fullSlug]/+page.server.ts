@@ -36,14 +36,11 @@ export const load: PageServerLoad = async ({ params, locals }) => {
         const userDoc = await getAdminDb().collection('users').doc(locals.user.uid).get();
         if (userDoc.exists) {
             const userData = userDoc.data();
-            if (userData && userData.visitedMemorials && userData.visitedMemorials.includes(memorial.id)) {
-                showFirstVisitPopup = false;
-            } else {
-                showFirstVisitPopup = true;
-            }
+            // The popup should only be shown if the user is logged in AND it's their first time.
+            showFirstVisitPopup = userData?.firstTimeMemorialVisit === true;
         } else {
-            // If a user doc doesn't exist, it's their first visit to any memorial.
-            showFirstVisitPopup = true;
+            // If a user doc doesn't exist, we can't determine their first-time status, so default to not showing it.
+            showFirstVisitPopup = false;
         }
     }
 

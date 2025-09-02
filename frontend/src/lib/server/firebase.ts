@@ -1,6 +1,7 @@
 import admin from 'firebase-admin';
 import { dev, building } from '$app/environment';
 import { env } from '$env/dynamic/private';
+import { env as publicEnv } from '$env/dynamic/public';
 
 let firebaseAdminApp: admin.app.App | undefined;
 
@@ -19,7 +20,7 @@ if (admin.apps.length === 0) {
 			process.env['FIREBASE_AUTH_EMULATOR_HOST'] = '127.0.0.1:9099';
 
 			firebaseAdminApp = admin.initializeApp({
-				projectId: 'fir-tweb',
+				projectId: publicEnv.PUBLIC_FIREBASE_PROJECT_ID,
 				storageBucket: env.PRIVATE_FIREBASE_STORAGE_BUCKET
 			});
 

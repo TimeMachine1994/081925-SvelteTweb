@@ -1,38 +1,17 @@
-# sv
+# Frontend Configuration
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+## Environment Variables
 
-## Creating a project
+This project uses environment variables to manage Firebase configuration for different environments.
 
-If you're seeing this, you've probably already done this step. Congrats!
+### Local Development
 
-```sh
-# create a new project in the current directory
-npx sv create
+1.  Create a `.env` file in this directory (`frontend/.env`).
+2.  Copy the contents of `.env.example` into your new `.env` file.
+3.  Replace the placeholder values with your Firebase project's configuration. For local development, you can use the same Firebase project you use for production, as the application will automatically connect to the Firebase emulators.
 
-# create a new project in my-app
-npx sv create my-app
-```
+### Production
 
-## Developing
+For production deployments, you will need to set the environment variables in your hosting provider's configuration. The required variables are listed in the `.env.example` file.
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```sh
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+**Note:** The `PRIVATE_FIREBASE_SERVICE_ACCOUNT_KEY` should be the JSON content of your service account key, not a path to the file.

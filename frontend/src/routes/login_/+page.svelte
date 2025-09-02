@@ -8,7 +8,7 @@
 
 <svelte:window
 	on:load={() => {
-		console.log('🔒 [/login] Page loaded');
+		console.log('🔒 [/login_] Page loaded');
 		console.log('  - Checking $page.data.user:', $page.data.user);
 	}}
 />

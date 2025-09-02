@@ -4,7 +4,6 @@
 	import Navbar from '$lib/components/Navbar.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
-	import FirstVisitPopup from '$lib/components/FirstVisitPopup.svelte'; // Import FirstVisitPopup
 
 	import { user } from '$lib/auth';
 	import { page } from '$app/stores';
@@ -14,25 +13,31 @@
 	let { children, data }: { children: Snippet; data: LayoutData } = $props();
 
 	$effect(() => {
-		user.set(data.user);
-		console.log('HTML data-mode:', document.documentElement.getAttribute('data-mode'));
-		console.log('✨ Layout data.showFirstVisitPopup:', data.showFirstVisitPopup);
+		console.log('🔄 [+layout.svelte] Effect running...');
+		console.log('  - Data from server:', data);
+		if (data.user) {
+			console.log('  - ✅ User data received, setting user store:', data.user);
+			user.set(data.user);
+		} else {
+			console.log('  - 🚫 No user data received, setting user store to null');
+			user.set(null);
+		}
+		console.log('  - HTML data-mode:', document.documentElement.getAttribute('data-mode'));
 	});
 </script>
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
 	<script>
-		const mode = localStorage.getItem('mode') || 'light';
-		document.documentElement.setAttribute('data-mode', mode);
+		if (typeof document !== 'undefined') {
+			const mode = localStorage.getItem('mode') || 'light';
+			document.documentElement.setAttribute('data-mode', mode);
+		}
 	</script>
 </svelte:head>
 
 <div class="app-container">
 	<Navbar />
-	{#if $page.route.id?.includes('/tributes/[fullSlug]') && data.showFirstVisitPopup}
-		<svelte:component this={FirstVisitPopup} />
-	{/if}
 	<main
 		class="main-content"
 		class:full-width={$page.route.id?.includes('/app/calculator')}
