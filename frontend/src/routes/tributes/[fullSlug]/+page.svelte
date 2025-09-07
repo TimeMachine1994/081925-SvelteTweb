@@ -31,7 +31,7 @@
 		<div class="header-content">
 			<h1>Celebration of Life for {memorial.lovedOneName}</h1>
 			{#if user && !isOwner}
-				<button onclick={toggleFollow} class="follow-btn">
+				<button onclick={toggleFollow} class="follow-btn" aria-label="Follow memorial">
 					<svg
 						class="heart {isFollowing ? 'following' : ''}"
 						viewBox="0 0 24 24"
@@ -59,6 +59,7 @@
 				<iframe
 					src="https://customer-j17w42139d580s8b.cloudflarestream.com/{memorial.livestream.uid}/iframe"
 					style="border: none; position: absolute; top: 0; left: 0; height: 100%; width: 100%;"
+					title="Memorial livestream"
 					allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
 					allowfullscreen={true}
 				></iframe>

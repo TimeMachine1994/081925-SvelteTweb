@@ -12,6 +12,7 @@
 	import type { Memorial } from '$lib/types/memorial';
 	import { onMount } from 'svelte';
 	import { auth } from '$lib/firebase';
+	import { useAutoSave } from '$lib/composables/useAutoSave';
 
 	let {
 		memorialId,
@@ -27,6 +28,10 @@
 	let clientSecret = $state<string | null>(null);
 	let configId = $state<string | null>(null);
 	let selectedTier = $state<Tier>(null);
+	
+	// Auto-save functionality
+	let autoSaveEnabled = $state(false);
+	let showAutoSaveStatus = $state(false);
 
 	let formData = $state<CalculatorFormData>({
 		lovedOneName: '',
@@ -57,7 +62,29 @@
 		}
 	});
 
-	onMount(() => {
+	// Initialize auto-save when memorialId is available
+	const autoSave = memorialId ? useAutoSave({
+		memorialId,
+		delay: 3000, // 3 second delay
+		onSave: (success, error) => {
+			showAutoSaveStatus = true;
+			if (!success && error) {
+				console.error('Auto-save failed:', error);
+			}
+			// Hide status after 2 seconds
+			setTimeout(() => {
+				showAutoSaveStatus = false;
+			}, 2000);
+		},
+		onLoad: (data) => {
+			if (data) {
+				console.log('📖 Auto-saved data loaded, prompting user...');
+				// Show restore prompt
+			}
+		}
+	}) : null;
+
+	onMount(async () => {
 		if (data.config) {
 			console.log('📝 Pre-filling form with existing config data:', data.config);
 			formData = data.config.formData;
@@ -70,6 +97,24 @@
 		} else if (data.memorial) {
 			console.log('📝 Pre-filling form with memorial data:', data.memorial);
 			formData.lovedOneName = data.memorial.lovedOneName;
+			
+			// Try to load auto-saved data if no existing config
+			if (autoSave && memorialId) {
+				const autoSavedData = await autoSave.loadAutoSavedData();
+				if (autoSavedData) {
+					const shouldRestore = confirm('We found an auto-saved version of your schedule. Would you like to restore it?');
+					if (shouldRestore) {
+						formData = autoSavedData;
+						console.log('✅ Auto-saved data restored');
+					}
+				}
+			}
+		}
+		
+		// Enable auto-save after initial load
+		if (memorialId) {
+			autoSaveEnabled = true;
+			console.log('🔄 Auto-save enabled for memorial:', memorialId);
 		}
 	});
 
@@ -256,7 +301,22 @@
 			liveMusician: false,
 			woodenUsbDrives: 0
 		};
+		
+		// Trigger auto-save when tier changes
+		if (autoSaveEnabled && autoSave) {
+			autoSave.triggerAutoSave(formData);
+		}
 	}
+
+	// Watch for form data changes and trigger auto-save
+	$effect(() => {
+		if (autoSaveEnabled && autoSave && memorialId) {
+			// Only auto-save if we have meaningful data
+			if (formData.lovedOneName || selectedTier) {
+				autoSave.triggerAutoSave(formData);
+			}
+		}
+	});
 
 	async function saveAndPayLater(isPayNowFlow = false) {
 		console.log('🚀 saveAndPayLater function called');
@@ -407,6 +467,32 @@
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 	<div class="lg:col-span-2 space-y-8">
+		<!-- Auto-save Status -->
+		{#if autoSaveEnabled && showAutoSaveStatus && autoSave}
+			<div class="fixed top-4 right-4 z-50 transition-all duration-300">
+				{#if autoSave.isSaving()}
+					<div class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2">
+						<div class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+						<span class="text-sm">Auto-saving...</span>
+					</div>
+				{:else if autoSave.lastSaved()}
+					<div class="bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2">
+						<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+							<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+						</svg>
+						<span class="text-sm">Auto-saved</span>
+					</div>
+				{:else if autoSave.hasUnsavedChanges()}
+					<div class="bg-yellow-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2">
+						<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+							<path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+						</svg>
+						<span class="text-sm">Unsaved changes</span>
+					</div>
+				{/if}
+			</div>
+		{/if}
+
 		{#if currentStep === 'booking'}
 			<TierSelector {selectedTier} on:change={(e) => handleTierChange(e.detail)} />
 			{#if selectedTier}
@@ -434,5 +520,27 @@
 
 	<div class="lg:col-span-1">
 		<Summary {bookingItems} {total} on:save={() => saveAndPayLater()} on:pay={proceedToPayment} on:payNow={handlePayNow} />
+		
+		<!-- Auto-save Info Panel -->
+		{#if autoSaveEnabled && autoSave}
+			<div class="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+				<div class="flex items-center space-x-2 mb-2">
+					<svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+						<path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+					</svg>
+					<span class="text-sm font-medium text-gray-700">Auto-save</span>
+				</div>
+				<p class="text-xs text-gray-500">
+					{#if autoSave.lastSaved()}
+						Last saved: {autoSave.lastSaved()?.toLocaleTimeString()}
+					{:else}
+						Changes are automatically saved as you work
+					{/if}
+				</p>
+				{#if autoSave.hasUnsavedChanges()}
+					<p class="text-xs text-yellow-600 mt-1">You have unsaved changes</p>
+				{/if}
+			</div>
+		{/if}
 	</div>
 </div>

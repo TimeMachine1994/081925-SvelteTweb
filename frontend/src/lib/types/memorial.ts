@@ -48,4 +48,17 @@ export interface Memorial {
 	
 	// New fields for Phase 1 refactoring - Additional notes
 	additionalNotes?: string;
+	
+	// Missing properties used in ViewerPortal and other components
+	serviceDate?: string;
+	serviceTime?: string;
+	location?: string;
+	duration?: number;
+	livestreamEnabled?: boolean;
+	followerCount?: number;
+	
+	// Additional properties for access control
+	ownerUid?: string;
+	funeralDirectorUid?: string;
+	familyMemberUids?: string[];
 }

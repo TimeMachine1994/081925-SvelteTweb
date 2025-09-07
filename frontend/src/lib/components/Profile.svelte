@@ -112,7 +112,7 @@
 				<div class="relative inline-block mb-6">
 					<div class="w-32 h-32 mx-auto rounded-full bg-gradient-to-r {roleInfo.gradient} p-1 shadow-2xl">
 						<div class="w-full h-full rounded-full bg-white flex items-center justify-center">
-							<svelte:component this={roleInfo.icon} class="w-16 h-16 text-gray-700" />
+							{@render roleInfo.icon({ class: "w-16 h-16 text-gray-700" })}
 						</div>
 					</div>
 					<div class="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r {roleInfo.gradient} rounded-full flex items-center justify-center shadow-lg">
@@ -124,7 +124,7 @@
 					{displayName || 'Welcome'}
 				</h1>
 				<div class="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r {roleInfo.gradient} text-white font-medium shadow-lg">
-					<svelte:component this={roleInfo.icon} class="w-4 h-4 mr-2" />
+					{@render roleInfo.icon({ class: "w-4 h-4 mr-2" })}
 					{roleInfo.title}
 				</div>
 			</div>
@@ -273,9 +273,7 @@
 							</div>
 						{:else}
 							<div class="text-center py-12">
-								<div class="w-24 h-24 mx-auto rounded-full bg-gradient-to-r from-gray-100 to-gray-200 flex items-center justify-center mb-6">
-									<Heart class="w-12 h-12 text-gray-400" />
-								</div>
+								<div class="w-24 h-24 mx-auto rounded-full bg-gradient-to-r {roleInfo.gradient} animate-spin mb-4"></div>
 								<h3 class="text-xl font-semibold text-gray-900 mb-2">No memorials yet</h3>
 								<p class="text-gray-500 mb-6">Create your first memorial to get started</p>
 								<a 
@@ -349,6 +347,7 @@
 					<button
 						onclick={() => showScheduleModal = false}
 						class="text-gray-400 hover:text-gray-600 transition-colors"
+						aria-label="Close modal"
 					>
 						<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -406,9 +405,9 @@
 							Service Duration
 						</h4>
 						<div class="space-y-3">
-							<label class="block text-sm font-medium text-gray-700">
+							<div class="block text-sm font-medium text-gray-700">
 								Service Duration: {scheduleForm.duration} {scheduleForm.duration === 1 ? 'hour' : 'hours'}
-							</label>
+							</div>
 							<div class="relative">
 								<input
 									type="range"
