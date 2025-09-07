@@ -26,6 +26,10 @@ export const load: PageServerLoad = async ({ locals }) => {
             email: locals.user.email,
             displayName: profileData?.displayName,
         },
+        user: {
+            role: locals.user.role,
+            uid: locals.user.uid
+        },
         memorials
     };
 };

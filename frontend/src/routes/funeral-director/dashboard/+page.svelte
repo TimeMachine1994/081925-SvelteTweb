@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
+  import { Plus, Users, Calendar, Video } from 'lucide-svelte';
   import type { FuneralDirector } from '$lib/types/funeral-director';
 
   let funeralDirector: FuneralDirector | null = null;
@@ -8,11 +9,17 @@
   let loading = true;
   let error = '';
 
-  onMount(async () => {
-    await loadDashboardData();
-  });
+  // Quick registration form
+  let showQuickForm = false;
+  let quickFormData = {
+    lovedOneName: '',
+    familyEmail: '',
+    serviceDate: '',
+    serviceTime: ''
+  };
+  let quickFormLoading = false;
 
-  async function loadDashboardData() {
+  onMount(async () => {
     try {
       // Load funeral director profile
       const profileResponse = await fetch('/api/funeral-director/profile');
@@ -20,17 +27,50 @@
         funeralDirector = await profileResponse.json();
       }
 
-      // Load memorials
+      // Load managed memorials
       const memorialsResponse = await fetch('/api/funeral-director/memorials');
       if (memorialsResponse.ok) {
         const data = await memorialsResponse.json();
-        memorials = data.memorials;
+        memorials = data.memorials || [];
       }
     } catch (err) {
       error = 'Failed to load dashboard data';
     } finally {
       loading = false;
     }
+  });
+
+  function navigateToCreateMemorial() {
+    goto('/funeral-director/create-customer-memorial');
+  }
+
+  async function handleQuickRegistration() {
+    quickFormLoading = true;
+    try {
+      const response = await fetch('/api/funeral-director/quick-register-family', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(quickFormData)
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        showQuickForm = false;
+        // Refresh memorials
+        location.reload();
+      } else {
+        const error = await response.json();
+        alert('Error: ' + error.message);
+      }
+    } catch (err) {
+      alert('Network error occurred');
+    } finally {
+      quickFormLoading = false;
+    }
+  }
+
+  function goLive(memorialId: string) {
+    goto(`/tributes/${memorialId}/livestream`);
   }
 
   function getStatusBadgeClass(status: string) {
@@ -58,12 +98,21 @@
             <p class="text-gray-600">{funeralDirector.companyName}</p>
           {/if}
         </div>
-        <button
-          on:click={() => goto('/funeral-director/create-memorial')}
-          class="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-        >
-          Create Memorial
-        </button>
+        <div class="flex space-x-3">
+          <button
+            on:click={() => showQuickForm = true}
+            class="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black px-6 py-2 rounded-full font-semibold hover:from-yellow-500 hover:to-yellow-700 transition-all duration-200 shadow-lg flex items-center"
+          >
+            <Plus class="w-4 h-4 mr-2" />
+            Quick Register Family
+          </button>
+          <button
+            on:click={navigateToCreateMemorial}
+            class="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            Detailed Memorial
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -206,13 +255,14 @@
                         </span>
                       {/if}
                       <button
-                        on:click={() => goto(`/funeral-director/memorial/${memorial.id}`)}
-                        class="text-blue-600 hover:text-blue-900 text-sm font-medium"
+                        on:click={() => goLive(memorial.slug)}
+                        class="bg-red-600 text-white px-3 py-1 rounded text-sm font-medium hover:bg-red-700 flex items-center"
                       >
-                        Manage
+                        <Video class="w-3 h-3 mr-1" />
+                        Go Live
                       </button>
                       <button
-                        on:click={() => goto(`/tributes/${memorial.fullSlug}`)}
+                        on:click={() => goto(`/tributes/${memorial.slug}`)}
                         class="text-gray-600 hover:text-gray-900 text-sm font-medium"
                       >
                         View
@@ -228,3 +278,79 @@
     {/if}
   </div>
 </div>
+
+<!-- Quick Registration Modal -->
+{#if showQuickForm}
+  <div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+      <div class="mt-3">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Quick Family Registration</h3>
+        
+        <form on:submit|preventDefault={handleQuickRegistration} class="space-y-4">
+          <div>
+            <label for="lovedOneName" class="block text-sm font-medium text-gray-700">Loved One's Name *</label>
+            <input
+              type="text"
+              id="lovedOneName"
+              bind:value={quickFormData.lovedOneName}
+              required
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              placeholder="John Smith"
+            />
+          </div>
+
+          <div>
+            <label for="familyEmail" class="block text-sm font-medium text-gray-700">Family Email *</label>
+            <input
+              type="email"
+              id="familyEmail"
+              bind:value={quickFormData.familyEmail}
+              required
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              placeholder="family@example.com"
+            />
+          </div>
+
+          <div>
+            <label for="serviceDate" class="block text-sm font-medium text-gray-700">Service Date *</label>
+            <input
+              type="date"
+              id="serviceDate"
+              bind:value={quickFormData.serviceDate}
+              required
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label for="serviceTime" class="block text-sm font-medium text-gray-700">Service Time *</label>
+            <input
+              type="time"
+              id="serviceTime"
+              bind:value={quickFormData.serviceTime}
+              required
+              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+
+          <div class="flex justify-end space-x-3 pt-4">
+            <button
+              type="button"
+              on:click={() => showQuickForm = false}
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={quickFormLoading}
+              class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
+            >
+              {quickFormLoading ? 'Creating...' : 'Create Memorial'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{/if}
