@@ -11,7 +11,7 @@ export const PATCH: RequestHandler = async ({ request, locals, params }) => {
 
     const { memorialId } = params;
     const data = await request.json();
-    const { serviceDate, serviceTime, duration } = data;
+    const { serviceDate, serviceTime, duration, location, timeIsUnknown } = data;
 
     if (!serviceDate || !serviceTime) {
       return json({ error: 'Service date and time are required' }, { status: 400 });
@@ -25,10 +25,14 @@ export const PATCH: RequestHandler = async ({ request, locals, params }) => {
     }
 
     const memorial = memorialDoc.data();
+    
+    if (!memorial) {
+      return json({ error: 'Memorial data not found' }, { status: 404 });
+    }
 
-    // Check if user has permission to edit (owner or funeral director who created it)
+    // Check if user has permission to edit this memorial
     const canEdit = memorial.ownerId === locals.user.uid || 
-                   memorial.creatorUid === locals.user.uid ||
+                   memorial.createdBy === locals.user.uid || 
                    memorial.funeralDirectorId === locals.user.uid;
 
     if (!canEdit) {
@@ -39,12 +43,20 @@ export const PATCH: RequestHandler = async ({ request, locals, params }) => {
     const serviceDateTime = new Date(`${serviceDate}T${serviceTime}`);
     
     // Update memorial with new schedule
-    await adminDb.collection('memorials').doc(memorialId).update({
+    const updateData: any = {
       serviceDate: Timestamp.fromDate(serviceDateTime),
       serviceTime: serviceTime,
       duration: duration || 2,
+      timeIsUnknown: timeIsUnknown || false,
       updatedAt: Timestamp.now()
-    });
+    };
+
+    // Add location data if provided
+    if (location) {
+      updateData.location = location;
+    }
+
+    await adminDb.collection('memorials').doc(memorialId).update(updateData);
 
     return json({ 
       success: true,

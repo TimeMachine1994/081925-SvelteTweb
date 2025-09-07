@@ -12,7 +12,13 @@
 	let scheduleForm = $state({
 		serviceDate: '',
 		serviceTime: '',
-		duration: 2
+		duration: 2,
+		location: {
+			name: '',
+			address: '',
+			isUnknown: false
+		},
+		timeIsUnknown: false
 	});
 	let mounted = $state(false);
 
@@ -54,12 +60,16 @@
 
 	const roleInfo = getRoleInfo(userRole);
 
-	function openScheduleModal(memorial) {
+	function openScheduleModal(memorial: any) {
 		selectedMemorial = memorial;
 		// Pre-fill with existing data if available
 		scheduleForm.serviceDate = memorial.serviceDate ? new Date(memorial.serviceDate).toISOString().split('T')[0] : '';
 		scheduleForm.serviceTime = memorial.serviceTime || '';
 		scheduleForm.duration = memorial.duration || 2;
+		scheduleForm.location.name = memorial.location?.name || '';
+		scheduleForm.location.address = memorial.location?.address || '';
+		scheduleForm.location.isUnknown = memorial.location?.isUnknown || false;
+		scheduleForm.timeIsUnknown = memorial.timeIsUnknown || false;
 		showScheduleModal = true;
 	}
 
@@ -131,7 +141,7 @@
 								Profile
 							</h2>
 							<button
-								on:click={() => isEditing = !isEditing}
+								onclick={() => isEditing = !isEditing}
 								class="p-2 rounded-full bg-{roleInfo.accentColor}-100 text-{roleInfo.accentColor}-600 hover:bg-{roleInfo.accentColor}-200 transition-colors"
 							>
 								<Edit3 class="w-4 h-4" />
@@ -169,7 +179,7 @@
 										</button>
 										<button
 											type="button"
-											on:click={() => isEditing = false}
+											onclick={() => isEditing = false}
 											class="px-6 py-3 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
 										>
 											Cancel
@@ -244,7 +254,7 @@
 											</div>
 											<div class="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
 												<button
-													on:click={() => openScheduleModal(memorial)}
+													onclick={() => openScheduleModal(memorial)}
 													class="px-4 py-2 rounded-xl bg-blue-600 text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center"
 												>
 													<Clock class="w-3 h-3 mr-1" />
@@ -337,7 +347,7 @@
 						Edit Schedule
 					</h3>
 					<button
-						on:click={() => showScheduleModal = false}
+						onclick={() => showScheduleModal = false}
 						class="text-gray-400 hover:text-gray-600 transition-colors"
 					>
 						<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -351,49 +361,118 @@
 					<p class="text-sm text-gray-600">Memorial Service Schedule</p>
 				</div>
 				
-				<form on:submit|preventDefault={updateSchedule} class="space-y-4">
-					<div>
-						<label for="serviceDate" class="block text-sm font-medium text-gray-700 mb-2">Service Date</label>
-						<input
-							type="date"
-							id="serviceDate"
-							bind:value={scheduleForm.serviceDate}
-							required
-							class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white/70 backdrop-blur-sm"
-						/>
+				<form onsubmit={(e) => { e.preventDefault(); updateSchedule(); }} class="space-y-6">
+					<!-- Date and Time Section -->
+					<div class="p-4 rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100">
+						<h4 class="font-semibold text-gray-900 mb-4 flex items-center">
+							<Calendar class="w-4 h-4 mr-2 text-blue-600" />
+							Service Date & Time
+						</h4>
+						<div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+							<div>
+								<label for="serviceDate" class="block text-sm font-medium text-gray-700 mb-2">Date of Service</label>
+								<input
+									type="date"
+									id="serviceDate"
+									bind:value={scheduleForm.serviceDate}
+									disabled={scheduleForm.timeIsUnknown}
+									class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white/70 backdrop-blur-sm disabled:bg-gray-100 disabled:text-gray-500"
+								/>
+							</div>
+							<div>
+								<label for="serviceTime" class="block text-sm font-medium text-gray-700 mb-2">Time of Service</label>
+								<input
+									type="time"
+									id="serviceTime"
+									bind:value={scheduleForm.serviceTime}
+									disabled={scheduleForm.timeIsUnknown}
+									class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white/70 backdrop-blur-sm disabled:bg-gray-100 disabled:text-gray-500"
+								/>
+							</div>
+							<button
+								type="button"
+								onclick={() => scheduleForm.timeIsUnknown = !scheduleForm.timeIsUnknown}
+								class="px-4 py-3 rounded-xl font-medium transition-all {scheduleForm.timeIsUnknown ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}"
+							>
+								Unknown
+							</button>
+						</div>
 					</div>
 
-					<div>
-						<label for="serviceTime" class="block text-sm font-medium text-gray-700 mb-2">Service Time</label>
-						<input
-							type="time"
-							id="serviceTime"
-							bind:value={scheduleForm.serviceTime}
-							required
-							class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white/70 backdrop-blur-sm"
-						/>
+					<!-- Duration Section -->
+					<div class="p-4 rounded-2xl bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100">
+						<h4 class="font-semibold text-gray-900 mb-4 flex items-center">
+							<Clock class="w-4 h-4 mr-2 text-green-600" />
+							Service Duration
+						</h4>
+						<div class="space-y-3">
+							<label class="block text-sm font-medium text-gray-700">
+								Service Duration: {scheduleForm.duration} {scheduleForm.duration === 1 ? 'hour' : 'hours'}
+							</label>
+							<div class="relative">
+								<input
+									type="range"
+									bind:value={scheduleForm.duration}
+									min="0.5"
+									max="8"
+									step="0.5"
+									class="w-full h-3 bg-gradient-to-r from-purple-200 to-blue-200 rounded-lg appearance-none cursor-pointer slider focus:outline-none focus:ring-2 focus:ring-purple-500"
+									style="background: linear-gradient(to right, #a855f7 0%, #3b82f6 {(scheduleForm.duration - 0.5) / 7.5 * 100}%, #e5e7eb {(scheduleForm.duration - 0.5) / 7.5 * 100}%, #e5e7eb 100%)"
+								/>
+								<div class="flex justify-between text-xs text-gray-500 mt-1">
+									<span>30 min</span>
+									<span>4 hrs</span>
+									<span>8 hrs</span>
+								</div>
+							</div>
+						</div>
 					</div>
 
-					<div>
-						<label for="duration" class="block text-sm font-medium text-gray-700 mb-2">Duration (hours)</label>
-						<select
-							id="duration"
-							bind:value={scheduleForm.duration}
-							class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white/70 backdrop-blur-sm"
-						>
-							<option value={1}>1 hour</option>
-							<option value={1.5}>1.5 hours</option>
-							<option value={2}>2 hours</option>
-							<option value={2.5}>2.5 hours</option>
-							<option value={3}>3 hours</option>
-							<option value={4}>4 hours</option>
-						</select>
+					<!-- Location Section -->
+					<div class="p-4 rounded-2xl bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100">
+						<h4 class="font-semibold text-gray-900 mb-4 flex items-center">
+							<Building2 class="w-4 h-4 mr-2 text-purple-600" />
+							Service Location
+						</h4>
+						<div class="space-y-4">
+							<div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+								<div class="md:col-span-2">
+									<label for="locationName" class="block text-sm font-medium text-gray-700 mb-2">Location Name</label>
+									<input
+										type="text"
+										id="locationName"
+										bind:value={scheduleForm.location.name}
+										disabled={scheduleForm.location.isUnknown}
+										placeholder="e.g., St. Mary's Church"
+										class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white/70 backdrop-blur-sm disabled:bg-gray-100 disabled:text-gray-500"
+									/>
+								</div>
+								<button
+									type="button"
+									onclick={() => scheduleForm.location.isUnknown = !scheduleForm.location.isUnknown}
+									class="px-4 py-3 rounded-xl font-medium transition-all {scheduleForm.location.isUnknown ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}"
+								>
+									Unknown
+								</button>
+							</div>
+							<div>
+								<label for="locationAddress" class="block text-sm font-medium text-gray-700 mb-2">Location Address</label>
+								<input
+									type="text"
+									id="locationAddress"
+									bind:value={scheduleForm.location.address}
+									disabled={scheduleForm.location.isUnknown}
+									placeholder="123 Main St, Anytown, USA"
+									class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white/70 backdrop-blur-sm disabled:bg-gray-100 disabled:text-gray-500"
+								/>
+							</div>
+						</div>
 					</div>
 
 					<div class="flex justify-end space-x-3 pt-4">
 						<button
 							type="button"
-							on:click={() => showScheduleModal = false}
+							onclick={() => showScheduleModal = false}
 							class="px-6 py-3 text-sm font-medium text-gray-700 bg-gray-200 rounded-xl hover:bg-gray-300 transition-colors"
 						>
 							Cancel
