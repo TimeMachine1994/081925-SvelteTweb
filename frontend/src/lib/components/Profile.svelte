@@ -1,12 +1,19 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { enhance } from '$app/forms';
-	import { User, Mail, Edit3, LogOut, Heart, Calendar, Users, Crown, Building2, Video, Settings, Sparkles } from 'lucide-svelte';
+	import { User, Mail, Edit3, LogOut, Heart, Calendar, Users, Crown, Building2, Video, Settings, Sparkles, Clock } from 'lucide-svelte';
 	import { onMount } from 'svelte';
 
 	let { data, form } = $props();
 	let displayName = $state(data.profile?.displayName || '');
 	let isEditing = $state(false);
+	let showScheduleModal = $state(false);
+	let selectedMemorial = $state(null);
+	let scheduleForm = $state({
+		serviceDate: '',
+		serviceTime: '',
+		duration: 2
+	});
 	let mounted = $state(false);
 
 	// Get user role from locals or profile data
@@ -46,6 +53,38 @@
 	}
 
 	const roleInfo = getRoleInfo(userRole);
+
+	function openScheduleModal(memorial) {
+		selectedMemorial = memorial;
+		// Pre-fill with existing data if available
+		scheduleForm.serviceDate = memorial.serviceDate ? new Date(memorial.serviceDate).toISOString().split('T')[0] : '';
+		scheduleForm.serviceTime = memorial.serviceTime || '';
+		scheduleForm.duration = memorial.duration || 2;
+		showScheduleModal = true;
+	}
+
+	async function updateSchedule() {
+		if (!selectedMemorial) return;
+
+		try {
+			const response = await fetch(`/api/memorials/${selectedMemorial.id}/schedule`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(scheduleForm)
+			});
+
+			if (response.ok) {
+				showScheduleModal = false;
+				// Refresh the page to show updated data
+				location.reload();
+			} else {
+				const error = await response.json();
+				alert('Error updating schedule: ' + error.message);
+			}
+		} catch (err) {
+			alert('Network error occurred');
+		}
+	}
 </script>
 
 <div class="min-h-screen bg-gradient-to-br {roleInfo.bgGradient} relative overflow-hidden">
@@ -203,12 +242,21 @@
 													</div>
 												</div>
 											</div>
-											<a 
-												href="/tributes/{memorial.slug}"
-												class="px-6 py-2 rounded-xl bg-gradient-to-r {roleInfo.gradient} text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105 opacity-0 group-hover:opacity-100"
-											>
-												View Memorial
-											</a>
+											<div class="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+												<button
+													on:click={() => openScheduleModal(memorial)}
+													class="px-4 py-2 rounded-xl bg-blue-600 text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center"
+												>
+													<Clock class="w-3 h-3 mr-1" />
+													Schedule
+												</button>
+												<a 
+													href="/tributes/{memorial.slug}"
+													class="px-4 py-2 rounded-xl bg-gradient-to-r {roleInfo.gradient} text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105"
+												>
+													View
+												</a>
+											</div>
 										</div>
 									</div>
 								{/each}
@@ -277,6 +325,91 @@
 		{/if}
 	</div>
 </div>
+
+<!-- Schedule Editing Modal -->
+{#if showScheduleModal && selectedMemorial}
+	<div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+		<div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-3xl bg-white/90 backdrop-blur-xl">
+			<div class="mt-3">
+				<div class="flex items-center justify-between mb-6">
+					<h3 class="text-xl font-bold text-gray-900 flex items-center">
+						<Clock class="w-6 h-6 mr-3 text-blue-600" />
+						Edit Schedule
+					</h3>
+					<button
+						on:click={() => showScheduleModal = false}
+						class="text-gray-400 hover:text-gray-600 transition-colors"
+					>
+						<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+						</svg>
+					</button>
+				</div>
+				
+				<div class="mb-4 p-4 rounded-2xl bg-gradient-to-r {roleInfo.bgGradient} border border-white/20">
+					<p class="font-semibold text-gray-900">{selectedMemorial.lovedOneName || selectedMemorial.title}</p>
+					<p class="text-sm text-gray-600">Memorial Service Schedule</p>
+				</div>
+				
+				<form on:submit|preventDefault={updateSchedule} class="space-y-4">
+					<div>
+						<label for="serviceDate" class="block text-sm font-medium text-gray-700 mb-2">Service Date</label>
+						<input
+							type="date"
+							id="serviceDate"
+							bind:value={scheduleForm.serviceDate}
+							required
+							class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white/70 backdrop-blur-sm"
+						/>
+					</div>
+
+					<div>
+						<label for="serviceTime" class="block text-sm font-medium text-gray-700 mb-2">Service Time</label>
+						<input
+							type="time"
+							id="serviceTime"
+							bind:value={scheduleForm.serviceTime}
+							required
+							class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white/70 backdrop-blur-sm"
+						/>
+					</div>
+
+					<div>
+						<label for="duration" class="block text-sm font-medium text-gray-700 mb-2">Duration (hours)</label>
+						<select
+							id="duration"
+							bind:value={scheduleForm.duration}
+							class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white/70 backdrop-blur-sm"
+						>
+							<option value={1}>1 hour</option>
+							<option value={1.5}>1.5 hours</option>
+							<option value={2}>2 hours</option>
+							<option value={2.5}>2.5 hours</option>
+							<option value={3}>3 hours</option>
+							<option value={4}>4 hours</option>
+						</select>
+					</div>
+
+					<div class="flex justify-end space-x-3 pt-4">
+						<button
+							type="button"
+							on:click={() => showScheduleModal = false}
+							class="px-6 py-3 text-sm font-medium text-gray-700 bg-gray-200 rounded-xl hover:bg-gray-300 transition-colors"
+						>
+							Cancel
+						</button>
+						<button
+							type="submit"
+							class="px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105"
+						>
+							Update Schedule
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+{/if}
 
 <style>
 	@keyframes fade-in-up {
