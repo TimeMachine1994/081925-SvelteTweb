@@ -26,7 +26,7 @@ export const actions: Actions = {
 			return fail(401, { message: 'Could not create session cookie.' });
 		}
 
-		console.log('Redirecting to /my-portal...');
-		redirect(303, '/my-portal');
+		console.log('Redirecting to home...');
+		redirect(303, '/');
 	}
 };

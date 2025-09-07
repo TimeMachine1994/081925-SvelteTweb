@@ -35,8 +35,8 @@
 						throw new Error('Failed to create session');
 					}
 
-					// Step 5: Redirect to the portal
-					await goto('/my-portal');
+					// Step 5: Redirect to the home page
+					await goto('/');
 				} catch (err: any) {
 					error = err.message;
 				}

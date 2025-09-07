@@ -10,10 +10,16 @@ export const load: PageServerLoad = async ({ locals }) => {
     const profileData = userDoc.data();
 
     const memorialsQuery = await adminDb.collection('memorials').where('creatorUid', '==', locals.user.uid).get();
-    const memorials = memorialsQuery.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-    }));
+    const memorials = memorialsQuery.docs.map(doc => {
+        const data = doc.data();
+        return {
+            id: doc.id,
+            ...data,
+            // Convert Firebase Timestamps to serializable dates
+            createdAt: data.createdAt?.toDate?.() || data.createdAt,
+            updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
+        };
+    });
 
     return {
         profile: {

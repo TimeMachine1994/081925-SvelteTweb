@@ -1,6 +1,6 @@
 # Implementation Plan: Role-Based Portal Features (v2)
 
-This document outlines the phased implementation plan for building out the distinct features for the `owner`, `family_member`, and `viewer` user roles, including critical security rule modifications.
+This document outlines the phased implementation plan for building out the distinct features for the `funeral director` `owner`, `family_member`, and `viewer` user roles, including critical security rule modifications.
 
 ## Phase 1: Backend & Data Model Foundation
 
@@ -18,6 +18,9 @@ This phase focuses on creating the necessary Firestore collections, API endpoint
 | 1.6: Add Firestore rules for `followers` sub-collection | 🔲 Pending |
 | **Family Member Photo Uploads** | |
 | 1.7: Update Firebase Storage rules for `family_member` uploads | 🔲 Pending |
+| **Funeral Director Registration and Streaming** | |
+| 1.8: Design Funeral Directors collection schema, endpoint, and rules | 🔲 Pending |
+
 
 ## Phase 2: `owner` Portal Implementation
 
@@ -44,3 +47,20 @@ This phase focuses on building the specific, limited portal experiences for thes
 | 3.4: Update `/my-portal` `load` function for `viewer` role | 🔲 Pending |
 | 3.5: Implement followed memorials list in `ViewerPortal.svelte` | 🔲 Pending |
 | 3.6: Add "Follow" button to public memorial page (`/tributes/[fullSlug]`) | 🔲 Pending |
+
+## Phase 4: `funeral_director` Portal Implementation
+
+This phase focuses on building the funeral director portal with registration, memorial management, and livestreaming capabilities.
+
+| Task | Status |
+| :--- | :--- |
+| **Funeral Director Authentication & Registration** | |
+| 4.1: Implement funeral director login system | 🔲 Pending |
+| 4.2: Create enhanced registration form for owners (funeral director version) | 🔲 Pending |
+| 4.3: Implement auto-prefill of funeral director info from account | 🔲 Pending |
+| 4.4: Add automatic memorial page creation and redirect functionality | 🔲 Pending |
+| **Funeral Director Portal Features** | |
+| 4.5: Build funeral director portal dashboard | 🔲 Pending |
+| 4.6: Implement memorial content viewing and editing capabilities | 🔲 Pending |
+| 4.7: Add photo management functionality for funeral directors | 🔲 Pending |
+| 4.8: Implement livestream initiation and management from backend | 🔲 Pending |

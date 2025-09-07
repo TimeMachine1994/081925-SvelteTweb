@@ -33,7 +33,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		console.log(`Redirecting to /tributes/${slug}...`);
 		redirect(303, `/tributes/${slug}`);
 	} else {
-		console.log('Redirecting to /my-portal...');
-		redirect(303, '/my-portal');
+		console.log('Redirecting to home...');
+		redirect(303, '/');
 	}
 };

@@ -37,5 +37,54 @@ service cloud.firestore {
       // Delete: Not allowed for clients.
       allow delete: if false;
     }
+
+    // Funeral Directors collection rules
+    match /funeral_directors/{funeralDirectorId} {
+      // Only the funeral director can read/write their own document
+      allow read, write: if request.auth != null && request.auth.uid == funeralDirectorId;
+      
+      // Admins can read/write all funeral director documents
+      allow read, write: if isAdmin();
+    }
+
+    // Enhanced memorial rules for funeral directors
+    match /memorials/{memorialId} {
+      // Admins can read/write any memorial.
+      // Otherwise, apply existing logic plus funeral director permissions.
+      allow read: if isAdmin() || 
+                     resource.data.isPublic == true || 
+                     request.auth.uid == resource.data.creatorUid ||
+                     (request.auth != null && resource.data.funeralDirector.id == request.auth.uid);
+      
+      allow create: if request.auth != null;
+      
+      allow update, delete: if isAdmin() || 
+                              (request.auth != null && request.auth.uid == resource.data.creatorUid) ||
+                              (request.auth != null && resource.data.funeralDirector.id == request.auth.uid && resource.data.permissions.funeralDirectorCanEdit == true);
+      
+      match /followers/{userId} {
+        // A user can only follow/unfollow for themselves.
+        allow read, create, delete: if request.auth != null && request.auth.uid == userId;
+        allow update: if false; // No updates allowed.
+      }
+
+      // Livestream rules
+      match /livestreams/{streamId} {
+        // Funeral director who created the memorial can manage streams
+        allow read, write: if request.auth != null &&
+          get(/databases/$(database)/documents/memorials/$(memorialId)).data.funeralDirector.id == request.auth.uid;
+        
+        // Memorial owner can view and manage streams
+        allow read, write: if request.auth != null &&
+          get(/databases/$(database)/documents/memorials/$(memorialId)).data.creatorUid == request.auth.uid;
+        
+        // Public streams can be viewed by anyone
+        allow read: if resource.data.isPublic == true;
+        
+        // Allowed viewers can read private streams
+        allow read: if request.auth != null && 
+          request.auth.uid in resource.data.allowedViewers;
+      }
+    }
   }
 }

@@ -19,7 +19,7 @@
 
 		if (response.ok) {
 			console.log('[Login.svelte] Session created successfully.');
-			goto('/my-portal');
+			goto('/');
 		} else {
 			throw new Error('Failed to create session.');
 		}

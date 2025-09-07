@@ -223,7 +223,7 @@ export const actions: Actions = {
 		}
 
 		// Redirect after the try...catch block to avoid catching the redirect throw
-		redirect(303, '/my-portal');
+		redirect(303, '/');
 	},
 	continueToPayment: async ({ request, locals }) => {
 		if (!locals.user) {

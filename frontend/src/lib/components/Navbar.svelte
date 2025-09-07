@@ -1,41 +1,105 @@
 <script lang="ts">
 	import { user } from '$lib/auth';
-	import { HelpCircle, Settings2, Mail, Calculator, Grid, Lock } from 'lucide-svelte';
+	import { ChevronDown, User, LogOut } from 'lucide-svelte';
+	import { onMount } from 'svelte';
+	
+	let dropdownOpen = false;
+	let dropdownElement: HTMLElement;
+
+	function toggleDropdown() {
+		dropdownOpen = !dropdownOpen;
+	}
+
+	function closeDropdown() {
+		dropdownOpen = false;
+	}
+
+	// Close dropdown when clicking outside
+	onMount(() => {
+		function handleClickOutside(event: MouseEvent) {
+			if (dropdownElement && !dropdownElement.contains(event.target as Node)) {
+				closeDropdown();
+			}
+		}
+
+		document.addEventListener('click', handleClickOutside);
+		return () => {
+			document.removeEventListener('click', handleClickOutside);
+		};
+	});
 </script>
 
-<nav class="sticky top-0 z-50 w-full bg-black">
+<nav class="sticky top-0 z-50 w-full bg-black shadow-lg">
 	<div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-		<a href="/" class="text-2xl font-extrabold italic text-white flex items-center">Tributestream<sup>®</sup></a>
+		<!-- Logo/Title -->
+		<a href="/" class="text-2xl font-extrabold italic text-white flex items-center hover:text-gray-200 transition-colors">
+			Tributestream
+		</a>
 
-		<ul class="flex items-center space-x-6 text-white">
+		<!-- Navigation Menu -->
+		<ul class="flex items-center space-x-8 text-white">
 			<li>
-				<a href="/why-tributestream" class="flex items-center gap-2 hover:text-gray-300">
-					<HelpCircle class="w-4 h-4" />Why Tributestream?
+				<a href="/create-memorial" class="hover:text-gray-300 transition-colors font-medium">
+					Create Memorial
 				</a>
 			</li>
 			<li>
-				<a href="/how-it-works" class="flex items-center gap-2 hover:text-gray-300">
-					<Settings2 class="w-4 h-4" />How Does Livestreaming Work?
+				<a href="/for-families" class="hover:text-gray-300 transition-colors font-medium">
+					For Families
 				</a>
 			</li>
 			<li>
-				<a href="/contact" class="flex items-center gap-2 hover:text-gray-300">
-					<Mail class="w-4 h-4" />Contact Tributestream
+				<a href="/for-funeral-homes" class="hover:text-gray-300 transition-colors font-medium">
+					For Funeral Homes
 				</a>
 			</li>
 			<li>
-				<a href="/pricing" class="flex items-center gap-2 hover:text-gray-300">
-					<Calculator class="w-4 h-4" />Pricing Calculator
+				<a href="/contact" class="hover:text-gray-300 transition-colors font-medium">
+					Contact Us
 				</a>
 			</li>
-			<li>
+			<li class="relative" bind:this={dropdownElement}>
 				{#if $user}
-					<a href="/my-portal" class="btn-gold flex items-center gap-2">
-						<Grid class="w-4 h-4" />My Portal
-					</a>
+					<!-- My Portal Button with Dropdown -->
+					<button
+						on:click={toggleDropdown}
+						class="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black px-6 py-2 rounded-full font-semibold hover:from-yellow-500 hover:to-yellow-700 transition-all duration-200 flex items-center gap-2 shadow-lg"
+					>
+						My Portal
+						<ChevronDown class="w-4 h-4 transition-transform duration-200 {dropdownOpen ? 'rotate-180' : ''}" />
+					</button>
+
+					<!-- Dropdown Menu -->
+					{#if dropdownOpen}
+						<div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+							<a
+								href="/profile"
+								class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+								on:click={closeDropdown}
+							>
+								<User class="w-4 h-4 mr-3" />
+								My Profile
+							</a>
+							<div class="border-t border-gray-100"></div>
+							<form method="POST" action="/logout" class="block">
+								<button
+									type="submit"
+									class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors text-left"
+									on:click={closeDropdown}
+								>
+									<LogOut class="w-4 h-4 mr-3" />
+									Logout
+								</button>
+							</form>
+						</div>
+					{/if}
 				{:else}
-					<a href="/login" class="btn-gold flex items-center gap-2">
-						<Lock class="w-4 h-4" />Login
+					<!-- Viewer Registration Button -->
+					<a
+						href="/register"
+						class="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black px-6 py-2 rounded-full font-semibold hover:from-yellow-500 hover:to-yellow-700 transition-all duration-200 shadow-lg"
+					>
+						Viewer Registration
 					</a>
 				{/if}
 			</li>
