@@ -44,7 +44,8 @@
     goto('/funeral-director/create-customer-memorial');
   }
 
-  async function handleQuickRegistration() {
+  async function handleQuickRegistration(event: Event) {
+    event.preventDefault();
     quickFormLoading = true;
     try {
       const response = await fetch('/api/funeral-director/quick-register-family', {
@@ -56,8 +57,14 @@
       if (response.ok) {
         const result = await response.json();
         showQuickForm = false;
-        // Refresh memorials
-        location.reload();
+        
+        // Show success message with go-live option
+        if (confirm(`Memorial created successfully for ${quickFormData.lovedOneName}!\n\nWould you like to go live now?`)) {
+          goLiveMobile(result.memorialId, result.streamKey);
+        } else {
+          // Refresh memorials
+          location.reload();
+        }
       } else {
         const error = await response.json();
         alert('Error: ' + error.message);
@@ -66,6 +73,40 @@
       alert('Network error occurred');
     } finally {
       quickFormLoading = false;
+    }
+  }
+
+  async function goLiveMobile(memorialId: string, streamKey?: string) {
+    try {
+      // Get or create stream key for mobile streaming
+      const response = await fetch(`/api/memorials/${memorialId}/stream/mobile`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (response.ok) {
+        const streamData = await response.json();
+        
+        // Open mobile-optimized livestream page
+        const streamUrl = `/funeral-director/mobile-stream/${memorialId}?key=${streamData.streamKey}`;
+        
+        // Check if on mobile device
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        if (isMobile) {
+          // Open in same tab for mobile
+          goto(streamUrl);
+        } else {
+          // Open in new tab for desktop (so they can use mobile device)
+          window.open(streamUrl, '_blank');
+          alert('Mobile streaming page opened in new tab. Use your mobile device to access this link and start streaming.');
+        }
+      } else {
+        const error = await response.json();
+        alert('Error setting up stream: ' + error.message);
+      }
+    } catch (err) {
+      alert('Network error occurred while setting up stream');
     }
   }
 
@@ -100,14 +141,14 @@
         </div>
         <div class="flex space-x-3">
           <button
-            on:click={() => showQuickForm = true}
+            onclick={() => showQuickForm = true}
             class="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black px-6 py-2 rounded-full font-semibold hover:from-yellow-500 hover:to-yellow-700 transition-all duration-200 shadow-lg flex items-center"
           >
             <Plus class="w-4 h-4 mr-2" />
             Quick Register Family
           </button>
           <button
-            on:click={navigateToCreateMemorial}
+            onclick={navigateToCreateMemorial}
             class="bg-blue-600 text-white px-4 py-2 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
           >
             Detailed Memorial
@@ -213,7 +254,7 @@
             <p class="mt-1 text-sm text-gray-500">Get started by creating your first memorial.</p>
             <div class="mt-6">
               <button
-                on:click={() => goto('/funeral-director/create-memorial')}
+                onclick={() => goto('/funeral-director/create-memorial')}
                 class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 Create Memorial
@@ -255,14 +296,14 @@
                         </span>
                       {/if}
                       <button
-                        on:click={() => goLive(memorial.slug)}
-                        class="bg-red-600 text-white px-3 py-1 rounded text-sm font-medium hover:bg-red-700 flex items-center"
+                        onclick={() => goLiveMobile(memorial.id)}
+                        class="bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center"
                       >
                         <Video class="w-3 h-3 mr-1" />
-                        Go Live
+                        Go Live Mobile
                       </button>
                       <button
-                        on:click={() => goto(`/tributes/${memorial.slug}`)}
+                        onclick={() => goto(`/tributes/${memorial.slug}`)}
                         class="text-gray-600 hover:text-gray-900 text-sm font-medium"
                       >
                         View
@@ -286,7 +327,7 @@
       <div class="mt-3">
         <h3 class="text-lg font-medium text-gray-900 mb-4">Quick Family Registration</h3>
         
-        <form on:submit|preventDefault={handleQuickRegistration} class="space-y-4">
+        <form onsubmit={handleQuickRegistration} class="space-y-4">
           <div>
             <label for="lovedOneName" class="block text-sm font-medium text-gray-700">Loved One's Name *</label>
             <input
@@ -336,7 +377,7 @@
           <div class="flex justify-end space-x-3 pt-4">
             <button
               type="button"
-              on:click={() => showQuickForm = false}
+              onclick={() => showQuickForm = false}
               class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
             >
               Cancel

@@ -127,17 +127,14 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
     return json({
       success: true,
-      memorial: {
-        id: memorialRef.id,
-        slug: memorialSlug,
-        lovedOneName: lovedOneName,
-        serviceDate: serviceDate,
-        serviceTime: serviceTime
-      },
-      family: {
+      message: 'Family memorial created successfully',
+      memorialId: memorialDoc.id,
+      streamKey: `mobile_${memorialDoc.id}_${Date.now()}`,
+      familyCredentials: {
         email: familyEmail,
-        tempPassword: tempPassword // In production, this should be sent via email
-      }
+        temporaryPassword: tempPassword
+      },
+      memorialUrl: `/tributes/${memorialDoc.id}`
     });
 
   } catch (error) {
