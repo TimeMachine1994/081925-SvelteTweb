@@ -21,8 +21,8 @@ export interface AccessCheckResult {
 
 export interface UserContext {
 	uid: string;
-	email: string;
-	role: string;
+	email: string | null;
+	role: 'admin' | 'owner' | 'family_member' | 'viewer' | 'funeral_director';
 	isAdmin?: boolean;
 }
 
@@ -418,12 +418,17 @@ export class MemorialAccessVerifier {
 	 */
 	static async getUserAccessibleMemorials(user: UserContext): Promise<Array<{memorial: Memorial, accessLevel: string}>> {
 		console.log('📋 Getting accessible memorials for user:', user.uid);
-
+		
 		try {
 			await initializeAdminDb();
+			if (!adminDb) {
+				console.warn('Admin DB not available, returning empty array');
+				return [];
+			}
+
 			const accessibleMemorials: Array<{memorial: Memorial, accessLevel: string}> = [];
 
-			// Admin gets all memorials
+			// Admin gets all memorials with full access
 			if (user.role === 'admin' || user.isAdmin) {
 				const allMemorialsSnap = await adminDb.collection('memorials').get();
 				return allMemorialsSnap.docs.map((doc: any) => ({

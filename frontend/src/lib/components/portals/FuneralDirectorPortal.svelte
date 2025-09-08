@@ -310,7 +310,7 @@
 
 	<!-- Logout Button -->
 	<div class="mt-12 text-center">
-		<form method="POST" action="?/logout">
+		<form method="POST" action="/logout">
 			<button type="submit" class="text-sm text-gray-500 hover:text-gray-700 hover:underline transition-colors">
 				Log Out
 			</button>

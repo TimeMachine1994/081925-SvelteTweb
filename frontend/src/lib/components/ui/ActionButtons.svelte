@@ -31,7 +31,7 @@
 		icon="calendar"
 		label="Edit Livestream Schedule"
 		color="amber"
-		href={`/app/calculator?memorialId=${memorial.id}&lovedOneName=${encodeURIComponent(memorial.lovedOneName)}`}
+		href="/schedule"
 	/>
 
 	<ActionButton

@@ -2,6 +2,7 @@
 	import { user } from '$lib/auth';
 	import { ChevronDown, User, LogOut } from 'lucide-svelte';
 	import { onMount } from 'svelte';
+	import { enhance } from '$app/forms';
 	
 	let dropdownOpen = false;
 	let dropdownElement: HTMLElement;
@@ -81,11 +82,17 @@
 								My Profile
 							</a>
 							<div class="border-t border-gray-100"></div>
-							<form method="POST" action="/logout" class="block">
+							<form method="POST" action="/logout" class="block" use:enhance={() => {
+								return async ({ result }) => {
+									// Handle redirect manually since logout returns a redirect
+									if (result.type === 'redirect') {
+										window.location.href = result.location;
+									}
+								};
+							}}>
 								<button
 									type="submit"
 									class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors text-left"
-									on:click={closeDropdown}
 								>
 									<LogOut class="w-4 h-4 mr-3" />
 									Logout
@@ -94,12 +101,12 @@
 						</div>
 					{/if}
 				{:else}
-					<!-- Viewer Registration Button -->
+					<!-- Login Button -->
 					<a
-						href="/register"
+						href="/login"
 						class="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black px-6 py-2 rounded-full font-semibold hover:from-yellow-500 hover:to-yellow-700 transition-all duration-200 shadow-lg"
 					>
-						Viewer Registration
+						Login
 					</a>
 				{/if}
 			</li>

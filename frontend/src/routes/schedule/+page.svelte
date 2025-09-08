@@ -1,0 +1,659 @@
+<script lang="ts">
+  import { Calculator, DollarSign, Users, Camera, Clock, Star, MapPin, Calendar } from 'lucide-svelte';
+  import { goto } from '$app/navigation';
+  import { onMount } from 'svelte';
+  import { browser } from '$app/environment';
+
+  // Loading state
+  let pageLoaded = true;
+
+  // Original TributeStream pricing structure
+  let selectedTier = 'solo';
+  let mainServiceHours = 2;
+  let additionalLocation = {
+    enabled: false,
+    hours: 2
+  };
+  let additionalDay = {
+    enabled: false,
+    hours: 2
+  };
+  let addons = {
+    photography: false,
+    audioVisualSupport: false,
+    liveMusician: false,
+    woodenUsbDrives: 0
+  };
+
+  // Auto-save functionality
+  let autoSaveTimeout: ReturnType<typeof setTimeout> | null = null;
+  let lastSaved = '';
+  let saveStatus = 'saved'; // 'saved', 'saving', 'unsaved'
+
+  // Original pricing constants
+  const TIER_PRICES = {
+    solo: 599,
+    live: 1299,
+    legacy: 1599
+  };
+
+  const ADDON_PRICES = {
+    photography: 400,
+    audioVisualSupport: 200,
+    liveMusician: 500,
+    woodenUsbDrives: 300 // First one, then $100 each
+  };
+
+  const HOURLY_OVERAGE_RATE = 125;
+  const ADDITIONAL_SERVICE_FEE = 325;
+
+  $: bookingItems = calculateBookingItems();
+  $: totalPrice = bookingItems.reduce((acc, item) => acc + item.total, 0);
+
+  function calculateBookingItems() {
+    const items = [];
+
+    // 1. Base Package
+    if (selectedTier) {
+      const price = TIER_PRICES[selectedTier as keyof typeof TIER_PRICES];
+      items.push({
+        name: `Tributestream ${selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)}`,
+        price: price,
+        quantity: 1,
+        total: price
+      });
+    }
+
+    // 2. Main Service Hourly Overage (over 2 hours)
+    const mainOverageHours = Math.max(0, mainServiceHours - 2);
+    if (mainOverageHours > 0) {
+      items.push({
+        name: 'Main Location Overage',
+        price: HOURLY_OVERAGE_RATE,
+        quantity: mainOverageHours,
+        total: HOURLY_OVERAGE_RATE * mainOverageHours
+      });
+    }
+
+    // 3. Additional Location
+    if (additionalLocation.enabled) {
+      items.push({
+        name: 'Additional Location Fee',
+        price: ADDITIONAL_SERVICE_FEE,
+        quantity: 1,
+        total: ADDITIONAL_SERVICE_FEE
+      });
+      const addlLocationOverage = Math.max(0, additionalLocation.hours - 2);
+      if (addlLocationOverage > 0) {
+        items.push({
+          name: 'Add. Location Overage',
+          price: HOURLY_OVERAGE_RATE,
+          quantity: addlLocationOverage,
+          total: HOURLY_OVERAGE_RATE * addlLocationOverage
+        });
+      }
+    }
+
+    // 4. Additional Day
+    if (additionalDay.enabled) {
+      items.push({
+        name: 'Additional Day Fee',
+        price: ADDITIONAL_SERVICE_FEE,
+        quantity: 1,
+        total: ADDITIONAL_SERVICE_FEE
+      });
+      const addlDayOverage = Math.max(0, additionalDay.hours - 2);
+      if (addlDayOverage > 0) {
+        items.push({
+          name: 'Add. Day Overage',
+          price: HOURLY_OVERAGE_RATE,
+          quantity: addlDayOverage,
+          total: HOURLY_OVERAGE_RATE * addlDayOverage
+        });
+      }
+    }
+
+    // 5. Add-ons
+    if (addons.photography) {
+      items.push({
+        name: 'Photography',
+        price: ADDON_PRICES.photography,
+        quantity: 1,
+        total: ADDON_PRICES.photography
+      });
+    }
+    if (addons.audioVisualSupport) {
+      items.push({
+        name: 'Audio/Visual Support',
+        price: ADDON_PRICES.audioVisualSupport,
+        quantity: 1,
+        total: ADDON_PRICES.audioVisualSupport
+      });
+    }
+    if (addons.liveMusician) {
+      items.push({
+        name: 'Live Musician',
+        price: ADDON_PRICES.liveMusician,
+        quantity: 1,
+        total: ADDON_PRICES.liveMusician
+      });
+    }
+    if (addons.woodenUsbDrives > 0) {
+      const isLegacy = selectedTier === 'legacy';
+      const usbDrives = addons.woodenUsbDrives;
+      const includedDrives = isLegacy ? 1 : 0;
+
+      if (usbDrives > includedDrives) {
+        const billableDrives = usbDrives - includedDrives;
+        // First billable drive logic
+        if (billableDrives > 0 && includedDrives === 0) {
+          items.push({
+            name: 'Wooden USB Drive',
+            price: ADDON_PRICES.woodenUsbDrives,
+            quantity: 1,
+            total: ADDON_PRICES.woodenUsbDrives
+          });
+          if (billableDrives > 1) {
+            items.push({
+              name: 'Additional Wooden USB Drives',
+              price: 100,
+              quantity: billableDrives - 1,
+              total: 100 * (billableDrives - 1)
+            });
+          }
+        } else {
+          items.push({
+            name: 'Additional Wooden USB Drives',
+            price: 100,
+            quantity: billableDrives,
+            total: 100 * billableDrives
+          });
+        }
+      }
+    }
+
+    return items;
+  }
+
+  function selectTier(tier: string) {
+    selectedTier = tier;
+    // Reset addons when changing tiers
+    addons = {
+      photography: false,
+      audioVisualSupport: false,
+      liveMusician: false,
+      woodenUsbDrives: selectedTier === 'legacy' ? 1 : 0 // Legacy includes 1 USB drive
+    };
+  }
+
+  function handleBookNow() {
+    const bookingData = {
+      items: bookingItems,
+      total: totalPrice
+    };
+    
+    const encodedData = encodeURIComponent(JSON.stringify(bookingData));
+    goto(`/payment?data=${encodedData}`);
+  }
+
+  function saveFormData() {
+    if (!browser) return;
+    
+    const formData = {
+      selectedTier,
+      mainServiceHours,
+      additionalLocation,
+      additionalDay,
+      addons,
+      savedAt: new Date().toISOString()
+    };
+    
+    localStorage.setItem('scheduleFormData', JSON.stringify(formData));
+    lastSaved = new Date().toLocaleTimeString();
+    saveStatus = 'saved';
+  }
+
+  function loadFormData() {
+    if (!browser) return;
+    
+    const saved = localStorage.getItem('scheduleFormData');
+    if (saved) {
+      try {
+        const formData = JSON.parse(saved);
+        selectedTier = formData.selectedTier || 'solo';
+        mainServiceHours = formData.mainServiceHours || 2;
+        additionalLocation = formData.additionalLocation || { enabled: false, hours: 2 };
+        additionalDay = formData.additionalDay || { enabled: false, hours: 2 };
+        addons = formData.addons || { photography: false, audioVisualSupport: false, liveMusician: false, woodenUsbDrives: 0 };
+        lastSaved = new Date(formData.savedAt).toLocaleTimeString();
+        saveStatus = 'saved';
+      } catch (e) {
+        console.warn('Failed to load saved form data:', e);
+      }
+    }
+  }
+
+  function autoSave() {
+    saveStatus = 'saving';
+    if (autoSaveTimeout) {
+      clearTimeout(autoSaveTimeout);
+    }
+    
+    autoSaveTimeout = setTimeout(() => {
+      saveFormData();
+    }, 1000); // Auto-save after 1 second of inactivity
+  }
+
+  function handleSaveAndPayLater() {
+    saveFormData();
+    goto('/profile');
+  }
+
+  // Watch for changes and trigger auto-save
+  $: if (browser && (selectedTier || mainServiceHours || additionalLocation || additionalDay || addons)) {
+    if (saveStatus === 'saved') {
+      saveStatus = 'unsaved';
+    }
+    autoSave();
+  }
+
+  onMount(() => {
+    loadFormData();
+  });
+
+  const tiers = [
+    {
+      name: 'Tributestream Solo',
+      alias: 'solo',
+      price: 599,
+      features: [
+        '2 Hours of Broadcast Time',
+        'Custom Link',
+        'Complimentary Download',
+        'One Year Hosting',
+        'DIY Livestream Kit'
+      ]
+    },
+    {
+      name: 'Tributestream Live',
+      alias: 'live',
+      price: 1299,
+      features: [
+        '2 Hours of Broadcast Time',
+        'Custom Link',
+        'Complimentary Download',
+        'One Year Hosting',
+        'Professional Videographer',
+        'Professional Livestream Tech'
+      ]
+    },
+    {
+      name: 'Tributestream Legacy',
+      alias: 'legacy',
+      price: 1599,
+      features: [
+        '2 Hours of Broadcast Time',
+        'Custom Link',
+        'Complimentary Download',
+        'One Year Hosting',
+        'Professional Videographer',
+        'Professional Livestream Tech',
+        'Video Editing',
+        'Engraved USB Drive and Wooden Keepsake Box'
+      ]
+    }
+  ];
+</script>
+
+<svelte:head>
+  <title>Price Calculator - TributeStream</title>
+  <meta name="description" content="Calculate the cost of your memorial service with our interactive pricing calculator." />
+</svelte:head>
+
+<!-- Header -->
+<section class="bg-gradient-to-br from-black via-gray-900 to-amber-900 text-white py-16">
+  <div class="max-w-4xl mx-auto px-4 text-center">
+    <div class="flex items-center justify-center mb-6">
+      <Calculator class="w-12 h-12 text-amber-400 mr-4" />
+      <h1 class="text-4xl font-bold bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent">
+        TributeStream Pricing Calculator
+      </h1>
+    </div>
+    <p class="text-xl text-gray-300 max-w-2xl mx-auto">
+      Configure your memorial service livestream package with our comprehensive pricing calculator
+    </p>
+    
+    <!-- Auto-save status indicator -->
+    {#if browser}
+      <div class="mt-4 flex items-center justify-center space-x-2 text-sm">
+        <div class="flex items-center space-x-1">
+          {#if saveStatus === 'saving'}
+            <div class="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
+            <span class="text-amber-400">Saving...</span>
+          {:else if saveStatus === 'saved'}
+            <div class="w-2 h-2 bg-green-400 rounded-full"></div>
+            <span class="text-green-400">Saved {lastSaved}</span>
+          {:else}
+            <div class="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+            <span class="text-yellow-400">Unsaved changes</span>
+          {/if}
+        </div>
+      </div>
+    {/if}
+  </div>
+</section>
+
+<!-- Calculator Section -->
+<section class="py-12 px-4 bg-gray-900">
+  <div class="max-w-6xl mx-auto">
+    <div class="grid lg:grid-cols-3 gap-8">
+      <!-- Configuration Panel -->
+      <div class="lg:col-span-2 space-y-8">
+        
+        <!-- Package Selection -->
+        <div class="bg-black/80 backdrop-blur-sm rounded-lg shadow-lg p-6 border border-amber-500/20">
+          <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+            <Star class="h-6 w-6 mr-2 text-amber-400" />
+            Choose Your TributeStream Package
+          </h2>
+          
+          <div class="grid md:grid-cols-3 gap-4">
+            {#each tiers as tier}
+              <button 
+                class="p-4 border-2 rounded-lg transition-all text-left {selectedTier === tier.alias ? 'border-amber-400 bg-amber-400/10' : 'border-gray-600 hover:border-amber-500/50'}"
+                on:click={() => selectTier(tier.alias)}
+              >
+                <h3 class="font-bold text-lg mb-2 text-white">{tier.name}</h3>
+                <p class="text-2xl font-bold text-amber-400 mb-3">${tier.price}</p>
+                <ul class="text-sm text-gray-300 space-y-1">
+                  {#each tier.features as feature}
+                    <li class="flex items-start">
+                      <span class="text-amber-400 mr-2">✓</span>
+                      {feature}
+                    </li>
+                  {/each}
+                </ul>
+              </button>
+            {/each}
+          </div>
+        </div>
+
+        <!-- Service Duration -->
+        <div class="bg-black/80 backdrop-blur-sm rounded-lg shadow-lg p-6 border border-amber-500/20">
+          <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+            <Clock class="h-6 w-6 mr-2 text-amber-400" />
+            Service Duration
+          </h2>
+          
+          <div class="space-y-4">
+            <div>
+              <label for="main-service-hours" class="block text-sm font-medium text-gray-300 mb-2">
+                Main Service Hours (2 hours included, ${HOURLY_OVERAGE_RATE}/hour overage)
+              </label>
+              <input 
+                id="main-service-hours"
+                type="range" 
+                min="1" 
+                max="8" 
+                step="1"
+                bind:value={mainServiceHours}
+                class="w-full gold-slider"
+              />
+              <div class="flex justify-between text-sm text-gray-400 mt-1">
+                <span>1 hour</span>
+                <span class="font-medium text-amber-400">{mainServiceHours} hours</span>
+                <span>8+ hours</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Additional Locations & Days -->
+        <div class="bg-black/80 backdrop-blur-sm rounded-lg shadow-lg p-6 border border-amber-500/20">
+          <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+            <MapPin class="h-6 w-6 mr-2 text-amber-400" />
+            Additional Services
+          </h2>
+          
+          <div class="space-y-6">
+            <!-- Additional Location -->
+            <div class="border border-gray-700 rounded-lg p-4 bg-gray-800/50">
+              <label class="flex items-center justify-between mb-4">
+                <div>
+                  <span class="font-medium text-white">Additional Location</span>
+                  <p class="text-sm text-gray-400">Stream from a second location (+${ADDITIONAL_SERVICE_FEE})</p>
+                </div>
+                <input 
+                  type="checkbox" 
+                  bind:checked={additionalLocation.enabled}
+                  class="h-5 w-5 text-amber-400 bg-gray-700 border-gray-600 rounded focus:ring-amber-500"
+                />
+              </label>
+              
+              {#if additionalLocation.enabled}
+                <div>
+                  <label for="additional-location-hours" class="block text-sm font-medium text-gray-300 mb-2">
+                    Additional Location Hours (2 hours included, ${HOURLY_OVERAGE_RATE}/hour overage)
+                  </label>
+                  <input 
+                    id="additional-location-hours"
+                    type="range" 
+                    min="1" 
+                    max="8" 
+                    step="1"
+                    bind:value={additionalLocation.hours}
+                    class="w-full gold-slider"
+                  />
+                  <div class="flex justify-between text-sm text-gray-400 mt-1">
+                    <span>1 hour</span>
+                    <span class="font-medium text-amber-400">{additionalLocation.hours} hours</span>
+                    <span>8+ hours</span>
+                  </div>
+                </div>
+              {/if}
+            </div>
+
+            <!-- Additional Day -->
+            <div class="border border-gray-700 rounded-lg p-4 bg-gray-800/50">
+              <label class="flex items-center justify-between mb-4">
+                <div>
+                  <span class="font-medium text-white">Additional Day</span>
+                  <p class="text-sm text-gray-400">Stream on a second day (+${ADDITIONAL_SERVICE_FEE})</p>
+                </div>
+                <input 
+                  type="checkbox" 
+                  bind:checked={additionalDay.enabled}
+                  class="h-5 w-5 text-amber-400 bg-gray-700 border-gray-600 rounded focus:ring-amber-500"
+                />
+              </label>
+              
+              {#if additionalDay.enabled}
+                <div>
+                  <label for="additional-day-hours" class="block text-sm font-medium text-gray-300 mb-2">
+                    Additional Day Hours (2 hours included, ${HOURLY_OVERAGE_RATE}/hour overage)
+                  </label>
+                  <input 
+                    id="additional-day-hours"
+                    type="range" 
+                    min="1" 
+                    max="8" 
+                    step="1"
+                    bind:value={additionalDay.hours}
+                    class="w-full gold-slider"
+                  />
+                  <div class="flex justify-between text-sm text-gray-400 mt-1">
+                    <span>1 hour</span>
+                    <span class="font-medium text-amber-400">{additionalDay.hours} hours</span>
+                    <span>8+ hours</span>
+                  </div>
+                </div>
+              {/if}
+            </div>
+          </div>
+        </div>
+
+        <!-- Add-ons -->
+        <div class="bg-black/80 backdrop-blur-sm rounded-lg shadow-lg p-6 border border-amber-500/20">
+          <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+            <Camera class="h-6 w-6 mr-2 text-amber-400" />
+            Add-on Services
+          </h2>
+          
+          <div class="space-y-4">
+            <label class="flex items-center justify-between p-4 border border-gray-700 rounded-lg hover:bg-gray-800/50 transition-colors">
+              <div>
+                <span class="font-medium text-white">Photography</span>
+                <p class="text-sm text-gray-400">Professional photography service</p>
+              </div>
+              <div class="flex items-center">
+                <span class="text-amber-400 font-bold mr-4">+${ADDON_PRICES.photography}</span>
+                <input 
+                  type="checkbox" 
+                  bind:checked={addons.photography}
+                  class="h-5 w-5 text-amber-400 bg-gray-700 border-gray-600 rounded focus:ring-amber-500"
+                />
+              </div>
+            </label>
+
+            <label class="flex items-center justify-between p-4 border border-gray-700 rounded-lg hover:bg-gray-800/50 transition-colors">
+              <div>
+                <span class="font-medium text-white">Audio/Visual Support</span>
+                <p class="text-sm text-gray-400">Professional A/V technical support</p>
+              </div>
+              <div class="flex items-center">
+                <span class="text-amber-400 font-bold mr-4">+${ADDON_PRICES.audioVisualSupport}</span>
+                <input 
+                  type="checkbox" 
+                  bind:checked={addons.audioVisualSupport}
+                  class="h-5 w-5 text-amber-400 bg-gray-700 border-gray-600 rounded focus:ring-amber-500"
+                />
+              </div>
+            </label>
+
+            <label class="flex items-center justify-between p-4 border border-gray-700 rounded-lg hover:bg-gray-800/50 transition-colors">
+              <div>
+                <span class="font-medium text-white">Live Musician</span>
+                <p class="text-sm text-gray-400">Professional live musical performance</p>
+              </div>
+              <div class="flex items-center">
+                <span class="text-amber-400 font-bold mr-4">+${ADDON_PRICES.liveMusician}</span>
+                <input 
+                  type="checkbox" 
+                  bind:checked={addons.liveMusician}
+                  class="h-5 w-5 text-amber-400 bg-gray-700 border-gray-600 rounded focus:ring-amber-500"
+                />
+              </div>
+            </label>
+
+            <div class="p-4 border border-gray-700 rounded-lg bg-gray-800/50">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <span class="font-medium text-white">Wooden USB Drives</span>
+                  <p class="text-sm text-gray-400">
+                    {#if selectedTier === 'legacy'}
+                      First drive included with Legacy. Additional drives: first +${ADDON_PRICES.woodenUsbDrives}, then +$100 each
+                    {:else}
+                      First drive +${ADDON_PRICES.woodenUsbDrives}, additional drives +$100 each
+                    {/if}
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-center space-x-4">
+                <label for="usb-drives-quantity" class="block text-sm font-medium text-gray-300">
+                  Quantity:
+                </label>
+                <input 
+                  id="usb-drives-quantity"
+                  type="number" 
+                  min="0" 
+                  max="10"
+                  bind:value={addons.woodenUsbDrives}
+                  class="w-20 p-2 border border-gray-600 rounded bg-gray-700 text-white focus:ring-amber-500 focus:border-amber-500"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Price Summary -->
+      <div class="lg:col-span-1">
+        <div class="bg-black/80 backdrop-blur-sm rounded-lg shadow-lg p-6 sticky top-8 border border-amber-500/20">
+          <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+            <DollarSign class="h-6 w-6 mr-2 text-amber-400" />
+            Price Breakdown
+          </h2>
+          
+          <div class="space-y-3 mb-6">
+            {#each bookingItems as item}
+              <div class="flex justify-between text-sm">
+                <span class="flex-1 text-gray-300">
+                  {item.name}
+                  {#if item.quantity > 1}
+                    <span class="text-gray-500">({item.quantity}x ${item.price})</span>
+                  {/if}
+                </span>
+                <span class="font-medium text-white">${item.total}</span>
+              </div>
+            {/each}
+          </div>
+          
+          <div class="border-t border-gray-700 pt-4">
+            <div class="flex justify-between items-center text-2xl font-bold">
+              <span class="text-white">Total</span>
+              <span class="text-amber-400">${totalPrice}</span>
+            </div>
+            <p class="text-sm text-gray-400 mt-2">One-time payment</p>
+          </div>
+          
+          <div class="mt-6 space-y-3">
+            <button 
+              on:click={handleBookNow}
+              class="w-full bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-black py-3 px-6 rounded-lg font-medium transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/25"
+            >
+              Book Now
+            </button>
+            <button 
+              on:click={handleSaveAndPayLater}
+              class="w-full border border-amber-500 hover:bg-amber-500/10 text-amber-400 hover:text-amber-300 py-3 px-6 rounded-lg font-medium transition-colors"
+            >
+              Save and Pay Later
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .gold-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 6px;
+    background: linear-gradient(to right, #374151 0%, #374151 100%);
+    border-radius: 3px;
+    outline: none;
+  }
+  
+  .gold-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+  }
+  
+  .gold-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+  }
+</style>

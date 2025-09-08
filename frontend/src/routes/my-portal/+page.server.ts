@@ -29,10 +29,17 @@ export const load: PageServerLoad = async ({ locals }) => {
 					.where('createdByUserId', '==', uid)
 					.get();
 				
-				memorials = ownerMemorialsSnap.docs.map(doc => ({
-					id: doc.id,
-					...doc.data()
-				})) as Memorial[];
+				memorials = ownerMemorialsSnap.docs.map(doc => {
+					const data = doc.data();
+					return {
+						id: doc.id,
+						...data,
+						// Convert Firestore Timestamps to serializable dates
+						createdAt: data.createdAt?.toDate?.() || data.createdAt,
+						updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
+						serviceDate: data.serviceDate?.toDate?.() || data.serviceDate
+					};
+				}) as Memorial[];
 
 				// Load invitations sent by this user
 				const sentInvitationsSnap = await adminDb
@@ -40,10 +47,18 @@ export const load: PageServerLoad = async ({ locals }) => {
 					.where('invitedByUid', '==', uid)
 					.get();
 				
-				invitations = sentInvitationsSnap.docs.map(doc => ({
-					id: doc.id,
-					...doc.data()
-				})) as Invitation[];
+				invitations = sentInvitationsSnap.docs.map(doc => {
+					const data = doc.data();
+					return {
+						id: doc.id,
+						...data,
+						// Convert Firestore Timestamps to serializable dates
+						createdAt: data.createdAt?.toDate?.() || data.createdAt,
+						updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
+						sentAt: data.sentAt?.toDate?.() || data.sentAt,
+						acceptedAt: data.acceptedAt?.toDate?.() || data.acceptedAt
+					};
+				}) as Invitation[];
 
 				console.log(`✅ Loaded ${memorials.length} memorials and ${invitations.length} invitations for owner`);
 				break;
@@ -67,10 +82,17 @@ export const load: PageServerLoad = async ({ locals }) => {
 						.where('__name__', 'in', memorialIds)
 						.get();
 					
-					memorials = familyMemorialsSnap.docs.map(doc => ({
-						id: doc.id,
-						...doc.data()
-					})) as Memorial[];
+					memorials = familyMemorialsSnap.docs.map(doc => {
+						const data = doc.data();
+						return {
+							id: doc.id,
+							...data,
+							// Convert Firestore Timestamps to serializable dates
+							createdAt: data.createdAt?.toDate?.() || data.createdAt,
+							updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
+							serviceDate: data.serviceDate?.toDate?.() || data.serviceDate
+						};
+					}) as Memorial[];
 				}
 
 				console.log(`✅ Loaded ${memorials.length} accessible memorials for family member`);
@@ -100,10 +122,19 @@ export const load: PageServerLoad = async ({ locals }) => {
 					const memorialDocs = await Promise.all(memorialPromises);
 					memorials = memorialDocs
 						.filter(doc => doc.exists)
-						.map(doc => ({
-							id: doc.id,
-							...doc.data()
-						})) as Memorial[];
+						.map(doc => {
+							const data = doc.data();
+							if (!data) return null;
+							return {
+								id: doc.id,
+								...data,
+								// Convert Firestore Timestamps to serializable dates
+								createdAt: data.createdAt?.toDate?.() || data.createdAt,
+								updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
+								serviceDate: data.serviceDate?.toDate?.() || data.serviceDate
+							};
+						})
+						.filter(memorial => memorial !== null) as Memorial[];
 				}
 
 				console.log(`✅ Loaded ${memorials.length} followed memorials for viewer`);
@@ -117,10 +148,17 @@ export const load: PageServerLoad = async ({ locals }) => {
 					.where('funeralDirectorUid', '==', uid)
 					.get();
 				
-				memorials = fdMemorialsSnap.docs.map(doc => ({
-					id: doc.id,
-					...doc.data()
-				})) as Memorial[];
+				memorials = fdMemorialsSnap.docs.map(doc => {
+					const data = doc.data();
+					return {
+						id: doc.id,
+						...data,
+						// Convert Firestore Timestamps to serializable dates
+						createdAt: data.createdAt?.toDate?.() || data.createdAt,
+						updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
+						serviceDate: data.serviceDate?.toDate?.() || data.serviceDate
+					};
+				}) as Memorial[];
 
 				console.log(`✅ Loaded ${memorials.length} assigned memorials for funeral director`);
 				break;

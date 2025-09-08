@@ -253,13 +253,13 @@
 												</div>
 											</div>
 											<div class="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-												<button
-													onclick={() => openScheduleModal(memorial)}
+												<a
+													href="/schedule"
 													class="px-4 py-2 rounded-xl bg-blue-600 text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center"
 												>
 													<Clock class="w-3 h-3 mr-1" />
 													Schedule
-												</button>
+												</a>
 												<a 
 													href="/tributes/{memorial.slug}"
 													class="px-4 py-2 rounded-xl bg-gradient-to-r {roleInfo.gradient} text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105"

@@ -16,7 +16,8 @@
 		"test:unit:watch": "vitest",
 		"test:coverage": "vitest run --coverage",
 		"test:e2e": "playwright test",
-		"test": "npm run test:unit && npm run test:e2e"
+		"test": "npm run test:unit && npm run test:e2e",
+		"create-admin": "node scripts/create-admin.js"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",

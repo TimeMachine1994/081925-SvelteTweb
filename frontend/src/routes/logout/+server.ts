@@ -16,7 +16,7 @@ export const GET: RequestHandler = async ({ cookies }) => {
 
 	console.log('Logging out...');
 	cookies.delete('session', { path: '/' });
-	redirect(303, '/login');
+	redirect(303, '/');
 };
 
 export const POST: RequestHandler = async ({ cookies }) => {
@@ -33,5 +33,5 @@ export const POST: RequestHandler = async ({ cookies }) => {
 
 	console.log('Logging out...');
 	cookies.delete('session', { path: '/' });
-	redirect(303, '/login');
+	redirect(303, '/');
 };
