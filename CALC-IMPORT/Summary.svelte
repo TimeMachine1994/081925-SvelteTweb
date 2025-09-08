@@ -1,10 +1,20 @@
 <script lang="ts">
 	import type { BookingItem } from '$lib/types/livestream';
-	import { onMount, createEventDispatcher } from 'svelte';
+	import { onMount } from 'svelte';
 
-	const dispatch = createEventDispatcher();
-
-	let { bookingItems, total } = $props<{ bookingItems: BookingItem[]; total: number }>();
+	let { 
+		bookingItems, 
+		total, 
+		onsave, 
+		onpay, 
+		onpayNow 
+	}: { 
+		bookingItems: BookingItem[]; 
+		total: number; 
+		onsave: () => void;
+		onpay: () => void;
+		onpayNow: () => void;
+	} = $props();
 
 	console.log('🧾 Summary Component Initializing...', { bookingItems, total });
 	$inspect(bookingItems, total);
@@ -93,8 +103,8 @@
 	{/if}
 
 	<div class="grid grid-cols-2 gap-2 pt-4">
-		<button class="btn preset-tonal-surface" onclick={() => { console.log('💾 Dispatching save event'); dispatch('save'); }}>Save and Pay Later</button>
-		<button class="btn preset-tonal-surface" onclick={() => { console.log('💳 Dispatching payNow event'); dispatch('payNow'); }}>Pay Now</button>
-		<button class="btn preset-filled-primary col-span-2" onclick={() => { console.log('💳 Dispatching pay event'); dispatch('pay'); }}>Continue to Payment</button>
+		<button class="btn preset-tonal-surface" onclick={() => { console.log('💾 Calling save function'); onsave(); }}>Save and Pay Later</button>
+		<button class="btn preset-tonal-surface" onclick={() => { console.log('💳 Calling payNow function'); onpayNow(); }}>Pay Now</button>
+		<button class="btn preset-filled-primary col-span-2" onclick={() => { console.log('💳 Calling pay function'); onpay(); }}>Continue to Payment</button>
 	</div>
 </div>

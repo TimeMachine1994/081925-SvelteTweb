@@ -34,7 +34,7 @@
 
 	let clientSecret = $state<string | null>(null);
 	let configId = $state<string | null>(null);
-	let selectedTier = $state<Tier>(null);
+	let selectedTier = $state<Tier>('solo');
 
 	let formData = $state<CalculatorFormData>({
 		lovedOneName: '',
@@ -265,7 +265,7 @@
 			photography: false,
 			audioVisualSupport: false,
 			liveMusician: false,
-			woodenUsbDrives: 0
+			woodenUsbDrives: tier === 'legacy' ? 1 : 0
 		};
 	}
 
@@ -436,7 +436,7 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
 	<div class="lg:col-span-2 space-y-8">
 		{#if currentStep === 'tier'}
-			<TierSelector {selectedTier} on:change={(e) => handleTierChange(e.detail)} />
+			<TierSelector {selectedTier} onchange={handleTierChange} />
 		{:else if currentStep === 'details'}
 			<ServiceDetailsForm bind:formData />
 		{:else if currentStep === 'addons'}
@@ -452,9 +452,9 @@
 		<Summary
 			{bookingItems}
 			{total}
-			on:save={() => saveAndPayLater()}
-			on:pay={proceedToPayment}
-			on:payNow={handlePayNow}
+			onsave={() => saveAndPayLater()}
+			onpay={proceedToPayment}
+			onpayNow={handlePayNow}
 		/>
 		<div class="mt-4 flex justify-between">
 			<button class="btn preset-tonal-surface" onclick={prevStep} disabled={currentStepIndex === 0}>

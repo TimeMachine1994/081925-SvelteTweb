@@ -104,9 +104,6 @@
 			<!-- Memorial Card -->
 			<MemorialCard memorial={currentMemorial} />
 
-			<!-- Action Buttons -->
-			<ActionButtons memorial={currentMemorial} />
-
 			<!-- Livestream Schedule Table -->
 			<LivestreamScheduleTable memorial={currentMemorial} />
 

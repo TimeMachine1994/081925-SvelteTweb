@@ -35,13 +35,27 @@ export interface Addons {
 }
 
 export interface CalculatorFormData {
+	// Memorial context
+	memorialId?: string;
 	lovedOneName: string;
+	
+	// Service configuration
+	selectedTier: Tier;
 	mainService: ServiceDetails;
 	additionalLocation: AdditionalServiceDetails;
 	additionalDay: AdditionalServiceDetails;
+	
+	// Contact information
 	funeralDirectorName: string;
 	funeralHome: string;
+	
+	// Add-ons
 	addons: Addons;
+	
+	// Metadata
+	createdAt?: Date;
+	updatedAt?: Date;
+	autoSaved?: boolean;
 }
 
 export interface BookingItem {
@@ -60,7 +74,35 @@ export interface LivestreamConfig {
 	total: number;
 	userId: string;
 	memorialId: string;
-	status: 'saved' | 'pending_payment' | 'paid';
+	status: 'draft' | 'saved' | 'pending_payment' | 'paid' | 'confirmed';
 	createdAt: Timestamp;
+	lastModified: Timestamp;
+	lastModifiedBy: string;
 	paymentIntentId?: string;
+}
+
+// Payment tracking interface
+export interface PaymentRecord {
+	paymentIntentId: string;
+	status: 'pending' | 'succeeded' | 'failed';
+	amount: number;
+	createdAt: Timestamp;
+	paidAt?: Timestamp;
+}
+
+// Unified calculator configuration for Firestore
+export interface CalculatorConfig {
+	formData: CalculatorFormData;
+	bookingItems: BookingItem[];
+	total: number;
+	lastModified: Timestamp;
+	lastModifiedBy: string;
+	status: 'draft' | 'saved' | 'paid' | 'confirmed';
+	autoSave?: {
+		formData: CalculatorFormData;
+		lastModified: Date;
+		lastModifiedBy: string;
+		timestamp: number;
+		autoSave: boolean;
+	};
 }

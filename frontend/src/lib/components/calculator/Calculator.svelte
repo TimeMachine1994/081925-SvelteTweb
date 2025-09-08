@@ -27,7 +27,7 @@
 	let currentStep = $state<'booking' | 'payment' | 'payNow'>('booking');
 	let clientSecret = $state<string | null>(null);
 	let configId = $state<string | null>(null);
-	let selectedTier = $state<Tier>(null);
+	let selectedTier = $state<Tier>('solo');
 	
 	// Auto-save functionality
 	let autoSaveEnabled = $state(false);
@@ -299,7 +299,7 @@
 			photography: false,
 			audioVisualSupport: false,
 			liveMusician: false,
-			woodenUsbDrives: 0
+			woodenUsbDrives: tier === 'legacy' ? 1 : 0
 		};
 		
 		// Trigger auto-save when tier changes
@@ -494,7 +494,7 @@
 		{/if}
 
 		{#if currentStep === 'booking'}
-			<TierSelector {selectedTier} on:change={(e) => handleTierChange(e.detail)} />
+			<TierSelector {selectedTier} onchange={handleTierChange} />
 			{#if selectedTier}
 				<BookingForm bind:formData />
 			{/if}
@@ -519,7 +519,7 @@
 	</div>
 
 	<div class="lg:col-span-1">
-		<Summary {bookingItems} {total} on:save={() => saveAndPayLater()} on:pay={proceedToPayment} on:payNow={handlePayNow} />
+		<Summary {bookingItems} {total} onsave={() => saveAndPayLater()} onpay={proceedToPayment} onpayNow={handlePayNow} />
 		
 		<!-- Auto-save Info Panel -->
 		{#if autoSaveEnabled && autoSave}

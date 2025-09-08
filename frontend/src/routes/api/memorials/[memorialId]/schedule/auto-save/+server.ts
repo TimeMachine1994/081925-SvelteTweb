@@ -1,7 +1,8 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { adminAuth, adminDb } from '$lib/firebase-admin';
-import type { CalculatorFormData } from '$lib/types/livestream';
+import type { CalculatorFormData, CalculatorConfig } from '$lib/types/livestream';
+import { Timestamp } from 'firebase-admin/firestore';
 
 export const POST: RequestHandler = async ({ request, params, locals }) => {
 	console.log('💾 Auto-save schedule API called for memorial:', params.memorialId);
@@ -44,10 +45,11 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 		const userRole = locals.user.role;
 		const userId = locals.user.uid;
 
-		// Check permissions
+		// Check permissions - handle both ownerUid and createdByUserId fields
 		const hasPermission = 
 			userRole === 'admin' ||
 			memorial?.ownerUid === userId ||
+			memorial?.createdByUserId === userId ||
 			memorial?.funeralDirectorUid === userId ||
 			(userRole === 'family_member' && memorial?.familyMemberUids?.includes(userId));
 
@@ -56,31 +58,42 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 				userRole,
 				userId,
 				ownerUid: memorial?.ownerUid,
+				createdByUserId: memorial?.createdByUserId,
 				funeralDirectorUid: memorial?.funeralDirectorUid
 			});
 			return json({ error: 'Insufficient permissions' }, { status: 403 });
 		}
 
-		// Create auto-save data structure
-		const autoSaveData = {
-			formData: formData as CalculatorFormData,
+		// Create unified calculator config structure
+		const calculatorConfig: Partial<CalculatorConfig> = {
+			formData: {
+				...formData as CalculatorFormData,
+				memorialId,
+				updatedAt: new Date(),
+				autoSaved: true
+			},
 			lastModified: new Date(),
 			lastModifiedBy: userId,
-			autoSave: true,
-			timestamp: timestamp || Date.now()
+			status: 'draft',
+			autoSave: {
+				formData: formData as CalculatorFormData,
+				lastModified: new Date(),
+				lastModifiedBy: userId,
+				timestamp: timestamp || Date.now(),
+				autoSave: true
+			}
 		};
 
-		// Save to memorial's livestreamConfig with auto-save flag
+		// Save to memorial's calculatorConfig
 		await memorialRef.update({
-			'livestreamConfig.autoSave': autoSaveData,
-			'livestreamConfig.lastAutoSave': new Date()
+			calculatorConfig: calculatorConfig
 		});
 
 		console.log('✅ Schedule auto-saved successfully for memorial:', memorialId);
 
 		return json({
 			success: true,
-			timestamp: autoSaveData.timestamp,
+			timestamp: timestamp || Date.now(),
 			message: 'Schedule auto-saved successfully'
 		});
 
@@ -119,10 +132,11 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		const userRole = locals.user.role;
 		const userId = locals.user.uid;
 
-		// Check permissions
+		// Check permissions - handle both ownerUid and createdByUserId fields
 		const hasPermission = 
 			userRole === 'admin' ||
 			memorial?.ownerUid === userId ||
+			memorial?.createdByUserId === userId ||
 			memorial?.funeralDirectorUid === userId ||
 			(userRole === 'family_member' && memorial?.familyMemberUids?.includes(userId));
 
@@ -130,15 +144,16 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 			return json({ error: 'Insufficient permissions' }, { status: 403 });
 		}
 
-		// Return auto-saved data if it exists
-		const autoSaveData = memorial?.livestreamConfig?.autoSave;
+		// Return calculator config data if it exists
+		const calculatorConfig = memorial?.calculatorConfig;
 		
-		if (autoSaveData) {
+		if (calculatorConfig && calculatorConfig.autoSave) {
 			console.log('✅ Auto-saved schedule found for memorial:', memorialId);
 			return json({
 				success: true,
-				autoSave: autoSaveData,
-				hasAutoSave: true
+				autoSave: calculatorConfig.autoSave,
+				hasAutoSave: true,
+				calculatorConfig: calculatorConfig
 			});
 		} else {
 			console.log('ℹ️ No auto-saved schedule found for memorial:', memorialId);

@@ -66,7 +66,7 @@
             <h5>h5: The quick brown fox jumps over the lazy dog</h5>
             <h6>h6: The quick brown fox jumps over the lazy dog</h6>
             <p>
-              p: The quick brown fox jumps over the lazy dog. This is a paragraph of text to demonstrate the default body copy style. It also includes a <a href="#" class="text-primary hover:underline">link</a> to show how hyperlinks are styled.
+              p: The quick brown fox jumps over the lazy dog. This is a paragraph of text to demonstrate the default body copy style. It also includes a <a href="/example" class="text-primary hover:underline">link</a> to show how hyperlinks are styled.
             </p>
             <blockquote>
               "This is a blockquote. It's used for pulling out important statements or quotes."

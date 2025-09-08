@@ -1,66 +1,70 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { Resend } from 'resend';
 
-// You'll need to install nodemailer or use a service like SendGrid/Mailgun
-// import nodemailer from 'nodemailer';
+// Initialize Resend
+const resend = new Resend(process.env.RESEND_API_KEY || 'mock_key');
 
 export const POST: RequestHandler = async ({ request }) => {
   try {
-    const { receiptData, customerEmail } = await request.json();
+    const { memorialId, paymentIntentId, customerEmail, lovedOneName, amount } = await request.json();
 
-    if (!receiptData || !customerEmail) {
+    if (!memorialId || !paymentIntentId || !customerEmail || !lovedOneName || !amount) {
       return json({ error: 'Missing required data' }, { status: 400 });
     }
 
     console.log('📧 Sending confirmation email to:', customerEmail);
 
-    // Mock email sending for development
-    // TODO: Replace with actual email service integration
-    
-    /* 
-    // Example with nodemailer (configure with your email service):
-    const transporter = nodemailer.createTransporter({
-      host: process.env.SMTP_HOST,
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
+    // Generate email content
+    const emailHtml = generateConfirmationEmailHTML({
+      memorialId,
+      paymentIntentId,
+      customerEmail,
+      lovedOneName,
+      amount,
+      paymentDate: new Date()
     });
 
-    const emailHtml = generateConfirmationEmailHTML(receiptData);
-    
-    await transporter.sendMail({
-      from: '"TributeStream" <noreply@tributestream.com>',
-      to: customerEmail,
-      subject: 'TributeStream Service Confirmation - Payment Received',
-      html: emailHtml,
-    });
-    */
+    // Send email with Resend
+    if (process.env.RESEND_API_KEY && process.env.RESEND_API_KEY !== 'mock_key') {
+      await resend.emails.send({
+        from: process.env.FROM_EMAIL || 'TributeStream <noreply@tributestream.com>',
+        to: customerEmail,
+        subject: `TributeStream Service Confirmation - ${lovedOneName}`,
+        html: emailHtml,
+      });
 
-    // Simulate email sending delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    console.log('✅ Confirmation email sent successfully (mock)');
+      console.log('✅ Confirmation email sent successfully via Resend');
+    } else {
+      // Mock for development
+      console.log('✅ Confirmation email sent successfully (mock - configure RESEND_API_KEY for production)');
+    }
 
     return json({ 
       success: true, 
-      message: 'Confirmation email sent successfully',
-      development_mode: true 
+      message: 'Confirmation email sent successfully'
     });
 
   } catch (error) {
     console.error('Failed to send confirmation email:', error);
     return json(
-      { error: 'Failed to send confirmation email' },
+      { error: 'Failed to send confirmation email', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
 };
 
-function generateConfirmationEmailHTML(receiptData: any): string {
-  const { customerInfo, bookingData, paymentIntentId, paymentDate } = receiptData;
+interface EmailData {
+  memorialId: string;
+  paymentIntentId: string;
+  customerEmail: string;
+  lovedOneName: string;
+  amount: number;
+  paymentDate: Date;
+}
+
+function generateConfirmationEmailHTML(data: EmailData): string {
+  const { memorialId, paymentIntentId, customerEmail, lovedOneName, amount, paymentDate } = data;
   
   return `
 <!DOCTYPE html>
@@ -86,30 +90,23 @@ function generateConfirmationEmailHTML(receiptData: any): string {
     </div>
     
     <div class="content">
-      <p>Dear ${customerInfo.firstName} ${customerInfo.lastName},</p>
+      <p>Dear Customer,</p>
       
-      <p>Thank you for choosing TributeStream! Your payment has been successfully processed and your memorial service has been confirmed.</p>
+      <p>Thank you for choosing TributeStream! Your payment has been successfully processed and your memorial service for <strong>${lovedOneName}</strong> has been confirmed.</p>
       
       <div class="receipt-box">
-        <h3>📋 Booking Details</h3>
+        <h3>📋 Payment Details</h3>
+        <p><strong>Memorial:</strong> ${lovedOneName}</p>
         <p><strong>Payment ID:</strong> ${paymentIntentId}</p>
-        <p><strong>Payment Date:</strong> ${new Date(paymentDate).toLocaleDateString()}</p>
-        <p><strong>Email:</strong> ${customerInfo.email}</p>
-        
-        <h4>Services Ordered:</h4>
-        <ul>
-          ${bookingData.items.map(item => 
-            `<li>${item.name}${item.quantity > 1 ? ` (${item.quantity}x)` : ''}: $${item.total}</li>`
-          ).join('')}
-        </ul>
-        
-        <p class="total">Total Paid: $${bookingData.total}</p>
+        <p><strong>Payment Date:</strong> ${paymentDate.toLocaleDateString()}</p>
+        <p><strong>Email:</strong> ${customerEmail}</p>
+        <p class="total">Total Paid: $${amount.toFixed(2)}</p>
       </div>
       
       <div class="receipt-box">
         <h3>📅 What's Next?</h3>
         <ul>
-          <li>Your schedule has been locked and confirmed</li>
+          <li>Your memorial service schedule has been confirmed</li>
           <li>Our team will contact you within 24 hours to coordinate service details</li>
           <li>You can access your booking anytime in your TributeStream portal</li>
           <li>We'll send additional information about your service setup closer to the date</li>

@@ -9,21 +9,21 @@
 
   let { data } = $props();
   
-  // Payment data from URL params
-  let bookingData: any = null;
-  let stripe: any = null;
-  let elements: any = null;
-  let cardElement: any = null;
+  // Payment data from URL params or server data
+  let bookingData = $state(data?.bookingData || null);
+  let stripe: any = $state(null);
+  let elements: any = $state(null);
+  let cardElement: any = $state(null);
   
-  // Form state
-  let isProcessing = false;
-  let paymentError = '';
-  let paymentSuccess = false;
-  let retryCount = 0;
-  let canRetry = true;
+  // Form state using runes
+  let isProcessing = $state(false);
+  let paymentError = $state('');
+  let paymentSuccess = $state(false);
+  let retryCount = $state(0);
+  let canRetry = $state(true);
   
-  // Customer information
-  let customerInfo = {
+  // Customer information using runes
+  let customerInfo = $state({
     firstName: '',
     lastName: '',
     email: '',
@@ -36,24 +36,31 @@
       postal_code: '',
       country: 'US'
     }
-  };
+  });
 
-  // Load booking data from URL params
+  // Load booking data from URL params if not provided via server data
   onMount(async () => {
     if (browser) {
-      const urlParams = new URLSearchParams(window.location.search);
-      const encodedData = urlParams.get('data');
-      
-      if (encodedData) {
-        try {
-          bookingData = JSON.parse(decodeURIComponent(encodedData));
-          console.log('📦 Booking data loaded:', bookingData);
-        } catch (e) {
-          console.error('Failed to parse booking data:', e);
+      // If no booking data from server, try URL params (fallback)
+      if (!bookingData) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const encodedData = urlParams.get('data');
+        
+        if (encodedData) {
+          try {
+            bookingData = JSON.parse(decodeURIComponent(encodedData));
+            console.log('📦 Booking data loaded from URL:', bookingData);
+          } catch (e) {
+            console.error('Failed to parse booking data:', e);
+            goto('/schedule');
+            return;
+          }
+        } else {
           goto('/schedule');
+          return;
         }
       } else {
-        goto('/schedule');
+        console.log('📦 Booking data loaded from server:', bookingData);
       }
 
       // Initialize Stripe

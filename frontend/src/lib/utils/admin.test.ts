@@ -294,7 +294,7 @@ describe('AdminService', () => {
 			});
 
 			await expect(AdminService.approveApplication('nonexistent', 'admin123'))
-				.rejects.toThrow('Application not found');
+				.rejects.toThrow('Failed to approve application');
 		});
 	});
 

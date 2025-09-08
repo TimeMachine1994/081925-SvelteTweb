@@ -1,16 +1,13 @@
 <script lang="ts">
 	import type { Tier } from '$lib/types/livestream';
-	import { createEventDispatcher } from 'svelte';
 
-	let { selectedTier } = $props<{ selectedTier: Tier }>();
-	const dispatch = createEventDispatcher<{ change: Tier }>();
+	let { selectedTier, onchange }: { selectedTier: Tier; onchange: (tier: Tier) => void } = $props();
 
 	console.log('👑 TierSelector Initializing...', { selectedTier });
 
 	function selectTier(tier: Tier) {
 		console.log('👑 Tier selected:', tier);
-		// Don't update the prop directly, just dispatch the event
-		dispatch('change', tier);
+		onchange(tier);
 	}
 
 	const tiers = [
@@ -64,7 +61,7 @@
 			<button
 				class="card preset-filled-surface-200-800 p-4 text-left space-y-4 transition-all duration-200 card-hover"
 				class:preset-outlined-primary-500={selectedTier === tier.alias}
-				onclick={() => dispatch('change', tier.alias as Tier)}
+				onclick={() => selectTier(tier.alias as Tier)}
 			>
 				<h3 class="h3">{tier.name}</h3>
 				<p class="h1 font-bold text-primary-500">${tier.price}</p>

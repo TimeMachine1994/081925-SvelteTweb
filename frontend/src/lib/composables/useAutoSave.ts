@@ -1,5 +1,5 @@
 import { onDestroy } from 'svelte';
-import type { CalculatorFormData } from '$lib/types/livestream';
+import type { CalculatorFormData, CalculatorConfig } from '$lib/types/livestream';
 
 export interface AutoSaveOptions {
 	memorialId: string;
@@ -26,16 +26,24 @@ export function useAutoSave(
 
 	console.log('🔄 Auto-save composable initialized');
 
-	// Auto-save function
+	// Auto-save function with enhanced data validation
 	async function autoSave(formData: CalculatorFormData) {
-		const dataString = JSON.stringify(formData);
+		// Ensure memorialId is included in formData
+		const enhancedFormData = {
+			...formData,
+			memorialId,
+			updatedAt: new Date(),
+			autoSaved: true
+		};
+		
+		const dataString = JSON.stringify(enhancedFormData);
 		
 		// Skip if data hasn't changed
 		if (dataString === lastSaveData) {
 			return;
 		}
 
-		console.log('💾 Auto-saving schedule data...');
+		console.log('💾 Auto-saving schedule data for memorial:', memorialId);
 		isSaving = true;
 		hasUnsavedChanges = false;
 
@@ -46,7 +54,7 @@ export function useAutoSave(
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify({
-					formData,
+					formData: enhancedFormData,
 					timestamp: Date.now()
 				})
 			});
@@ -56,7 +64,7 @@ export function useAutoSave(
 			if (response.ok && result.success) {
 				lastSaveData = dataString;
 				lastSaved = new Date();
-				console.log('✅ Schedule auto-saved successfully');
+				console.log('✅ Schedule auto-saved successfully to calculatorConfig');
 				onSave?.(true);
 			} else {
 				console.error('❌ Auto-save failed:', result.error);
@@ -87,27 +95,56 @@ export function useAutoSave(
 		}, delay);
 	}
 
-	// Load auto-saved data
+	// Load auto-saved data with enhanced structure support
 	async function loadAutoSavedData(): Promise<CalculatorFormData | null> {
-		console.log('📖 Loading auto-saved schedule data...');
+		console.log('📖 Loading auto-saved schedule data for memorial:', memorialId);
 		
 		try {
 			const response = await fetch(`/api/memorials/${memorialId}/schedule/auto-save`);
 			const result = await response.json();
 
 			if (response.ok && result.success && result.hasAutoSave) {
-				console.log('✅ Auto-saved data loaded');
+				console.log('✅ Auto-saved data loaded from calculatorConfig');
 				const autoSavedData = result.autoSave.formData;
-				onLoad?.(autoSavedData);
-				return autoSavedData;
+				
+				// Ensure the data has the memorial context
+				const enhancedData = {
+					...autoSavedData,
+					memorialId,
+					autoSaved: true
+				};
+				
+				onLoad?.(enhancedData);
+				return enhancedData;
 			} else {
-				console.log('ℹ️ No auto-saved data found');
+				console.log('ℹ️ No auto-saved data found for memorial:', memorialId);
 				onLoad?.(null);
 				return null;
 			}
 		} catch (error) {
 			console.error('💥 Error loading auto-saved data:', error);
 			onLoad?.(null);
+			return null;
+		}
+	}
+
+	// Load full calculator config (including booking items and totals)
+	async function loadCalculatorConfig(): Promise<CalculatorConfig | null> {
+		console.log('📖 Loading full calculator config for memorial:', memorialId);
+		
+		try {
+			const response = await fetch(`/api/memorials/${memorialId}/schedule/auto-save`);
+			const result = await response.json();
+
+			if (response.ok && result.success && result.calculatorConfig) {
+				console.log('✅ Calculator config loaded');
+				return result.calculatorConfig;
+			} else {
+				console.log('ℹ️ No calculator config found');
+				return null;
+			}
+		} catch (error) {
+			console.error('💥 Error loading calculator config:', error);
 			return null;
 		}
 	}
@@ -137,6 +174,7 @@ export function useAutoSave(
 		// Methods
 		triggerAutoSave,
 		saveNow,
-		loadAutoSavedData
+		loadAutoSavedData,
+		loadCalculatorConfig
 	};
 }

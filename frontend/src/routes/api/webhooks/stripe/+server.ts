@@ -1,16 +1,16 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-
-// You'll need to install stripe: npm install stripe
-// import Stripe from 'stripe';
+import Stripe from 'stripe';
+import { adminDb } from '$lib/firebase-admin';
+import { Timestamp, FieldValue } from 'firebase-admin/firestore';
 
 // Initialize Stripe with your secret key
-// const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-//   apiVersion: '2023-10-16',
-// });
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_mock', {
+  apiVersion: '2023-10-16',
+});
 
 // Your webhook endpoint secret from Stripe Dashboard
-// const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET || 'whsec_test_mock';
 
 export const POST: RequestHandler = async ({ request }) => {
   try {
@@ -24,11 +24,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
     console.log('🔔 Stripe webhook received');
 
-    // Mock implementation for development
-    // TODO: Replace with actual Stripe webhook verification
-    
-    /* 
-    // Actual Stripe webhook implementation:
+    // Verify webhook signature
     let event: Stripe.Event;
 
     try {
@@ -37,6 +33,8 @@ export const POST: RequestHandler = async ({ request }) => {
       console.error('Webhook signature verification failed:', err);
       return json({ error: 'Invalid signature' }, { status: 400 });
     }
+
+    console.log('✅ Webhook signature verified, event type:', event.type);
 
     // Handle the event
     switch (event.type) {
@@ -58,13 +56,8 @@ export const POST: RequestHandler = async ({ request }) => {
       default:
         console.log(`Unhandled event type: ${event.type}`);
     }
-    */
 
-    // Mock event handling for development
-    const mockEvent = JSON.parse(body);
-    console.log('📦 Mock webhook event:', mockEvent.type || 'unknown');
-
-    return json({ received: true, development_mode: true });
+    return json({ received: true });
 
   } catch (error) {
     console.error('Webhook processing failed:', error);
@@ -76,35 +69,45 @@ export const POST: RequestHandler = async ({ request }) => {
 };
 
 // Handle successful payment
-async function handlePaymentSuccess(paymentIntent: any) {
+async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
   try {
     console.log('✅ Payment succeeded:', paymentIntent.id);
 
-    // TODO: Implement your business logic here:
-    // 1. Update booking status in database
-    // 2. Send confirmation email
-    // 3. Lock schedule/time slots
-    // 4. Create memorial service record
-    // 5. Notify relevant parties
+    const memorialId = paymentIntent.metadata.memorialId;
+    const userId = paymentIntent.metadata.userId;
 
-    /* 
-    // Example database operations:
-    await db.bookings.update({
-      where: { paymentIntentId: paymentIntent.id },
-      data: { 
-        status: 'confirmed',
-        confirmedAt: new Date()
-      }
+    if (!memorialId) {
+      console.error('Missing memorialId in payment intent metadata');
+      return;
+    }
+
+    // Update memorial with payment success
+    const memorialRef = adminDb.collection('memorials').doc(memorialId);
+    
+    await memorialRef.update({
+      'calculatorConfig.status': 'paid',
+      'calculatorConfig.paidAt': Timestamp.now(),
+      'calculatorConfig.paymentIntentId': paymentIntent.id,
+      'calculatorConfig.lastModified': Timestamp.now(),
+      'paymentHistory': FieldValue.arrayUnion({
+        paymentIntentId: paymentIntent.id,
+        status: 'succeeded',
+        amount: paymentIntent.amount / 100, // Convert from cents
+        paidAt: Timestamp.now(),
+        createdBy: userId
+      })
     });
 
-    // Send internal notification
-    await notifyTeam({
-      type: 'payment_success',
+    console.log('✅ Memorial payment status updated:', memorialId);
+
+    // Send confirmation email
+    await sendConfirmationEmail({
+      memorialId,
       paymentIntentId: paymentIntent.id,
-      amount: paymentIntent.amount,
-      customerEmail: paymentIntent.receipt_email
+      customerEmail: paymentIntent.metadata.customerEmail,
+      lovedOneName: paymentIntent.metadata.lovedOneName,
+      amount: paymentIntent.amount / 100
     });
-    */
 
   } catch (error) {
     console.error('Failed to handle payment success:', error);
@@ -112,34 +115,46 @@ async function handlePaymentSuccess(paymentIntent: any) {
 }
 
 // Handle failed payment
-async function handlePaymentFailure(paymentIntent: any) {
+async function handlePaymentFailure(paymentIntent: Stripe.PaymentIntent) {
   try {
     console.log('❌ Payment failed:', paymentIntent.id);
 
-    // TODO: Implement failure handling:
-    // 1. Update booking status
-    // 2. Send failure notification to customer
-    // 3. Release held time slots
-    // 4. Log for follow-up
+    const memorialId = paymentIntent.metadata.memorialId;
+    const userId = paymentIntent.metadata.userId;
 
-    /* 
-    // Example failure handling:
-    await db.bookings.update({
-      where: { paymentIntentId: paymentIntent.id },
-      data: { 
-        status: 'payment_failed',
-        failedAt: new Date(),
-        failureReason: paymentIntent.last_payment_error?.message
-      }
+    if (!memorialId) {
+      console.error('Missing memorialId in payment intent metadata');
+      return;
+    }
+
+    // Update memorial with payment failure
+    const memorialRef = adminDb.collection('memorials').doc(memorialId);
+    
+    await memorialRef.update({
+      'calculatorConfig.status': 'payment_failed',
+      'calculatorConfig.paymentFailedAt': Timestamp.now(),
+      'calculatorConfig.paymentIntentId': paymentIntent.id,
+      'calculatorConfig.lastModified': Timestamp.now(),
+      'paymentHistory': FieldValue.arrayUnion({
+        paymentIntentId: paymentIntent.id,
+        status: 'failed',
+        amount: paymentIntent.amount / 100,
+        failedAt: Timestamp.now(),
+        failureReason: paymentIntent.last_payment_error?.message || 'Payment failed',
+        createdBy: userId
+      })
     });
 
-    // Send failure email to customer
+    console.log('❌ Memorial payment failure recorded:', memorialId);
+
+    // Send failure notification email
     await sendPaymentFailureEmail({
-      customerEmail: paymentIntent.receipt_email,
+      memorialId,
       paymentIntentId: paymentIntent.id,
-      failureReason: paymentIntent.last_payment_error?.message
+      customerEmail: paymentIntent.metadata.customerEmail,
+      lovedOneName: paymentIntent.metadata.lovedOneName,
+      failureReason: paymentIntent.last_payment_error?.message || 'Payment failed'
     });
-    */
 
   } catch (error) {
     console.error('Failed to handle payment failure:', error);
@@ -147,34 +162,129 @@ async function handlePaymentFailure(paymentIntent: any) {
 }
 
 // Handle payment requiring additional action
-async function handlePaymentActionRequired(paymentIntent: any) {
+async function handlePaymentActionRequired(paymentIntent: Stripe.PaymentIntent) {
   try {
     console.log('⚠️ Payment requires action:', paymentIntent.id);
 
-    // TODO: Implement action required handling:
-    // 1. Send email with action required notice
-    // 2. Update booking status to pending action
-    // 3. Set reminder for follow-up
+    const memorialId = paymentIntent.metadata.memorialId;
+    const userId = paymentIntent.metadata.userId;
 
-    /* 
-    // Example action required handling:
-    await db.bookings.update({
-      where: { paymentIntentId: paymentIntent.id },
-      data: { 
+    if (!memorialId) {
+      console.error('Missing memorialId in payment intent metadata');
+      return;
+    }
+
+    // Update memorial with action required status
+    const memorialRef = adminDb.collection('memorials').doc(memorialId);
+    
+    await memorialRef.update({
+      'calculatorConfig.status': 'action_required',
+      'calculatorConfig.actionRequiredAt': Timestamp.now(),
+      'calculatorConfig.paymentIntentId': paymentIntent.id,
+      'calculatorConfig.lastModified': Timestamp.now(),
+      'paymentHistory': FieldValue.arrayUnion({
+        paymentIntentId: paymentIntent.id,
         status: 'action_required',
-        actionRequiredAt: new Date()
-      }
+        amount: paymentIntent.amount / 100,
+        actionRequiredAt: Timestamp.now(),
+        createdBy: userId
+      })
     });
+
+    console.log('⚠️ Memorial payment action required recorded:', memorialId);
 
     // Send action required email
     await sendActionRequiredEmail({
-      customerEmail: paymentIntent.receipt_email,
+      memorialId,
       paymentIntentId: paymentIntent.id,
+      customerEmail: paymentIntent.metadata.customerEmail,
+      lovedOneName: paymentIntent.metadata.lovedOneName,
       nextActionUrl: paymentIntent.next_action?.redirect_to_url?.url
     });
-    */
 
   } catch (error) {
     console.error('Failed to handle payment action required:', error);
+  }
+}
+
+// Email helper functions
+async function sendConfirmationEmail(data: {
+  memorialId: string;
+  paymentIntentId: string;
+  customerEmail: string;
+  lovedOneName: string;
+  amount: number;
+}) {
+  try {
+    console.log('📧 Sending confirmation email to:', data.customerEmail);
+    
+    // Call email service endpoint
+    const response = await fetch('/api/send-confirmation-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Email service failed: ${response.statusText}`);
+    }
+
+    console.log('✅ Confirmation email sent successfully');
+  } catch (error) {
+    console.error('Failed to send confirmation email:', error);
+  }
+}
+
+async function sendPaymentFailureEmail(data: {
+  memorialId: string;
+  paymentIntentId: string;
+  customerEmail: string;
+  lovedOneName: string;
+  failureReason: string;
+}) {
+  try {
+    console.log('📧 Sending payment failure email to:', data.customerEmail);
+    
+    // Call email service endpoint
+    const response = await fetch('/api/send-failure-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Email service failed: ${response.statusText}`);
+    }
+
+    console.log('✅ Payment failure email sent successfully');
+  } catch (error) {
+    console.error('Failed to send payment failure email:', error);
+  }
+}
+
+async function sendActionRequiredEmail(data: {
+  memorialId: string;
+  paymentIntentId: string;
+  customerEmail: string;
+  lovedOneName: string;
+  nextActionUrl?: string;
+}) {
+  try {
+    console.log('📧 Sending action required email to:', data.customerEmail);
+    
+    // Call email service endpoint
+    const response = await fetch('/api/send-action-required-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Email service failed: ${response.statusText}`);
+    }
+
+    console.log('✅ Action required email sent successfully');
+  } catch (error) {
+    console.error('Failed to send action required email:', error);
   }
 }

@@ -1,80 +1,90 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-
-// You'll need to install stripe: npm install stripe
-// import Stripe from 'stripe';
+import Stripe from 'stripe';
+import { adminDb } from '$lib/firebase-admin';
+import { Timestamp, FieldValue } from 'firebase-admin/firestore';
 
 // Initialize Stripe with your secret key
-// const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-//   apiVersion: '2023-10-16',
-// });
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_mock', {
+  apiVersion: '2023-10-16',
+});
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, locals }) => {
   try {
-    const { amount, currency, bookingData, customerInfo } = await request.json();
-
-    // Validate required fields
-    if (!amount || !currency || !bookingData || !customerInfo) {
-      return json({ error: 'Missing required fields' }, { status: 400 });
+    // Check authentication
+    if (!locals.user) {
+      return json({ error: 'Authentication required' }, { status: 401 });
     }
 
-    // For now, return a mock response since Stripe isn't configured yet
-    // TODO: Replace this with actual Stripe integration
-    console.log('🔄 Creating payment intent for:', {
-      amount,
-      currency,
-      customer: `${customerInfo.firstName} ${customerInfo.lastName}`,
-      email: customerInfo.email,
-      items: bookingData.items?.length || 0
-    });
+    const { amount, memorialId, customerInfo, formData } = await request.json();
 
-    // Mock response - replace with actual Stripe call
-    const mockClientSecret = 'pi_mock_client_secret_' + Date.now();
+    if (!amount || !memorialId) {
+      return json({ error: 'Missing required data' }, { status: 400 });
+    }
+
+    console.log('💳 Creating payment intent:', { amount, memorialId, userId: locals.user.uid });
+
+    // Verify memorial exists and user has permission
+    const memorialRef = adminDb.collection('memorials').doc(memorialId);
+    const memorialDoc = await memorialRef.get();
     
-    /* 
-    // Actual Stripe implementation:
+    if (!memorialDoc.exists) {
+      return json({ error: 'Memorial not found' }, { status: 404 });
+    }
+
+    const memorial = memorialDoc.data();
+    const userRole = locals.user.role;
+    const userId = locals.user.uid;
+    
+    const hasPermission = 
+      userRole === 'admin' ||
+      memorial?.ownerUid === userId ||
+      memorial?.funeralDirectorUid === userId ||
+      (userRole === 'family_member' && memorial?.familyMemberUids?.includes(userId));
+
+    if (!hasPermission) {
+      return json({ error: 'Insufficient permissions' }, { status: 403 });
+    }
+
+    // Create Stripe payment intent
     const paymentIntent = await stripe.paymentIntents.create({
-      amount,
-      currency,
-      automatic_payment_methods: {
-        enabled: true,
-      },
+      amount: Math.round(amount * 100), // Convert to cents
+      currency: 'usd',
       metadata: {
-        bookingId: bookingData.id || 'new_booking',
-        customerEmail: customerInfo.email,
-        items: JSON.stringify(bookingData.items),
+        memorialId,
+        userId: locals.user.uid,
+        customerEmail: customerInfo?.email || locals.user.email || '',
+        lovedOneName: memorial?.lovedOneName || ''
       },
-      receipt_email: customerInfo.email,
-      shipping: {
-        name: `${customerInfo.firstName} ${customerInfo.lastName}`,
-        address: {
-          line1: customerInfo.address.line1,
-          line2: customerInfo.address.line2 || undefined,
-          city: customerInfo.address.city,
-          state: customerInfo.address.state,
-          postal_code: customerInfo.address.postal_code,
-          country: customerInfo.address.country,
-        },
-      },
+      description: `TributeStream service for ${memorial?.lovedOneName || 'Memorial Service'}`
     });
 
-    return json({
-      client_secret: paymentIntent.client_secret,
+    // Save payment intent to memorial
+    await memorialRef.update({
+      'paymentHistory': FieldValue.arrayUnion({
+        paymentIntentId: paymentIntent.id,
+        status: 'pending',
+        amount: amount,
+        createdAt: Timestamp.now(),
+        createdBy: userId
+      }),
+      'calculatorConfig.status': 'pending_payment',
+      'calculatorConfig.paymentIntentId': paymentIntent.id,
+      'calculatorConfig.lastModified': Timestamp.now()
     });
-    */
 
-    // Return mock response for development
+    console.log('✅ Payment intent created successfully:', paymentIntent.id);
+
     return json({
-      client_secret: mockClientSecret,
-      // Include development notice
-      development_mode: true,
-      message: 'This is a development mock. Configure Stripe keys for production.'
+      clientSecret: paymentIntent.client_secret,
+      paymentIntentId: paymentIntent.id,
+      amount: amount
     });
 
   } catch (error) {
-    console.error('Payment intent creation failed:', error);
+    console.error('Failed to create payment intent:', error);
     return json(
-      { error: 'Failed to create payment intent' },
+      { error: 'Failed to create payment intent', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

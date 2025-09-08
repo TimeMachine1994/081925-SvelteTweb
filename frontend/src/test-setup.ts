@@ -1,4 +1,5 @@
 import { vi } from 'vitest';
+import '@testing-library/jest-dom';
 
 // Mock SvelteKit modules
 vi.mock('$app/environment', () => ({
@@ -32,6 +33,27 @@ vi.mock('$app/stores', () => ({
   }
 }));
 
+// Mock Firebase
+vi.mock('$lib/firebase', () => ({
+  auth: {
+    currentUser: { uid: 'test-user', email: 'test@example.com' }
+  },
+  db: {}
+}));
+
+// Mock auto-save composable
+vi.mock('$lib/composables/useAutoSave', () => ({
+  useAutoSave: vi.fn(() => ({
+    triggerAutoSave: vi.fn(),
+    saveNow: vi.fn(() => Promise.resolve()),
+    loadAutoSavedData: vi.fn(() => Promise.resolve(null)),
+    loadCalculatorConfig: vi.fn(() => Promise.resolve(null)),
+    isSaving: vi.fn(() => false),
+    lastSaved: vi.fn(() => null),
+    hasUnsavedChanges: vi.fn(() => false)
+  }))
+}));
+
 // Mock localStorage
 Object.defineProperty(window, 'localStorage', {
   value: {
@@ -44,3 +66,6 @@ Object.defineProperty(window, 'localStorage', {
 
 // Mock fetch
 global.fetch = vi.fn();
+
+// Mock window.alert
+window.alert = vi.fn();

@@ -254,7 +254,7 @@
 											</div>
 											<div class="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
 												<a
-													href="/schedule"
+													href="/schedule?memorialId={memorial.id}"
 													class="px-4 py-2 rounded-xl bg-blue-600 text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center"
 												>
 													<Clock class="w-3 h-3 mr-1" />

@@ -50,7 +50,7 @@
                 <h2>h2: The quick brown fox jumps over the lazy dog</h2>
                 <h3>h3: The quick brown fox jumps over the lazy dog</h3>
                 <p>
-                  p: The quick brown fox jumps over the lazy dog. It also includes a <a href="#" style="color: var(--theme-primary);">link</a>.
+                  p: The quick brown fox jumps over the lazy dog. It also includes a <a href="/example" style="color: var(--theme-primary);">link</a>.
                 </p>
                 <blockquote>
                   "This is a blockquote."

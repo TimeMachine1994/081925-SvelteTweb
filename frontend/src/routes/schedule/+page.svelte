@@ -3,32 +3,51 @@
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
   import { browser } from '$app/environment';
+  import type { CalculatorFormData, Tier, LocationInfo, TimeInfo, ServiceDetails, AdditionalServiceDetails, Addons } from '$lib/types/livestream';
+  import { useAutoSave } from '$lib/composables/useAutoSave';
 
   // Loading state
-  let pageLoaded = true;
+  let pageLoaded = $state(true);
 
-  // Original TributeStream pricing structure
-  let selectedTier = 'solo';
-  let mainServiceHours = 2;
-  let additionalLocation = {
-    enabled: false,
+  // Memorial context - will be set when user creates/selects memorial
+  let memorialId = $state('');
+  let lovedOneName = $state('');
+
+  // Form data matching our schema
+  let selectedTier: Tier = $state('solo');
+  let mainService = $state<ServiceDetails>({
+    location: { name: '', address: '', isUnknown: false },
+    time: { date: null, time: null, isUnknown: false },
     hours: 2
-  };
-  let additionalDay = {
+  });
+  let additionalLocation = $state<AdditionalServiceDetails>({
     enabled: false,
+    location: { name: '', address: '', isUnknown: false },
+    startTime: null,
     hours: 2
-  };
-  let addons = {
+  });
+  let additionalDay = $state<AdditionalServiceDetails>({
+    enabled: false,
+    location: { name: '', address: '', isUnknown: false },
+    startTime: null,
+    hours: 2
+  });
+  let addons = $state<Addons>({
     photography: false,
     audioVisualSupport: false,
     liveMusician: false,
     woodenUsbDrives: 0
-  };
+  });
+
+  // Contact information
+  let funeralDirectorName = $state('');
+  let funeralHome = $state('');
 
   // Auto-save functionality
-  let autoSaveTimeout: ReturnType<typeof setTimeout> | null = null;
-  let lastSaved = '';
-  let saveStatus = 'saved'; // 'saved', 'saving', 'unsaved'
+  let saveStatus = $state('saved'); // 'saved', 'saving', 'unsaved'
+  let lastSaved = $state('');
+  
+  // Remove broken auto-save composable - we'll handle it directly
 
   // Original pricing constants
   const TIER_PRICES = {
@@ -47,8 +66,82 @@
   const HOURLY_OVERAGE_RATE = 125;
   const ADDITIONAL_SERVICE_FEE = 325;
 
-  $: bookingItems = calculateBookingItems();
-  $: totalPrice = bookingItems.reduce((acc, item) => acc + item.total, 0);
+  // Reactive calculations using SvelteKit 5 runes
+  const bookingItems = $derived(calculateBookingItems());
+  const totalPrice = $derived(bookingItems.reduce((acc, item) => acc + item.total, 0));
+
+  // Create form data structure matching our schema
+  const formData = $derived.by(() => ({
+    memorialId,
+    lovedOneName,
+    selectedTier,
+    mainService,
+    additionalLocation,
+    additionalDay,
+    funeralDirectorName,
+    funeralHome,
+    addons,
+    updatedAt: new Date(),
+    autoSaved: false
+  } as CalculatorFormData));
+
+  // Auto-save effect - triggers when form data changes
+  let autoSaveTimeout: NodeJS.Timeout | null = null;
+  
+  $effect(() => {
+    // Only auto-save if we have a valid memorial ID (not 'temp' or empty)
+    if (memorialId && memorialId !== 'temp' && formData) {
+      saveStatus = 'saving';
+      
+      // Clear existing timeout
+      if (autoSaveTimeout) {
+        clearTimeout(autoSaveTimeout);
+      }
+      
+      // Set new timeout for auto-save
+      autoSaveTimeout = setTimeout(async () => {
+        const currentMemorialId = memorialId; // Capture current value
+        
+        try {
+          const scheduleData = {
+            selectedTier,
+            mainService,
+            additionalLocation,
+            additionalDay,
+            addons,
+            funeralDirectorName,
+            funeralHome,
+            bookingItems,
+            totalPrice,
+            status: 'draft',
+            lastUpdated: new Date().toISOString()
+          };
+          
+          const response = await fetch(`/api/memorials/${currentMemorialId}/schedule/auto-save`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              formData: scheduleData,
+              timestamp: Date.now()
+            })
+          });
+
+          if (response.ok) {
+            saveStatus = 'saved';
+            lastSaved = new Date().toLocaleTimeString();
+          } else {
+            saveStatus = 'unsaved';
+            console.error('Auto-save failed:', await response.text());
+          }
+        } catch (error) {
+          saveStatus = 'unsaved';
+          console.error('Auto-save error:', error);
+        }
+      }, 2000);
+    }
+  });
 
   function calculateBookingItems() {
     const items = [];
@@ -57,6 +150,7 @@
     if (selectedTier) {
       const price = TIER_PRICES[selectedTier as keyof typeof TIER_PRICES];
       items.push({
+        id: 'base-package',
         name: `Tributestream ${selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)}`,
         price: price,
         quantity: 1,
@@ -65,9 +159,10 @@
     }
 
     // 2. Main Service Hourly Overage (over 2 hours)
-    const mainOverageHours = Math.max(0, mainServiceHours - 2);
+    const mainOverageHours = Math.max(0, mainService.hours - 2);
     if (mainOverageHours > 0) {
       items.push({
+        id: 'main-overage',
         name: 'Main Location Overage',
         price: HOURLY_OVERAGE_RATE,
         quantity: mainOverageHours,
@@ -78,15 +173,21 @@
     // 3. Additional Location
     if (additionalLocation.enabled) {
       items.push({
-        name: 'Additional Location Fee',
+        id: 'additional-location-base',
+        name: 'Additional Location',
+        package: selectedTier || 'solo',
         price: ADDITIONAL_SERVICE_FEE,
         quantity: 1,
         total: ADDITIONAL_SERVICE_FEE
       });
+
+      // Additional location overage
       const addlLocationOverage = Math.max(0, additionalLocation.hours - 2);
       if (addlLocationOverage > 0) {
         items.push({
-          name: 'Add. Location Overage',
+          id: 'additional-location-overage',
+          name: 'Additional Location Overage',
+          package: selectedTier || 'solo',
           price: HOURLY_OVERAGE_RATE,
           quantity: addlLocationOverage,
           total: HOURLY_OVERAGE_RATE * addlLocationOverage
@@ -97,15 +198,21 @@
     // 4. Additional Day
     if (additionalDay.enabled) {
       items.push({
-        name: 'Additional Day Fee',
+        id: 'additional-day-base',
+        name: 'Additional Day',
+        package: selectedTier || 'solo',
         price: ADDITIONAL_SERVICE_FEE,
         quantity: 1,
         total: ADDITIONAL_SERVICE_FEE
       });
+
+      // Additional day overage
       const addlDayOverage = Math.max(0, additionalDay.hours - 2);
       if (addlDayOverage > 0) {
         items.push({
-          name: 'Add. Day Overage',
+          id: 'additional-day-overage',
+          name: 'Additional Day Overage',
+          package: selectedTier || 'solo',
           price: HOURLY_OVERAGE_RATE,
           quantity: addlDayOverage,
           total: HOURLY_OVERAGE_RATE * addlDayOverage
@@ -116,67 +223,161 @@
     // 5. Add-ons
     if (addons.photography) {
       items.push({
-        name: 'Photography',
+        id: 'photography',
+        name: 'Photography Service',
+        package: selectedTier || 'solo',
         price: ADDON_PRICES.photography,
         quantity: 1,
         total: ADDON_PRICES.photography
       });
     }
+
     if (addons.audioVisualSupport) {
       items.push({
+        id: 'audio-visual',
         name: 'Audio/Visual Support',
+        package: selectedTier || 'solo',
         price: ADDON_PRICES.audioVisualSupport,
         quantity: 1,
         total: ADDON_PRICES.audioVisualSupport
       });
     }
+
     if (addons.liveMusician) {
       items.push({
+        id: 'live-musician',
         name: 'Live Musician',
+        package: selectedTier || 'solo',
         price: ADDON_PRICES.liveMusician,
         quantity: 1,
         total: ADDON_PRICES.liveMusician
       });
     }
-    if (addons.woodenUsbDrives > 0) {
-      const isLegacy = selectedTier === 'legacy';
-      const usbDrives = addons.woodenUsbDrives;
-      const includedDrives = isLegacy ? 1 : 0;
 
-      if (usbDrives > includedDrives) {
-        const billableDrives = usbDrives - includedDrives;
-        // First billable drive logic
-        if (billableDrives > 0 && includedDrives === 0) {
-          items.push({
-            name: 'Wooden USB Drive',
-            price: ADDON_PRICES.woodenUsbDrives,
-            quantity: 1,
-            total: ADDON_PRICES.woodenUsbDrives
-          });
-          if (billableDrives > 1) {
-            items.push({
-              name: 'Additional Wooden USB Drives',
-              price: 100,
-              quantity: billableDrives - 1,
-              total: 100 * (billableDrives - 1)
-            });
-          }
+    if (addons.woodenUsbDrives > 0) {
+      // Legacy tier includes 1 USB drive
+      const includedDrives = selectedTier === 'legacy' ? 1 : 0;
+      const chargeableDrives = Math.max(0, addons.woodenUsbDrives - includedDrives);
+      
+      if (chargeableDrives > 0) {
+        const firstDrivePrice = ADDON_PRICES.woodenUsbDrives;
+        const additionalDrivePrice = 100;
+        
+        let totalUsbPrice = 0;
+        if (chargeableDrives === 1) {
+          totalUsbPrice = firstDrivePrice;
         } else {
-          items.push({
-            name: 'Additional Wooden USB Drives',
-            price: 100,
-            quantity: billableDrives,
-            total: 100 * billableDrives
-          });
+          totalUsbPrice = firstDrivePrice + (chargeableDrives - 1) * additionalDrivePrice;
         }
+        
+        items.push({
+          id: 'wooden-usb',
+          name: `Wooden USB Drive${chargeableDrives > 1 ? 's' : ''}`,
+          package: selectedTier || 'solo',
+          price: totalUsbPrice / chargeableDrives,
+          quantity: chargeableDrives,
+          total: totalUsbPrice
+        });
       }
     }
 
     return items;
   }
 
+  // Booking functions that integrate with our payment API
+  async function handleBookNow() {
+    if (!memorialId || !formData) {
+      alert('Please ensure all required information is filled out.');
+      return;
+    }
+
+    try {
+      // Create payment intent with our existing API
+      const response = await fetch('/api/create-payment-intent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          memorialId,
+          amount: totalPrice,
+          bookingItems,
+          customerInfo: {
+            email: '', // Will be filled from user context
+            name: funeralDirectorName || lovedOneName
+          }
+        })
+      });
+
+      const result = await response.json();
+      
+      if (response.ok && result.clientSecret) {
+        // Redirect to payment page with encoded data
+        const paymentData = {
+          memorialId,
+          clientSecret: result.clientSecret,
+          paymentIntentId: result.paymentIntentId,
+          amount: totalPrice,
+          bookingItems,
+          formData
+        };
+        
+        const encodedData = btoa(JSON.stringify(paymentData));
+        goto(`/payment?data=${encodedData}`);
+      } else {
+        alert('Failed to create payment: ' + (result.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Booking error:', error);
+      alert('An error occurred while processing your booking.');
+    }
+  }
+
+  async function handleSaveAndPayLater() {
+    if (!memorialId) {
+      goto('/profile');
+      return;
+    }
+
+    try {
+      // Save configuration to the memorial's schedule data
+      const scheduleData = {
+        selectedTier,
+        mainService,
+        additionalLocation,
+        additionalDay,
+        addons,
+        funeralDirectorName,
+        funeralHome,
+        bookingItems,
+        totalPrice,
+        status: 'draft',
+        lastUpdated: new Date().toISOString()
+      };
+      
+      const response = await fetch(`/api/memorials/${memorialId}/schedule/auto-save`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(scheduleData)
+      });
+
+      if (response.ok) {
+        // Redirect to profile page
+        goto('/profile');
+      } else {
+        console.error('Save failed:', await response.text());
+        goto('/profile');
+      }
+    } catch (error) {
+      console.error('Save error:', error);
+      goto('/profile');
+    }
+  }
+
   function selectTier(tier: string) {
-    selectedTier = tier;
+    selectedTier = tier as Tier;
     // Reset addons when changing tiers
     addons = {
       photography: false,
@@ -186,79 +387,101 @@
     };
   }
 
-  function handleBookNow() {
-    const bookingData = {
-      items: bookingItems,
-      total: totalPrice
-    };
-    
-    const encodedData = encodeURIComponent(JSON.stringify(bookingData));
-    goto(`/payment?data=${encodedData}`);
+
+  // Redirect to memorial-specific route or new memorial creation
+  function redirectToProperRoute() {
+    // Check if user has existing memorials
+    goto('/schedule/new');
   }
 
-  function saveFormData() {
-    if (!browser) return;
-    
-    const formData = {
-      selectedTier,
-      mainServiceHours,
-      additionalLocation,
-      additionalDay,
-      addons,
-      savedAt: new Date().toISOString()
-    };
-    
-    localStorage.setItem('scheduleFormData', JSON.stringify(formData));
-    lastSaved = new Date().toLocaleTimeString();
-    saveStatus = 'saved';
-  }
+  // This page now serves as a redirect to the proper memorial-specific route
 
-  function loadFormData() {
-    if (!browser) return;
-    
-    const saved = localStorage.getItem('scheduleFormData');
-    if (saved) {
-      try {
-        const formData = JSON.parse(saved);
-        selectedTier = formData.selectedTier || 'solo';
-        mainServiceHours = formData.mainServiceHours || 2;
-        additionalLocation = formData.additionalLocation || { enabled: false, hours: 2 };
-        additionalDay = formData.additionalDay || { enabled: false, hours: 2 };
-        addons = formData.addons || { photography: false, audioVisualSupport: false, liveMusician: false, woodenUsbDrives: 0 };
-        lastSaved = new Date(formData.savedAt).toLocaleTimeString();
-        saveStatus = 'saved';
-      } catch (e) {
-        console.warn('Failed to load saved form data:', e);
+  // Auto-save functionality moved to memorial-specific routes
+
+
+  // Only redirect if no memorial ID is provided in URL
+  $effect(() => {
+    if (browser) {
+      const urlParams = new URLSearchParams(window.location.search);
+      const paramMemorialId = urlParams.get('memorialId');
+      
+      if (!paramMemorialId) {
+        // No memorial ID provided, redirect to profile to select memorial
+        goto('/profile');
       }
     }
-  }
+  });
 
-  function autoSave() {
-    saveStatus = 'saving';
-    if (autoSaveTimeout) {
-      clearTimeout(autoSaveTimeout);
-    }
+  onMount(async () => {
+    // Get memorial context from URL params or user selection
+    const urlParams = new URLSearchParams(window.location.search);
+    const paramMemorialId = urlParams.get('memorialId');
     
-    autoSaveTimeout = setTimeout(() => {
-      saveFormData();
-    }, 1000); // Auto-save after 1 second of inactivity
-  }
-
-  function handleSaveAndPayLater() {
-    saveFormData();
-    goto('/profile');
-  }
-
-  // Watch for changes and trigger auto-save
-  $: if (browser && (selectedTier || mainServiceHours || additionalLocation || additionalDay || addons)) {
-    if (saveStatus === 'saved') {
-      saveStatus = 'unsaved';
+    if (paramMemorialId) {
+      memorialId = paramMemorialId;
+      
+      // Load existing calculator config if available
+      try {
+        // Load existing data from API
+        const response = await fetch(`/api/memorials/${memorialId}/schedule/auto-save`);
+        const result = response.ok ? await response.json() : null;
+        
+        if (result && result.hasAutoSave && result.autoSave) {
+          const savedData = result.autoSave.formData;
+          
+          // Populate form with saved data
+          selectedTier = (savedData.selectedTier || 'solo') as Tier;
+          lovedOneName = savedData.lovedOneName || '';
+          
+          if (savedData.mainService) {
+            mainService = {
+              location: savedData.mainService.location || { name: '', address: '', isUnknown: false },
+              time: savedData.mainService.time || { date: null, time: null, isUnknown: false },
+              hours: savedData.mainService.hours || 2
+            };
+          }
+          
+          if (savedData.additionalLocation) {
+            additionalLocation = {
+              enabled: savedData.additionalLocation.enabled || false,
+              location: savedData.additionalLocation.location || { name: '', address: '', isUnknown: false },
+              startTime: savedData.additionalLocation.startTime || null,
+              hours: savedData.additionalLocation.hours || 2
+            };
+          }
+          
+          if (savedData.additionalDay) {
+            additionalDay = {
+              enabled: savedData.additionalDay.enabled || false,
+              location: savedData.additionalDay.location || { name: '', address: '', isUnknown: false },
+              startTime: savedData.additionalDay.startTime || null,
+              hours: savedData.additionalDay.hours || 2
+            };
+          }
+          
+          if (savedData.addons) {
+            addons = {
+              photography: savedData.addons.photography || false,
+              audioVisualSupport: savedData.addons.audioVisualSupport || false,
+              liveMusician: savedData.addons.liveMusician || false,
+              woodenUsbDrives: savedData.addons.woodenUsbDrives || 0
+            };
+          }
+          
+          funeralDirectorName = savedData.funeralDirectorName || '';
+          funeralHome = savedData.funeralHome || '';
+          
+          console.log('✅ Loaded existing calculator configuration:', savedData);
+        } else {
+          console.log('ℹ️ No saved configuration found, using defaults');
+        }
+      } catch (error) {
+        console.error('Error loading existing data:', error);
+      }
+    } else {
+      // If no memorial ID, redirect to profile to select/create memorial
+      goto('/profile');
     }
-    autoSave();
-  }
-
-  onMount(() => {
-    loadFormData();
   });
 
   const tiers = [
@@ -323,23 +546,6 @@
       Configure your memorial service livestream package with our comprehensive pricing calculator
     </p>
     
-    <!-- Auto-save status indicator -->
-    {#if browser}
-      <div class="mt-4 flex items-center justify-center space-x-2 text-sm">
-        <div class="flex items-center space-x-1">
-          {#if saveStatus === 'saving'}
-            <div class="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
-            <span class="text-amber-400">Saving...</span>
-          {:else if saveStatus === 'saved'}
-            <div class="w-2 h-2 bg-green-400 rounded-full"></div>
-            <span class="text-green-400">Saved {lastSaved}</span>
-          {:else}
-            <div class="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
-            <span class="text-yellow-400">Unsaved changes</span>
-          {/if}
-        </div>
-      </div>
-    {/if}
   </div>
 </section>
 
@@ -361,7 +567,7 @@
             {#each tiers as tier}
               <button 
                 class="p-4 border-2 rounded-lg transition-all text-left {selectedTier === tier.alias ? 'border-amber-400 bg-amber-400/10' : 'border-gray-600 hover:border-amber-500/50'}"
-                on:click={() => selectTier(tier.alias)}
+                onclick={() => selectTier(tier.alias)}
               >
                 <h3 class="font-bold text-lg mb-2 text-white">{tier.name}</h3>
                 <p class="text-2xl font-bold text-amber-400 mb-3">${tier.price}</p>
@@ -396,12 +602,12 @@
                 min="1" 
                 max="8" 
                 step="1"
-                bind:value={mainServiceHours}
+                bind:value={mainService.hours}
                 class="w-full gold-slider"
               />
               <div class="flex justify-between text-sm text-gray-400 mt-1">
                 <span>1 hour</span>
-                <span class="font-medium text-amber-400">{mainServiceHours} hours</span>
+                <span class="font-medium text-amber-400">{mainService.hours} hours</span>
                 <span>8+ hours</span>
               </div>
             </div>
@@ -608,13 +814,13 @@
           
           <div class="mt-6 space-y-3">
             <button 
-              on:click={handleBookNow}
+              onclick={handleBookNow}
               class="w-full bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-black py-3 px-6 rounded-lg font-medium transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/25"
             >
               Book Now
             </button>
             <button 
-              on:click={handleSaveAndPayLater}
+              onclick={handleSaveAndPayLater}
               class="w-full border border-amber-500 hover:bg-amber-500/10 text-amber-400 hover:text-amber-300 py-3 px-6 rounded-lg font-medium transition-colors"
             >
               Save and Pay Later
