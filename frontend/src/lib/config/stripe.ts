@@ -1,20 +1,36 @@
 import { dev } from '$app/environment';
 import { browser } from '$app/environment';
+import { PUBLIC_STRIPE_PUBLISHABLE_KEY } from '$env/static/public';
 
 // Get Stripe key from environment or browser globals
 function getStripePublishableKey(): string {
+  // Debug logging
+  console.log('🔍 Checking for Stripe key...');
+  console.log('PUBLIC_STRIPE_PUBLISHABLE_KEY from $env/static/public:', PUBLIC_STRIPE_PUBLISHABLE_KEY ? 'Found' : 'Not found');
+  
+  // First try SvelteKit's environment system
+  if (PUBLIC_STRIPE_PUBLISHABLE_KEY) {
+    console.log('✅ Using Stripe key from $env/static/public');
+    return PUBLIC_STRIPE_PUBLISHABLE_KEY;
+  }
+  
+  // Try to get from process.env as fallback
+  if (typeof process !== 'undefined' && process.env?.PUBLIC_STRIPE_PUBLISHABLE_KEY) {
+    console.log('✅ Using Stripe key from process.env');
+    return process.env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
+  }
+  
   // In browser, try to get from window object (set by server)
   if (browser && typeof window !== 'undefined') {
     const key = (window as any).__STRIPE_PUBLISHABLE_KEY__;
-    if (key) return key;
+    if (key) {
+      console.log('✅ Using Stripe key from window object');
+      return key;
+    }
   }
   
-  // Fallback for development
-  if (dev) {
-    return 'pk_test_development_key_placeholder';
-  }
-  
-  // Production fallback - will be validated later
+  // Fallback for development - return empty to force proper configuration
+  console.log('❌ No Stripe key found, using empty string');
   return '';
 }
 

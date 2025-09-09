@@ -2,7 +2,6 @@
 	import { user } from '$lib/auth';
 	import { ChevronDown, User, LogOut } from 'lucide-svelte';
 	import { onMount } from 'svelte';
-	import { enhance } from '$app/forms';
 	
 	let dropdownOpen = false;
 	let dropdownElement: HTMLElement;
@@ -13,6 +12,29 @@
 
 	function closeDropdown() {
 		dropdownOpen = false;
+	}
+
+	async function handleLogout() {
+		try {
+			console.log('🚪 Initiating logout...');
+			closeDropdown();
+			
+			const response = await fetch('/logout', {
+				method: 'POST',
+				credentials: 'include'
+			});
+			
+			if (response.ok || response.redirected) {
+				console.log('✅ Logout successful, redirecting...');
+				window.location.href = '/';
+			} else {
+				console.error('❌ Logout failed');
+			}
+		} catch (error) {
+			console.error('❌ Logout error:', error);
+			// Force redirect even if there's an error
+			window.location.href = '/';
+		}
 	}
 
 	// Close dropdown when clicking outside
@@ -82,22 +104,13 @@
 								My Profile
 							</a>
 							<div class="border-t border-gray-100"></div>
-							<form method="POST" action="/logout" class="block" use:enhance={() => {
-								return async ({ result }) => {
-									// Handle redirect manually since logout returns a redirect
-									if (result.type === 'redirect') {
-										window.location.href = result.location;
-									}
-								};
-							}}>
-								<button
-									type="submit"
-									class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors text-left"
-								>
-									<LogOut class="w-4 h-4 mr-3" />
-									Logout
-								</button>
-							</form>
+							<button
+								on:click={handleLogout}
+								class="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors text-left"
+							>
+								<LogOut class="w-4 h-4 mr-3" />
+								Logout
+							</button>
 						</div>
 					{/if}
 				{:else}

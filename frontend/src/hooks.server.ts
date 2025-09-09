@@ -48,6 +48,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 			
 			if (error instanceof Error && error.message.includes('expired')) {
 				console.error('⏰ Session cookie has expired');
+			} else if (error instanceof Error && error.message.includes('invalid signature')) {
+				console.error('🔑 Session cookie has invalid signature - likely environment mismatch');
+				// Clear the invalid cookie
+				event.cookies.delete('session', { path: '/' });
+				console.log('🗑️ Cleared invalid session cookie');
 			}
 			
 			event.locals.user = null;

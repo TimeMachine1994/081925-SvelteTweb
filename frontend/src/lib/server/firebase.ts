@@ -3,12 +3,16 @@ import { dev } from '$app/environment';
 import { env } from '$env/dynamic/private';
 
 console.log('--- SERVER FIREBASE INITIALIZATION START ---');
+console.log('🔥 [FIREBASE] Environment check - dev mode:', dev);
+console.log('🔥 [FIREBASE] NODE_ENV:', process.env.NODE_ENV);
+console.log('🔥 [FIREBASE] Current admin apps count:', admin.apps.length);
 
 if (admin.apps.length) {
-	console.log('Firebase Admin SDK already initialized.');
+	console.log('🔥 [FIREBASE] Firebase Admin SDK already initialized.');
+	console.log('🔥 [FIREBASE] Existing app names:', admin.apps.map(app => app.name));
 } else {
-	console.log('Firebase Admin SDK not initialized. Starting setup...');
-	console.log(`SvelteKit dev mode: ${dev}`);
+	console.log('🔥 [FIREBASE] Firebase Admin SDK not initialized. Starting setup...');
+	console.log('🔥 [FIREBASE] SvelteKit dev mode:', dev);
 
 	if (dev) {
 		console.log('Running in development mode. Preparing to connect to emulators.');
@@ -36,24 +40,45 @@ if (admin.apps.length) {
 		console.log('✅ Firebase Admin initialized for local development with emulators.');
 		console.log('✅ Firebase Admin initialized for local development with emulators.');
 	} else {
-		console.log('Running in production mode.');
+		console.log('🔥 [FIREBASE] Running in production mode.');
 		// In production, we use the service account credentials.
 		const serviceAccountJson = env.PRIVATE_FIREBASE_SERVICE_ACCOUNT_KEY;
 		const storageBucket = env.PRIVATE_FIREBASE_STORAGE_BUCKET;
 
+		console.log('🔥 [FIREBASE] Service account key present:', !!serviceAccountJson);
+		console.log('🔥 [FIREBASE] Storage bucket:', storageBucket);
+
 		if (serviceAccountJson) {
-			console.log('Found service account key. Initializing with service account.');
-			const serviceAccount = JSON.parse(serviceAccountJson);
-			admin.initializeApp({
-				credential: admin.credential.cert(serviceAccount),
-				storageBucket: storageBucket
-			});
-			console.log('✅ Firebase Admin initialized for production.');
+			try {
+				console.log('🔥 [FIREBASE] Found service account key. Initializing with service account.');
+				console.log('🔥 [FIREBASE] Service account key length:', serviceAccountJson.length);
+				const serviceAccount = JSON.parse(serviceAccountJson);
+				console.log('🔥 [FIREBASE] Parsed service account project_id:', serviceAccount.project_id);
+				
+				admin.initializeApp({
+					credential: admin.credential.cert(serviceAccount),
+					storageBucket: storageBucket
+				});
+				console.log('✅ [FIREBASE] Firebase Admin initialized for production with service account.');
+			} catch (parseError) {
+				console.error('❌ [FIREBASE] Error parsing service account JSON:', parseError);
+				console.error('❌ [FIREBASE] Service account preview:', serviceAccountJson.substring(0, 100));
+				// Fallback: try to initialize with default credentials or hardcoded config
+				console.log('🔄 [FIREBASE] Attempting fallback initialization...');
+				admin.initializeApp({
+					projectId: 'fir-tweb',
+					storageBucket: storageBucket || 'fir-tweb.firebasestorage.app'
+				});
+				console.log('⚠️ [FIREBASE] Firebase Admin initialized with fallback configuration.');
+			}
 		} else {
-			// This case should ideally not be reached in a properly configured production environment.
-			console.error(
-				'❌ ERROR: Production environment detected, but PRIVATE_FIREBASE_SERVICE_ACCOUNT_KEY is not set.'
-			);
+			console.log('⚠️ [FIREBASE] No service account key found, using default configuration...');
+			// Fallback initialization for production
+			admin.initializeApp({
+				projectId: 'fir-tweb',
+				storageBucket: storageBucket || 'fir-tweb.firebasestorage.app'
+			});
+			console.log('⚠️ [FIREBASE] Firebase Admin initialized with default configuration.');
 		}
 	}
 }

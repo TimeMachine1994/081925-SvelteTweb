@@ -3,53 +3,78 @@
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
   import { browser } from '$app/environment';
-  import type { CalculatorFormData, Tier, LocationInfo, TimeInfo, ServiceDetails, AdditionalServiceDetails, Addons } from '$lib/types/livestream';
+  import { page } from '$app/stores';
   import { useAutoSave } from '$lib/composables/useAutoSave';
+  import type { CalculatorFormData, Tier } from '$lib/types/livestream';
 
+  let { data } = $props();
+  
+  // Get memorial ID from route params
+  const memorialId = $page.params.memorialId;
+  
   // Loading state
   let pageLoaded = $state(true);
 
-  // Memorial context - will be set when user creates/selects memorial
-  let memorialId = $state('');
-  let lovedOneName = $state('');
-
-  // Form data matching our schema
-  let selectedTier: Tier = $state('solo');
-  let mainService = $state<ServiceDetails>({
-    location: { name: '', address: '', isUnknown: false },
-    time: { date: null, time: null, isUnknown: false },
-    hours: 2
+  // Unified calculator data structure
+  let formData = $state<CalculatorFormData>({
+    memorialId,
+    lovedOneName: data?.memorial?.lovedOneName || '',
+    selectedTier: 'solo',
+    mainService: {
+      location: { name: '', address: '', isUnknown: false },
+      time: { date: null, time: null, isUnknown: false },
+      hours: 2
+    },
+    additionalLocation: {
+      enabled: false,
+      location: { name: '', address: '', isUnknown: false },
+      startTime: null,
+      hours: 2
+    },
+    additionalDay: {
+      enabled: false,
+      location: { name: '', address: '', isUnknown: false },
+      startTime: null,
+      hours: 2
+    },
+    funeralDirectorName: '',
+    funeralHome: '',
+    addons: {
+      photography: false,
+      audioVisualSupport: false,
+      liveMusician: false,
+      woodenUsbDrives: 0
+    },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    autoSaved: false
   });
-  let additionalLocation = $state<AdditionalServiceDetails>({
-    enabled: false,
-    location: { name: '', address: '', isUnknown: false },
-    startTime: null,
-    hours: 2
-  });
-  let additionalDay = $state<AdditionalServiceDetails>({
-    enabled: false,
-    location: { name: '', address: '', isUnknown: false },
-    startTime: null,
-    hours: 2
-  });
-  let addons = $state<Addons>({
-    photography: false,
-    audioVisualSupport: false,
-    liveMusician: false,
-    woodenUsbDrives: 0
-  });
-
-  // Contact information
-  let funeralDirectorName = $state('');
-  let funeralHome = $state('');
 
   // Auto-save functionality
-  let saveStatus = $state('saved'); // 'saved', 'saving', 'unsaved'
+  let saveStatus = $state<'saved' | 'saving' | 'unsaved' | 'error'>('saved');
   let lastSaved = $state('');
-  
-  // Remove broken auto-save composable - we'll handle it directly
 
-  // Original pricing constants
+  // Initialize auto-save
+  const autoSave = useAutoSave('', 2000, '', {
+    memorialId,
+    delay: 2000,
+    onSave: (success, error) => {
+      if (success) {
+        saveStatus = 'saved';
+        lastSaved = new Date().toLocaleTimeString();
+      } else {
+        saveStatus = 'error';
+        console.error('Auto-save failed:', error);
+      }
+    },
+    onLoad: (data) => {
+      if (data) {
+        console.log('Auto-saved data loaded');
+      }
+    }
+  });
+
+  // Pricing constants
   const TIER_PRICES = {
     solo: 599,
     live: 1299,
@@ -60,109 +85,34 @@
     photography: 400,
     audioVisualSupport: 200,
     liveMusician: 500,
-    woodenUsbDrives: 300 // First one, then $100 each
+    woodenUsbDrives: 300
   };
 
   const HOURLY_OVERAGE_RATE = 125;
   const ADDITIONAL_SERVICE_FEE = 325;
 
-  // Reactive calculations using SvelteKit 5 runes
+  // Reactive calculations
   const bookingItems = $derived(calculateBookingItems());
   const totalPrice = $derived(bookingItems.reduce((acc, item) => acc + item.total, 0));
-
-  // Create form data structure matching our schema
-  const formData = $derived.by(() => ({
-    memorialId,
-    lovedOneName,
-    selectedTier,
-    mainService,
-    additionalLocation,
-    additionalDay,
-    funeralDirectorName,
-    funeralHome,
-    addons,
-    updatedAt: new Date(),
-    autoSaved: false
-  } as CalculatorFormData));
-
-  // Auto-save effect - triggers when form data changes
-  let autoSaveTimeout: NodeJS.Timeout | null = null;
-  
-  $effect(() => {
-    // Only auto-save if we have a valid memorial ID (not 'temp' or empty)
-    if (memorialId && memorialId !== 'temp' && formData) {
-      saveStatus = 'saving';
-      
-      // Clear existing timeout
-      if (autoSaveTimeout) {
-        clearTimeout(autoSaveTimeout);
-      }
-      
-      // Set new timeout for auto-save
-      autoSaveTimeout = setTimeout(async () => {
-        const currentMemorialId = memorialId; // Capture current value
-        
-        try {
-          const scheduleData = {
-            selectedTier,
-            mainService,
-            additionalLocation,
-            additionalDay,
-            addons,
-            funeralDirectorName,
-            funeralHome,
-            bookingItems,
-            totalPrice,
-            status: 'draft',
-            lastUpdated: new Date().toISOString()
-          };
-          
-          const response = await fetch(`/api/memorials/${currentMemorialId}/schedule/auto-save`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              formData: scheduleData,
-              timestamp: Date.now()
-            })
-          });
-
-          if (response.ok) {
-            saveStatus = 'saved';
-            lastSaved = new Date().toLocaleTimeString();
-          } else {
-            saveStatus = 'unsaved';
-            console.error('Auto-save failed:', await response.text());
-          }
-        } catch (error) {
-          saveStatus = 'unsaved';
-          console.error('Auto-save error:', error);
-        }
-      }, 2000);
-    }
-  });
 
   function calculateBookingItems() {
     const items = [];
 
-    // 1. Base Package
-    if (selectedTier) {
-      const price = TIER_PRICES[selectedTier as keyof typeof TIER_PRICES];
+    // Base Package
+    if (formData.selectedTier) {
+      const price = TIER_PRICES[formData.selectedTier as keyof typeof TIER_PRICES];
       items.push({
-        id: 'base-package',
-        name: `Tributestream ${selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)}`,
+        name: `Tributestream ${formData.selectedTier.charAt(0).toUpperCase() + formData.selectedTier.slice(1)}`,
         price: price,
         quantity: 1,
         total: price
       });
     }
 
-    // 2. Main Service Hourly Overage (over 2 hours)
-    const mainOverageHours = Math.max(0, mainService.hours - 2);
+    // Main Service Hourly Overage
+    const mainOverageHours = Math.max(0, formData.mainService.hours - 2);
     if (mainOverageHours > 0) {
       items.push({
-        id: 'main-overage',
         name: 'Main Location Overage',
         price: HOURLY_OVERAGE_RATE,
         quantity: mainOverageHours,
@@ -170,24 +120,18 @@
       });
     }
 
-    // 3. Additional Location
-    if (additionalLocation.enabled) {
+    // Additional Location
+    if (formData.additionalLocation.enabled) {
       items.push({
-        id: 'additional-location-base',
-        name: 'Additional Location',
-        package: selectedTier || 'solo',
+        name: 'Additional Location Fee',
         price: ADDITIONAL_SERVICE_FEE,
         quantity: 1,
         total: ADDITIONAL_SERVICE_FEE
       });
-
-      // Additional location overage
-      const addlLocationOverage = Math.max(0, additionalLocation.hours - 2);
+      const addlLocationOverage = Math.max(0, formData.additionalLocation.hours - 2);
       if (addlLocationOverage > 0) {
         items.push({
-          id: 'additional-location-overage',
-          name: 'Additional Location Overage',
-          package: selectedTier || 'solo',
+          name: 'Add. Location Overage',
           price: HOURLY_OVERAGE_RATE,
           quantity: addlLocationOverage,
           total: HOURLY_OVERAGE_RATE * addlLocationOverage
@@ -195,24 +139,18 @@
       }
     }
 
-    // 4. Additional Day
-    if (additionalDay.enabled) {
+    // Additional Day
+    if (formData.additionalDay.enabled) {
       items.push({
-        id: 'additional-day-base',
-        name: 'Additional Day',
-        package: selectedTier || 'solo',
+        name: 'Additional Day Fee',
         price: ADDITIONAL_SERVICE_FEE,
         quantity: 1,
         total: ADDITIONAL_SERVICE_FEE
       });
-
-      // Additional day overage
-      const addlDayOverage = Math.max(0, additionalDay.hours - 2);
+      const addlDayOverage = Math.max(0, formData.additionalDay.hours - 2);
       if (addlDayOverage > 0) {
         items.push({
-          id: 'additional-day-overage',
-          name: 'Additional Day Overage',
-          package: selectedTier || 'solo',
+          name: 'Add. Day Overage',
           price: HOURLY_OVERAGE_RATE,
           quantity: addlDayOverage,
           total: HOURLY_OVERAGE_RATE * addlDayOverage
@@ -220,268 +158,122 @@
       }
     }
 
-    // 5. Add-ons
-    if (addons.photography) {
+    // Add-ons
+    if (formData.addons.photography) {
       items.push({
-        id: 'photography',
-        name: 'Photography Service',
-        package: selectedTier || 'solo',
+        name: 'Photography',
         price: ADDON_PRICES.photography,
         quantity: 1,
         total: ADDON_PRICES.photography
       });
     }
-
-    if (addons.audioVisualSupport) {
+    if (formData.addons.audioVisualSupport) {
       items.push({
-        id: 'audio-visual',
         name: 'Audio/Visual Support',
-        package: selectedTier || 'solo',
         price: ADDON_PRICES.audioVisualSupport,
         quantity: 1,
         total: ADDON_PRICES.audioVisualSupport
       });
     }
-
-    if (addons.liveMusician) {
+    if (formData.addons.liveMusician) {
       items.push({
-        id: 'live-musician',
         name: 'Live Musician',
-        package: selectedTier || 'solo',
         price: ADDON_PRICES.liveMusician,
         quantity: 1,
         total: ADDON_PRICES.liveMusician
       });
     }
+    if (formData.addons.woodenUsbDrives > 0) {
+      const isLegacy = formData.selectedTier === 'legacy';
+      const usbDrives = formData.addons.woodenUsbDrives;
+      const includedDrives = isLegacy ? 1 : 0;
 
-    if (addons.woodenUsbDrives > 0) {
-      // Legacy tier includes 1 USB drive
-      const includedDrives = selectedTier === 'legacy' ? 1 : 0;
-      const chargeableDrives = Math.max(0, addons.woodenUsbDrives - includedDrives);
-      
-      if (chargeableDrives > 0) {
-        const firstDrivePrice = ADDON_PRICES.woodenUsbDrives;
-        const additionalDrivePrice = 100;
-        
-        let totalUsbPrice = 0;
-        if (chargeableDrives === 1) {
-          totalUsbPrice = firstDrivePrice;
+      if (usbDrives > includedDrives) {
+        const billableDrives = usbDrives - includedDrives;
+        if (billableDrives > 0 && includedDrives === 0) {
+          items.push({
+            name: 'Wooden USB Drive',
+            price: ADDON_PRICES.woodenUsbDrives,
+            quantity: 1,
+            total: ADDON_PRICES.woodenUsbDrives
+          });
+          if (billableDrives > 1) {
+            items.push({
+              name: 'Additional Wooden USB Drives',
+              price: 100,
+              quantity: billableDrives - 1,
+              total: 100 * (billableDrives - 1)
+            });
+          }
         } else {
-          totalUsbPrice = firstDrivePrice + (chargeableDrives - 1) * additionalDrivePrice;
+          items.push({
+            name: 'Additional Wooden USB Drives',
+            price: 100,
+            quantity: billableDrives,
+            total: 100 * billableDrives
+          });
         }
-        
-        items.push({
-          id: 'wooden-usb',
-          name: `Wooden USB Drive${chargeableDrives > 1 ? 's' : ''}`,
-          package: selectedTier || 'solo',
-          price: totalUsbPrice / chargeableDrives,
-          quantity: chargeableDrives,
-          total: totalUsbPrice
-        });
       }
     }
 
     return items;
   }
 
-  // Booking functions that integrate with our payment API
-  async function handleBookNow() {
-    if (!memorialId || !formData) {
-      alert('Please ensure all required information is filled out.');
-      return;
-    }
-
-    try {
-      // Create payment intent with our existing API
-      const response = await fetch('/api/create-payment-intent', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          memorialId,
-          amount: totalPrice,
-          bookingItems,
-          customerInfo: {
-            email: '', // Will be filled from user context
-            name: funeralDirectorName || lovedOneName
-          }
-        })
-      });
-
-      const result = await response.json();
-      
-      if (response.ok && result.clientSecret) {
-        // Redirect to payment page with encoded data
-        const paymentData = {
-          memorialId,
-          clientSecret: result.clientSecret,
-          paymentIntentId: result.paymentIntentId,
-          amount: totalPrice,
-          total: totalPrice,
-          bookingItems,
-          formData
-        };
-        
-        const encodedData = btoa(JSON.stringify(paymentData));
-        goto(`/payment?data=${encodedData}`);
-      } else {
-        alert('Failed to create payment: ' + (result.error || 'Unknown error'));
-      }
-    } catch (error) {
-      console.error('Booking error:', error);
-      alert('An error occurred while processing your booking.');
-    }
-  }
-
-  async function handleSaveAndPayLater() {
-    if (!memorialId) {
-      goto('/profile');
-      return;
-    }
-
-    try {
-      // Save configuration to the memorial's schedule data
-      const scheduleData = {
-        selectedTier,
-        mainService,
-        additionalLocation,
-        additionalDay,
-        addons,
-        funeralDirectorName,
-        funeralHome,
-        bookingItems,
-        totalPrice,
-        status: 'draft',
-        lastUpdated: new Date().toISOString()
-      };
-      
-      const response = await fetch(`/api/memorials/${memorialId}/schedule/auto-save`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(scheduleData)
-      });
-
-      if (response.ok) {
-        // Redirect to profile page
-        goto('/profile');
-      } else {
-        console.error('Save failed:', await response.text());
-        goto('/profile');
-      }
-    } catch (error) {
-      console.error('Save error:', error);
-      goto('/profile');
-    }
-  }
-
-  function selectTier(tier: string) {
-    selectedTier = tier as Tier;
+  function selectTier(tier: Tier) {
+    formData.selectedTier = tier;
     // Reset addons when changing tiers
-    addons = {
+    formData.addons = {
       photography: false,
       audioVisualSupport: false,
       liveMusician: false,
-      woodenUsbDrives: selectedTier === 'legacy' ? 1 : 0 // Legacy includes 1 USB drive
+      woodenUsbDrives: tier === 'legacy' ? 1 : 0
     };
+    triggerAutoSave();
   }
 
-
-  // Redirect to memorial-specific route or new memorial creation
-  function redirectToProperRoute() {
-    // Check if user has existing memorials
-    goto('/schedule/new');
+  function triggerAutoSave() {
+    if (saveStatus === 'saved') {
+      saveStatus = 'unsaved';
+    }
+    formData.updatedAt = new Date();
+    autoSave.triggerAutoSave(formData);
   }
 
-  // This page now serves as a redirect to the proper memorial-specific route
+  function handleBookNow() {
+    const bookingData = {
+      items: bookingItems,
+      total: totalPrice,
+      formData,
+      memorialId,
+      timestamp: new Date().toISOString()
+    };
+    
+    const encodedData = encodeURIComponent(JSON.stringify(bookingData));
+    goto(`/payment?data=${encodedData}`);
+  }
 
-  // Auto-save functionality moved to memorial-specific routes
+  async function handleSaveAndPayLater() {
+    // Force immediate save
+    await autoSave.saveNow(formData);
+    goto(`/my-portal/tributes/${memorialId}/edit`);
+  }
 
-
-  // Only redirect if no memorial ID is provided in URL
+  // Watch for changes and trigger auto-save
   $effect(() => {
-    if (browser) {
-      const urlParams = new URLSearchParams(window.location.search);
-      const paramMemorialId = urlParams.get('memorialId');
-      
-      if (!paramMemorialId) {
-        // No memorial ID provided, redirect to profile to select memorial
-        goto('/profile');
-      }
+    if (browser && formData.lovedOneName) {
+      triggerAutoSave();
     }
   });
 
   onMount(async () => {
-    // Get memorial context from URL params or user selection
-    const urlParams = new URLSearchParams(window.location.search);
-    const paramMemorialId = urlParams.get('memorialId');
-    
-    if (paramMemorialId) {
-      memorialId = paramMemorialId;
-      
-      // Load existing calculator config if available
-      try {
-        // Load existing data from API
-        const response = await fetch(`/api/memorials/${memorialId}/schedule/auto-save`);
-        const result = response.ok ? await response.json() : null;
-        
-        if (result && result.hasAutoSave && result.autoSave) {
-          const savedData = result.autoSave.formData;
-          
-          // Populate form with saved data
-          selectedTier = (savedData.selectedTier || 'solo') as Tier;
-          lovedOneName = savedData.lovedOneName || '';
-          
-          if (savedData.mainService) {
-            mainService = {
-              location: savedData.mainService.location || { name: '', address: '', isUnknown: false },
-              time: savedData.mainService.time || { date: null, time: null, isUnknown: false },
-              hours: savedData.mainService.hours || 2
-            };
-          }
-          
-          if (savedData.additionalLocation) {
-            additionalLocation = {
-              enabled: savedData.additionalLocation.enabled || false,
-              location: savedData.additionalLocation.location || { name: '', address: '', isUnknown: false },
-              startTime: savedData.additionalLocation.startTime || null,
-              hours: savedData.additionalLocation.hours || 2
-            };
-          }
-          
-          if (savedData.additionalDay) {
-            additionalDay = {
-              enabled: savedData.additionalDay.enabled || false,
-              location: savedData.additionalDay.location || { name: '', address: '', isUnknown: false },
-              startTime: savedData.additionalDay.startTime || null,
-              hours: savedData.additionalDay.hours || 2
-            };
-          }
-          
-          if (savedData.addons) {
-            addons = {
-              photography: savedData.addons.photography || false,
-              audioVisualSupport: savedData.addons.audioVisualSupport || false,
-              liveMusician: savedData.addons.liveMusician || false,
-              woodenUsbDrives: savedData.addons.woodenUsbDrives || 0
-            };
-          }
-          
-          funeralDirectorName = savedData.funeralDirectorName || '';
-          funeralHome = savedData.funeralHome || '';
-          
-          console.log('✅ Loaded existing calculator configuration:', savedData);
-        } else {
-          console.log('ℹ️ No saved configuration found, using defaults');
-        }
-      } catch (error) {
-        console.error('Error loading existing data:', error);
+    // Load existing auto-saved data
+    const autoSavedData = await autoSave.loadAutoSavedData();
+    if (autoSavedData) {
+      const shouldRestore = confirm('We found an auto-saved version of your schedule. Would you like to restore it?');
+      if (shouldRestore) {
+        formData = autoSavedData;
+        console.log('✅ Auto-saved data restored');
       }
-    } else {
-      // If no memorial ID, redirect to profile to select/create memorial
-      goto('/profile');
     }
   });
 
@@ -531,7 +323,7 @@
 
 <svelte:head>
   <title>Price Calculator - TributeStream</title>
-  <meta name="description" content="Calculate the cost of your memorial service with our interactive pricing calculator." />
+  <meta name="description" content="Configure your memorial service livestream package with our comprehensive pricing calculator." />
 </svelte:head>
 
 <!-- Header -->
@@ -544,9 +336,29 @@
       </h1>
     </div>
     <p class="text-xl text-gray-300 max-w-2xl mx-auto">
-      Configure your memorial service livestream package with our comprehensive pricing calculator
+      Configure your memorial service livestream package for {formData.lovedOneName || 'your loved one'}
     </p>
     
+    <!-- Auto-save status indicator -->
+    {#if browser}
+      <div class="mt-4 flex items-center justify-center space-x-2 text-sm">
+        <div class="flex items-center space-x-1">
+          {#if saveStatus === 'saving'}
+            <div class="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
+            <span class="text-amber-400">Saving...</span>
+          {:else if saveStatus === 'saved'}
+            <div class="w-2 h-2 bg-green-400 rounded-full"></div>
+            <span class="text-green-400">Saved {lastSaved}</span>
+          {:else if saveStatus === 'error'}
+            <div class="w-2 h-2 bg-red-400 rounded-full"></div>
+            <span class="text-red-400">Save failed</span>
+          {:else}
+            <div class="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+            <span class="text-yellow-400">Unsaved changes</span>
+          {/if}
+        </div>
+      </div>
+    {/if}
   </div>
 </section>
 
@@ -567,7 +379,7 @@
           <div class="grid md:grid-cols-3 gap-4">
             {#each tiers as tier}
               <button 
-                class="p-4 border-2 rounded-lg transition-all text-left {selectedTier === tier.alias ? 'border-amber-400 bg-amber-400/10' : 'border-gray-600 hover:border-amber-500/50'}"
+                class="p-4 border-2 rounded-lg transition-all text-left {formData.selectedTier === tier.alias ? 'border-amber-400 bg-amber-400/10' : 'border-gray-600 hover:border-amber-500/50'}"
                 onclick={() => selectTier(tier.alias)}
               >
                 <h3 class="font-bold text-lg mb-2 text-white">{tier.name}</h3>
@@ -603,12 +415,13 @@
                 min="1" 
                 max="8" 
                 step="1"
-                bind:value={mainService.hours}
+                bind:value={formData.mainService.hours}
                 class="w-full gold-slider"
+                onchange={triggerAutoSave}
               />
               <div class="flex justify-between text-sm text-gray-400 mt-1">
                 <span>1 hour</span>
-                <span class="font-medium text-amber-400">{mainService.hours} hours</span>
+                <span class="font-medium text-amber-400">{formData.mainService.hours} hours</span>
                 <span>8+ hours</span>
               </div>
             </div>
@@ -632,12 +445,13 @@
                 </div>
                 <input 
                   type="checkbox" 
-                  bind:checked={additionalLocation.enabled}
+                  bind:checked={formData.additionalLocation.enabled}
+                  onchange={triggerAutoSave}
                   class="h-5 w-5 text-amber-400 bg-gray-700 border-gray-600 rounded focus:ring-amber-500"
                 />
               </label>
               
-              {#if additionalLocation.enabled}
+              {#if formData.additionalLocation.enabled}
                 <div>
                   <label for="additional-location-hours" class="block text-sm font-medium text-gray-300 mb-2">
                     Additional Location Hours (2 hours included, ${HOURLY_OVERAGE_RATE}/hour overage)
@@ -648,12 +462,13 @@
                     min="1" 
                     max="8" 
                     step="1"
-                    bind:value={additionalLocation.hours}
+                    bind:value={formData.additionalLocation.hours}
+                    onchange={triggerAutoSave}
                     class="w-full gold-slider"
                   />
                   <div class="flex justify-between text-sm text-gray-400 mt-1">
                     <span>1 hour</span>
-                    <span class="font-medium text-amber-400">{additionalLocation.hours} hours</span>
+                    <span class="font-medium text-amber-400">{formData.additionalLocation.hours} hours</span>
                     <span>8+ hours</span>
                   </div>
                 </div>
@@ -669,12 +484,13 @@
                 </div>
                 <input 
                   type="checkbox" 
-                  bind:checked={additionalDay.enabled}
+                  bind:checked={formData.additionalDay.enabled}
+                  onchange={triggerAutoSave}
                   class="h-5 w-5 text-amber-400 bg-gray-700 border-gray-600 rounded focus:ring-amber-500"
                 />
               </label>
               
-              {#if additionalDay.enabled}
+              {#if formData.additionalDay.enabled}
                 <div>
                   <label for="additional-day-hours" class="block text-sm font-medium text-gray-300 mb-2">
                     Additional Day Hours (2 hours included, ${HOURLY_OVERAGE_RATE}/hour overage)
@@ -685,12 +501,13 @@
                     min="1" 
                     max="8" 
                     step="1"
-                    bind:value={additionalDay.hours}
+                    bind:value={formData.additionalDay.hours}
+                    onchange={triggerAutoSave}
                     class="w-full gold-slider"
                   />
                   <div class="flex justify-between text-sm text-gray-400 mt-1">
                     <span>1 hour</span>
-                    <span class="font-medium text-amber-400">{additionalDay.hours} hours</span>
+                    <span class="font-medium text-amber-400">{formData.additionalDay.hours} hours</span>
                     <span>8+ hours</span>
                   </div>
                 </div>
@@ -716,7 +533,8 @@
                 <span class="text-amber-400 font-bold mr-4">+${ADDON_PRICES.photography}</span>
                 <input 
                   type="checkbox" 
-                  bind:checked={addons.photography}
+                  bind:checked={formData.addons.photography}
+                  onchange={triggerAutoSave}
                   class="h-5 w-5 text-amber-400 bg-gray-700 border-gray-600 rounded focus:ring-amber-500"
                 />
               </div>
@@ -731,7 +549,8 @@
                 <span class="text-amber-400 font-bold mr-4">+${ADDON_PRICES.audioVisualSupport}</span>
                 <input 
                   type="checkbox" 
-                  bind:checked={addons.audioVisualSupport}
+                  bind:checked={formData.addons.audioVisualSupport}
+                  onchange={triggerAutoSave}
                   class="h-5 w-5 text-amber-400 bg-gray-700 border-gray-600 rounded focus:ring-amber-500"
                 />
               </div>
@@ -746,7 +565,8 @@
                 <span class="text-amber-400 font-bold mr-4">+${ADDON_PRICES.liveMusician}</span>
                 <input 
                   type="checkbox" 
-                  bind:checked={addons.liveMusician}
+                  bind:checked={formData.addons.liveMusician}
+                  onchange={triggerAutoSave}
                   class="h-5 w-5 text-amber-400 bg-gray-700 border-gray-600 rounded focus:ring-amber-500"
                 />
               </div>
@@ -757,7 +577,7 @@
                 <div>
                   <span class="font-medium text-white">Wooden USB Drives</span>
                   <p class="text-sm text-gray-400">
-                    {#if selectedTier === 'legacy'}
+                    {#if formData.selectedTier === 'legacy'}
                       First drive included with Legacy. Additional drives: first +${ADDON_PRICES.woodenUsbDrives}, then +$100 each
                     {:else}
                       First drive +${ADDON_PRICES.woodenUsbDrives}, additional drives +$100 each
@@ -774,7 +594,8 @@
                   type="number" 
                   min="0" 
                   max="10"
-                  bind:value={addons.woodenUsbDrives}
+                  bind:value={formData.addons.woodenUsbDrives}
+                  onchange={triggerAutoSave}
                   class="w-20 p-2 border border-gray-600 rounded bg-gray-700 text-white focus:ring-amber-500 focus:border-amber-500"
                 />
               </div>

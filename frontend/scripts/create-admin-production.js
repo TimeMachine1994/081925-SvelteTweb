@@ -13,9 +13,10 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import readline from 'readline';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__dirname);
+const __dirname = dirname(__filename);
 
 // Get command line arguments
 const args = process.argv.slice(2);
@@ -31,7 +32,6 @@ if (!email) {
 // Production safety check
 function confirmProduction() {
   return new Promise((resolve) => {
-    const readline = require('readline');
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout
@@ -101,7 +101,6 @@ async function createProductionAdmin() {
       });
       console.log('');
       
-      const readline = require('readline');
       const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout

@@ -112,7 +112,8 @@
     }
   }
 
-  async function handleSubmit() {
+  async function handleSubmit(event: Event) {
+    event.preventDefault();
     if (!stripe || !cardElement || !bookingData) {
       paymentError = 'Payment system not ready. Please try again.';
       return;
@@ -150,20 +151,25 @@
           },
           body: JSON.stringify({
             amount: Math.round(bookingData.total * 100), // Convert to cents
+            memorialId: bookingData.memorialId,
             currency: 'usd',
             bookingData,
             customerInfo
           }),
         });
 
-        const { client_secret, error } = await response.json();
+        const result = await response.json();
 
-        if (error) {
-          throw new Error(error);
+        if (result.error) {
+          throw new Error(result.error);
+        }
+
+        if (!result.clientSecret) {
+          throw new Error('No client secret received from server');
         }
 
         // Confirm payment with Stripe
-        const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(client_secret, {
+        const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(result.clientSecret, {
           payment_method: {
             card: cardElement,
             billing_details: {
@@ -248,7 +254,7 @@
             Customer Information
           </h2>
 
-          <form on:submit|preventDefault={handleSubmit} class="space-y-4">
+          <form onsubmit={handleSubmit} class="space-y-4">
             <!-- Name Fields -->
             <div class="grid grid-cols-2 gap-4">
               <div>
@@ -400,7 +406,7 @@
                 {#if canRetry && retryCount < 3}
                   <button
                     type="button"
-                    on:click={handleRetry}
+                    onclick={handleRetry}
                     disabled={isProcessing}
                     class="inline-flex items-center px-3 py-1 text-xs bg-red-100 hover:bg-red-200 text-red-700 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
@@ -437,7 +443,7 @@
           <h2 class="text-xl font-semibold text-gray-900 mb-6">Order Summary</h2>
           
           <div class="space-y-3 mb-6">
-            {#each bookingData.items as item}
+            {#each bookingData.bookingItems as item}
               <div class="flex justify-between text-sm">
                 <span class="flex-1 text-gray-700">
                   {item.name}

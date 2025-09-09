@@ -3,10 +3,11 @@ import type { RequestHandler } from './$types';
 import Stripe from 'stripe';
 import { adminDb } from '$lib/firebase-admin';
 import { Timestamp, FieldValue } from 'firebase-admin/firestore';
+import { STRIPE_SECRET_KEY } from '$env/static/private';
 
 // Initialize Stripe with your secret key
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_mock', {
-  apiVersion: '2023-10-16',
+const stripe = new Stripe(STRIPE_SECRET_KEY, {
+  apiVersion: '2025-08-27.basil',
 });
 
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -39,6 +40,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     const hasPermission = 
       userRole === 'admin' ||
       memorial?.ownerUid === userId ||
+      memorial?.createdByUserId === userId ||
       memorial?.funeralDirectorUid === userId ||
       (userRole === 'family_member' && memorial?.familyMemberUids?.includes(userId));
 

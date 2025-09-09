@@ -4,6 +4,7 @@ import { getAuth, connectAuthEmulator, type Auth } from 'firebase/auth';
 import { getStorage, connectStorageEmulator, type FirebaseStorage } from 'firebase/storage';
 import { dev, browser } from '$app/environment';
 
+// Firebase configuration - using direct values since env vars aren't available in production
 const firebaseConfig = {
 	apiKey: 'AIzaSyAXmTxzYRc-LhMEW75nZjjjQCZov1gpiw0',
 	authDomain: 'fir-tweb.firebaseapp.com',
@@ -12,6 +13,13 @@ const firebaseConfig = {
 	messagingSenderId: '509455146790',
 	appId: '1:509455146790:web:7ec99527214b05d7b9ebe7'
 };
+
+console.log('🔥 Firebase Config:', {
+	projectId: firebaseConfig.projectId,
+	authDomain: firebaseConfig.authDomain,
+	isDev: dev,
+	isBrowser: browser
+});
 
 // Initialize Firebase
 let app: FirebaseApp;

@@ -11,7 +11,9 @@ export const load: PageServerLoad = async ({ url }) => {
   }
 
   try {
-    const bookingData = JSON.parse(decodeURIComponent(encodedData));
+    // Decode base64 data first, then parse JSON
+    const decodedData = atob(encodedData);
+    const bookingData = JSON.parse(decodedData);
     return {
       bookingData
     };

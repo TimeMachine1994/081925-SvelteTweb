@@ -1,716 +1,49 @@
-[debug] [2025-09-06T21:31:53.929Z] ----------------------------------------------------------------------
-[debug] [2025-09-06T21:31:53.937Z] Command:       /home/austin/.nvm/versions/node/v22.16.0/bin/node /home/austin/.nvm/versions/node/v22.16.0/bin/firebase emulators:start
-[debug] [2025-09-06T21:31:53.939Z] CLI Version:   14.15.1
-[debug] [2025-09-06T21:31:53.939Z] Platform:      linux
-[debug] [2025-09-06T21:31:53.940Z] Node Version:  v22.16.0
-[debug] [2025-09-06T21:31:53.941Z] Time:          Sat Sep 06 2025 17:31:53 GMT-0400 (Eastern Daylight Time)
-[debug] [2025-09-06T21:31:53.941Z] ----------------------------------------------------------------------
+[debug] [2025-09-08T15:56:33.589Z] ----------------------------------------------------------------------
+[debug] [2025-09-08T15:56:33.599Z] Command:       /home/austin/.nvm/versions/node/v22.16.0/bin/node /home/austin/.nvm/versions/node/v22.16.0/bin/firebase emulators:start
+[debug] [2025-09-08T15:56:33.602Z] CLI Version:   14.15.1
+[debug] [2025-09-08T15:56:33.603Z] Platform:      linux
+[debug] [2025-09-08T15:56:33.604Z] Node Version:  v22.16.0
+[debug] [2025-09-08T15:56:33.605Z] Time:          Mon Sep 08 2025 11:56:33 GMT-0400 (Eastern Daylight Time)
+[debug] [2025-09-08T15:56:33.606Z] ----------------------------------------------------------------------
 [debug] 
-[debug] [2025-09-06T21:31:55.420Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
-[debug] [2025-09-06T21:31:55.422Z] > authorizing via signed-in user (austinbryanfilm@gmail.com)
-[debug] [2025-09-06T21:31:55.600Z] openjdk version "11.0.28" 2025-07-15
-OpenJDK Runtime Environment (build 11.0.28+6-post-Ubuntu-1ubuntu122.04.1)
+[debug] [2025-09-08T15:56:33.617Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2025-09-08T15:56:35.213Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-09-08T15:56:35.214Z] > authorizing via signed-in user (austinbryanfilm@gmail.com)
+[debug] [2025-09-08T15:56:35.496Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2025-09-08T15:56:35.497Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[debug] [2025-09-08T15:56:35.981Z] openjdk version "11.0.28" 2025-07-15
+
+[debug] [2025-09-08T15:56:35.983Z] OpenJDK Runtime Environment (build 11.0.28+6-post-Ubuntu-1ubuntu122.04.1)
 OpenJDK 64-Bit Server VM (build 11.0.28+6-post-Ubuntu-1ubuntu122.04.1, mixed mode, sharing)
 
-[debug] [2025-09-06T21:31:55.746Z] Parsed Java major version: 11
+[debug] [2025-09-08T15:56:35.995Z] Parsed Java major version: 11
 [info] i  emulators: Starting emulators: auth, firestore, hosting, storage {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth, firestore, hosting, storage"}}
-[debug] [2025-09-06T21:31:55.772Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"firestore":[{"address":"127.0.0.1","family":"IPv4","port":8080}],"hosting":[{"address":"127.0.0.1","family":"IPv4","port":5000}],"storage":[{"address":"127.0.0.1","family":"IPv4","port":9199}],"firestore.websocket":[{"address":"127.0.0.1","family":"IPv4","port":9151}]},"metadata":{"message":"assigned listening specs for emulators"}}
-[warn] ⚠  emulators: It seems that you are running multiple instances of the emulator suite for project fir-tweb. This may result in unexpected behavior. 
-[debug] [2025-09-06T21:31:55.808Z] [hub] writing locator at /tmp/hub-fir-tweb.json
-[debug] [2025-09-06T21:31:55.865Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: auto_download"}}
-[debug] [2025-09-06T21:31:55.865Z] Ignoring unsupported arg: single_project_mode_error {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: single_project_mode_error"}}
-[debug] [2025-09-06T21:31:55.866Z] Starting Firestore Emulator with command {"binary":"java","args":["-Djava.net.preferIPv4Stack=true","-Dgoogle.cloud_firestore.debug_log_level=FINE","-Duser.language=en","-jar","/home/austin/.cache/firebase/emulators/cloud-firestore-emulator-v1.19.8.jar","--host","127.0.0.1","--port",8080,"--websocket_port",9151,"--project_id","fir-tweb","--rules","/home/austin/081925-SvelteTweb-1/firestore.rules","--single_project_mode",true],"optionalArgs":["port","webchannel_port","host","rules","websocket_port","functions_emulator","seed_from_export","project_id","single_project_mode"],"joinArgs":false,"shell":false,"port":8080} {"metadata":{"emulator":{"name":"firestore"},"message":"Starting Firestore Emulator with command {\"binary\":\"java\",\"args\":[\"-Djava.net.preferIPv4Stack=true\",\"-Dgoogle.cloud_firestore.debug_log_level=FINE\",\"-Duser.language=en\",\"-jar\",\"/home/austin/.cache/firebase/emulators/cloud-firestore-emulator-v1.19.8.jar\",\"--host\",\"127.0.0.1\",\"--port\",8080,\"--websocket_port\",9151,\"--project_id\",\"fir-tweb\",\"--rules\",\"/home/austin/081925-SvelteTweb-1/firestore.rules\",\"--single_project_mode\",true],\"optionalArgs\":[\"port\",\"webchannel_port\",\"host\",\"rules\",\"websocket_port\",\"functions_emulator\",\"seed_from_export\",\"project_id\",\"single_project_mode\"],\"joinArgs\":false,\"shell\":false,\"port\":8080}"}}
+[debug] [2025-09-08T15:56:36.018Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"firestore":[{"address":"127.0.0.1","family":"IPv4","port":8080}],"firestore.websocket":[{"address":"127.0.0.1","family":"IPv4","port":9150}],"hosting":[{"address":"127.0.0.1","family":"IPv4","port":5000}],"storage":[{"address":"127.0.0.1","family":"IPv4","port":9199}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[debug] [2025-09-08T15:56:36.039Z] [hub] writing locator at /tmp/hub-fir-tweb.json
+[debug] [2025-09-08T15:56:36.080Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2025-09-08T15:56:36.081Z] Ignoring unsupported arg: single_project_mode_error {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: single_project_mode_error"}}
+[debug] [2025-09-08T15:56:36.082Z] Starting Firestore Emulator with command {"binary":"java","args":["-Djava.net.preferIPv4Stack=true","-Dgoogle.cloud_firestore.debug_log_level=FINE","-Duser.language=en","-jar","/home/austin/.cache/firebase/emulators/cloud-firestore-emulator-v1.19.8.jar","--host","127.0.0.1","--port",8080,"--websocket_port",9150,"--project_id","fir-tweb","--rules","/home/austin/081925-SvelteTweb-1/firestore.rules","--single_project_mode",true],"optionalArgs":["port","webchannel_port","host","rules","websocket_port","functions_emulator","seed_from_export","project_id","single_project_mode"],"joinArgs":false,"shell":false,"port":8080} {"metadata":{"emulator":{"name":"firestore"},"message":"Starting Firestore Emulator with command {\"binary\":\"java\",\"args\":[\"-Djava.net.preferIPv4Stack=true\",\"-Dgoogle.cloud_firestore.debug_log_level=FINE\",\"-Duser.language=en\",\"-jar\",\"/home/austin/.cache/firebase/emulators/cloud-firestore-emulator-v1.19.8.jar\",\"--host\",\"127.0.0.1\",\"--port\",8080,\"--websocket_port\",9150,\"--project_id\",\"fir-tweb\",\"--rules\",\"/home/austin/081925-SvelteTweb-1/firestore.rules\",\"--single_project_mode\",true],\"optionalArgs\":[\"port\",\"webchannel_port\",\"host\",\"rules\",\"websocket_port\",\"functions_emulator\",\"seed_from_export\",\"project_id\",\"single_project_mode\"],\"joinArgs\":false,\"shell\":false,\"port\":8080}"}}
 [info] i  firestore: Firestore Emulator logging to firestore-debug.log {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator logging to \u001b[1mfirestore-debug.log\u001b[22m"}}
-[debug] [2025-09-06T21:32:01.564Z] Sep 06, 2025 5:32:01 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketServer start
-INFO: Started WebSocket server on ws://127.0.0.1:9151
- {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 06, 2025 5:32:01 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketServer start\nINFO: Started WebSocket server on ws://127.0.0.1:9151\n"}}
-[debug] [2025-09-06T21:32:01.655Z] API endpoint: http:// {"metadata":{"emulator":{"name":"firestore"},"message":"API endpoint: http://"}}
-[debug] [2025-09-06T21:32:01.657Z] 127.0.0.1:8080
-If you are using a library that supports the FIRESTORE_EMULATOR_HOST environment variable, run:
-
-   export FIRESTORE_EMULATOR_HOST=127.0.0.1:8080
-
-If you are running a Firestore in Datastore Mode project, run:
-
-   export DATASTORE_EMULATOR_HOST=127.0.0.1:8080
-
-Note: Support for Datastore Mode is in preview. If you encounter any bugs please file at https://github.com/firebase/firebase-tools/issues.
-Dev App Server is now running.
-
- {"metadata":{"emulator":{"name":"firestore"},"message":"127.0.0.1:8080\nIf you are using a library that supports the FIRESTORE_EMULATOR_HOST environment variable, run:\n\n   export FIRESTORE_EMULATOR_HOST=127.0.0.1:8080\n\nIf you are running a Firestore in Datastore Mode project, run:\n\n   export DATASTORE_EMULATOR_HOST=127.0.0.1:8080\n\nNote: Support for Datastore Mode is in preview. If you encounter any bugs please file at https://github.com/firebase/firebase-tools/issues.\nDev App Server is now running.\n\n"}}
-[info] ✔  firestore: Firestore Emulator UI websocket is running on 9151. {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator UI websocket is running on 9151."}}
-[debug] [2025-09-06T21:32:43.193Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"storage"},"message":"Ignoring unsupported arg: port"}}
-[warn] ⚠  Missing 'match' keyword before path in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:12 {"metadata":{"emulator":{"name":"storage"},"message":"Missing 'match' keyword before path in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:12"}}
-[warn] ⚠  Forward slash '/' found where identifier or binding expected in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:12 {"metadata":{"emulator":{"name":"storage"},"message":"Forward slash '/' found where identifier or binding expected in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:12"}}
-[warn] ⚠  mismatched input '$' expecting {'{', '/', PATH_SEGMENT} in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:12 {"metadata":{"emulator":{"name":"storage"},"message":"mismatched input '$' expecting {'{', '/', PATH_SEGMENT} in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:12"}}
-[warn] ⚠  Unexpected '_$' in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:12 {"metadata":{"emulator":{"name":"storage"},"message":"Unexpected '_$' in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:12"}}
-[warn] ⚠  Missing 'match' keyword before path in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:13 {"metadata":{"emulator":{"name":"storage"},"message":"Missing 'match' keyword before path in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:13"}}
-[warn] ⚠  Forward slash '/' found where identifier or binding expected in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:13 {"metadata":{"emulator":{"name":"storage"},"message":"Forward slash '/' found where identifier or binding expected in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:13"}}
-[warn] ⚠  mismatched input '$' expecting {'{', '/', PATH_SEGMENT} in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:13 {"metadata":{"emulator":{"name":"storage"},"message":"mismatched input '$' expecting {'{', '/', PATH_SEGMENT} in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:13"}}
-[warn] ⚠  Unexpected '}' in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:24 {"metadata":{"emulator":{"name":"storage"},"message":"Unexpected '}' in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:24"}}
-[debug] [2025-09-06T21:32:45.775Z] Temp file directory for storage emulator: /tmp/firebase/storage/blobs {"metadata":{"emulator":{"name":"storage"},"message":"Temp file directory for storage emulator: /tmp/firebase/storage/blobs"}}
-[debug] [2025-09-06T21:32:45.801Z] Checked if tokens are valid: true, expires at: 1757197325122
-[debug] [2025-09-06T21:32:45.802Z] Checked if tokens are valid: true, expires at: 1757197325122
-[debug] [2025-09-06T21:32:45.814Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/fir-tweb/sites 
-[debug] [2025-09-06T21:32:46.303Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/fir-tweb/sites 200
-[debug] [2025-09-06T21:32:46.303Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/fir-tweb/sites {"sites":[{"name":"projects/fir-tweb/sites/fir-tweb","defaultUrl":"https://fir-tweb.web.app","appId":"1:509455146790:web:7ec99527214b05d7b9ebe7","type":"DEFAULT_SITE"}]}
-[debug] [2025-09-06T21:32:46.304Z] Checked if tokens are valid: true, expires at: 1757197325122
-[debug] [2025-09-06T21:32:46.304Z] Checked if tokens are valid: true, expires at: 1757197325122
-[debug] [2025-09-06T21:32:46.304Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/webApps/1:509455146790:web:7ec99527214b05d7b9ebe7/config [none]
-[debug] [2025-09-06T21:32:46.801Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/webApps/1:509455146790:web:7ec99527214b05d7b9ebe7/config 200
-[debug] [2025-09-06T21:32:46.802Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/webApps/1:509455146790:web:7ec99527214b05d7b9ebe7/config {"projectId":"fir-tweb","appId":"1:509455146790:web:7ec99527214b05d7b9ebe7","storageBucket":"fir-tweb.firebasestorage.app","apiKey":"AIzaSyAXmTxzYRc-LhMEW75nZjjjQCZov1gpiw0","authDomain":"fir-tweb.firebaseapp.com","messagingSenderId":"509455146790","measurementId":"G-NLY7K5GGYQ"}
-[debug] [2025-09-06T21:32:46.813Z] Checked if tokens are valid: true, expires at: 1757197325122
-[debug] [2025-09-06T21:32:46.813Z] Checked if tokens are valid: true, expires at: 1757197325122
-[debug] [2025-09-06T21:32:46.814Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb [none]
-[debug] [2025-09-06T21:32:47.112Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb 200
-[debug] [2025-09-06T21:32:47.113Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb {"projectId":"fir-tweb","projectNumber":"509455146790","displayName":"firebaseTweb","name":"projects/fir-tweb","resources":{"hostingSite":"fir-tweb"},"state":"ACTIVE","etag":"1_5e1608ca-6866-46b2-9819-5e74a50ac9d9"}
-[debug] [2025-09-06T21:32:47.116Z] Specified "public" directory "frontend/build" does not exist; Deploy to Hosting site "fir-tweb" may fail or be empty.
-[info] i  hosting[fir-tweb]: Serving hosting files from: frontend/build {"metadata":{"emulator":{"name":"hosting"},"message":"Serving hosting files from: \u001b[1mfrontend/build\u001b[22m"}}
-[info] ✔  hosting[fir-tweb]: Local server: http://127.0.0.1:5000 {"metadata":{"emulator":{"name":"hosting"},"message":"Local server: \u001b[4m\u001b[1mhttp://127.0.0.1:5000\u001b[22m\u001b[24m"}}
-[debug] [2025-09-06T21:32:47.189Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
-[info] 
-┌─────────────────────────────────────────────────────────────┐
-│ ✔  All emulators ready! It is now safe to connect your app. │
-│ i  View Emulator UI at http://127.0.0.1:4000/               │
-└─────────────────────────────────────────────────────────────┘
-
-┌────────────────┬────────────────┬─────────────────────────────────┐
-│ Emulator       │ Host:Port      │ View in Emulator UI             │
-├────────────────┼────────────────┼─────────────────────────────────┤
-│ Authentication │ 127.0.0.1:9099 │ http://127.0.0.1:4000/auth      │
-├────────────────┼────────────────┼─────────────────────────────────┤
-│ Firestore      │ 127.0.0.1:8080 │ http://127.0.0.1:4000/firestore │
-├────────────────┼────────────────┼─────────────────────────────────┤
-│ Hosting        │ 127.0.0.1:5000 │ n/a                             │
-├────────────────┼────────────────┼─────────────────────────────────┤
-│ Storage        │ 127.0.0.1:9199 │ http://127.0.0.1:4000/storage   │
-└────────────────┴────────────────┴─────────────────────────────────┘
-  Emulator Hub host: 127.0.0.1 port: 4400
-  Other reserved ports: 4500, 9151
-
-Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
- 
-[debug] [2025-09-06T21:37:17.662Z] Sep 06, 2025 5:37:17 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
-INFO: Detected HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 06, 2025 5:37:17 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
-[debug] [2025-09-06T21:37:48.019Z] Received signal SIGHUP 1
-[info]  
-[info] i  emulators: Received SIGHUP for the first time. Starting a clean shutdown. 
-[info] i  emulators: Please wait for a clean shutdown or send the SIGHUP signal again to stop right now. 
-[debug] [2025-09-06T21:37:48.028Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:37:48.031Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:37:48.034Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:37:48.037Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:37:48.039Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:37:48.041Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:37:48.043Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:37:48.045Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:37:48.047Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:37:48.049Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:37:48.054Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:37:48.058Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:37:48.060Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:37:48.062Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:37:48.063Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:37:48.068Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:37:48.070Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:37:48.072Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:41:56.054Z] ----------------------------------------------------------------------
-[debug] [2025-09-06T21:41:56.071Z] Command:       /home/austin/.nvm/versions/node/v22.16.0/bin/node /home/austin/.nvm/versions/node/v22.16.0/bin/firebase emulators:start
-[debug] [2025-09-06T21:41:56.073Z] CLI Version:   14.15.1
-[debug] [2025-09-06T21:41:56.074Z] Platform:      linux
-[debug] [2025-09-06T21:41:56.074Z] Node Version:  v22.16.0
-[debug] [2025-09-06T21:41:56.076Z] Time:          Sat Sep 06 2025 17:41:56 GMT-0400 (Eastern Daylight Time)
-[debug] [2025-09-06T21:41:56.076Z] ----------------------------------------------------------------------
-[debug] 
-[debug] [2025-09-06T21:41:57.522Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
-[debug] [2025-09-06T21:41:57.524Z] > authorizing via signed-in user (austinbryanfilm@gmail.com)
-[debug] [2025-09-06T21:41:57.694Z] openjdk version "11.0.28" 2025-07-15
-OpenJDK Runtime Environment (build 11.0.28+6-post-Ubuntu-1ubuntu122.04.1)
-OpenJDK 64-Bit Server VM (build 11.0.28+6-post-Ubuntu-1ubuntu122.04.1, mixed mode, sharing)
-
-[debug] [2025-09-06T21:41:57.699Z] Parsed Java major version: 11
-[info] i  emulators: Starting emulators: auth, firestore, hosting, storage {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth, firestore, hosting, storage"}}
-[debug] [2025-09-06T21:41:57.722Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"firestore":[{"address":"127.0.0.1","family":"IPv4","port":8080}],"hosting":[{"address":"127.0.0.1","family":"IPv4","port":5000}],"storage":[{"address":"127.0.0.1","family":"IPv4","port":9199}],"firestore.websocket":[{"address":"127.0.0.1","family":"IPv4","port":9151}]},"metadata":{"message":"assigned listening specs for emulators"}}
-[warn] ⚠  emulators: It seems that you are running multiple instances of the emulator suite for project fir-tweb. This may result in unexpected behavior. 
-[debug] [2025-09-06T21:41:57.743Z] [hub] writing locator at /tmp/hub-fir-tweb.json
-[debug] [2025-09-06T21:41:57.788Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: auto_download"}}
-[debug] [2025-09-06T21:41:57.791Z] Ignoring unsupported arg: single_project_mode_error {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: single_project_mode_error"}}
-[debug] [2025-09-06T21:41:57.792Z] Starting Firestore Emulator with command {"binary":"java","args":["-Djava.net.preferIPv4Stack=true","-Dgoogle.cloud_firestore.debug_log_level=FINE","-Duser.language=en","-jar","/home/austin/.cache/firebase/emulators/cloud-firestore-emulator-v1.19.8.jar","--host","127.0.0.1","--port",8080,"--websocket_port",9151,"--project_id","fir-tweb","--rules","/home/austin/081925-SvelteTweb-1/firestore.rules","--single_project_mode",true],"optionalArgs":["port","webchannel_port","host","rules","websocket_port","functions_emulator","seed_from_export","project_id","single_project_mode"],"joinArgs":false,"shell":false,"port":8080} {"metadata":{"emulator":{"name":"firestore"},"message":"Starting Firestore Emulator with command {\"binary\":\"java\",\"args\":[\"-Djava.net.preferIPv4Stack=true\",\"-Dgoogle.cloud_firestore.debug_log_level=FINE\",\"-Duser.language=en\",\"-jar\",\"/home/austin/.cache/firebase/emulators/cloud-firestore-emulator-v1.19.8.jar\",\"--host\",\"127.0.0.1\",\"--port\",8080,\"--websocket_port\",9151,\"--project_id\",\"fir-tweb\",\"--rules\",\"/home/austin/081925-SvelteTweb-1/firestore.rules\",\"--single_project_mode\",true],\"optionalArgs\":[\"port\",\"webchannel_port\",\"host\",\"rules\",\"websocket_port\",\"functions_emulator\",\"seed_from_export\",\"project_id\",\"single_project_mode\"],\"joinArgs\":false,\"shell\":false,\"port\":8080}"}}
-[info] i  firestore: Firestore Emulator logging to firestore-debug.log {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator logging to \u001b[1mfirestore-debug.log\u001b[22m"}}
-[debug] [2025-09-06T21:42:03.731Z] Sep 06, 2025 5:42:03 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketServer start
-INFO: Started WebSocket server on ws://127.0.0.1:9151
- {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 06, 2025 5:42:03 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketServer start\nINFO: Started WebSocket server on ws://127.0.0.1:9151\n"}}
-[debug] [2025-09-06T21:42:03.951Z] API endpoint: http:// {"metadata":{"emulator":{"name":"firestore"},"message":"API endpoint: http://"}}
-[debug] [2025-09-06T21:42:03.952Z] 127.0.0.1:8080
-If you are using a library that supports the FIRESTORE_EMULATOR_HOST environment variable, run:
-
-   export FIRESTORE_EMULATOR_HOST=127.0.0.1:8080
-
-If you are running a Firestore in Datastore Mode project, run:
- {"metadata":{"emulator":{"name":"firestore"},"message":"127.0.0.1:8080\nIf you are using a library that supports the FIRESTORE_EMULATOR_HOST environment variable, run:\n\n   export FIRESTORE_EMULATOR_HOST=127.0.0.1:8080\n\nIf you are running a Firestore in Datastore Mode project, run:\n"}}
-[debug] [2025-09-06T21:42:03.954Z] 
-   export DATASTORE_EMULATOR_HOST= {"metadata":{"emulator":{"name":"firestore"},"message":"\n   export DATASTORE_EMULATOR_HOST="}}
-[debug] [2025-09-06T21:42:03.955Z] 127.0.0.1:8080 {"metadata":{"emulator":{"name":"firestore"},"message":"127.0.0.1:8080"}}
-[debug] [2025-09-06T21:42:03.957Z] 
-
- {"metadata":{"emulator":{"name":"firestore"},"message":"\n\n"}}
-[debug] [2025-09-06T21:42:03.958Z] Note: Support for Datastore Mode is in preview. If you encounter any bugs please file at https://github.com/firebase/firebase-tools/issues. {"metadata":{"emulator":{"name":"firestore"},"message":"Note: Support for Datastore Mode is in preview. If you encounter any bugs please file at https://github.com/firebase/firebase-tools/issues."}}
-[debug] [2025-09-06T21:42:03.966Z] 
-Dev App Server is now running.
-
- {"metadata":{"emulator":{"name":"firestore"},"message":"\nDev App Server is now running.\n\n"}}
-[info] ✔  firestore: Firestore Emulator UI websocket is running on 9151. {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator UI websocket is running on 9151."}}
-[debug] [2025-09-06T21:42:41.823Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"storage"},"message":"Ignoring unsupported arg: port"}}
-[warn] ⚠  Missing 'match' keyword before path in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:12 {"metadata":{"emulator":{"name":"storage"},"message":"Missing 'match' keyword before path in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:12"}}
-[warn] ⚠  Forward slash '/' found where identifier or binding expected in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:12 {"metadata":{"emulator":{"name":"storage"},"message":"Forward slash '/' found where identifier or binding expected in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:12"}}
-[warn] ⚠  mismatched input '$' expecting {'{', '/', PATH_SEGMENT} in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:12 {"metadata":{"emulator":{"name":"storage"},"message":"mismatched input '$' expecting {'{', '/', PATH_SEGMENT} in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:12"}}
-[warn] ⚠  Unexpected '_$' in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:12 {"metadata":{"emulator":{"name":"storage"},"message":"Unexpected '_$' in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:12"}}
-[warn] ⚠  Missing 'match' keyword before path in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:13 {"metadata":{"emulator":{"name":"storage"},"message":"Missing 'match' keyword before path in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:13"}}
-[warn] ⚠  Forward slash '/' found where identifier or binding expected in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:13 {"metadata":{"emulator":{"name":"storage"},"message":"Forward slash '/' found where identifier or binding expected in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:13"}}
-[warn] ⚠  mismatched input '$' expecting {'{', '/', PATH_SEGMENT} in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:13 {"metadata":{"emulator":{"name":"storage"},"message":"mismatched input '$' expecting {'{', '/', PATH_SEGMENT} in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:13"}}
-[warn] ⚠  Unexpected '}' in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:24 {"metadata":{"emulator":{"name":"storage"},"message":"Unexpected '}' in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:24"}}
-[debug] [2025-09-06T21:42:44.248Z] Temp file directory for storage emulator: /tmp/firebase/storage/blobs {"metadata":{"emulator":{"name":"storage"},"message":"Temp file directory for storage emulator: /tmp/firebase/storage/blobs"}}
-[debug] [2025-09-06T21:42:44.272Z] Checked if tokens are valid: true, expires at: 1757197325122
-[debug] [2025-09-06T21:42:44.273Z] Checked if tokens are valid: true, expires at: 1757197325122
-[debug] [2025-09-06T21:42:44.280Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/fir-tweb/sites 
-[debug] [2025-09-06T21:42:44.793Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/fir-tweb/sites 200
-[debug] [2025-09-06T21:42:44.794Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/fir-tweb/sites {"sites":[{"name":"projects/fir-tweb/sites/fir-tweb","defaultUrl":"https://fir-tweb.web.app","appId":"1:509455146790:web:7ec99527214b05d7b9ebe7","type":"DEFAULT_SITE"}]}
-[debug] [2025-09-06T21:42:44.795Z] Checked if tokens are valid: true, expires at: 1757197325122
-[debug] [2025-09-06T21:42:44.795Z] Checked if tokens are valid: true, expires at: 1757197325122
-[debug] [2025-09-06T21:42:44.795Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/webApps/1:509455146790:web:7ec99527214b05d7b9ebe7/config [none]
-[debug] [2025-09-06T21:42:45.332Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/webApps/1:509455146790:web:7ec99527214b05d7b9ebe7/config 200
-[debug] [2025-09-06T21:42:45.333Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/webApps/1:509455146790:web:7ec99527214b05d7b9ebe7/config {"projectId":"fir-tweb","appId":"1:509455146790:web:7ec99527214b05d7b9ebe7","storageBucket":"fir-tweb.firebasestorage.app","apiKey":"AIzaSyAXmTxzYRc-LhMEW75nZjjjQCZov1gpiw0","authDomain":"fir-tweb.firebaseapp.com","messagingSenderId":"509455146790","measurementId":"G-NLY7K5GGYQ"}
-[debug] [2025-09-06T21:42:45.349Z] Checked if tokens are valid: true, expires at: 1757197325122
-[debug] [2025-09-06T21:42:45.350Z] Checked if tokens are valid: true, expires at: 1757197325122
-[debug] [2025-09-06T21:42:45.351Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb [none]
-[debug] [2025-09-06T21:42:45.651Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb 200
-[debug] [2025-09-06T21:42:45.652Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb {"projectId":"fir-tweb","projectNumber":"509455146790","displayName":"firebaseTweb","name":"projects/fir-tweb","resources":{"hostingSite":"fir-tweb"},"state":"ACTIVE","etag":"1_5e1608ca-6866-46b2-9819-5e74a50ac9d9"}
-[debug] [2025-09-06T21:42:45.655Z] Specified "public" directory "frontend/build" does not exist; Deploy to Hosting site "fir-tweb" may fail or be empty.
-[info] i  hosting[fir-tweb]: Serving hosting files from: frontend/build {"metadata":{"emulator":{"name":"hosting"},"message":"Serving hosting files from: \u001b[1mfrontend/build\u001b[22m"}}
-[info] ✔  hosting[fir-tweb]: Local server: http://127.0.0.1:5000 {"metadata":{"emulator":{"name":"hosting"},"message":"Local server: \u001b[4m\u001b[1mhttp://127.0.0.1:5000\u001b[22m\u001b[24m"}}
-[debug] [2025-09-06T21:42:45.724Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
-[info] 
-┌─────────────────────────────────────────────────────────────┐
-│ ✔  All emulators ready! It is now safe to connect your app. │
-│ i  View Emulator UI at http://127.0.0.1:4000/               │
-└─────────────────────────────────────────────────────────────┘
-
-┌────────────────┬────────────────┬─────────────────────────────────┐
-│ Emulator       │ Host:Port      │ View in Emulator UI             │
-├────────────────┼────────────────┼─────────────────────────────────┤
-│ Authentication │ 127.0.0.1:9099 │ http://127.0.0.1:4000/auth      │
-├────────────────┼────────────────┼─────────────────────────────────┤
-│ Firestore      │ 127.0.0.1:8080 │ http://127.0.0.1:4000/firestore │
-├────────────────┼────────────────┼─────────────────────────────────┤
-│ Hosting        │ 127.0.0.1:5000 │ n/a                             │
-├────────────────┼────────────────┼─────────────────────────────────┤
-│ Storage        │ 127.0.0.1:9199 │ http://127.0.0.1:4000/storage   │
-└────────────────┴────────────────┴─────────────────────────────────┘
-  Emulator Hub host: 127.0.0.1 port: 4400
-  Other reserved ports: 4500, 9151
-
-Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
- 
-[debug] [2025-09-06T21:44:09.965Z] Sep 06, 2025 5:44:09 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
-INFO: Detected HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 06, 2025 5:44:09 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
-[debug] [2025-09-06T21:47:50.636Z] Received signal SIGHUP 1
-[info]  
-[info] i  emulators: Received SIGHUP for the first time. Starting a clean shutdown. 
-[info] i  emulators: Please wait for a clean shutdown or send the SIGHUP signal again to stop right now. 
-[debug] [2025-09-06T21:47:50.646Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:47:50.656Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:47:50.659Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:47:50.663Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:47:50.666Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:47:50.683Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:47:50.686Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:47:50.689Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:47:50.691Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:47:50.699Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:47:50.702Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:47:50.706Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:47:50.711Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:47:50.714Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:47:50.717Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:47:50.720Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:47:50.722Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-06T21:47:50.724Z] Error: write EIO
-    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
-    at writeGeneric (node:internal/stream_base_commons:150:3)
-    at Socket._writeGeneric (node:net:971:11)
-    at Socket._write (node:net:983:8)
-    at writeOrBuffer (node:internal/streams/writable:572:12)
-    at _write (node:internal/streams/writable:501:10)
-    at Writable.write (node:internal/streams/writable:510:10)
-    at Console.log (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston/lib/winston/transports/console.js:87:23)
-    at Console._write (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/modern.js:103:17)
-    at doWrite (/home/austin/.nvm/versions/node/v22.16.0/lib/node_modules/firebase-tools/node_modules/winston-transport/node_modules/readable-stream/lib/_stream_writable.js:390:139)
-[error] 
-[error] Error: An unexpected error has occurred.
-[debug] [2025-09-07T00:01:07.465Z] ----------------------------------------------------------------------
-[debug] [2025-09-07T00:01:07.487Z] Command:       /home/austin/.nvm/versions/node/v22.16.0/bin/node /home/austin/.nvm/versions/node/v22.16.0/bin/firebase emulators:start
-[debug] [2025-09-07T00:01:07.489Z] CLI Version:   14.15.1
-[debug] [2025-09-07T00:01:07.490Z] Platform:      linux
-[debug] [2025-09-07T00:01:07.490Z] Node Version:  v22.16.0
-[debug] [2025-09-07T00:01:07.492Z] Time:          Sat Sep 06 2025 20:01:07 GMT-0400 (Eastern Daylight Time)
-[debug] [2025-09-07T00:01:07.492Z] ----------------------------------------------------------------------
-[debug] 
-[debug] [2025-09-07T00:01:08.612Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
-[debug] [2025-09-07T00:01:08.614Z] > authorizing via signed-in user (austinbryanfilm@gmail.com)
-[debug] [2025-09-07T00:01:08.986Z] openjdk version "11.0.28" 2025-07-15
-[debug] [2025-09-07T00:01:08.988Z] 
-OpenJDK Runtime Environment (build 11.0.28+6-post-Ubuntu-1ubuntu122.04.1)
-OpenJDK 64-Bit Server VM (build 11.0.28+6-post-Ubuntu-1ubuntu122.04.1, mixed mode, sharing)
-
-[debug] [2025-09-07T00:01:09.000Z] Parsed Java major version: 11
-[info] i  emulators: Starting emulators: auth, firestore, hosting, storage {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth, firestore, hosting, storage"}}
-[debug] [2025-09-07T00:01:09.019Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"firestore":[{"address":"127.0.0.1","family":"IPv4","port":8080}],"firestore.websocket":[{"address":"127.0.0.1","family":"IPv4","port":9150}],"hosting":[{"address":"127.0.0.1","family":"IPv4","port":5000}],"storage":[{"address":"127.0.0.1","family":"IPv4","port":9199}]},"metadata":{"message":"assigned listening specs for emulators"}}
-[debug] [2025-09-07T00:01:09.037Z] [hub] writing locator at /tmp/hub-fir-tweb.json
-[debug] [2025-09-07T00:01:09.075Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: auto_download"}}
-[debug] [2025-09-07T00:01:09.076Z] Ignoring unsupported arg: single_project_mode_error {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: single_project_mode_error"}}
-[debug] [2025-09-07T00:01:09.077Z] Starting Firestore Emulator with command {"binary":"java","args":["-Djava.net.preferIPv4Stack=true","-Dgoogle.cloud_firestore.debug_log_level=FINE","-Duser.language=en","-jar","/home/austin/.cache/firebase/emulators/cloud-firestore-emulator-v1.19.8.jar","--host","127.0.0.1","--port",8080,"--websocket_port",9150,"--project_id","fir-tweb","--rules","/home/austin/081925-SvelteTweb-1/firestore.rules","--single_project_mode",true],"optionalArgs":["port","webchannel_port","host","rules","websocket_port","functions_emulator","seed_from_export","project_id","single_project_mode"],"joinArgs":false,"shell":false,"port":8080} {"metadata":{"emulator":{"name":"firestore"},"message":"Starting Firestore Emulator with command {\"binary\":\"java\",\"args\":[\"-Djava.net.preferIPv4Stack=true\",\"-Dgoogle.cloud_firestore.debug_log_level=FINE\",\"-Duser.language=en\",\"-jar\",\"/home/austin/.cache/firebase/emulators/cloud-firestore-emulator-v1.19.8.jar\",\"--host\",\"127.0.0.1\",\"--port\",8080,\"--websocket_port\",9150,\"--project_id\",\"fir-tweb\",\"--rules\",\"/home/austin/081925-SvelteTweb-1/firestore.rules\",\"--single_project_mode\",true],\"optionalArgs\":[\"port\",\"webchannel_port\",\"host\",\"rules\",\"websocket_port\",\"functions_emulator\",\"seed_from_export\",\"project_id\",\"single_project_mode\"],\"joinArgs\":false,\"shell\":false,\"port\":8080}"}}
-[info] i  firestore: Firestore Emulator logging to firestore-debug.log {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator logging to \u001b[1mfirestore-debug.log\u001b[22m"}}
-[debug] [2025-09-07T00:01:14.575Z] Sep 06, 2025 8:01:14 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketServer start
+[debug] [2025-09-08T15:56:44.358Z] Sep 08, 2025 11:56:44 AM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketServer start
 INFO: Started WebSocket server on ws://127.0.0.1:9150
- {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 06, 2025 8:01:14 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketServer start\nINFO: Started WebSocket server on ws://127.0.0.1:9150\n"}}
-[debug] [2025-09-07T00:01:14.671Z] API endpoint: http:// {"metadata":{"emulator":{"name":"firestore"},"message":"API endpoint: http://"}}
-[debug] [2025-09-07T00:01:14.672Z] 127.0.0.1:8080
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 08, 2025 11:56:44 AM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketServer start\nINFO: Started WebSocket server on ws://127.0.0.1:9150\n"}}
+[debug] [2025-09-08T15:56:44.524Z] API endpoint: http:// {"metadata":{"emulator":{"name":"firestore"},"message":"API endpoint: http://"}}
+[debug] [2025-09-08T15:56:44.526Z] 127.0.0.1:8080
 If you are using a library that supports the FIRESTORE_EMULATOR_HOST environment variable, run:
 
    export FIRESTORE_EMULATOR_HOST=127.0.0.1:8080
 
 If you are running a Firestore in Datastore Mode project, run:
 
-   export DATASTORE_EMULATOR_HOST=127.0.0.1:8080
+   export DATASTORE_EMULATOR_HOST= {"metadata":{"emulator":{"name":"firestore"},"message":"127.0.0.1:8080\nIf you are using a library that supports the FIRESTORE_EMULATOR_HOST environment variable, run:\n\n   export FIRESTORE_EMULATOR_HOST=127.0.0.1:8080\n\nIf you are running a Firestore in Datastore Mode project, run:\n\n   export DATASTORE_EMULATOR_HOST="}}
+[debug] [2025-09-08T15:56:44.527Z] 127.0.0.1:8080
 
 Note: Support for Datastore Mode is in preview. If you encounter any bugs please file at https://github.com/firebase/firebase-tools/issues.
 Dev App Server is now running.
 
- {"metadata":{"emulator":{"name":"firestore"},"message":"127.0.0.1:8080\nIf you are using a library that supports the FIRESTORE_EMULATOR_HOST environment variable, run:\n\n   export FIRESTORE_EMULATOR_HOST=127.0.0.1:8080\n\nIf you are running a Firestore in Datastore Mode project, run:\n\n   export DATASTORE_EMULATOR_HOST=127.0.0.1:8080\n\nNote: Support for Datastore Mode is in preview. If you encounter any bugs please file at https://github.com/firebase/firebase-tools/issues.\nDev App Server is now running.\n\n"}}
+ {"metadata":{"emulator":{"name":"firestore"},"message":"127.0.0.1:8080\n\nNote: Support for Datastore Mode is in preview. If you encounter any bugs please file at https://github.com/firebase/firebase-tools/issues.\nDev App Server is now running.\n\n"}}
 [info] ✔  firestore: Firestore Emulator UI websocket is running on 9150. {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator UI websocket is running on 9150."}}
-[debug] [2025-09-07T00:01:46.540Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"storage"},"message":"Ignoring unsupported arg: port"}}
+[debug] [2025-09-08T15:57:30.483Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"storage"},"message":"Ignoring unsupported arg: port"}}
 [warn] ⚠  Missing 'match' keyword before path in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:12 {"metadata":{"emulator":{"name":"storage"},"message":"Missing 'match' keyword before path in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:12"}}
 [warn] ⚠  Forward slash '/' found where identifier or binding expected in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:12 {"metadata":{"emulator":{"name":"storage"},"message":"Forward slash '/' found where identifier or binding expected in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:12"}}
 [warn] ⚠  mismatched input '$' expecting {'{', '/', PATH_SEGMENT} in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:12 {"metadata":{"emulator":{"name":"storage"},"message":"mismatched input '$' expecting {'{', '/', PATH_SEGMENT} in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:12"}}
@@ -719,31 +52,31 @@ Dev App Server is now running.
 [warn] ⚠  Forward slash '/' found where identifier or binding expected in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:13 {"metadata":{"emulator":{"name":"storage"},"message":"Forward slash '/' found where identifier or binding expected in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:13"}}
 [warn] ⚠  mismatched input '$' expecting {'{', '/', PATH_SEGMENT} in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:13 {"metadata":{"emulator":{"name":"storage"},"message":"mismatched input '$' expecting {'{', '/', PATH_SEGMENT} in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:13"}}
 [warn] ⚠  Unexpected '}' in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:24 {"metadata":{"emulator":{"name":"storage"},"message":"Unexpected '}' in /home/austin/081925-SvelteTweb-1/frontend/storage.rules:24"}}
-[debug] [2025-09-07T00:01:49.012Z] Temp file directory for storage emulator: /tmp/firebase/storage/blobs {"metadata":{"emulator":{"name":"storage"},"message":"Temp file directory for storage emulator: /tmp/firebase/storage/blobs"}}
-[debug] [2025-09-07T00:01:49.032Z] Checked if tokens are valid: false, expires at: 1757197325122
-[debug] [2025-09-07T00:01:49.032Z] Checked if tokens are valid: false, expires at: 1757197325122
-[debug] [2025-09-07T00:01:49.036Z] > refreshing access token with scopes: []
-[debug] [2025-09-07T00:01:49.042Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
-[debug] [2025-09-07T00:01:49.043Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
-[debug] [2025-09-07T00:01:49.185Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
-[debug] [2025-09-07T00:01:49.185Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
-[debug] [2025-09-07T00:01:49.209Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/fir-tweb/sites 
-[debug] [2025-09-07T00:01:49.844Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/fir-tweb/sites 200
-[debug] [2025-09-07T00:01:49.844Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/fir-tweb/sites {"sites":[{"name":"projects/fir-tweb/sites/fir-tweb","defaultUrl":"https://fir-tweb.web.app","appId":"1:509455146790:web:7ec99527214b05d7b9ebe7","type":"DEFAULT_SITE"}]}
-[debug] [2025-09-07T00:01:49.845Z] Checked if tokens are valid: true, expires at: 1757206908186
-[debug] [2025-09-07T00:01:49.845Z] Checked if tokens are valid: true, expires at: 1757206908186
-[debug] [2025-09-07T00:01:49.845Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/webApps/1:509455146790:web:7ec99527214b05d7b9ebe7/config [none]
-[debug] [2025-09-07T00:01:50.311Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/webApps/1:509455146790:web:7ec99527214b05d7b9ebe7/config 200
-[debug] [2025-09-07T00:01:50.312Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/webApps/1:509455146790:web:7ec99527214b05d7b9ebe7/config {"projectId":"fir-tweb","appId":"1:509455146790:web:7ec99527214b05d7b9ebe7","storageBucket":"fir-tweb.firebasestorage.app","apiKey":"AIzaSyAXmTxzYRc-LhMEW75nZjjjQCZov1gpiw0","authDomain":"fir-tweb.firebaseapp.com","messagingSenderId":"509455146790","measurementId":"G-NLY7K5GGYQ"}
-[debug] [2025-09-07T00:01:50.333Z] Checked if tokens are valid: true, expires at: 1757206908186
-[debug] [2025-09-07T00:01:50.333Z] Checked if tokens are valid: true, expires at: 1757206908186
-[debug] [2025-09-07T00:01:50.334Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb [none]
-[debug] [2025-09-07T00:01:50.539Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb 200
-[debug] [2025-09-07T00:01:50.540Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb {"projectId":"fir-tweb","projectNumber":"509455146790","displayName":"firebaseTweb","name":"projects/fir-tweb","resources":{"hostingSite":"fir-tweb"},"state":"ACTIVE","etag":"1_5e1608ca-6866-46b2-9819-5e74a50ac9d9"}
-[debug] [2025-09-07T00:01:50.546Z] Specified "public" directory "frontend/build" does not exist; Deploy to Hosting site "fir-tweb" may fail or be empty.
+[debug] [2025-09-08T15:57:35.117Z] Temp file directory for storage emulator: /tmp/firebase/storage/blobs {"metadata":{"emulator":{"name":"storage"},"message":"Temp file directory for storage emulator: /tmp/firebase/storage/blobs"}}
+[debug] [2025-09-08T15:57:35.167Z] Checked if tokens are valid: false, expires at: 1757273762431
+[debug] [2025-09-08T15:57:35.167Z] Checked if tokens are valid: false, expires at: 1757273762431
+[debug] [2025-09-08T15:57:35.169Z] > refreshing access token with scopes: []
+[debug] [2025-09-08T15:57:35.184Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-09-08T15:57:35.185Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-09-08T15:57:35.355Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-09-08T15:57:35.356Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-09-08T15:57:35.445Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/fir-tweb/sites 
+[debug] [2025-09-08T15:57:36.048Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/fir-tweb/sites 200
+[debug] [2025-09-08T15:57:36.049Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/fir-tweb/sites {"sites":[{"name":"projects/fir-tweb/sites/fir-tweb","defaultUrl":"https://fir-tweb.web.app","appId":"1:509455146790:web:7ec99527214b05d7b9ebe7","type":"DEFAULT_SITE"}]}
+[debug] [2025-09-08T15:57:36.050Z] Checked if tokens are valid: true, expires at: 1757350654356
+[debug] [2025-09-08T15:57:36.050Z] Checked if tokens are valid: true, expires at: 1757350654356
+[debug] [2025-09-08T15:57:36.053Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/webApps/1:509455146790:web:7ec99527214b05d7b9ebe7/config [none]
+[debug] [2025-09-08T15:57:36.608Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/webApps/1:509455146790:web:7ec99527214b05d7b9ebe7/config 200
+[debug] [2025-09-08T15:57:36.609Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/webApps/1:509455146790:web:7ec99527214b05d7b9ebe7/config {"projectId":"fir-tweb","appId":"1:509455146790:web:7ec99527214b05d7b9ebe7","storageBucket":"fir-tweb.firebasestorage.app","apiKey":"AIzaSyAXmTxzYRc-LhMEW75nZjjjQCZov1gpiw0","authDomain":"fir-tweb.firebaseapp.com","messagingSenderId":"509455146790","measurementId":"G-NLY7K5GGYQ"}
+[debug] [2025-09-08T15:57:36.633Z] Checked if tokens are valid: true, expires at: 1757350654356
+[debug] [2025-09-08T15:57:36.634Z] Checked if tokens are valid: true, expires at: 1757350654356
+[debug] [2025-09-08T15:57:36.635Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb [none]
+[debug] [2025-09-08T15:57:36.859Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb 200
+[debug] [2025-09-08T15:57:36.859Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb {"projectId":"fir-tweb","projectNumber":"509455146790","displayName":"firebaseTweb","name":"projects/fir-tweb","resources":{"hostingSite":"fir-tweb"},"state":"ACTIVE","etag":"1_5e1608ca-6866-46b2-9819-5e74a50ac9d9"}
+[debug] [2025-09-08T15:57:36.864Z] Specified "public" directory "frontend/build" does not exist; Deploy to Hosting site "fir-tweb" may fail or be empty.
 [info] i  hosting[fir-tweb]: Serving hosting files from: frontend/build {"metadata":{"emulator":{"name":"hosting"},"message":"Serving hosting files from: \u001b[1mfrontend/build\u001b[22m"}}
 [info] ✔  hosting[fir-tweb]: Local server: http://127.0.0.1:5000 {"metadata":{"emulator":{"name":"hosting"},"message":"Local server: \u001b[4m\u001b[1mhttp://127.0.0.1:5000\u001b[22m\u001b[24m"}}
-[debug] [2025-09-07T00:01:50.705Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
+[debug] [2025-09-08T15:57:36.968Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: . If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
 [info] 
 ┌─────────────────────────────────────────────────────────────┐
 │ ✔  All emulators ready! It is now safe to connect your app. │
@@ -766,89 +99,48 @@ Dev App Server is now running.
 
 Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
  
-[debug] [2025-09-07T00:03:38.683Z] Sep 06, 2025 8:03:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+[debug] [2025-09-08T15:59:19.231Z] Sep 08, 2025 11:59:19 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 06, 2025 8:03:38 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
-[info] i  firestore: Change detected, updating rules... 
-[debug] [2025-09-07T02:56:16.988Z] >>> [apiv2][query] PUT http://127.0.0.1:8080/emulator/v1/projects/fir-tweb:securityRules [none]
-[debug] [2025-09-07T02:56:16.988Z] >>> [apiv2][body] PUT http://127.0.0.1:8080/emulator/v1/projects/fir-tweb:securityRules {"ignore_errors":true,"rules":{"files":[{"name":"security.rules","content":"rules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n\n    // Helper function to check for admin custom claim\n    function isAdmin() {\n      return request.auth.token.admin == true;\n    }\n\n    match /users/{userId} {\n      // Admins can read/write any user document.\n      // Regular users can only read/write their own.\n      allow read, write: if isAdmin() || (request.auth != null && request.auth.uid == userId);\n    }\n\n    match /memorials/{memorialId} {\n      // Admins can read/write any memorial.\n      // Otherwise, apply existing logic.\n      allow read: if isAdmin() || resource.data.isPublic == true || request.auth.uid == resource.data.creatorUid;\n      allow create: if request.auth != null;\n      allow update, delete: if isAdmin() || (request.auth != null && request.auth.uid == resource.data.creatorUid);\n      \n      match /followers/{userId} {\n        // A user can only follow/unfollow for themselves.\n        allow read, create, delete: if request.auth != null && request.auth.uid == userId;\n        allow update: if false; // No updates allowed.\n      }\n    }\n\n    match /invitations/{invitationId} {\n      // Read: Allowed if you sent the invitation or if you are the recipient.\n      allow read: if request.auth != null && (request.auth.uid == resource.data.invitedByUid || request.auth.token.email == resource.data.inviteeEmail);\n      // Create: Allowed if you are the sender.\n      allow create: if request.auth != null && request.resource.data.invitedByUid == request.auth.uid;\n      // Update: Allowed only by the recipient to accept it.\n      allow update: if request.auth != null && request.auth.token.email == resource.data.inviteeEmail;\n      // Delete: Not allowed for clients.\n      allow delete: if false;\n    }\n\n    // Funeral Directors collection rules\n    match /funeral_directors/{funeralDirectorId} {\n      // Only the funeral director can read/write their own document\n      allow read, write: if request.auth != null && request.auth.uid == funeralDirectorId;\n      \n      // Admins can read/write all funeral director documents\n      allow read, write: if isAdmin();\n    }\n\n    // Enhanced memorial rules for funeral directors\n    match /memorials/{memorialId} {\n      // Admins can read/write any memorial.\n      // Otherwise, apply existing logic plus funeral director permissions.\n      allow read: if isAdmin() || \n                     resource.data.isPublic == true || \n                     request.auth.uid == resource.data.creatorUid ||\n                     (request.auth != null && resource.data.funeralDirector.id == request.auth.uid);\n      \n      allow create: if request.auth != null;\n      \n      allow update, delete: if isAdmin() || \n                              (request.auth != null && request.auth.uid == resource.data.creatorUid) ||\n                              (request.auth != null && resource.data.funeralDirector.id == request.auth.uid && resource.data.permissions.funeralDirectorCanEdit == true);\n      \n      match /followers/{userId} {\n        // A user can only follow/unfollow for themselves.\n        allow read, create, delete: if request.auth != null && request.auth.uid == userId;\n        allow update: if false; // No updates allowed.\n      }\n\n      // Livestream rules\n      match /livestreams/{streamId} {\n        // Funeral director who created the memorial can manage streams\n        allow read, write: if request.auth != null &&\n          get(/databases/$(database)/documents/memorials/$(memorialId)).data.funeralDirector.id == request.auth.uid;\n        \n        // Memorial owner can view and manage streams\n        allow read, write: if request.auth != null &&\n          get(/databases/$(database)/documents/memorials/$(memorialId)).data.creatorUid == request.auth.uid;\n        \n        // Public streams can be viewed by anyone\n        allow read: if resource.data.isPublic == true;\n        \n        // Allowed viewers can read private streams\n        allow read: if request.auth != null && \n          request.auth.uid in resource.data.allowedViewers;\n      }\n    }\n  }\n}"}]}}
-[debug] [2025-09-07T02:56:17.007Z] Sep 06, 2025 10:56:17 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
-INFO: Detected non-HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 06, 2025 10:56:17 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected non-HTTP/2 connection.\n"}}
-[debug] [2025-09-07T02:56:17.416Z] Sep 06, 2025 10:56:17 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 08, 2025 11:59:19 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
+[debug] [2025-09-08T16:11:33.969Z] Sep 08, 2025 12:11:33 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 06, 2025 10:56:17 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
-[debug] [2025-09-07T02:56:18.771Z] <<< [apiv2][status] PUT http://127.0.0.1:8080/emulator/v1/projects/fir-tweb:securityRules 200
-[debug] [2025-09-07T02:56:18.771Z] <<< [apiv2][body] PUT http://127.0.0.1:8080/emulator/v1/projects/fir-tweb:securityRules {}
-[info] ✔  firestore: Rules updated. 
-[debug] [2025-09-07T03:56:40.871Z] Sep 06, 2025 11:56:40 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 08, 2025 12:11:33 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
+[debug] [2025-09-08T16:41:59.926Z] Sep 08, 2025 12:41:59 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 06, 2025 11:56:40 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
-[debug] [2025-09-07T04:03:08.428Z] Sep 07, 2025 12:03:08 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 08, 2025 12:41:59 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
+[debug] [2025-09-08T17:35:30.209Z] Sep 08, 2025 1:35:30 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 07, 2025 12:03:08 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
-[debug] [2025-09-07T04:18:20.477Z] Sep 07, 2025 12:18:20 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 08, 2025 1:35:30 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
+[debug] [2025-09-08T17:54:13.746Z] Sep 08, 2025 1:54:13 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 07, 2025 12:18:20 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
-[debug] [2025-09-07T04:56:34.944Z] Sep 07, 2025 12:56:34 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 08, 2025 1:54:13 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
+[debug] [2025-09-08T18:34:47.004Z] Sep 08, 2025 2:34:47 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 07, 2025 12:56:34 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
-[debug] [2025-09-07T05:03:22.070Z] Sep 07, 2025 1:03:22 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 08, 2025 2:34:47 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
+[debug] [2025-09-08T18:41:08.317Z] Sep 08, 2025 2:41:08 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 07, 2025 1:03:22 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
-[debug] [2025-09-07T05:12:58.251Z] Sep 07, 2025 1:12:58 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 08, 2025 2:41:08 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
+[debug] [2025-09-08T22:38:51.271Z] Sep 08, 2025 6:38:51 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 07, 2025 1:12:58 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
-[debug] [2025-09-07T14:12:48.747Z] Sep 07, 2025 10:12:48 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 08, 2025 6:38:51 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
+[debug] [2025-09-08T22:49:04.658Z] Sep 08, 2025 6:49:04 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 07, 2025 10:12:48 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
-[debug] [2025-09-07T14:29:48.679Z] Sep 07, 2025 10:29:48 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 08, 2025 6:49:04 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
+[debug] [2025-09-08T22:58:19.276Z] Sep 08, 2025 6:58:19 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 07, 2025 10:29:48 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
-[debug] [2025-09-07T15:04:22.014Z] Sep 07, 2025 11:04:22 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 08, 2025 6:58:19 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
+[debug] [2025-09-08T23:12:45.566Z] Sep 08, 2025 7:12:45 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 07, 2025 11:04:22 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
-[debug] [2025-09-07T16:12:43.919Z] Sep 07, 2025 12:12:43 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 08, 2025 7:12:45 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
+[debug] [2025-09-08T23:16:04.451Z] Sep 08, 2025 7:16:04 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 07, 2025 12:12:43 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
-[debug] [2025-09-07T16:47:53.179Z] Sep 07, 2025 12:47:53 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 08, 2025 7:16:04 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
+[debug] [2025-09-08T23:27:21.263Z] Sep 08, 2025 7:27:21 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 07, 2025 12:47:53 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
-[debug] [2025-09-07T18:36:03.130Z] Sep 07, 2025 2:36:03 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel
-INFO: Connected to new websocket client
- {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 07, 2025 2:36:03 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler initChannel\nINFO: Connected to new websocket client\n"}}
-[debug] [2025-09-07T18:36:03.289Z] Checked if tokens are valid: false, expires at: 1757206908186
-[debug] [2025-09-07T18:36:03.290Z] Checked if tokens are valid: false, expires at: 1757206908186
-[debug] [2025-09-07T18:36:03.290Z] > refreshing access token with scopes: []
-[debug] [2025-09-07T18:36:03.292Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
-[debug] [2025-09-07T18:36:03.292Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
-[debug] [2025-09-07T18:36:03.430Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
-[debug] [2025-09-07T18:36:03.431Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
-[debug] [2025-09-07T18:36:03.471Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/adminSdkConfig [none]
-[debug] [2025-09-07T18:36:03.807Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/adminSdkConfig 200
-[debug] [2025-09-07T18:36:03.808Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/adminSdkConfig {"projectId":"fir-tweb","storageBucket":"fir-tweb.firebasestorage.app"}
-[warn] ⚠  Permission denied because no Storage ruleset is currently loaded, check your rules for syntax errors. {"metadata":{"emulator":{"name":"storage"},"message":"Permission denied because no Storage ruleset is currently loaded, check your rules for syntax errors."}}
-[debug] [2025-09-07T18:36:04.009Z] Sep 07, 2025 2:36:04 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler channelClosed
-INFO: Websocket client disconnected
- {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 07, 2025 2:36:04 PM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketChannelHandler channelClosed\nINFO: Websocket client disconnected\n"}}
-[debug] [2025-09-07T20:55:34.562Z] Sep 07, 2025 4:55:34 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 08, 2025 7:27:21 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
+[debug] [2025-09-08T23:40:43.779Z] Sep 08, 2025 7:40:43 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 07, 2025 4:55:34 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
-[debug] [2025-09-08T12:14:37.450Z] Sep 08, 2025 8:14:37 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 08, 2025 7:40:43 PM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
+[debug] [2025-09-09T08:03:46.409Z] Sep 09, 2025 4:03:46 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 08, 2025 8:14:37 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
-[debug] [2025-09-08T14:04:26.583Z] Sep 08, 2025 10:04:26 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
-INFO: Detected HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 08, 2025 10:04:26 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
-[debug] [2025-09-08T14:15:05.720Z] Sep 08, 2025 10:15:05 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
-INFO: Detected HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 08, 2025 10:15:05 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
-[debug] [2025-09-08T14:33:54.378Z] Sep 08, 2025 10:33:54 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
-INFO: Detected HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 08, 2025 10:33:54 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
-[debug] [2025-09-08T14:50:15.334Z] Sep 08, 2025 10:50:15 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
-INFO: Detected HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 08, 2025 10:50:15 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
-[debug] [2025-09-08T15:14:22.414Z] Sep 08, 2025 11:14:22 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
-INFO: Detected HTTP/2 connection.
- {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 08, 2025 11:14:22 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 09, 2025 4:03:46 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
