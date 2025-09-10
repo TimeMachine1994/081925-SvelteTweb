@@ -25,10 +25,7 @@
 
 		if (response.ok) {
 			const result = await response.json();
-			console.log('[Login.svelte] Session created successfully.');
-			
 			if (result.redirectTo) {
-				console.log('[Login.svelte] Redirecting to:', result.redirectTo);
 				goto(result.redirectTo);
 			} else {
 				goto('/');
@@ -40,68 +37,51 @@
 
 	async function handleSubmit(event: SubmitEvent) {
 		event.preventDefault();
-		console.log('[Login.svelte] Starting login process...');
 		loading = true;
 		error = null;
 
 		try {
-			console.log('[Login.svelte] Calling signInWithEmailAndPassword...');
 			const userCredential = await signInWithEmailAndPassword(auth, email, password);
-			console.log('[Login.svelte] Sign-in successful, user:', userCredential.user.uid);
-
-			console.log('[Login.svelte] Getting ID token...');
 			const idToken = await userCredential.user.getIdToken();
-			console.log('[Login.svelte] Got ID token.');
-
 			await createSession(idToken);
 		} catch (e: any) {
 			error = e.message;
 			console.error('[Login.svelte] An error occurred during login:', e);
 		} finally {
 			loading = false;
-			console.log('[Login.svelte] Login process finished.');
 		}
 	}
 
 	async function handleGoogleSignIn() {
-		console.log('[Login.svelte] Starting Google sign-in process...');
 		loading = true;
 		error = null;
 
 		try {
 			const provider = new GoogleAuthProvider();
 			const userCredential = await signInWithPopup(auth, provider);
-			console.log('[Login.svelte] Google sign-in successful, user:', userCredential.user.uid);
-
 			const idToken = await userCredential.user.getIdToken();
-			console.log('[Login.svelte] Got ID token from Google sign-in.');
-
 			await createSession(idToken);
 		} catch (e: any) {
 			error = e.message;
 			console.error('[Login.svelte] An error occurred during Google sign-in:', e);
 		} finally {
 			loading = false;
-			console.log('[Login.svelte] Google sign-in process finished.');
 		}
 	}
 
 	async function handlePasswordReset(event: SubmitEvent) {
 		event.preventDefault();
-		console.log('[Login.svelte] Starting password reset process...');
 		resetLoading = true;
 		error = null;
 
 		try {
 			await sendPasswordResetEmail(auth, resetEmail);
-			console.log('[Login.svelte] Password reset email sent successfully');
 			resetSuccess = true;
 		} catch (e: any) {
 			error = e.message;
 			console.error('[Login.svelte] An error occurred during password reset:', e);
 		} finally {
 			resetLoading = false;
-			console.log('[Login.svelte] Password reset process finished.');
 		}
 	}
 

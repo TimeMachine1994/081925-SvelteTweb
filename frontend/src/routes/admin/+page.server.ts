@@ -37,43 +37,13 @@ export const load = async ({ locals }: any) => {
 		// Load only essential data for admin operations
 		console.log('📊 [ADMIN LOAD] Loading admin dashboard data...');
 
-		const [pendingDirectorsSnap, recentMemorialsSnap] = await Promise.all([
-			// Load pending funeral directors (primary admin task)
-			adminDb.collection('funeral_directors')
-				.where('status', '==', 'pending')
-				.orderBy('createdAt', 'desc')
-				.get(),
-			
+		const [recentMemorialsSnap] = await Promise.all([
 			// Load recent memorials for oversight (last 30 days)
 			adminDb.collection('memorials')
 				.orderBy('createdAt', 'desc')
 				.limit(20)
 				.get()
 		]);
-
-		// === PROCESS FUNERAL DIRECTORS ===
-		// Following same timestamp conversion pattern as memorial flow
-		const pendingFuneralDirectors = pendingDirectorsSnap.docs.map(doc => {
-			const data = doc.data();
-			console.log(`🏥 [ADMIN LOAD] Processing pending director: ${data.companyName}`);
-			
-			return {
-				id: doc.id,
-				companyName: data.companyName || 'Unknown Company',
-				contactPerson: data.contactPerson || 'Unknown Contact',
-				email: data.email || '',
-				phone: data.phone || '',
-				licenseNumber: data.licenseNumber || '',
-				status: data.status,
-				createdAt: data.createdAt?.toDate?.()?.toISOString() || null,
-				// Include verification documents info
-				documents: {
-					businessLicense: !!data.businessLicense,
-					funeralLicense: !!data.funeralLicense,
-					insurance: !!data.insurance
-				}
-			};
-		});
 
 		// === PROCESS RECENT MEMORIALS ===
 		// Following memorial collection structure from flow analysis
@@ -105,19 +75,18 @@ export const load = async ({ locals }: any) => {
 		const stats = {
 			totalMemorials: totalMemorialsSnap.data().count,
 			totalFuneralDirectors: totalDirectorsSnap.data().count,
-			pendingApprovals: pendingFuneralDirectors.length,
+			pendingApprovals: 0, // This is now obsolete
 			recentMemorials: recentMemorials.length
 		};
 
 		console.log('✅ [ADMIN LOAD] Dashboard data loaded successfully:', {
-			pendingDirectors: pendingFuneralDirectors.length,
 			recentMemorials: recentMemorials.length,
 			stats
 		});
 
 		return {
 			// Core admin data
-			pendingFuneralDirectors,
+			pendingFuneralDirectors: [], // Obsolete, return empty array
 			recentMemorials,
 			stats,
 			// User context

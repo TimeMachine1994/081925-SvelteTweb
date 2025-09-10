@@ -2,7 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import Stripe from 'stripe';
 import { adminDb } from '$lib/firebase-admin';
-import { Timestamp, FieldValue } from 'firebase-admin/firestore';
+import { Timestamp } from 'firebase-admin/firestore';
 import { STRIPE_SECRET_KEY } from '$env/static/private';
 
 // Initialize Stripe with your secret key
@@ -17,7 +17,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       return json({ error: 'Authentication required' }, { status: 401 });
     }
 
-    const { amount, memorialId, customerInfo, formData } = await request.json();
+    const { memorialId, customerInfo, bookingData } = await request.json();
+    const { bookingItems, total: amount } = bookingData;
 
     if (!amount || !memorialId) {
       return json({ error: 'Missing required data' }, { status: 400 });
@@ -48,39 +49,42 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       return json({ error: 'Insufficient permissions' }, { status: 403 });
     }
 
-    // Create Stripe payment intent
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(amount * 100), // Convert to cents
-      currency: 'usd',
+    // Create a Stripe Checkout Session
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: bookingItems.map((item: any) => ({
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: item.name,
+          },
+          unit_amount: Math.round(item.price * 100),
+        },
+        quantity: item.quantity,
+      })),
+      mode: 'payment',
+      success_url: `${request.headers.get('origin')}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${request.headers.get('origin')}/schedule/${memorialId}`,
       metadata: {
         memorialId,
         userId: locals.user.uid,
         customerEmail: customerInfo?.email || locals.user.email || '',
         lovedOneName: memorial?.lovedOneName || ''
       },
-      description: `TributeStream service for ${memorial?.lovedOneName || 'Memorial Service'}`
+      customer_email: customerInfo?.email || locals.user.email || ''
     });
 
-    // Save payment intent to memorial
+    // Save checkout session info to memorial
     await memorialRef.update({
-      'paymentHistory': FieldValue.arrayUnion({
-        paymentIntentId: paymentIntent.id,
-        status: 'pending',
-        amount: amount,
-        createdAt: Timestamp.now(),
-        createdBy: userId
-      }),
       'calculatorConfig.status': 'pending_payment',
-      'calculatorConfig.paymentIntentId': paymentIntent.id,
+      'calculatorConfig.checkoutSessionId': session.id,
       'calculatorConfig.lastModified': Timestamp.now()
     });
 
-    console.log('✅ Payment intent created successfully:', paymentIntent.id);
+    console.log('✅ Checkout session created successfully:', session.id);
 
     return json({
-      clientSecret: paymentIntent.client_secret,
-      paymentIntentId: paymentIntent.id,
-      amount: amount
+      url: session.url
     });
 
   } catch (error) {

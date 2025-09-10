@@ -1,17 +1,21 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
+	import { enhance, applyAction } from '$app/forms';
+	import { goto } from '$app/navigation';
 	import LiveUrlPreview from '$lib/components/LiveUrlPreview.svelte';
+	import type { PageData } from './$types';
+	import { useFormAutoSave } from '$lib/composables/useFormAutoSave';
+	import { Check, Copy } from 'lucide-svelte';
 
-	let { form }: { form?: { error?: any; success?: boolean } } = $props();
+	let { form, data }: { form?: { error?: any; success?: boolean; memorialLink?: string }; data: PageData } = $props();
 
 	// Svelte 5 runes
 	let lovedOneName = $state('');
 	let familyContactName = $state('');
 	let familyContactEmail = $state('');
 	let familyContactPhone = $state('');
-	let directorName = $state('');
-	let directorEmail = $state('');
-	let funeralHomeName = $state('');
+	let directorName = $state(data.funeralDirector?.contactPerson || '');
+	let directorEmail = $state(data.funeralDirector?.email || '');
+	let funeralHomeName = $state(data.funeralDirector?.companyName || '');
 	let locationName = $state('');
 	let locationAddress = $state('');
 	let memorialDate = $state('');
@@ -19,26 +23,73 @@
 	let contactPreference = $state('email');
 	let additionalNotes = $state('');
 
-	let validationErrors = $state<string[]>([]);
+	let copied = $state(false);
 
-	function validateForm() {
-		const errors: string[] = [];
-		if (!lovedOneName.trim()) errors.push("Loved one's name is required");
-		if (!familyContactName.trim()) errors.push('Family contact name is required');
-		if (!familyContactEmail.trim()) errors.push('Family contact email is required');
-		if (!familyContactPhone.trim()) errors.push('Family contact phone is required');
-		if (!directorName.trim()) errors.push('Director name is required');
-		if (!directorEmail.trim()) errors.push('Director email is required');
-		if (!funeralHomeName.trim()) errors.push('Funeral home name is required');
-		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		if (familyContactEmail && !emailRegex.test(familyContactEmail)) errors.push('Family contact email must be valid');
-		if (directorEmail && !emailRegex.test(directorEmail)) errors.push('Director email must be valid');
-		validationErrors = errors;
-		return errors.length === 0;
-	}
+	// Initialize auto-save functionality
+	const autoSave = useFormAutoSave({
+		storageKey: 'family-memorial-registration',
+		debounceMs: 2500,
+		useLocalStorage: false, // Use cookies for better persistence
+		cookieExpireDays: 14,
+		onSave: (data) => console.log('👨‍👩‍👧‍👦 [AUTO-SAVE] Family memorial form data saved'),
+		onLoad: (data) => {
+			if (data) {
+				console.log('👨‍👩‍👧‍👦 [AUTO-SAVE] Loading saved family memorial data');
+				// Restore form fields from saved data (but don't override prepopulated director data)
+				lovedOneName = data.lovedOneName || '';
+				familyContactName = data.familyContactName || '';
+				familyContactEmail = data.familyContactEmail || '';
+				familyContactPhone = data.familyContactPhone || '';
+				locationName = data.locationName || '';
+				locationAddress = data.locationAddress || '';
+				memorialDate = data.memorialDate || '';
+				memorialTime = data.memorialTime || '';
+				contactPreference = data.contactPreference || 'email';
+				additionalNotes = data.additionalNotes || '';
+				
+				// Only restore director info if not prepopulated
+			}
+		}
+	});
 
-	function handleSubmit(e: SubmitEvent) {
-		if (!validateForm()) e.preventDefault();
+	// Auto-save form data when fields change
+	$effect(() => {
+		const formData = {
+			lovedOneName,
+			familyContactName,
+			familyContactEmail,
+			familyContactPhone,
+			directorName,
+			directorEmail,
+			funeralHomeName,
+			locationName,
+			locationAddress,
+			memorialDate,
+			memorialTime,
+			contactPreference,
+			additionalNotes
+		};
+		
+		// Only auto-save if we have some meaningful data
+		if (lovedOneName || familyContactName || familyContactEmail) {
+			autoSave.triggerAutoSave(formData);
+		}
+	});
+
+	// Load saved data on component mount (but after prepopulation check)
+	$effect(() => {
+		// Load saved data first
+		autoSave.loadFromStorage();
+	});
+
+
+	function copyToClipboard(text: string) {
+		navigator.clipboard.writeText(text).then(() => {
+			copied = true;
+			setTimeout(() => {
+				copied = false;
+			}, 2000);
+		});
 	}
 </script>
 
@@ -54,7 +105,19 @@
 			</p>
 		</header>
 
-		<form method="POST" use:enhance onsubmit={handleSubmit} class="grid grid-cols-1 md:grid-cols-2 gap-8 p-10">
+						<form 
+				method="POST" 
+				use:enhance={({}) => {
+					return async ({ result }) => {
+						if (result.type === 'success' && result.data?.success) {
+							await goto(result.data.memorialLink);
+						} else {
+							await applyAction(result);
+						}
+					};
+				}}
+								class="grid grid-cols-1 md:grid-cols-2 gap-8 p-10"
+			>
 
 			<!-- LIVE PREVIEW -->
 			<section class="md:col-span-2">
@@ -70,8 +133,10 @@
 
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 					<div class="md:col-span-2">
-						<label class="block text-sm font-medium mb-1">Location Name</label>
+						<label for="locationName" class="block text-sm font-medium mb-1">Location Name</label>
 						<input
+							id="locationName"
+							name="locationName"
 							type="text"
 							bind:value={locationName}
 							placeholder="Church, funeral home, or venue"
@@ -79,8 +144,10 @@
 					</div>
 
 					<div class="md:col-span-2">
-						<label class="block text-sm font-medium mb-1">Location Address</label>
+						<label for="locationAddress" class="block text-sm font-medium mb-1">Location Address</label>
 						<input
+							id="locationAddress"
+							name="locationAddress"
 							type="text"
 							bind:value={locationAddress}
 							placeholder="Full address"
@@ -88,16 +155,20 @@
 					</div>
 
 					<div>
-						<label class="block text-sm font-medium mb-1">Memorial Date</label>
+						<label for="memorialDate" class="block text-sm font-medium mb-1">Memorial Date</label>
 						<input
+							id="memorialDate"
+							name="memorialDate"
 							type="date"
 							bind:value={memorialDate}
 							class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#D5BA7F] focus:border-[#D5BA7F]" />
 					</div>
 
 					<div>
-						<label class="block text-sm font-medium mb-1">Memorial Time</label>
+						<label for="memorialTime" class="block text-sm font-medium mb-1">Memorial Time</label>
 						<input
+							id="memorialTime"
+							name="memorialTime"
 							type="time"
 							bind:value={memorialTime}
 							class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#D5BA7F] focus:border-[#D5BA7F]" />
@@ -114,43 +185,55 @@
 
 				<div class="grid grid-cols-1 gap-6">
 					<div>
-						<label class="block text-sm font-medium mb-1">Loved One's Full Name *</label>
+						<label for="lovedOneName" class="block text-sm font-medium mb-1">Loved One's Full Name *</label>
 						<input
+							id="lovedOneName"
+							name="lovedOneName"
 							type="text"
 							required
 							bind:value={lovedOneName}
 							placeholder="Enter the full name of the deceased"
 							class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#D5BA7F] focus:border-[#D5BA7F]" />
+							{#if form?.errors?.lovedOneName}<p class="text-red-500 text-sm mt-1">{form.errors.lovedOneName}</p>{/if}
 					</div>
 
 					<div>
-						<label class="block text-sm font-medium mb-1">Family Contact Name *</label>
+						<label for="familyContactName" class="block text-sm font-medium mb-1">Family Contact Name *</label>
 						<input
+							id="familyContactName"
+							name="familyContactName"
 							type="text"
 							required
 							bind:value={familyContactName}
 							placeholder="Primary family contact"
 							class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#D5BA7F] focus:border-[#D5BA7F]" />
+							{#if form?.errors?.familyContactName}<p class="text-red-500 text-sm mt-1">{form.errors.familyContactName}</p>{/if}
 					</div>
 
 					<div>
-						<label class="block text-sm font-medium mb-1">Family Contact Email *</label>
+						<label for="familyContactEmail" class="block text-sm font-medium mb-1">Family Contact Email *</label>
 						<input
+							id="familyContactEmail"
+							name="familyContactEmail"
 							type="email"
 							required
 							bind:value={familyContactEmail}
 							placeholder="family@example.com"
 							class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#D5BA7F] focus:border-[#D5BA7F]" />
+							{#if form?.errors?.familyContactEmail}<p class="text-red-500 text-sm mt-1">{form.errors.familyContactEmail}</p>{/if}
 					</div>
 
 					<div>
-						<label class="block text-sm font-medium mb-1">Family Contact Phone *</label>
+						<label for="familyContactPhone" class="block text-sm font-medium mb-1">Family Contact Phone *</label>
 						<input
+							id="familyContactPhone"
+							name="familyContactPhone"
 							type="tel"
 							required
 							bind:value={familyContactPhone}
 							placeholder="(555) 123-4567"
 							class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#D5BA7F] focus:border-[#D5BA7F]" />
+							{#if form?.errors?.familyContactPhone}<p class="text-red-500 text-sm mt-1">{form.errors.familyContactPhone}</p>{/if}
 					</div>
 				</div>
 			</section>
@@ -164,49 +247,56 @@
 					</div>
 				</div>
 
+
 				<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 					<div>
-						<label class="block text-sm font-medium mb-1">Director Name *</label>
+						<label for="directorName" class="block text-sm font-medium mb-1">Director Name *</label>
 						<input
+							id="directorName"
+							name="directorName"
 							type="text"
 							required
 							bind:value={directorName}
-							placeholder="Your full name"
-							class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#D5BA7F] focus:border-[#D5BA7F]" />
+							class="w-full border rounded-lg px-4 py-2 bg-gray-100 cursor-not-allowed"
+							readonly />
 					</div>
 
 					<div>
-						<label class="block text-sm font-medium mb-1">Director Email *</label>
+						<label for="directorEmail" class="block text-sm font-medium mb-1">Director Email *</label>
 						<input
+							id="directorEmail"
+							name="directorEmail"
 							type="email"
 							required
 							bind:value={directorEmail}
-							placeholder="director@funeralhome.com"
-							class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#D5BA7F] focus:border-[#D5BA7F]" />
+							class="w-full border rounded-lg px-4 py-2 bg-gray-100 cursor-not-allowed"
+							readonly />
 					</div>
 
 					<div class="md:col-span-1">
 						<label class="block text-sm font-medium mb-1">Contact Preference</label>
 						<div class="flex items-center gap-6 h-[42px]">
 							<label class="flex items-center gap-2 cursor-pointer">
-								<input type="radio" value="email" bind:group={contactPreference} class="accent-[#D5BA7F]" />
+								<input type="radio" name="contactPreference" value="email" bind:group={contactPreference} class="accent-[#D5BA7F]" />
 								<span>Email</span>
 							</label>
 							<label class="flex items-center gap-2 cursor-pointer">
-								<input type="radio" value="phone" bind:group={contactPreference} class="accent-[#D5BA7F]" />
+								<input type="radio" name="contactPreference" value="phone" bind:group={contactPreference} class="accent-[#D5BA7F]" />
 								<span>Phone</span>
 							</label>
 						</div>
 					</div>
 
 					<div class="md:col-span-3">
-						<label class="block text-sm font-medium mb-1">Funeral Home Name *</label>
+						<label for="funeralHomeName" class="block text-sm font-medium mb-1">Funeral Home Name *</label>
 						<input
+							id="funeralHomeName"
+							name="funeralHomeName"
 							type="text"
 							required
 							bind:value={funeralHomeName}
-							placeholder="Name of your funeral home"
-							class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#D5BA7F] focus:border-[#D5BA7F]" />
+							class="w-full border rounded-lg px-4 py-2 bg-gray-100 cursor-not-allowed"
+							readonly />
 					</div>
 				</div>
 			</section>
@@ -219,32 +309,17 @@
 				</div>
 				<textarea
 					rows="4"
+					name="additionalNotes"
 					bind:value={additionalNotes}
 					placeholder="Any special requests, cultural considerations, or additional info..."
 					class="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#D5BA7F] focus:border-[#D5BA7F]"></textarea>
 			</section>
 
-			<!-- ERRORS -->
-			{#if validationErrors.length > 0}
-				<div class="md:col-span-2 bg-red-50 border border-red-300 text-red-700 rounded-lg p-4 space-y-2">
-					<h3 class="font-semibold">❌ Please correct the following errors:</h3>
-					<ul class="list-disc list-inside">
-						{#each validationErrors as error}
-							<li>{error}</li>
-						{/each}
-					</ul>
-				</div>
-			{/if}
 
 			<!-- MESSAGES -->
 			{#if form?.error}
 				<div class="md:col-span-2 bg-red-100 border border-red-300 text-red-600 p-4 rounded-lg">
 					❌ {form.error}
-				</div>
-			{/if}
-			{#if form?.success}
-				<div class="md:col-span-2 bg-green-100 border border-green-300 text-green-700 p-4 rounded-lg">
-					✅ Success! Please check your email for login details and memorial setup info.
 				</div>
 			{/if}
 
@@ -256,7 +331,7 @@
 					🚀 Submit Form & Create Account
 				</button>
 				<p class="text-sm text-gray-500 max-w-prose mx-auto">
-					By submitting, you'll create your funeral director account and set up the memorial page. Login credentials will be emailed.
+					By submitting, you'll create the family's account and set up the memorial page. Login credentials will be emailed to them.
 				</p>
 			</div>
 		</form>

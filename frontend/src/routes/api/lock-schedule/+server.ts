@@ -1,81 +1,76 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import Stripe from 'stripe';
+import { STRIPE_SECRET_KEY } from '$env/static/private';
+import { adminDb } from '$lib/firebase-admin';
+import { Timestamp } from 'firebase-admin/firestore';
 
-export const POST: RequestHandler = async ({ request }) => {
+// Initialize Stripe
+const stripe = new Stripe(STRIPE_SECRET_KEY, {
+  apiVersion: '2025-08-27.basil',
+});
+
+export const POST: RequestHandler = async ({ request, locals }) => {
   try {
     const { paymentIntentId, bookingData, customerInfo } = await request.json();
+    const memorialId = bookingData?.memorialId;
 
-    if (!paymentIntentId || !bookingData || !customerInfo) {
+    if (!paymentIntentId || !bookingData || !customerInfo || !memorialId) {
       return json({ error: 'Missing required data' }, { status: 400 });
+    }
+
+    if (!locals.user) {
+      return json({ error: 'Authentication required' }, { status: 401 });
     }
 
     console.log('🔒 Locking schedule for payment:', paymentIntentId);
 
-    // TODO: Implement actual schedule locking logic
-    // This would typically involve:
-    // 1. Creating a confirmed booking record in the database
-    // 2. Marking the selected time slots as unavailable
-    // 3. Creating a memorial service record with payment confirmation
-    // 4. Updating user's memorial status to 'paid'
+    // 1. Verify the payment intent status with Stripe
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
-    /* 
-    // Example database operations:
-    const booking = await db.bookings.create({
-      data: {
-        paymentIntentId,
-        customerEmail: customerInfo.email,
-        customerName: `${customerInfo.firstName} ${customerInfo.lastName}`,
-        customerPhone: customerInfo.phone,
-        billingAddress: customerInfo.address,
-        serviceDetails: bookingData.items,
-        totalAmount: bookingData.total,
-        status: 'confirmed',
-        createdAt: new Date(),
-        lockedAt: new Date()
-      }
-    });
-
-    // Update memorial status if associated with existing memorial
-    if (bookingData.memorialId) {
-      await db.memorials.update({
-        where: { id: bookingData.memorialId },
-        data: { 
-          paymentStatus: 'paid',
-          serviceConfirmed: true,
-          updatedAt: new Date()
-        }
-      });
+    if (paymentIntent.status !== 'succeeded') {
+      console.error('Payment not successful:', paymentIntent.status);
+      return json({ error: 'Payment not successful. Please complete payment.' }, { status: 402 });
     }
 
-    // Mark time slots as unavailable
-    await db.timeSlots.updateMany({
-      where: { 
-        date: bookingData.serviceDate,
-        time: { in: bookingData.selectedTimeSlots }
-      },
-      data: { 
-        available: false,
-        bookedBy: booking.id
+    // 2. Update the memorial document in Firestore
+    const memorialRef = adminDb.collection('memorials').doc(memorialId);
+    const memorialDoc = await memorialRef.get();
+
+    if (!memorialDoc.exists) {
+      return json({ error: 'Memorial not found' }, { status: 404 });
+    }
+
+    const updatePayload = {
+      'calculatorConfig.status': 'paid',
+      'calculatorConfig.paidAt': Timestamp.now(),
+      'calculatorConfig.paymentIntentId': paymentIntent.id,
+      'calculatorConfig.customerInfo': customerInfo, // Save customer info with the booking
+      'calculatorConfig.bookingItems': bookingData.items, // Save final booking items
+      'calculatorConfig.total': bookingData.total, // Save final total
+      'paymentHistory': {
+        paymentIntentId: paymentIntent.id,
+        status: 'succeeded',
+        amount: paymentIntent.amount / 100,
+        paidAt: Timestamp.now(),
+        createdBy: locals.user.uid
       }
-    });
-    */
+    };
 
-    // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await memorialRef.update(updatePayload);
 
-    console.log('✅ Schedule locked successfully (mock)');
+    console.log('✅ Schedule locked and memorial updated successfully for:', memorialId);
 
-    return json({ 
-      success: true, 
+    return json({
+      success: true,
       message: 'Schedule locked successfully',
-      bookingId: `booking_${Date.now()}`,
-      development_mode: true 
+      bookingId: `booking_${memorialId}`
     });
 
   } catch (error) {
     console.error('Failed to lock schedule:', error);
     return json(
-      { error: 'Failed to lock schedule' },
+      { error: 'Failed to lock schedule', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

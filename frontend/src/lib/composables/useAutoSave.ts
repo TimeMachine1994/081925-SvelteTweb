@@ -24,7 +24,6 @@ export function useAutoSave(
 	
 	const { memorialId, delay = debounceMs, onSave, onLoad } = options;
 
-	console.log('🔄 Auto-save composable initialized');
 
 	// Auto-save function with enhanced data validation
 	async function autoSave(formData: CalculatorFormData) {
@@ -43,7 +42,6 @@ export function useAutoSave(
 			return;
 		}
 
-		console.log('💾 Auto-saving schedule data for memorial:', memorialId);
 		isSaving = true;
 		hasUnsavedChanges = false;
 
@@ -64,7 +62,6 @@ export function useAutoSave(
 			if (response.ok && result.success) {
 				lastSaveData = dataString;
 				lastSaved = new Date();
-				console.log('✅ Schedule auto-saved successfully to calculatorConfig');
 				onSave?.(true);
 			} else {
 				console.error('❌ Auto-save failed:', result.error);
@@ -97,14 +94,12 @@ export function useAutoSave(
 
 	// Load auto-saved data with enhanced structure support
 	async function loadAutoSavedData(): Promise<CalculatorFormData | null> {
-		console.log('📖 Loading auto-saved schedule data for memorial:', memorialId);
 		
 		try {
 			const response = await fetch(`/api/memorials/${memorialId}/schedule/auto-save`);
 			const result = await response.json();
 
 			if (response.ok && result.success && result.hasAutoSave) {
-				console.log('✅ Auto-saved data loaded from calculatorConfig');
 				const autoSavedData = result.autoSave.formData;
 				
 				// Ensure the data has the memorial context
@@ -117,8 +112,6 @@ export function useAutoSave(
 				onLoad?.(enhancedData);
 				return enhancedData;
 			} else {
-				console.log('ℹ️ No auto-saved data found for memorial:', memorialId);
-				onLoad?.(null);
 				return null;
 			}
 		} catch (error) {
@@ -130,17 +123,14 @@ export function useAutoSave(
 
 	// Load full calculator config (including booking items and totals)
 	async function loadCalculatorConfig(): Promise<CalculatorConfig | null> {
-		console.log('📖 Loading full calculator config for memorial:', memorialId);
 		
 		try {
 			const response = await fetch(`/api/memorials/${memorialId}/schedule/auto-save`);
 			const result = await response.json();
 
 			if (response.ok && result.success && result.calculatorConfig) {
-				console.log('✅ Calculator config loaded');
 				return result.calculatorConfig;
 			} else {
-				console.log('ℹ️ No calculator config found');
 				return null;
 			}
 		} catch (error) {
@@ -150,12 +140,15 @@ export function useAutoSave(
 	}
 
 	// Manual save function
-	async function saveNow(formData: CalculatorFormData) {
-		if (saveTimeout) {
-			clearTimeout(saveTimeout);
-			saveTimeout = null;
-		}
-		await autoSave(formData);
+	function saveNow(formData: CalculatorFormData): Promise<void> {
+		return new Promise(async (resolve) => {
+			if (saveTimeout) {
+				clearTimeout(saveTimeout);
+				saveTimeout = null;
+			}
+			await autoSave(formData);
+			resolve();
+		});
 	}
 
 	// Cleanup on component destroy

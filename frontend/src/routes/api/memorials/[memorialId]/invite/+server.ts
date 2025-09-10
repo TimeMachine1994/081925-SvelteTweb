@@ -2,6 +2,7 @@ import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { adminDb } from '$lib/server/firebase';
 import { Timestamp } from 'firebase-admin/firestore';
+import { sendInvitationEmail } from '$lib/server/email';
 
 export const POST: RequestHandler = async ({ request, locals, params }) => {
 	console.log('📨 Received request to send invitation...');
@@ -50,7 +51,18 @@ export const POST: RequestHandler = async ({ request, locals, params }) => {
 		const newInvitationRef = await adminDb.collection('invitations').add(invitationData);
 		console.log(`✅ Invitation created with ID: ${newInvitationRef.id}`);
 
-		// TODO: In a real application, send an email to the inviteeEmail here.
+		// Send invitation email
+		try {
+			await sendInvitationEmail({
+				to: inviteeEmail,
+				invitationId: newInvitationRef.id,
+				memorialName: memorialSnap.data()?.lovedOneName || 'the memorial',
+				inviterName: locals.user.displayName || locals.user.email || 'A friend'
+			});
+		} catch (emailError) {
+			console.error('⚠️ Failed to send invitation email:', emailError);
+			// Do not fail the request if email sending fails
+		}
 
 		return json({ success: true, invitationId: newInvitationRef.id }, { status: 201 });
 

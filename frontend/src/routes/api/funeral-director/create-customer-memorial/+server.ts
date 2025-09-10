@@ -3,6 +3,7 @@ import type { RequestHandler } from './$types';
 import { adminDb } from '$lib/server/firebase';
 import { Timestamp } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
+import { sendEnhancedRegistrationEmail } from '$lib/server/email';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
   try {
@@ -69,7 +70,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       },
 
       // Owner information (customer)
-      ownerId: customerUser.uid,
+      ownerUid: customerUser.uid,
       ownerInfo: {
         firstName: formData.customer.firstName,
         lastName: formData.customer.lastName,
@@ -91,6 +92,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       },
 
       // Funeral director information
+      funeralDirectorUid: locals.user.uid,
       funeralDirector: {
         id: locals.user.uid,
         companyName: funeralDirector.companyName,
@@ -151,14 +153,19 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       memorialIds: [memorialRef.id]
     });
 
-    // TODO: Send email invitation to customer with login credentials
-    // This would typically use a service like SendGrid, AWS SES, or similar
-    // For now, we'll just log the credentials
-    console.log(`Customer account created:
-      Email: ${formData.customer.email}
-      Temporary Password: ${temporaryPassword}
-      Memorial URL: /tributes/${fullSlug}
-    `);
+    // Send email invitation to customer with login credentials
+    try {
+      await sendEnhancedRegistrationEmail({
+        email: formData.customer.email,
+        lovedOneName: `${formData.lovedOne.firstName} ${formData.lovedOne.lastName}`,
+        memorialUrl: `https://tributestream.com/tributes/${fullSlug}`,
+        ownerName: `${formData.customer.firstName} ${formData.customer.lastName}`
+      });
+      console.log('📧 Welcome email sent to new customer successfully.');
+    } catch (emailError) {
+      console.error('⚠️ Failed to send welcome email to customer:', emailError);
+      // Do not fail the request if email sending fails
+    }
 
     return json({
       success: true,
@@ -166,7 +173,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       fullSlug: fullSlug,
       customerEmail: formData.customer.email,
       customerUserId: customerUser.uid,
-      temporaryPassword: temporaryPassword, // In production, don't return this
       message: 'Memorial created successfully and customer account set up'
     });
 

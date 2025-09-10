@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { adminDb, adminAuth } from '$lib/server/firebase';
 import { Timestamp } from 'firebase-admin/firestore';
+import { sendEnhancedRegistrationEmail } from '$lib/server/email';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
   try {
@@ -116,25 +117,34 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       status: 'active'
     });
 
-    // Log credentials for manual sharing (since email sending is TODO)
-    console.log('=== NEW FAMILY ACCOUNT CREATED ===');
-    console.log(`Family Email: ${familyEmail}`);
-    console.log(`Temporary Password: ${tempPassword}`);
-    console.log(`Memorial: ${lovedOneName}`);
-    console.log(`Service: ${serviceDate} at ${serviceTime}`);
-    console.log(`Memorial URL: /tributes/${memorialSlug}`);
-    console.log('=====================================');
+    // Send welcome email to the family
+    try {
+      await sendEnhancedRegistrationEmail({
+        email: familyEmail,
+        password: tempPassword,
+        lovedOneName: lovedOneName,
+        tributeUrl: `https://tributestream.com/tributes/${memorialSlug}`,
+        familyContactName: `Family of ${lovedOneName}`,
+        familyContactEmail: familyEmail,
+        familyContactPhone: '', // Not collected in this simplified flow
+        contactPreference: 'email',
+        directorName: funeralDirector?.contactPerson || 'Your Funeral Director',
+        funeralHomeName: funeralDirector?.companyName || 'Your Funeral Home',
+        memorialDate: serviceDate,
+        memorialTime: serviceTime
+      });
+      console.log('📧 Welcome email sent to family successfully.');
+    } catch (emailError) {
+      console.error('⚠️ Failed to send welcome email:', emailError);
+      // Do not fail the entire request if email sending fails, just log it
+    }
 
     return json({
       success: true,
       message: 'Family memorial created successfully',
-      memorialId: memorialDoc.id,
-      streamKey: `mobile_${memorialDoc.id}_${Date.now()}`,
-      familyCredentials: {
-        email: familyEmail,
-        temporaryPassword: tempPassword
-      },
-      memorialUrl: `/tributes/${memorialDoc.id}`
+      memorialId: memorialRef.id,
+      streamKey: `mobile_${memorialRef.id}_${Date.now()}`,
+      memorialUrl: `/tributes/${memorialRef.id}`
     });
 
   } catch (error) {

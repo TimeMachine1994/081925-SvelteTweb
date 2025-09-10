@@ -217,7 +217,7 @@
 				<h3 class="text-lg font-medium text-gray-900 mb-2">No Assigned Memorials</h3>
 				<p class="text-gray-600 mb-6">You don't have any memorials assigned to you yet. Create a new memorial to get started.</p>
 				<a 
-					href="/funeral-director/create-memorial"
+					href="/register/funeral-director"
 					class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-105"
 				>
 					<Plus class="w-5 h-5 mr-2" />

@@ -26,7 +26,15 @@ export const actions: Actions = {
 			return fail(401, { message: 'Could not create session cookie.' });
 		}
 
-		console.log('Redirecting to home...');
+		// For AJAX calls (like from registration), return success. For form submissions, redirect.
+		if (request.headers.get('accept')?.includes('application/json')) {
+			return new Response(JSON.stringify({ success: true, message: 'Login successful' }), {
+				headers: { 'Content-Type': 'application/json' },
+				status: 200
+			});
+		}
+
+		console.log('Redirecting to home for standard form submission...');
 		redirect(303, '/');
 	}
 };

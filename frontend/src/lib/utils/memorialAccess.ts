@@ -50,7 +50,7 @@ export async function verifyMemorialAccess(user: any, memorialId: string, memori
 			}
 
 			// Check if user is funeral director (also check role)
-			if ((memorial.funeralDirectorId === user.uid || memorial.funeralDirectorUid === user.uid) || userContext.role === 'funeral_director') {
+			if ((memorial.funeralDirectorUid === user.uid || memorial.funeralDirectorUid === user.uid) || userContext.role === 'funeral_director') {
 				return {
 					hasAccess: true,
 					accessLevel: 'admin', // Changed to admin for funeral directors in tests
@@ -168,6 +168,7 @@ export class MemorialAccessVerifier {
 		console.log('🔍 Checking view access for memorial:', memorialId, 'user:', user.uid);
 
 		try {
+			await initializeAdminDb(); // Ensure DB is initialized
 			// Admin always has access
 			if (user.role === 'admin' || user.isAdmin) {
 				return {
@@ -454,7 +455,7 @@ export class MemorialAccessVerifier {
 			if (user.role === 'funeral_director') {
 				const assignedMemorialsSnap = await adminDb
 					.collection('memorials')
-					.where('funeralDirectorUid', '==', user.uid)
+					.where('funeralDirectorId', '==', user.uid)
 					.get();
 
 				assignedMemorialsSnap.docs.forEach((doc: any) => {

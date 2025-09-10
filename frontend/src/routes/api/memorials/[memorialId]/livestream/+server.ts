@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { adminAuth, adminDb } from '$lib/firebase-admin';
 import { requireLivestreamAccess, createMemorialRequest } from '$lib/server/memorialMiddleware';
+import { CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, CLOUDFLARE_CUSTOMER_CODE } from '$env/static/private';
 
 /**
  * Start livestream for a memorial
@@ -30,7 +31,29 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 
 		const memorial = memorialDoc.data();
 
-		// Create livestream session
+		// 1. Create a new Live Input in Cloudflare Stream
+		const cfResponse = await fetch(`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/stream/live_inputs`, {
+			method: 'POST',
+			headers: {
+				'Authorization': `Bearer ${CLOUDFLARE_API_TOKEN}`,
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({
+				meta: { name: `${memorial?.lovedOneName} - ${streamTitle}` },
+				recording: { mode: 'automatic' }
+			})
+		});
+
+		if (!cfResponse.ok) {
+			const errorBody = await cfResponse.text();
+			console.error(`Cloudflare API error: ${cfResponse.status} - ${errorBody}`);
+			return json({ error: 'Failed to create livestream input', details: errorBody }, { status: 502 });
+		}
+
+		const cfData = await cfResponse.json();
+		const liveInput = cfData.result;
+
+		// 2. Create livestream session document in Firestore
 		const livestreamData = {
 			memorialId,
 			startedBy: locals.user.uid,
@@ -40,12 +63,10 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 			description: streamDescription || '',
 			status: 'starting',
 			startedAt: new Date(),
-			viewerCount: 0,
-			maxViewers: 0,
-			// TODO: Integration with Cloudflare Stream or other service
-			streamKey: `stream_${memorialId}_${Date.now()}`,
-			streamUrl: `https://stream.example.com/live/${memorialId}`,
-			playbackUrl: `https://stream.example.com/watch/${memorialId}`,
+			cloudflareId: liveInput.uid,
+			streamKey: liveInput.rtmps.streamKey,
+			streamUrl: liveInput.rtmps.url,
+			playbackUrl: `https://customer-${CLOUDFLARE_CUSTOMER_CODE}.cloudflarestream.com/${liveInput.uid}/iframe`,
 			permissions: {
 				canStart: accessResult.accessLevel === 'admin' || accessResult.accessLevel === 'edit',
 				canStop: accessResult.accessLevel === 'admin' || accessResult.accessLevel === 'edit',
@@ -53,16 +74,17 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 			}
 		};
 
-		// Save livestream session
 		const livestreamRef = await adminDb.collection('livestreams').add(livestreamData);
 
-		// Update memorial with active livestream
+		// 3. Update memorial with active livestream details
 		await memorialRef.update({
 			'livestream.isActive': true,
 			'livestream.sessionId': livestreamRef.id,
+			'livestream.cloudflareId': liveInput.uid,
 			'livestream.startedAt': new Date(),
 			'livestream.startedBy': locals.user.uid,
-			'livestream.streamUrl': livestreamData.streamUrl,
+			'livestream.streamUrl': liveInput.rtmps.url,
+			'livestream.streamKey': liveInput.rtmps.streamKey,
 			'livestream.playbackUrl': livestreamData.playbackUrl
 		});
 
@@ -71,8 +93,8 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 		return json({
 			success: true,
 			sessionId: livestreamRef.id,
-			streamKey: livestreamData.streamKey,
-			streamUrl: livestreamData.streamUrl,
+			streamKey: liveInput.rtmps.streamKey,
+			streamUrl: liveInput.rtmps.url,
 			playbackUrl: livestreamData.playbackUrl,
 			permissions: livestreamData.permissions
 		});

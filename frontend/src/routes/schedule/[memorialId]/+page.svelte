@@ -255,7 +255,13 @@
   async function handleSaveAndPayLater() {
     // Force immediate save
     await autoSave.saveNow(formData);
-    goto(`/my-portal/tributes/${memorialId}/edit`);
+    
+    // Redirect based on user role
+    if (data.role === 'funeral_director') {
+      goto('/profile');
+    } else {
+      goto(`/my-portal/tributes/${memorialId}/edit`);
+    }
   }
 
   // Watch for changes and trigger auto-save
@@ -269,11 +275,8 @@
     // Load existing auto-saved data
     const autoSavedData = await autoSave.loadAutoSavedData();
     if (autoSavedData) {
-      const shouldRestore = confirm('We found an auto-saved version of your schedule. Would you like to restore it?');
-      if (shouldRestore) {
-        formData = autoSavedData;
-        console.log('✅ Auto-saved data restored');
-      }
+      formData = autoSavedData;
+      console.log('✅ Auto-saved data automatically restored');
     }
   });
 

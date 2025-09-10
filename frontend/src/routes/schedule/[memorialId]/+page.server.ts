@@ -2,6 +2,23 @@ import type { PageServerLoad } from './$types';
 import { adminDb } from '$lib/firebase-admin';
 import { error } from '@sveltejs/kit';
 
+// Helper function to convert Timestamps and Dates to strings
+function sanitizeData(data: any): any {
+  if (!data) return data;
+  if (Array.isArray(data)) return data.map(sanitizeData);
+  if (typeof data === 'object') {
+    if (data.toDate) return data.toDate().toISOString(); // Firestore Timestamp
+    if (data instanceof Date) return data.toISOString(); // JavaScript Date
+
+    const sanitized: { [key: string]: any } = {};
+    for (const key in data) {
+      sanitized[key] = sanitizeData(data[key]);
+    }
+    return sanitized;
+  }
+  return data;
+}
+
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const { memorialId } = params;
 
@@ -27,6 +44,11 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		// Check permissions
 		const userRole = locals.user.role;
 		const userId = locals.user.uid;
+
+		console.log('🛡️ Permission Check:');
+		console.log(`   - User ID: ${userId}, Role: ${userRole}`);
+		console.log(`   - Memorial Owner UID: ${memorial.ownerUid}`);
+		console.log(`   - Memorial FD UID: ${memorial.funeralDirectorUid}`);
 		
 		const hasPermission = 
 			userRole === 'admin' ||
@@ -39,15 +61,16 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		}
 
 		// Return memorial data and any existing calculator config
-		return {
+		return sanitizeData({
 			memorial: {
 				id: memorialId,
-				lovedOneName: memorial.lovedOneName,
-				ownerUid: memorial.ownerUid,
-				funeralDirectorUid: memorial.funeralDirectorUid
+				lovedOneName: memorial?.lovedOneName || 'Unnamed Memorial',
+				ownerUid: memorial?.ownerUid,
+				funeralDirectorUid: memorial?.funeralDirectorUid
 			},
-			calculatorConfig: memorial.calculatorConfig || null
-		};
+			calculatorConfig: memorial?.calculatorConfig || null,
+			role: locals.user.role // Pass role to the page
+		});
 
 	} catch (err) {
 		console.error('Error loading memorial data:', err);

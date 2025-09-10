@@ -1,8 +1,20 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { adminDb } from '$lib/server/firebase';
+import { adminDb, adminAuth } from '$lib/server/firebase';
 import type { FuneralDirectorMemorialRequest } from '$lib/types/funeral-director';
 import { Timestamp } from 'firebase-admin/firestore';
+import { sendEnhancedRegistrationEmail } from '$lib/server/email';
+
+// Helper function to generate a random password
+function generateRandomPassword(length = 12) {
+	const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()';
+	let password = '';
+	for (let i = 0; i < length; i++) {
+		const randomIndex = Math.floor(Math.random() * charset.length);
+		password += charset[randomIndex];
+	}
+	return password;
+}
 
 export const POST: RequestHandler = async ({ request, locals }) => {
   try {
@@ -105,12 +117,52 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       activeStreams: 0
     };
 
+    // Create owner user account
+    const ownerData = memorialData.owner;
+    const password = generateRandomPassword();
+    const userRecord = await adminAuth.createUser({
+      email: ownerData.email,
+      password: password,
+      displayName: `${ownerData.firstName} ${ownerData.lastName}`
+    });
+
+    await adminAuth.setCustomUserClaims(userRecord.uid, { role: 'owner' });
+
+    // Create user profile in Firestore
+    await adminDb.collection('users').doc(userRecord.uid).set({
+      email: ownerData.email,
+      displayName: `${ownerData.firstName} ${ownerData.lastName}`,
+      phone: ownerData.phone,
+      role: 'owner',
+      createdAt: Timestamp.now(),
+      createdByFuneralDirector: locals.user.uid
+    });
+
+    // Add ownerUid to the memorial data
+    memorial.ownerUid = userRecord.uid;
+
     // Create memorial document
     const memorialRef = adminDb.collection('memorials').doc();
     await memorialRef.set(memorial);
 
-    // TODO: Create owner user account and send invitation email
-    // This would involve creating a user account for the owner and sending them login credentials
+    // Send registration email to the owner
+    try {
+      await sendEnhancedRegistrationEmail({
+        email: ownerData.email,
+        password: password,
+        lovedOneName: `${memorialData.deceased.firstName} ${memorialData.deceased.lastName}`,
+        tributeUrl: `https://tributestream.com/tributes/${memorial.fullSlug}`,
+        familyContactName: `${ownerData.firstName} ${ownerData.lastName}`,
+        familyContactEmail: ownerData.email,
+        familyContactPhone: ownerData.phone,
+        contactPreference: 'email', // Defaulting
+        directorName: funeralDirector.contactPerson,
+        directorEmail: funeralDirector.email,
+        funeralHomeName: funeralDirector.companyName
+      });
+    } catch (emailError) {
+      console.error('⚠️ Failed to send registration email to owner:', emailError);
+    }
 
     return json({
       success: true,

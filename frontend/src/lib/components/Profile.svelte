@@ -31,6 +31,14 @@
 
 	function getRoleInfo(role: string) {
 		switch (role) {
+			case 'admin':
+				return {
+					title: 'Admin',
+					icon: Crown,
+					gradient: 'from-red-600 via-pink-600 to-purple-600',
+					bgGradient: 'from-red-50 to-pink-50',
+					accentColor: 'red'
+				};
 			case 'funeral_director':
 				return {
 					title: 'Funeral Director',
@@ -253,19 +261,16 @@
 												</div>
 											</div>
 											<div class="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-												<a
-													href="/schedule?memorialId={memorial.id}"
-													class="px-4 py-2 rounded-xl bg-blue-600 text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center"
-												>
+												<a href={`/schedule/${memorial.id}`} class="px-4 py-2 rounded-xl bg-blue-600 text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center">
 													<Clock class="w-3 h-3 mr-1" />
 													Schedule
 												</a>
-												<a 
-													href="/tributes/{memorial.slug}"
-													class="px-4 py-2 rounded-xl bg-gradient-to-r {roleInfo.gradient} text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105"
-												>
-													View
-												</a>
+												{#if userRole === 'funeral_director'}
+													<a href={`/livestream/${memorial.id}`} class="px-4 py-2 rounded-xl bg-red-600 text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center">
+														<Video class="w-3 h-3 mr-1" />
+														Start Stream
+													</a>
+												{/if}
 											</div>
 										</div>
 									</div>
@@ -277,7 +282,7 @@
 								<h3 class="text-xl font-semibold text-gray-900 mb-2">No memorials yet</h3>
 								<p class="text-gray-500 mb-6">Create your first memorial to get started</p>
 								<a 
-									href="/create"
+									href="/register/funeral-director"
 									class="inline-flex items-center px-6 py-3 rounded-xl bg-gradient-to-r {roleInfo.gradient} text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105"
 								>
 									<Heart class="w-4 h-4 mr-2" />
@@ -291,7 +296,29 @@
 
 			<!-- Actions Section -->
 			<div class="mt-12 {mounted ? 'animate-fade-in-up' : 'opacity-0'}" style="animation-delay: 0.5s;">
-				<div class="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8">
+				<div class="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 space-y-6">
+					{#if userRole === 'admin'}
+						<!-- Site Admin Section -->
+						<div class="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0 pb-6 border-b border-gray-200">
+							<div class="flex items-center space-x-4">
+								<Crown class="w-6 h-6 text-red-600" />
+								<div>
+									<h3 class="font-semibold text-gray-900">Site Admin</h3>
+									<p class="text-sm text-gray-500">Administrative dashboard and controls</p>
+								</div>
+							</div>
+							<div class="flex space-x-4">
+								<a 
+									href="/admin"
+									class="px-6 py-3 rounded-xl bg-gradient-to-r from-red-500 to-pink-600 text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105"
+								>
+									Admin Dashboard
+								</a>
+							</div>
+						</div>
+					{/if}
+					
+					<!-- Account Settings Section -->
 					<div class="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
 						<div class="flex items-center space-x-4">
 							<Settings class="w-6 h-6 text-gray-600" />

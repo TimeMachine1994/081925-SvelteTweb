@@ -1,10 +1,55 @@
 import { adminAuth, adminDb } from '$lib/server/firebase';
-import { fail, redirect, isRedirect } from '@sveltejs/kit';
-import type { Actions } from './$types';
+import { fail, redirect } from '@sveltejs/kit';
+import type { Actions, PageServerLoad } from './$types';
 import { sendEnhancedRegistrationEmail } from '$lib/server/email';
-import type { EnhancedRegistrationEmailData } from '$lib/server/email';
 import { indexMemorial } from '$lib/server/algolia-indexing';
 import type { Memorial } from '$lib/types/memorial';
+
+/**
+ * LOAD FUNERAL DIRECTOR DATA
+ * Secures the route and fetches the logged-in funeral director's profile.
+ */
+export const load: PageServerLoad = async ({ locals }) => {
+	console.log('🔐 [FD-REG] Verifying user is a logged-in funeral director...');
+
+	// 1. Check for logged-in user with 'funeral_director' role
+	if (!locals.user || locals.user.role !== 'funeral_director') {
+		console.log('🛑 [FD-REG] User not authorized. Redirecting to login.');
+		redirect(303, '/login?redirect=/register/funeral-director');
+	}
+
+	const directorUid = locals.user.uid;
+	console.log(`✅ [FD-REG] User ${directorUid} is authorized. Fetching director profile...`);
+
+	try {
+		// 2. Fetch the funeral director's specific profile from the 'funeral_directors' collection
+		const directorDocSnap = await adminDb.collection('funeral_directors').doc(directorUid).get();
+
+		if (!directorDocSnap.exists) {
+			console.error(`❌ [FD-REG] No funeral director profile found for UID: ${directorUid}`);
+			return fail(404, { error: 'Funeral director profile not found. Please contact support.' });
+		}
+
+		const directorData = directorDocSnap.data()!;
+		const funeralDirector = {
+			id: directorDocSnap.id,
+			companyName: directorData.companyName || '',
+			contactPerson: directorData.contactPerson || '',
+			email: directorData.email || ''
+		};
+
+		console.log(`✅ [FD-REG] Successfully fetched profile for: ${funeralDirector.companyName}`);
+
+		// 3. Return the specific funeral director's data
+		return {
+			funeralDirector
+		};
+
+	} catch (error) {
+		console.error('❌ [FD-REG] Error loading funeral director profile:', error);
+		return fail(500, { error: 'Failed to load funeral director information.' });
+	}
+};
 
 // Helper function to generate a random password
 function generateRandomPassword(length = 12) {
@@ -19,16 +64,14 @@ function generateRandomPassword(length = 12) {
 
 // Helper function to generate slug from loved one's name
 function generateSlug(lovedOneName: string): string {
-	console.log('🔗 Generating slug for:', lovedOneName);
 	const slug = `celebration-of-life-for-${lovedOneName
 		.trim()
 		.toLowerCase()
-		.replace(/[^a-z0-9\s-]/g, '') // Remove special characters
-		.replace(/\s+/g, '-') // Replace spaces with hyphens
-		.replace(/-+/g, '-') // Replace multiple hyphens with single
-		.replace(/^-|-$/g, '')}` // Remove leading/trailing hyphens
-		.substring(0, 100); // Limit length
-	console.log('🔗 Generated slug:', slug);
+		.replace(/[^a-z0-9\s-]/g, '')
+		.replace(/\s+/g, '-')
+		.replace(/-+/g, '-')
+		.replace(/^-|-$/g, '')}`
+		.substring(0, 100);
 	return slug;
 }
 
@@ -39,19 +82,28 @@ function isValidEmail(email: string): boolean {
 }
 
 export const actions: Actions = {
-	default: async ({ request }) => {
-		console.log('🎯 Enhanced funeral director registration started');
+	default: async ({ request, locals }) => {
+		console.log('🎯 [FD-REG] Memorial registration started by funeral director');
 		const data = await request.formData();
-		
-		// Extract all form fields
-		console.log('📝 Extracting form data...');
+
+		// Security check: Ensure a logged-in funeral director is making the request
+		if (!locals.user || locals.user.role !== 'funeral_director') {
+			return fail(403, { error: 'You must be a logged-in funeral director to perform this action.' });
+		}
+		const directorUid = locals.user.uid;
+
+		// Fetch the director's profile to get authoritative data
+		const directorDoc = await adminDb.collection('funeral_directors').doc(directorUid).get();
+		if (!directorDoc.exists) {
+			return fail(404, { error: 'Funeral director profile not found.' });
+		}
+		const directorData = directorDoc.data()!;
+
+		// Extract form data
 		const lovedOneName = (data.get('lovedOneName') as string)?.trim();
 		const familyContactName = (data.get('familyContactName') as string)?.trim();
 		const familyContactEmail = (data.get('familyContactEmail') as string)?.trim();
 		const familyContactPhone = (data.get('familyContactPhone') as string)?.trim();
-		const directorName = (data.get('directorName') as string)?.trim();
-		const directorEmail = (data.get('directorEmail') as string)?.trim();
-		const funeralHomeName = (data.get('funeralHomeName') as string)?.trim();
 		const locationName = (data.get('locationName') as string)?.trim();
 		const locationAddress = (data.get('locationAddress') as string)?.trim();
 		const memorialDate = (data.get('memorialDate') as string)?.trim();
@@ -59,196 +111,98 @@ export const actions: Actions = {
 		const contactPreference = (data.get('contactPreference') as string)?.trim() || 'email';
 		const additionalNotes = (data.get('additionalNotes') as string)?.trim();
 
-		console.log('📋 Form data extracted:', {
-			lovedOneName,
-			familyContactName,
-			familyContactEmail,
-			directorName,
-			funeralHomeName,
-			hasLocationInfo: !!(locationName || locationAddress),
-			hasScheduleInfo: !!(memorialDate || memorialTime),
-			contactPreference
-		});
-
-		// Enhanced validation for required fields
-		console.log('🔍 Validating required fields...');
-		const validationErrors: string[] = [];
-
-		if (!lovedOneName) validationErrors.push('Loved one\'s name is required');
-		if (!directorName) validationErrors.push('Director name is required');
-		if (!familyContactEmail) validationErrors.push('Family contact email is required');
-		if (!familyContactPhone) validationErrors.push('Family contact phone is required');
-		if (!funeralHomeName) validationErrors.push('Funeral home name is required');
-
-		// Email format validation
-		if (familyContactEmail && !isValidEmail(familyContactEmail)) {
-			validationErrors.push('Family contact email must be a valid email address');
+		// Validation
+		const errors: Record<string, string> = {};
+		if (!lovedOneName) errors.lovedOneName = "Loved one's name is required";
+		if (!familyContactName) errors.familyContactName = 'Family contact name is required';
+		if (!familyContactEmail || !isValidEmail(familyContactEmail)) {
+			errors.familyContactEmail = 'A valid family contact email is required';
 		}
-		if (directorEmail && !isValidEmail(directorEmail)) {
-			validationErrors.push('Director email must be a valid email address');
-		}
+		if (!familyContactPhone) errors.familyContactPhone = 'Family contact phone is required';
 
-		if (validationErrors.length > 0) {
-			console.log('❌ Validation failed:', validationErrors);
-			return fail(400, { error: `Validation failed: ${validationErrors.join(', ')}` });
+		if (Object.keys(errors).length > 0) {
+			return fail(400, {
+				data: Object.fromEntries(data.entries()), // Return submitted data
+				errors
+			});
 		}
-
-		console.log('✅ All required fields validated successfully');
 
 		const password = generateRandomPassword();
 		const slug = generateSlug(lovedOneName);
-		const fullSlug = `tributes/${slug}`;
 
 		try {
-			// 1. Create user in Firebase Auth using family contact email as primary
-			console.log(`👤 Creating user account with family contact email: ${familyContactEmail}`);
+			// 1. Create user for the family member
 			const userRecord = await adminAuth.createUser({
-				email: familyContactEmail, // Use family contact email as primary
+				email: familyContactEmail,
 				password,
-				displayName: familyContactName || directorName // Prefer family contact name
+				displayName: familyContactName
 			});
-			console.log(`✅ User created successfully: ${userRecord.uid}`);
 
-			// 2. Set custom claim for owner role
-			console.log('👑 Setting owner role claim...');
+			// 2. Set 'owner' role for the new family member user
 			await adminAuth.setCustomUserClaims(userRecord.uid, { role: 'owner' });
-			console.log(`✅ Custom claim 'owner' set for ${familyContactEmail}`);
 
-			// 3. Create enhanced user profile in Firestore
-			console.log('📝 Creating enhanced user profile...');
+			// 3. Create user profile in Firestore for the family member
 			const userProfile = {
 				email: familyContactEmail,
-				displayName: familyContactName || directorName,
+				displayName: familyContactName,
 				phone: familyContactPhone,
-				funeralHomeName,
 				role: 'owner',
 				createdAt: new Date(),
-				// Enhanced director information
-				directorEmail: directorEmail || null,
-				directorName: directorName,
-				familyContactName: familyContactName,
-				familyContactPhone: familyContactPhone,
-				contactPreference: contactPreference as 'phone' | 'email'
+				createdByFuneralDirector: directorUid
 			};
-
 			await adminDb.collection('users').doc(userRecord.uid).set(userProfile);
-			console.log(`✅ Enhanced user profile created for ${familyContactEmail}`);
 
-			// 4. Create comprehensive memorial with all service details
-			console.log('🕊️ Creating comprehensive memorial...');
+			// 4. Create the memorial, assigning the FD as the manager
 			const memorialData = {
-				// Core memorial fields
-				lovedOneName: lovedOneName,
-				slug: slug,
-				fullSlug: fullSlug,
-				createdByUserId: userRecord.uid,
-				creatorEmail: familyContactEmail,
-				creatorName: familyContactName || directorName,
-				
-				// Service information fields
-				directorFullName: directorName,
-				funeralHomeName: funeralHomeName,
+				lovedOneName,
+				slug,
+				ownerUid: userRecord.uid, // The family member owns the memorial
+				funeralDirectorUid: directorUid, // The logged-in FD manages it
+				createdByUserId: directorUid, // Legacy field, points to creator
+				creatorEmail: directorData.email,
+				creatorName: directorData.contactPerson,
+				directorFullName: directorData.contactPerson,
+				funeralHomeName: directorData.companyName,
+				directorEmail: directorData.email,
 				memorialDate: memorialDate || null,
 				memorialTime: memorialTime || null,
 				memorialLocationName: locationName || null,
 				memorialLocationAddress: locationAddress || null,
-				
-				// Family contact fields
-				familyContactName: familyContactName,
-				familyContactEmail: familyContactEmail,
-				familyContactPhone: familyContactPhone,
-				familyContactPreference: contactPreference as 'phone' | 'email',
-				
-				// Director information
-				directorEmail: directorEmail || null,
-				
-				// Additional information
-				additionalNotes: additionalNotes || null,
-				
-				// Default values
-				isPublic: true,
-				content: '',
-				custom_html: null,
-				
-				// Timestamps
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				
-				// Legacy compatibility
-				creatorUid: userRecord.uid // Keep for backward compatibility
-			};
-
-			const memorialRef = await adminDb.collection('memorials').add(memorialData);
-			console.log(`✅ Comprehensive memorial created for ${lovedOneName} with ID: ${memorialRef.id}`);
-			console.log(`🔗 Memorial slug: ${slug}, Full slug: ${fullSlug}`);
-
-			// Index the new memorial in Algolia
-			await indexMemorial({ ...memorialData, id: memorialRef.id } as Memorial);
-
-			// 5. Send enhanced registration email
-			console.log('📧 Sending enhanced registration email...');
-			await sendEnhancedRegistrationEmail({
-				email: familyContactEmail,
-				password,
-				lovedOneName,
-				tributeUrl: `https://yoursite.com/tributes/celebration-of-life-for-${slug}`,
 				familyContactName,
 				familyContactEmail,
 				familyContactPhone,
-				contactPreference: contactPreference as 'phone' | 'email',
-				directorName,
-				directorEmail,
-				funeralHomeName,
-				memorialDate,
-				memorialTime,
-				locationName,
-				locationAddress,
-				additionalNotes
+				familyContactPreference: contactPreference,
+				additionalNotes: additionalNotes || null,
+				isPublic: true,
+				createdAt: new Date(),
+				updatedAt: new Date()
+			};
+			const memorialRef = await adminDb.collection('memorials').add(memorialData);
+
+			// 5. Index in Algolia
+			await indexMemorial({ ...memorialData, id: memorialRef.id } as unknown as Memorial);
+
+			// 6. Send registration email to the family member
+			await sendEnhancedRegistrationEmail({
+				email: familyContactEmail,
+				lovedOneName,
+				memorialUrl: `https://yoursite.com/tributes/${slug}`,
+				ownerName: familyContactName
 			});
-			console.log('✅ Enhanced registration email sent successfully');
 
-			// 6. Create a custom token for auto-login
-			console.log('🎟️ Creating custom token for auto-login...');
-			const customToken = await adminAuth.createCustomToken(userRecord.uid);
-			console.log(`✅ Custom token created for ${familyContactEmail}`);
+			// 7. Return success with the shareable link
+			return {
+				success: true,
+				memorialLink: `/tributes/${slug}`
+			};
 
-			// 7. Redirect to the session creation page with enhanced parameters
-			const redirectUrl = `/auth/session?token=${customToken}&slug=${slug}`;
-			console.log(`🚀 Redirecting to: ${redirectUrl}`);
-			
-			console.log('🎉 Enhanced funeral director registration completed successfully!');
-			redirect(303, redirectUrl);
-			
 		} catch (error: any) {
-			if (isRedirect(error)) {
-				throw error;
-			}
-			
-			console.error('💥 Error during enhanced registration process:', error);
-			
-			// Enhanced error handling with specific messages
-			let errorMessage = 'An unexpected error occurred during registration.';
-			
+			let errorMessage = 'An unexpected error occurred.';
 			if (error.code === 'auth/email-already-exists') {
-				errorMessage = `An account with email ${familyContactEmail} already exists. Please use a different email or contact support.`;
-			} else if (error.code === 'auth/invalid-email') {
-				errorMessage = 'The provided email address is invalid. Please check and try again.';
-			} else if (error.code === 'auth/weak-password') {
-				errorMessage = 'The generated password is too weak. Please try again.';
-			} else if (error.message?.includes('PERMISSION_DENIED')) {
-				errorMessage = 'Database permission denied. Please contact support.';
-			} else if (error.message?.includes('QUOTA_EXCEEDED')) {
-				errorMessage = 'Service quota exceeded. Please try again later.';
+				errorMessage = `An account with email ${familyContactEmail} already exists.`;
 			} else if (error.message) {
 				errorMessage = `Registration failed: ${error.message}`;
 			}
-			
-			console.error('❌ Specific error details:', {
-				code: error.code,
-				message: error.message,
-				stack: error.stack
-			});
-			
 			return fail(500, { error: errorMessage });
 		}
 	}

@@ -15,30 +15,80 @@ if (admin.apps.length) {
 	console.log('🔥 [FIREBASE] SvelteKit dev mode:', dev);
 
 	if (dev) {
-		console.log('Running in development mode. Preparing to connect to emulators.');
-		// In development, we use the emulators.
-		// Unset GOOGLE_APPLICATION_CREDENTIALS to ensure the Admin SDK
-		// connects to the emulators when running locally.
-		console.log('Running in development mode. Connecting to emulators.');
-		// Unset GOOGLE_APPLICATION_CREDENTIALS to prioritize emulators.
-		delete process.env['GOOGLE_APPLICATION_CREDENTIALS'];
-
-		// Set Auth emulator host via environment variable, which is the required method for the Admin SDK.
-		process.env['FIREBASE_AUTH_EMULATOR_HOST'] = '127.0.0.1:9099';
-
-		admin.initializeApp({
-			projectId: 'fir-tweb',
-			storageBucket: env.PRIVATE_FIREBASE_STORAGE_BUCKET
+		console.log('🔥 [FIREBASE] Running in development mode. Checking for emulators...');
+		
+		// Check if emulators are running by testing connection
+		const net = await import('net');
+		const isEmulatorRunning = await new Promise((resolve) => {
+			const socket = new net.Socket();
+			socket.setTimeout(1000);
+			socket.on('connect', () => {
+				socket.destroy();
+				resolve(true);
+			});
+			socket.on('timeout', () => {
+				socket.destroy();
+				resolve(false);
+			});
+			socket.on('error', () => {
+				resolve(false);
+			});
+			socket.connect(9099, '127.0.0.1');
 		});
 
-		// For Firestore, we can use the settings() method for a more direct connection.
-		const firestore = admin.firestore();
-		firestore.settings({
-			host: '127.0.0.1:8080',
-			ssl: false
-		});
-		console.log('✅ Firebase Admin initialized for local development with emulators.');
-		console.log('✅ Firebase Admin initialized for local development with emulators.');
+		if (isEmulatorRunning) {
+			console.log('✅ [FIREBASE] Emulators detected. Connecting to local emulators...');
+			// Unset GOOGLE_APPLICATION_CREDENTIALS to prioritize emulators
+			delete process.env['GOOGLE_APPLICATION_CREDENTIALS'];
+			
+			// Set Auth emulator host via environment variable
+			process.env['FIREBASE_AUTH_EMULATOR_HOST'] = '127.0.0.1:9099';
+
+			admin.initializeApp({
+				projectId: 'fir-tweb',
+				storageBucket: env.PRIVATE_FIREBASE_STORAGE_BUCKET
+			});
+
+			// Configure Firestore emulator
+			const firestore = admin.firestore();
+			firestore.settings({
+				host: '127.0.0.1:8080',
+				ssl: false
+			});
+			console.log('✅ [FIREBASE] Connected to Firebase emulators successfully');
+		} else {
+			console.log('⚠️ [FIREBASE] Emulators not running. Connecting to production Firebase...');
+			console.log('💡 [FIREBASE] To use emulators, run: firebase emulators:start');
+			
+			// Use production Firebase in dev mode when emulators aren't available
+			const serviceAccountJson = env.PRIVATE_FIREBASE_SERVICE_ACCOUNT_KEY;
+			
+			if (serviceAccountJson) {
+				try {
+					const serviceAccount = JSON.parse(serviceAccountJson);
+					admin.initializeApp({
+						credential: admin.credential.cert(serviceAccount),
+						storageBucket: env.PRIVATE_FIREBASE_STORAGE_BUCKET || 'fir-tweb.firebasestorage.app'
+					});
+					console.log('✅ [FIREBASE] Connected to production Firebase (dev mode fallback)');
+				} catch (error) {
+					console.error('❌ [FIREBASE] Service account error:', error);
+					// Final fallback
+					admin.initializeApp({
+						projectId: 'fir-tweb',
+						storageBucket: 'fir-tweb.firebasestorage.app'
+					});
+					console.log('⚠️ [FIREBASE] Using minimal configuration fallback');
+				}
+			} else {
+				// Minimal fallback configuration
+				admin.initializeApp({
+					projectId: 'fir-tweb',
+					storageBucket: 'fir-tweb.firebasestorage.app'
+				});
+				console.log('⚠️ [FIREBASE] Using minimal configuration (no service account)');
+			}
+		}
 	} else {
 		console.log('🔥 [FIREBASE] Running in production mode.');
 		// In production, we use the service account credentials.
