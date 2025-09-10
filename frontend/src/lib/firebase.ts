@@ -35,11 +35,28 @@ if (browser) {
 
 	if (dev) {
 		try {
-			connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
-			connectFirestoreEmulator(db, '127.0.0.1', 8080);
-			connectStorageEmulator(storage, '127.0.0.1', 9199);
+			console.log('🔥 Connecting to Firebase emulators...');
+			
+			// Check if already connected to avoid duplicate connection errors
+			if (!auth.config.emulator) {
+				connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
+				console.log('✅ Connected to Auth emulator on port 9099');
+			}
+			
+			if (!db._delegate._databaseId.host.includes('127.0.0.1')) {
+				connectFirestoreEmulator(db, '127.0.0.1', 8080);
+				console.log('✅ Connected to Firestore emulator on port 8080');
+			}
+			
+			if (!storage._delegate._host.includes('127.0.0.1')) {
+				connectStorageEmulator(storage, '127.0.0.1', 9199);
+				console.log('✅ Connected to Storage emulator on port 9199');
+			}
+			
+			console.log('🎉 All Firebase emulators connected successfully');
 		} catch (error) {
-			console.error('Error connecting to Firebase emulators:', error);
+			console.error('❌ Error connecting to Firebase emulators:', error);
+			console.error('❌ Make sure Firebase emulators are running: firebase emulators:start');
 		}
 	}
 }

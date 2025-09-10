@@ -1,147 +1,154 @@
 import { redirect } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
-import type { PageServerLoad } from './$types';
-import type { Memorial } from '$lib/types/memorial';
 
-export const load: PageServerLoad = async ({ locals }) => {
-	console.log('🔐 [ADMIN PAGE] Loading admin dashboard for user:', locals.user?.email);
-	console.log('🔐 [ADMIN PAGE] User object:', JSON.stringify(locals.user, null, 2));
-
-	// Redirect to login if not authenticated
-	if (!locals.user) {
-		console.log('🚫 [ADMIN PAGE] User not authenticated, redirecting to login');
-		throw redirect(302, '/login');
-	}
-
-	// Check if user is admin
-	if (!locals.user.admin && locals.user.role !== 'admin') {
-		console.log('🚫 [ADMIN PAGE] User is not admin, redirecting to profile');
-		console.log('🚫 [ADMIN PAGE] User admin flag:', locals.user.admin);
-		console.log('🚫 [ADMIN PAGE] User role:', locals.user.role);
-		throw redirect(302, '/profile');
-	}
-
-	console.log('👑 [ADMIN PAGE] User is admin, loading admin dashboard data...');
-	console.log('👑 [ADMIN PAGE] Admin check passed - admin:', locals.user.admin, 'role:', locals.user.role);
+/**
+ * SIMPLIFIED ADMIN DASHBOARD SERVER LOAD
+ * 
+ * Purpose: Load essential data for admin operations:
+ * 1. Pending funeral directors (for approval workflow)
+ * 2. Recent memorials (for oversight)
+ * 3. Basic system stats
+ * 
+ * Follows established patterns from memorial flow analysis
+ */
+export const load = async ({ locals }: any) => {
+	console.log('🔐 [ADMIN LOAD] Starting admin dashboard load for:', locals.user?.email);
 
 	try {
-		console.log('🔥 Attempting to connect to Firestore...');
-		
-		// Test Firestore connection first
-		await adminDb.collection('test').limit(1).get();
-		console.log('✅ Firestore connection successful');
+		// === AUTHENTICATION & AUTHORIZATION ===
+		// Following same pattern as memorial APIs
+		if (!locals.user) {
+			console.log('🚫 [ADMIN LOAD] No authenticated user - redirecting to login');
+			throw redirect(302, '/login');
+		}
 
-		// Load all memorials for admin view
-		console.log('📊 Loading memorials...');
-		const memorialsSnap = await adminDb.collection('memorials').get();
-		const memorials = memorialsSnap.docs.map(doc => {
-			const data = doc.data();
+		if (!locals.user.admin && locals.user.role !== 'admin') {
+			console.log('🚫 [ADMIN LOAD] User lacks admin privileges:', {
+				uid: locals.user.uid,
+				admin: locals.user.admin,
+				role: locals.user.role
+			});
+			throw redirect(302, '/profile');
+		}
+
+		console.log('✅ [ADMIN LOAD] Admin authentication verified for:', locals.user.email);
+
+		// === DATA LOADING ===
+		// Load only essential data for admin operations
+		console.log('📊 [ADMIN LOAD] Loading admin dashboard data...');
+
+		const [pendingDirectorsSnap, recentMemorialsSnap] = await Promise.all([
+			// Load pending funeral directors (primary admin task)
+			adminDb.collection('funeral_directors')
+				.where('status', '==', 'pending')
+				.orderBy('createdAt', 'desc')
+				.get(),
 			
-			// Helper function to convert Firestore Timestamps to ISO strings
-			const convertTimestamp = (timestamp: any) => {
-				if (timestamp?.toDate) {
-					return timestamp.toDate().toISOString();
-				}
-				if (timestamp instanceof Date) {
-					return timestamp.toISOString();
-				}
-				return timestamp;
-			};
+			// Load recent memorials for oversight (last 30 days)
+			adminDb.collection('memorials')
+				.orderBy('createdAt', 'desc')
+				.limit(20)
+				.get()
+		]);
 
-			// Convert nested paymentHistory dates
-			const paymentHistory = data.paymentHistory?.map((payment: any) => ({
-				...payment,
-				createdAt: convertTimestamp(payment.createdAt),
-				updatedAt: convertTimestamp(payment.updatedAt)
-			})) || [];
-
-			// Convert nested schedule dates
-			const schedule = data.schedule ? {
-				...data.schedule,
-				createdAt: convertTimestamp(data.schedule.createdAt),
-				updatedAt: convertTimestamp(data.schedule.updatedAt),
-				serviceDate: convertTimestamp(data.schedule.serviceDate)
-			} : null;
-
+		// === PROCESS FUNERAL DIRECTORS ===
+		// Following same timestamp conversion pattern as memorial flow
+		const pendingFuneralDirectors = pendingDirectorsSnap.docs.map(doc => {
+			const data = doc.data();
+			console.log(`🏥 [ADMIN LOAD] Processing pending director: ${data.companyName}`);
+			
 			return {
 				id: doc.id,
-				...data,
-				// Convert main Firestore Timestamps to ISO strings
-				createdAt: convertTimestamp(data.createdAt),
-				updatedAt: convertTimestamp(data.updatedAt),
-				serviceDate: convertTimestamp(data.serviceDate),
-				// Convert nested objects
-				paymentHistory,
-				schedule
-			};
-		}) as Memorial[];
-
-		// Load all users for admin management
-		console.log('👥 Loading users...');
-		const usersSnap = await adminDb.collection('users').get();
-		const allUsers = usersSnap.docs.map(doc => {
-			const data = doc.data();
-			
-			// Helper function to convert Firestore Timestamps to ISO strings
-			const convertTimestamp = (timestamp: any) => {
-				if (timestamp?.toDate) {
-					return timestamp.toDate().toISOString();
-				}
-				if (timestamp instanceof Date) {
-					return timestamp.toISOString();
-				}
-				return timestamp;
-			};
-
-			return {
-				uid: doc.id,
+				companyName: data.companyName || 'Unknown Company',
+				contactPerson: data.contactPerson || 'Unknown Contact',
 				email: data.email || '',
-				displayName: data.displayName || '',
-				role: data.role || 'owner',
-				createdAt: convertTimestamp(data.createdAt),
-				updatedAt: convertTimestamp(data.updatedAt)
+				phone: data.phone || '',
+				licenseNumber: data.licenseNumber || '',
+				status: data.status,
+				createdAt: data.createdAt?.toDate?.()?.toISOString() || null,
+				// Include verification documents info
+				documents: {
+					businessLicense: !!data.businessLicense,
+					funeralLicense: !!data.funeralLicense,
+					insurance: !!data.insurance
+				}
 			};
 		});
 
-		console.log(`✅ Loaded ${memorials.length} memorials and ${allUsers.length} users for admin`);
+		// === PROCESS RECENT MEMORIALS ===
+		// Following memorial collection structure from flow analysis
+		const recentMemorials = recentMemorialsSnap.docs.map(doc => {
+			const data = doc.data();
+			console.log(`💝 [ADMIN LOAD] Processing memorial: ${data.lovedOneName}`);
+			
+			return {
+				id: doc.id,
+				lovedOneName: data.lovedOneName || 'Unknown',
+				slug: data.slug,
+				fullSlug: data.fullSlug,
+				creatorEmail: data.creatorEmail || '',
+				createdAt: data.createdAt?.toDate?.()?.toISOString() || null,
+				// Payment status from calculatorConfig (following established pattern)
+				paymentStatus: data.calculatorConfig?.status || 'draft',
+				// Check if has active livestream
+				hasLivestream: !!data.livestream?.isActive
+			};
+		});
+
+		// === CALCULATE STATS ===
+		// Get quick stats for dashboard overview
+		const [totalMemorialsSnap, totalDirectorsSnap] = await Promise.all([
+			adminDb.collection('memorials').count().get(),
+			adminDb.collection('funeral_directors').count().get()
+		]);
+
+		const stats = {
+			totalMemorials: totalMemorialsSnap.data().count,
+			totalFuneralDirectors: totalDirectorsSnap.data().count,
+			pendingApprovals: pendingFuneralDirectors.length,
+			recentMemorials: recentMemorials.length
+		};
+
+		console.log('✅ [ADMIN LOAD] Dashboard data loaded successfully:', {
+			pendingDirectors: pendingFuneralDirectors.length,
+			recentMemorials: recentMemorials.length,
+			stats
+		});
 
 		return {
-			user: locals.user,
-			memorials,
-			allUsers,
-			stats: {
-				totalMemorials: memorials.length,
-				totalUsers: allUsers.length,
-				activeStreams: memorials.filter(m => m.livestream).length,
-				recentMemorials: memorials.filter(m => {
-					const createdAt = new Date(m.createdAt);
-					const weekAgo = new Date();
-					weekAgo.setDate(weekAgo.getDate() - 7);
-					return createdAt > weekAgo;
-				}).length
+			// Core admin data
+			pendingFuneralDirectors,
+			recentMemorials,
+			stats,
+			// User context
+			adminUser: {
+				email: locals.user.email,
+				uid: locals.user.uid
 			}
 		};
 
-	} catch (error) {
-		console.error('❌ Error loading admin dashboard data:', error);
-		console.error('❌ Error details:', {
-			name: error.name,
-			message: error.message,
-			code: error.code,
-			stack: error.stack
+	} catch (error: any) {
+		console.error('💥 [ADMIN LOAD] Error loading admin dashboard:', {
+			error: error.message,
+			stack: error.stack,
+			user: locals.user?.email
 		});
 		
+		// Return safe fallback data to prevent 500 errors
 		return {
-			user: locals.user,
-			memorials: [],
-			allUsers: [],
+			pendingFuneralDirectors: [],
+			recentMemorials: [],
 			stats: {
 				totalMemorials: 0,
-				totalUsers: 0,
-				activeStreams: 0,
+				totalFuneralDirectors: 0,
+				pendingApprovals: 0,
 				recentMemorials: 0
 			},
-			error: `Failed to load admin dashboard data: ${error.message}`
+			adminUser: {
+				email: locals.user?.email || '',
+				uid: locals.user?.uid || ''
+			},
+			error: `Failed to load admin data: ${error.message}`
 		};
 	}
 };
