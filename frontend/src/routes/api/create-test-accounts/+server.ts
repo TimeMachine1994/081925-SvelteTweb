@@ -40,16 +40,6 @@ const testAccounts = [
       phone: '(555) 987-6543'
     }
   },
-  {
-    email: 'viewer@test.com',
-    password: 'test123',
-    role: 'viewer',
-    name: 'Mike Viewer',
-    data: {
-      role: 'viewer',
-      followedMemorials: []
-    }
-  }
 ];
 
 export const POST: RequestHandler = async () => {
@@ -70,7 +60,7 @@ export const POST: RequestHandler = async () => {
         // Set custom claims
         const customClaims: Record<string, any> = { role: account.role };
         if (account.role === 'admin') {
-          customClaims.isAdmin = true;
+          customClaims.admin = true;
         }
         await adminAuth.setCustomUserClaims(userRecord.uid, customClaims);
         

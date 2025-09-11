@@ -23,7 +23,7 @@ describe('OwnerPortal Component', () => {
     expect(screen.getByText('Owner Portal')).toBeInTheDocument();
     expect(screen.getByText('Memorial Management')).toBeInTheDocument();
     expect(screen.getByText('Create Memorial')).toBeInTheDocument();
-    expect(screen.getByText('Manage Invitations')).toBeInTheDocument();
+    // Invitation system removed in V1 - expect(screen.getByText('Manage Invitations')).toBeInTheDocument();
   });
 
   it('shows create memorial button and handles clicks', async () => {

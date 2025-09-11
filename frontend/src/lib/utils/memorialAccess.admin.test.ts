@@ -129,6 +129,19 @@ describe('Admin Role Memorial Access', () => {
 				reason: 'Admin privileges'
 			});
 		});
+
+		it('should deny photo upload access for all users in V1', async () => {
+			const adminUser = { uid: 'admin-123', role: 'admin', email: 'admin@test.com' };
+			const memorial = { id: 'memorial-123', ownerUid: 'owner-123' };
+			
+			const result = await MemorialAccessVerifier.checkPhotoUploadAccess(adminUser, memorial);
+			
+			expect(result).toEqual({
+				hasAccess: false,
+				accessLevel: 'none',
+				reason: 'Photo upload functionality removed in V1'
+			});
+		});
 	});
 
 	describe('Admin Role Validation', () => {

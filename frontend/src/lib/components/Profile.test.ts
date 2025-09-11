@@ -42,9 +42,9 @@ describe('Profile Component - Schedule Navigation Logic', () => {
     
     expect(hasSchedulePermission(user, memorial)).toBe(true);
     
-    // Test viewer without permission
-    const viewer = { uid: 'different-user', role: 'viewer' };
-    expect(hasSchedulePermission(viewer, memorial)).toBe(false);
+    // Test user without permission (different owner)
+    const unauthorizedUser = { uid: 'different-user', role: 'funeral_director' };
+    expect(hasSchedulePermission(unauthorizedUser, memorial)).toBe(false);
   });
 
   it('should handle memorial status for schedule button text', () => {

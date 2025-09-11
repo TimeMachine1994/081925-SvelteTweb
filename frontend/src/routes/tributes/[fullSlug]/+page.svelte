@@ -1,5 +1,4 @@
 <script lang="ts">
-	import PhotoGallery from '$lib/components/PhotoGallery.svelte';
 	import FakeVideoPlayer from '$lib/components/FakeVideoPlayer.svelte';
 	import type { PageData } from './$types';
 
@@ -70,9 +69,7 @@
 			</div>
 		{/if}
 
-		{#if memorial.photos && memorial.photos.length > 0}
-			<PhotoGallery photos={memorial.photos} />
-		{/if}
+		<!-- Photo gallery removed in V1 - photo upload functionality disabled -->
 	</main>
 </div>
 

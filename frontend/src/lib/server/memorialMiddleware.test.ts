@@ -9,12 +9,10 @@ const logAccessAttempt = vi.fn();
 // Mock dependencies
 vi.mock('$lib/utils/memorialAccess', () => ({
   verifyMemorialAccess: vi.fn(),
-  hasPhotoUploadPermission: vi.fn(),
   logAccessAttempt: vi.fn(),
   MemorialAccessVerifier: {
     checkViewAccess: vi.fn(),
     checkEditAccess: vi.fn(),
-    checkPhotoUploadAccess: vi.fn(),
     checkLivestreamAccess: vi.fn()
   }
 }));
