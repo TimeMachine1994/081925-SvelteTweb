@@ -369,6 +369,8 @@ export class MemorialAccessVerifier {
 	static async checkLivestreamAccess(memorialId: string, user: UserContext): Promise<AccessCheckResult> {
 		console.log('📺 Checking livestream access for memorial:', memorialId);
 
+		await initializeAdminDb(); // Ensure DB is initialized
+
 		// Only admin, owner, and funeral director can control livestream
 		if (user.role === 'admin' || user.isAdmin) {
 			return {

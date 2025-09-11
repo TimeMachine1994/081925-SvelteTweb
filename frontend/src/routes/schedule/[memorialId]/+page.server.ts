@@ -1,5 +1,5 @@
 import type { PageServerLoad } from './$types';
-import { adminDb } from '$lib/firebase-admin';
+import { adminDb } from '$lib/server/firebase';
 import { error } from '@sveltejs/kit';
 
 // Helper function to convert Timestamps and Dates to strings
@@ -47,12 +47,12 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 		console.log('🛡️ Permission Check:');
 		console.log(`   - User ID: ${userId}, Role: ${userRole}`);
-		console.log(`   - Memorial Owner UID: ${memorial.ownerUid}`);
+		console.log(`   - Memorial Owner UID: ${memorial.createdByUserId}`);
 		console.log(`   - Memorial FD UID: ${memorial.funeralDirectorUid}`);
 		
 		const hasPermission = 
 			userRole === 'admin' ||
-			memorial.ownerUid === userId ||
+			memorial.createdByUserId === userId ||
 			memorial.funeralDirectorUid === userId ||
 			(userRole === 'family_member' && memorial.familyMemberUids?.includes(userId));
 
@@ -65,7 +65,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			memorial: {
 				id: memorialId,
 				lovedOneName: memorial?.lovedOneName || 'Unnamed Memorial',
-				ownerUid: memorial?.ownerUid,
+				ownerUid: memorial?.createdByUserId,
 				funeralDirectorUid: memorial?.funeralDirectorUid
 			},
 			calculatorConfig: memorial?.calculatorConfig || null,

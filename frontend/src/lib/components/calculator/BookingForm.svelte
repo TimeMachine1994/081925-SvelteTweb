@@ -134,7 +134,7 @@
 					</label>
 					<label class="label">
 						<span>Start Time</span>
-						<input class="input" type="time" bind:value={formData.additionalLocation.startTime} />
+						<input class="input" type="time" bind:value={formData.additionalLocation.time.time} />
 					</label>
 				</div>
 				<label class="label">
@@ -169,17 +169,21 @@
 			<div class="card preset-tonal-surface p-4 space-y-4">
 				<h4 class="h4">Additional Day Details</h4>
 				<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-					<label class="label">
+					<label class="label md:col-span-3">
 						<span>Location Name</span>
 						<input class="input" type="text" bind:value={formData.additionalDay.location.name} />
 					</label>
-					<label class="label">
+					<label class="label md:col-span-3">
 						<span>Location Address</span>
 						<input class="input" type="text" bind:value={formData.additionalDay.location.address} />
 					</label>
 					<label class="label">
+						<span>Date of Service</span>
+						<input class="input" type="date" bind:value={formData.additionalDay.time.date} />
+					</label>
+					<label class="label">
 						<span>Start Time</span>
-						<input class="input" type="time" bind:value={formData.additionalDay.startTime} />
+						<input class="input" type="time" bind:value={formData.additionalDay.time.time} />
 					</label>
 				</div>
 				<label class="label">

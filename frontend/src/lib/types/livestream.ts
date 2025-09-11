@@ -23,7 +23,7 @@ export interface ServiceDetails {
 export interface AdditionalServiceDetails {
 	enabled: boolean;
 	location: LocationInfo;
-	startTime: string | null;
+	time: TimeInfo;
 	hours: number;
 }
 

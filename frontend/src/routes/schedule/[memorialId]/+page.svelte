@@ -248,7 +248,7 @@
       timestamp: new Date().toISOString()
     };
     
-    const encodedData = encodeURIComponent(JSON.stringify(bookingData));
+    const encodedData = btoa(JSON.stringify(bookingData));
     goto(`/payment?data=${encodedData}`);
   }
 
@@ -256,12 +256,8 @@
     // Force immediate save
     await autoSave.saveNow(formData);
     
-    // Redirect based on user role
-    if (data.role === 'funeral_director') {
-      goto('/profile');
-    } else {
-      goto(`/my-portal/tributes/${memorialId}/edit`);
-    }
+    // Redirect to profile page for both owner and funeral director
+    goto('/profile');
   }
 
   // Watch for changes and trigger auto-save

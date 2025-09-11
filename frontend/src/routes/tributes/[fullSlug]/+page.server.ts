@@ -3,6 +3,23 @@ import { adminDb } from '$lib/server/firebase';
 import type { PageServerLoad } from './$types';
 import type { Memorial } from '$lib/types/memorial';
 
+// Helper function to recursively convert Timestamps and Dates to strings
+function sanitizeData(data: any): any {
+  if (!data) return data;
+  if (Array.isArray(data)) return data.map(sanitizeData);
+  if (typeof data === 'object' && data !== null) {
+    if (data.toDate && typeof data.toDate === 'function') return data.toDate().toISOString(); // Firestore Timestamp
+    if (data instanceof Date) return data.toISOString(); // JavaScript Date
+
+    const sanitized: { [key: string]: any } = {};
+    for (const key in data) {
+      sanitized[key] = sanitizeData(data[key]);
+    }
+    return sanitized;
+  }
+  return data;
+}
+
 export const load: PageServerLoad = async ({ params, locals }) => {
     const { fullSlug } = params;
     const memorialsRef = adminDb.collection('memorials');
@@ -15,12 +32,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     const memorialDoc = snapshot.docs[0];
     const memorialData = memorialDoc.data();
 
-    // Firestore Timestamps are not directly serializable, so we convert them.
     const memorial = {
         id: memorialDoc.id,
-        ...memorialData,
-        createdAt: memorialData.createdAt?.toDate ? memorialData.createdAt.toDate().toISOString() : null,
-        updatedAt: memorialData.updatedAt?.toDate ? memorialData.updatedAt.toDate().toISOString() : null,
+        ...memorialData
     } as Memorial;
 
     let isOwner = false;
@@ -34,7 +48,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     }
 
     return {
-        memorial,
+        memorial: sanitizeData(memorial),
         user: locals.user,
         isOwner,
         isFollowing

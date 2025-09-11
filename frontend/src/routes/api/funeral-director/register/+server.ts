@@ -42,13 +42,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       businessType: data.businessType,
       servicesOffered: data.servicesOffered || [],
       yearsInBusiness: data.yearsInBusiness || 0,
-      status: 'pending',
-      verificationStatus: 'unverified',
+      status: 'active',
+      verificationStatus: 'verified', // Auto-verified on registration
       permissions: {
-        canCreateMemorials: false, // Will be enabled after approval
-        canManageMemorials: false,
-        canLivestream: false,
-        maxMemorials: 0
+        canCreateMemorials: true,
+        canManageMemorials: true,
+        canLivestream: true,
+        maxMemorials: 50 // Default limit for new directors
       },
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),

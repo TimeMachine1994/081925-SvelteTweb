@@ -23,13 +23,13 @@
   let additionalLocation = $state<AdditionalServiceDetails>({
     enabled: false,
     location: { name: '', address: '', isUnknown: false },
-    startTime: null,
+    time: { date: null, time: null, isUnknown: false },
     hours: 2
   });
   let additionalDay = $state<AdditionalServiceDetails>({
     enabled: false,
     location: { name: '', address: '', isUnknown: false },
-    startTime: null,
+    time: { date: null, time: null, isUnknown: false },
     hours: 2
   });
   let addons = $state<Addons>({
@@ -446,7 +446,7 @@
             additionalLocation = {
               enabled: savedData.additionalLocation.enabled || false,
               location: savedData.additionalLocation.location || { name: '', address: '', isUnknown: false },
-              startTime: savedData.additionalLocation.startTime || null,
+              time: savedData.additionalLocation.time || { date: null, time: null, isUnknown: false },
               hours: savedData.additionalLocation.hours || 2
             };
           }
@@ -455,7 +455,7 @@
             additionalDay = {
               enabled: savedData.additionalDay.enabled || false,
               location: savedData.additionalDay.location || { name: '', address: '', isUnknown: false },
-              startTime: savedData.additionalDay.startTime || null,
+              time: savedData.additionalDay.time || { date: null, time: null, isUnknown: false },
               hours: savedData.additionalDay.hours || 2
             };
           }
@@ -585,6 +585,36 @@
           </div>
         </div>
 
+        <!-- Main Service Details -->
+        <div class="bg-black/80 backdrop-blur-sm rounded-lg shadow-lg p-6 border border-amber-500/20">
+          <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
+            <Calendar class="h-6 w-6 mr-2 text-amber-400" />
+            Main Service Details
+          </h2>
+          <div class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="main-location-name" class="block text-sm font-medium text-gray-300 mb-2">Location Name</label>
+                <input id="main-location-name" type="text" placeholder="e.g., St. Mary's Church" bind:value={mainService.location.name} class="w-full p-2 border border-gray-600 rounded bg-gray-700 text-white" />
+              </div>
+              <div>
+                <label for="main-location-address" class="block text-sm font-medium text-gray-300 mb-2">Location Address</label>
+                <input id="main-location-address" type="text" placeholder="e.g., 123 Main St, Anytown" bind:value={mainService.location.address} class="w-full p-2 border border-gray-600 rounded bg-gray-700 text-white" />
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="main-service-date" class="block text-sm font-medium text-gray-300 mb-2">Service Date</label>
+                <input id="main-service-date" type="date" bind:value={mainService.time.date} class="w-full p-2 border border-gray-600 rounded bg-gray-700 text-white" />
+              </div>
+              <div>
+                <label for="main-service-time" class="block text-sm font-medium text-gray-300 mb-2">Start Time</label>
+                <input id="main-service-time" type="time" bind:value={mainService.time.time} class="w-full p-2 border border-gray-600 rounded bg-gray-700 text-white" />
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Service Duration -->
         <div class="bg-black/80 backdrop-blur-sm rounded-lg shadow-lg p-6 border border-amber-500/20">
           <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
@@ -638,23 +668,35 @@
               </label>
               
               {#if additionalLocation.enabled}
-                <div>
-                  <label for="additional-location-hours" class="block text-sm font-medium text-gray-300 mb-2">
-                    Additional Location Hours (2 hours included, ${HOURLY_OVERAGE_RATE}/hour overage)
-                  </label>
-                  <input 
-                    id="additional-location-hours"
-                    type="range" 
-                    min="1" 
-                    max="8" 
-                    step="1"
-                    bind:value={additionalLocation.hours}
-                    class="w-full gold-slider"
-                  />
-                  <div class="flex justify-between text-sm text-gray-400 mt-1">
-                    <span>1 hour</span>
-                    <span class="font-medium text-amber-400">{additionalLocation.hours} hours</span>
-                    <span>8+ hours</span>
+                <div class="space-y-4">
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label for="additional-location-date" class="block text-sm font-medium text-gray-300 mb-2">Date</label>
+                      <input id="additional-location-date" type="date" bind:value={additionalLocation.time.date} class="w-full p-2 border border-gray-600 rounded bg-gray-700 text-white" />
+                    </div>
+                    <div>
+                      <label for="additional-location-time" class="block text-sm font-medium text-gray-300 mb-2">Start Time</label>
+                      <input id="additional-location-time" type="time" bind:value={additionalLocation.time.time} class="w-full p-2 border border-gray-600 rounded bg-gray-700 text-white" />
+                    </div>
+                  </div>
+                  <div>
+                    <label for="additional-location-hours" class="block text-sm font-medium text-gray-300 mb-2">
+                      Additional Location Hours (2 hours included, ${HOURLY_OVERAGE_RATE}/hour overage)
+                    </label>
+                    <input 
+                      id="additional-location-hours"
+                      type="range" 
+                      min="1" 
+                      max="8" 
+                      step="1"
+                      bind:value={additionalLocation.hours}
+                      class="w-full gold-slider"
+                    />
+                    <div class="flex justify-between text-sm text-gray-400 mt-1">
+                      <span>1 hour</span>
+                      <span class="font-medium text-amber-400">{additionalLocation.hours} hours</span>
+                      <span>8+ hours</span>
+                    </div>
                   </div>
                 </div>
               {/if}
@@ -675,23 +717,35 @@
               </label>
               
               {#if additionalDay.enabled}
-                <div>
-                  <label for="additional-day-hours" class="block text-sm font-medium text-gray-300 mb-2">
-                    Additional Day Hours (2 hours included, ${HOURLY_OVERAGE_RATE}/hour overage)
-                  </label>
-                  <input 
-                    id="additional-day-hours"
-                    type="range" 
-                    min="1" 
-                    max="8" 
-                    step="1"
-                    bind:value={additionalDay.hours}
-                    class="w-full gold-slider"
-                  />
-                  <div class="flex justify-between text-sm text-gray-400 mt-1">
-                    <span>1 hour</span>
-                    <span class="font-medium text-amber-400">{additionalDay.hours} hours</span>
-                    <span>8+ hours</span>
+                <div class="space-y-4">
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label for="additional-day-date" class="block text-sm font-medium text-gray-300 mb-2">Date</label>
+                      <input id="additional-day-date" type="date" bind:value={additionalDay.time.date} class="w-full p-2 border border-gray-600 rounded bg-gray-700 text-white" />
+                    </div>
+                    <div>
+                      <label for="additional-day-time" class="block text-sm font-medium text-gray-300 mb-2">Start Time</label>
+                      <input id="additional-day-time" type="time" bind:value={additionalDay.time.time} class="w-full p-2 border border-gray-600 rounded bg-gray-700 text-white" />
+                    </div>
+                  </div>
+                  <div>
+                    <label for="additional-day-hours" class="block text-sm font-medium text-gray-300 mb-2">
+                      Additional Day Hours (2 hours included, ${HOURLY_OVERAGE_RATE}/hour overage)
+                    </label>
+                    <input 
+                      id="additional-day-hours"
+                      type="range" 
+                      min="1" 
+                      max="8" 
+                      step="1"
+                      bind:value={additionalDay.hours}
+                      class="w-full gold-slider"
+                    />
+                    <div class="flex justify-between text-sm text-gray-400 mt-1">
+                      <span>1 hour</span>
+                      <span class="font-medium text-amber-400">{additionalDay.hours} hours</span>
+                      <span>8+ hours</span>
+                    </div>
                   </div>
                 </div>
               {/if}

@@ -40,6 +40,28 @@ We have made significant progress in preparing the application for production. H
 -   We have begun the process of removing unnecessary `console.log` statements from the codebase to clean up production logs, focusing on high-traffic files like server hooks, authentication components, and API endpoints.
 -   Styling for several placeholder components (`/register/_page.svelte`, `FamilyMemberPortal.svelte`, etc.) has been updated to match the application's modern "glassmorphism" theme.
 
+### 8. Schedule Page Analysis (09/10/25)
+
+A full analysis of the schedule page (`/schedule`) and its underlying systems was conducted. The page serves as the central hub for service configuration, pricing calculation, and booking.
+
+**Key Findings:**
+
+-   **Workflow**: The page requires a `memorialId` URL parameter for context. If a user arrives without one, they are redirected to the `/profile` page to select or create a memorial. This ensures all scheduling activities are tied to a specific event.
+
+-   **Data Loading**: On initial load, the page makes a `GET` request to `/api/memorials/[memorialId]/schedule/auto-save` to fetch any previously saved calculator data from the `calculatorConfig` field in the memorial's Firestore document.
+
+-   **State Management**: The page is fully modernized with Svelte 5 runes. All form inputs and derived calculations (like `totalPrice`) use `$state` and `$derived`, ensuring a highly reactive and efficient user interface.
+
+-   **Auto-Save Mechanism**: An `$effect` hook provides a built-in, debounced auto-save feature. It monitors form data for changes and sends a `POST` request to the `/api/memorials/[memorialId]/schedule/auto-save` endpoint 2 seconds after the user stops making edits. The `useAutoSave.ts` composable has been deprecated in favor of this more direct implementation.
+
+-   **Data Persistence**: All calculator and schedule data is stored within a single object, `calculatorConfig`, in the corresponding `memorial` document in Firestore. This centralized approach simplifies data management.
+
+-   **Role-Based Access**: The API endpoints enforce strict, role-based permissions. Access is granted only to the memorial owner, the assigned funeral director, invited family members, and admins. This prevents unauthorized users from viewing or modifying schedule details.
+
+-   **User Actions**:
+    -   **"Book Now"**: Initiates the payment process by calling `/api/create-payment-intent` and redirecting the user to Stripe Checkout.
+    -   **"Save and Pay Later"**: Manually triggers the auto-save endpoint and redirects the user to their `/profile` page, allowing them to resume later.
+
 ## To-Do: Finalizing for Production
 
 The following tasks remain to complete the production refactor:

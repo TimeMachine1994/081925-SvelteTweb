@@ -36,6 +36,15 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 
     const memorial = memorialDoc.data();
 
+    if (!memorial) {
+        throw error(404, 'Memorial data could not be loaded.');
+    }
+
+    // Ensure fullSlug is present for the link
+    if (!memorial.fullSlug && memorial.slug) {
+        memorial.fullSlug = memorial.slug;
+    }
+
     // Permission check: only admin or the assigned funeral director can access
     const hasPermission = role === 'admin' || memorial?.funeralDirectorUid === uid;
 

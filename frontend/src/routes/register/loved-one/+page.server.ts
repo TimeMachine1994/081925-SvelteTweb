@@ -1,7 +1,7 @@
 import { adminAuth, adminDb } from '$lib/server/firebase';
 import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
-import { sendRegistrationEmail } from '$lib/server/email';
+import { sendEnhancedRegistrationEmail } from '$lib/server/email';
 import { indexMemorial } from '$lib/server/algolia-indexing';
 import type { Memorial } from '$lib/types/memorial';
 
@@ -90,10 +90,14 @@ export const actions: Actions = {
 			// Index the new memorial in Algolia
 			await indexMemorial({ ...memorialData, id: memorialRef.id } as Memorial);
 
-			// 5. Send registration email
-			// For now, we'll use the simple registration email.
-			// TODO: In the future, we can expand this to use the enhanced email by collecting more data.
-			await sendRegistrationEmail(email, password);
+			// 5. Send enhanced registration email
+			await sendEnhancedRegistrationEmail({
+				email,
+				ownerName: name,
+				lovedOneName,
+				memorialUrl: `https://tributestream.com/${fullSlug}`,
+				password // Pass the generated password to the enhanced email function
+			});
 
 			// 6. Create a custom token for auto-login
 			const customToken = await adminAuth.createCustomToken(userRecord.uid);

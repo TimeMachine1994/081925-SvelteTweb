@@ -11,10 +11,17 @@ export const PATCH: RequestHandler = async ({ request, locals, params }) => {
 
     const { memorialId } = params;
     const data = await request.json();
-    const { serviceDate, serviceTime, duration, location, timeIsUnknown } = data;
+    const { formData } = data;
 
-    if (!serviceDate || !serviceTime) {
-      return json({ error: 'Service date and time are required' }, { status: 400 });
+    if (!formData || !formData.mainService) {
+      return json({ error: 'Invalid form data provided' }, { status: 400 });
+    }
+
+    const { mainService } = formData;
+    const { date, time, isUnknown } = mainService.time;
+
+    if (!isUnknown && (!date || !time)) {
+      return json({ error: 'Service date and time are required unless marked as unknown' }, { status: 400 });
     }
 
     // Get memorial to verify ownership
@@ -31,29 +38,23 @@ export const PATCH: RequestHandler = async ({ request, locals, params }) => {
     }
 
     // Check if user has permission to edit this memorial
-    const canEdit = memorial.ownerId === locals.user.uid || 
-                   memorial.createdBy === locals.user.uid || 
+    const canEdit = memorial.ownerUid === locals.user.uid || 
+                   memorial.createdByUserId === locals.user.uid || 
                    memorial.funeralDirectorId === locals.user.uid;
 
     if (!canEdit) {
       return json({ error: 'Permission denied' }, { status: 403 });
     }
 
-    // Combine date and time into a timestamp
-    const serviceDateTime = new Date(`${serviceDate}T${serviceTime}`);
-    
-    // Update memorial with new schedule
     const updateData: any = {
-      serviceDate: Timestamp.fromDate(serviceDateTime),
-      serviceTime: serviceTime,
-      duration: duration || 2,
-      timeIsUnknown: timeIsUnknown || false,
+      'schedule.mainService': mainService,
+      'schedule.timeIsUnknown': isUnknown,
       updatedAt: Timestamp.now()
     };
 
-    // Add location data if provided
-    if (location) {
-      updateData.location = location;
+    if (!isUnknown) {
+      const serviceDateTime = new Date(`${date}T${time}`);
+      updateData['schedule.serviceDate'] = Timestamp.fromDate(serviceDateTime);
     }
 
     await adminDb.collection('memorials').doc(memorialId).update(updateData);
@@ -62,9 +63,7 @@ export const PATCH: RequestHandler = async ({ request, locals, params }) => {
       success: true,
       message: 'Schedule updated successfully',
       schedule: {
-        serviceDate: serviceDateTime.toISOString(),
-        serviceTime: serviceTime,
-        duration: duration || 2
+        ...mainService
       }
     });
 

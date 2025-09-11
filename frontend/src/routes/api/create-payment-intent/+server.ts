@@ -18,7 +18,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     }
 
     const { memorialId, customerInfo, bookingData } = await request.json();
-    const { bookingItems, total: amount } = bookingData;
+    const { items: bookingItems, total: amount } = bookingData;
 
     if (!amount || !memorialId) {
       return json({ error: 'Missing required data' }, { status: 400 });
@@ -40,7 +40,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     
     const hasPermission = 
       userRole === 'admin' ||
-      memorial?.ownerUid === userId ||
       memorial?.createdByUserId === userId ||
       memorial?.funeralDirectorUid === userId ||
       (userRole === 'family_member' && memorial?.familyMemberUids?.includes(userId));
@@ -58,7 +57,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
           product_data: {
             name: item.name,
           },
-          unit_amount: Math.round(item.price * 100),
+          unit_amount: Math.round((item.total / item.quantity) * 100),
         },
         quantity: item.quantity,
       })),

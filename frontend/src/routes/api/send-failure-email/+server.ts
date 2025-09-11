@@ -1,9 +1,13 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { Resend } from 'resend';
+import sgMail from '@sendgrid/mail';
+import { SENDGRID_API_KEY, FROM_EMAIL } from '$env/static/private';
+import { PUBLIC_BASE_URL } from '$env/static/public';
 
-// Initialize Resend
-const resend = new Resend(process.env.RESEND_API_KEY || 'mock_key');
+// Initialize SendGrid
+if (SENDGRID_API_KEY && SENDGRID_API_KEY !== 'mock_key') {
+  sgMail.setApiKey(SENDGRID_API_KEY);
+}
 
 export const POST: RequestHandler = async ({ request }) => {
   try {
@@ -25,19 +29,19 @@ export const POST: RequestHandler = async ({ request }) => {
       failureDate: new Date()
     });
 
-    // Send email with Resend
-    if (process.env.RESEND_API_KEY && process.env.RESEND_API_KEY !== 'mock_key') {
-      await resend.emails.send({
-        from: process.env.FROM_EMAIL || 'TributeStream <noreply@tributestream.com>',
+    // Send email with SendGrid
+    if (SENDGRID_API_KEY && SENDGRID_API_KEY !== 'mock_key') {
+      await sgMail.send({
+        from: FROM_EMAIL || 'TributeStream <noreply@tributestream.com>',
         to: customerEmail,
         subject: `TributeStream Payment Issue - ${lovedOneName}`,
         html: emailHtml,
       });
 
-      console.log('✅ Payment failure email sent successfully via Resend');
+      console.log('✅ Payment failure email sent successfully via SendGrid');
     } else {
       // Mock for development
-      console.log('✅ Payment failure email sent successfully (mock - configure RESEND_API_KEY for production)');
+      console.log('✅ Payment failure email sent successfully (mock - configure SENDGRID_API_KEY for production)');
     }
 
     return json({ 
@@ -114,7 +118,7 @@ function generateFailureEmailHTML(data: FailureEmailData): string {
         </ul>
         
         <p>You can retry your payment by returning to your booking:</p>
-        <a href="${process.env.PUBLIC_BASE_URL || 'https://tributestream.com'}/schedule/${memorialId}" class="retry-button">
+        <a href="${PUBLIC_BASE_URL || 'https://tributestream.com'}/schedule/${memorialId}" class="retry-button">
           Retry Payment
         </a>
       </div>

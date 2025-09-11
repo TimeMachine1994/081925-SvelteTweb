@@ -43,13 +43,13 @@
 		additionalLocation: {
 			enabled: false,
 			location: { name: '', address: '', isUnknown: false },
-			startTime: null,
+			time: { date: null, time: null, isUnknown: false },
 			hours: 2
 		},
 		additionalDay: {
 			enabled: false,
 			location: { name: '', address: '', isUnknown: false },
-			startTime: null,
+			time: { date: null, time: null, isUnknown: false },
 			hours: 2
 		},
 		funeralDirectorName: '',

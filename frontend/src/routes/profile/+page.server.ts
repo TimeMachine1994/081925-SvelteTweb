@@ -36,10 +36,22 @@ export const load: PageServerLoad = async ({ locals }) => {
         let memorials: Memorial[] = [];
         if (role === 'funeral_director') {
             const memorialsSnap = await adminDb.collection('memorials').where('funeralDirectorUid', '==', uid).get();
-            memorials = memorialsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Memorial));
+            memorials = memorialsSnap.docs.map(doc => {
+                const data = doc.data();
+                if (!data.fullSlug && data.slug) {
+                    data.fullSlug = data.slug;
+                }
+                return { id: doc.id, ...data } as Memorial;
+            });
         } else if (role === 'owner') {
-            const memorialsSnap = await adminDb.collection('memorials').where('ownerUid', '==', uid).get();
-            memorials = memorialsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Memorial));
+            const memorialsSnap = await adminDb.collection('memorials').where('createdByUserId', '==', uid).get();
+            memorials = memorialsSnap.docs.map(doc => {
+                const data = doc.data();
+                if (!data.fullSlug && data.slug) {
+                    data.fullSlug = data.slug;
+                }
+                return { id: doc.id, ...data } as Memorial;
+            });
         }
         // Add other roles as needed
 

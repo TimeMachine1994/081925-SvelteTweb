@@ -274,8 +274,8 @@
 					</div>
 
 					<div class="md:col-span-1">
-						<label class="block text-sm font-medium mb-1">Contact Preference</label>
-						<div class="flex items-center gap-6 h-[42px]">
+						<p id="contact-preference-label" class="block text-sm font-medium mb-1">Contact Preference</p>
+						<div role="group" aria-labelledby="contact-preference-label" class="flex items-center gap-6 h-[42px]">
 							<label class="flex items-center gap-2 cursor-pointer">
 								<input type="radio" name="contactPreference" value="email" bind:group={contactPreference} class="accent-[#D5BA7F]" />
 								<span>Email</span>

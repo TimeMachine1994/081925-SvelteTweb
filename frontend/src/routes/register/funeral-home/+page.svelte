@@ -94,9 +94,9 @@
 						throw new Error('Session creation failed.');
 					}
 
-					console.log('Auto-login successful, redirecting to portal...');
+					console.log('Auto-login successful, redirecting to profile...');
 					autoSave.clearStorage(); // Clear data before navigating
-					window.location.href = '/my-portal'; // Use full page reload
+					window.location.href = '/profile'; // Use full page reload
 				} catch (error) {
 					console.error('Auto-login process failed:', error);
 					// If auto-login fails, send user to the manual login page as a fallback

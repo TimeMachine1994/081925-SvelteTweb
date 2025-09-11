@@ -1,7 +1,8 @@
 import { adminDb } from '$lib/server/firebase';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { sendReceiptEmail } from '$lib/server/email';
+import { sendEnhancedRegistrationEmail } from '$lib/server/email';
+import { PUBLIC_BASE_URL } from '$env/static/public';
 import type { LivestreamConfig } from '$lib/types/livestream';
 
 export const load: PageServerLoad = async ({ url, locals }) => {
@@ -32,10 +33,13 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 		createdAt: configData?.createdAt?.toDate ? configData.createdAt.toDate().toISOString() : null
 	};
 
-	if (locals.user.email) {
-		// We can send the raw configData to the email function if needed,
-		// but the page needs the serialized version.
-		await sendReceiptEmail(locals.user.email, { id: configDoc.id, ...configData });
+	if (locals.user.email && configData) {
+		await sendEnhancedRegistrationEmail({
+			email: locals.user.email,
+			ownerName: locals.user.name || 'TributeStream User',
+			lovedOneName: configData.formData.lovedOneName,
+			memorialUrl: `${PUBLIC_BASE_URL}/memorials/${configData.memorialId}`
+		});
 	}
 
 	return {

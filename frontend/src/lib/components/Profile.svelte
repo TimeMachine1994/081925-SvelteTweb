@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { enhance } from '$app/forms';
-	import { User, Mail, Edit3, LogOut, Heart, Calendar, Users, Crown, Building2, Video, Settings, Sparkles, Clock } from 'lucide-svelte';
+	import { User, Mail, Edit3, LogOut, Heart, Calendar, Users, Crown, Building2, Video, Settings, Sparkles, Clock, Eye } from 'lucide-svelte';
 	import { onMount } from 'svelte';
 
 	let { data, form } = $props();
@@ -101,6 +101,30 @@
 			}
 		} catch (err) {
 			alert('Network error occurred');
+		}
+	}
+
+	async function startStream(memorialId: string) {
+		try {
+			const response = await fetch(`/api/memorials/${memorialId}/livestream`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ streamTitle: 'Memorial Livestream' }), // Default title
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to start livestream session.');
+			}
+
+			// On success, navigate to the livestream control page
+			await goto(`/livestream/${memorialId}`);
+
+		} catch (err) {
+			console.error('Error starting stream:', err);
+			// TODO: Show a user-friendly error message
+			alert('Could not start the stream. Please try again.');
 		}
 	}
 </script>
@@ -261,15 +285,19 @@
 												</div>
 											</div>
 											<div class="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+												<a href={`/${memorial.fullSlug}`} target="_blank" class="px-4 py-2 rounded-xl bg-green-600 text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center">
+													<Eye class="w-3 h-3 mr-1" />
+													View
+												</a>
 												<a href={`/schedule/${memorial.id}`} class="px-4 py-2 rounded-xl bg-blue-600 text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center">
 													<Clock class="w-3 h-3 mr-1" />
 													Schedule
 												</a>
 												{#if userRole === 'funeral_director'}
-													<a href={`/livestream/${memorial.id}`} class="px-4 py-2 rounded-xl bg-red-600 text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center">
+													<button onclick={() => startStream(memorial.id)} class="px-4 py-2 rounded-xl bg-red-600 text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center">
 														<Video class="w-3 h-3 mr-1" />
 														Start Stream
-													</a>
+													</button>
 												{/if}
 											</div>
 										</div>

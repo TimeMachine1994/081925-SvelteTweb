@@ -34,10 +34,10 @@
 			<li>
 				{#if $user}
 					<a
-						href={$user.role === 'admin' ? '/admin' : $user.role === 'funeral_director' ? '/profile' : '/my-portal'}
+						href={$user.role === 'admin' ? '/admin' : ($user.role === 'funeral_director' || $user.role === 'owner') ? '/profile' : '/my-portal'}
 						class="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black px-6 py-2 rounded-full font-semibold hover:from-yellow-500 hover:to-yellow-700 transition-all duration-200 shadow-lg"
 					>
-						{#if $user.role === 'funeral_director'}
+						{#if $user.role === 'funeral_director' || $user.role === 'owner'}
 							My Profile
 						{:else}
 							My Portal

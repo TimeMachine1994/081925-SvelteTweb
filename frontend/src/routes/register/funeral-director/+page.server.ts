@@ -187,7 +187,8 @@ export const actions: Actions = {
 				email: familyContactEmail,
 				lovedOneName,
 				memorialUrl: `https://yoursite.com/tributes/${slug}`,
-				ownerName: familyContactName
+				ownerName: familyContactName,
+				password // Pass the generated password
 			});
 
 			// 7. Return success with the shareable link

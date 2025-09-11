@@ -445,15 +445,6 @@
 		align-items: center;
 	}
 
-	.input-icon {
-		position: absolute;
-		left: 16px;
-		width: 20px;
-		height: 20px;
-		color: #9CA3AF;
-		z-index: 1;
-	}
-
 	.form-input {
 		width: 100%;
 		padding: 16px 16px 16px 48px;
