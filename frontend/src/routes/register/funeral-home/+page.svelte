@@ -116,12 +116,12 @@
 	<meta name="description" content="Join TributeStream's network of professional funeral directors and provide families with beautiful memorial experiences." />
 </svelte:head>
 
-<div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+<div class="min-h-screen bg-gradient-to-br from-yellow-50 to-white">
 	<div class="container mx-auto px-4 py-12">
 		
 		<!-- Header -->
 		<div class="text-center mb-12">
-			<div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full mb-6">
+			<div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-yellow-600 to-amber-600 rounded-full mb-6">
 				<Building2 class="w-8 h-8 text-white" />
 			</div>
 			<h1 class="text-4xl font-bold text-gray-900 mb-4">Register Your Funeral Home</h1>
@@ -179,7 +179,7 @@
 									bind:value={companyName}
 									onchange={(e) => companyName = e.currentTarget.value}
 									required
-									class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+									class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
 									placeholder="Smith & Sons Funeral Home"
 								/>
 							</div>
@@ -197,7 +197,7 @@
 									onchange={(e) => password = e.currentTarget.value}
 									required
 									minlength="6"
-									class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+									class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
 									placeholder="Choose a secure password"
 								/>
 							</div>
@@ -214,7 +214,7 @@
 									bind:value={contactPerson}
 									onchange={(e) => contactPerson = e.currentTarget.value}
 									required
-									class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+									class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
 									placeholder="John Smith"
 								/>
 							</div>
@@ -232,7 +232,7 @@
 									bind:value={email}
 									onchange={(e) => email = e.currentTarget.value}
 									required
-									class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+									class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
 									placeholder="john@smithfuneralhome.com"
 								/>
 							</div>
@@ -249,7 +249,7 @@
 									bind:value={phone}
 									onchange={(e) => phone = e.currentTarget.value}
 									required
-									class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+									class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
 									placeholder="(555) 123-4567"
 								/>
 							</div>
@@ -269,7 +269,7 @@
 										bind:value={address.street}
 										onchange={(e) => address.street = e.currentTarget.value}
 										required
-										class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+										class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
 										placeholder="Street Address"
 									/>
 								</div>
@@ -280,7 +280,7 @@
 										bind:value={address.city}
 										onchange={(e) => address.city = e.currentTarget.value}
 										required
-										class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+										class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
 										placeholder="City"
 									/>
 								</div>
@@ -291,7 +291,7 @@
 										bind:value={address.state}
 										onchange={(e) => address.state = e.currentTarget.value}
 										required
-										class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+										class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
 										placeholder="State"
 									/>
 								</div>
@@ -302,7 +302,7 @@
 										bind:value={address.zipCode}
 										onchange={(e) => address.zipCode = e.currentTarget.value}
 										required
-										class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+										class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
 										placeholder="ZIP Code"
 									/>
 								</div>
@@ -312,7 +312,7 @@
 										name="address.country"
 										bind:value={address.country}
 										onchange={(e) => address.country = e.currentTarget.value}
-										class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+										class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
 										placeholder="Country"
 									/>
 								</div>
@@ -331,7 +331,7 @@
 						<button
 							type="submit"
 							disabled={isSubmitting}
-							class="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+							class="px-8 py-3 bg-gradient-to-r from-yellow-600 to-amber-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{isSubmitting ? 'Creating Account...' : 'Create Account & Get Started'}
 						</button>

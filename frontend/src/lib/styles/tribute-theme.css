@@ -3,26 +3,26 @@
 :root {
   /* Base Colors */
   --fa-gold: #D5BA7F;
-  --fa-indigo: #2a3b8e;
+  --fa-dark-gold: #8B7A4F;
   --fa-black: #1a1a1a;
   --fa-white: #ffffff;
   
-  /* Role-Specific Colors */
+  /* Role-Specific Colors - Unified Gold Theme */
   --owner-primary: #f59e0b;
   --owner-secondary: #d97706;
   --owner-accent: #fbbf24;
   
-  --funeral-director-primary: #8b5cf6;
-  --funeral-director-secondary: #7c3aed;
-  --funeral-director-accent: #a78bfa;
+  --funeral-director-primary: #D5BA7F;
+  --funeral-director-secondary: #C5AA6F;
+  --funeral-director-accent: #E5CA8F;
   
-  --family-member-primary: #10b981;
-  --family-member-secondary: #059669;
-  --family-member-accent: #34d399;
+  --family-member-primary: #B8A06B;
+  --family-member-secondary: #A8905B;
+  --family-member-accent: #C8B07B;
   
-  --viewer-primary: #3b82f6;
-  --viewer-secondary: #2563eb;
-  --viewer-accent: #60a5fa;
+  --viewer-primary: #E6D199;
+  --viewer-secondary: #D6C189;
+  --viewer-accent: #F6E1A9;
   
   /* Neutral Colors */
   --gray-50: #f9fafb;

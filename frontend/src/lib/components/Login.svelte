@@ -308,7 +308,7 @@
 		align-items: center;
 		justify-content: center;
 		position: relative;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
 		padding: 20px;
 		overflow: hidden;
 	}
@@ -326,7 +326,7 @@
 	.floating-shape {
 		position: absolute;
 		border-radius: 50%;
-		background: rgba(255, 255, 255, 0.1);
+		background: rgba(213, 186, 127, 0.2);
 		backdrop-filter: blur(10px);
 		animation: float 6s ease-in-out infinite;
 	}
@@ -400,12 +400,12 @@
 	.logo-icon {
 		width: 64px;
 		height: 64px;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		background: linear-gradient(135deg, #D5BA7F 0%, #B8A06B 100%);
 		border-radius: 16px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+		box-shadow: 0 8px 16px rgba(213, 186, 127, 0.3);
 	}
 
 	.card-title {
@@ -457,9 +457,9 @@
 
 	.form-input:focus {
 		outline: none;
-		border-color: #667eea;
+		border-color: #D5BA7F;
 		background: white;
-		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+		box-shadow: 0 0 0 3px rgba(213, 186, 127, 0.1);
 	}
 
 	.password-toggle {
@@ -475,7 +475,7 @@
 	}
 
 	.password-toggle:hover {
-		color: #667eea;
+		color: #D5BA7F;
 	}
 
 	.forgot-password {
@@ -486,7 +486,7 @@
 	.forgot-password-btn {
 		background: none;
 		border: none;
-		color: #667eea;
+		color: #D5BA7F;
 		font-size: 14px;
 		cursor: pointer;
 		text-decoration: underline;
@@ -495,7 +495,7 @@
 	}
 
 	.forgot-password-btn:hover {
-		color: #764ba2;
+		color: #B8A06B;
 	}
 
 	.error-message {
@@ -546,16 +546,16 @@
 	}
 
 	.back-btn:hover {
-		border-color: #667eea;
-		color: #667eea;
-		background: rgba(102, 126, 234, 0.05);
+		border-color: #D5BA7F;
+		color: #D5BA7F;
+		background: rgba(213, 186, 127, 0.05);
 	}
 
 	.login-btn {
 		width: 100%;
 		padding: 16px;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		color: white;
+		background: linear-gradient(135deg, #D5BA7F 0%, #B8A06B 100%);
+		color: #1a1a1a;
 		border: none;
 		border-radius: 12px;
 		font-size: 16px;
@@ -570,7 +570,7 @@
 
 	.login-btn:hover:not(:disabled) {
 		transform: translateY(-2px);
-		box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+		box-shadow: 0 8px 16px rgba(213, 186, 127, 0.3);
 	}
 
 	.login-btn:disabled {
@@ -581,8 +581,8 @@
 	.loading-spinner {
 		width: 20px;
 		height: 20px;
-		border: 2px solid rgba(255, 255, 255, 0.3);
-		border-top: 2px solid white;
+		border: 2px solid rgba(26, 26, 26, 0.3);
+		border-top: 2px solid #1a1a1a;
 		border-radius: 50%;
 		animation: spin 1s linear infinite;
 	}
@@ -663,9 +663,9 @@
 		justify-content: center;
 		padding: 12px 24px;
 		background: transparent;
-		border: 2px solid #667eea;
+		border: 2px solid #D5BA7F;
 		border-radius: 12px;
-		color: #667eea;
+		color: #D5BA7F;
 		text-decoration: none;
 		font-weight: 600;
 		font-size: 16px;
@@ -673,10 +673,10 @@
 	}
 
 	.register-btn:hover {
-		background: #667eea;
-		color: white;
+		background: #D5BA7F;
+		color: #1a1a1a;
 		transform: translateY(-2px);
-		box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+		box-shadow: 0 8px 16px rgba(213, 186, 127, 0.3);
 	}
 
 	@media (max-width: 480px) {

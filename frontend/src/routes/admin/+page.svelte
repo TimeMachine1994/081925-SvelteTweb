@@ -122,7 +122,7 @@
 		<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
 			<div class="bg-white p-6 rounded-lg shadow-sm border">
 				<h3 class="text-sm font-medium text-gray-500 mb-2">Total Memorials</h3>
-				<p class="text-2xl font-bold text-blue-600">{data.stats.totalMemorials}</p>
+				<p class="text-2xl font-bold text-yellow-600">{data.stats.totalMemorials}</p>
 			</div>
 			<div class="bg-white p-6 rounded-lg shadow-sm border">
 				<h3 class="text-sm font-medium text-gray-500 mb-2">Funeral Directors</h3>
@@ -130,7 +130,7 @@
 			</div>
 			<div class="bg-white p-6 rounded-lg shadow-sm border">
 				<h3 class="text-sm font-medium text-gray-500 mb-2">Recent Memorials</h3>
-				<p class="text-2xl font-bold text-purple-600">{data.stats.recentMemorials}</p>
+				<p class="text-2xl font-bold text-amber-600">{data.stats.recentMemorials}</p>
 			</div>
 		</div>
 
@@ -139,13 +139,13 @@
 			<nav class="flex space-x-8">
 				<button 
 					onclick={() => activeTab = 'recent-memorials'}
-					class="py-2 px-1 border-b-2 font-medium text-sm {activeTab === 'recent-memorials' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}"
+					class="py-2 px-1 border-b-2 font-medium text-sm {activeTab === 'recent-memorials' ? 'border-yellow-500 text-yellow-600' : 'border-transparent text-gray-500 hover:text-gray-700'}"
 				>
 					Recent Memorials ({data.recentMemorials.length})
 				</button>
 				<button 
 					onclick={() => activeTab = 'create-memorial'}
-					class="py-2 px-1 border-b-2 font-medium text-sm {activeTab === 'create-memorial' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}"
+					class="py-2 px-1 border-b-2 font-medium text-sm {activeTab === 'create-memorial' ? 'border-yellow-500 text-yellow-600' : 'border-transparent text-gray-500 hover:text-gray-700'}"
 				>
 					Create Memorial
 				</button>
@@ -188,7 +188,7 @@
 											<a 
 												href="/tributes/{memorial.fullSlug}" 
 												target="_blank"
-												class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+												class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
 											>
 												View Memorial
 											</a>
@@ -211,14 +211,14 @@
 						<button 
 							onclick={createMemorial}
 							disabled={!!processingId}
-							class="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+							class="w-full px-6 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
 						>
 							{processingId ? 'Processing...' : 'Create New Memorial'}
 						</button>
 						
-						<div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-							<h4 class="font-medium text-blue-900 mb-2">What happens when you create a memorial:</h4>
-							<ul class="text-sm text-blue-800 space-y-1">
+						<div class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+							<h4 class="font-medium text-yellow-900 mb-2">What happens when you create a memorial:</h4>
+							<ul class="text-sm text-yellow-800 space-y-1">
 								<li>• Creates Firebase Auth user account</li>
 								<li>• Generates memorial with unique slug</li>
 								<li>• Sends login credentials via email</li>

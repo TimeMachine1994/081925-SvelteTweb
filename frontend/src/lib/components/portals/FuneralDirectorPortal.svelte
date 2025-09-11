@@ -12,7 +12,7 @@
 	<!-- Header Section -->
 	<div class="mb-8">
 		<div class="flex items-center space-x-4 mb-6">
-			<div class="w-16 h-16 rounded-full bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 flex items-center justify-center shadow-lg">
+			<div class="w-16 h-16 rounded-full bg-gradient-to-r from-yellow-600 via-amber-600 to-orange-600 flex items-center justify-center shadow-lg">
 				<Building2 class="w-8 h-8 text-white" />
 			</div>
 			<div>
@@ -25,12 +25,24 @@
 		<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
 			<div class="bg-white rounded-xl shadow-lg border border-gray-200 p-4">
 				<div class="flex items-center space-x-3">
-					<div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-						<Building2 class="w-5 h-5 text-purple-600" />
+					<div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
+						<Building2 class="w-5 h-5 text-yellow-600" />
 					</div>
 					<div>
 						<p class="text-2xl font-bold text-gray-900">{memorials.length}</p>
 						<p class="text-sm text-gray-600">Active Memorials</p>
+					</div>
+				</div>
+			</div>
+			
+			<div class="bg-white rounded-xl shadow-lg border border-gray-200 p-4">
+				<div class="flex items-center space-x-3">
+					<div class="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+						<Users class="w-5 h-5 text-amber-600" />
+					</div>
+					<div>
+						<p class="text-2xl font-bold text-gray-900">{memorials.reduce((sum, m) => sum + (m.familyMemberCount || 0), 0)}</p>
+						<p class="text-sm text-gray-600">Family Members</p>
 					</div>
 				</div>
 			</div>
@@ -58,18 +70,6 @@
 					</div>
 				</div>
 			</div>
-			
-			<div class="bg-white rounded-xl shadow-lg border border-gray-200 p-4">
-				<div class="flex items-center space-x-3">
-					<div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-						<Users class="w-5 h-5 text-blue-600" />
-					</div>
-					<div>
-						<p class="text-2xl font-bold text-gray-900">{memorials.reduce((sum, m) => sum + (m.familyMemberCount || 0), 0)}</p>
-						<p class="text-sm text-gray-600">Family Members</p>
-					</div>
-				</div>
-			</div>
 		</div>
 	</div>
 
@@ -90,13 +90,13 @@
 			
 			<a 
 				href="/app/calculator"
-				class="bg-gradient-to-r from-purple-500 to-indigo-600 text-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+				class="bg-gradient-to-r from-yellow-500 to-amber-600 text-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
 			>
 				<div class="flex items-center space-x-3 mb-3">
 					<Calendar class="w-6 h-6" />
 					<h3 class="text-lg font-semibold">Manage Schedule</h3>
 				</div>
-				<p class="text-purple-100">Update service times and livestream schedule</p>
+				<p class="text-yellow-100">Update service times and livestream schedule</p>
 			</a>
 			
 			<a 
@@ -126,7 +126,7 @@
 					<div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300">
 						<div class="flex items-center justify-between">
 							<div class="flex items-center space-x-4">
-								<div class="w-12 h-12 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 flex items-center justify-center shadow-lg">
+								<div class="w-12 h-12 rounded-full bg-gradient-to-r from-yellow-600 to-amber-600 flex items-center justify-center shadow-lg">
 									<span class="text-white font-bold text-lg">
 										{memorial.lovedOneName?.charAt(0) || 'M'}
 									</span>
@@ -151,7 +151,7 @@
 							<div class="flex space-x-2">
 								<a 
 									href="/my-portal/tributes/{memorial.id}/edit"
-									class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-1"
+									class="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center space-x-1"
 								>
 									<Camera class="w-4 h-4" />
 									<span>Manage</span>
@@ -177,7 +177,7 @@
 								
 								<a 
 									href="/tributes/{memorial.slug}"
-									class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+									class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
 								>
 									View
 								</a>
@@ -218,7 +218,7 @@
 				<p class="text-gray-600 mb-6">You don't have any memorials assigned to you yet. Create a new memorial to get started.</p>
 				<a 
 					href="/register/funeral-director"
-					class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-105"
+					class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-yellow-600 to-amber-600 text-white rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-105"
 				>
 					<Plus class="w-5 h-5 mr-2" />
 					Create First Memorial
@@ -228,9 +228,9 @@
 	</div>
 
 	<!-- Support Section -->
-	<div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl border border-purple-100 p-6">
+	<div class="bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl border border-yellow-100 p-6">
 		<div class="flex items-center space-x-3 mb-4">
-			<Phone class="w-6 h-6 text-purple-600" />
+			<Phone class="w-6 h-6 text-yellow-600" />
 			<h3 class="text-lg font-semibold text-gray-900">Need Support?</h3>
 		</div>
 		<p class="text-gray-600 mb-4">
@@ -239,13 +239,13 @@
 		<div class="flex space-x-4">
 			<a 
 				href="tel:+1-800-TRIBUTE"
-				class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+				class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
 			>
 				Call Support
 			</a>
 			<a 
 				href="/funeral-director/help"
-				class="px-4 py-2 bg-white text-purple-600 border border-purple-200 rounded-lg hover:bg-purple-50 transition-colors"
+				class="px-4 py-2 bg-white text-yellow-600 border border-yellow-200 rounded-lg hover:bg-yellow-50 transition-colors"
 			>
 				Help Center
 			</a>
@@ -274,7 +274,7 @@
 								<div class="flex items-center space-x-2">
 									<a 
 										href="/my-portal/tributes/{memorial.id}/edit"
-										class="text-blue-600 hover:text-blue-700 text-sm font-medium"
+										class="text-amber-600 hover:text-amber-700 text-sm font-medium"
 									>
 										Manage
 									</a>

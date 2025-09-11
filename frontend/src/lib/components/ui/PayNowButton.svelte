@@ -15,8 +15,8 @@
 	}
 
 	const baseClasses = "inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors";
-	const primaryClasses = "bg-purple-600 hover:bg-purple-700 text-white";
-	const secondaryClasses = "bg-purple-100 hover:bg-purple-200 text-purple-800 border border-purple-300";
+	const primaryClasses = "bg-yellow-600 hover:bg-yellow-700 text-white";
+	const secondaryClasses = "bg-yellow-100 hover:bg-yellow-200 text-yellow-800 border border-yellow-300";
 </script>
 
 <button 

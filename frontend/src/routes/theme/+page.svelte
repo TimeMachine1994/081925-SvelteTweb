@@ -177,7 +177,7 @@
         <div>
           <h3 class="text-xl font-semibold mb-4">Alerts</h3>
           <div class="space-y-4">
-            <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4" role="alert">
+            <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4" role="alert">
               <p class="font-bold">Informational</p>
               <p>This is an informational alert.</p>
             </div>

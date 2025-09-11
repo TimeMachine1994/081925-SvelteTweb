@@ -1,3 +1,18 @@
+<script lang="ts">
+	import { user } from '$lib/auth';
+	import { goto } from '$app/navigation';
+	
+	function handleFuneralDirectorClick() {
+		if ($user) {
+			// User is logged in, go to funeral director registration
+			goto('/register/funeral-director');
+		} else {
+			// User not logged in, go to funeral home registration
+			goto('/register/funeral-home');
+		}
+	}
+</script>
+
 <footer class="footer">
 	<div class="footer-container">
 		<div class="footer-section">
@@ -7,7 +22,7 @@
 				families and friends to a celebration of life.
 			</p>
 			<p>We don't make videos, we make documentaries.</p>
-			<a href="/funeral-director-form" class="footer-link">Funeral Director Form</a>
+			<button onclick={handleFuneralDirectorClick} class="footer-link funeral-director-btn">Funeral Director Form</button>
 		</div>
 		<div class="footer-section">
 			<h3 class="footer-heading">COVERAGE LOCATIONS</h3>
@@ -74,6 +89,15 @@
 
 	.footer-link:hover {
 		text-decoration: underline;
+	}
+
+	.funeral-director-btn {
+		background: none;
+		border: none;
+		padding: 0;
+		font: inherit;
+		cursor: pointer;
+		text-align: left;
 	}
 
 	.review-btn {

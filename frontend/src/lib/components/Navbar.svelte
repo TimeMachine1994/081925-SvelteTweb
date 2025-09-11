@@ -12,7 +12,7 @@
 		<!-- Navigation Menu -->
 		<ul class="flex items-center space-x-8 text-white">
 			<li>
-				<a href="/create-memorial" class="hover:text-gray-300 transition-colors font-medium">
+				<a href="/register/loved-one" class="hover:text-gray-300 transition-colors font-medium">
 					Create Memorial
 				</a>
 			</li>

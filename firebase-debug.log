@@ -1270,3 +1270,109 @@ INFO: Detected HTTP/2 connection.
 [debug] [2025-09-11T13:26:16.329Z] Sep 11, 2025 9:26:16 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
 INFO: Detected HTTP/2 connection.
  {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 11, 2025 9:26:16 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
+[debug] [2025-09-11T13:58:21.108Z] ----------------------------------------------------------------------
+[debug] [2025-09-11T13:58:21.114Z] Command:       /home/austin/.nvm/versions/node/v24.4.1/bin/node /home/austin/.nvm/versions/node/v24.4.1/bin/firebase emulators:start
+[debug] [2025-09-11T13:58:21.114Z] CLI Version:   14.13.0
+[debug] [2025-09-11T13:58:21.114Z] Platform:      linux
+[debug] [2025-09-11T13:58:21.114Z] Node Version:  v24.4.1
+[debug] [2025-09-11T13:58:21.115Z] Time:          Thu Sep 11 2025 09:58:21 GMT-0400 (Eastern Daylight Time)
+[debug] [2025-09-11T13:58:21.115Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-09-11T13:58:21.116Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2025-09-11T13:58:21.315Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-09-11T13:58:21.315Z] > authorizing via signed-in user (austinbryanfilm@gmail.com)
+[debug] [2025-09-11T13:58:21.405Z] openjdk version "21.0.8" 2025-07-15
+OpenJDK Runtime Environment (build 21.0.8+9-Ubuntu-0ubuntu124.04.1)
+
+[debug] [2025-09-11T13:58:21.406Z] OpenJDK 64-Bit Server VM (build 21.0.8+9-Ubuntu-0ubuntu124.04.1, mixed mode, sharing)
+
+[debug] [2025-09-11T13:58:21.414Z] Parsed Java major version: 21
+[info] i  emulators: Starting emulators: auth, firestore, hosting, storage {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth, firestore, hosting, storage"}}
+[debug] [2025-09-11T13:58:21.417Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"firestore":[{"address":"127.0.0.1","family":"IPv4","port":8080}],"firestore.websocket":[{"address":"127.0.0.1","family":"IPv4","port":9150}],"hosting":[{"address":"127.0.0.1","family":"IPv4","port":5000}],"storage":[{"address":"127.0.0.1","family":"IPv4","port":9199}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[debug] [2025-09-11T13:58:21.421Z] [hub] writing locator at /tmp/hub-fir-tweb.json
+[debug] [2025-09-11T13:58:21.430Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2025-09-11T13:58:21.430Z] Ignoring unsupported arg: single_project_mode_error {"metadata":{"emulator":{"name":"firestore"},"message":"Ignoring unsupported arg: single_project_mode_error"}}
+[debug] [2025-09-11T13:58:21.431Z] Starting Firestore Emulator with command {"binary":"java","args":["-Djava.net.preferIPv4Stack=true","-Dgoogle.cloud_firestore.debug_log_level=FINE","-Duser.language=en","-jar","/home/austin/.cache/firebase/emulators/cloud-firestore-emulator-v1.19.8.jar","--host","127.0.0.1","--port",8080,"--websocket_port",9150,"--project_id","fir-tweb","--rules","/home/austin/081925-SvelteTweb/firestore.rules","--single_project_mode",true],"optionalArgs":["port","webchannel_port","host","rules","websocket_port","functions_emulator","seed_from_export","project_id","single_project_mode"],"joinArgs":false,"shell":false,"port":8080} {"metadata":{"emulator":{"name":"firestore"},"message":"Starting Firestore Emulator with command {\"binary\":\"java\",\"args\":[\"-Djava.net.preferIPv4Stack=true\",\"-Dgoogle.cloud_firestore.debug_log_level=FINE\",\"-Duser.language=en\",\"-jar\",\"/home/austin/.cache/firebase/emulators/cloud-firestore-emulator-v1.19.8.jar\",\"--host\",\"127.0.0.1\",\"--port\",8080,\"--websocket_port\",9150,\"--project_id\",\"fir-tweb\",\"--rules\",\"/home/austin/081925-SvelteTweb/firestore.rules\",\"--single_project_mode\",true],\"optionalArgs\":[\"port\",\"webchannel_port\",\"host\",\"rules\",\"websocket_port\",\"functions_emulator\",\"seed_from_export\",\"project_id\",\"single_project_mode\"],\"joinArgs\":false,\"shell\":false,\"port\":8080}"}}
+[info] i  firestore: Firestore Emulator logging to firestore-debug.log {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator logging to \u001b[1mfirestore-debug.log\u001b[22m"}}
+[debug] [2025-09-11T13:58:21.577Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2025-09-11T13:58:21.577Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[debug] [2025-09-11T13:58:22.499Z] Sep 11, 2025 9:58:22 AM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketServer start
+INFO: Started WebSocket server on ws://127.0.0.1:9150
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 11, 2025 9:58:22 AM com.google.cloud.datastore.emulator.firestore.websocket.WebSocketServer start\nINFO: Started WebSocket server on ws://127.0.0.1:9150\n"}}
+[debug] [2025-09-11T13:58:22.521Z] API endpoint: http://127.0.0.1:8080
+ {"metadata":{"emulator":{"name":"firestore"},"message":"API endpoint: http://127.0.0.1:8080\n"}}
+[debug] [2025-09-11T13:58:22.522Z] If you are using a library that supports the FIRESTORE_EMULATOR_HOST environment variable, run:
+
+   export FIRESTORE_EMULATOR_HOST=127.0.0.1:8080
+
+If you are running a Firestore in Datastore Mode project, run:
+
+   export DATASTORE_EMULATOR_HOST=127.0.0.1:8080
+
+Note: Support for Datastore Mode is in preview. If you encounter any bugs please file at https://github.com/firebase/firebase-tools/issues.
+Dev App Server is now running.
+
+ {"metadata":{"emulator":{"name":"firestore"},"message":"If you are using a library that supports the FIRESTORE_EMULATOR_HOST environment variable, run:\n\n   export FIRESTORE_EMULATOR_HOST=127.0.0.1:8080\n\nIf you are running a Firestore in Datastore Mode project, run:\n\n   export DATASTORE_EMULATOR_HOST=127.0.0.1:8080\n\nNote: Support for Datastore Mode is in preview. If you encounter any bugs please file at https://github.com/firebase/firebase-tools/issues.\nDev App Server is now running.\n\n"}}
+[info] ✔  firestore: Firestore Emulator UI websocket is running on 9150. {"metadata":{"emulator":{"name":"firestore"},"message":"Firestore Emulator UI websocket is running on 9150."}}
+[debug] [2025-09-11T13:58:27.049Z] Ignoring unsupported arg: port {"metadata":{"emulator":{"name":"storage"},"message":"Ignoring unsupported arg: port"}}
+[warn] ⚠  Missing 'match' keyword before path in /home/austin/081925-SvelteTweb/frontend/storage.rules:12 {"metadata":{"emulator":{"name":"storage"},"message":"Missing 'match' keyword before path in /home/austin/081925-SvelteTweb/frontend/storage.rules:12"}}
+[warn] ⚠  Forward slash '/' found where identifier or binding expected in /home/austin/081925-SvelteTweb/frontend/storage.rules:12 {"metadata":{"emulator":{"name":"storage"},"message":"Forward slash '/' found where identifier or binding expected in /home/austin/081925-SvelteTweb/frontend/storage.rules:12"}}
+[warn] ⚠  mismatched input '$' expecting {'{', '/', PATH_SEGMENT} in /home/austin/081925-SvelteTweb/frontend/storage.rules:12 {"metadata":{"emulator":{"name":"storage"},"message":"mismatched input '$' expecting {'{', '/', PATH_SEGMENT} in /home/austin/081925-SvelteTweb/frontend/storage.rules:12"}}
+[warn] ⚠  Unexpected '_$' in /home/austin/081925-SvelteTweb/frontend/storage.rules:12 {"metadata":{"emulator":{"name":"storage"},"message":"Unexpected '_$' in /home/austin/081925-SvelteTweb/frontend/storage.rules:12"}}
+[warn] ⚠  Missing 'match' keyword before path in /home/austin/081925-SvelteTweb/frontend/storage.rules:13 {"metadata":{"emulator":{"name":"storage"},"message":"Missing 'match' keyword before path in /home/austin/081925-SvelteTweb/frontend/storage.rules:13"}}
+[warn] ⚠  Forward slash '/' found where identifier or binding expected in /home/austin/081925-SvelteTweb/frontend/storage.rules:13 {"metadata":{"emulator":{"name":"storage"},"message":"Forward slash '/' found where identifier or binding expected in /home/austin/081925-SvelteTweb/frontend/storage.rules:13"}}
+[warn] ⚠  mismatched input '$' expecting {'{', '/', PATH_SEGMENT} in /home/austin/081925-SvelteTweb/frontend/storage.rules:13 {"metadata":{"emulator":{"name":"storage"},"message":"mismatched input '$' expecting {'{', '/', PATH_SEGMENT} in /home/austin/081925-SvelteTweb/frontend/storage.rules:13"}}
+[warn] ⚠  Unexpected '}' in /home/austin/081925-SvelteTweb/frontend/storage.rules:24 {"metadata":{"emulator":{"name":"storage"},"message":"Unexpected '}' in /home/austin/081925-SvelteTweb/frontend/storage.rules:24"}}
+[debug] [2025-09-11T13:58:27.555Z] Temp file directory for storage emulator: /tmp/firebase/storage/blobs {"metadata":{"emulator":{"name":"storage"},"message":"Temp file directory for storage emulator: /tmp/firebase/storage/blobs"}}
+[debug] [2025-09-11T13:58:27.559Z] Checked if tokens are valid: false, expires at: 1756930567680
+[debug] [2025-09-11T13:58:27.559Z] Checked if tokens are valid: false, expires at: 1756930567680
+[debug] [2025-09-11T13:58:27.559Z] > refreshing access token with scopes: []
+[debug] [2025-09-11T13:58:27.560Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-09-11T13:58:27.560Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-09-11T13:58:27.991Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-09-11T13:58:27.992Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-09-11T13:58:28.019Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/fir-tweb/sites 
+[debug] [2025-09-11T13:58:28.961Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/fir-tweb/sites 200
+[debug] [2025-09-11T13:58:28.961Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/fir-tweb/sites {"sites":[{"name":"projects/fir-tweb/sites/fir-tweb","defaultUrl":"https://fir-tweb.web.app","appId":"1:509455146790:web:7ec99527214b05d7b9ebe7","type":"DEFAULT_SITE"}]}
+[debug] [2025-09-11T13:58:28.961Z] Checked if tokens are valid: true, expires at: 1757602706992
+[debug] [2025-09-11T13:58:28.961Z] Checked if tokens are valid: true, expires at: 1757602706992
+[debug] [2025-09-11T13:58:28.961Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/webApps/1:509455146790:web:7ec99527214b05d7b9ebe7/config [none]
+[debug] [2025-09-11T13:58:29.799Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/webApps/1:509455146790:web:7ec99527214b05d7b9ebe7/config 200
+[debug] [2025-09-11T13:58:29.800Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb/webApps/1:509455146790:web:7ec99527214b05d7b9ebe7/config {"projectId":"fir-tweb","appId":"1:509455146790:web:7ec99527214b05d7b9ebe7","storageBucket":"fir-tweb.firebasestorage.app","apiKey":"AIzaSyAXmTxzYRc-LhMEW75nZjjjQCZov1gpiw0","authDomain":"fir-tweb.firebaseapp.com","messagingSenderId":"509455146790","measurementId":"G-NLY7K5GGYQ"}
+[debug] [2025-09-11T13:58:29.818Z] Checked if tokens are valid: true, expires at: 1757602706992
+[debug] [2025-09-11T13:58:29.818Z] Checked if tokens are valid: true, expires at: 1757602706992
+[debug] [2025-09-11T13:58:29.818Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb [none]
+[debug] [2025-09-11T13:58:30.106Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb 200
+[debug] [2025-09-11T13:58:30.106Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/fir-tweb {"projectId":"fir-tweb","projectNumber":"509455146790","displayName":"firebaseTweb","name":"projects/fir-tweb","resources":{"hostingSite":"fir-tweb"},"state":"ACTIVE","etag":"1_5e1608ca-6866-46b2-9819-5e74a50ac9d9"}
+[debug] [2025-09-11T13:58:30.107Z] Specified "public" directory "frontend/build" does not exist; Deploy to Hosting site "fir-tweb" may fail or be empty.
+[info] i  hosting[fir-tweb]: Serving hosting files from: frontend/build {"metadata":{"emulator":{"name":"hosting"},"message":"Serving hosting files from: \u001b[1mfrontend/build\u001b[22m"}}
+[info] ✔  hosting[fir-tweb]: Local server: http://127.0.0.1:5000 {"metadata":{"emulator":{"name":"hosting"},"message":"Local server: \u001b[4m\u001b[1mhttp://127.0.0.1:5000\u001b[22m\u001b[24m"}}
+[debug] [2025-09-11T13:58:30.122Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: connect ECONNREFUSED 127.0.0.1:40001. If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+│ i  View Emulator UI at http://127.0.0.1:4000/               │
+└─────────────────────────────────────────────────────────────┘
+
+┌────────────────┬────────────────┬─────────────────────────────────┐
+│ Emulator       │ Host:Port      │ View in Emulator UI             │
+├────────────────┼────────────────┼─────────────────────────────────┤
+│ Authentication │ 127.0.0.1:9099 │ http://127.0.0.1:4000/auth      │
+├────────────────┼────────────────┼─────────────────────────────────┤
+│ Firestore      │ 127.0.0.1:8080 │ http://127.0.0.1:4000/firestore │
+├────────────────┼────────────────┼─────────────────────────────────┤
+│ Hosting        │ 127.0.0.1:5000 │ n/a                             │
+├────────────────┼────────────────┼─────────────────────────────────┤
+│ Storage        │ 127.0.0.1:9199 │ http://127.0.0.1:4000/storage   │
+└────────────────┴────────────────┴─────────────────────────────────┘
+  Emulator Hub host: 127.0.0.1 port: 4400
+  Other reserved ports: 4500, 9150
+
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 
+[debug] [2025-09-11T14:05:52.846Z] Sep 11, 2025 10:05:52 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 11, 2025 10:05:52 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
+[debug] [2025-09-11T15:17:27.952Z] Sep 11, 2025 11:17:27 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead
+INFO: Detected HTTP/2 connection.
+ {"metadata":{"emulator":{"name":"firestore"},"message":"Sep 11, 2025 11:17:27 AM io.gapi.emulators.netty.HttpVersionRoutingHandler channelRead\nINFO: Detected HTTP/2 connection.\n"}}
