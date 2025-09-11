@@ -17,7 +17,7 @@
 	} = $props();
 
 	// Active tab state
-	let activeTab = $state<'overview' | 'funeral-directors' | 'memorials' | 'create-memorial'>('overview');
+	let activeTab = $state<'overview' | 'funeral-directors' | 'memorials' | 'create-memorial' | 'audit-logs'>('overview');
 
 	// Memorial creation form state
 	let newMemorialForm = $state({
@@ -34,6 +34,18 @@
 	// Loading states
 	let isApproving = $state(false);
 	let isCreatingMemorial = $state(false);
+
+	// Audit logs state
+	let auditLogs = $state<any[]>([]);
+	let auditLoading = $state(false);
+	let auditFilters = $state({
+		action: '',
+		userEmail: '',
+		resourceType: '',
+		dateFrom: '',
+		dateTo: '',
+		limit: 50
+	});
 
 	/**
 	 * Approve a funeral director - updates their status and permissions
@@ -153,6 +165,78 @@
 			isCreatingMemorial = false;
 		}
 	}
+
+	/**
+	 * Load audit logs with current filters
+	 */
+	async function loadAuditLogs() {
+		console.log('🔍 [ADMIN] Loading audit logs...');
+		auditLoading = true;
+
+		try {
+			const params = new URLSearchParams();
+			if (auditFilters.action) params.set('action', auditFilters.action);
+			if (auditFilters.userEmail) params.set('userEmail', auditFilters.userEmail);
+			if (auditFilters.resourceType) params.set('resourceType', auditFilters.resourceType);
+			if (auditFilters.dateFrom) params.set('dateFrom', auditFilters.dateFrom);
+			if (auditFilters.dateTo) params.set('dateTo', auditFilters.dateTo);
+			params.set('limit', auditFilters.limit.toString());
+
+			const response = await fetch(`/api/admin/audit-logs?${params}`);
+			const result = await response.json();
+
+			if (response.ok) {
+				auditLogs = result.logs || [];
+				console.log('✅ [ADMIN] Loaded audit logs:', auditLogs.length);
+			} else {
+				console.error('❌ [ADMIN] Failed to load audit logs:', result.error);
+				alert(`Failed to load audit logs: ${result.error}`);
+			}
+		} catch (error) {
+			console.error('❌ [ADMIN] Error loading audit logs:', error);
+			alert('Network error occurred while loading audit logs');
+		} finally {
+			auditLoading = false;
+		}
+	}
+
+	/**
+	 * Format timestamp for display
+	 */
+	function formatTimestamp(timestamp: any): string {
+		if (!timestamp) return 'Unknown';
+		const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+		return date.toLocaleString();
+	}
+
+	/**
+	 * Get action emoji for display
+	 */
+	function getActionEmoji(action: string): string {
+		const emojiMap: Record<string, string> = {
+			'memorial_created': '🆕',
+			'memorial_updated': '✏️',
+			'memorial_deleted': '🗑️',
+			'memorial_viewed': '👁️',
+			'user_login': '🔐',
+			'user_logout': '🚪',
+			'user_created': '👤',
+			'role_changed': '🔄',
+			'schedule_updated': '📅',
+			'schedule_locked': '🔒',
+			'payment_completed': '💳',
+			'payment_failed': '❌',
+			'livestream_started': '📺',
+			'livestream_stopped': '⏹️',
+			'livestream_configured': '⚙️',
+			'funeral_director_approved': '✅',
+			'funeral_director_rejected': '❌',
+			'admin_memorial_created': '👑',
+			'system_config_changed': '⚙️',
+			'api_access_denied': '🚫'
+		};
+		return emojiMap[action] || '📝';
+	}
 </script>
 
 <!-- Simplified Admin Dashboard with Tabs -->
@@ -182,6 +266,12 @@
 			class="px-4 py-2 rounded-lg transition-all duration-200 {activeTab === 'create-memorial' ? 'bg-amber-500 text-white' : 'text-white/70 hover:text-white hover:bg-white/10'}"
 		>
 			➕ Create Memorial
+		</button>
+		<button 
+			onclick={() => { activeTab = 'audit-logs'; loadAuditLogs(); }}
+			class="px-4 py-2 rounded-lg transition-all duration-200 {activeTab === 'audit-logs' ? 'bg-amber-500 text-white' : 'text-white/70 hover:text-white hover:bg-white/10'}"
+		>
+			🔍 Audit Logs
 		</button>
 	</div>
 
@@ -449,6 +539,218 @@
 					</div>
 				</form>
 			</div>
+		</div>
+	{/if}
+
+	<!-- Audit Logs Tab -->
+	{#if activeTab === 'audit-logs'}
+		<div class="space-y-6">
+			<h2 class="text-2xl font-bold text-white mb-4">🔍 Audit Logs</h2>
+			
+			<!-- Filters -->
+			<div class="bg-white/5 rounded-xl p-4 border border-white/10">
+				<h3 class="text-lg font-semibold text-white mb-4">Filters</h3>
+				<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+					<div>
+						<label class="block text-white/70 text-sm mb-1">Action</label>
+						<select 
+							bind:value={auditFilters.action}
+							class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:border-amber-400"
+						>
+							<option value="">All Actions</option>
+							<option value="memorial_created">Memorial Created</option>
+							<option value="memorial_updated">Memorial Updated</option>
+							<option value="memorial_deleted">Memorial Deleted</option>
+							<option value="memorial_viewed">Memorial Viewed</option>
+							<option value="user_login">User Login</option>
+							<option value="user_logout">User Logout</option>
+							<option value="funeral_director_approved">Director Approved</option>
+							<option value="api_access_denied">Access Denied</option>
+						</select>
+					</div>
+					<div>
+						<label class="block text-white/70 text-sm mb-1">User Email</label>
+						<input 
+							type="email"
+							bind:value={auditFilters.userEmail}
+							placeholder="Filter by user"
+							class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm placeholder-white/50 focus:outline-none focus:border-amber-400"
+						/>
+					</div>
+					<div>
+						<label class="block text-white/70 text-sm mb-1">Resource Type</label>
+						<select 
+							bind:value={auditFilters.resourceType}
+							class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:border-amber-400"
+						>
+							<option value="">All Types</option>
+							<option value="memorial">Memorial</option>
+							<option value="user">User</option>
+							<option value="schedule">Schedule</option>
+							<option value="payment">Payment</option>
+							<option value="livestream">Livestream</option>
+						</select>
+					</div>
+					<div>
+						<label class="block text-white/70 text-sm mb-1">Date From</label>
+						<input 
+							type="date"
+							bind:value={auditFilters.dateFrom}
+							class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:border-amber-400"
+						/>
+					</div>
+					<div>
+						<label class="block text-white/70 text-sm mb-1">Date To</label>
+						<input 
+							type="date"
+							bind:value={auditFilters.dateTo}
+							class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:border-amber-400"
+						/>
+					</div>
+					<div>
+						<label class="block text-white/70 text-sm mb-1">Limit</label>
+						<select 
+							bind:value={auditFilters.limit}
+							class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:border-amber-400"
+						>
+							<option value={25}>25</option>
+							<option value={50}>50</option>
+							<option value={100}>100</option>
+							<option value={250}>250</option>
+						</select>
+					</div>
+				</div>
+				<div class="flex gap-2 mt-4">
+					<button 
+						onclick={loadAuditLogs}
+						disabled={auditLoading}
+						class="px-4 py-2 bg-amber-500 hover:bg-amber-600 disabled:bg-amber-300 text-white font-semibold rounded-lg transition-colors"
+					>
+						{auditLoading ? 'Loading...' : '🔍 Search'}
+					</button>
+					<button 
+						onclick={() => {
+							auditFilters.action = '';
+							auditFilters.userEmail = '';
+							auditFilters.resourceType = '';
+							auditFilters.dateFrom = '';
+							auditFilters.dateTo = '';
+							auditFilters.limit = 50;
+							loadAuditLogs();
+						}}
+						class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-lg transition-colors"
+					>
+						🔄 Clear Filters
+					</button>
+				</div>
+			</div>
+
+			<!-- Audit Logs Table -->
+			<div class="bg-white/5 rounded-xl border border-white/10 overflow-hidden">
+				{#if auditLoading}
+					<div class="p-8 text-center">
+						<div class="text-white/70">Loading audit logs...</div>
+					</div>
+				{:else if auditLogs.length === 0}
+					<div class="p-8 text-center">
+						<div class="text-white/70">No audit logs found matching your criteria.</div>
+					</div>
+				{:else}
+					<div class="overflow-x-auto">
+						<table class="w-full">
+							<thead class="bg-white/10">
+								<tr>
+									<th class="px-4 py-3 text-left text-white font-semibold">Timestamp</th>
+									<th class="px-4 py-3 text-left text-white font-semibold">Action</th>
+									<th class="px-4 py-3 text-left text-white font-semibold">User</th>
+									<th class="px-4 py-3 text-left text-white font-semibold">Resource</th>
+									<th class="px-4 py-3 text-left text-white font-semibold">Details</th>
+									<th class="px-4 py-3 text-left text-white font-semibold">IP Address</th>
+								</tr>
+							</thead>
+							<tbody>
+								{#each auditLogs as log, index}
+									<tr class="border-t border-white/10 {index % 2 === 0 ? 'bg-white/5' : ''}">
+										<td class="px-4 py-3 text-white/90 text-sm">
+											{formatTimestamp(log.timestamp)}
+										</td>
+										<td class="px-4 py-3 text-white/90">
+											<span class="inline-flex items-center gap-2">
+												{getActionEmoji(log.action)}
+												<span class="text-sm">{log.action}</span>
+											</span>
+										</td>
+										<td class="px-4 py-3 text-white/90 text-sm">
+											<div>
+												<div class="font-medium">{log.userEmail || 'Unknown'}</div>
+												{#if log.userRole}
+													<div class="text-xs text-white/60">{log.userRole}</div>
+												{/if}
+											</div>
+										</td>
+										<td class="px-4 py-3 text-white/90 text-sm">
+											{#if log.resourceType && log.resourceId}
+												<div>
+													<div class="font-medium">{log.resourceType}</div>
+													<div class="text-xs text-white/60 font-mono">{log.resourceId}</div>
+												</div>
+											{:else}
+												<span class="text-white/50">-</span>
+											{/if}
+										</td>
+										<td class="px-4 py-3 text-white/90 text-sm max-w-xs">
+											{#if log.details}
+												<div class="truncate" title={JSON.stringify(log.details, null, 2)}>
+													{typeof log.details === 'string' ? log.details : JSON.stringify(log.details)}
+												</div>
+											{:else}
+												<span class="text-white/50">-</span>
+											{/if}
+										</td>
+										<td class="px-4 py-3 text-white/90 text-sm font-mono">
+											{log.ipAddress || '-'}
+										</td>
+									</tr>
+								{/each}
+							</tbody>
+						</table>
+					</div>
+				{/if}
+			</div>
+
+			<!-- Summary Stats -->
+			{#if auditLogs.length > 0}
+				<div class="bg-white/5 rounded-xl p-4 border border-white/10">
+					<h3 class="text-lg font-semibold text-white mb-2">Summary</h3>
+					<div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+						<div>
+							<div class="text-white/70">Total Events</div>
+							<div class="text-white font-semibold text-lg">{auditLogs.length}</div>
+						</div>
+						<div>
+							<div class="text-white/70">Unique Users</div>
+							<div class="text-white font-semibold text-lg">
+								{new Set(auditLogs.map(log => log.userEmail).filter(Boolean)).size}
+							</div>
+						</div>
+						<div>
+							<div class="text-white/70">Access Denied</div>
+							<div class="text-white font-semibold text-lg">
+								{auditLogs.filter(log => log.action === 'api_access_denied').length}
+							</div>
+						</div>
+						<div>
+							<div class="text-white/70">Date Range</div>
+							<div class="text-white font-semibold text-sm">
+								{#if auditLogs.length > 0}
+									{formatTimestamp(auditLogs[auditLogs.length - 1].timestamp).split(',')[0]} - 
+									{formatTimestamp(auditLogs[0].timestamp).split(',')[0]}
+								{/if}
+							</div>
+						</div>
+					</div>
+				</div>
+			{/if}
 		</div>
 	{/if}
 </div>

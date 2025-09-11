@@ -64,6 +64,8 @@
 		"algoliasearch": "^5.35.0",
 		"firebase": "^12.1.0",
 		"firebase-admin": "^13.4.0",
-		"stripe": "^18.5.0"
+		"g": "^2.0.1",
+		"stripe": "^18.5.0",
+		"vercel": "^47.1.4"
 	}
 }

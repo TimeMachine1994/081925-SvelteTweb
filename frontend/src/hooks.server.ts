@@ -1,7 +1,9 @@
 import { adminAuth } from '$lib/server/firebase';
+import { auditMiddleware } from '$lib/server/auditMiddleware';
+import { logUserAction, extractUserContext } from '$lib/server/auditLogger';
 import type { Handle } from '@sveltejs/kit';
 
-export const handle: Handle = async ({ event, resolve }) => {
+const authHandle: Handle = async ({ event, resolve }) => {
 	console.log('🔐 Authentication check for:', event.url.pathname);
 	
 	const sessionCookie = event.cookies.get('session');
@@ -40,6 +42,15 @@ export const handle: Handle = async ({ event, resolve }) => {
 			};
 			
 			console.log('✅ User set in event.locals:', event.locals.user);
+
+			// Log successful login
+			const userContext = extractUserContext(event);
+			if (userContext && event.url.pathname.includes('/login')) {
+				await logUserAction(userContext, 'user_login', userContext.userId, {
+					loginTime: new Date().toISOString(),
+					userAgent: userContext.userAgent
+				});
+			}
 			
 		} catch (error) {
 			console.error('❌ Session verification failed:', error);
@@ -67,4 +78,13 @@ export const handle: Handle = async ({ event, resolve }) => {
 	console.log('👤 Final user state:', event.locals.user ? 'authenticated' : 'not authenticated');
 	
 	return resolve(event);
+};
+
+// Combine authentication and audit middleware
+export const handle: Handle = async ({ event, resolve }) => {
+	// First run authentication
+	const authResponse = await authHandle({ event, resolve: (e) => Promise.resolve(new Response()) });
+	
+	// Then run audit middleware
+	return auditMiddleware({ event, resolve });
 };

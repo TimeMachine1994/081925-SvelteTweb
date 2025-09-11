@@ -22,7 +22,7 @@ export interface AccessCheckResult {
 export interface UserContext {
 	uid: string;
 	email: string | null;
-	role: 'admin' | 'owner' | 'family_member' | 'viewer' | 'funeral_director';
+	role: 'admin' | 'owner' | 'funeral_director';
 	isAdmin?: boolean;
 }
 
@@ -34,7 +34,7 @@ export async function verifyMemorialAccess(user: any, memorialId: string, memori
 		const userContext: UserContext = {
 			uid: user.uid,
 			email: user.email,
-			role: user.customClaims?.role || 'viewer',
+			role: user.customClaims?.role || 'owner',
 			isAdmin: user.customClaims?.admin || false
 		};
 
@@ -58,25 +58,7 @@ export async function verifyMemorialAccess(user: any, memorialId: string, memori
 				};
 			}
 
-			// Check family member access via invitation
-			if (userContext.role === 'family_member') {
-				// For testing, assume family members with invitation have access
-				return {
-					hasAccess: true,
-					accessLevel: 'edit',
-					reason: 'Family member with accepted invitation'
-				};
-			}
-
-			// Viewers should not have access to unauthorized memorials unless it's a public memorial
-			if (userContext.role === 'viewer') {
-				// For testing, assume viewers don't have access to private memorials
-				return {
-					hasAccess: false,
-					accessLevel: 'none',
-					reason: 'No access permission for this memorial'
-				};
-			}
+			// No additional role-specific access checks needed for V1
 
 			return {
 				hasAccess: false,
@@ -96,58 +78,20 @@ export async function verifyMemorialAccess(user: any, memorialId: string, memori
 	}
 }
 
+// V1: Photo upload functionality removed
 export function hasPhotoUploadPermission(role: string, hasInvitation: boolean = false) {
-	if (role === 'owner' || role === 'admin') return true;
-	if (role === 'funeral_director') return true;
-	if (role === 'family_member' && hasInvitation) return true;
+	// Photo upload removed in V1
 	return false;
 }
 
+// V1: Invitation system removed
 export async function checkInvitationStatus(memorialId: string, userEmail: string) {
-	// For testing, return a mock response to avoid Firebase dependency issues
-	if (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') {
-		return {
-			exists: false,
-			status: null,
-			roleToAssign: null
-		};
-	}
-
-	try {
-		await initializeAdminDb();
-		if (!adminDb) {
-			throw new Error('Firebase Admin not initialized');
-		}
-
-		const invitationSnap = await adminDb
-			.collection('invitations')
-			.where('memorialId', '==', memorialId)
-			.where('inviteeEmail', '==', userEmail)
-			.limit(1)
-			.get();
-
-		if (invitationSnap.empty) {
-			return {
-				exists: false,
-				status: null,
-				roleToAssign: null
-			};
-		}
-
-		const invitation = invitationSnap.docs[0].data();
-		return {
-			exists: true,
-			status: invitation.status,
-			roleToAssign: invitation.roleToAssign
-		};
-	} catch (error) {
-		console.error('Error checking invitation status:', error);
-		return {
-			exists: false,
-			status: null,
-			roleToAssign: null
-		};
-	}
+	// Invitation system removed in V1
+	return {
+		exists: false,
+		status: null,
+		roleToAssign: null
+	};
 }
 
 export function logAccessAttempt(details: any) {
@@ -208,41 +152,7 @@ export class MemorialAccessVerifier {
 				};
 			}
 
-			// Family member access check
-			if (user.role === 'family_member') {
-				const familyAccess = await this.checkFamilyMemberAccess(memorialId, user);
-				if (familyAccess.hasAccess) {
-					return familyAccess;
-				}
-			}
-
-			// Viewer access (followed memorials or public)
-			if (user.role === 'viewer') {
-				// Check if user follows this memorial
-				const followerDoc = await adminDb
-					.collection('memorials')
-					.doc(memorialId)
-					.collection('followers')
-					.doc(user.uid)
-					.get();
-
-				if (followerDoc.exists) {
-					return {
-						hasAccess: true,
-						accessLevel: 'view',
-						reason: 'Following memorial'
-					};
-				}
-
-				// Check if memorial is public
-				if (memorial.isPublic !== false) { // Default to public if not explicitly private
-					return {
-						hasAccess: true,
-						accessLevel: 'view',
-						reason: 'Public memorial'
-					};
-				}
-			}
+			// V1: Only admin, owner, and funeral_director roles supported
 
 			// Default: no access
 			return {
@@ -345,22 +255,15 @@ export class MemorialAccessVerifier {
 	}
 
 	/**
-	 * Check photo upload permissions
+	 * V1: Photo upload functionality removed
 	 */
 	static async checkPhotoUploadAccess(memorialId: string, user: UserContext): Promise<AccessCheckResult> {
-		console.log('📸 Checking photo upload access for memorial:', memorialId);
-
-		// Photo upload requires edit access
-		const editAccess = await this.checkEditAccess(memorialId, user);
-		if (!editAccess.hasAccess) {
-			return {
-				hasAccess: false,
-				accessLevel: 'none',
-				reason: 'Photo upload requires edit permissions'
-			};
-		}
-
-		return editAccess;
+		// Photo upload removed in V1
+		return {
+			hasAccess: false,
+			accessLevel: 'none',
+			reason: 'Photo upload functionality removed in V1'
+		};
 	}
 
 	/**
@@ -468,58 +371,7 @@ export class MemorialAccessVerifier {
 				});
 			}
 
-			// Family member invited memorials
-			if (user.role === 'family_member') {
-				const acceptedInvitationsSnap = await adminDb
-					.collection('invitations')
-					.where('inviteeEmail', '==', user.email)
-					.where('status', '==', 'accepted')
-					.where('roleToAssign', '==', 'family_member')
-					.get();
-
-				const memorialPromises = acceptedInvitationsSnap.docs.map(async (inviteDoc: any) => {
-					const invitation = inviteDoc.data();
-					const memorialDoc = await adminDb.collection('memorials').doc(invitation.memorialId).get();
-					if (memorialDoc.exists) {
-						return {
-							memorial: { id: memorialDoc.id, ...memorialDoc.data() } as Memorial,
-							accessLevel: 'edit'
-						};
-					}
-					return null;
-				});
-
-				const familyMemorials = await Promise.all(memorialPromises);
-				familyMemorials.forEach(item => {
-					if (item) accessibleMemorials.push(item);
-				});
-			}
-
-			// Viewer followed memorials
-			if (user.role === 'viewer') {
-				const followedMemorialsSnap = await adminDb
-					.collectionGroup('followers')
-					.where('userId', '==', user.uid)
-					.get();
-
-				const memorialPromises = followedMemorialsSnap.docs.map(async (followerDoc: any) => {
-					const pathParts = followerDoc.ref.path.split('/');
-					const memorialId = pathParts[pathParts.length - 3];
-					const memorialDoc = await adminDb.collection('memorials').doc(memorialId).get();
-					if (memorialDoc.exists) {
-						return {
-							memorial: { id: memorialDoc.id, ...memorialDoc.data() } as Memorial,
-							accessLevel: 'view'
-						};
-					}
-					return null;
-				});
-
-				const followedMemorials = await Promise.all(memorialPromises);
-				followedMemorials.forEach(item => {
-					if (item) accessibleMemorials.push(item);
-				});
-			}
+			// V1: No family_member or viewer role support
 
 			return accessibleMemorials;
 		} catch (error) {

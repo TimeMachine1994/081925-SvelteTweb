@@ -20,11 +20,7 @@
 </script>
 
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-	<ActionButton
-		icon="upload"
-		label="Upload Photos"
-		color="blue"
-		href="/my-portal/tributes/{memorial.id}/edit"
+	<!-- Photo upload removed in V1 -->
 	/>
 
 	<ActionButton

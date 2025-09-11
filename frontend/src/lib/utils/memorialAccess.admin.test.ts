@@ -35,13 +35,13 @@ describe('Admin Role Memorial Access', () => {
 			});
 		});
 
-		it('should grant admin photo upload access to any memorial', async () => {
+		it('should deny photo upload access in V1 (feature disabled)', async () => {
 			const result = await MemorialAccessVerifier.checkPhotoUploadAccess('memorial123', adminUser);
 
 			expect(result).toEqual({
-				hasAccess: true,
-				accessLevel: 'admin',
-				reason: 'Admin privileges'
+				hasAccess: false,
+				accessLevel: 'none',
+				reason: 'Photo upload functionality removed in V1'
 			});
 		});
 
@@ -55,9 +55,9 @@ describe('Admin Role Memorial Access', () => {
 			});
 		});
 
-		it('should allow admin photo upload permission', () => {
-			const hasPermission = hasPhotoUploadPermission('admin');
-			expect(hasPermission).toBe(true);
+		it('should deny admin photo upload permission in V1', () => {
+			const hasPermission = hasPhotoUploadPermission('admin', false);
+			expect(hasPermission).toBe(false);
 		});
 
 		it('should recognize admin role through isAdmin flag', async () => {
@@ -156,8 +156,8 @@ describe('Admin Role Memorial Access', () => {
 				isAdmin: true
 			};
 
-			// Admin should have all permissions
-			expect(hasPhotoUploadPermission(adminUser.role)).toBe(true);
+			// Admin should have photo upload disabled in V1
+			expect(hasPhotoUploadPermission(adminUser.role)).toBe(false);
 			expect(adminUser.role === 'admin' || adminUser.isAdmin).toBe(true);
 		});
 	});
@@ -188,28 +188,28 @@ describe('Admin Role Memorial Access', () => {
 			expect(fdUser.isAdmin).toBe(false);
 		});
 
-		it('should not grant admin access to family member', async () => {
-			const familyUser: UserContext = {
-				uid: 'family123',
-				email: 'family@test.com',
-				role: 'family_member',
+		it('should not grant admin access to owner without admin flag', async () => {
+			const ownerUser: UserContext = {
+				uid: 'owner123',
+				email: 'owner@test.com',
+				role: 'owner',
 				isAdmin: false
 			};
 
-			expect(familyUser.role).not.toBe('admin');
-			expect(familyUser.isAdmin).toBe(false);
+			expect(ownerUser.role).not.toBe('admin');
+			expect(ownerUser.isAdmin).toBe(false);
 		});
 
-		it('should not grant admin access to viewer', async () => {
-			const viewerUser: UserContext = {
-				uid: 'viewer123',
-				email: 'viewer@test.com',
-				role: 'viewer',
+		it('should not grant admin access to funeral director without admin flag', async () => {
+			const fdUser: UserContext = {
+				uid: 'fd123',
+				email: 'fd@test.com',
+				role: 'funeral_director',
 				isAdmin: false
 			};
 
-			expect(viewerUser.role).not.toBe('admin');
-			expect(viewerUser.isAdmin).toBe(false);
+			expect(fdUser.role).not.toBe('admin');
+			expect(fdUser.isAdmin).toBe(false);
 		});
 	});
 
@@ -235,7 +235,7 @@ describe('Admin Role Memorial Access', () => {
 			const adminUser: UserContext = {
 				uid: 'admin123',
 				email: 'admin@test.com',
-				role: 'viewer', // Different role
+				role: 'owner', // Different role
 				isAdmin: true   // But admin flag is set
 			};
 

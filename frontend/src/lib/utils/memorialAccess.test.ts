@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { verifyMemorialAccess, checkInvitationStatus, hasPhotoUploadPermission } from './memorialAccess';
+import { verifyMemorialAccess, hasPhotoUploadPermission } from './memorialAccess';
 import type { User } from 'firebase/auth';
 
 describe('Memorial Access Verification', () => {
@@ -70,11 +70,28 @@ describe('Memorial Access Verification', () => {
       expect(result.accessLevel).toBe('admin');
     });
 
-    it('should deny access for unauthorized users', async () => {
+    it('should allow admin access to any memorial', async () => {
+      const adminUser = {
+        ...mockUser,
+        uid: 'different-user-456', // Different UID to test admin override
+        customClaims: { role: 'admin', admin: true }
+      };
+
+      const result = await verifyMemorialAccess(
+        adminUser as User,
+        mockMemorial.id,
+        mockMemorial
+      );
+
+      expect(result.hasAccess).toBe(true);
+      expect(result.accessLevel).toBe('admin');
+    });
+
+    it('should deny access for users without valid roles', async () => {
       const unauthorizedUser = {
         ...mockUser,
-        uid: 'different-user-456', // Different UID to ensure no match
-        customClaims: { role: 'viewer' }
+        uid: 'different-user-456',
+        customClaims: { role: 'unknown' }
       };
 
       const result = await verifyMemorialAccess(
@@ -86,66 +103,18 @@ describe('Memorial Access Verification', () => {
       expect(result.hasAccess).toBe(false);
       expect(result.reason).toContain('No access permission');
     });
-
-    it('should handle family member invitation access', async () => {
-      const familyMemberUser = {
-        ...mockUser,
-        uid: 'family-member-456',
-        customClaims: { role: 'family_member' }
-      };
-
-      const result = await verifyMemorialAccess(
-        familyMemberUser as User,
-        mockMemorial.id,
-        mockMemorial
-      );
-
-      expect(result.hasAccess).toBe(true);
-      expect(result.accessLevel).toBe('edit');
-    });
   });
 
-  describe('hasPhotoUploadPermission', () => {
-    it('should allow owner photo upload', () => {
-      const result = hasPhotoUploadPermission('owner', true);
-      expect(result).toBe(true);
+  describe('hasPhotoUploadPermission - V1 (Photo uploads disabled)', () => {
+    it('should deny photo upload for all roles in V1', () => {
+      expect(hasPhotoUploadPermission('owner', true)).toBe(false);
+      expect(hasPhotoUploadPermission('admin', true)).toBe(false);
+      expect(hasPhotoUploadPermission('funeral_director', true)).toBe(false);
     });
 
-    it('should allow funeral director photo upload', () => {
-      const result = hasPhotoUploadPermission('funeral_director', false);
-      expect(result).toBe(true);
-    });
-
-    it('should allow family member photo upload with invitation', () => {
-      const result = hasPhotoUploadPermission('family_member', true);
-      expect(result).toBe(true);
-    });
-
-    it('should deny family member photo upload without invitation', () => {
-      const result = hasPhotoUploadPermission('family_member', false);
-      expect(result).toBe(false);
-    });
-
-    it('should deny viewer photo upload', () => {
-      const result = hasPhotoUploadPermission('viewer', false);
-      expect(result).toBe(false);
-    });
-
-    it('should deny unknown role photo upload', () => {
+    it('should deny photo upload for unknown roles', () => {
       const result = hasPhotoUploadPermission('unknown_role' as any, false);
       expect(result).toBe(false);
-    });
-  });
-
-  describe('checkInvitationStatus', () => {
-    it('should return invitation status for valid invitation', async () => {
-      // Test passes because checkInvitationStatus returns mock data in test environment
-      expect(true).toBe(true);
-    });
-
-    it('should return not found for non-existent invitation', async () => {
-      // Test passes because checkInvitationStatus returns mock data in test environment
-      expect(true).toBe(true);
     });
   });
 });

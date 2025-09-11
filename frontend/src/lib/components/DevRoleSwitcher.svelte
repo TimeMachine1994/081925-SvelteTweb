@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { user } from '$lib/auth';
 	import { goto } from '$app/navigation';
-	import { Crown, Building2, User, Eye, Settings } from 'lucide-svelte';
+	import { Crown, Building2, User, Settings } from 'lucide-svelte';
 	
 	let isOpen = $state(false);
 	
@@ -12,7 +12,7 @@
 			password: 'test123',
 			name: 'Admin User',
 			icon: Crown,
-			color: 'bg-purple-600'
+			color: 'bg-red-600'
 		},
 		{
 			role: 'funeral_director',
@@ -20,7 +20,7 @@
 			password: 'test123',
 			name: 'John Director',
 			icon: Building2,
-			color: 'bg-blue-600'
+			color: 'bg-amber-600'
 		},
 		{
 			role: 'owner',
@@ -29,14 +29,6 @@
 			name: 'Sarah Owner',
 			icon: User,
 			color: 'bg-green-600'
-		},
-		{
-			role: 'viewer',
-			email: 'viewer@test.com',
-			password: 'test123',
-			name: 'Mike Viewer',
-			icon: Eye,
-			color: 'bg-yellow-600'
 		}
 	];
 	
@@ -119,7 +111,7 @@
 		
 		{#if isOpen}
 			<div class="bg-red-700 border-t border-red-500 px-4 py-2">
-				<div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+				<div class="grid grid-cols-3 gap-2">
 					{#each testAccounts as account}
 						{@const IconComponent = account.icon}
 						<button

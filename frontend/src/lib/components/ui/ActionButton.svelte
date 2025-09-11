@@ -1,5 +1,5 @@
 <script lang="ts">
-	type IconType = 'upload' | 'calendar' | 'phone' | 'share';
+	type IconType = 'calendar' | 'phone' | 'share';
 	type ColorType = 'blue' | 'amber' | 'violet' | 'cyan';
 
 	let { 
@@ -26,7 +26,6 @@
 	};
 
 	const iconMap: Record<IconType, string> = {
-		upload: '📤',
 		calendar: '📅',
 		phone: '📞',
 		share: '✈️'
