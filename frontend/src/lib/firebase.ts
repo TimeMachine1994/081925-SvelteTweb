@@ -37,23 +37,41 @@ if (browser) {
 		try {
 			console.log('🔥 Connecting to Firebase emulators...');
 			
-			// Check if already connected to avoid duplicate connection errors
-			if (!auth.config.emulator) {
+			// Connect to Auth emulator - only connect once
+			try {
+				// Check if already connected by trying to connect
 				connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
 				console.log('✅ Connected to Auth emulator on port 9099');
+			} catch (authError) {
+				// Ignore "already connected" errors
+				if (!(authError as Error).message?.includes('already')) {
+					console.warn('⚠️ Auth emulator connection failed:', authError);
+				}
 			}
 			
-			if (!db._delegate._databaseId.host.includes('127.0.0.1')) {
+			// Connect to Firestore emulator - only connect once
+			try {
 				connectFirestoreEmulator(db, '127.0.0.1', 8080);
 				console.log('✅ Connected to Firestore emulator on port 8080');
+			} catch (firestoreError) {
+				// Ignore "already connected" errors
+				if (!(firestoreError as Error).message?.includes('already')) {
+					console.warn('⚠️ Firestore emulator connection failed:', firestoreError);
+				}
 			}
 			
-			if (!storage._delegate._host.includes('127.0.0.1')) {
+			// Connect to Storage emulator - only connect once
+			try {
 				connectStorageEmulator(storage, '127.0.0.1', 9199);
 				console.log('✅ Connected to Storage emulator on port 9199');
+			} catch (storageError) {
+				// Ignore "already connected" errors
+				if (!(storageError as Error).message?.includes('already')) {
+					console.warn('⚠️ Storage emulator connection failed:', storageError);
+				}
 			}
 			
-			console.log('🎉 All Firebase emulators connected successfully');
+			console.log('🎉 Firebase emulator connections attempted');
 		} catch (error) {
 			console.error('❌ Error connecting to Firebase emulators:', error);
 			console.error('❌ Make sure Firebase emulators are running: firebase emulators:start');

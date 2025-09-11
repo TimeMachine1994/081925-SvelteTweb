@@ -3,6 +3,7 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import Navbar from '$lib/components/Navbar.svelte';
 	import Footer from '$lib/components/Footer.svelte';
+	import DevRoleSwitcher from '$lib/components/DevRoleSwitcher.svelte';
 
 	import { user } from '$lib/auth';
 	import { page } from '$app/stores';
@@ -21,6 +22,7 @@
 </svelte:head>
 
 <div class="app-container">
+	<DevRoleSwitcher />
 	<Navbar />
 	<main
 		class="main-content"
