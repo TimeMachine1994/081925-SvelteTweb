@@ -3,15 +3,23 @@ import { getFirestore, connectFirestoreEmulator, type Firestore } from 'firebase
 import { getAuth, connectAuthEmulator, type Auth } from 'firebase/auth';
 import { getStorage, connectStorageEmulator, type FirebaseStorage } from 'firebase/storage';
 import { dev, browser } from '$app/environment';
+import { 
+	PUBLIC_FIREBASE_API_KEY,
+	PUBLIC_FIREBASE_AUTH_DOMAIN,
+	PUBLIC_FIREBASE_PROJECT_ID,
+	PUBLIC_FIREBASE_STORAGE_BUCKET,
+	PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+	PUBLIC_FIREBASE_APP_ID
+} from '$env/static/public';
 
-// Firebase configuration - using direct values since env vars aren't available in production
+// Firebase configuration using environment variables
 const firebaseConfig = {
-	apiKey: 'AIzaSyAXmTxzYRc-LhMEW75nZjjjQCZov1gpiw0',
-	authDomain: 'fir-tweb.firebaseapp.com',
-	projectId: 'fir-tweb',
-	storageBucket: 'fir-tweb.firebasestorage.app',
-	messagingSenderId: '509455146790',
-	appId: '1:509455146790:web:7ec99527214b05d7b9ebe7'
+	apiKey: PUBLIC_FIREBASE_API_KEY,
+	authDomain: PUBLIC_FIREBASE_AUTH_DOMAIN,
+	projectId: PUBLIC_FIREBASE_PROJECT_ID,
+	storageBucket: PUBLIC_FIREBASE_STORAGE_BUCKET,
+	messagingSenderId: PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+	appId: PUBLIC_FIREBASE_APP_ID
 };
 
 console.log('🔥 Firebase Config:', {

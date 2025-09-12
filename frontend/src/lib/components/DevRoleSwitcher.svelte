@@ -50,22 +50,26 @@
 			const userCredential = await signInWithEmailAndPassword(auth, account.email, account.password);
 			const idToken = await getIdToken(userCredential.user);
 			
-			// Create session with the server
-			const formData = new FormData();
-			formData.append('idToken', idToken);
-			
-			const loginResponse = await fetch('/login?/login', {
+			// Create session with the server using the correct API endpoint
+			const response = await fetch('/api/session', {
 				method: 'POST',
-				body: formData
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ idToken })
 			});
-			
-			if (loginResponse.ok) {
+
+			if (response.ok) {
 				console.log(`Successfully switched to ${account.role}`);
-				// Reload the page to update the user state
-				window.location.reload();
+				const result = await response.json();
+				if (result.redirectTo) {
+					window.location.href = result.redirectTo;
+				} else {
+					window.location.href = '/'; // Fallback to homepage
+				}
 			} else {
 				console.error('Failed to create session');
-				const errorText = await loginResponse.text();
+				const errorText = await response.text();
 				console.error('Login response:', errorText);
 			}
 		} catch (error: any) {

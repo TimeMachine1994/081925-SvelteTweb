@@ -71,7 +71,6 @@ export async function createTestMemorial(overrides: any = {}) {
     lovedOneName: 'Test Loved One',
     slug: 'test-loved-one',
     fullSlug: 'test-loved-one-123',
-    createdByUserId: 'test-owner-123',
     creatorEmail: 'owner@test.com',
     creatorName: 'Test Owner',
     ownerUid: 'test-owner-123',
@@ -103,7 +102,7 @@ export async function createTestUser(overrides: any = {}) {
     uid: `test-user-${Date.now()}`,
     email: 'test@example.com',
     customClaims: {
-      role: 'viewer',
+      role: 'owner', // V1: Updated default role
       admin: false
     },
     ...overrides
@@ -126,7 +125,7 @@ export async function createTestInvitation(memorialId: string, inviteeEmail: str
     memorialId,
     inviteeEmail,
     inviterUid: 'test-owner-123',
-    roleToAssign: 'family_member',
+    roleToAssign: 'owner', // V1: Updated role assignment
     status: 'pending',
     createdAt: new Date(),
     ...overrides

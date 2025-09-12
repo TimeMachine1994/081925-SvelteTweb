@@ -37,7 +37,7 @@
 	}
 </script>
 
-{#if $user && $user.role === 'viewer'}
+{#if $user}
 	<button
 		onclick={toggleFollow}
 		disabled={isLoading}

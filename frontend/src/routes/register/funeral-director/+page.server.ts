@@ -1,5 +1,5 @@
 import { adminAuth, adminDb } from '$lib/server/firebase';
-import { fail, redirect } from '@sveltejs/kit';
+import { fail, redirect, error as SvelteKitError } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { sendEnhancedRegistrationEmail } from '$lib/server/email';
 import { indexMemorial } from '$lib/server/algolia-indexing';
@@ -27,7 +27,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 		if (!directorDocSnap.exists) {
 			console.error(`❌ [FD-REG] No funeral director profile found for UID: ${directorUid}`);
-			return fail(404, { error: 'Funeral director profile not found. Please contact support.' });
+						throw SvelteKitError(404, 'Your funeral director profile was not found. Please complete your registration or contact support.');
 		}
 
 		const directorData = directorDocSnap.data()!;
@@ -47,7 +47,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	} catch (error) {
 		console.error('❌ [FD-REG] Error loading funeral director profile:', error);
-		return fail(500, { error: 'Failed to load funeral director information.' });
+				throw SvelteKitError(500, 'Failed to load funeral director information.');
 	}
 };
 
@@ -158,7 +158,6 @@ export const actions: Actions = {
 				slug,
 				ownerUid: userRecord.uid, // The family member owns the memorial
 				funeralDirectorUid: directorUid, // The logged-in FD manages it
-				createdByUserId: directorUid, // Legacy field, points to creator
 				creatorEmail: directorData.email,
 				creatorName: directorData.contactPerson,
 				directorFullName: directorData.contactPerson,

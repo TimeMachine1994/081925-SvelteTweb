@@ -41,7 +41,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     let isFollowing = false;
 
     if (locals.user) {
-        isOwner = locals.user.uid === memorial.createdByUserId;
+        isOwner = locals.user.uid === memorial.ownerUid;
 
         const followerDoc = await adminDb.collection('memorials').doc(memorial.id).collection('followers').doc(locals.user.uid).get();
         isFollowing = followerDoc.exists;

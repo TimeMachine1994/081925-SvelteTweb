@@ -10,8 +10,8 @@ describe('Memorial Access Verification', () => {
 
   const mockMemorial = {
     id: 'memorial-123',
-    ownerId: 'test-user-123', // Match the mock user UID
-    funeralDirectorId: 'fd-789'
+    ownerUid: 'test-user-123', // V1: Updated field name
+    funeralDirectorUid: 'fd-789' // V1: Updated field name
   };
 
   beforeEach(() => {
@@ -57,7 +57,7 @@ describe('Memorial Access Verification', () => {
       // Mock memorial where user is funeral director
       const fdMemorial = {
         ...mockMemorial,
-        funeralDirectorId: mockUser.uid
+        funeralDirectorUid: mockUser.uid
       };
 
       const result = await verifyMemorialAccess(
@@ -77,10 +77,17 @@ describe('Memorial Access Verification', () => {
         customClaims: { role: 'admin', admin: true }
       };
 
+      // Mock the memorial with V1 field structure
+      const v1Memorial = {
+        ...mockMemorial,
+        ownerUid: 'test-user-123',
+        funeralDirectorUid: 'fd-789'
+      };
+
       const result = await verifyMemorialAccess(
         adminUser as User,
-        mockMemorial.id,
-        mockMemorial
+        v1Memorial.id,
+        v1Memorial
       );
 
       expect(result.hasAccess).toBe(true);

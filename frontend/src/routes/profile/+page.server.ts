@@ -44,7 +44,7 @@ export const load: PageServerLoad = async ({ locals }) => {
                 return { id: doc.id, ...data } as Memorial;
             });
         } else if (role === 'owner') {
-            const memorialsSnap = await adminDb.collection('memorials').where('createdByUserId', '==', uid).get();
+            const memorialsSnap = await adminDb.collection('memorials').where('ownerUid', '==', uid).get();
             memorials = memorialsSnap.docs.map(doc => {
                 const data = doc.data();
                 if (!data.fullSlug && data.slug) {

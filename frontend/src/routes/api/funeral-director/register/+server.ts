@@ -13,10 +13,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
     const data = await request.json();
     
-    // Validate required fields
+    // Validate required fields (V1: simplified)
     const requiredFields = [
-      'companyName', 'licenseNumber', 'contactPerson', 
-      'email', 'phone', 'address', 'businessType'
+      'companyName', 'contactPerson', 
+      'email', 'phone', 'address'
     ];
     
     for (const field of requiredFields) {
@@ -25,10 +25,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       }
     }
 
-    // Create funeral director document
+    // Create funeral director document (V1: simplified)
     const funeralDirector: Omit<FuneralDirector, 'id'> = {
       companyName: data.companyName,
-      licenseNumber: data.licenseNumber,
       contactPerson: data.contactPerson,
       email: data.email,
       phone: data.phone,
@@ -36,27 +35,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         street: data.address.street,
         city: data.address.city,
         state: data.address.state,
-        zipCode: data.address.zipCode,
-        country: data.address.country || 'US'
+        zipCode: data.address.zipCode
       },
-      businessType: data.businessType,
-      servicesOffered: data.servicesOffered || [],
-      yearsInBusiness: data.yearsInBusiness || 0,
-      status: 'active',
-      verificationStatus: 'verified', // Auto-verified on registration
-      permissions: {
-        canCreateMemorials: true,
-        canManageMemorials: true,
-        canLivestream: true,
-        maxMemorials: 50 // Default limit for new directors
-      },
+      status: 'approved', // V1: auto-approved
       createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now(),
-      streamingConfig: {
-        provider: 'custom',
-        maxConcurrentStreams: 1,
-        streamingEnabled: false
-      }
+      updatedAt: Timestamp.now()
     };
 
     // Save to Firestore
@@ -72,7 +55,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
     return json({ 
       success: true, 
-      message: 'Funeral director registration submitted for approval',
+      message: 'Funeral director registration completed successfully',
       id: locals.user.uid
     });
 

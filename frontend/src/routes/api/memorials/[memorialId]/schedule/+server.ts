@@ -39,8 +39,8 @@ export const PATCH: RequestHandler = async ({ request, locals, params }) => {
 
     // Check if user has permission to edit this memorial
     const canEdit = memorial.ownerUid === locals.user.uid || 
-                   memorial.createdByUserId === locals.user.uid || 
-                   memorial.funeralDirectorId === locals.user.uid;
+                   memorial.funeralDirectorUid === locals.user.uid ||
+                   locals.user.role === 'admin';
 
     if (!canEdit) {
       return json({ error: 'Permission denied' }, { status: 403 });

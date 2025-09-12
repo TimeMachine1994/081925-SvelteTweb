@@ -45,20 +45,17 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 		const userRole = locals.user.role;
 		const userId = locals.user.uid;
 
-		// Check permissions - handle both ownerUid and createdByUserId fields
+		// Check permissions (V1: simplified roles)
 		const hasPermission = 
 			userRole === 'admin' ||
 			memorial?.ownerUid === userId ||
-			memorial?.createdByUserId === userId ||
-			memorial?.funeralDirectorUid === userId ||
-			(userRole === 'family_member' && memorial?.familyMemberUids?.includes(userId));
+			memorial?.funeralDirectorUid === userId;
 
 		if (!hasPermission) {
 			console.log('❌ User lacks permission to edit memorial:', {
 				userRole,
 				userId,
 				ownerUid: memorial?.ownerUid,
-				createdByUserId: memorial?.createdByUserId,
 				funeralDirectorUid: memorial?.funeralDirectorUid
 			});
 			return json({ error: 'Insufficient permissions' }, { status: 403 });
@@ -132,13 +129,11 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		const userRole = locals.user.role;
 		const userId = locals.user.uid;
 
-		// Check permissions - handle both ownerUid and createdByUserId fields
+		// Check permissions (V1: simplified roles)
 		const hasPermission = 
 			userRole === 'admin' ||
 			memorial?.ownerUid === userId ||
-			memorial?.createdByUserId === userId ||
-			memorial?.funeralDirectorUid === userId ||
-			(userRole === 'family_member' && memorial?.familyMemberUids?.includes(userId));
+			memorial?.funeralDirectorUid === userId;
 
 		if (!hasPermission) {
 			return json({ error: 'Insufficient permissions' }, { status: 403 });

@@ -29,8 +29,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     }
 
     const funeralDirector = funeralDirectorDoc.data();
+    // V1: All funeral directors are auto-approved
     if (funeralDirector?.status !== 'approved') {
-      return json({ error: 'Funeral director account not approved' }, { status: 403 });
+      return json({ error: 'Funeral director account not active' }, { status: 403 });
     }
 
     const memorialData: FuneralDirectorMemorialRequest = await request.json();
@@ -82,7 +83,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         contactPerson: funeralDirector.contactPerson,
         phone: funeralDirector.phone,
         email: funeralDirector.email,
-        licenseNumber: funeralDirector.licenseNumber
+        // V1: License number removed
       },
 
       // Owner information (will be created as user)

@@ -35,10 +35,10 @@ const authHandle: Handle = async ({ event, resolve }) => {
 			
 			event.locals.user = {
 				uid: userRecord.uid,
-				email: userRecord.email,
+				email: userRecord.email || null,
 				displayName: userRecord.displayName,
-				role: userRecord.customClaims?.role,
-				admin: userRecord.customClaims?.admin
+				role: userRecord.customClaims?.role || 'owner',
+				isAdmin: userRecord.customClaims?.admin || false
 			};
 			
 			console.log('✅ User set in event.locals:', event.locals.user);

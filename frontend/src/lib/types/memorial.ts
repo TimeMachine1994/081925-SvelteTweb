@@ -15,7 +15,7 @@ export interface Memorial {
 	lovedOneName: string;
 	slug: string;
 	fullSlug: string;
-	createdByUserId: string;
+	ownerUid: string;
 	creatorEmail: string;
 	creatorName: string;
 	directorFullName?: string;
@@ -57,8 +57,6 @@ export interface Memorial {
 	livestreamEnabled?: boolean;
 	followerCount?: number;
 	
-	// Additional properties for access control
-	ownerUid?: string;
+	// Access control - required fields
 	funeralDirectorUid?: string;
-	familyMemberUids?: string[];
 }

@@ -67,7 +67,7 @@
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
 				inviteeEmail: email,
-				roleToAssign: 'family_member'
+				roleToAssign: 'owner'
 			})
 		});
 

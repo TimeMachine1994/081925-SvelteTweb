@@ -404,6 +404,31 @@
           </h2>
           
           <div class="space-y-4">
+            <!-- Date and Time Picker -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="main-service-date" class="block text-sm font-medium text-gray-300 mb-2">Service Date</label>
+                <input 
+                  id="main-service-date" 
+                  type="date" 
+                  bind:value={formData.mainService.time.date} 
+                  onchange={triggerAutoSave}
+                  class="w-full p-3 border border-gray-600 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
+                />
+              </div>
+              <div>
+                <label for="main-service-time" class="block text-sm font-medium text-gray-300 mb-2">Start Time</label>
+                <input 
+                  id="main-service-time" 
+                  type="time" 
+                  bind:value={formData.mainService.time.time} 
+                  onchange={triggerAutoSave}
+                  class="w-full p-3 border border-gray-600 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
+                />
+              </div>
+            </div>
+
+            <!-- Service Hours Slider -->
             <div>
               <label for="main-service-hours" class="block text-sm font-medium text-gray-300 mb-2">
                 Main Service Hours (2 hours included, ${HOURLY_OVERAGE_RATE}/hour overage)
@@ -451,24 +476,51 @@
               </label>
               
               {#if formData.additionalLocation.enabled}
-                <div>
-                  <label for="additional-location-hours" class="block text-sm font-medium text-gray-300 mb-2">
-                    Additional Location Hours (2 hours included, ${HOURLY_OVERAGE_RATE}/hour overage)
-                  </label>
-                  <input 
-                    id="additional-location-hours"
-                    type="range" 
-                    min="1" 
-                    max="8" 
-                    step="1"
-                    bind:value={formData.additionalLocation.hours}
-                    onchange={triggerAutoSave}
-                    class="w-full gold-slider"
-                  />
-                  <div class="flex justify-between text-sm text-gray-400 mt-1">
-                    <span>1 hour</span>
-                    <span class="font-medium text-amber-400">{formData.additionalLocation.hours} hours</span>
-                    <span>8+ hours</span>
+                <div class="space-y-4">
+                  <!-- Date and Time Picker for Additional Location -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label for="additional-location-date" class="block text-sm font-medium text-gray-300 mb-2">Additional Location Date</label>
+                      <input 
+                        id="additional-location-date" 
+                        type="date" 
+                        bind:value={formData.additionalLocation.time.date} 
+                        onchange={triggerAutoSave}
+                        class="w-full p-3 border border-gray-600 rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
+                      />
+                    </div>
+                    <div>
+                      <label for="additional-location-time" class="block text-sm font-medium text-gray-300 mb-2">Start Time</label>
+                      <input 
+                        id="additional-location-time" 
+                        type="time" 
+                        bind:value={formData.additionalLocation.time.time} 
+                        onchange={triggerAutoSave}
+                        class="w-full p-3 border border-gray-600 rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- Hours Slider for Additional Location -->
+                  <div>
+                    <label for="additional-location-hours" class="block text-sm font-medium text-gray-300 mb-2">
+                      Additional Location Hours (2 hours included, ${HOURLY_OVERAGE_RATE}/hour overage)
+                    </label>
+                    <input 
+                      id="additional-location-hours"
+                      type="range" 
+                      min="1" 
+                      max="8" 
+                      step="1"
+                      bind:value={formData.additionalLocation.hours}
+                      onchange={triggerAutoSave}
+                      class="w-full gold-slider"
+                    />
+                    <div class="flex justify-between text-sm text-gray-400 mt-1">
+                      <span>1 hour</span>
+                      <span class="font-medium text-amber-400">{formData.additionalLocation.hours} hours</span>
+                      <span>8+ hours</span>
+                    </div>
                   </div>
                 </div>
               {/if}
@@ -490,24 +542,51 @@
               </label>
               
               {#if formData.additionalDay.enabled}
-                <div>
-                  <label for="additional-day-hours" class="block text-sm font-medium text-gray-300 mb-2">
-                    Additional Day Hours (2 hours included, ${HOURLY_OVERAGE_RATE}/hour overage)
-                  </label>
-                  <input 
-                    id="additional-day-hours"
-                    type="range" 
-                    min="1" 
-                    max="8" 
-                    step="1"
-                    bind:value={formData.additionalDay.hours}
-                    onchange={triggerAutoSave}
-                    class="w-full gold-slider"
-                  />
-                  <div class="flex justify-between text-sm text-gray-400 mt-1">
-                    <span>1 hour</span>
-                    <span class="font-medium text-amber-400">{formData.additionalDay.hours} hours</span>
-                    <span>8+ hours</span>
+                <div class="space-y-4">
+                  <!-- Date and Time Picker for Additional Day -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label for="additional-day-date" class="block text-sm font-medium text-gray-300 mb-2">Additional Day Date</label>
+                      <input 
+                        id="additional-day-date" 
+                        type="date" 
+                        bind:value={formData.additionalDay.time.date} 
+                        onchange={triggerAutoSave}
+                        class="w-full p-3 border border-gray-600 rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
+                      />
+                    </div>
+                    <div>
+                      <label for="additional-day-time" class="block text-sm font-medium text-gray-300 mb-2">Start Time</label>
+                      <input 
+                        id="additional-day-time" 
+                        type="time" 
+                        bind:value={formData.additionalDay.time.time} 
+                        onchange={triggerAutoSave}
+                        class="w-full p-3 border border-gray-600 rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- Hours Slider for Additional Day -->
+                  <div>
+                    <label for="additional-day-hours" class="block text-sm font-medium text-gray-300 mb-2">
+                      Additional Day Hours (2 hours included, ${HOURLY_OVERAGE_RATE}/hour overage)
+                    </label>
+                    <input 
+                      id="additional-day-hours"
+                      type="range" 
+                      min="1" 
+                      max="8" 
+                      step="1"
+                      bind:value={formData.additionalDay.hours}
+                      onchange={triggerAutoSave}
+                      class="w-full gold-slider"
+                    />
+                    <div class="flex justify-between text-sm text-gray-400 mt-1">
+                      <span>1 hour</span>
+                      <span class="font-medium text-amber-400">{formData.additionalDay.hours} hours</span>
+                      <span>8+ hours</span>
+                    </div>
                   </div>
                 </div>
               {/if}

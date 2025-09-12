@@ -11,12 +11,18 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		return json({ message: 'idToken is required' }, { status: 400 });
 	}
 
-	const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
+	const expiresIn = 60 * 60 * 24 * 1000; // 24 hours
 
 	try {
 		console.log('Creating session cookie...');
 		const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
-		const options = { maxAge: expiresIn, httpOnly: true, secure: true, path: '/' };
+		const options = { 
+			maxAge: expiresIn, 
+			httpOnly: true, 
+			secure: true, 
+			sameSite: 'lax' as const,
+			path: '/' 
+		};
 		cookies.set('session', sessionCookie, options);
 		console.log('Session cookie created and set successfully.');
 

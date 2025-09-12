@@ -309,13 +309,17 @@
 								<div class="w-24 h-24 mx-auto rounded-full bg-gradient-to-r {roleInfo.gradient} animate-spin mb-4"></div>
 								<h3 class="text-xl font-semibold text-gray-900 mb-2">No memorials yet</h3>
 								<p class="text-gray-500 mb-6">Create your first memorial to get started</p>
-								<a 
-									href="/register/funeral-director"
-									class="inline-flex items-center px-6 py-3 rounded-xl bg-gradient-to-r {roleInfo.gradient} text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105"
-								>
-									<Heart class="w-4 h-4 mr-2" />
-									Create Memorial
-								</a>
+								{#if userRole === 'funeral_director'}
+									<a 
+										href="/register/funeral-director"
+										class="inline-flex items-center px-6 py-3 rounded-xl bg-gradient-to-r {roleInfo.gradient} text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105"
+									>
+										<Heart class="w-4 h-4 mr-2" />
+										Create Memorial
+									</a>
+								{:else}
+									<p class="text-gray-500">Please contact your funeral director to create a new memorial.</p>
+								{/if}
 							</div>
 						{/if}
 					</div>

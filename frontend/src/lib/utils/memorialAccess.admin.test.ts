@@ -120,13 +120,13 @@ describe('Admin Role Memorial Access', () => {
 				isAdmin: true
 			};
 
-			// Admin should have access without needing family member invitations
+			// V1: Photo upload disabled for all users including admins
 			const result = await MemorialAccessVerifier.checkPhotoUploadAccess('memorial789', adminUser);
 
 			expect(result).toEqual({
-				hasAccess: true,
-				accessLevel: 'admin',
-				reason: 'Admin privileges'
+				hasAccess: false,
+				accessLevel: 'none',
+				reason: 'Photo upload functionality removed in V1'
 			});
 		});
 
@@ -134,7 +134,7 @@ describe('Admin Role Memorial Access', () => {
 			const adminUser = { uid: 'admin-123', role: 'admin', email: 'admin@test.com' };
 			const memorial = { id: 'memorial-123', ownerUid: 'owner-123' };
 			
-			const result = await MemorialAccessVerifier.checkPhotoUploadAccess(adminUser, memorial);
+			const result = await MemorialAccessVerifier.checkPhotoUploadAccess('memorial-123', adminUser);
 			
 			expect(result).toEqual({
 				hasAccess: false,

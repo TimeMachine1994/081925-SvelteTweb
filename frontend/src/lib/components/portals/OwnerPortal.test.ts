@@ -46,8 +46,8 @@ describe('OwnerPortal Component', () => {
 
   it('displays memorial list when memorials exist', () => {
     const mockMemorials = [
-      { id: '1', name: 'John Doe Memorial', ownerUid: 'owner-123' },
-      { id: '2', name: 'Jane Smith Memorial', ownerUid: 'owner-123' }
+      { id: '1', lovedOneName: 'John Doe Memorial', ownerUid: 'owner-123' },
+      { id: '2', lovedOneName: 'Jane Smith Memorial', ownerUid: 'owner-123' }
     ];
 
     render(OwnerPortal, {

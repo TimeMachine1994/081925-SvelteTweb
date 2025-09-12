@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { adminDb } from '$lib/server/firebase-admin';
+import { adminDb } from '$lib/firebase-admin';
 import { logAuditEvent } from '$lib/server/auditLogger';
 
 export const GET: RequestHandler = async ({ request, locals, getClientAddress }) => {

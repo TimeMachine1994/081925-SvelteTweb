@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { FuneralDirectorApplication, UserManagementData } from '$lib/types/admin';
+import type { UserManagementData } from '$lib/types/admin';
 
 // Mock Firebase Admin first
 const mockAdminDb = {
@@ -200,131 +200,14 @@ describe('AdminService', () => {
 		});
 	});
 
-	describe('getPendingApplications', () => {
-		it('should fetch pending funeral director applications', async () => {
-			const mockApplications = [
-				{
-					id: 'app1',
-					data: () => ({
-						userId: 'user1',
-						userEmail: 'director@test.com',
-						businessName: 'Test Funeral Home',
-						licenseNumber: 'FL123456',
-						phoneNumber: '555-0123',
-						address: '123 Main St',
-						status: 'pending_review',
-						createdAt: { toDate: () => new Date('2024-01-01') },
-						updatedAt: { toDate: () => new Date('2024-01-01') }
-					})
-				}
-			];
+	// V1: Removed getPendingApplications test - auto-approval workflow
 
-			mockAdminDb.collection.mockReturnValueOnce({
-				where: vi.fn().mockReturnValue({
-					orderBy: vi.fn().mockReturnValue({
-						get: vi.fn().mockResolvedValue({ docs: mockApplications })
-					})
-				})
-			});
-
-			const result = await AdminService.getPendingApplications();
-
-			expect(result).toHaveLength(1);
-			expect(result[0]).toMatchObject({
-				id: 'app1',
-				userId: 'user1',
-				userEmail: 'director@test.com',
-				businessName: 'Test Funeral Home',
-				status: 'pending_review'
-			});
-		});
-	});
-
-	describe('approveApplication', () => {
-		it('should approve application and update user role', async () => {
-			const mockApplicationDoc = {
-				exists: true,
-				data: () => ({
-					userId: 'user123',
-					userEmail: 'director@test.com',
-					status: 'pending_review'
-				})
-			};
-
-			const mockApplicationRef = {
-				get: vi.fn().mockResolvedValue(mockApplicationDoc),
-				update: vi.fn().mockResolvedValue(undefined)
-			};
-
-			const mockUserRef = {
-				update: vi.fn().mockResolvedValue(undefined)
-			};
-
-			mockAdminDb.collection
-				.mockReturnValueOnce({
-					doc: vi.fn().mockReturnValue(mockApplicationRef)
-				})
-				.mockReturnValueOnce({
-					doc: vi.fn().mockReturnValue(mockUserRef)
-				});
-
-			await AdminService.approveApplication('app123', 'admin123');
-
-			expect(mockApplicationRef.update).toHaveBeenCalledWith({
-				status: 'approved',
-				reviewedBy: 'admin123',
-				reviewedAt: expect.any(Date),
-				updatedAt: expect.any(Date)
-			});
-
-			expect(mockUserRef.update).toHaveBeenCalledWith({
-				role: 'funeral_director',
-				approvedAt: expect.any(Date),
-				updatedAt: expect.any(Date)
-			});
-		});
-
-		it('should throw error if application not found', async () => {
-			const mockApplicationRef = {
-				get: vi.fn().mockResolvedValue({ exists: false })
-			};
-
-			mockAdminDb.collection.mockReturnValueOnce({
-				doc: vi.fn().mockReturnValue(mockApplicationRef)
-			});
-
-			await expect(AdminService.approveApplication('nonexistent', 'admin123'))
-				.rejects.toThrow('Failed to approve application');
-		});
-	});
-
-	describe('rejectApplication', () => {
-		it('should reject application with reason', async () => {
-			const mockApplicationRef = {
-				update: vi.fn().mockResolvedValue(undefined)
-			};
-
-			mockAdminDb.collection.mockReturnValueOnce({
-				doc: vi.fn().mockReturnValue(mockApplicationRef)
-			});
-
-			await AdminService.rejectApplication('app123', 'admin123', 'Incomplete documentation');
-
-			expect(mockApplicationRef.update).toHaveBeenCalledWith({
-				status: 'rejected',
-				reviewedBy: 'admin123',
-				reviewedAt: expect.any(Date),
-				adminNotes: 'Incomplete documentation',
-				updatedAt: expect.any(Date)
-			});
-		});
-	});
+	// V1: Removed approveApplication and rejectApplication tests - auto-approval workflow
 
 	describe('getDashboardStats', () => {
 		it('should calculate dashboard statistics correctly', async () => {
 			const mockUsers = { size: 150 };
 			const mockMemorials = { size: 75 };
-			const mockApplications = { size: 5 };
 			const mockNewUsers = { size: 12 };
 			const mockNewMemorials = { size: 8 };
 			const mockActiveStreams = { size: 3 };
@@ -338,11 +221,6 @@ describe('AdminService', () => {
 				})
 				.mockReturnValueOnce({
 					get: vi.fn().mockResolvedValue(mockMemorials)
-				})
-				.mockReturnValueOnce({
-					where: vi.fn().mockReturnValue({
-						get: vi.fn().mockResolvedValue(mockApplications)
-					})
 				})
 				.mockReturnValueOnce({
 					where: vi.fn().mockReturnValue({
@@ -367,7 +245,6 @@ describe('AdminService', () => {
 			expect(result).toEqual({
 				totalUsers: 150,
 				totalMemorials: 75,
-				pendingApplications: 5,
 				activeStreams: 3,
 				newUsersThisWeek: 12,
 				newMemorialsThisWeek: 8

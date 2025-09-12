@@ -40,8 +40,17 @@ export async function verifyMemorialAccess(user: any, memorialId: string, memori
 
 		// If memorial data is provided, use it directly for testing
 		if (memorial) {
-			// Check if user is owner (also check role for owner access)
-			if ((memorial.ownerId === user.uid || memorial.ownerUid === user.uid) || userContext.role === 'owner') {
+			// Check if user is admin first (highest priority)
+			if (userContext.role === 'admin' || userContext.isAdmin) {
+				return {
+					hasAccess: true,
+					accessLevel: 'admin',
+					reason: 'Admin privileges'
+				};
+			}
+
+			// Check if user is owner
+			if (memorial.ownerUid === user.uid || userContext.role === 'owner') {
 				return {
 					hasAccess: true,
 					accessLevel: 'admin',
@@ -49,8 +58,8 @@ export async function verifyMemorialAccess(user: any, memorialId: string, memori
 				};
 			}
 
-			// Check if user is funeral director (also check role)
-			if ((memorial.funeralDirectorUid === user.uid || memorial.funeralDirectorUid === user.uid) || userContext.role === 'funeral_director') {
+			// Check if user is funeral director
+			if (memorial.funeralDirectorUid === user.uid || userContext.role === 'funeral_director') {
 				return {
 					hasAccess: true,
 					accessLevel: 'admin', // Changed to admin for funeral directors in tests
@@ -196,62 +205,15 @@ export class MemorialAccessVerifier {
 	}
 
 	/**
-	 * Check family member access through invitation system
+	 * V1: Family member access removed - simplified to owner/funeral_director only
 	 */
 	static async checkFamilyMemberAccess(memorialId: string, user: UserContext): Promise<AccessCheckResult> {
-		console.log('👨‍👩‍👧‍👦 Checking family member access for memorial:', memorialId);
-
-		try {
-			// Check for accepted invitation
-			const invitationSnap = await adminDb
-				.collection('invitations')
-				.where('memorialId', '==', memorialId)
-				.where('inviteeEmail', '==', user.email)
-				.where('status', '==', 'accepted')
-				.where('roleToAssign', '==', 'family_member')
-				.limit(1)
-				.get();
-
-			if (!invitationSnap.empty) {
-				const invitation = invitationSnap.docs[0].data();
-				console.log('✅ Family member access granted via invitation:', invitation.id);
-				
-				return {
-					hasAccess: true,
-					accessLevel: 'edit',
-					reason: 'Accepted family member invitation'
-				};
-			}
-
-			// Check if user is in memorial's familyMemberUids array (legacy support)
-			const memorialDoc = await adminDb.collection('memorials').doc(memorialId).get();
-			if (memorialDoc.exists) {
-				const memorial = memorialDoc.data() as Memorial;
-				if (memorial.familyMemberUids?.includes(user.uid)) {
-					console.log('✅ Family member access granted via familyMemberUids');
-					
-					return {
-						hasAccess: true,
-						accessLevel: 'edit',
-						reason: 'Listed as family member'
-					};
-				}
-			}
-
-			return {
-				hasAccess: false,
-				accessLevel: 'none',
-				reason: 'No valid family member invitation found'
-			};
-
-		} catch (error) {
-			console.error('💥 Error checking family member access:', error);
-			return {
-				hasAccess: false,
-				accessLevel: 'none',
-				reason: 'Family member access check failed'
-			};
-		}
+		// Family member role removed in V1
+		return {
+			hasAccess: false,
+			accessLevel: 'none',
+			reason: 'Family member role removed in V1'
+		};
 	}
 
 	/**
@@ -360,7 +322,7 @@ export class MemorialAccessVerifier {
 			if (user.role === 'funeral_director') {
 				const assignedMemorialsSnap = await adminDb
 					.collection('memorials')
-					.where('funeralDirectorId', '==', user.uid)
+					.where('funeralDirectorUid', '==', user.uid)
 					.get();
 
 				assignedMemorialsSnap.docs.forEach((doc: any) => {

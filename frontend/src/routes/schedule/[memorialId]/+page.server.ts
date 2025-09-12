@@ -47,14 +47,13 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 		console.log('🛡️ Permission Check:');
 		console.log(`   - User ID: ${userId}, Role: ${userRole}`);
-		console.log(`   - Memorial Owner UID: ${memorial.createdByUserId}`);
+		console.log(`   - Memorial Owner UID: ${memorial.ownerUid}`);
 		console.log(`   - Memorial FD UID: ${memorial.funeralDirectorUid}`);
 		
 		const hasPermission = 
 			userRole === 'admin' ||
-			memorial.createdByUserId === userId ||
-			memorial.funeralDirectorUid === userId ||
-			(userRole === 'family_member' && memorial.familyMemberUids?.includes(userId));
+			memorial.ownerUid === userId ||
+			memorial.funeralDirectorUid === userId;
 
 		if (!hasPermission) {
 			throw error(403, 'Insufficient permissions to access this memorial');
@@ -65,7 +64,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			memorial: {
 				id: memorialId,
 				lovedOneName: memorial?.lovedOneName || 'Unnamed Memorial',
-				ownerUid: memorial?.createdByUserId,
+				ownerUid: memorial?.ownerUid,
 				funeralDirectorUid: memorial?.funeralDirectorUid
 			},
 			calculatorConfig: memorial?.calculatorConfig || null,

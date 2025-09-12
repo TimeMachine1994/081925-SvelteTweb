@@ -6,19 +6,19 @@ declare global {
 		interface Locals {
 			user: {
 				uid: string;
-				email: string | null | undefined;
-				displayName: string | undefined;
-				role?: string;
-				admin?: boolean;
+				email: string | null;
+				displayName?: string;
+				role: 'admin' | 'owner' | 'funeral_director';
+				isAdmin: boolean;
 			} | null;
 		}
 		interface PageData {
 			user: {
 				uid: string;
-				email: string | null | undefined;
-				displayName: string | undefined;
-				role?: string;
-				admin?: boolean;
+				email: string | null;
+				displayName?: string;
+				role: 'admin' | 'owner' | 'funeral_director';
+				isAdmin: boolean;
 			} | null;
 		}
 		// interface PageState {}

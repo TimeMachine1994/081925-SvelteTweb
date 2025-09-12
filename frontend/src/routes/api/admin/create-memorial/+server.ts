@@ -70,9 +70,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			lovedOneName: formData.lovedOneName,
 			slug: baseSlug,
 			fullSlug: fullSlug,
-			createdByUserId: userUid,
-			creatorUid: userUid,
-			ownerUid: userUid,
+			ownerUid: userUid, // V1: Single source of truth for ownership
 			creatorEmail: formData.creatorEmail,
 			creatorName: formData.creatorName || formData.lovedOneName + ' Family',
 			content: formData.content || '',
@@ -94,7 +92,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			updatedAt: Timestamp.now(),
 			photos: [],
 			embeds: [],
-			familyMemberUids: [],
 			calculatorConfig: {
 				status: 'draft',
 				formData: {},

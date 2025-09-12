@@ -1,7 +1,7 @@
 // Script to create test accounts and data for demo purposes
 // Run this with: node src/scripts/create-test-data.js
 
-import { adminAuth, adminDb } from '../lib/server/firebase.js';
+import { adminAuth, adminDb } from '../lib/firebase-admin.js';
 
 const testAccounts = [
   {
@@ -41,16 +41,7 @@ const testAccounts = [
       phone: '(555) 987-6543'
     }
   },
-  {
-    email: 'viewer@test.com',
-    password: 'test123',
-    role: 'viewer',
-    name: 'Mike Viewer',
-    data: {
-      role: 'viewer',
-      followedMemorials: []
-    }
-  }
+  // V1: Removed viewer role - deprecated
 ];
 
 async function createTestAccounts() {
@@ -70,7 +61,7 @@ async function createTestAccounts() {
       // Set custom claims
       const customClaims = { role: account.role };
       if (account.role === 'admin') {
-        customClaims.isAdmin = true;
+        customClaims.admin = true;
       }
       await adminAuth.setCustomUserClaims(userRecord.uid, customClaims);
       
@@ -82,6 +73,24 @@ async function createTestAccounts() {
         createdAt: new Date().toISOString(),
         lastLoginAt: new Date().toISOString()
       });
+
+      // For funeral directors, also create profile in funeral_directors collection
+      if (account.role === 'funeral_director') {
+        await adminDb.collection('funeral_directors').doc(userRecord.uid).set({
+          companyName: account.data.companyName,
+          contactPerson: account.name,
+          email: account.email,
+          phone: account.data.phone,
+          address: account.data.address,
+          status: 'approved',
+          isActive: true,
+          createdAt: new Date(),
+          approvedAt: new Date(),
+          approvedBy: 'system_auto_approve',
+          userId: userRecord.uid
+        });
+        console.log(`✅ Created funeral_directors profile for: ${account.email}`);
+      }
       
       console.log(`✅ Created ${account.role}: ${account.email}`);
       
@@ -114,7 +123,7 @@ async function createTestMemorial() {
         location: 'Smith & Sons Funeral Home',
         address: '123 Memorial Drive, Orlando, FL 32801'
       },
-      createdBy: ownerUser.uid,
+      ownerUid: ownerUser.uid, // V1: Updated field name
       createdAt: new Date().toISOString(),
       isPublic: true,
       photos: [],

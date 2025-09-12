@@ -7,12 +7,8 @@
 
     const roles = [
         'admin',
-        'family_member',
-        'viewer',
         'owner',
-        'funeral_director',
-        'remote_producer',
-        'onsite_videographer'
+        'funeral_director'
     ];
 
     $effect(() => {

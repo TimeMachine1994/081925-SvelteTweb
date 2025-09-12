@@ -7,27 +7,13 @@ export interface AdminUser {
 	lastLoginAt?: Date;
 }
 
-export interface FuneralDirectorApplication {
-	id: string;
-	userId: string;
-	userEmail: string;
-	businessName: string;
-	licenseNumber: string;
-	phoneNumber: string;
-	address: string;
-	status: 'pending_review' | 'approved' | 'rejected';
-	adminNotes?: string;
-	reviewedBy?: string;
-	reviewedAt?: Date;
-	createdAt: Date;
-	updatedAt: Date;
-}
+// V1: Funeral director applications removed - auto-approved registration
 
 export interface UserManagementData {
 	uid: string;
 	email: string;
 	displayName?: string;
-	role: 'admin' | 'owner' | 'funeral_director' | 'family_member' | 'viewer';
+	role: 'admin' | 'owner' | 'funeral_director';
 	isAdmin: boolean;
 	suspended: boolean;
 	suspendedReason?: string;
@@ -39,7 +25,6 @@ export interface UserManagementData {
 export interface AdminDashboardStats {
 	totalUsers: number;
 	totalMemorials: number;
-	pendingApplications: number;
 	activeStreams: number;
 	newUsersThisWeek: number;
 	newMemorialsThisWeek: number;
@@ -48,7 +33,7 @@ export interface AdminDashboardStats {
 export interface AdminAction {
 	id: string;
 	adminId: string;
-	action: 'user_created' | 'user_suspended' | 'user_deleted' | 'role_changed' | 'application_approved' | 'application_rejected';
+	action: 'user_created' | 'user_suspended' | 'user_deleted' | 'role_changed';
 	targetType: 'user' | 'memorial' | 'application';
 	targetId: string;
 	details: Record<string, any>;

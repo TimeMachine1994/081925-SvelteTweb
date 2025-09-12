@@ -23,10 +23,10 @@ export const POST: RequestHandler = async ({ request, locals, params }) => {
       return json({ error: 'Memorial data not found' }, { status: 404 });
     }
 
-    // Check if user has permission to stream (funeral director, owner, or creator)
-    const canStream = memorial.ownerId === locals.user.uid || 
-                     memorial.createdBy === locals.user.uid || 
-                     memorial.funeralDirectorId === locals.user.uid ||
+    // Check if user has permission to stream (funeral director, owner, or admin)
+    const canStream = memorial.ownerUid === locals.user.uid || 
+                     memorial.funeralDirectorUid === locals.user.uid ||
+                     locals.user.role === 'admin' ||
                      locals.user.role === 'funeral_director';
 
     if (!canStream) {

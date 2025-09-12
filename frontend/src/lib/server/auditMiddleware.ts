@@ -51,7 +51,7 @@ export const auditMiddleware: Handle = async ({ event, resolve }) => {
 						...(event.request.method === 'POST' && { hasBody: true })
 					},
 					success,
-					errorMessage: error?.message
+					...(error?.message && { errorMessage: error.message })
 				});
 			}
 

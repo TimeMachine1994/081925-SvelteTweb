@@ -77,18 +77,17 @@ export const actions: Actions = {
 				lovedOneName: lovedOneName,
 				slug,
 				fullSlug,
-				createdByUserId: userRecord.uid,
+				ownerUid: userRecord.uid, // V1: Single source of truth for ownership
 				creatorEmail: email,
 				familyContactEmail: email,
 				createdAt: new Date(),
-				updatedAt: new Date(),
-				creatorUid: userRecord.uid // for legacy compatibility
+				updatedAt: new Date()
 			};
 			const memorialRef = await adminDb.collection('memorials').add(memorialData);
 			console.log(`Memorial created for ${lovedOneName} with slug: ${slug} 🕊️`);
 
 			// Index the new memorial in Algolia
-			await indexMemorial({ ...memorialData, id: memorialRef.id } as Memorial);
+			await indexMemorial({ ...memorialData, id: memorialRef.id } as unknown as Memorial);
 
 			// 5. Send enhanced registration email
 			await sendEnhancedRegistrationEmail({

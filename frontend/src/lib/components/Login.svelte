@@ -26,9 +26,10 @@
 		if (response.ok) {
 			const result = await response.json();
 			if (result.redirectTo) {
-				goto(result.redirectTo);
+				// Use window.location.href to avoid race condition with session cookie
+				window.location.href = result.redirectTo;
 			} else {
-				goto('/');
+				window.location.href = '/';
 			}
 		} else {
 			throw new Error('Failed to create session.');

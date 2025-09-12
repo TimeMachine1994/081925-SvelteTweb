@@ -5,49 +5,24 @@ export interface FuneralDirector {
   
   // Basic Info
   companyName: string;
-  licenseNumber: string;
   contactPerson: string;
   email: string;
   phone: string;
   
-  // Address
+  // Address (simplified)
   address: {
     street: string;
     city: string;
     state: string;
     zipCode: string;
-    country: string;
   };
   
-  // Business Details
-  businessType: 'funeral_home' | 'crematory' | 'memorial_service' | 'other';
-  servicesOffered: string[];
-  yearsInBusiness: number;
-  
-  // Account Status
-  status: 'pending' | 'approved' | 'suspended' | 'inactive';
-  verificationStatus: 'unverified' | 'pending' | 'verified';
-  
-  // Permissions
-  permissions: {
-    canCreateMemorials: boolean;
-    canManageMemorials: boolean;
-    canLivestream: boolean;
-    maxMemorials: number;
-  };
+  // Account Status (V1: auto-approved)
+  status: 'approved' | 'suspended' | 'inactive';
   
   // Metadata
   createdAt: Timestamp;
   updatedAt: Timestamp;
-  createdBy?: string;
-  
-  // Streaming Configuration
-  streamingConfig?: {
-    provider: 'youtube' | 'facebook' | 'custom';
-    streamKey?: string;
-    maxConcurrentStreams: number;
-    streamingEnabled: boolean;
-  };
 }
 
 export interface ServiceDetails {

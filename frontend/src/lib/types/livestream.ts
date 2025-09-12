@@ -90,7 +90,8 @@ export interface PaymentRecord {
 	paidAt?: Timestamp;
 }
 
-// Unified calculator configuration for Firestore
+// DEPRECATED: Use LivestreamConfig instead
+// This interface is kept temporarily for migration compatibility
 export interface CalculatorConfig {
 	formData: CalculatorFormData;
 	bookingItems: BookingItem[];

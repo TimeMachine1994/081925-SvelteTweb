@@ -38,11 +38,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
     const userRole = locals.user.role;
     const userId = locals.user.uid;
     
+    // Check if user owns this memorial
+    const isOwner = memorial.ownerUid === locals.user.uid;
+
     const hasPermission = 
       userRole === 'admin' ||
-      memorial?.createdByUserId === userId ||
-      memorial?.funeralDirectorUid === userId ||
-      (userRole === 'family_member' && memorial?.familyMemberUids?.includes(userId));
+      memorial?.ownerUid === userId ||
+      memorial?.funeralDirectorUid === userId;
 
     if (!hasPermission) {
       return json({ error: 'Insufficient permissions' }, { status: 403 });

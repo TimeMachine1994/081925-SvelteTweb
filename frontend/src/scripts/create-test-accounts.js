@@ -48,16 +48,6 @@ const testAccounts = [
       role: 'owner',
       phone: '(555) 987-6543'
     }
-  },
-  {
-    email: 'viewer@test.com',
-    password: 'test123',
-    role: 'viewer',
-    name: 'Mike Viewer',
-    data: {
-      role: 'viewer',
-      followedMemorials: []
-    }
   }
 ];
 
