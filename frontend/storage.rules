@@ -9,8 +9,9 @@ service firebase.storage {
 
     function isFamilyMember(memorialId) {
       // Check if an accepted invitation exists for this user and memorial
-      return firestore.exists(/databases/(default)/documents/invitations/$(request.auth.uid)_$(memorialId)) &&
-             firestore.get(/databases/(default)/documents/invitations/$(request.auth.uid)_$(memorialId)).data.status == 'accepted';
+      let invitationId = request.auth.uid + '_' + memorialId;
+      return firestore.exists(/databases/(default)/documents/invitations/$(invitationId)) &&
+             firestore.get(/databases/(default)/documents/invitations/$(invitationId)).data.status == 'accepted';
     }
 
     // Memorial photos:

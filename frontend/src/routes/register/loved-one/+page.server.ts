@@ -32,7 +32,7 @@ function generateSlug(lovedOneName: string): string {
 }
 
 export const actions: Actions = {
-	default: async ({ request }) => {
+	default: async ({ request, cookies }) => {
 		console.log('Family member registration started 👨‍👩‍👧‍👦');
 		const data = await request.formData();
 		const lovedOneName = (data.get('lovedOneName') as string)?.trim();
@@ -111,7 +111,11 @@ export const actions: Actions = {
 				console.log('⚠️ User not found, waiting additional time...');
 				await new Promise(resolve => setTimeout(resolve, 1000));
 			}
-			const customToken = await adminAuth.createCustomToken(userRecord.uid);
+			// Create custom token with additional claims to prevent tenant errors
+			const customToken = await adminAuth.createCustomToken(userRecord.uid, {
+				role: 'owner',
+				email: email
+			});
 			console.log(`Custom token created for ${email} 🎟️`);
 
 			// 7. Redirect to the session creation page

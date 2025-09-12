@@ -9,7 +9,7 @@ export default defineConfig({
 	workers: process.env.CI ? 1 : undefined,
 	reporter: 'html',
 	use: {
-		baseURL: process.env.PLAYWRIGHT_BASE_URL || 'https://tweblol-9nei05p5d-timemachine1994s-projects.vercel.app',
+		baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:5175',
 		trace: 'on-first-retry'
 	},
 	projects: [
@@ -17,6 +17,11 @@ export default defineConfig({
 			name: 'chromium',
 			use: { ...devices['Desktop Chrome'] }
 		}
-	]
-	// Removed webServer config since we're testing against live deployment
+	],
+	webServer: {
+		command: 'npm run dev',
+		port: 5173,
+		reuseExistingServer: !process.env.CI,
+		timeout: 120 * 1000
+	}
 });

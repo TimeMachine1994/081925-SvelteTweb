@@ -120,9 +120,14 @@ function determineAuditAction(pathname: string, method: string): string | null {
 		if (method === 'POST') return 'role_changed';
 	}
 
+	// Session routes
+	if (pathname.includes('/session')) {
+		if (method === 'POST') return 'session_created';
+	}
+
 	// Generic API access for other routes
 	if (pathname.startsWith('/api/')) {
-		return 'api_access_denied'; // Will be overridden to success if no error
+		return 'api_accessed'; // Generic API access logging
 	}
 
 	return null;

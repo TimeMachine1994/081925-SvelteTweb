@@ -129,7 +129,10 @@ export const actions: Actions = {
 			}
 
 			// Create a custom token to allow for auto-login on the client
-			const customToken = await auth.createCustomToken(uid);
+			const customToken = await auth.createCustomToken(uid, {
+				role: 'funeral_director',
+				email: applicationData.email
+			});
 
 			return {
 				success: true,
