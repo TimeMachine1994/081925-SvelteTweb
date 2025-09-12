@@ -62,6 +62,10 @@ export const actions: Actions = {
 			await adminAuth.setCustomUserClaims(userRecord.uid, { role: 'owner' });
 			console.log(`Custom claim 'owner' set for ${email} 👑`);
 
+			// Wait for user propagation in Firebase
+			console.log('⏳ Waiting for Firebase user propagation...');
+			await new Promise(resolve => setTimeout(resolve, 2000));
+
 			// 3. Create user profile in Firestore
 			await adminDb.collection('users').doc(userRecord.uid).set({
 				email,
@@ -99,6 +103,14 @@ export const actions: Actions = {
 			});
 
 			// 6. Create a custom token for auto-login
+			// Verify user exists before creating token
+			try {
+				await adminAuth.getUser(userRecord.uid);
+				console.log('✅ User record verified before token creation');
+			} catch (verifyError) {
+				console.log('⚠️ User not found, waiting additional time...');
+				await new Promise(resolve => setTimeout(resolve, 1000));
+			}
 			const customToken = await adminAuth.createCustomToken(userRecord.uid);
 			console.log(`Custom token created for ${email} 🎟️`);
 

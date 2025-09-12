@@ -3,23 +3,16 @@ import { getFirestore, connectFirestoreEmulator, type Firestore } from 'firebase
 import { getAuth, connectAuthEmulator, type Auth } from 'firebase/auth';
 import { getStorage, connectStorageEmulator, type FirebaseStorage } from 'firebase/storage';
 import { dev, browser } from '$app/environment';
-import { 
-	PUBLIC_FIREBASE_API_KEY,
-	PUBLIC_FIREBASE_AUTH_DOMAIN,
-	PUBLIC_FIREBASE_PROJECT_ID,
-	PUBLIC_FIREBASE_STORAGE_BUCKET,
-	PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-	PUBLIC_FIREBASE_APP_ID
-} from '$env/static/public';
+import { env } from '$env/dynamic/public';
 
-// Firebase configuration using environment variables
+// Firebase configuration with environment variables and fallbacks
 const firebaseConfig = {
-	apiKey: PUBLIC_FIREBASE_API_KEY,
-	authDomain: PUBLIC_FIREBASE_AUTH_DOMAIN,
-	projectId: PUBLIC_FIREBASE_PROJECT_ID,
-	storageBucket: PUBLIC_FIREBASE_STORAGE_BUCKET,
-	messagingSenderId: PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-	appId: PUBLIC_FIREBASE_APP_ID
+	apiKey: env.PUBLIC_FIREBASE_API_KEY || 'AIzaSyAXmTxzYRc-LhMEW75nZjjjQCZov1gpiw0',
+	authDomain: env.PUBLIC_FIREBASE_AUTH_DOMAIN || 'fir-tweb.firebaseapp.com',
+	projectId: env.PUBLIC_FIREBASE_PROJECT_ID || 'fir-tweb',
+	storageBucket: env.PUBLIC_FIREBASE_STORAGE_BUCKET || 'fir-tweb.firebasestorage.app',
+	messagingSenderId: env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '509455146790',
+	appId: env.PUBLIC_FIREBASE_APP_ID || '1:509455146790:web:7ec99527214b05d7b9ebe7'
 };
 
 console.log('🔥 Firebase Config:', {

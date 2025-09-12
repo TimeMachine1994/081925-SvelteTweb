@@ -25,7 +25,25 @@ const authHandle: Handle = async ({ event, resolve }) => {
 			console.log('  - exp:', new Date(decodedClaims.exp * 1000));
 			
 			console.log('👤 Fetching user record...');
-			const userRecord = await adminAuth.getUser(decodedClaims.uid);
+			// Add retry logic for user record fetching to handle propagation delays
+			let userRecord;
+			let retryCount = 0;
+			const maxRetries = 3;
+			
+			while (retryCount < maxRetries) {
+				try {
+					userRecord = await adminAuth.getUser(decodedClaims.uid);
+					break;
+				} catch (userError: any) {
+					if (userError.code === 'auth/user-not-found' && retryCount < maxRetries - 1) {
+						console.log(`⏳ User not found, retry ${retryCount + 1}/${maxRetries} in 1s...`);
+						await new Promise(resolve => setTimeout(resolve, 1000));
+						retryCount++;
+					} else {
+						throw userError;
+					}
+				}
+			}
 			console.log('✅ User record fetched successfully');
 			console.log('👤 User record details:');
 			console.log('  - uid:', userRecord.uid);
