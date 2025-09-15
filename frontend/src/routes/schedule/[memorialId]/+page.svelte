@@ -28,13 +28,13 @@
     additionalLocation: {
       enabled: false,
       location: { name: '', address: '', isUnknown: false },
-      startTime: null,
+      time: { date: null, time: null, isUnknown: false },
       hours: 2
     },
     additionalDay: {
       enabled: false,
       location: { name: '', address: '', isUnknown: false },
-      startTime: null,
+      time: { date: null, time: null, isUnknown: false },
       hours: 2
     },
     funeralDirectorName: '',
@@ -49,6 +49,37 @@
     updatedAt: new Date(),
     autoSaved: false
   });
+
+  // Data structure validation logging - moved to onMount to avoid state reference warnings
+
+  // Validate data structure matches TypeScript interface
+  function validateDataStructure() {
+    const errors = [];
+    
+    if (!formData.additionalLocation.time) {
+      errors.push('❌ additionalLocation.time is missing');
+    } else {
+      if (!('date' in formData.additionalLocation.time)) errors.push('❌ additionalLocation.time.date is missing');
+      if (!('time' in formData.additionalLocation.time)) errors.push('❌ additionalLocation.time.time is missing');
+      if (!('isUnknown' in formData.additionalLocation.time)) errors.push('❌ additionalLocation.time.isUnknown is missing');
+    }
+    
+    if (!formData.additionalDay.time) {
+      errors.push('❌ additionalDay.time is missing');
+    } else {
+      if (!('date' in formData.additionalDay.time)) errors.push('❌ additionalDay.time.date is missing');
+      if (!('time' in formData.additionalDay.time)) errors.push('❌ additionalDay.time.time is missing');
+      if (!('isUnknown' in formData.additionalDay.time)) errors.push('❌ additionalDay.time.isUnknown is missing');
+    }
+    
+    if (errors.length > 0) {
+      console.error('🚨 [VALIDATION] Data structure errors:', errors);
+      return false;
+    } else {
+      console.log('✅ [VALIDATION] Data structure is valid');
+      return true;
+    }
+  }
 
   // Auto-save functionality
   let saveStatus = $state<'saved' | 'saving' | 'unsaved' | 'error'>('saved');
@@ -236,6 +267,29 @@
       saveStatus = 'unsaved';
     }
     formData.updatedAt = new Date();
+    
+    // Log form data changes for debugging
+    console.log('💾 [AUTO-SAVE] Triggering auto-save with data:', {
+      additionalLocation: {
+        enabled: formData.additionalLocation.enabled,
+        timeDate: formData.additionalLocation.time?.date,
+        timeTime: formData.additionalLocation.time?.time,
+        hours: formData.additionalLocation.hours
+      },
+      additionalDay: {
+        enabled: formData.additionalDay.enabled,
+        timeDate: formData.additionalDay.time?.date,
+        timeTime: formData.additionalDay.time?.time,
+        hours: formData.additionalDay.hours
+      }
+    });
+    
+    // Validate data structure before saving
+    const isValid = validateDataStructure();
+    if (!isValid) {
+      console.error('🚨 [AUTO-SAVE] Attempting to save invalid data structure!');
+    }
+    
     autoSave.triggerAutoSave(formData);
   }
 
@@ -262,17 +316,53 @@
 
   // Watch for changes and trigger auto-save
   $effect(() => {
-    if (browser && formData.lovedOneName) {
-      triggerAutoSave();
+    if (browser) {
+      // Trigger reactivity for pricing calculations
+      bookingItems;
+      totalPrice;
+    }
+  });
+
+  // Watch for checkbox changes specifically
+  $effect(() => {
+    if (browser) {
+      console.log('🔄 [REACTIVITY] Additional services state changed:', {
+        additionalLocation: formData.additionalLocation.enabled,
+        additionalDay: formData.additionalDay.enabled,
+        additionalLocationHours: formData.additionalLocation.hours,
+        additionalDayHours: formData.additionalDay.hours
+      });
+      
+      // Force reactivity trigger
+      formData.additionalLocation.enabled;
+      formData.additionalDay.enabled;
     }
   });
 
   onMount(async () => {
+    // Data structure validation logging
+    console.log('🔍 [VALIDATION] Form data initialized:', {
+      additionalLocation: {
+        hasTimeProperty: 'time' in formData.additionalLocation,
+        timeStructure: formData.additionalLocation.time,
+        hasStartTimeProperty: 'startTime' in formData.additionalLocation,
+        enabled: formData.additionalLocation.enabled
+      },
+      additionalDay: {
+        hasTimeProperty: 'time' in formData.additionalDay,
+        timeStructure: formData.additionalDay.time,
+        hasStartTimeProperty: 'startTime' in formData.additionalDay,
+        enabled: formData.additionalDay.enabled
+      }
+    });
+    
     // Load existing auto-saved data
     const autoSavedData = await autoSave.loadAutoSavedData();
     if (autoSavedData) {
       formData = autoSavedData;
       console.log('✅ Auto-saved data automatically restored');
+      // Validate restored data structure
+      validateDataStructure();
     }
   });
 
@@ -470,10 +560,16 @@
                 <input 
                   type="checkbox" 
                   bind:checked={formData.additionalLocation.enabled}
-                  onchange={triggerAutoSave}
+                  onchange={() => {
+                    console.log('📋 [CHECKBOX] Additional Location toggled:', formData.additionalLocation.enabled);
+                    triggerAutoSave();
+                  }}
                   class="h-5 w-5 text-amber-400 bg-gray-700 border-gray-600 rounded focus:ring-amber-500"
                 />
               </label>
+              
+              <!-- Debug: Always show state -->
+              <div class="text-xs text-gray-500 mb-2">Debug: additionalLocation.enabled = {formData.additionalLocation.enabled}</div>
               
               {#if formData.additionalLocation.enabled}
                 <div class="space-y-4">
@@ -536,10 +632,16 @@
                 <input 
                   type="checkbox" 
                   bind:checked={formData.additionalDay.enabled}
-                  onchange={triggerAutoSave}
+                  onchange={() => {
+                    console.log('📋 [CHECKBOX] Additional Day toggled:', formData.additionalDay.enabled);
+                    triggerAutoSave();
+                  }}
                   class="h-5 w-5 text-amber-400 bg-gray-700 border-gray-600 rounded focus:ring-amber-500"
                 />
               </label>
+              
+              <!-- Debug: Always show state -->
+              <div class="text-xs text-gray-500 mb-2">Debug: additionalDay.enabled = {formData.additionalDay.enabled}</div>
               
               {#if formData.additionalDay.enabled}
                 <div class="space-y-4">
