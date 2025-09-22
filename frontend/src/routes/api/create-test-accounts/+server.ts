@@ -40,6 +40,16 @@ const testAccounts = [
       phone: '(555) 987-6543'
     }
   },
+  {
+    email: 'viewer@test.com',
+    password: 'test123',
+    role: 'viewer',
+    name: 'Mike Viewer',
+    data: {
+      role: 'viewer',
+      phone: '(555) 555-5555'
+    }
+  }
 ];
 
 export const POST: RequestHandler = async () => {
@@ -90,30 +100,37 @@ export const POST: RequestHandler = async () => {
       
       const memorialData = {
         lovedOneName: 'Robert Johnson',
-        dateOfBirth: '1945-03-15',
-        dateOfPassing: '2024-09-01',
-        biography: 'Robert was a loving father, grandfather, and friend to many. He spent his career as a teacher, inspiring countless students over 40 years. He loved fishing, gardening, and spending time with his family.',
-        serviceDetails: {
-          date: '2024-09-15',
-          time: '2:00 PM',
-          location: 'Smith & Sons Funeral Home',
-          address: '123 Memorial Drive, Orlando, FL 32801'
+        slug: 'robert-johnson-test',
+        fullSlug: `robert-johnson-test-${Date.now()}`,
+        ownerUid: ownerUser.uid,
+        creatorEmail: 'owner@test.com',
+        familyContactEmail: 'owner@test.com',
+        
+        // New services structure
+        services: {
+          main: {
+            location: {
+              name: 'Smith & Sons Funeral Home',
+              address: '123 Memorial Drive, Orlando, FL 32801',
+              isUnknown: false
+            },
+            time: {
+              date: '2024-09-15',
+              time: '14:00',
+              isUnknown: false
+            },
+            hours: 2
+          },
+          additional: []
         },
-        createdBy: ownerUser.uid,
-        createdAt: new Date().toISOString(),
+        
+        // Basic memorial settings
         isPublic: true,
-        photos: [],
-        tributes: [
-          {
-            id: 'tribute1',
-            authorName: 'Mary Johnson',
-            authorEmail: 'mary@example.com',
-            message: 'Dad was the most wonderful man I ever knew. He taught me to be kind, work hard, and always help others.',
-            createdAt: new Date().toISOString()
-          }
-        ],
-        followers: [],
-        followerCount: 0
+        content: 'Robert was a loving father, grandfather, and friend to many. He spent his career as a teacher, inspiring countless students over 40 years. He loved fishing, gardening, and spending time with his family.',
+        custom_html: null,
+        
+        createdAt: new Date(),
+        updatedAt: new Date()
       };
       
       const memorialRef = await adminDb.collection('memorials').add(memorialData);

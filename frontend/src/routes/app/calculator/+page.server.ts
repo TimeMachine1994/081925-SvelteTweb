@@ -44,6 +44,12 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 				if (memorialData.updatedAt && typeof memorialData.updatedAt.toDate === 'function') {
 					(memorialData.updatedAt as any) = memorialData.updatedAt.toDate().toISOString();
 				}
+				console.log('📊 Memorial data loaded:', {
+					id: memorialSnap.id,
+					lovedOneName: memorialData.lovedOneName,
+					hasServices: !!memorialData.services,
+					services: memorialData.services
+				});
 				memorial = { ...(memorialData as Omit<Memorial, 'id'>), id: memorialSnap.id };
 			}
 		}

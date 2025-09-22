@@ -1,31 +1,7 @@
 import type { Timestamp } from 'firebase/firestore';
+import type { ServiceDetails, AdditionalServiceDetails, LocationInfo, TimeInfo } from './memorial';
 
 export type Tier = 'solo' | 'live' | 'legacy' | null;
-
-export interface LocationInfo {
-	name: string;
-	address: string;
-	isUnknown: boolean;
-}
-
-export interface TimeInfo {
-	date: string | null;
-	time: string | null;
-	isUnknown: boolean;
-}
-
-export interface ServiceDetails {
-	location: LocationInfo;
-	time: TimeInfo;
-	hours: number;
-}
-
-export interface AdditionalServiceDetails {
-	enabled: boolean;
-	location: LocationInfo;
-	time: TimeInfo;
-	hours: number;
-}
 
 export interface Addons {
 	photography: boolean;
@@ -35,27 +11,17 @@ export interface Addons {
 }
 
 export interface CalculatorFormData {
-	// Memorial context
-	memorialId?: string;
-	lovedOneName: string;
+	// Memorial Reference (service details now stored in Memorial)
+	memorialId: string;             // Required - references Memorial for service data
 	
-	// Service configuration
-	selectedTier: Tier;
-	mainService: ServiceDetails;
-	additionalLocation: AdditionalServiceDetails;
-	additionalDay: AdditionalServiceDetails;
-	
-	// Contact information
-	funeralDirectorName: string;
-	funeralHome: string;
-	
-	// Add-ons
-	addons: Addons;
+	// Calculator-Specific Configuration
+	selectedTier: Tier;             // Service tier
+	addons: Addons;                 // Selected add-on services
 	
 	// Metadata
-	createdAt?: Date;
-	updatedAt?: Date;
-	autoSaved?: boolean;
+	createdAt?: Date;               // Form creation
+	updatedAt?: Date;               // Form update
+	autoSaved?: boolean;            // Auto-save flag
 }
 
 export interface BookingItem {
@@ -72,7 +38,7 @@ export interface LivestreamConfig {
 	formData: CalculatorFormData;
 	bookingItems: BookingItem[];
 	total: number;
-	userId: string;
+	uid: string;
 	memorialId: string;
 	status: 'draft' | 'saved' | 'pending_payment' | 'paid' | 'confirmed';
 	createdAt: Timestamp;
@@ -88,22 +54,4 @@ export interface PaymentRecord {
 	amount: number;
 	createdAt: Timestamp;
 	paidAt?: Timestamp;
-}
-
-// DEPRECATED: Use LivestreamConfig instead
-// This interface is kept temporarily for migration compatibility
-export interface CalculatorConfig {
-	formData: CalculatorFormData;
-	bookingItems: BookingItem[];
-	total: number;
-	lastModified: Timestamp;
-	lastModifiedBy: string;
-	status: 'draft' | 'saved' | 'paid' | 'confirmed';
-	autoSave?: {
-		formData: CalculatorFormData;
-		lastModified: Date;
-		lastModifiedBy: string;
-		timestamp: number;
-		autoSave: boolean;
-	};
 }

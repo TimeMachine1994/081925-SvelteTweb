@@ -24,7 +24,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       return json({ error: 'Missing required data' }, { status: 400 });
     }
 
-    console.log('💳 Creating payment intent:', { amount, memorialId, userId: locals.user.uid });
+    console.log('💳 Creating payment intent:', { amount, memorialId, uid: locals.user.uid });
 
     // Verify memorial exists and user has permission
     const memorialRef = adminDb.collection('memorials').doc(memorialId);
@@ -36,15 +36,15 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
     const memorial = memorialDoc.data();
     const userRole = locals.user.role;
-    const userId = locals.user.uid;
+    const uid = locals.user.uid;
     
     // Check if user owns this memorial
     const isOwner = memorial.ownerUid === locals.user.uid;
 
     const hasPermission = 
       userRole === 'admin' ||
-      memorial?.ownerUid === userId ||
-      memorial?.funeralDirectorUid === userId;
+      memorial?.ownerUid === uid ||
+      memorial?.funeralDirectorUid === uid;
 
     if (!hasPermission) {
       return json({ error: 'Insufficient permissions' }, { status: 403 });
@@ -68,7 +68,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       cancel_url: `${request.headers.get('origin')}/schedule/${memorialId}`,
       metadata: {
         memorialId,
-        userId: locals.user.uid,
+        uid: locals.user.uid,
         customerEmail: customerInfo?.email || locals.user.email || '',
         lovedOneName: memorial?.lovedOneName || ''
       },

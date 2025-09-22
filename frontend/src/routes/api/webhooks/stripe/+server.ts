@@ -3,7 +3,10 @@ import type { RequestHandler } from './$types';
 import Stripe from 'stripe';
 import { adminDb } from '$lib/firebase-admin';
 import { Timestamp, FieldValue } from 'firebase-admin/firestore';
-import { STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET } from '$env/static/private';
+import { STRIPE_SECRET_KEY } from '$env/static/private';
+
+// Use fallback for STRIPE_WEBHOOK_SECRET if not set
+const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY, {
   apiVersion: '2023-10-16',
@@ -62,7 +65,7 @@ export const POST: RequestHandler = async ({ request }) => {
 async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
   try {
     const memorialId = paymentIntent.metadata.memorialId;
-    const userId = paymentIntent.metadata.userId;
+    const uid = paymentIntent.metadata.uid;
 
     if (!memorialId) {
       console.error('Missing memorialId in payment intent metadata');
@@ -81,7 +84,7 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
         status: 'succeeded',
         amount: paymentIntent.amount / 100,
         paidAt: Timestamp.now(),
-        createdBy: userId
+        createdBy: uid
       })
     });
 
@@ -101,7 +104,7 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
 async function handlePaymentFailure(paymentIntent: Stripe.PaymentIntent) {
   try {
     const memorialId = paymentIntent.metadata.memorialId;
-    const userId = paymentIntent.metadata.userId;
+    const uid = paymentIntent.metadata.uid;
 
     if (!memorialId) {
       console.error('Missing memorialId in payment intent metadata');
@@ -121,7 +124,7 @@ async function handlePaymentFailure(paymentIntent: Stripe.PaymentIntent) {
         amount: paymentIntent.amount / 100,
         failedAt: Timestamp.now(),
         failureReason: paymentIntent.last_payment_error?.message || 'Payment failed',
-        createdBy: userId
+        createdBy: uid
       })
     });
 
@@ -141,7 +144,7 @@ async function handlePaymentFailure(paymentIntent: Stripe.PaymentIntent) {
 async function handlePaymentActionRequired(paymentIntent: Stripe.PaymentIntent) {
   try {
     const memorialId = paymentIntent.metadata.memorialId;
-    const userId = paymentIntent.metadata.userId;
+    const uid = paymentIntent.metadata.uid;
 
     if (!memorialId) {
       console.error('Missing memorialId in payment intent metadata');
@@ -160,7 +163,7 @@ async function handlePaymentActionRequired(paymentIntent: Stripe.PaymentIntent) 
         status: 'action_required',
         amount: paymentIntent.amount / 100,
         actionRequiredAt: Timestamp.now(),
-        createdBy: userId
+        createdBy: uid
       })
     });
 

@@ -2,7 +2,10 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { adminAuth, adminDb } from '$lib/firebase-admin';
 import { requireLivestreamAccess, createMemorialRequest } from '$lib/server/memorialMiddleware';
-import { CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, CLOUDFLARE_CUSTOMER_CODE } from '$env/static/private';
+import { CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN } from '$env/static/private';
+
+// Optional Cloudflare customer code - fallback to empty string if not set
+const CLOUDFLARE_CUSTOMER_CODE = process.env.CLOUDFLARE_CUSTOMER_CODE || '';
 
 /**
  * Start livestream for a memorial

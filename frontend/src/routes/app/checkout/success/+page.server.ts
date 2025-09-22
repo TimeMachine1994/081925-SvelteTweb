@@ -2,7 +2,8 @@ import { adminDb } from '$lib/server/firebase';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { sendEnhancedRegistrationEmail } from '$lib/server/email';
-import { PUBLIC_BASE_URL } from '$env/static/public';
+// Use fallback for PUBLIC_BASE_URL if not set
+const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || 'http://localhost:5173';
 import type { LivestreamConfig } from '$lib/types/livestream';
 
 export const load: PageServerLoad = async ({ url, locals }) => {

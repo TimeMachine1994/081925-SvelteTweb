@@ -86,8 +86,7 @@
   let lastSaved = $state('');
 
   // Initialize auto-save
-  const autoSave = useAutoSave('', 2000, '', {
-    memorialId,
+  const autoSave = useAutoSave(memorialId, {
     delay: 2000,
     onSave: (success, error) => {
       if (success) {
@@ -290,7 +289,29 @@
       console.error('🚨 [AUTO-SAVE] Attempting to save invalid data structure!');
     }
     
-    autoSave.triggerAutoSave(formData);
+    // Create proper AutoSaveData structure
+    const autoSaveData = {
+      calculatorData: formData,
+      services: {
+        main: formData.mainService,
+        additional: [
+          ...(formData.additionalLocation.enabled ? [{
+            type: 'location',
+            location: formData.additionalLocation.location,
+            time: formData.additionalLocation.time,
+            hours: formData.additionalLocation.hours
+          }] : []),
+          ...(formData.additionalDay.enabled ? [{
+            type: 'day',
+            location: formData.additionalDay.location,
+            time: formData.additionalDay.time,
+            hours: formData.additionalDay.hours
+          }] : [])
+        ]
+      }
+    };
+    
+    autoSave.triggerAutoSave(autoSaveData);
   }
 
   function handleBookNow() {
@@ -307,8 +328,27 @@
   }
 
   async function handleSaveAndPayLater() {
-    // Force immediate save
-    await autoSave.saveNow(formData);
+    // Force immediate save with proper data structure
+    await autoSave.saveNow({
+      calculatorData: formData,
+      services: {
+        main: formData.mainService,
+        additional: [
+          ...(formData.additionalLocation.enabled ? [{
+            type: 'location',
+            location: formData.additionalLocation.location,
+            time: formData.additionalLocation.time,
+            hours: formData.additionalLocation.hours
+          }] : []),
+          ...(formData.additionalDay.enabled ? [{
+            type: 'day',
+            location: formData.additionalDay.location,
+            time: formData.additionalDay.time,
+            hours: formData.additionalDay.hours
+          }] : [])
+        ]
+      }
+    });
     
     // Redirect to profile page for both owner and funeral director
     goto('/profile');

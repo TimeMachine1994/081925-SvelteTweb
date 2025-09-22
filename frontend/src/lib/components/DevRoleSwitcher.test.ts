@@ -10,6 +10,20 @@ vi.mock('$lib/firebase', () => ({
   }
 }));
 
+// Mock auth store
+vi.mock('$lib/auth', () => ({
+  user: {
+    subscribe: vi.fn(() => () => {}),
+    set: vi.fn(),
+    update: vi.fn()
+  }
+}));
+
+// Mock navigation
+vi.mock('$app/navigation', () => ({
+  goto: vi.fn()
+}));
+
 // Mock stores
 vi.mock('$app/stores', () => ({
   page: {

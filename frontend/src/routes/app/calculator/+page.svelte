@@ -1,12 +1,11 @@
 <script lang="ts">
 	import Calculator from '$lib/components/calculator/Calculator.svelte';
 	import { page } from '$app/stores';
+	import type { PageData } from './$types';
 
-	let { data } = $props();
+	let { data }: { data: PageData } = $props();
 
-	const memorialId = $page.url.searchParams.get('memorialId');
-
-	console.log('👽 Calculator Page Initializing...', { memorialId, data });
+	const memorialId = $derived($page.url.searchParams.get('memorialId'));
 </script>
 
 <svelte:head>

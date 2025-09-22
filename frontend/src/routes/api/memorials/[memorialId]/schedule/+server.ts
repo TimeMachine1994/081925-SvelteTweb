@@ -11,14 +11,14 @@ export const PATCH: RequestHandler = async ({ request, locals, params }) => {
 
     const { memorialId } = params;
     const data = await request.json();
-    const { formData } = data;
+    const { services, calculatorData } = data;
 
-    if (!formData || !formData.mainService) {
-      return json({ error: 'Invalid form data provided' }, { status: 400 });
+    if (!services || !services.main) {
+      return json({ error: 'Invalid services data provided' }, { status: 400 });
     }
 
-    const { mainService } = formData;
-    const { date, time, isUnknown } = mainService.time;
+    const { main, additional } = services;
+    const { date, time, isUnknown } = main.time;
 
     if (!isUnknown && (!date || !time)) {
       return json({ error: 'Service date and time are required unless marked as unknown' }, { status: 400 });
@@ -46,15 +46,21 @@ export const PATCH: RequestHandler = async ({ request, locals, params }) => {
       return json({ error: 'Permission denied' }, { status: 403 });
     }
 
+    // Update Memorial.services with new structure
     const updateData: any = {
-      'schedule.mainService': mainService,
-      'schedule.timeIsUnknown': isUnknown,
+      'services.main': main,
+      'services.additional': additional || [],
       updatedAt: Timestamp.now()
     };
 
-    if (!isUnknown) {
-      const serviceDateTime = new Date(`${date}T${time}`);
-      updateData['schedule.serviceDate'] = Timestamp.fromDate(serviceDateTime);
+    // Also update calculator config if provided
+    if (calculatorData) {
+      updateData.calculatorConfig = {
+        ...calculatorData,
+        memorialId,
+        lastModified: Timestamp.now(),
+        lastModifiedBy: locals.user.uid
+      };
     }
 
     await adminDb.collection('memorials').doc(memorialId).update(updateData);
@@ -62,8 +68,9 @@ export const PATCH: RequestHandler = async ({ request, locals, params }) => {
     return json({ 
       success: true,
       message: 'Schedule updated successfully',
-      schedule: {
-        ...mainService
+      services: {
+        main,
+        additional: additional || []
       }
     });
 

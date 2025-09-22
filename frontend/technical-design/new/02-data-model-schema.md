@@ -12,7 +12,9 @@ Stores user profiles and authentication metadata for all system users.
 
 #### Schema
 ```typescript
-interface User {
+// User interface is defined in app.d.ts as part of App.Locals and App.PageData
+// Actual User document structure in Firestore:
+export interface User {
   uid: string;                    // Firebase Auth UID (document ID)
   email: string;                  // User email address
   displayName?: string;           // Full name
@@ -29,6 +31,15 @@ interface User {
   createdByFuneralDirector?: string; // UID of FD who created family account
   deleted?: boolean;              // Soft delete flag
   deletedAt?: Timestamp;          // Soft delete timestamp
+}
+
+// Session user context (from app.d.ts):
+export interface SessionUser {
+  uid: string;
+  email: string | null;
+  displayName?: string;
+  role: 'admin' | 'owner' | 'funeral_director';
+  isAdmin: boolean;
 }
 ```
 
@@ -71,15 +82,21 @@ interface Memorial {
   deathDate?: string;             // Date of death
   imageUrl?: string;              // Profile photo URL
   
-  // Service Details
-  memorialDate?: string;          // Memorial service date
-  memorialTime?: string;          // Memorial service time
-  serviceDate?: string;           // Alternative service date field
-  serviceTime?: string;           // Alternative service time field
-  memorialLocationName?: string;  // Service location name
-  memorialLocationAddress?: string; // Service location address
-  location?: string;              // General location field
-  duration?: number;              // Service duration in hours
+  // Service Details (NEW: Consolidated structure)
+  services: {
+    main: ServiceDetails;         // Primary service details
+    additional: AdditionalServiceDetails[]; // Additional locations/days
+  };
+  
+  // Legacy Service Fields (DEPRECATED - maintained for backward compatibility)
+  memorialDate?: string;          // Legacy date field
+  memorialTime?: string;          // Legacy time field
+  memorialLocationName?: string;  // Legacy location name
+  memorialLocationAddress?: string; // Legacy location address
+  serviceDate?: string;           // Legacy service date
+  serviceTime?: string;           // Legacy service time
+  location?: string;              // Legacy location
+  duration?: number;              // Legacy duration
   
   // Content
   isPublic: boolean;              // Public visibility flag
@@ -126,6 +143,32 @@ interface Embed {
   embedUrl: string;               // Embed URL
   createdAt: Timestamp;           // Creation timestamp
   updatedAt: Timestamp;           // Update timestamp
+}
+
+// Service Detail Interfaces (moved from LivestreamConfig)
+interface ServiceDetails {
+  location: LocationInfo;         // Service location
+  time: TimeInfo;                 // Service time
+  hours: number;                  // Duration in hours
+}
+
+interface AdditionalServiceDetails {
+  enabled: boolean;               // Whether service is enabled
+  location: LocationInfo;         // Service location
+  time: TimeInfo;                 // Service time
+  hours: number;                  // Duration in hours
+}
+
+interface LocationInfo {
+  name: string;                   // Location name
+  address: string;                // Location address
+  isUnknown: boolean;             // Unknown location flag
+}
+
+interface TimeInfo {
+  date: string | null;            // Service date
+  time: string | null;            // Service time
+  isUnknown: boolean;             // Unknown time flag
 }
 ```
 
@@ -198,12 +241,12 @@ Comprehensive audit trail for all system actions and security events.
 
 #### Schema
 ```typescript
-interface AuditEvent {
+export interface AuditEvent {
   id?: string;                    // Document ID (auto-generated)
   timestamp: Date;                // Event timestamp
   
   // User Information
-  userId: string;                 // Acting user UID
+  uid: string;                    // Acting user UID
   userEmail: string;              // Acting user email
   userRole: 'admin' | 'owner' | 'funeral_director'; // Acting user role
   
@@ -239,7 +282,7 @@ type AuditAction =
 ```
 
 #### Indexes
-- `userId` (for user action history)
+- `uid` (for user action history)
 - `action` (for action type filtering)
 - `resourceType` (for resource filtering)
 - `timestamp` (for chronological queries)
@@ -267,7 +310,7 @@ interface LivestreamConfig {
   total: number;                  // Total cost
   
   // Ownership
-  userId: string;                 // User who created booking
+  uid: string;                    // User who created booking
   memorialId: string;             // Associated memorial
   
   // Status
@@ -283,52 +326,17 @@ interface LivestreamConfig {
 }
 
 interface CalculatorFormData {
-  // Memorial Context
-  memorialId?: string;            // Associated memorial ID
-  lovedOneName: string;           // Name of deceased
+  // Memorial Reference (service details now stored in Memorial)
+  memorialId: string;             // Required - references Memorial for service data
   
-  // Service Configuration
+  // Calculator-Specific Configuration
   selectedTier: 'solo' | 'live' | 'legacy' | null; // Service tier
-  mainService: ServiceDetails;    // Primary service details
-  additionalLocation: AdditionalServiceDetails; // Additional location
-  additionalDay: AdditionalServiceDetails;      // Additional day
-  
-  // Contact Information
-  funeralDirectorName: string;    // FD name
-  funeralHome: string;            // Funeral home name
-  
-  // Add-ons
   addons: Addons;                 // Selected add-on services
   
   // Metadata
   createdAt?: Date;               // Form creation
   updatedAt?: Date;               // Form update
   autoSaved?: boolean;            // Auto-save flag
-}
-
-interface ServiceDetails {
-  location: LocationInfo;         // Service location
-  time: TimeInfo;                 // Service time
-  hours: number;                  // Duration in hours
-}
-
-interface AdditionalServiceDetails {
-  enabled: boolean;               // Whether service is enabled
-  location: LocationInfo;         // Service location
-  time: TimeInfo;                 // Service time
-  hours: number;                  // Duration in hours
-}
-
-interface LocationInfo {
-  name: string;                   // Location name
-  address: string;                // Location address
-  isUnknown: boolean;             // Unknown location flag
-}
-
-interface TimeInfo {
-  date: string | null;            // Service date
-  time: string | null;            // Service time
-  isUnknown: boolean;             // Unknown time flag
 }
 
 interface Addons {
@@ -349,7 +357,7 @@ interface BookingItem {
 ```
 
 #### Indexes
-- `userId` (for user bookings)
+- `uid` (for user bookings)
 - `memorialId` (for memorial bookings)
 - `status` (for booking status queries)
 - `createdAt` (for chronological sorting)
@@ -400,14 +408,14 @@ Tracks memorial followers for engagement metrics.
 #### Schema
 ```typescript
 interface Follower {
-  userId: string;                 // Follower UID
+  uid: string;                    // Follower UID
   followedAt: Timestamp;          // Follow timestamp
 }
 ```
 
 #### Collection Structure
 ```
-memorials/{memorialId}/followers/{userId}
+memorials/{memorialId}/followers/{uid}
 ```
 
 #### Indexes
@@ -429,6 +437,7 @@ memorials/{memorialId}/followers/{userId}
 
 ### Memorial → Livestream Config Relationship
 - **One-to-Many**: One memorial can have multiple livestream configurations
+- **Data Flow**: Memorial stores service details, LivestreamConfig references Memorial + manages booking
 - **Lifecycle**: Configurations progress from draft → paid → confirmed
 
 ### User → Audit Log Relationship
@@ -438,6 +447,33 @@ memorials/{memorialId}/followers/{userId}
 ### Memorial → Follower Relationship
 - **One-to-Many**: One memorial can have multiple followers
 - **Subcollection**: Followers stored as subcollection under memorial
+
+## Data Flow Design
+
+### Funeral Director Registration → Memorial Creation
+```
+1. Funeral director creates memorial via /register/funeral-director
+2. Initial service details written to Memorial.services.main
+3. Memorial created with single main service location/time
+4. Family account created and linked as ownerUid
+```
+
+### Calculator Page Workflow
+```
+1. Calculator loads existing Memorial.services data from server-side page load
+2. User can add/remove additional locations via Memorial.services.additional[]
+3. User selects packages/addons (stored in LivestreamConfig)
+4. Calculator writes service changes back to Memorial via auto-save
+5. Booking data (tier, addons, pricing) stored in LivestreamConfig
+6. LivestreamConfig references Memorial via memorialId
+7. Auto-save triggers on form changes to preserve user progress
+8. Final save creates/updates LivestreamConfig with complete booking data
+```
+
+### Data Authority
+- **Memorial Collection**: Authoritative source for service details (locations, times, hours)
+- **LivestreamConfig Collection**: Authoritative source for booking details (packages, addons, pricing)
+- **Calculator**: Reads from Memorial, writes to both Memorial (services) and LivestreamConfig (booking)
 
 ## Data Migration Considerations
 

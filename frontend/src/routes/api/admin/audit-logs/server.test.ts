@@ -22,7 +22,7 @@ const mockGet = vi.fn().mockResolvedValue({
   ]
 });
 
-vi.mock('$lib/server/firebase-admin', () => ({
+vi.mock('$lib/server/firebase', () => ({
   adminDb: {
     collection: vi.fn(() => ({
       add: mockAdd,

@@ -46,7 +46,7 @@ export const actions: Actions = {
 
 		const password = generateRandomPassword();
 		const slug = generateSlug(lovedOneName);
-		const fullSlug = `tributes/${slug}`;
+		const fullSlug = slug;
 
 		try {
 			// 1. Create user in Firebase Auth
@@ -84,6 +84,30 @@ export const actions: Actions = {
 				ownerUid: userRecord.uid, // V1: Single source of truth for ownership
 				creatorEmail: email,
 				familyContactEmail: email,
+				
+				// Service Details - basic structure for family registration
+				services: {
+					main: {
+						location: {
+							name: '',
+							address: '',
+							isUnknown: true
+						},
+						time: {
+							date: null,
+							time: null,
+							isUnknown: true
+						},
+						hours: 2 // Default duration
+					},
+					additional: [] // Empty initially
+				},
+				
+				// Basic memorial settings
+				isPublic: false,
+				content: '',
+				custom_html: null,
+				
 				createdAt: new Date(),
 				updatedAt: new Date()
 			};

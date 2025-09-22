@@ -147,7 +147,7 @@
                             
                             <div class="flex space-x-2">
                                 <a 
-                                    href="/tributes/{memorial.slug}"
+                                    href="/{memorial.slug}"
                                     class="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition-colors flex items-center space-x-1"
                                 >
                                     <Eye class="w-4 h-4" />

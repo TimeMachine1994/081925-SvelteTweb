@@ -5,7 +5,7 @@
 export interface ErrorContext {
   component?: string;
   action?: string;
-  userId?: string;
+  uid?: string;
   memorialId?: string;
   role?: string;
   timestamp?: string;

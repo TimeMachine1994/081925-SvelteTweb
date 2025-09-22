@@ -20,16 +20,17 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 		}
 
 		// Parse request body
-		const { formData, timestamp } = await request.json();
-		if (!formData) {
-			return json({ error: 'Form data is required' }, { status: 400 });
+		const { services, calculatorData, timestamp } = await request.json();
+		if (!services && !calculatorData) {
+			return json({ error: 'Services or calculator data is required' }, { status: 400 });
 		}
 
 		console.log('📝 Auto-saving schedule data:', {
 			memorialId,
 			userId: locals.user.uid,
 			timestamp,
-			hasFormData: !!formData
+			hasServices: !!services,
+			hasCalculatorData: !!calculatorData
 		});
 
 		// Verify user has permission to edit this memorial
@@ -61,30 +62,43 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 			return json({ error: 'Insufficient permissions' }, { status: 403 });
 		}
 
-		// Create unified calculator config structure
-		const calculatorConfig: Partial<CalculatorConfig> = {
-			formData: {
-				...formData as CalculatorFormData,
-				memorialId,
-				updatedAt: new Date(),
-				autoSaved: true
-			},
-			lastModified: new Date(),
-			lastModifiedBy: userId,
-			status: 'draft',
-			autoSave: {
-				formData: formData as CalculatorFormData,
-				lastModified: new Date(),
-				lastModifiedBy: userId,
-				timestamp: timestamp || Date.now(),
-				autoSave: true
-			}
+		// Prepare update data
+		const updateData: any = {
+			updatedAt: Timestamp.now(),
+			lastModifiedBy: userId
 		};
 
-		// Save to memorial's calculatorConfig
-		await memorialRef.update({
-			calculatorConfig: calculatorConfig
-		});
+		// Update Memorial.services if provided
+		if (services) {
+			updateData['services.main'] = services.main;
+			updateData['services.additional'] = services.additional || [];
+		}
+
+		// Update calculator config if provided
+		if (calculatorData) {
+			const calculatorConfig: Partial<CalculatorConfig> = {
+				formData: {
+					...calculatorData as CalculatorFormData,
+					memorialId,
+					updatedAt: new Date(),
+					autoSaved: true
+				},
+				lastModified: new Date(),
+				lastModifiedBy: userId,
+				status: 'draft',
+				autoSave: {
+					formData: calculatorData as CalculatorFormData,
+					lastModified: new Date(),
+					lastModifiedBy: userId,
+					timestamp: timestamp || Date.now(),
+					autoSave: true
+				}
+			};
+			updateData.calculatorConfig = calculatorConfig;
+		}
+
+		// Save to memorial
+		await memorialRef.update(updateData);
 
 		console.log('✅ Schedule auto-saved successfully for memorial:', memorialId);
 
@@ -139,16 +153,18 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 			return json({ error: 'Insufficient permissions' }, { status: 403 });
 		}
 
-		// Return calculator config data if it exists
+		// Return services and calculator config data
+		const services = memorial?.services;
 		const calculatorConfig = memorial?.calculatorConfig;
 		
-		if (calculatorConfig && calculatorConfig.autoSave) {
+		if (services || (calculatorConfig && calculatorConfig.autoSave)) {
 			console.log('✅ Auto-saved schedule found for memorial:', memorialId);
 			return json({
 				success: true,
-				autoSave: calculatorConfig.autoSave,
+				services: services || null,
+				autoSave: calculatorConfig?.autoSave || null,
 				hasAutoSave: true,
-				calculatorConfig: calculatorConfig
+				calculatorConfig: calculatorConfig || null
 			});
 		} else {
 			console.log('ℹ️ No auto-saved schedule found for memorial:', memorialId);

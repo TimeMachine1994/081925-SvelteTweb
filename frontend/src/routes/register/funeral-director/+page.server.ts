@@ -152,27 +152,58 @@ export const actions: Actions = {
 			};
 			await adminDb.collection('users').doc(userRecord.uid).set(userProfile);
 
-			// 4. Create the memorial, assigning the FD as the manager
+			// 4. Create the memorial with new services structure
 			const memorialData = {
 				lovedOneName,
 				slug,
+				fullSlug: `${slug}-${Date.now()}`, // Ensure uniqueness
 				ownerUid: userRecord.uid, // The family member owns the memorial
 				funeralDirectorUid: directorUid, // The logged-in FD manages it
 				creatorEmail: directorData.email,
-				creatorName: directorData.contactPerson,
-				directorFullName: directorData.contactPerson,
-				funeralHomeName: directorData.companyName,
-				directorEmail: directorData.email,
-				memorialDate: memorialDate || null,
-				memorialTime: memorialTime || null,
-				memorialLocationName: locationName || null,
-				memorialLocationAddress: locationAddress || null,
-				familyContactName,
 				familyContactEmail,
-				familyContactPhone,
-				familyContactPreference: contactPreference,
-				additionalNotes: additionalNotes || null,
+				
+				// New services structure
+				services: {
+					main: {
+						location: {
+							name: locationName || '',
+							address: locationAddress || '',
+							isUnknown: !locationName && !locationAddress
+						},
+						time: {
+							date: memorialDate || null,
+							time: memorialTime || null,
+							isUnknown: !memorialDate && !memorialTime
+						},
+						hours: 2 // Default duration
+					},
+					additional: [] // Empty initially
+				},
+				
+				// Funeral director information
+				funeralDirector: {
+					id: directorUid,
+					companyName: directorData.companyName,
+					contactPerson: directorData.contactPerson,
+					phone: directorData.phone || '',
+					email: directorData.email
+				},
+				
+				// Family contact information
+				family: {
+					primaryContact: {
+						name: familyContactName,
+						email: familyContactEmail,
+						phone: familyContactPhone,
+						contactPreference: contactPreference
+					}
+				},
+				
+				// Memorial settings
 				isPublic: true,
+				content: additionalNotes || '',
+				custom_html: null,
+				
 				createdAt: new Date(),
 				updatedAt: new Date()
 			};
@@ -185,7 +216,7 @@ export const actions: Actions = {
 			await sendEnhancedRegistrationEmail({
 				email: familyContactEmail,
 				lovedOneName,
-				memorialUrl: `https://yoursite.com/tributes/${slug}`,
+				memorialUrl: `https://yoursite.com/${slug}`,
 				ownerName: familyContactName,
 				password // Pass the generated password
 			});
@@ -193,7 +224,7 @@ export const actions: Actions = {
 			// 7. Return success with the shareable link
 			return {
 				success: true,
-				memorialLink: `/tributes/${slug}`
+				memorialLink: `/${slug}`
 			};
 
 		} catch (error: any) {

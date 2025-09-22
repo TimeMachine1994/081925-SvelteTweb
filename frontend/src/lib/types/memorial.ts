@@ -10,6 +10,32 @@ export interface Embed {
 	updatedAt: Timestamp;
 }
 
+// Service Detail Interfaces (moved from LivestreamConfig)
+export interface ServiceDetails {
+	location: LocationInfo;         // Service location
+	time: TimeInfo;                 // Service time
+	hours: number;                  // Duration in hours
+}
+
+export interface AdditionalServiceDetails {
+	enabled: boolean;               // Whether service is enabled
+	location: LocationInfo;         // Service location
+	time: TimeInfo;                 // Service time
+	hours: number;                  // Duration in hours
+}
+
+export interface LocationInfo {
+	name: string;                   // Location name
+	address: string;                // Location address
+	isUnknown: boolean;             // Unknown location flag
+}
+
+export interface TimeInfo {
+	date: string | null;            // Service date
+	time: string | null;            // Service time
+	isUnknown: boolean;             // Unknown time flag
+}
+
 export interface Memorial {
 	id: string;
 	lovedOneName: string;
@@ -20,6 +46,14 @@ export interface Memorial {
 	creatorName: string;
 	directorFullName?: string;
 	funeralHomeName?: string;
+	
+	// Service Details - consolidated structure
+	services: {
+		main: ServiceDetails;         // Primary service details
+		additional: AdditionalServiceDetails[]; // Additional locations/days
+	};
+	
+	// Legacy fields (deprecated - will be removed after migration)
 	memorialDate?: string;
 	memorialTime?: string;
 	memorialLocationName?: string;

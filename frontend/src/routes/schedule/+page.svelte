@@ -3,35 +3,36 @@
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
   import { browser } from '$app/environment';
+  import { page } from '$app/stores';
   import type { CalculatorFormData, Tier, LocationInfo, TimeInfo, ServiceDetails, AdditionalServiceDetails, Addons } from '$lib/types/livestream';
   import { useAutoSave } from '$lib/composables/useAutoSave';
+
+  let { data } = $props();
 
   // Loading state
   let pageLoaded = $state(true);
 
-  // Memorial context - will be set when user creates/selects memorial
-  let memorialId = $state('');
+  // Get memorial ID from route params or data
+  const memorialId = $page.params.memorialId || data?.memorial?.id || '';
   let lovedOneName = $state('');
 
-  // Form data matching our schema
+  // Memorial services data (new structure)
+  let services = $state({
+    main: {
+      location: { name: '', address: '', isUnknown: false },
+      time: { date: null, time: null, isUnknown: false },
+      hours: 2
+    },
+    additional: [] as Array<{
+      type: 'location' | 'day';
+      location: { name: string; address: string; isUnknown: boolean };
+      time: { date: string | null; time: string | null; isUnknown: boolean };
+      hours: number;
+    }>
+  });
+
+  // Calculator data (booking/pricing)
   let selectedTier: Tier = $state('solo');
-  let mainService = $state<ServiceDetails>({
-    location: { name: '', address: '', isUnknown: false },
-    time: { date: null, time: null, isUnknown: false },
-    hours: 2
-  });
-  let additionalLocation = $state<AdditionalServiceDetails>({
-    enabled: false,
-    location: { name: '', address: '', isUnknown: false },
-    time: { date: null, time: null, isUnknown: false },
-    hours: 2
-  });
-  let additionalDay = $state<AdditionalServiceDetails>({
-    enabled: false,
-    location: { name: '', address: '', isUnknown: false },
-    time: { date: null, time: null, isUnknown: false },
-    hours: 2
-  });
   let addons = $state<Addons>({
     photography: false,
     audioVisualSupport: false,
@@ -39,15 +40,46 @@
     woodenUsbDrives: 0
   });
 
+  // Legacy form fields for backward compatibility
+  let mainService = $derived(services.main);
+  let additionalLocation = $derived({
+    enabled: services.additional.some(s => s.type === 'location'),
+    ...services.additional.find(s => s.type === 'location') || {
+      location: { name: '', address: '', isUnknown: false },
+      time: { date: null, time: null, isUnknown: false },
+      hours: 2
+    }
+  });
+  let additionalDay = $derived({
+    enabled: services.additional.some(s => s.type === 'day'),
+    ...services.additional.find(s => s.type === 'day') || {
+      location: { name: '', address: '', isUnknown: false },
+      time: { date: null, time: null, isUnknown: false },
+      hours: 2
+    }
+  });
+
   // Contact information
   let funeralDirectorName = $state('');
   let funeralHome = $state('');
 
   // Auto-save functionality
-  let saveStatus = $state('saved'); // 'saved', 'saving', 'unsaved'
-  let lastSaved = $state('');
+  let autoSaveEnabled = $state(false);
+  let showAutoSaveStatus = $state(false);
   
-  // Remove broken auto-save composable - we'll handle it directly
+  // Initialize auto-save when memorialId is available
+  const autoSave = $derived(memorialId ? useAutoSave(memorialId, {
+    delay: 3000,
+    onSave: (success, error) => {
+      showAutoSaveStatus = true;
+      if (!success && error) {
+        console.error('Auto-save failed:', error);
+      }
+      setTimeout(() => {
+        showAutoSaveStatus = false;
+      }, 2000);
+    }
+  }) : null);
 
   // Original pricing constants
   const TIER_PRICES = {
@@ -70,78 +102,32 @@
   const bookingItems = $derived(calculateBookingItems());
   const totalPrice = $derived(bookingItems.reduce((acc, item) => acc + item.total, 0));
 
-  // Create form data structure matching our schema
-  const formData = $derived.by(() => ({
+  // Create data structures for new API
+  const calculatorData = $derived.by(() => ({
     memorialId,
-    lovedOneName,
     selectedTier,
-    mainService,
-    additionalLocation,
-    additionalDay,
-    funeralDirectorName,
-    funeralHome,
     addons,
+    createdAt: new Date(),
     updatedAt: new Date(),
     autoSaved: false
   } as CalculatorFormData));
 
-  // Auto-save effect - triggers when form data changes
-  let autoSaveTimeout: NodeJS.Timeout | null = null;
-  
+  // Auto-save trigger when form data changes
   $effect(() => {
-    // Only auto-save if we have a valid memorial ID (not 'temp' or empty)
-    if (memorialId && memorialId !== 'temp' && formData) {
-      saveStatus = 'saving';
-      
-      // Clear existing timeout
-      if (autoSaveTimeout) {
-        clearTimeout(autoSaveTimeout);
+    if (autoSaveEnabled && autoSave && memorialId) {
+      if (selectedTier || services.main.location.name || services.additional.length > 0) {
+        autoSave.triggerAutoSave({ services, calculatorData });
       }
-      
-      // Set new timeout for auto-save
-      autoSaveTimeout = setTimeout(async () => {
-        const currentMemorialId = memorialId; // Capture current value
-        
-        try {
-          const scheduleData = {
-            selectedTier,
-            mainService,
-            additionalLocation,
-            additionalDay,
-            addons,
-            funeralDirectorName,
-            funeralHome,
-            bookingItems,
-            totalPrice,
-            status: 'draft',
-            lastUpdated: new Date().toISOString()
-          };
-          
-          const response = await fetch(`/api/memorials/${currentMemorialId}/schedule/auto-save`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              formData: scheduleData,
-              timestamp: Date.now()
-            })
-          });
-
-          if (response.ok) {
-            saveStatus = 'saved';
-            lastSaved = new Date().toLocaleTimeString();
-          } else {
-            saveStatus = 'unsaved';
-            console.error('Auto-save failed:', await response.text());
-          }
-        } catch (error) {
-          saveStatus = 'unsaved';
-          console.error('Auto-save error:', error);
-        }
-      }, 2000);
     }
   });
+
+  // Enable auto-save after component mounts
+  onMount(() => {
+    if (memorialId) {
+      autoSaveEnabled = true;
+    }
+  });
+
 
   function calculateBookingItems() {
     const items = [];
@@ -159,7 +145,7 @@
     }
 
     // 2. Main Service Hourly Overage (over 2 hours)
-    const mainOverageHours = Math.max(0, mainService.hours - 2);
+    const mainOverageHours = Math.max(0, services.main.hours - 2);
     if (mainOverageHours > 0) {
       items.push({
         id: 'main-overage',
@@ -171,7 +157,9 @@
     }
 
     // 3. Additional Location
-    if (additionalLocation.enabled) {
+    const hasAdditionalLocation = services.additional.some(s => s.type === 'location');
+    if (hasAdditionalLocation) {
+      const additionalLocationService = services.additional.find(s => s.type === 'location');
       items.push({
         id: 'additional-location-base',
         name: 'Additional Location',
@@ -182,7 +170,7 @@
       });
 
       // Additional location overage
-      const addlLocationOverage = Math.max(0, additionalLocation.hours - 2);
+      const addlLocationOverage = Math.max(0, (additionalLocationService?.hours || 2) - 2);
       if (addlLocationOverage > 0) {
         items.push({
           id: 'additional-location-overage',
@@ -196,7 +184,9 @@
     }
 
     // 4. Additional Day
-    if (additionalDay.enabled) {
+    const hasAdditionalDay = services.additional.some(s => s.type === 'day');
+    if (hasAdditionalDay) {
+      const additionalDayService = services.additional.find(s => s.type === 'day');
       items.push({
         id: 'additional-day-base',
         name: 'Additional Day',
@@ -207,7 +197,7 @@
       });
 
       // Additional day overage
-      const addlDayOverage = Math.max(0, additionalDay.hours - 2);
+      const addlDayOverage = Math.max(0, (additionalDayService?.hours || 2) - 2);
       if (addlDayOverage > 0) {
         items.push({
           id: 'additional-day-overage',
@@ -414,14 +404,8 @@
   });
 
   onMount(async () => {
-    // Get memorial context from URL params or user selection
-    const urlParams = new URLSearchParams(window.location.search);
-    const paramMemorialId = urlParams.get('memorialId');
-    
-    if (paramMemorialId) {
-      memorialId = paramMemorialId;
-      
-      // Load existing calculator config if available
+    // Load existing calculator config if available if we have a memorialId
+    if (memorialId) {
       try {
         // Load existing data from API
         const response = await fetch(`/api/memorials/${memorialId}/schedule/auto-save`);

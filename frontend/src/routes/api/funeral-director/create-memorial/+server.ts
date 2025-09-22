@@ -73,8 +73,23 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       // Family information
       family: memorialData.family,
 
-      // Service information
-      services: memorialData.services,
+      // Service Details - new consolidated structure
+      services: {
+        main: {
+          location: {
+            name: memorialData.services?.location?.name || '',
+            address: memorialData.services?.location?.address || '',
+            isUnknown: memorialData.services?.location?.isUnknown || false
+          },
+          time: {
+            date: memorialData.services?.date || null,
+            time: memorialData.services?.time || null,
+            isUnknown: memorialData.services?.timeUnknown || false
+          },
+          hours: memorialData.services?.duration || 2
+        },
+        additional: [] // Empty initially, can be added via calculator
+      },
 
       // Funeral director information
       funeralDirector: {

@@ -123,15 +123,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         email: familyEmail,
         password: tempPassword,
         lovedOneName: lovedOneName,
-        tributeUrl: `https://tributestream.com/tributes/${memorialSlug}`,
-        familyContactName: `Family of ${lovedOneName}`,
-        familyContactEmail: familyEmail,
-        familyContactPhone: '', // Not collected in this simplified flow
-        contactPreference: 'email',
-        directorName: funeralDirector?.contactPerson || 'Your Funeral Director',
-        funeralHomeName: funeralDirector?.companyName || 'Your Funeral Home',
-        memorialDate: serviceDate,
-        memorialTime: serviceTime
+        memorialUrl: `https://tributestream.com/${memorialSlug}`,
+        ownerName: `Family of ${lovedOneName}`
       });
       console.log('📧 Welcome email sent to family successfully.');
     } catch (emailError) {
@@ -144,7 +137,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       message: 'Family memorial created successfully',
       memorialId: memorialRef.id,
       streamKey: `mobile_${memorialRef.id}_${Date.now()}`,
-      memorialUrl: `/tributes/${memorialRef.id}`
+      memorialUrl: `/${memorialRef.id}`
     });
 
   } catch (error) {

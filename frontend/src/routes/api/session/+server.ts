@@ -40,8 +40,8 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			console.log('Admin user detected, redirecting to admin dashboard...');
 			return json({ redirectTo: '/admin' });
 		} else if (slug && typeof slug === 'string') {
-			console.log(`Redirecting to /tributes/${slug}...`);
-			return json({ redirectTo: `/tributes/${slug}` });
+			console.log(`Redirecting to /${slug}...`);
+			return json({ redirectTo: `/${slug}` });
 		} else {
 			console.log('Regular user, redirecting to my-portal...');
 			return json({ redirectTo: '/my-portal' });

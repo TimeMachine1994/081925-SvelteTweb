@@ -2,7 +2,8 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import sgMail from '@sendgrid/mail';
 import { SENDGRID_API_KEY, FROM_EMAIL } from '$env/static/private';
-import { PUBLIC_BASE_URL } from '$env/static/public';
+// Use fallback for PUBLIC_BASE_URL if not set
+const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || 'http://localhost:5173';
 
 // Initialize SendGrid
 if (SENDGRID_API_KEY && SENDGRID_API_KEY !== 'mock_key') {

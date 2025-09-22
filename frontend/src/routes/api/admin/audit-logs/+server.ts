@@ -1,17 +1,20 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { adminDb } from '$lib/firebase-admin';
+import { adminDb } from '$lib/server/firebase';
 import { logAuditEvent } from '$lib/server/auditLogger';
 
 export const GET: RequestHandler = async ({ request, locals, getClientAddress }) => {
 	// Verify admin access
 	if (!locals.user?.admin) {
 		await logAuditEvent({
+			uid: locals.user?.uid || 'anonymous',
 			action: 'api_access_denied',
 			userEmail: locals.user?.email || 'anonymous',
 			userRole: (locals.user?.role as 'admin' | 'owner' | 'funeral_director') || 'admin',
 			resourceType: 'audit_logs',
+			resourceId: 'audit_logs_access',
 			details: { reason: 'Admin access required' },
+			success: false,
 			ipAddress: getClientAddress(),
 			userAgent: request.headers.get('user-agent') || undefined
 		});
@@ -74,14 +77,17 @@ export const GET: RequestHandler = async ({ request, locals, getClientAddress })
 
 		// Log the audit log access
 		await logAuditEvent({
+			uid: locals.user.uid,
 			action: 'admin_audit_logs_accessed',
 			userEmail: locals.user.email,
 			userRole: (locals.user.role as 'admin' | 'owner' | 'funeral_director') || 'admin',
 			resourceType: 'audit_logs',
+			resourceId: 'audit_logs_query',
 			details: {
 				filters: { action, userEmail, resourceType, dateFrom, dateTo, limit },
 				resultCount: logs.length
 			},
+			success: true,
 			ipAddress: getClientAddress(),
 			userAgent: request.headers.get('user-agent') || undefined
 		});
@@ -98,11 +104,14 @@ export const GET: RequestHandler = async ({ request, locals, getClientAddress })
 
 		// Log the error
 		await logAuditEvent({
+			uid: locals.user?.uid || 'unknown',
 			action: 'admin_audit_logs_error',
 			userEmail: locals.user?.email || 'unknown',
 			userRole: (locals.user?.role as 'admin' | 'owner' | 'funeral_director') || 'admin',
 			resourceType: 'audit_logs',
+			resourceId: 'audit_logs_error',
 			details: { error: error instanceof Error ? error.message : 'Unknown error' },
+			success: false,
 			ipAddress: getClientAddress(),
 			userAgent: request.headers.get('user-agent') || undefined
 		});

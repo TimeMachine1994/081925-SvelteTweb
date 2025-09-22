@@ -22,7 +22,6 @@
 		data: { memorial: Memorial | null; config: LivestreamConfig | null };
 	} = $props();
 
-	console.log('🧮 Calculator Component Initializing...', { memorialId, data });
 
 	let currentStep = $state<'booking' | 'payment' | 'payNow'>('booking');
 	let clientSecret = $state<string | null>(null);
@@ -33,27 +32,25 @@
 	let autoSaveEnabled = $state(false);
 	let showAutoSaveStatus = $state(false);
 
-	let formData = $state<CalculatorFormData>({
-		lovedOneName: '',
-		mainService: {
+	// Memorial services data (authoritative source)
+	let services = $state({
+		main: {
 			location: { name: '', address: '', isUnknown: false },
 			time: { date: null, time: null, isUnknown: false },
 			hours: 2
 		},
-		additionalLocation: {
-			enabled: false,
-			location: { name: '', address: '', isUnknown: false },
-			time: { date: null, time: null, isUnknown: false },
-			hours: 2
-		},
-		additionalDay: {
-			enabled: false,
-			location: { name: '', address: '', isUnknown: false },
-			time: { date: null, time: null, isUnknown: false },
-			hours: 2
-		},
-		funeralDirectorName: '',
-		funeralHome: '',
+		additional: [] as Array<{
+			type: 'location' | 'day';
+			location: { name: string; address: string; isUnknown: boolean };
+			time: { date: string | null; time: string | null; isUnknown: boolean };
+			hours: number;
+		}>
+	});
+
+	// Calculator-specific data (booking/pricing)
+	let calculatorData = $state<CalculatorFormData>({
+		memorialId: memorialId || '',
+		selectedTier: 'solo',
 		addons: {
 			photography: false,
 			audioVisualSupport: false,
@@ -62,50 +59,69 @@
 		}
 	});
 
+	// Update calculatorData when selectedTier changes
+	$effect(() => {
+		calculatorData.selectedTier = selectedTier;
+	});
+
+	// Memorial context data
+	let lovedOneName = $state(data.memorial?.lovedOneName || '');
+	let funeralDirectorName = $state(data.memorial?.funeralDirectorName || '');
+	let funeralHome = $state(data.memorial?.funeralHome || '');
+
+
+
 	// Initialize auto-save when memorialId is available
-	const autoSave = memorialId ? useAutoSave({
-		memorialId,
-		delay: 3000, // 3 second delay
+	const autoSave = memorialId ? useAutoSave(memorialId, {
+		delay: 3000,
 		onSave: (success, error) => {
 			showAutoSaveStatus = true;
 			if (!success && error) {
 				console.error('Auto-save failed:', error);
 			}
-			// Hide status after 2 seconds
 			setTimeout(() => {
 				showAutoSaveStatus = false;
 			}, 2000);
-		},
-		onLoad: (data) => {
-			if (data) {
-				console.log('📖 Auto-saved data loaded, prompting user...');
-				// Show restore prompt
-			}
 		}
 	}) : null;
 
 	onMount(async () => {
-		if (data.config) {
-			console.log('📝 Pre-filling form with existing config data:', data.config);
-			formData = data.config.formData;
-			const basePackage = data.config.bookingItems.find(
-				(item) => item.package.includes('Tributestream')
-			);
-			if (basePackage) {
-				selectedTier = basePackage.id as Tier;
+		// Load existing data if available
+		if (data.memorial) {
+			// Load memorial metadata
+			lovedOneName = data.memorial.lovedOneName || '';
+			funeralDirectorName = data.memorial.funeralDirectorName || '';
+			funeralHome = data.memorial.funeralHome || '';
+
+			// Load existing calculator config if available
+			if (data.memorial.calculatorConfig) {
+				calculatorData = data.memorial.calculatorConfig;
+				if (data.memorial.calculatorConfig.selectedTier) {
+					selectedTier = data.memorial.calculatorConfig.selectedTier;
+				}
 			}
-		} else if (data.memorial) {
-			console.log('📝 Pre-filling form with memorial data:', data.memorial);
-			formData.lovedOneName = data.memorial.lovedOneName;
+
+			// Load services data
+			if (data.memorial.services) {
+				services.main = data.memorial.services.main;
+				services.additional = data.memorial.services.additional || [];
+			}
 			
-			// Try to load auto-saved data if no existing config
+			// Try to load auto-saved data
 			if (autoSave && memorialId) {
 				const autoSavedData = await autoSave.loadAutoSavedData();
 				if (autoSavedData) {
 					const shouldRestore = confirm('We found an auto-saved version of your schedule. Would you like to restore it?');
 					if (shouldRestore) {
-						formData = autoSavedData;
-						console.log('✅ Auto-saved data restored');
+						if (autoSavedData.services) {
+							services = autoSavedData.services;
+						}
+						if (autoSavedData.calculatorData) {
+							calculatorData = autoSavedData.calculatorData;
+							if (autoSavedData.calculatorData.selectedTier) {
+								selectedTier = autoSavedData.calculatorData.selectedTier;
+							}
+						}
 					}
 				}
 			}
@@ -114,11 +130,9 @@
 		// Enable auto-save after initial load
 		if (memorialId) {
 			autoSaveEnabled = true;
-			console.log('🔄 Auto-save enabled for memorial:', memorialId);
 		}
 	});
 
-	$inspect(formData, selectedTier, currentStep, clientSecret, configId);
 
 	const TIER_PRICES: Record<string, number> = {
 		solo: 599,
@@ -142,7 +156,6 @@
 		// 1. Base Package
 		if (selectedTier) {
 			const price = TIER_PRICES[selectedTier];
-			console.log(`Tier: ${selectedTier}, Price: ${price}`);
 			items.push({
 				id: selectedTier,
 				name: `Tributestream ${selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)}`,
@@ -151,10 +164,12 @@
 				quantity: 1,
 				total: price
 			});
+		} else {
+			return items;
 		}
 
 		// 2. Hourly Overage Charges
-		const mainOverageHours = Math.max(0, formData.mainService.hours - 2);
+		const mainOverageHours = Math.max(0, services.main.hours - 2);
 		if (mainOverageHours > 0) {
 			items.push({
 				id: 'main_overage',
@@ -167,7 +182,8 @@
 		}
 
 		// 3. Additional Location
-		if (formData.additionalLocation.enabled) {
+		const additionalLocation = services.additional.find(s => s.type === 'location');
+		if (additionalLocation) {
 			items.push({
 				id: 'addl_location_fee',
 				name: 'Additional Location Fee',
@@ -176,7 +192,7 @@
 				quantity: 1,
 				total: ADDITIONAL_SERVICE_FEE
 			});
-			const addlLocationOverage = Math.max(0, formData.additionalLocation.hours - 2);
+			const addlLocationOverage = Math.max(0, additionalLocation.hours - 2);
 			if (addlLocationOverage > 0) {
 				items.push({
 					id: 'addl_location_overage',
@@ -190,7 +206,8 @@
 		}
 
 		// 4. Additional Day
-		if (formData.additionalDay.enabled) {
+		const additionalDay = services.additional.find(s => s.type === 'day');
+		if (additionalDay) {
 			items.push({
 				id: 'addl_day_fee',
 				name: 'Additional Day Fee',
@@ -199,7 +216,7 @@
 				quantity: 1,
 				total: ADDITIONAL_SERVICE_FEE
 			});
-			const addlDayOverage = Math.max(0, formData.additionalDay.hours - 2);
+			const addlDayOverage = Math.max(0, additionalDay.hours - 2);
 			if (addlDayOverage > 0) {
 				items.push({
 					id: 'addl_day_overage',
@@ -213,7 +230,7 @@
 		}
 
 		// 5. Add-ons
-		if (formData.addons.photography) {
+		if (calculatorData.addons.photography) {
 			items.push({
 				id: 'photography',
 				name: 'Photography',
@@ -223,7 +240,7 @@
 				total: ADDON_PRICES.photography
 			});
 		}
-		if (formData.addons.audioVisualSupport) {
+		if (calculatorData.addons.audioVisualSupport) {
 			items.push({
 				id: 'av_support',
 				name: 'Audio/Visual Support',
@@ -233,7 +250,7 @@
 				total: ADDON_PRICES.audioVisualSupport
 			});
 		}
-		if (formData.addons.liveMusician) {
+		if (calculatorData.addons.liveMusician) {
 			items.push({
 				id: 'live_musician',
 				name: 'Live Musician',
@@ -243,9 +260,9 @@
 				total: ADDON_PRICES.liveMusician
 			});
 		}
-		if (formData.addons.woodenUsbDrives > 0) {
+		if (calculatorData.addons.woodenUsbDrives > 0) {
 			const isLegacy = selectedTier === 'legacy';
-			const usbDrives = formData.addons.woodenUsbDrives;
+			const usbDrives = calculatorData.addons.woodenUsbDrives;
 			const includedDrives = isLegacy ? 1 : 0;
 
 			if (usbDrives > includedDrives) {
@@ -294,8 +311,10 @@
 	function handleTierChange(tier: Tier) {
 		console.log('✨ Tier selected:', tier);
 		selectedTier = tier;
-		// Reset relevant parts of the form when tier changes
-		formData.addons = {
+		// Update calculator data
+		calculatorData.selectedTier = tier;
+		// Reset relevant parts of the addons when tier changes
+		calculatorData.addons = {
 			photography: false,
 			audioVisualSupport: false,
 			liveMusician: false,
@@ -304,139 +323,83 @@
 		
 		// Trigger auto-save when tier changes
 		if (autoSaveEnabled && autoSave) {
-			autoSave.triggerAutoSave(formData);
+			autoSave.triggerAutoSave({ services, calculatorData });
 		}
 	}
 
-	// Watch for form data changes and trigger auto-save
+	// Watch for services and calculator data changes
+	// Auto-save trigger when form data changes
 	$effect(() => {
-		if (autoSaveEnabled && autoSave && memorialId) {
-			// Only auto-save if we have meaningful data
-			if (formData.lovedOneName || selectedTier) {
-				autoSave.triggerAutoSave(formData);
+		if (autoSaveEnabled && autoSave) {
+			if (selectedTier || services.main.location.name || services.additional.length > 0) {
+				autoSave.triggerAutoSave({ services, calculatorData });
 			}
 		}
 	});
 
 	async function saveAndPayLater(isPayNowFlow = false) {
-		console.log('🚀 saveAndPayLater function called');
-		console.log('📊 Current state check:');
-		console.log('  - selectedTier:', selectedTier);
-		console.log('  - formData:', formData);
-		console.log('  - bookingItems:', bookingItems);
-		console.log('  - total:', total);
-		console.log('  - auth.currentUser:', auth.currentUser);
+		// Validate required data
+		if (!selectedTier) {
+			alert('Please select a service tier before proceeding.');
+			return;
+		}
+
+		if (!services.main.location.name) {
+			alert('Please specify the main service location.');
+			return;
+		}
+
+		if (bookingItems.length === 0) {
+			alert('Unable to calculate booking items. Please check your selections.');
+			return;
+		}
+		
+		// Prepare payload for API
+		const payload = {
+			services,
+			calculatorData,
+			bookingItems,
+			totalPrice: bookingItems.reduce((sum, item) => sum + item.total, 0)
+		};
 		
 		try {
-			console.log('💾 Starting save and pay later process...');
-			
-			// Validate required data
-			if (!selectedTier) {
-				console.error('❌ No tier selected!');
-				return;
-			}
-			
-			if (bookingItems.length === 0) {
-				console.error('❌ No booking items found!');
-				return;
-			}
-			
-			if (total <= 0) {
-				console.error('❌ Invalid total amount:', total);
-				return;
-			}
-			
-			console.log('✅ Data validation passed');
-			
-			// Prepare form data
-			console.log('📦 Preparing FormData...');
-			const formDataToSend = new FormData();
-			
-			const formDataJson = JSON.stringify(formData);
-			const bookingItemsJson = JSON.stringify(bookingItems);
-			const totalString = total.toString();
-			
-			console.log('📝 Data to send:');
-			console.log('  - formData JSON length:', formDataJson.length);
-			console.log('  - bookingItems JSON length:', bookingItemsJson.length);
-			console.log('  - total string:', totalString);
-			
-			formDataToSend.append('formData', formDataJson);
-			formDataToSend.append('bookingItems', bookingItemsJson);
-			formDataToSend.append('total', totalString);
-			if (memorialId) {
-				formDataToSend.append('memorialId', memorialId);
-			}
-			
-			console.log('✅ FormData prepared successfully');
-			
-			// Make the request
-			console.log('🌐 Making fetch request to /app/calculator?/saveAndPayLater');
-			const response = await fetch('/app/calculator?/saveAndPayLater', {
-				method: 'POST',
-				body: formDataToSend
+			const response = await fetch(`/api/memorials/${memorialId}/schedule`, {
+				method: 'PATCH',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(payload)
 			});
-			
-			console.log('📡 Response received:');
-			console.log('  - status:', response.status);
-			console.log('  - statusText:', response.statusText);
-			console.log('  - ok:', response.ok);
-			console.log('  - headers:', Object.fromEntries(response.headers.entries()));
-			
-			if (!response.ok) {
-				console.error('❌ Response not OK:', response.status, response.statusText);
-				const errorText = await response.text();
-				console.error('❌ Error response body:', errorText);
-				return;
-			}
-			
-			console.log('🔄 Parsing JSON response...');
+
 			const result = await response.json();
-			console.log('✅ Save response parsed:', result);
 
-			if (result.type === 'redirect' && !isPayNowFlow) {
-				console.log(`🔀 Server initiated redirect to: ${result.location}`);
-				window.location.href = result.location;
-				return;
-			}
-
-			if (result.type === 'failure') {
-				console.error('❌ Save failed:', result.data);
-				alert(`Save failed: ${result.data?.details || result.data?.error || 'Unknown error'}`);
-				return;
-			}
-
-			if (result.type === 'success' && result.data?.success) {
-				console.log('🎉 Configuration saved successfully!', result.data);
+			if (response.ok) {
+				// Clear auto-save data since we've successfully saved
+				if (autoSave) {
+					autoSave.clearAutoSave?.();
+				}
+				
 				if (!isPayNowFlow) {
-					alert('Configuration saved successfully!');
+					alert('Schedule saved successfully!');
 				}
 			} else {
-				console.error('❌ An unexpected error occurred:', result);
-				alert('An unexpected error occurred. Please try again.');
+				alert(`Failed to save schedule: ${result.error}`);
 			}
-			
 		} catch (error) {
-			console.error('💥 Error in saveAndPayLater function:', error);
-			console.error('📍 Error stack:', error instanceof Error ? error.stack : 'No stack trace available');
-			// TODO: Show error message to user
+			alert('An error occurred while saving the schedule.');
 		}
 	}
 
 	async function proceedToPayment() {
-		console.log('💳 Proceeding to payment...');
 		if (!memorialId) {
-			console.error('Memorial ID is required to proceed to payment.');
-			// Optionally, display an error to the user
 			return;
 		}
 		const payload = {
-			formData: formData,
-			bookingItems: bookingItems,
-			total: total,
-			memorialId: memorialId
+			services,
+			calculatorData,
+			bookingItems,
+			totalPrice: bookingItems.reduce((sum, item) => sum + item.total, 0)
 		};
-		console.log('📦 Payload for payment:', payload);
 
 		const response = await fetch('/app/calculator?/continueToPayment', {
 			method: 'POST',
@@ -445,22 +408,18 @@
 		});
 
 		const result = await response.json();
-		console.log('💳 Payment initiation response:', result);
 
 		if (result.success) {
-			console.log('✅ Payment initiated successfully!', result);
 			clientSecret = result.clientSecret;
 			configId = result.configId;
 			currentStep = 'payment';
 		} else {
-			console.error('🔥 Failed to initiate payment:', result);
-			// Optionally, display an error to the user
+			alert('Failed to initiate payment. Please try again.');
 		}
 	}
 
 	async function handlePayNow() {
-		console.log('💰 Pay Now button clicked, attempting to save data first...');
-		await saveAndPayLater(true); // Pass a flag to indicate this is part of the "Pay Now" flow
+		await saveAndPayLater(true);
 		currentStep = 'payNow';
 	}
 </script>
@@ -496,18 +455,24 @@
 		{#if currentStep === 'booking'}
 			<TierSelector {selectedTier} onchange={handleTierChange} />
 			{#if selectedTier}
-				<BookingForm bind:formData />
+				<BookingForm 
+					bind:services 
+					bind:calculatorData 
+					bind:lovedOneName 
+					bind:funeralDirectorName 
+					bind:funeralHome 
+				/>
 			{/if}
 		{:else if currentStep === 'payNow'}
 			{#if memorialId}
-				<StripeCheckout amount={total} {memorialId} lovedOneName={formData.lovedOneName} />
+				<StripeCheckout amount={total} {memorialId} {lovedOneName} />
 			{/if}
 		{:else}
 			{#if clientSecret && configId && memorialId}
 				<StripeCheckout
 					amount={total}
 					{memorialId}
-					lovedOneName={formData.lovedOneName}
+					{lovedOneName}
 				/>
 			{:else}
 				<div class="card p-4 text-center">

@@ -65,7 +65,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 				id: memorialId,
 				lovedOneName: memorial?.lovedOneName || 'Unnamed Memorial',
 				ownerUid: memorial?.ownerUid,
-				funeralDirectorUid: memorial?.funeralDirectorUid
+				funeralDirectorUid: memorial?.funeralDirectorUid,
+				services: memorial?.services || null // Include services data
 			},
 			calculatorConfig: memorial?.calculatorConfig || null,
 			role: locals.user.role // Pass role to the page

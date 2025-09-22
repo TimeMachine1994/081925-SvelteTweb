@@ -158,7 +158,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       await sendEnhancedRegistrationEmail({
         email: formData.customer.email,
         lovedOneName: `${formData.lovedOne.firstName} ${formData.lovedOne.lastName}`,
-        memorialUrl: `https://tributestream.com/tributes/${fullSlug}`,
+        memorialUrl: `https://tributestream.com/${fullSlug}`,
         ownerName: `${formData.customer.firstName} ${formData.customer.lastName}`
       });
       console.log('📧 Welcome email sent to new customer successfully.');

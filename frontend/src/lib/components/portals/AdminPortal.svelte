@@ -414,7 +414,7 @@
 										</td>
 										<td class="px-4 py-3">
 											<div class="flex gap-2">
-												<a href="/tributes/{memorial.fullSlug}" class="text-blue-400 hover:text-blue-300 text-sm">View</a>
+												<a href="/{memorial.fullSlug}" class="text-blue-400 hover:text-blue-300 text-sm">View</a>
 												<a href="/schedule?memorialId={memorial.id}" class="text-purple-400 hover:text-purple-300 text-sm">Schedule</a>
 											</div>
 										</td>

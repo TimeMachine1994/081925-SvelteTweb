@@ -10,7 +10,7 @@ This document provides a comprehensive inventory of all Svelte components in Tri
 - **Props-Down, Events-Up**: Clear data flow patterns
 - **Role-Based Rendering**: Conditional UI based on user permissions
 - **Type Safety**: Full TypeScript support with typed props
-- **Reactive State**: Svelte's reactive state management
+- **Reactive State**: Svelte 5 runes ($state, $derived, $effect)
 - **Accessibility**: ARIA labels and keyboard navigation support
 
 ## Core Layout Components
@@ -20,7 +20,7 @@ This document provides a comprehensive inventory of all Svelte components in Tri
 **Purpose**: Main application layout wrapper
 
 #### Features
-- Global user state management via Svelte stores
+- Global user state management via Svelte 5 runes
 - Conditional styling for different page types (calculator, homepage)
 - Integration of navbar, footer, and dev tools
 - Responsive design with max-width constraints
@@ -47,7 +47,8 @@ This document provides a comprehensive inventory of all Svelte components in Tri
 
 #### State Management
 ```typescript
-import { user } from '$lib/auth';
+// Uses Svelte 5 runes for reactive state
+let user = $state(null);
 ```
 
 #### Navigation Logic
@@ -231,23 +232,49 @@ let auditFilters = $state({
 
 #### Features
 - Service tier selection (Solo, Live, Legacy)
-- Location and time configuration
+- Memorial.services data integration (loads from server)
+- Location and time configuration (writes to Memorial)
 - Add-on service selection
 - Real-time pricing calculation
-- Auto-save functionality
+- Auto-save functionality with comprehensive logging
 - Form validation and error handling
+- Svelte 5 runes for reactive state management
+- Debug logging for data flow troubleshooting
 
-#### State Management
+#### State Management (Svelte 5 Runes - CURRENT)
 ```typescript
-let formData = $state<CalculatorFormData>({
-  lovedOneName: '',
+// Memorial data loaded from server-side page load
+let memorial = $state(null);
+let memorialId = $state('');
+
+// Calculator configuration (booking-specific data)
+let calculatorData = $state({
   selectedTier: null,
-  mainService: defaultServiceDetails,
-  additionalLocation: defaultAdditionalService,
-  additionalDay: defaultAdditionalService,
-  funeralDirectorName: '',
-  funeralHome: '',
-  addons: defaultAddons
+  addons: {
+    photography: false,
+    audioVisualSupport: false,
+    liveMusician: false,
+    woodenUsbDrives: 0
+  }
+});
+
+// Service details (authoritative source: Memorial.services)
+let services = $state({
+  main: {
+    location: { name: '', address: '', isUnknown: false },
+    time: { date: null, time: null, isUnknown: false },
+    hours: 2
+  },
+  additional: [] // AdditionalServiceDetails[]
+});
+
+// Auto-save integration
+let autoSaveEnabled = $state(true);
+
+// Reactive pricing calculation
+let bookingItems = $derived.by(() => {
+  // Pricing logic based on services and calculatorData
+  return calculateBookingItems(services, calculatorData);
 });
 ```
 
@@ -521,15 +548,24 @@ OwnerPortal.test.ts
 ## Theme & Styling
 
 ### Theme System
-Based on the memory analysis, there are theme inconsistencies:
+The application uses a consistent gold/black theme throughout:
 
-#### Correct Theme (Gold/Black)
-- Used in: Navbar, funeral director forms, calculator components
-- Colors: `#D5BA7F` (gold), `#1a1a1a` (black), `#ffffff` (white)
+#### Primary Theme (Gold/Black)
+- **Primary Gold**: `#D5BA7F`
+- **Primary Black**: `#1a1a1a` 
+- **White**: `#ffffff`
+- **Used in**: All components, forms, navigation, and UI elements
 
-#### Incorrect Theme (Purple/Blue)
-- Found in: Invitation pages, profile components, admin components
-- Needs migration to gold/black theme
+#### Role-Based Accent Colors
+- **Admin**: Red/Pink gradient (`from-red-600 via-pink-600 to-purple-600`)
+- **Funeral Director**: Yellow/Amber gradient (`from-yellow-600 via-amber-600 to-orange-600`)
+- **Owner**: Blue/Purple gradient (`from-blue-600 via-purple-600 to-indigo-600`)
+
+#### Modern UI Features
+- **Glassmorphism**: Frosted glass effects with backdrop blur
+- **Gradients**: Smooth color transitions
+- **Animations**: Fade-in-up animations with staggered delays
+- **3D Effects**: Shadows and depth for modern appearance
 
 ### Component Styling Patterns
 - **Tailwind CSS**: Utility-first styling approach
@@ -542,7 +578,7 @@ Based on the memory analysis, there are theme inconsistencies:
 ### Optimization Strategies
 - **Code Splitting**: Route-based component loading
 - **Lazy Loading**: On-demand component imports
-- **State Management**: Efficient reactive updates
+- **State Management**: Efficient Svelte 5 runes reactive updates
 - **Bundle Size**: Tree-shaking and dead code elimination
 
 ### Component Optimization

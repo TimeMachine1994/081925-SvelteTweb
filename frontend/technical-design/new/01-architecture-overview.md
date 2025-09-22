@@ -8,8 +8,9 @@ TributeStream is a comprehensive memorial service platform built with SvelteKit,
 ### Frontend
 - **Framework**: SvelteKit with TypeScript
 - **Styling**: Tailwind CSS with custom theme system
-- **State Management**: Svelte stores and reactive patterns
+- **State Management**: Svelte 5 runes ($state, $derived, $effect) and reactive patterns
 - **Build Tool**: Vite (via SvelteKit)
+- **Development**: Comprehensive console logging for debugging data flows
 
 ### Backend
 - **Runtime**: Node.js via SvelteKit server-side rendering
@@ -46,12 +47,16 @@ frontend/src/
 │   │   ├── auditLogger.ts # Comprehensive audit logging
 │   │   ├── email.ts       # Email service
 │   │   ├── firebase.ts    # Firebase Admin SDK
-│   │   └── stripe.ts      # Stripe integration
+│   │   ├── stripe.ts      # Stripe integration
+│   │   ├── memorialMiddleware.ts # Memorial access middleware
+│   │   └── algolia-indexing.ts # Search indexing
 │   ├── types/             # TypeScript interfaces
 │   │   ├── memorial.ts    # Memorial data models
 │   │   ├── funeral-director.ts # FD data models
 │   │   ├── admin.ts       # Admin data models
-│   │   └── livestream.ts  # Livestream data models
+│   │   ├── livestream.ts  # Livestream data models
+│   │   ├── invitation.ts  # Invitation data models
+│   │   └── follower.ts    # Follower data models
 │   ├── utils/             # Client-side utilities
 │   │   ├── memorialAccess.ts # Access control logic
 │   │   ├── payment.ts     # Payment utilities
@@ -121,7 +126,7 @@ frontend/src/
 
 ### Memorial Management Flow
 ```
-1. Memorial Creation (Family/FD) → 
+1. Memorial Creation (Owner/FD) → 
 2. Access Control Verification → 
 3. Firestore Storage → 
 4. Audit Logging → 
@@ -130,11 +135,13 @@ frontend/src/
 
 ### Livestream Booking Flow
 ```
-1. Service Calculator → 
-2. Booking Form → 
-3. Payment Processing (Stripe) → 
-4. Schedule Locking → 
-5. Confirmation & Notifications
+1. Memorial Data Loading (server-side) → 
+2. Service Calculator (Memorial.services integration) → 
+3. Auto-save (preserves progress) → 
+4. Booking Form → 
+5. Payment Processing (Stripe) → 
+6. Schedule Locking → 
+7. Confirmation & Notifications
 ```
 
 ## Security Architecture
@@ -162,8 +169,10 @@ frontend/src/
 ### Client-Side Optimization
 - **Code Splitting**: Route-based code splitting via SvelteKit
 - **Lazy Loading**: Components loaded on demand
-- **State Management**: Efficient Svelte stores
+- **State Management**: Svelte 5 runes ($state, $derived, $effect) with proper reactive contexts
 - **Caching**: Browser caching for static assets
+- **Debug Logging**: Comprehensive logging system for troubleshooting data flows (reduced in production)
+- **Memorial.services Integration**: Consolidated service data structure for improved performance
 
 ### Server-Side Optimization
 - **Firebase Optimization**: Efficient Firestore queries

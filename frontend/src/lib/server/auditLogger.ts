@@ -1,11 +1,11 @@
 // Site-wide audit logging system for TributeStream V1
-import { adminDb } from '$lib/firebase-admin';
+import { adminDb } from './firebase';
 import type { RequestEvent } from '@sveltejs/kit';
 
 export interface AuditEvent {
 	id?: string;
 	timestamp: Date;
-	userId: string;
+	uid: string;
 	userEmail: string;
 	userRole: 'admin' | 'owner' | 'funeral_director';
 	action: AuditAction;
@@ -58,13 +58,13 @@ export async function logAuditEvent(event: Omit<AuditEvent, 'id' | 'timestamp'>)
 /**
  * Extract user context from SvelteKit request event
  */
-export function extractUserContext(event: RequestEvent): Pick<AuditEvent, 'userId' | 'userEmail' | 'userRole' | 'ipAddress' | 'userAgent'> | null {
+export function extractUserContext(event: RequestEvent): Pick<AuditEvent, 'uid' | 'userEmail' | 'userRole' | 'ipAddress' | 'userAgent'> | null {
 	if (!event.locals.user) {
 		return null;
 	}
 
 	return {
-		userId: event.locals.user.uid,
+		uid: event.locals.user.uid,
 		userEmail: event.locals.user.email || 'unknown',
 		userRole: (event.locals.user.role as 'admin' | 'owner' | 'funeral_director') || 'owner',
 		ipAddress: event.getClientAddress(),

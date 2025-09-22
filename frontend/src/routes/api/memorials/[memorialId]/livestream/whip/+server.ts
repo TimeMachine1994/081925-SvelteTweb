@@ -2,7 +2,10 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { adminDb } from '$lib/server/firebase';
 import { requireLivestreamAccess, createMemorialRequest } from '$lib/server/memorialMiddleware';
-import { CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN, CLOUDFLARE_CUSTOMER_CODE } from '$env/static/private';
+import { CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN } from '$env/static/private';
+
+// Optional Cloudflare customer code - fallback to empty string if not set
+const CLOUDFLARE_CUSTOMER_CODE = process.env.CLOUDFLARE_CUSTOMER_CODE || '';
 
 /**
  * Creates a new WHIP (WebRTC-HTTP Ingestion Protocol) endpoint for mobile streaming.
