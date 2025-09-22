@@ -15,30 +15,10 @@
   // Loading state
   let pageLoaded = $state(true);
 
-  // Unified calculator data structure
-  let formData = $state<CalculatorFormData>({
+  // Calculator form data (design spec compliant)
+  let calculatorData = $state<CalculatorFormData>({
     memorialId,
-    lovedOneName: data?.memorial?.lovedOneName || '',
     selectedTier: 'solo',
-    mainService: {
-      location: { name: '', address: '', isUnknown: false },
-      time: { date: null, time: null, isUnknown: false },
-      hours: 2
-    },
-    additionalLocation: {
-      enabled: false,
-      location: { name: '', address: '', isUnknown: false },
-      time: { date: null, time: null, isUnknown: false },
-      hours: 2
-    },
-    additionalDay: {
-      enabled: false,
-      location: { name: '', address: '', isUnknown: false },
-      time: { date: null, time: null, isUnknown: false },
-      hours: 2
-    },
-    funeralDirectorName: '',
-    funeralHome: '',
     addons: {
       photography: false,
       audioVisualSupport: false,
@@ -50,26 +30,54 @@
     autoSaved: false
   });
 
+  // Service data (loaded from Memorial.services)
+  let services = $state({
+    main: data?.memorial?.services?.main || {
+      location: { name: '', address: '', isUnknown: false },
+      time: { date: null, time: null, isUnknown: false },
+      hours: 2
+    },
+    additional: data?.memorial?.services?.additional || []
+  });
+
+  // Additional service toggles (UI state)
+  let additionalLocation = $state({
+    enabled: false,
+    location: { name: '', address: '', isUnknown: false },
+    time: { date: null, time: null, isUnknown: false },
+    hours: 2
+  });
+
+  let additionalDay = $state({
+    enabled: false,
+    location: { name: '', address: '', isUnknown: false },
+    time: { date: null, time: null, isUnknown: false },
+    hours: 2
+  });
+
+  // Memorial metadata
+  const lovedOneName = data?.memorial?.lovedOneName || '';
+
   // Data structure validation logging - moved to onMount to avoid state reference warnings
 
   // Validate data structure matches TypeScript interface
   function validateDataStructure() {
     const errors = [];
     
-    if (!formData.additionalLocation.time) {
+    if (!additionalLocation.time) {
       errors.push('❌ additionalLocation.time is missing');
     } else {
-      if (!('date' in formData.additionalLocation.time)) errors.push('❌ additionalLocation.time.date is missing');
-      if (!('time' in formData.additionalLocation.time)) errors.push('❌ additionalLocation.time.time is missing');
-      if (!('isUnknown' in formData.additionalLocation.time)) errors.push('❌ additionalLocation.time.isUnknown is missing');
+      if (!('date' in additionalLocation.time)) errors.push('❌ additionalLocation.time.date is missing');
+      if (!('time' in additionalLocation.time)) errors.push('❌ additionalLocation.time.time is missing');
+      if (!('isUnknown' in additionalLocation.time)) errors.push('❌ additionalLocation.time.isUnknown is missing');
     }
     
-    if (!formData.additionalDay.time) {
+    if (!additionalDay.time) {
       errors.push('❌ additionalDay.time is missing');
     } else {
-      if (!('date' in formData.additionalDay.time)) errors.push('❌ additionalDay.time.date is missing');
-      if (!('time' in formData.additionalDay.time)) errors.push('❌ additionalDay.time.time is missing');
-      if (!('isUnknown' in formData.additionalDay.time)) errors.push('❌ additionalDay.time.isUnknown is missing');
+      if (!('date' in additionalDay.time)) errors.push('❌ additionalDay.time.date is missing');
+      if (!('time' in additionalDay.time)) errors.push('❌ additionalDay.time.time is missing');
+      if (!('isUnknown' in additionalDay.time)) errors.push('❌ additionalDay.time.isUnknown is missing');
     }
     
     if (errors.length > 0) {
@@ -129,10 +137,10 @@
     const items = [];
 
     // Base Package
-    if (formData.selectedTier) {
-      const price = TIER_PRICES[formData.selectedTier as keyof typeof TIER_PRICES];
+    if (calculatorData.selectedTier) {
+      const price = TIER_PRICES[calculatorData.selectedTier as keyof typeof TIER_PRICES];
       items.push({
-        name: `Tributestream ${formData.selectedTier.charAt(0).toUpperCase() + formData.selectedTier.slice(1)}`,
+        name: `Tributestream ${calculatorData.selectedTier.charAt(0).toUpperCase() + calculatorData.selectedTier.slice(1)}`,
         price: price,
         quantity: 1,
         total: price
@@ -140,7 +148,7 @@
     }
 
     // Main Service Hourly Overage
-    const mainOverageHours = Math.max(0, formData.mainService.hours - 2);
+    const mainOverageHours = Math.max(0, services.main.hours - 2);
     if (mainOverageHours > 0) {
       items.push({
         name: 'Main Location Overage',
@@ -151,14 +159,14 @@
     }
 
     // Additional Location
-    if (formData.additionalLocation.enabled) {
+    if (additionalLocation.enabled) {
       items.push({
         name: 'Additional Location Fee',
         price: ADDITIONAL_SERVICE_FEE,
         quantity: 1,
         total: ADDITIONAL_SERVICE_FEE
       });
-      const addlLocationOverage = Math.max(0, formData.additionalLocation.hours - 2);
+      const addlLocationOverage = Math.max(0, additionalLocation.hours - 2);
       if (addlLocationOverage > 0) {
         items.push({
           name: 'Add. Location Overage',
@@ -170,14 +178,14 @@
     }
 
     // Additional Day
-    if (formData.additionalDay.enabled) {
+    if (additionalDay.enabled) {
       items.push({
         name: 'Additional Day Fee',
         price: ADDITIONAL_SERVICE_FEE,
         quantity: 1,
         total: ADDITIONAL_SERVICE_FEE
       });
-      const addlDayOverage = Math.max(0, formData.additionalDay.hours - 2);
+      const addlDayOverage = Math.max(0, additionalDay.hours - 2);
       if (addlDayOverage > 0) {
         items.push({
           name: 'Add. Day Overage',
@@ -189,7 +197,7 @@
     }
 
     // Add-ons
-    if (formData.addons.photography) {
+    if (calculatorData.addons.photography) {
       items.push({
         name: 'Photography',
         price: ADDON_PRICES.photography,
@@ -197,7 +205,7 @@
         total: ADDON_PRICES.photography
       });
     }
-    if (formData.addons.audioVisualSupport) {
+    if (calculatorData.addons.audioVisualSupport) {
       items.push({
         name: 'Audio/Visual Support',
         price: ADDON_PRICES.audioVisualSupport,
@@ -205,7 +213,7 @@
         total: ADDON_PRICES.audioVisualSupport
       });
     }
-    if (formData.addons.liveMusician) {
+    if (calculatorData.addons.liveMusician) {
       items.push({
         name: 'Live Musician',
         price: ADDON_PRICES.liveMusician,
@@ -213,9 +221,9 @@
         total: ADDON_PRICES.liveMusician
       });
     }
-    if (formData.addons.woodenUsbDrives > 0) {
-      const isLegacy = formData.selectedTier === 'legacy';
-      const usbDrives = formData.addons.woodenUsbDrives;
+    if (calculatorData.addons.woodenUsbDrives > 0) {
+      const isLegacy = calculatorData.selectedTier === 'legacy';
+      const usbDrives = calculatorData.addons.woodenUsbDrives;
       const includedDrives = isLegacy ? 1 : 0;
 
       if (usbDrives > includedDrives) {
@@ -250,9 +258,9 @@
   }
 
   function selectTier(tier: Tier) {
-    formData.selectedTier = tier;
+    calculatorData.selectedTier = tier;
     // Reset addons when changing tiers
-    formData.addons = {
+    calculatorData.addons = {
       photography: false,
       audioVisualSupport: false,
       liveMusician: false,
@@ -265,21 +273,40 @@
     if (saveStatus === 'saved') {
       saveStatus = 'unsaved';
     }
-    formData.updatedAt = new Date();
+    calculatorData.updatedAt = new Date();
+    
+    // Update services.additional array based on UI toggles
+    const updatedServices = {
+      main: services.main,
+      additional: [
+        ...(additionalLocation.enabled ? [{
+          type: 'location',
+          location: additionalLocation.location,
+          time: additionalLocation.time,
+          hours: additionalLocation.hours
+        }] : []),
+        ...(additionalDay.enabled ? [{
+          type: 'day',
+          location: additionalDay.location,
+          time: additionalDay.time,
+          hours: additionalDay.hours
+        }] : [])
+      ]
+    };
     
     // Log form data changes for debugging
     console.log('💾 [AUTO-SAVE] Triggering auto-save with data:', {
       additionalLocation: {
-        enabled: formData.additionalLocation.enabled,
-        timeDate: formData.additionalLocation.time?.date,
-        timeTime: formData.additionalLocation.time?.time,
-        hours: formData.additionalLocation.hours
+        enabled: additionalLocation.enabled,
+        timeDate: additionalLocation.time?.date,
+        timeTime: additionalLocation.time?.time,
+        hours: additionalLocation.hours
       },
       additionalDay: {
-        enabled: formData.additionalDay.enabled,
-        timeDate: formData.additionalDay.time?.date,
-        timeTime: formData.additionalDay.time?.time,
-        hours: formData.additionalDay.hours
+        enabled: additionalDay.enabled,
+        timeDate: additionalDay.time?.date,
+        timeTime: additionalDay.time?.time,
+        hours: additionalDay.hours
       }
     });
     
@@ -289,26 +316,10 @@
       console.error('🚨 [AUTO-SAVE] Attempting to save invalid data structure!');
     }
     
-    // Create proper AutoSaveData structure
+    // Create proper AutoSaveData structure (design spec compliant)
     const autoSaveData = {
-      calculatorData: formData,
-      services: {
-        main: formData.mainService,
-        additional: [
-          ...(formData.additionalLocation.enabled ? [{
-            type: 'location',
-            location: formData.additionalLocation.location,
-            time: formData.additionalLocation.time,
-            hours: formData.additionalLocation.hours
-          }] : []),
-          ...(formData.additionalDay.enabled ? [{
-            type: 'day',
-            location: formData.additionalDay.location,
-            time: formData.additionalDay.time,
-            hours: formData.additionalDay.hours
-          }] : [])
-        ]
-      }
+      services: updatedServices,
+      calculatorData: calculatorData
     };
     
     autoSave.triggerAutoSave(autoSaveData);
@@ -318,7 +329,7 @@
     const bookingData = {
       items: bookingItems,
       total: totalPrice,
-      formData,
+      calculatorData,
       memorialId,
       timestamp: new Date().toISOString()
     };
@@ -328,26 +339,29 @@
   }
 
   async function handleSaveAndPayLater() {
-    // Force immediate save with proper data structure
+    // Update services.additional array based on UI toggles
+    const updatedServices = {
+      main: services.main,
+      additional: [
+        ...(additionalLocation.enabled ? [{
+          type: 'location',
+          location: additionalLocation.location,
+          time: additionalLocation.time,
+          hours: additionalLocation.hours
+        }] : []),
+        ...(additionalDay.enabled ? [{
+          type: 'day',
+          location: additionalDay.location,
+          time: additionalDay.time,
+          hours: additionalDay.hours
+        }] : [])
+      ]
+    };
+    
+    // Force immediate save with proper data structure (design spec compliant)
     await autoSave.saveNow({
-      calculatorData: formData,
-      services: {
-        main: formData.mainService,
-        additional: [
-          ...(formData.additionalLocation.enabled ? [{
-            type: 'location',
-            location: formData.additionalLocation.location,
-            time: formData.additionalLocation.time,
-            hours: formData.additionalLocation.hours
-          }] : []),
-          ...(formData.additionalDay.enabled ? [{
-            type: 'day',
-            location: formData.additionalDay.location,
-            time: formData.additionalDay.time,
-            hours: formData.additionalDay.hours
-          }] : [])
-        ]
-      }
+      services: updatedServices,
+      calculatorData: calculatorData
     });
     
     // Redirect to profile page for both owner and funeral director
@@ -367,15 +381,15 @@
   $effect(() => {
     if (browser) {
       console.log('🔄 [REACTIVITY] Additional services state changed:', {
-        additionalLocation: formData.additionalLocation.enabled,
-        additionalDay: formData.additionalDay.enabled,
-        additionalLocationHours: formData.additionalLocation.hours,
-        additionalDayHours: formData.additionalDay.hours
+        additionalLocation: additionalLocation.enabled,
+        additionalDay: additionalDay.enabled,
+        additionalLocationHours: additionalLocation.hours,
+        additionalDayHours: additionalDay.hours
       });
       
       // Force reactivity trigger
-      formData.additionalLocation.enabled;
-      formData.additionalDay.enabled;
+      additionalLocation.enabled;
+      additionalDay.enabled;
     }
   });
 
@@ -383,23 +397,53 @@
     // Data structure validation logging
     console.log('🔍 [VALIDATION] Form data initialized:', {
       additionalLocation: {
-        hasTimeProperty: 'time' in formData.additionalLocation,
-        timeStructure: formData.additionalLocation.time,
-        hasStartTimeProperty: 'startTime' in formData.additionalLocation,
-        enabled: formData.additionalLocation.enabled
+        hasTimeProperty: 'time' in additionalLocation,
+        timeStructure: additionalLocation.time,
+        enabled: additionalLocation.enabled
       },
       additionalDay: {
-        hasTimeProperty: 'time' in formData.additionalDay,
-        timeStructure: formData.additionalDay.time,
-        hasStartTimeProperty: 'startTime' in formData.additionalDay,
-        enabled: formData.additionalDay.enabled
+        hasTimeProperty: 'time' in additionalDay,
+        timeStructure: additionalDay.time,
+        enabled: additionalDay.enabled
       }
     });
     
     // Load existing auto-saved data
     const autoSavedData = await autoSave.loadAutoSavedData();
     if (autoSavedData) {
-      formData = autoSavedData;
+      // Restore calculator data
+      if (autoSavedData.calculatorData) {
+        calculatorData = autoSavedData.calculatorData;
+      }
+      
+      // Restore service data
+      if (autoSavedData.services) {
+        services = autoSavedData.services;
+        
+        // Update UI toggles based on additional services
+        const additionalServices = autoSavedData.services.additional || [];
+        const locationService = additionalServices.find(s => s.type === 'location');
+        const dayService = additionalServices.find(s => s.type === 'day');
+        
+        if (locationService) {
+          additionalLocation = {
+            enabled: true,
+            location: locationService.location,
+            time: locationService.time,
+            hours: locationService.hours
+          };
+        }
+        
+        if (dayService) {
+          additionalDay = {
+            enabled: true,
+            location: dayService.location,
+            time: dayService.time,
+            hours: dayService.hours
+          };
+        }
+      }
+      
       console.log('✅ Auto-saved data automatically restored');
       // Validate restored data structure
       validateDataStructure();
@@ -465,7 +509,7 @@
       </h1>
     </div>
     <p class="text-xl text-gray-300 max-w-2xl mx-auto">
-      Configure your memorial service livestream package for {formData.lovedOneName || 'your loved one'}
+      Configure your memorial service livestream package for {lovedOneName || 'your loved one'}
     </p>
     
     <!-- Auto-save status indicator -->
@@ -508,7 +552,7 @@
           <div class="grid md:grid-cols-3 gap-4">
             {#each tiers as tier}
               <button 
-                class="p-4 border-2 rounded-lg transition-all text-left {formData.selectedTier === tier.alias ? 'border-amber-400 bg-amber-400/10' : 'border-gray-600 hover:border-amber-500/50'}"
+                class="p-4 border-2 rounded-lg transition-all text-left {calculatorData.selectedTier === tier.alias ? 'border-amber-400 bg-amber-400/10' : 'border-gray-600 hover:border-amber-500/50'}"
                 onclick={() => selectTier(tier.alias)}
               >
                 <h3 class="font-bold text-lg mb-2 text-white">{tier.name}</h3>
@@ -541,7 +585,7 @@
                 <input 
                   id="main-service-date" 
                   type="date" 
-                  bind:value={formData.mainService.time.date} 
+                  bind:value={services.main.time.date} 
                   onchange={triggerAutoSave}
                   class="w-full p-3 border border-gray-600 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
                 />
@@ -551,7 +595,7 @@
                 <input 
                   id="main-service-time" 
                   type="time" 
-                  bind:value={formData.mainService.time.time} 
+                  bind:value={services.main.time.time} 
                   onchange={triggerAutoSave}
                   class="w-full p-3 border border-gray-600 rounded-lg bg-gray-800 text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
                 />
@@ -569,13 +613,13 @@
                 min="1" 
                 max="8" 
                 step="1"
-                bind:value={formData.mainService.hours}
+                bind:value={services.main.hours}
                 class="w-full gold-slider"
                 onchange={triggerAutoSave}
               />
               <div class="flex justify-between text-sm text-gray-400 mt-1">
                 <span>1 hour</span>
-                <span class="font-medium text-amber-400">{formData.mainService.hours} hours</span>
+                <span class="font-medium text-amber-400">{services.main.hours} hours</span>
                 <span>8+ hours</span>
               </div>
             </div>
@@ -599,9 +643,9 @@
                 </div>
                 <input 
                   type="checkbox" 
-                  bind:checked={formData.additionalLocation.enabled}
+                  bind:checked={additionalLocation.enabled}
                   onchange={() => {
-                    console.log('📋 [CHECKBOX] Additional Location toggled:', formData.additionalLocation.enabled);
+                    console.log('📋 [CHECKBOX] Additional Location toggled:', additionalLocation.enabled);
                     triggerAutoSave();
                   }}
                   class="h-5 w-5 text-amber-400 bg-gray-700 border-gray-600 rounded focus:ring-amber-500"
@@ -609,9 +653,9 @@
               </label>
               
               <!-- Debug: Always show state -->
-              <div class="text-xs text-gray-500 mb-2">Debug: additionalLocation.enabled = {formData.additionalLocation.enabled}</div>
+              <div class="text-xs text-gray-500 mb-2">Debug: additionalLocation.enabled = {additionalLocation.enabled}</div>
               
-              {#if formData.additionalLocation.enabled}
+              {#if additionalLocation.enabled}
                 <div class="space-y-4">
                   <!-- Date and Time Picker for Additional Location -->
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -620,7 +664,7 @@
                       <input 
                         id="additional-location-date" 
                         type="date" 
-                        bind:value={formData.additionalLocation.time.date} 
+                        bind:value={additionalLocation.time.date} 
                         onchange={triggerAutoSave}
                         class="w-full p-3 border border-gray-600 rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
                       />
@@ -630,7 +674,7 @@
                       <input 
                         id="additional-location-time" 
                         type="time" 
-                        bind:value={formData.additionalLocation.time.time} 
+                        bind:value={additionalLocation.time.time} 
                         onchange={triggerAutoSave}
                         class="w-full p-3 border border-gray-600 rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
                       />
@@ -648,13 +692,13 @@
                       min="1" 
                       max="8" 
                       step="1"
-                      bind:value={formData.additionalLocation.hours}
+                      bind:value={additionalLocation.hours}
                       onchange={triggerAutoSave}
                       class="w-full gold-slider"
                     />
                     <div class="flex justify-between text-sm text-gray-400 mt-1">
                       <span>1 hour</span>
-                      <span class="font-medium text-amber-400">{formData.additionalLocation.hours} hours</span>
+                      <span class="font-medium text-amber-400">{additionalLocation.hours} hours</span>
                       <span>8+ hours</span>
                     </div>
                   </div>
@@ -671,9 +715,9 @@
                 </div>
                 <input 
                   type="checkbox" 
-                  bind:checked={formData.additionalDay.enabled}
+                  bind:checked={additionalDay.enabled}
                   onchange={() => {
-                    console.log('📋 [CHECKBOX] Additional Day toggled:', formData.additionalDay.enabled);
+                    console.log('📋 [CHECKBOX] Additional Day toggled:', additionalDay.enabled);
                     triggerAutoSave();
                   }}
                   class="h-5 w-5 text-amber-400 bg-gray-700 border-gray-600 rounded focus:ring-amber-500"
@@ -681,9 +725,9 @@
               </label>
               
               <!-- Debug: Always show state -->
-              <div class="text-xs text-gray-500 mb-2">Debug: additionalDay.enabled = {formData.additionalDay.enabled}</div>
+              <div class="text-xs text-gray-500 mb-2">Debug: additionalDay.enabled = {additionalDay.enabled}</div>
               
-              {#if formData.additionalDay.enabled}
+              {#if additionalDay.enabled}
                 <div class="space-y-4">
                   <!-- Date and Time Picker for Additional Day -->
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -692,7 +736,7 @@
                       <input 
                         id="additional-day-date" 
                         type="date" 
-                        bind:value={formData.additionalDay.time.date} 
+                        bind:value={additionalDay.time.date} 
                         onchange={triggerAutoSave}
                         class="w-full p-3 border border-gray-600 rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
                       />
@@ -702,7 +746,7 @@
                       <input 
                         id="additional-day-time" 
                         type="time" 
-                        bind:value={formData.additionalDay.time.time} 
+                        bind:value={additionalDay.time.time} 
                         onchange={triggerAutoSave}
                         class="w-full p-3 border border-gray-600 rounded-lg bg-gray-700 text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors"
                       />
@@ -720,13 +764,13 @@
                       min="1" 
                       max="8" 
                       step="1"
-                      bind:value={formData.additionalDay.hours}
+                      bind:value={additionalDay.hours}
                       onchange={triggerAutoSave}
                       class="w-full gold-slider"
                     />
                     <div class="flex justify-between text-sm text-gray-400 mt-1">
                       <span>1 hour</span>
-                      <span class="font-medium text-amber-400">{formData.additionalDay.hours} hours</span>
+                      <span class="font-medium text-amber-400">{additionalDay.hours} hours</span>
                       <span>8+ hours</span>
                     </div>
                   </div>
@@ -753,7 +797,7 @@
                 <span class="text-amber-400 font-bold mr-4">+${ADDON_PRICES.photography}</span>
                 <input 
                   type="checkbox" 
-                  bind:checked={formData.addons.photography}
+                  bind:checked={calculatorData.addons.photography}
                   onchange={triggerAutoSave}
                   class="h-5 w-5 text-amber-400 bg-gray-700 border-gray-600 rounded focus:ring-amber-500"
                 />
@@ -769,7 +813,7 @@
                 <span class="text-amber-400 font-bold mr-4">+${ADDON_PRICES.audioVisualSupport}</span>
                 <input 
                   type="checkbox" 
-                  bind:checked={formData.addons.audioVisualSupport}
+                  bind:checked={calculatorData.addons.audioVisualSupport}
                   onchange={triggerAutoSave}
                   class="h-5 w-5 text-amber-400 bg-gray-700 border-gray-600 rounded focus:ring-amber-500"
                 />
@@ -785,7 +829,7 @@
                 <span class="text-amber-400 font-bold mr-4">+${ADDON_PRICES.liveMusician}</span>
                 <input 
                   type="checkbox" 
-                  bind:checked={formData.addons.liveMusician}
+                  bind:checked={calculatorData.addons.liveMusician}
                   onchange={triggerAutoSave}
                   class="h-5 w-5 text-amber-400 bg-gray-700 border-gray-600 rounded focus:ring-amber-500"
                 />
@@ -797,7 +841,7 @@
                 <div>
                   <span class="font-medium text-white">Wooden USB Drives</span>
                   <p class="text-sm text-gray-400">
-                    {#if formData.selectedTier === 'legacy'}
+                    {#if calculatorData.selectedTier === 'legacy'}
                       First drive included with Legacy. Additional drives: first +${ADDON_PRICES.woodenUsbDrives}, then +$100 each
                     {:else}
                       First drive +${ADDON_PRICES.woodenUsbDrives}, additional drives +$100 each
@@ -814,7 +858,7 @@
                   type="number" 
                   min="0" 
                   max="10"
-                  bind:value={formData.addons.woodenUsbDrives}
+                  bind:value={calculatorData.addons.woodenUsbDrives}
                   onchange={triggerAutoSave}
                   class="w-20 p-2 border border-gray-600 rounded bg-gray-700 text-white focus:ring-amber-500 focus:border-amber-500"
                 />
