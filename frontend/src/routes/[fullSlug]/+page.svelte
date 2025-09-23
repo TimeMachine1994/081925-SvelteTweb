@@ -1,5 +1,5 @@
 <script lang="ts">
-	import FakeVideoPlayer from '$lib/components/FakeVideoPlayer.svelte';
+	import LivestreamPlayer from '$lib/components/LivestreamPlayer.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -53,21 +53,9 @@
 	</header>
 
 	<main>
-		{#if memorial.livestream?.uid}
-			<div class="livestream-player">
-				<iframe
-					src="https://customer-j17w42139d580s8b.cloudflarestream.com/{memorial.livestream.uid}/iframe"
-					style="border: none; position: absolute; top: 0; left: 0; height: 100%; width: 100%;"
-					title="Memorial livestream"
-					allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
-					allowfullscreen={true}
-				></iframe>
-			</div>
-		{:else}
-			<div class="livestream-player blank">
-				<FakeVideoPlayer />
-			</div>
-		{/if}
+		<div class="livestream-player">
+			<LivestreamPlayer {memorial} />
+		</div>
 
 		<!-- Photo gallery removed in V1 - photo upload functionality disabled -->
 	</main>
