@@ -19,7 +19,7 @@ export const GET: RequestHandler = async ({ cookies }) => {
 	throw redirect(303, '/');
 };
 
-export const POST: RequestHandler = async ({ cookies }) => {
+export const POST: RequestHandler = async ({ cookies, url }) => {
 	const sessionCookie = cookies.get('session');
 	
 	if (sessionCookie) {
@@ -32,6 +32,12 @@ export const POST: RequestHandler = async ({ cookies }) => {
 	}
 
 	cookies.delete('session', { path: '/' });
+	
+	// Check if this is from DevRoleSwitcher (no redirect needed)
+	const isDevRoleSwitcher = url.searchParams.get('dev') === 'true';
+	if (isDevRoleSwitcher) {
+		return new Response('OK', { status: 200 });
+	}
 	
 	throw redirect(303, '/');
 };

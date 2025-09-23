@@ -7,7 +7,7 @@ import { env } from '$env/dynamic/public';
 
 // Firebase configuration with environment variables and fallbacks
 const firebaseConfig = {
-	apiKey: env.PUBLIC_FIREBASE_API_KEY || 'AIzaSyAXmTxzYRc-LhMEW75nZjjjQCZov1gpiw0',
+	apiKey: dev ? 'dummy' : (env.PUBLIC_FIREBASE_API_KEY || 'AIzaSyAXmTxzYRc-LhMEW75nZjjjQCZov1gpiw0'),
 	authDomain: env.PUBLIC_FIREBASE_AUTH_DOMAIN || 'fir-tweb.firebaseapp.com',
 	projectId: env.PUBLIC_FIREBASE_PROJECT_ID || 'fir-tweb',
 	storageBucket: env.PUBLIC_FIREBASE_STORAGE_BUCKET || 'fir-tweb.firebasestorage.app',
@@ -18,6 +18,7 @@ const firebaseConfig = {
 console.log('🔥 Firebase Config:', {
 	projectId: firebaseConfig.projectId,
 	authDomain: firebaseConfig.authDomain,
+	apiKey: firebaseConfig.apiKey,
 	isDev: dev,
 	isBrowser: browser
 });
@@ -41,8 +42,8 @@ if (browser) {
 			// Connect to Auth emulator
 			try {
 				console.log('🔄 Connecting to Auth emulator...');
-				// Use localhost instead of 127.0.0.1 for browser compatibility
-				connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
+				// Use 127.0.0.1 to match emulator host
+				connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
 				console.log('✅ Connected to Auth emulator on port 9099');
 			} catch (authError) {
 				const errorMessage = (authError as Error).message;
@@ -55,7 +56,7 @@ if (browser) {
 			
 			// Connect to Firestore emulator
 			try {
-				connectFirestoreEmulator(db, 'localhost', 8080);
+				connectFirestoreEmulator(db, '127.0.0.1', 8080);
 				console.log('✅ Connected to Firestore emulator on port 8080');
 			} catch (firestoreError) {
 				const errorMessage = (firestoreError as Error).message;
@@ -68,7 +69,7 @@ if (browser) {
 			
 			// Connect to Storage emulator
 			try {
-				connectStorageEmulator(storage, 'localhost', 9199);
+				connectStorageEmulator(storage, '127.0.0.1', 9199);
 				console.log('✅ Connected to Storage emulator on port 9199');
 			} catch (storageError) {
 				const errorMessage = (storageError as Error).message;

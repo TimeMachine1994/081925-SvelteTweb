@@ -15,7 +15,7 @@ async function createTestAccounts() {
   try {
     console.log('🚀 Creating test accounts via server endpoint...');
     
-    const response = await fetch('http://localhost:5174/api/create-test-accounts', {
+    const response = await fetch('http://localhost:5173/api/create-test-accounts', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -51,7 +51,7 @@ async function createTestAccounts() {
     
   } catch (error) {
     console.error('❌ Error creating test accounts:', error.message);
-    console.log('\n💡 Make sure your dev server is running on http://localhost:5174');
+    console.log('\n💡 Make sure your dev server is running on http://localhost:5173');
     console.log('   Run: npm run dev');
   }
 }

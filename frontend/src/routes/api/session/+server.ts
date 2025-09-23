@@ -19,7 +19,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		const options = { 
 			maxAge: expiresIn, 
 			httpOnly: true, 
-			secure: true, 
+			secure: false, // Allow non-HTTPS in development
 			sameSite: 'lax' as const,
 			path: '/' 
 		};

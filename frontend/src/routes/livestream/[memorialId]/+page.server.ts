@@ -58,6 +58,29 @@ export const load: PageServerLoad = async ({ locals, params }) => {
         throw error(404, 'Livestream not configured for this memorial.');
     }
 
+    // Fetch the complete livestream session data if there's an active session
+    let completeSessionData = null;
+    if (memorial.livestream.sessionId) {
+        console.log('📡 Fetching complete session data for:', memorial.livestream.sessionId);
+        const sessionDoc = await adminDb.collection('livestreams').doc(memorial.livestream.sessionId).get();
+        if (sessionDoc.exists) {
+            completeSessionData = sessionDoc.data();
+            console.log('✅ Complete session data loaded:', JSON.stringify(completeSessionData, null, 2));
+            
+            // Merge the complete session data into memorial.livestream
+            memorial.livestream = {
+                ...memorial.livestream,
+                ...completeSessionData,
+                // Preserve the memorial-level fields
+                isActive: memorial.livestream.isActive,
+                startedAt: memorial.livestream.startedAt
+            };
+            console.log('🔄 Merged livestream data:', JSON.stringify(memorial.livestream, null, 2));
+        } else {
+            console.warn('⚠️ Session document not found:', memorial.livestream.sessionId);
+        }
+    }
+
     return {
         memorial: sanitizeData({ id: memorialDoc.id, ...memorial })
     };

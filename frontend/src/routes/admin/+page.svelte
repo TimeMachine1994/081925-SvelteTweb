@@ -186,7 +186,7 @@
 										</div>
 										<div class="ml-4">
 											<a 
-												href="/tributes/{memorial.fullSlug}" 
+												href="/{memorial.slug}" 
 												target="_blank"
 												class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
 											>

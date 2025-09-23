@@ -3,6 +3,16 @@
 
 	let { data } = $props();
 	const { memorial } = data;
+	
+	// Debug logging for memorial data
+	console.log('🏛️ Memorial data loaded:', JSON.stringify(memorial, null, 2));
+	console.log('🎥 Livestream data:', JSON.stringify(memorial.livestream, null, 2));
+	console.log('🔗 Playback URLs available:', {
+		playbackUrl: memorial.livestream?.playbackUrl,
+		alternativePlaybackUrl: memorial.livestream?.alternativePlaybackUrl,
+		directPlaybackUrl: memorial.livestream?.directPlaybackUrl,
+		hls: memorial.livestream?.playback?.hls
+	});
 
 	let streamKeyCopied = $state(false);
 	let serverUrlCopied = $state(false);
@@ -36,9 +46,17 @@
 		navigator.clipboard.writeText(text);
 	}
 
-	const rtmpsUrl = memorial.livestream?.rtmps?.url || 'rtmps://live.cloudflare.com:443/live/';
+	const rtmpsUrl = memorial.livestream?.rtmps?.url || memorial.livestream?.streamUrl || 'rtmps://live.cloudflare.com:443/live/';
 	const streamKey = memorial.livestream?.streamKey || '';
 	const serverUrl = rtmpsUrl.replace('{STREAM_KEY}', '');
+	
+	// Debug RTMPS configuration
+	console.log('📡 RTMPS Configuration:', {
+		rtmpsUrl,
+		streamKey: streamKey ? 'SET' : 'MISSING',
+		serverUrl,
+		originalStreamUrl: memorial.livestream?.streamUrl
+	});
 
 	async function getVideoDevices() {
 		try {
@@ -61,17 +79,30 @@
 			stopStreaming(false); // Keep UI state, just stop tracks
 
 			// Get camera permissions and stream
-			console.log(`Requesting camera with deviceId: ${deviceId}`);
+			console.log(`📹 Requesting camera with deviceId: ${deviceId}`);
 			const constraints: MediaStreamConstraints = {
 				audio: true,
 				video: deviceId ? { deviceId: { exact: deviceId } } : true
 			};
+			console.log('📹 Media constraints:', JSON.stringify(constraints, null, 2));
 			localStream = await navigator.mediaDevices.getUserMedia(constraints);
 			console.log('✅ MediaStream acquired:', localStream);
+			console.log('📹 Stream tracks:', localStream.getTracks().map(track => ({
+				kind: track.kind,
+				label: track.label,
+				enabled: track.enabled,
+				readyState: track.readyState
+			})));
 			const videoTracks = localStream.getVideoTracks();
 			console.log('✅ Video Tracks:', videoTracks);
 			if (videoTracks.length > 0) {
 				console.log('  - Track 0 Settings:', videoTracks[0].getSettings());
+			}
+
+			// Assign stream to video element for preview
+			if (videoElement && localStream) {
+				videoElement.srcObject = localStream;
+				console.log('📺 Stream assigned to video element');
 			}
 
 			// Populate device list if not already done
@@ -80,16 +111,23 @@
 			}
 
 			// Fetch the WHIP URL from our API
+			console.log('🌐 Fetching WHIP URL from API...');
 			const response = await fetch(`/api/memorials/${memorial.id}/livestream/whip`, {
 				method: 'POST',
 			});
 
+			console.log('🌐 WHIP API Response status:', response.status);
 			if (!response.ok) {
+				const errorText = await response.text();
+				console.error('❌ WHIP API Error:', errorText);
 				throw new Error('Failed to get WHIP URL from server.');
 			}
 
-			const { whipEndpoint } = await response.json();
+			const whipData = await response.json();
+			console.log('🌐 WHIP API Response data:', JSON.stringify(whipData, null, 2));
+			const { whipEndpoint } = whipData;
 			whipUrl = whipEndpoint;
+			console.log('🌐 WHIP URL set to:', whipUrl);
 
 		} catch (error) {
 			console.error('Error preparing mobile stream:', error);
@@ -106,37 +144,72 @@
 
 		pc = new RTCPeerConnection();
 		pc.oniceconnectionstatechange = () => {
-			console.log('ICE Connection State:', pc?.iceConnectionState);
+			console.log('🧊 ICE Connection State changed:', pc?.iceConnectionState);
 			if (pc?.iceConnectionState === 'connected') {
+				console.log('✅ WebRTC connection established!');
 				isStreaming = true;
 				isLoading = false;
 			}
 			if (pc?.iceConnectionState === 'failed' || pc?.iceConnectionState === 'disconnected') {
+				console.log('❌ WebRTC connection failed/disconnected');
 				stopStreaming();
 			}
 		};
+		
+		pc.onconnectionstatechange = () => {
+			console.log('🔗 Connection State changed:', pc?.connectionState);
+		};
+		
+		pc.onicegatheringstatechange = () => {
+			console.log('🧊 ICE Gathering State changed:', pc?.iceGatheringState);
+		};
 
-		localStream.getTracks().forEach(track => pc!.addTrack(track, localStream!));
+		console.log('📡 Adding tracks to peer connection...');
+		localStream.getTracks().forEach(track => {
+			console.log('➕ Adding track:', track.kind, track.label);
+			pc!.addTrack(track, localStream!);
+		});
 
-		await pc.setLocalDescription(await pc.createOffer());
+		console.log('📝 Creating WebRTC offer...');
+		const offer = await pc.createOffer();
+		console.log('📝 Offer created:', offer.type, offer.sdp?.substring(0, 100) + '...');
+		await pc.setLocalDescription(offer);
+		console.log('📝 Local description set');
 
 		try {
+			console.log('🌐 Sending WHIP request to:', whipUrl);
+			console.log('📝 SDP Offer length:', pc.localDescription?.sdp?.length);
 			const response = await fetch(whipUrl, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/sdp' },
 				body: pc.localDescription?.sdp,
 			});
 
+			console.log('🌐 WHIP Response status:', response.status);
+			console.log('🌐 WHIP Response headers:', Object.fromEntries(response.headers.entries()));
+			
 			if (!response.ok || response.status !== 201) {
-				throw new Error(`WHIP connection failed: ${response.status}`);
+				const errorBody = await response.text();
+				console.error('❌ WHIP Error body:', errorBody);
+				throw new Error(`WHIP connection failed: ${response.status} - ${errorBody}`);
 			}
 
 			const answerSdp = await response.text();
+			console.log('📝 SDP Answer received, length:', answerSdp.length);
+			console.log('📝 SDP Answer preview:', answerSdp.substring(0, 200) + '...');
 			await pc.setRemoteDescription({ type: 'answer', sdp: answerSdp });
+			console.log('📝 Remote description set successfully');
 
 		} catch (error) {
-			console.error('Error during WHIP negotiation:', error);
-			alert('Failed to connect to the streaming server.');
+			console.error('💥 Error during WHIP negotiation:', error);
+			console.error('💥 Error details:', {
+				message: error instanceof Error ? error.message : 'Unknown error',
+				stack: error instanceof Error ? error.stack : undefined,
+				whipUrl,
+				peerConnectionState: pc?.connectionState,
+				iceConnectionState: pc?.iceConnectionState
+			});
+			alert('Failed to connect to the streaming server. Check console for details.');
 			stopStreaming();
 			isLoading = false;
 		}

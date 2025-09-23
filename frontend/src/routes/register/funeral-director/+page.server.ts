@@ -156,7 +156,7 @@ export const actions: Actions = {
 			const memorialData = {
 				lovedOneName,
 				slug,
-				fullSlug: `${slug}-${Date.now()}`, // Ensure uniqueness
+				fullSlug: slug, // Use clean slug without timestamp
 				ownerUid: userRecord.uid, // The family member owns the memorial
 				funeralDirectorUid: directorUid, // The logged-in FD manages it
 				creatorEmail: directorData.email,

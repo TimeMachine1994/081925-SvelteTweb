@@ -29,6 +29,14 @@
 			name: 'Sarah Owner',
 			icon: User,
 			color: 'bg-green-600'
+		},
+		{
+			role: 'viewer',
+			email: 'viewer@test.com',
+			password: 'test123',
+			name: 'Mike Viewer',
+			icon: User,
+			color: 'bg-blue-600'
 		}
 	];
 	
@@ -38,39 +46,35 @@
 			
 			// First logout current user if any
 			try {
-				await fetch('/logout', { method: 'POST' });
+				await fetch('/logout?dev=true', { method: 'POST' });
 			} catch (e) {
 				console.log('No current session to logout');
 			}
 			
-			// Use Firebase Auth directly to sign in
-			const { signInWithEmailAndPassword, getIdToken } = await import('firebase/auth');
-			const { auth } = await import('$lib/firebase');
-			
-			const userCredential = await signInWithEmailAndPassword(auth, account.email, account.password);
-			const idToken = await getIdToken(userCredential.user);
-			
-			// Create session with the server using the correct API endpoint
-			const response = await fetch('/api/session', {
+			// Use server-side authentication to avoid browser Firebase issues
+			const response = await fetch('/api/dev-role-switch', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ idToken })
+				body: JSON.stringify({ 
+					email: account.email, 
+					password: account.password 
+				})
 			});
 
 			if (response.ok) {
-				console.log(`Successfully switched to ${account.role}`);
 				const result = await response.json();
+				console.log(`Successfully switched to ${result.role}`);
 				if (result.redirectTo) {
 					window.location.href = result.redirectTo;
 				} else {
 					window.location.href = '/'; // Fallback to homepage
 				}
 			} else {
-				console.error('Failed to create session');
-				const errorText = await response.text();
-				console.error('Login response:', errorText);
+				const errorData = await response.json();
+				console.error('Failed to switch roles:', errorData.error);
+				alert(`Error switching to ${account.role}: ${errorData.error}`);
 			}
 		} catch (error: any) {
 			console.error('Error switching roles:', error);

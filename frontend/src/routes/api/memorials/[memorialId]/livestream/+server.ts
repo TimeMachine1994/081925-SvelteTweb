@@ -6,6 +6,10 @@ import { CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN } from '$env/static/private
 
 // Optional Cloudflare customer code - fallback to empty string if not set
 const CLOUDFLARE_CUSTOMER_CODE = process.env.CLOUDFLARE_CUSTOMER_CODE || '';
+console.log('🔧 CLOUDFLARE_CUSTOMER_CODE loaded:', CLOUDFLARE_CUSTOMER_CODE ? 'SET' : 'EMPTY');
+console.log('🔧 CLOUDFLARE_CUSTOMER_CODE value:', CLOUDFLARE_CUSTOMER_CODE);
+console.log('🔧 CLOUDFLARE_ACCOUNT_ID:', CLOUDFLARE_ACCOUNT_ID ? 'SET' : 'EMPTY');
+console.log('🔧 CLOUDFLARE_API_TOKEN:', CLOUDFLARE_API_TOKEN ? 'SET' : 'EMPTY');
 
 /**
  * Start livestream for a memorial
@@ -54,14 +58,33 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 		}
 
 		const cfData = await cfResponse.json();
+		console.log('📡 Cloudflare API Response:', JSON.stringify(cfData, null, 2));
 		const liveInput = cfData.result;
+		console.log('📡 Live Input Data:', JSON.stringify(liveInput, null, 2));
 
 		// 2. Create livestream session document in Firestore
+		// Generate playback URLs - prioritize working formats
+		const alternativePlaybackUrl = `https://cloudflarestream.com/${liveInput.uid}/iframe`;
+		const customerPlaybackUrl = CLOUDFLARE_CUSTOMER_CODE ? 
+			`https://customer-${CLOUDFLARE_CUSTOMER_CODE}.cloudflarestream.com/${liveInput.uid}/iframe` : null;
+		const directPlaybackUrl = liveInput.playback?.hls || liveInput.playback?.dash || null;
+		
+		// Use the best available URL format
+		const playbackUrl = alternativePlaybackUrl; // This format works without customer code
+		
+		console.log('🎥 Primary playback URL (standard format):', playbackUrl);
+		console.log('🎥 Customer playback URL:', customerPlaybackUrl);
+		console.log('🎥 Alternative playback URL:', alternativePlaybackUrl);
+		console.log('🎥 Direct playback URL from API:', directPlaybackUrl);
+		console.log('🎥 Live Input UID:', liveInput.uid);
+		console.log('🎥 Live Input RTMPS URL:', liveInput.rtmps?.url);
+		console.log('🎥 Live Input Stream Key:', liveInput.rtmps?.streamKey ? 'SET' : 'MISSING');
+		
 		const livestreamData = {
 			memorialId,
-			startedBy: locals.user.uid,
-			startedByEmail: locals.user.email,
-			startedByRole: locals.user.role,
+			startedBy: locals.user?.uid,
+			startedByEmail: locals.user?.email,
+			startedByRole: locals.user?.role,
 			title: streamTitle || `${memorial?.lovedOneName} Memorial Service`,
 			description: streamDescription || '',
 			status: 'starting',
@@ -69,18 +92,23 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 			cloudflareId: liveInput.uid,
 			streamKey: liveInput.rtmps.streamKey,
 			streamUrl: liveInput.rtmps.url,
-			playbackUrl: `https://customer-${CLOUDFLARE_CUSTOMER_CODE}.cloudflarestream.com/${liveInput.uid}/iframe`,
+			playbackUrl,
+			alternativePlaybackUrl,
+			customerPlaybackUrl,
+			directPlaybackUrl,
 			permissions: {
 				canStart: accessResult.accessLevel === 'admin' || accessResult.accessLevel === 'edit',
 				canStop: accessResult.accessLevel === 'admin' || accessResult.accessLevel === 'edit',
 				canModerate: accessResult.accessLevel === 'admin'
 			}
 		};
+		
+		console.log('💾 Livestream data to be saved:', JSON.stringify(livestreamData, null, 2));
 
 		const livestreamRef = await adminDb.collection('livestreams').add(livestreamData);
 
 		// 3. Update memorial with active livestream details
-		await memorialRef.update({
+		const memorialUpdateData = {
 			'livestream.isActive': true,
 			'livestream.sessionId': livestreamRef.id,
 			'livestream.cloudflareId': liveInput.uid,
@@ -88,19 +116,32 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 			'livestream.startedBy': locals.user.uid,
 			'livestream.streamUrl': liveInput.rtmps.url,
 			'livestream.streamKey': liveInput.rtmps.streamKey,
-			'livestream.playbackUrl': livestreamData.playbackUrl
-		});
+			'livestream.playbackUrl': livestreamData.playbackUrl,
+			'livestream.alternativePlaybackUrl': livestreamData.alternativePlaybackUrl,
+			'livestream.customerPlaybackUrl': livestreamData.customerPlaybackUrl,
+			'livestream.directPlaybackUrl': livestreamData.directPlaybackUrl
+		};
+		
+		console.log('💾 Memorial update data:', JSON.stringify(memorialUpdateData, null, 2));
+		await memorialRef.update(memorialUpdateData);
 
 		console.log('✅ Livestream started successfully:', livestreamRef.id);
 
-		return json({
+		const responseData = {
 			success: true,
 			sessionId: livestreamRef.id,
 			streamKey: liveInput.rtmps.streamKey,
 			streamUrl: liveInput.rtmps.url,
 			playbackUrl: livestreamData.playbackUrl,
+			alternativePlaybackUrl: livestreamData.alternativePlaybackUrl,
+			customerPlaybackUrl: livestreamData.customerPlaybackUrl,
+			directPlaybackUrl: livestreamData.directPlaybackUrl,
+			cloudflareId: liveInput.uid,
 			permissions: livestreamData.permissions
-		});
+		};
+		
+		console.log('📤 API Response:', JSON.stringify(responseData, null, 2));
+		return json(responseData);
 
 	} catch (error) {
 		console.error('💥 Error starting livestream:', error);

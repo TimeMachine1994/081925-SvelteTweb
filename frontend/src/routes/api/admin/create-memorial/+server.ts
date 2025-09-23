@@ -28,8 +28,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			.replace(/-+/g, '-')
 			.replace(/^-|-$/g, '');
 
-		const timestamp = Date.now();
-		const fullSlug = `celebration-of-life-for-${baseSlug}-${timestamp}`;
+		const fullSlug = `celebration-of-life-for-${baseSlug}`;
 
 		const auth = getAuth();
 		let userUid = null;

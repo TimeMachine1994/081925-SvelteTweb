@@ -21,13 +21,15 @@ const testAccounts = [
     data: {
       role: 'funeral_director',
       companyName: 'Smith & Sons Funeral Home',
+      contactPerson: 'John Director',
       phone: '(555) 123-4567',
       address: {
         street: '123 Memorial Drive',
         city: 'Orlando',
         state: 'FL',
         zipCode: '32801'
-      }
+      },
+      status: 'approved'
     }
   },
   {
@@ -82,6 +84,20 @@ export const POST: RequestHandler = async () => {
           createdAt: new Date().toISOString(),
           lastLoginAt: new Date().toISOString()
         });
+        
+        // Create funeral director profile document if this is a funeral director
+        if (account.role === 'funeral_director') {
+          await adminDb.collection('funeral_directors').doc(userRecord.uid).set({
+            companyName: account.data.companyName,
+            contactPerson: account.data.contactPerson,
+            email: account.email,
+            phone: account.data.phone,
+            address: account.data.address,
+            status: account.data.status,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          });
+        }
         
         results.push({ success: true, role: account.role, email: account.email });
         

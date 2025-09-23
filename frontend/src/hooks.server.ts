@@ -4,6 +4,11 @@ import { logUserAction, extractUserContext } from '$lib/server/auditLogger';
 import type { Handle } from '@sveltejs/kit';
 
 const authHandle: Handle = async ({ event, resolve }) => {
+	// Skip authentication middleware for logout endpoint to avoid confusion
+	if (event.url.pathname === '/logout') {
+		return resolve(event);
+	}
+	
 	console.log('🔐 Authentication check for:', event.url.pathname);
 	
 	const sessionCookie = event.cookies.get('session');
