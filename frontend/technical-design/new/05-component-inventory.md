@@ -350,6 +350,16 @@ let bookingItems = $derived.by(() => {
 - Mock video player for development
 - Testing interface for livestream features
 
+### `LivestreamPlayer.svelte`
+**Location**: `/src/lib/components/LivestreamPlayer.svelte`
+**Purpose**: Video player for livestream viewing
+
+#### Features
+- Cloudflare Stream integration
+- Player controls and settings
+- Quality selection
+- Fullscreen support
+
 ## UI Components
 
 ### `ActionButton.svelte`
@@ -456,29 +466,58 @@ let bookingItems = $derived.by(() => {
 #### Features
 - Follow/unfollow toggle
 - Follower count display
-- Authentication requirement
-- Optimistic updates
+
+### `Register.svelte`
+**Location**: `/src/lib/components/Register.svelte`
+**Purpose**: User registration component
+
+#### Features
+- Multi-step registration form
+- Form validation and error handling
+- Role-based registration flows
+- Auto-save functionality
+
+### `ErrorBoundary.svelte`
+**Location**: `/src/lib/components/ErrorBoundary.svelte`
+**Purpose**: Error handling wrapper component
+
+#### Features
+- Catches and displays component errors
+- Graceful error recovery
+- Error reporting integration
+- User-friendly error messages
+
+### `LoadingSpinner.svelte`
+**Location**: `/src/lib/components/LoadingSpinner.svelte`
+**Purpose**: Loading state indicator
+
+#### Features
+- Animated loading spinner
+- Customizable size and colors
+- Accessible loading states
+- Consistent loading UX
+
+### `LiveUrlPreview.svelte`
+**Location**: `/src/lib/components/LiveUrlPreview.svelte`
+**Purpose**: URL preview functionality
+
+#### Features
+- Live URL preview generation
+- Metadata extraction
+- Image and title display
+- Social media integration
 
 ### `RolePreviewer.svelte`
 **Location**: `/src/lib/components/RolePreviewer.svelte`
-**Purpose**: Role-based preview utility
+**Purpose**: Role preview utility for development
 
 #### Features
-- Preview components as different roles
-- Development and testing utility
-- Permission simulation
+- Preview different user roles
+- Development environment only
+- Quick role switching
+- UI state testing
 
 ## Page Components
-
-### Homepage
-**Location**: `/src/routes/+page.svelte`
-**Purpose**: Landing page
-
-#### Features
-- Hero section with value proposition
-- Service overview
-- Call-to-action buttons
-- Responsive design
 
 ### Portal Pages
 

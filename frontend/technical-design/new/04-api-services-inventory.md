@@ -414,6 +414,19 @@ This document provides a comprehensive inventory of all API endpoints in Tribute
 
 ## Development & Testing APIs
 
+### `/api/dev-role-switch`
+**Purpose**: Development role switching
+
+#### POST `/api/dev-role-switch`
+- **Description**: Switch user roles in development
+- **Request**: `{ email: string, password: string }`
+- **Response**: `{ success: boolean, redirectTo: string }`
+- **Features**:
+  - Development environment only
+  - Predefined test accounts only
+  - Session cookie creation
+  - Role-based redirection
+
 ### `/api/create-test-accounts`
 **Purpose**: Test account creation
 
@@ -434,6 +447,28 @@ This document provides a comprehensive inventory of all API endpoints in Tribute
 - **Features**:
   - Role claim fixes
   - Profile synchronization
+  - Development environment only
+
+### `/api/set-role-claim`
+**Purpose**: Development role assignment
+
+#### POST `/api/set-role-claim`
+- **Description**: Set user role claims (development only)
+- **Request**: `{ uid: string, role: string }`
+- **Response**: `{ success: boolean }`
+- **Features**:
+  - Firebase Auth custom claims
+  - Development environment only
+
+### `/api/set-admin-claim`
+**Purpose**: Development admin assignment
+
+#### POST `/api/set-admin-claim`
+- **Description**: Set admin privileges (development only)
+- **Request**: `{ uid: string, admin: boolean }`
+- **Response**: `{ success: boolean }`
+- **Features**:
+  - Firebase Auth admin claims
   - Development environment only
 
 ## API Security Features
