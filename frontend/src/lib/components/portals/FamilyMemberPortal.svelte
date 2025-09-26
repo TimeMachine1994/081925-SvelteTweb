@@ -12,8 +12,8 @@
             {#each memorials as memorial}
                 <div class="TODO: replace-with-theme-class">
                     <h2 class="TODO: replace-with-theme-class">{memorial.lovedOneName}</h2>
-                    <a href="/tributes/{memorial.slug}" class="TODO: replace-with-theme-class">View Memorial</a>
-                    <a href="/my-portal/tributes/{memorial.id}/edit" class="TODO: replace-with-theme-class">Add Photos</a>
+                    <a href="/{memorial.fullSlug || memorial.slug}" class="TODO: replace-with-theme-class">View Memorial</a>
+                    <a href="/profile" class="TODO: replace-with-theme-class">Manage Memorial</a>
                 </div>
             {/each}
         </div>

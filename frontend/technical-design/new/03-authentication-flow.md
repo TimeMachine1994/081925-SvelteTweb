@@ -30,26 +30,30 @@ await createSession(idToken);
 
 #### Session Creation (`/api/session`)
 ```typescript
-// 1. Verify ID token
-const decodedToken = await adminAuth.verifyIdToken(idToken);
-
-// 2. Create session cookie (24 hours)
+// 1. Create session cookie (24 hours)
+const expiresIn = 60 * 60 * 24 * 1000; // 24 hours
 const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
 
-// 3. Set secure HTTP-only cookie
+// 2. Set secure HTTP-only cookie
 cookies.set('session', sessionCookie, {
   maxAge: expiresIn,
   httpOnly: true,
-  secure: true,
+  secure: false, // Allow non-HTTPS in development
   sameSite: 'lax',
   path: '/'
 });
 
-// 4. Role-based redirect
+// 3. Verify token and get user claims
+const decodedToken = await adminAuth.verifyIdToken(idToken);
+
+// 4. Add propagation delay for Firebase user record
+await new Promise((resolve) => setTimeout(resolve, 1500));
+
+// 5. Role-based redirect
 if (decodedToken.role === 'admin') {
   return json({ redirectTo: '/admin' });
 } else if (slug) {
-  return json({ redirectTo: `/tributes/${slug}` });
+  return json({ redirectTo: `/${slug}` });
 } else {
   return json({ redirectTo: '/my-portal' });
 }
@@ -299,6 +303,43 @@ export const GET: RequestHandler = async ({ locals, params }) => {
 - **Permission Changes**: Role modification tracking
 - **Security Events**: Suspicious activity detection
 
+## Security Improvements & Race Condition Fixes
+
+### Race Condition Resolution
+**Problem**: Client-side navigation after session creation could occur before browser processed session cookie, causing authentication failures.
+
+**Solution**: 
+```typescript
+// Use full page reload instead of client-side navigation
+window.location.href = '/profile'; // ✅ Correct
+// await goto('/profile'); // ❌ Race condition
+```
+
+### Firebase Propagation Delays
+**Problem**: User record not immediately available after creation due to Firebase's eventual consistency.
+
+**Solutions**:
+1. **Session Creation Delay**: 1.5s wait after token verification
+2. **Retry Logic**: 3 attempts with 1s delays in hooks.server.ts
+3. **User Record Verification**: Check user exists before token creation
+
+### Session Security Enhancements
+```typescript
+// Current session cookie configuration
+cookies.set('session', sessionCookie, {
+  maxAge: 24 * 60 * 60 * 1000, // 24 hours
+  httpOnly: true,              // Prevent XSS
+  secure: false,               // Allow HTTP in development
+  sameSite: 'lax',            // CSRF protection
+  path: '/'                   // Site-wide access
+});
+```
+
+### Data Model Standardization
+- **Consistent Naming**: uid, email, displayName, role, isAdmin
+- **Memorial Fields**: ownerUid, funeralDirectorUid (not createdByUserId)
+- **Type Safety**: Standardized User interface across all files
+
 ## Error Handling
 
 ### Authentication Errors
@@ -309,13 +350,15 @@ export const GET: RequestHandler = async ({ locals, params }) => {
 - 'auth/session-cookie-expired': Session timeout
 - 'auth/session-cookie-revoked': Token revocation
 - 'auth/insufficient-permission': Role-based access denial
+- 'auth/invalid-signature': Environment mismatch
 ```
 
 ### Error Recovery
-- **Retry Logic**: User record propagation delays
+- **Retry Logic**: User record propagation delays (3 attempts, 1s intervals)
 - **Graceful Degradation**: Fallback to public access
-- **Session Cleanup**: Invalid session removal
-- **User Feedback**: Clear error messages
+- **Session Cleanup**: Invalid session removal with cookie deletion
+- **User Feedback**: Clear error messages with context
+- **Propagation Handling**: Built-in delays for Firebase consistency
 
 ## Development & Testing
 

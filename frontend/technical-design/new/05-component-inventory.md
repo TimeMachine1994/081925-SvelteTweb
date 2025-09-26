@@ -359,6 +359,62 @@ let bookingItems = $derived.by(() => {
 - Player controls and settings
 - Quality selection
 - Fullscreen support
+- Multi-service stream display
+- Live and archived stream separation
+
+### `LivestreamArchive.svelte`
+**Location**: `/src/lib/components/LivestreamArchive.svelte`
+**Purpose**: Archive management interface for funeral directors
+
+#### Features
+- Display all archived livestream entries
+- Visibility toggle controls (Eye/EyeOff icons)
+- Recording status indicators
+- Archive entry management (edit, delete)
+- Real-time status updates
+- Color-coded visibility states (Green=Visible, Gray=Hidden)
+
+#### State Management
+```typescript
+let archiveEntries = $state<LivestreamArchiveEntry[]>([]);
+let loading = $state(false);
+let error = $state<string | null>(null);
+```
+
+#### Key Functions
+- `toggleVisibility()`: Toggle archive entry visibility
+- `checkRecordings()`: Manual recording status refresh
+- `deleteEntry()`: Remove archive entry
+- `loadArchive()`: Fetch archive entries
+
+### `LivestreamArchivePlayer.svelte`
+**Location**: `/src/lib/components/LivestreamArchivePlayer.svelte`
+**Purpose**: Multi-player component for memorial pages
+
+#### Features
+- Display multiple archived recordings
+- Separate sections for live vs recorded services
+- Service details display (date, time, location, duration)
+- Only shows visible recordings to public
+- Processing status indicators
+- Manual recording check button
+- Responsive grid layout
+
+#### Props
+```typescript
+{
+  memorialId: string;
+  scheduledServices?: ScheduledService[];
+  userRole?: 'admin' | 'owner' | 'funeral_director' | null;
+}
+```
+
+#### State Management
+```typescript
+let liveServices = $derived(/* filter live services */);
+let recordedServices = $derived(/* filter completed services */);
+let checkingRecordings = $state(false);
+```
 
 ## UI Components
 

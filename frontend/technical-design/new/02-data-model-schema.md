@@ -111,6 +111,9 @@ interface Memorial {
   livestream?: any;               // Livestream data (CloudflareStream)
   livestreamConfig?: any;         // Calculator/booking configuration
   livestreamEnabled?: boolean;    // Livestream availability flag
+  livestreamArchive?: LivestreamArchiveEntry[]; // Historical livestreams
+  customStreams?: Record<string, CustomStreamConfig>; // Multi-service streaming
+  activeStreams?: number;         // Number of active streams
   
   // Contact Information
   familyContactName?: string;     // Primary family contact
@@ -169,6 +172,60 @@ interface TimeInfo {
   date: string | null;            // Service date
   time: string | null;            // Service time
   isUnknown: boolean;             // Unknown time flag
+}
+
+// Livestream Archive Interface
+export interface LivestreamArchiveEntry {
+  id: string;                     // Unique identifier for this stream
+  title: string;                  // Stream title
+  description?: string;           // Stream description
+  cloudflareId: string;           // Cloudflare Stream ID
+  playbackUrl: string;            // Playback URL for recorded stream
+  recordingPlaybackUrl?: string;  // Cloudflare recording URL
+  livePlaybackUrl?: string;       // Live stream URL
+  startedAt: Timestamp;           // When stream started
+  endedAt?: Timestamp;            // When stream ended
+  duration?: number;              // Duration in seconds
+  isVisible: boolean;             // Whether visible on memorial page
+  recordingReady: boolean;        // Whether recording is available
+  startedBy: string;              // UID of user who started stream
+  startedByName?: string;         // Name of user who started stream
+  viewerCount?: number;           // Peak viewer count
+  thumbnailUrl?: string;          // Recording thumbnail
+  fileSize?: number;              // Recording file size
+  createdAt: Timestamp;           // Archive entry creation
+  updatedAt: Timestamp;           // Last update
+}
+
+// Custom Stream Configuration for Multi-Service Streaming
+export interface CustomStreamConfig {
+  id: string;                     // Stream configuration ID
+  title: string;                  // Stream title
+  status: 'scheduled' | 'live' | 'completed'; // Stream status
+  isVisible: boolean;             // Public visibility
+  cloudflareId?: string;          // Cloudflare Stream ID
+  streamKey?: string;             // RTMP stream key
+  streamUrl?: string;             // RTMP stream URL
+  sessionId?: string;             // Session identifier
+  createdAt: Timestamp;           // Creation timestamp
+  updatedAt: Timestamp;           // Last update
+}
+
+// Scheduled Service Interface for Multi-Service Support
+export interface ScheduledService {
+  id: string;                     // Service identifier
+  title: string;                  // Service title
+  location: LocationInfo;         // Service location
+  time: TimeInfo;                 // Service time
+  hours: number;                  // Duration in hours
+  streamKey?: string;             // RTMP stream key
+  streamUrl?: string;             // RTMP stream URL
+  sessionId?: string;             // Session identifier
+  status: 'scheduled' | 'live' | 'completed'; // Service status
+  isVisible: boolean;             // Public visibility
+  createdAt: Date;                // Creation timestamp
+  type: 'main' | 'additional';    // Service type
+  index?: number;                 // For additional services
 }
 ```
 

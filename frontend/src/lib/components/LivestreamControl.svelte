@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Play, Square, Users, Eye, Settings, AlertCircle } from 'lucide-svelte';
+	import LivestreamArchive from './LivestreamArchive.svelte';
 
 	let {
 		memorialId,
@@ -145,32 +146,40 @@
 	}
 </script>
 
-<div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-	{#if showTitle}
-		<div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-red-50 to-pink-50">
-			<div class="flex items-center space-x-3">
-				<div class="w-10 h-10 rounded-full bg-gradient-to-r from-red-500 to-pink-500 flex items-center justify-center">
-					{#if livestreamStatus.isActive}
-						<div class="w-3 h-3 bg-white rounded-full animate-pulse"></div>
-					{:else}
-						<Play class="w-5 h-5 text-white" />
-					{/if}
-				</div>
-				<div>
-					<h3 class="text-lg font-semibold text-gray-900">Livestream Control</h3>
-					<p class="text-sm text-gray-600">
-						{#if livestreamStatus.isActive}
-							<span class="text-red-600 font-medium">● LIVE</span> - Stream is active
-						{:else}
-							Stream is offline
-						{/if}
-					</p>
-				</div>
-			</div>
-		</div>
-	{/if}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+	<!-- Archive Management (Left 2/3) -->
+	<div class="lg:col-span-2">
+		<LivestreamArchive {memorialId} {memorialName} />
+	</div>
 
-	<div class="p-6">
+	<!-- Control Panel (Right 1/3) -->
+	<div class="lg:col-span-1">
+		<div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+			{#if showTitle}
+				<div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-red-50 to-pink-50">
+					<div class="flex items-center space-x-3">
+						<div class="w-10 h-10 rounded-full bg-gradient-to-r from-red-500 to-pink-500 flex items-center justify-center">
+							{#if livestreamStatus.isActive}
+								<div class="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+							{:else}
+								<Play class="w-5 h-5 text-white" />
+							{/if}
+						</div>
+						<div>
+							<h3 class="text-lg font-semibold text-gray-900">Livestream Control</h3>
+							<p class="text-sm text-gray-600">
+								{#if livestreamStatus.isActive}
+									<span class="text-red-600 font-medium">● LIVE</span> - Stream is active
+								{:else}
+									Stream is offline
+								{/if}
+							</p>
+						</div>
+					</div>
+				</div>
+			{/if}
+
+			<div class="p-6">
 		{#if error}
 			<div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center space-x-2">
 				<AlertCircle class="w-5 h-5 text-red-500" />
@@ -273,6 +282,8 @@
 				{/if}
 			</div>
 		{/if}
+			</div>
+		</div>
 	</div>
 </div>
 

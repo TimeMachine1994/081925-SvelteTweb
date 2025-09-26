@@ -150,7 +150,7 @@
 							
 							<div class="flex space-x-2">
 								<a 
-									href="/my-portal/tributes/{memorial.id}/edit"
+									href="/profile"
 									class="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center space-x-1"
 								>
 									<Camera class="w-4 h-4" />
@@ -273,7 +273,7 @@
 								</div>
 								<div class="flex items-center space-x-2">
 									<a 
-										href="/my-portal/tributes/{memorial.id}/edit"
+										href="/profile"
 										class="text-amber-600 hover:text-amber-700 text-sm font-medium"
 									>
 										Manage

@@ -128,7 +128,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					email: formData.creatorEmail,
 					password: password,
 					lovedOneName: formData.lovedOneName,
-					tributeUrl: `https://tributestream.com/tributes/${fullSlug}`,
+					tributeUrl: `https://tributestream.com/${fullSlug}`,
 					familyContactEmail: formData.creatorEmail,
 					familyContactName: formData.creatorName || `${formData.lovedOneName} Family`,
 					familyContactPhone: '',
@@ -148,7 +148,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			fullSlug,
 			userUid,
 			userCreated: !userExists,
-			memorialUrl: `/tributes/${fullSlug}`
+			memorialUrl: `/${fullSlug}`
 		});
 
 	} catch (error: any) {

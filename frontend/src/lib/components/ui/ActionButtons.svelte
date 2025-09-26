@@ -34,13 +34,13 @@
 		icon="phone"
 		label="Manage Invitations"
 		color="violet"
-		href="/my-portal/tributes/{memorial.id}/invite"
+		href="/profile"
 	/>
 
 	<ActionButton
 		icon="share"
 		label="Invite Others to Share Media"
 		color="cyan"
-		href="/my-portal/tributes/{memorial.id}/invite"
+		href="/profile"
 	/>
 </div>

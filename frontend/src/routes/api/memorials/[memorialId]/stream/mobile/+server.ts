@@ -71,7 +71,7 @@ export const POST: RequestHandler = async ({ request, locals, params }) => {
       streamKey,
       streamData: cloudflareStreamData,
       mobileStreamUrl: `/funeral-director/mobile-stream/${memorialId}?key=${streamKey}`,
-      viewerUrl: `/tributes/${memorial.slug || memorialId}`,
+      viewerUrl: `/${memorial.fullSlug || memorial.slug || memorialId}`,
       message: 'Mobile stream ready'
     });
 

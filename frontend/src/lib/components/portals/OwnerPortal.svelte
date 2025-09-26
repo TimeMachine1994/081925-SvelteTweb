@@ -155,7 +155,7 @@
 			<h3 class="text-lg font-medium text-gray-900 mb-2">No Memorials Yet</h3>
 			<p class="text-gray-600 mb-6">You haven't created any memorials yet. Get started by creating your first memorial.</p>
 			<a 
-				href="/my-portal/tributes/new"
+				href="/register/family"
 				class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
 			>
 				Create Your First Memorial

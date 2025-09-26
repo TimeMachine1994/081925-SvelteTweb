@@ -167,7 +167,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         email: ownerData.email,
         password: password,
         lovedOneName: `${memorialData.deceased.firstName} ${memorialData.deceased.lastName}`,
-        tributeUrl: `https://tributestream.com/tributes/${memorial.fullSlug}`,
+        tributeUrl: `https://tributestream.com/${memorial.fullSlug}`,
         familyContactName: `${ownerData.firstName} ${ownerData.lastName}`,
         familyContactEmail: ownerData.email,
         familyContactPhone: ownerData.phone,

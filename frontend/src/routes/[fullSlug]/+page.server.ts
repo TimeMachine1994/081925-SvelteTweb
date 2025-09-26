@@ -2,6 +2,7 @@ import { error } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
 import type { PageServerLoad } from './$types';
 import type { Memorial } from '$lib/types/memorial';
+import { convertMemorialToScheduledServices } from '$lib/server/scheduledServicesUtils';
 
 // Helper function to recursively convert Timestamps and Dates to strings
 function sanitizeData(data: any): any {
@@ -47,8 +48,33 @@ export const load: PageServerLoad = async ({ params, locals }) => {
         isFollowing = followerDoc.exists;
     }
 
+    // Load scheduled services for the memorial page
+    const scheduledServices = convertMemorialToScheduledServices(memorial);
+    // Filter to only show visible services for public viewers
+    const visibleServices = scheduledServices.filter(service => service.isVisible !== false);
+
+    // Load archive entries for recordings
+    const archiveEntries = memorial.livestreamArchive || [];
+    // Filter to only show visible and ready recordings for public viewers
+    const visibleArchiveEntries = archiveEntries.filter(entry => 
+        entry.isVisible !== false && entry.recordingReady === true
+    );
+
+    console.log('📺 Memorial page loading archive entries:', {
+        totalEntries: archiveEntries.length,
+        visibleEntries: visibleArchiveEntries.length,
+        entries: archiveEntries.map(e => ({
+            id: e.id,
+            title: e.title,
+            recordingReady: e.recordingReady,
+            isVisible: e.isVisible
+        }))
+    });
+
     return {
         memorial: sanitizeData(memorial),
+        scheduledServices: sanitizeData(visibleServices),
+        archiveEntries: sanitizeData(visibleArchiveEntries),
         user: locals.user,
         isOwner,
         isFollowing

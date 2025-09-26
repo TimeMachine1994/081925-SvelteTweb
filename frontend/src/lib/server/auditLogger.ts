@@ -63,11 +63,23 @@ export function extractUserContext(event: RequestEvent): Pick<AuditEvent, 'uid' 
 		return null;
 	}
 
+	// Safely get client address with fallback
+	let ipAddress = 'unknown';
+	try {
+		ipAddress = event.getClientAddress();
+	} catch (error) {
+		console.warn('⚠️ Could not determine client address:', error);
+		// Try to get from headers as fallback
+		ipAddress = event.request.headers.get('x-forwarded-for') || 
+		           event.request.headers.get('x-real-ip') || 
+		           'localhost';
+	}
+
 	return {
 		uid: event.locals.user.uid,
 		userEmail: event.locals.user.email || 'unknown',
 		userRole: (event.locals.user.role as 'admin' | 'owner' | 'funeral_director') || 'owner',
-		ipAddress: event.getClientAddress(),
+		ipAddress,
 		userAgent: event.request.headers.get('user-agent') || 'unknown'
 	};
 }

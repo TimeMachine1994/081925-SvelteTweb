@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { adminAuth, adminDb } from '$lib/firebase-admin';
+import { adminAuth, adminDb, FieldValue } from '$lib/firebase-admin';
 import { requireLivestreamAccess, createMemorialRequest } from '$lib/server/memorialMiddleware';
 import { CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN } from '$env/static/private';
 
@@ -177,9 +177,35 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
 
 		const memorial = memorialDoc.data();
 		const sessionId = memorial?.livestream?.sessionId;
+		const cloudflareId = memorial?.livestream?.cloudflareId;
 
 		if (!sessionId) {
 			return json({ error: 'No active livestream found' }, { status: 404 });
+		}
+
+		// Optionally disconnect the Cloudflare Live Input (this will force stop any active streams)
+		if (cloudflareId) {
+			try {
+				console.log('🌩️ Disconnecting Cloudflare Live Input:', cloudflareId);
+				// Note: Cloudflare doesn't have a direct "stop" API, but we can delete the live input
+				// This will force disconnect any active streams
+				const cfResponse = await fetch(`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/stream/live_inputs/${cloudflareId}`, {
+					method: 'DELETE',
+					headers: {
+						'Authorization': `Bearer ${CLOUDFLARE_API_TOKEN}`,
+						'Content-Type': 'application/json'
+					}
+				});
+				
+				if (cfResponse.ok) {
+					console.log('✅ Cloudflare Live Input deleted successfully');
+				} else {
+					const errorBody = await cfResponse.text();
+					console.warn('⚠️ Could not delete Cloudflare Live Input:', errorBody);
+				}
+			} catch (cfError) {
+				console.warn('⚠️ Error disconnecting Cloudflare Live Input:', cfError);
+			}
 		}
 
 		// Update livestream session
@@ -191,11 +217,70 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
 			endedByRole: locals.user.role
 		});
 
-		// Update memorial to remove active livestream
+		// Try to get the recorded video from Cloudflare
+		let recordingPlaybackUrl = '';
+		let recordingReady = false;
+		let recordingThumbnail = '';
+		
+		if (cloudflareId) {
+			try {
+				console.log('🎬 Checking for recorded video:', cloudflareId);
+				const videoResponse = await fetch(`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/stream/${cloudflareId}`, {
+					headers: {
+						'Authorization': `Bearer ${CLOUDFLARE_API_TOKEN}`,
+						'Content-Type': 'application/json'
+					}
+				});
+
+				if (videoResponse.ok) {
+					const videoData = await videoResponse.json();
+					const video = videoData.result;
+					
+					console.log('🎥 Video data from Cloudflare:', JSON.stringify(video, null, 2));
+					
+					if (video.status === 'ready' && video.playback) {
+						recordingReady = true;
+						recordingPlaybackUrl = video.playback.hls || video.playback.dash || '';
+						recordingThumbnail = video.thumbnail || '';
+						console.log('✅ Recording is ready:', recordingPlaybackUrl);
+					} else {
+						console.log('⏳ Recording not ready yet, status:', video.status);
+					}
+				} else {
+					console.warn('⚠️ Could not fetch video data from Cloudflare:', videoResponse.status);
+				}
+			} catch (error) {
+				console.warn('⚠️ Error fetching recorded video:', error);
+			}
+		}
+
+		// Create archive entry for this livestream
+		const archiveEntry = {
+			id: sessionId,
+			title: memorial.livestream?.title || `${memorial.lovedOneName} Memorial Service`,
+			description: memorial.livestream?.description || '',
+			cloudflareId: cloudflareId,
+			playbackUrl: recordingPlaybackUrl || memorial.livestream?.playbackUrl || '', // Use recording URL if available
+			recordingPlaybackUrl: recordingPlaybackUrl,
+			recordingThumbnail: recordingThumbnail,
+			startedAt: memorial.livestream?.startedAt,
+			endedAt: new Date(),
+			isVisible: true, // Default to visible
+			recordingReady: recordingReady, // True if recording is immediately available
+			startedBy: memorial.livestream?.startedBy || locals.user.uid,
+			startedByName: locals.user?.displayName || 'Unknown',
+			viewerCount: 0, // Could be updated with actual viewer count
+			createdAt: new Date(),
+			updatedAt: new Date()
+		};
+
+		// Add to archive and update memorial
 		await memorialRef.update({
 			'livestream.isActive': false,
 			'livestream.endedAt': new Date(),
-			'livestream.endedBy': locals.user.uid
+			'livestream.endedBy': locals.user.uid,
+			'livestream.status': 'ended',
+			'livestreamArchive': FieldValue.arrayUnion(archiveEntry)
 		});
 
 		console.log('✅ Livestream stopped successfully:', sessionId);
@@ -228,7 +313,8 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		// Note: We could use requireViewAccess here, but livestream status might be public
 		
 		// Get memorial document
-		const memorialDoc = await adminDb.collection('memorials').doc(memorialId).get();
+		const memorialRef = adminDb.collection('memorials').doc(memorialId);
+		const memorialDoc = await memorialRef.get();
 
 		if (!memorialDoc.exists) {
 			return json({ error: 'Memorial not found' }, { status: 404 });
@@ -246,6 +332,52 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 					id: sessionDoc.id,
 					...sessionDoc.data()
 				};
+			}
+		}
+
+		// Check actual Cloudflare status to verify if stream is really live
+		let cloudflareStatus = null;
+		let actuallyLive = false;
+		if (livestreamInfo.cloudflareId) {
+			try {
+				console.log('🔍 Checking actual Cloudflare status for:', livestreamInfo.cloudflareId);
+				const cfResponse = await fetch(`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/stream/live_inputs/${livestreamInfo.cloudflareId}`, {
+					headers: {
+						'Authorization': `Bearer ${CLOUDFLARE_API_TOKEN}`,
+						'Content-Type': 'application/json'
+					}
+				});
+
+				if (cfResponse.ok) {
+					const cfData = await cfResponse.json();
+					cloudflareStatus = cfData.result;
+					actuallyLive = cloudflareStatus.status === 'live';
+					console.log('🌩️ Cloudflare Live Input status:', cloudflareStatus.status);
+					
+					// If Cloudflare says not live but our DB says active, sync the status
+					if (!actuallyLive && livestreamInfo.isActive) {
+						console.log('🔄 Syncing status: Cloudflare not live, updating memorial');
+						await memorialRef.update({
+							'livestream.isActive': false,
+							'livestream.status': 'ended',
+							'livestream.syncedAt': new Date()
+						});
+						livestreamInfo.isActive = false;
+					}
+				} else if (cfResponse.status === 404) {
+					// Live input was deleted, update our status
+					console.log('🔄 Live input not found, marking as ended');
+					if (livestreamInfo.isActive) {
+						await memorialRef.update({
+							'livestream.isActive': false,
+							'livestream.status': 'ended',
+							'livestream.syncedAt': new Date()
+						});
+						livestreamInfo.isActive = false;
+					}
+				}
+			} catch (cfError) {
+				console.warn('⚠️ Could not check Cloudflare status:', cfError);
 			}
 		}
 
@@ -271,11 +403,26 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 			success: true,
 			livestream: {
 				isActive: livestreamInfo.isActive || false,
+				actuallyLive,
 				startedAt: livestreamInfo.startedAt || null,
+				endedAt: livestreamInfo.endedAt || null,
 				streamUrl: livestreamInfo.streamUrl || null,
 				playbackUrl: livestreamInfo.playbackUrl || null,
+				status: livestreamInfo.status || 'unknown',
+				cloudflareId: livestreamInfo.cloudflareId || null,
 				currentSession,
-				permissions
+				permissions,
+				cloudflareStatus: cloudflareStatus ? {
+					status: cloudflareStatus.status,
+					connectionCount: cloudflareStatus.connectionCount || 0,
+					recording: cloudflareStatus.recording
+				} : null,
+				debugging: {
+					dbSaysActive: livestreamInfo.isActive || false,
+					cloudflareSaysLive: actuallyLive,
+					statusMatch: (livestreamInfo.isActive || false) === actuallyLive,
+					lastSyncedAt: livestreamInfo.syncedAt || null
+				}
 			}
 		});
 

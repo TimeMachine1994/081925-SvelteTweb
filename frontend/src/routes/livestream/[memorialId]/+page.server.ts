@@ -81,7 +81,64 @@ export const load: PageServerLoad = async ({ locals, params }) => {
         }
     }
 
+    // Fetch scheduled services from memorial data
+    const scheduledServices = [];
+    
+    // Convert main service to scheduled service
+    if (memorial.services?.main) {
+        const mainService = {
+            id: 'main',
+            title: memorial.services.main.location.name || 'Main Service',
+            location: memorial.services.main.location,
+            time: memorial.services.main.time,
+            hours: memorial.services.main.hours,
+            status: 'scheduled',
+            type: 'main',
+            streamKey: memorial.livestream?.streamKey || `stream_main_${Date.now()}`,
+            streamUrl: memorial.livestream?.streamUrl || `rtmps://live.cloudflare.com:443/live/`
+        };
+        scheduledServices.push(mainService);
+    }
+
+    // Convert additional services to scheduled services
+    if (memorial.services?.additional && memorial.services.additional.length > 0) {
+        memorial.services.additional.forEach((additionalService, index) => {
+            if (additionalService.enabled) {
+                const scheduledService = {
+                    id: `additional_${index}`,
+                    title: additionalService.location.name || `Additional Service ${index + 1}`,
+                    location: additionalService.location,
+                    time: additionalService.time,
+                    hours: additionalService.hours,
+                    status: 'scheduled',
+                    type: 'additional',
+                    index,
+                    streamKey: `stream_additional_${index}_${Date.now()}`,
+                    streamUrl: `rtmps://live.cloudflare.com:443/live/`
+                };
+                scheduledServices.push(scheduledService);
+            }
+        });
+    }
+
+    // Add any custom streams
+    if (memorial.customStreams) {
+        Object.values(memorial.customStreams).forEach(customStream => {
+            scheduledServices.push(sanitizeData(customStream));
+        });
+    }
+
+    // Sort by date/time
+    scheduledServices.sort((a, b) => {
+        const dateA = a.time?.date ? new Date(a.time.date).getTime() : 0;
+        const dateB = b.time?.date ? new Date(b.time.date).getTime() : 0;
+        return dateA - dateB;
+    });
+
+    console.log(`📅 Loaded ${scheduledServices.length} scheduled services for memorial ${memorialId}`);
+
     return {
-        memorial: sanitizeData({ id: memorialDoc.id, ...memorial })
+        memorial: sanitizeData({ id: memorialDoc.id, ...memorial }),
+        scheduledServices: sanitizeData(scheduledServices)
     };
 };

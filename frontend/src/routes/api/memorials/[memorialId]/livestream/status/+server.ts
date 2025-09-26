@@ -47,6 +47,63 @@ export const GET: RequestHandler = async ({ params }) => {
 
 		console.log('📊 Cloudflare Live Input Status:', JSON.stringify(liveInput, null, 2));
 
+		// Check if recording is available for playback
+		let recordingStatus = null;
+		if (liveInput.recording?.uid) {
+			console.log('🎬 Checking recording status for video:', liveInput.recording.uid);
+			
+			try {
+				const videoResponse = await fetch(`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/stream/${liveInput.recording.uid}`, {
+					headers: {
+						'Authorization': `Bearer ${CLOUDFLARE_API_TOKEN}`,
+						'Content-Type': 'application/json'
+					}
+				});
+
+				if (videoResponse.ok) {
+					const videoData = await videoResponse.json();
+					const video = videoData.result;
+					console.log('🎬 Recording video status:', video.status?.state);
+					
+					recordingStatus = {
+						uid: video.uid,
+						state: video.status?.state, // 'ready', 'inprogress', 'error', etc.
+						isReady: video.status?.state === 'ready',
+						duration: video.duration,
+						playback: video.playback,
+						created: video.created,
+						modified: video.modified
+					};
+
+					// Update archive entry if recording just became ready
+					if (video.status?.state === 'ready' && memorial?.livestreamArchive) {
+						const archive = memorial.livestreamArchive;
+						let archiveUpdated = false;
+
+						for (let i = 0; i < archive.length; i++) {
+							if (archive[i].cloudflareId === liveInput.recording.uid && !archive[i].recordingReady) {
+								archive[i].recordingReady = true;
+								archive[i].duration = video.duration;
+								archive[i].updatedAt = new Date();
+								archiveUpdated = true;
+								console.log('🎬 Updated archive entry recording status:', archive[i].id);
+								break;
+							}
+						}
+
+						if (archiveUpdated) {
+							await memorialRef.update({
+								livestreamArchive: archive,
+								updatedAt: new Date()
+							});
+						}
+					}
+				}
+			} catch (recordingError) {
+				console.warn('⚠️ Could not fetch recording status:', recordingError);
+			}
+		}
+
 		// Extract key status information
 		const status = {
 			uid: liveInput.uid,
@@ -58,6 +115,7 @@ export const GET: RequestHandler = async ({ params }) => {
 			webRTC: liveInput.webRTC,
 			sip: liveInput.sip,
 			recording: liveInput.recording,
+			recordingStatus,
 			meta: liveInput.meta,
 			created: liveInput.created,
 			modified: liveInput.modified,

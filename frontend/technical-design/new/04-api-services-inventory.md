@@ -299,6 +299,86 @@ This document provides a comprehensive inventory of all API endpoints in Tribute
 - **Description**: WHIP protocol endpoint for streaming
 - **Response**: WHIP configuration
 
+### `/api/memorials/[memorialId]/livestream/archive`
+**Purpose**: Livestream archive management
+
+#### GET `/api/memorials/[memorialId]/livestream/archive`
+- **Authorization**: View access required
+- **Description**: Get all archived livestream entries
+- **Response**: `LivestreamArchiveEntry[]`
+- **Features**:
+  - Returns all archive entries for funeral directors/owners
+  - Filters visible entries for public viewers
+  - Includes recording status and metadata
+
+#### POST `/api/memorials/[memorialId]/livestream/archive`
+- **Authorization**: Edit access required
+- **Description**: Create new archive entry
+- **Request**: `{ title: string, description?: string, cloudflareId: string }`
+- **Response**: `{ success: boolean, entryId: string }`
+
+### `/api/memorials/[memorialId]/livestream/archive/[entryId]`
+**Purpose**: Individual archive entry management
+
+#### PUT `/api/memorials/[memorialId]/livestream/archive/[entryId]`
+- **Authorization**: Edit access required
+- **Description**: Update archive entry (visibility, title, etc.)
+- **Request**: Archive entry updates
+- **Response**: `{ success: boolean }`
+
+#### DELETE `/api/memorials/[memorialId]/livestream/archive/[entryId]`
+- **Authorization**: Edit access required
+- **Description**: Delete archive entry
+- **Response**: `{ success: boolean }`
+
+### `/api/memorials/[memorialId]/livestream/archive/check-recordings`
+**Purpose**: Recording status verification
+
+#### POST `/api/memorials/[memorialId]/livestream/archive/check-recordings`
+- **Authorization**: Edit access required
+- **Description**: Check and update recording status for all archive entries
+- **Response**: `{ updated: number, summary: string }`
+- **Features**:
+  - Queries Cloudflare API for recording status
+  - Updates recordingReady and playback URLs
+  - Returns summary of updates made
+
+### `/api/memorials/[memorialId]/scheduled-services`
+**Purpose**: Multi-service streaming management
+
+#### GET `/api/memorials/[memorialId]/scheduled-services`
+- **Authorization**: View access required
+- **Description**: Get all scheduled services for memorial
+- **Response**: `ScheduledService[]`
+- **Features**:
+  - Converts Memorial.services to scheduled service format
+  - Includes stream credentials and status
+  - Supports main + additional services
+
+#### POST `/api/memorials/[memorialId]/scheduled-services`
+- **Authorization**: Edit access required
+- **Description**: Create new scheduled service
+- **Request**: Service configuration
+- **Response**: `{ success: boolean, serviceId: string }`
+
+### `/api/memorials/[memorialId]/scheduled-services/[serviceId]`
+**Purpose**: Individual scheduled service management
+
+#### PUT `/api/memorials/[memorialId]/scheduled-services/[serviceId]`
+- **Authorization**: Edit access required
+- **Description**: Update scheduled service (status, visibility)
+- **Request**: `{ status?: string, isVisible?: boolean }`
+- **Response**: `{ success: boolean }`
+- **Features**:
+  - Updates service status (scheduled → live → completed)
+  - Controls public visibility
+  - Manages stream session data
+
+#### DELETE `/api/memorials/[memorialId]/scheduled-services/[serviceId]`
+- **Authorization**: Edit access required
+- **Description**: Delete scheduled service
+- **Response**: `{ success: boolean }`
+
 ### `/api/memorials/[memorialId]/livestreams`
 **Purpose**: Livestream session management
 
@@ -359,6 +439,20 @@ This document provides a comprehensive inventory of all API endpoints in Tribute
   - Webhook signature verification
   - Payment status updates
   - Order fulfillment triggers
+
+### `/api/webhooks/cloudflare/recording`
+**Purpose**: Cloudflare Stream recording notifications
+
+#### POST `/api/webhooks/cloudflare/recording`
+- **Description**: Handle Cloudflare recording ready notifications
+- **Request**: Cloudflare webhook payload
+- **Response**: `{ received: boolean }`
+- **Features**:
+  - Automatic recording status updates
+  - Updates memorial archive entries
+  - Sets recordingReady and playback URLs
+  - Optional webhook signature verification
+  - Handles HLS/DASH URLs, thumbnails, metadata
 
 ### `/api/lock-schedule`
 **Purpose**: Schedule locking after payment
