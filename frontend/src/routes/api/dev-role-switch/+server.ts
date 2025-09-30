@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { adminAuth } from '$lib/server/firebase';
+import { adminAuth } from '$lib/firebase-admin';
 
 // Server-side role switching for DevRoleSwitcher
 export const POST: RequestHandler = async ({ request, cookies }) => {

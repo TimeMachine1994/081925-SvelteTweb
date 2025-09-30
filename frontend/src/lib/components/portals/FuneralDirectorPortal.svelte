@@ -165,14 +165,21 @@
 								{/if}
 								
 								{#if memorial.livestreamEnabled}
-									<button class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-1">
+									<a 
+										href="/memorials/{memorial.id}/streams"
+										class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-1"
+									>
 										<Video class="w-4 h-4" />
-										<span>Go Live</span>
-									</button>
+										<span>Manage Streams</span>
+									</a>
 								{:else}
-									<button class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
-										Setup Stream
-									</button>
+									<a 
+										href="/memorials/{memorial.id}/streams"
+										class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-1"
+									>
+										<Video class="w-4 h-4" />
+										<span>Setup Stream</span>
+									</a>
 								{/if}
 								
 								<a 

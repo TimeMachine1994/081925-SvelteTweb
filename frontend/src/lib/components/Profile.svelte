@@ -118,8 +118,8 @@
 				throw new Error('Failed to start livestream session.');
 			}
 
-			// On success, navigate to the livestream control page
-			await goto(`/livestream/${memorialId}`);
+			// On success, navigate to the memorial streams management page
+			await goto(`/memorials/${memorialId}/streams`);
 
 		} catch (err) {
 			console.error('Error starting stream:', err);
@@ -172,65 +172,69 @@
 								<User class="w-6 h-6 mr-3 text-{roleInfo.accentColor}-600" />
 								Profile
 							</h2>
-							<button
-								onclick={() => isEditing = !isEditing}
-								class="p-2 rounded-full bg-{roleInfo.accentColor}-100 text-{roleInfo.accentColor}-600 hover:bg-{roleInfo.accentColor}-200 transition-colors"
-							>
-								<Edit3 class="w-4 h-4" />
-							</button>
 						</div>
 
 						<div class="space-y-6">
-							<div class="flex items-center space-x-4 p-4 rounded-2xl bg-gradient-to-r from-gray-50 to-white border border-gray-100">
-								<Mail class="w-5 h-5 text-gray-500" />
-								<div>
-									<p class="text-sm text-gray-500 font-medium">Email</p>
-									<p class="text-gray-900 font-semibold">{data.profile.email}</p>
+							{#if userRole === 'funeral_director' && data.funeralDirector}
+								<!-- Funeral Director Business Info -->
+								<div class="flex items-center space-x-4 p-4 rounded-2xl bg-gradient-to-r from-{roleInfo.accentColor}-50 to-white border border-{roleInfo.accentColor}-100">
+									<Building2 class="w-5 h-5 text-{roleInfo.accentColor}-600" />
+									<div>
+										<p class="text-sm text-{roleInfo.accentColor}-600 font-medium">Company</p>
+										<p class="text-gray-900 font-semibold">{data.funeralDirector.companyName}</p>
+									</div>
 								</div>
-							</div>
 
-							{#if isEditing}
-								<form method="POST" action="?/updateProfile" use:enhance class="space-y-4">
-									<div class="space-y-2">
-										<label for="displayName" class="block text-sm font-medium text-gray-700">Display Name</label>
-										<input
-											type="text"
-											id="displayName"
-											name="displayName"
-											bind:value={displayName}
-											class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-{roleInfo.accentColor}-500 focus:border-transparent transition-all bg-white/50 backdrop-blur-sm"
-											placeholder="Enter your display name"
-										/>
+								<div class="flex items-center space-x-4 p-4 rounded-2xl bg-gradient-to-r from-gray-50 to-white border border-gray-100">
+									<User class="w-5 h-5 text-gray-500" />
+									<div>
+										<p class="text-sm text-gray-500 font-medium">Contact Person</p>
+										<p class="text-gray-900 font-semibold">{data.funeralDirector.contactPerson}</p>
 									</div>
-									<div class="flex space-x-3">
-										<button
-											type="submit"
-											class="flex-1 bg-gradient-to-r {roleInfo.gradient} text-white px-6 py-3 rounded-xl font-medium hover:shadow-lg transition-all duration-300 hover:scale-105"
-										>
-											Save Changes
-										</button>
-										<button
-											type="button"
-											onclick={() => isEditing = false}
-											class="px-6 py-3 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
-										>
-											Cancel
-										</button>
+								</div>
+
+								<div class="flex items-center space-x-4 p-4 rounded-2xl bg-gradient-to-r from-gray-50 to-white border border-gray-100">
+									<Mail class="w-5 h-5 text-gray-500" />
+									<div>
+										<p class="text-sm text-gray-500 font-medium">Email</p>
+										<p class="text-gray-900 font-semibold">{data.funeralDirector.email}</p>
 									</div>
-								</form>
+								</div>
+
+								<div class="flex items-center space-x-4 p-4 rounded-2xl bg-gradient-to-r from-gray-50 to-white border border-gray-100">
+									<User class="w-5 h-5 text-gray-500" />
+									<div>
+										<p class="text-sm text-gray-500 font-medium">Phone</p>
+										<p class="text-gray-900 font-semibold">{data.funeralDirector.phone}</p>
+									</div>
+								</div>
+
+								<div class="flex items-center space-x-4 p-4 rounded-2xl bg-gradient-to-r from-gray-50 to-white border border-gray-100">
+									<Building2 class="w-5 h-5 text-gray-500" />
+									<div>
+										<p class="text-sm text-gray-500 font-medium">Address</p>
+										<p class="text-gray-900 font-semibold">
+											{data.funeralDirector.address.street}<br>
+											{data.funeralDirector.address.city}, {data.funeralDirector.address.state} {data.funeralDirector.address.zipCode}
+										</p>
+									</div>
+								</div>
 							{:else}
+								<!-- Regular user profile -->
+								<div class="flex items-center space-x-4 p-4 rounded-2xl bg-gradient-to-r from-gray-50 to-white border border-gray-100">
+									<Mail class="w-5 h-5 text-gray-500" />
+									<div>
+										<p class="text-sm text-gray-500 font-medium">Email</p>
+										<p class="text-gray-900 font-semibold">{data.profile.email}</p>
+									</div>
+								</div>
+
 								<div class="flex items-center space-x-4 p-4 rounded-2xl bg-gradient-to-r from-{roleInfo.accentColor}-50 to-white border border-{roleInfo.accentColor}-100">
 									<User class="w-5 h-5 text-{roleInfo.accentColor}-600" />
 									<div>
 										<p class="text-sm text-{roleInfo.accentColor}-600 font-medium">Display Name</p>
 										<p class="text-gray-900 font-semibold">{displayName || 'Not set'}</p>
 									</div>
-								</div>
-							{/if}
-
-							{#if form?.message}
-								<div class="p-4 rounded-xl bg-green-50 border border-green-200">
-									<p class="text-green-800 font-medium">{form.message}</p>
 								</div>
 							{/if}
 						</div>
@@ -296,7 +300,7 @@
 												{#if userRole === 'funeral_director'}
 													<button onclick={() => startStream(memorial.id)} class="px-4 py-2 rounded-xl bg-red-600 text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center">
 														<Video class="w-3 h-3 mr-1" />
-														Start Stream
+														Setup Stream
 													</button>
 												{/if}
 											</div>

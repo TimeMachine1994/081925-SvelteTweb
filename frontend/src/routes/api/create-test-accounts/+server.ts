@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { adminAuth, adminDb } from '$lib/server/firebase';
+import { adminAuth, adminDb } from '$lib/firebase-admin';
 
 const testAccounts = [
   {

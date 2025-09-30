@@ -26,15 +26,41 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 			console.log('📊 Public archive access - showing visible entries only');
 		}
 
-		// Get memorial document
+		// Get memorial document for validation
 		const memorialDoc = await adminDb.collection('memorials').doc(memorialId).get();
 
 		if (!memorialDoc.exists) {
 			return json({ error: 'Memorial not found' }, { status: 404 });
 		}
 
-		const memorial = memorialDoc.data();
-		let archive = memorial?.livestreamArchive || [];
+		// Query streams collection directly instead of reading from livestreamArchive array
+		// This prevents document size limit issues and provides real-time data
+		let query = adminDb.collection('streams')
+			.where('memorialId', '==', memorialId)
+			.where('status', '==', 'completed')
+			.orderBy('actualStartTime', 'desc');
+
+		const streamsSnapshot = await query.get();
+		
+		let archive = streamsSnapshot.docs.map(doc => {
+			const streamData = doc.data();
+			return {
+				id: doc.id,
+				title: streamData.title,
+				description: streamData.description || '',
+				cloudflareId: streamData.cloudflareId,
+				playbackUrl: streamData.recordingUrl || streamData.playbackUrl,
+				startedAt: streamData.actualStartTime || streamData.createdAt,
+				endedAt: streamData.endTime,
+				duration: streamData.recordingDuration,
+				isVisible: streamData.isVisible,
+				recordingReady: streamData.recordingReady,
+				startedBy: streamData.createdBy,
+				viewerCount: streamData.viewerCount || 0,
+				createdAt: streamData.createdAt,
+				updatedAt: streamData.updatedAt
+			};
+		});
 
 		// If user doesn't have control access, filter to only visible entries
 		if (!hasControlAccess) {
@@ -45,12 +71,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 
 		return json({
 			success: true,
-			archive: archive.sort((a: any, b: any) => {
-				// Sort by startedAt descending (newest first)
-				const aTime = a.startedAt?.toDate?.() || new Date(a.startedAt);
-				const bTime = b.startedAt?.toDate?.() || new Date(b.startedAt);
-				return bTime.getTime() - aTime.getTime();
-			}),
+			archive,
 			hasControlAccess
 		});
 

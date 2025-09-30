@@ -1,4 +1,5 @@
 import admin from 'firebase-admin';
+import type { FieldValue } from 'firebase-admin/firestore';
 import { dev } from '$app/environment';
 import { env } from '$env/dynamic/private';
 
@@ -138,3 +139,6 @@ console.log('--- SERVER FIREBASE INITIALIZATION END ---');
 export const adminAuth = admin.auth();
 export const adminDb = admin.firestore();
 export const adminStorage = admin.storage();
+
+// Export FieldValue for array operations
+export { FieldValue } from 'firebase-admin/firestore';

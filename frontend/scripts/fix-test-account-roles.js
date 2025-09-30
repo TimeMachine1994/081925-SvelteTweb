@@ -3,7 +3,7 @@
 // Script to fix custom claims for test accounts
 // Run with: node scripts/fix-test-account-roles.js
 
-import { adminAuth } from '../src/lib/server/firebase.js';
+import { adminAuth } from '../src/lib/firebase-admin.js';
 
 const testAccounts = [
   {

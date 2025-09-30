@@ -1,14 +1,18 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { adminDb } from '$lib/server/firebase';
+import { adminDb, FieldValue } from '$lib/server/firebase';
 import { env } from '$env/dynamic/private';
 
 /**
- * Webhook endpoint for Cloudflare Stream recording notifications
- * This is called when a recording is ready for playback
+ * Unified Cloudflare Stream recording webhook
+ * 
+ * This webhook now ONLY targets the unified 'streams' collection.
+ * Legacy collections are no longer updated by this webhook.
+ * 
+ * @version 2.0 - Unified streams only
  */
 export const POST: RequestHandler = async ({ request }) => {
-	console.log('🎬 Cloudflare recording webhook received');
+	console.log('🎬 [UNIFIED] Cloudflare recording webhook received');
 
 	try {
 		// Verify webhook signature if secret is configured
@@ -42,77 +46,133 @@ export const POST: RequestHandler = async ({ request }) => {
 		console.log('🎥 Playback URLs:', playback);
 		console.log('🎥 Recording info:', recording);
 
-		// Find the livestream session with this Cloudflare ID
-		const livestreamsQuery = await adminDb
-			.collection('livestreams')
+		// Find stream in the unified streams collection ONLY
+		const streamsQuery = await adminDb
+			.collection('streams')
 			.where('cloudflareId', '==', uid)
 			.limit(1)
 			.get();
 
-		if (livestreamsQuery.empty) {
-			console.warn('⚠️ No livestream found for Cloudflare ID:', uid);
-			return json({ success: true, message: 'Livestream not found' });
+		if (streamsQuery.empty) {
+			console.warn('⚠️ No stream found in unified collection for cloudflareId:', uid);
+			return json({ 
+				success: false, 
+				message: 'Stream not found in unified collection',
+				cloudflareId: uid 
+			}, { status: 404 });
 		}
 
-		const livestreamDoc = livestreamsQuery.docs[0];
-		const livestreamData = livestreamDoc.data();
-		const memorialId = livestreamData.memorialId;
+		const streamDoc = streamsQuery.docs[0];
+		const streamData = streamDoc.data();
+		console.log('📍 Found unified stream:', streamDoc.id);
 
-		console.log('📍 Found livestream session:', livestreamDoc.id, 'for memorial:', memorialId);
-
-		// Update the livestream session with recording URLs
-		await livestreamDoc.ref.update({
+		// Create recording session entry
+		const recordingSession = {
+			sessionId: `session_${Date.now()}`,
+			cloudflareStreamId: uid,
+			startTime: streamData.actualStartTime || new Date(),
+			endTime: new Date(),
+			duration: recording?.duration || null,
+			status: 'ready',
 			recordingReady: true,
-			recordingPlaybackUrl: playback?.hls || playback?.dash || null,
-			recordingThumbnail: playback?.thumbnail || null,
+			recordingUrl: playback?.hls || playback?.dash || null,
+			playbackUrl: `https://cloudflarestream.com/${uid}/iframe`,
+			thumbnailUrl: playback?.thumbnail || null,
+			createdAt: new Date(),
+			updatedAt: new Date()
+		};
+
+		// Update the unified stream with standardized recording data
+		await streamDoc.ref.update({
+			// Legacy fields (for backward compatibility)
+			recordingReady: true,
+			recordingUrl: playback?.hls || playback?.dash || null,
 			recordingDuration: recording?.duration || null,
-			recordingSize: recording?.size || null,
-			recordingUpdatedAt: new Date()
+			
+			// New multi-session recording system
+			recordingSessions: FieldValue.arrayUnion(recordingSession),
+			
+			// Stream status
+			status: 'completed',
+			playbackUrl: `https://cloudflarestream.com/${uid}/iframe`,
+			updatedAt: new Date()
 		});
 
-		// Update the memorial's archive entry
-		const memorialRef = adminDb.collection('memorials').doc(memorialId);
-		const memorialDoc = await memorialRef.get();
-
-		if (memorialDoc.exists) {
-			const memorial = memorialDoc.data();
-			const archive = memorial?.livestreamArchive || [];
-
-			// Find and update the archive entry for this session
-			const updatedArchive = archive.map((entry: any) => {
-				if (entry.cloudflareId === uid) {
-					return {
-						...entry,
-						recordingReady: true,
-						recordingPlaybackUrl: playback?.hls || playback?.dash || null,
-						recordingThumbnail: playback?.thumbnail || null,
-						recordingDuration: recording?.duration || null,
-						recordingSize: recording?.size || null,
-						updatedAt: new Date()
-					};
-				}
-				return entry;
-			});
-
-			await memorialRef.update({
-				livestreamArchive: updatedArchive
-			});
-
-			console.log('✅ Updated archive entry for memorial:', memorialId);
+		console.log('✅ Updated unified stream with recording data');
+		
+		// Update memorial archive if this stream is associated with a memorial
+		if (streamData.memorialId) {
+			await updateMemorialArchive(streamData.memorialId, uid, playback, recording, streamData);
 		}
-
-		console.log('✅ Recording webhook processed successfully');
 
 		return json({
 			success: true,
-			message: 'Recording processed successfully'
+			message: 'Unified stream recording processed successfully',
+			streamId: streamDoc.id,
+			cloudflareId: uid
 		});
 
 	} catch (error) {
-		console.error('💥 Error processing recording webhook:', error);
-		return json(
-			{ error: 'Failed to process recording webhook', details: error instanceof Error ? error.message : 'Unknown error' },
-			{ status: 500 }
-		);
+		console.error('❌ Webhook processing error:', error);
+		return json({ 
+			error: 'Webhook processing failed',
+			details: error instanceof Error ? error.message : 'Unknown error'
+		}, { status: 500 });
 	}
 };
+
+/**
+ * Helper function to update memorial archive for backward compatibility
+ */
+async function updateMemorialArchive(memorialId: string, cloudflareId: string, playback: any, recording: any, streamData: any) {
+	try {
+		const memorialRef = adminDb.collection('memorials').doc(memorialId);
+		const memorialDoc = await memorialRef.get();
+
+		if (!memorialDoc.exists) {
+			console.warn('⚠️ Memorial not found:', memorialId);
+			return;
+		}
+
+		const memorial = memorialDoc.data();
+		const archive = memorial?.livestreamArchive || [];
+
+		// Create or update archive entry
+		const archiveEntry = {
+			id: cloudflareId,
+			title: streamData.title || 'Memorial Service',
+			description: streamData.description || '',
+			cloudflareId: cloudflareId,
+			playbackUrl: playback?.hls || playback?.dash || `https://cloudflarestream.com/${cloudflareId}/iframe`,
+			startedAt: streamData.actualStartTime || new Date(),
+			endedAt: new Date(),
+			duration: recording?.duration || null,
+			isVisible: streamData.isVisible !== false,
+			recordingReady: true,
+			startedBy: streamData.createdBy || '',
+			startedByName: streamData.createdByName || '',
+			viewerCount: streamData.viewerCount || 0,
+			createdAt: streamData.createdAt || new Date(),
+			updatedAt: new Date()
+		};
+
+		// Check if entry already exists
+		const existingIndex = archive.findIndex((entry: any) => entry.cloudflareId === cloudflareId);
+		
+		if (existingIndex >= 0) {
+			// Update existing entry
+			archive[existingIndex] = { ...archive[existingIndex], ...archiveEntry };
+		} else {
+			// Add new entry
+			archive.push(archiveEntry);
+		}
+
+		await memorialRef.update({
+			livestreamArchive: archive
+		});
+
+		console.log('✅ Updated memorial archive for:', memorialId);
+	} catch (error) {
+		console.error('❌ Error updating memorial archive:', error);
+	}
+}

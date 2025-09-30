@@ -32,6 +32,15 @@ export const load: PageServerLoad = async ({ locals }) => {
         const userDoc = await adminDb.collection('users').doc(uid).get();
         const profileData = userDoc.data();
 
+        // Fetch funeral director profile if user is a funeral director
+        let funeralDirectorData = null;
+        if (role === 'funeral_director') {
+            const directorDoc = await adminDb.collection('funeral_directors').doc(uid).get();
+            if (directorDoc.exists) {
+                funeralDirectorData = directorDoc.data();
+            }
+        }
+
         // Fetch memorials based on role
         let memorials: Memorial[] = [];
         if (role === 'funeral_director') {
@@ -64,6 +73,7 @@ export const load: PageServerLoad = async ({ locals }) => {
                 role: locals.user.role,
                 uid: locals.user.uid
             },
+            funeralDirector: funeralDirectorData ? sanitizeData(funeralDirectorData) : null,
             memorials: sanitizeData(memorials)
         };
     } catch (error) {

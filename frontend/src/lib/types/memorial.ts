@@ -36,26 +36,7 @@ export interface TimeInfo {
 	isUnknown: boolean;             // Unknown time flag
 }
 
-export interface LivestreamArchiveEntry {
-	id: string;                     // Unique identifier for this stream
-	title: string;                  // Stream title
-	description?: string;           // Stream description
-	cloudflareId: string;           // Cloudflare Stream ID
-	playbackUrl: string;            // Playback URL for recorded stream
-	startedAt: Timestamp;           // When stream started
-	endedAt?: Timestamp;            // When stream ended
-	duration?: number;              // Duration in seconds
-	isVisible: boolean;             // Whether visible on memorial page
-	recordingReady: boolean;        // Whether recording is available
-	startedBy: string;              // UID of user who started stream
-	startedByName?: string;         // Name of user who started stream
-	viewerCount?: number;           // Peak viewer count
-	createdAt: Timestamp;           // Archive entry creation
-	updatedAt: Timestamp;           // Last update
-}
-
 export interface Memorial {
-	id: string;
 	lovedOneName: string;
 	slug: string;
 	fullSlug: string;
@@ -86,7 +67,6 @@ export interface Memorial {
 	deathDate?: string;
 	livestream?: any; // CloudflareStream when available
 	livestreamConfig?: any; // Holds data from the calculator/booking form
-	livestreamArchive?: LivestreamArchiveEntry[]; // Historical livestreams
 	photos?: string[];
 	embeds?: Embed[];
 	

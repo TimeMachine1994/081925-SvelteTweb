@@ -28,6 +28,7 @@
 		class="main-content"
 		class:full-width={$page.route.id?.includes('/app/calculator')}
 		class:homepage={$page.route.id === '/'}
+		class:memorial-page={$page.route.id === '/[fullSlug]'}
 	>
 		{@render children?.()}
 	</main>
@@ -54,6 +55,11 @@
 	}
 
 	.main-content.homepage {
+		max-width: none;
+		padding: 0;
+	}
+
+	.main-content.memorial-page {
 		max-width: none;
 		padding: 0;
 	}
