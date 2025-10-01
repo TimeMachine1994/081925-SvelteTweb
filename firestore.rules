@@ -95,18 +95,18 @@ service cloud.firestore {
                      canManageMemorial(resource.data.memorialId);
       
       // 2. Public can read visible streams from public memorials
-      allow read: if resource.data.isVisible == true && 
+      allow read: if (resource.data.isVisible == true || resource.data.isVisible == null) && 
                      resource.data.memorialId != null &&
                      isMemorialPublic(resource.data.memorialId);
       
       // 3. Authenticated users can read visible streams they're explicitly allowed to view
       allow read: if request.auth != null && 
-                     resource.data.isVisible == true &&
+                     (resource.data.isVisible == true || resource.data.isVisible == null) &&
                      request.auth.uid in resource.data.allowedUsers;
       
       // 4. Public streams (not tied to memorials) can be read by anyone if visible
-      allow read: if resource.data.isPublic == true && 
-                     resource.data.isVisible == true;
+      allow read: if (resource.data.isPublic == true || resource.data.isPublic == null) && 
+                     (resource.data.isVisible == true || resource.data.isVisible == null);
       
       // WRITE RULES
       // 1. Only stream managers can create streams

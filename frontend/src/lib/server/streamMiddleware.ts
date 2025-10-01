@@ -184,7 +184,18 @@ async function checkMemorialStreamPermissions(
     }
 
     // Check if user is funeral director for this memorial
+    console.log('🔍 [STREAM_MIDDLEWARE] Memorial permissions check:', {
+      memorialId,
+      ownerUid: memorial.ownerUid,
+      funeralDirectorUid: memorial.funeralDirectorUid,
+      userUid: user.uid,
+      userRole: user.role,
+      isOwner: memorial.ownerUid === user.uid,
+      isFuneralDirector: memorial.funeralDirectorUid === user.uid
+    });
+
     if (memorial.funeralDirectorUid === user.uid) {
+      console.log('✅ [STREAM_MIDDLEWARE] Granting funeral director access');
       return {
         canView: true,
         canEdit: true,
@@ -296,6 +307,7 @@ export async function withStreamAccess(
 function getActionPermission(permissions: StreamPermissions, action: string): boolean {
   switch (action) {
     case 'view':
+    case 'read':  // Add 'read' as alias for 'view'
       return permissions.canView;
     case 'create':
     case 'edit':

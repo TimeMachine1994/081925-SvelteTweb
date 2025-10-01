@@ -78,7 +78,8 @@ export type StreamStatus =
   | 'scheduled'  // Stream is scheduled for future
   | 'ready'      // Stream is ready to start
   | 'live'       // Stream is currently broadcasting
-  | 'completed'  // Stream has ended
+  | 'ending'     // Stream just ended, recording is processing
+  | 'completed'  // Stream has ended and recording is ready
   | 'error';     // Stream encountered an error
 
 /**

@@ -86,47 +86,133 @@ export const load: PageServerLoad = async ({ params }) => {
             const streamsSnapshot = await streamsQuery.get();
             console.log('📺 [MEMORIAL_PAGE] Query completed, found streams:', streamsSnapshot.docs.length);
 
-            // Process streams using SAME logic as /api/memorials/[id]/streams
+            // Log raw stream data for debugging
+            streamsSnapshot.docs.forEach((doc, index) => {
+                const data = doc.data();
+                console.log(`📄 [MEMORIAL_PAGE] Raw stream ${index + 1}:`, {
+                    id: doc.id,
+                    title: data.title,
+                    status: data.status,
+                    isVisible: data.isVisible,
+                    recordingReady: data.recordingReady,
+                    memorialId: data.memorialId
+                });
+            });
+
+            // Process streams using unified Stream interface (matches real-time listener)
             const allStreams = streamsSnapshot.docs.map(doc => {
                 const data = doc.data();
                 return {
                     id: doc.id,
-                    title: data.title,
-                    description: data.description,
-                    memorialId: data.memorialId,
-                    memorialName: data.memorialName,
-                    cloudflareId: data.cloudflareId,
-                    streamKey: data.streamKey,
-                    streamUrl: data.streamUrl,
-                    playbackUrl: data.playbackUrl,
-                    status: data.status,
-                    recordingReady: data.recordingReady,
-                    recordingUrl: data.recordingUrl,
-                    recordingDuration: data.recordingDuration,
-                    isVisible: data.isVisible,
-                    isPublic: data.isPublic,
-                    createdBy: data.createdBy,
-                    allowedUsers: data.allowedUsers,
-                    displayOrder: data.displayOrder,
-                    viewerCount: data.viewerCount,
-                    // Convert timestamps to ISO strings for serialization
-                    createdAt: data.createdAt?.toDate()?.toISOString() || null,
-                    updatedAt: data.updatedAt?.toDate()?.toISOString() || null,
-                    scheduledStartTime: data.scheduledStartTime?.toDate()?.toISOString() || null,
-                    actualStartTime: data.actualStartTime?.toDate()?.toISOString() || null,
-                    endTime: data.endTime?.toDate()?.toISOString() || null
+                    title: data.title || 'Untitled Stream',
+                    description: data.description || '',
+                    memorialId: data.memorialId || '',
+                    memorialName: data.memorialName || memorial.lovedOneName, // Include memorialName
+                    cloudflareId: data.cloudflareId || null,
+                    streamKey: data.streamKey || null,
+                    streamUrl: data.streamUrl || null,
+                    playbackUrl: data.playbackUrl || null,
+                    status: data.status || 'unknown',
+                    recordingReady: data.recordingReady === true,
+                    recordingUrl: data.recordingUrl || null,
+                    recordingDuration: data.recordingDuration || null, // Include recordingDuration
+                    recordings: data.recordings || [], // Include recordings array
+                    isVisible: data.isVisible !== false, // Default to true if undefined
+                    isPublic: data.isPublic || false, // Default to false if undefined
+                    createdBy: data.createdBy || null,
+                    allowedUsers: data.allowedUsers || [],
+                    displayOrder: data.displayOrder || 0,
+                    viewerCount: data.viewerCount || 0,
+                    // Convert timestamps to Date objects (not strings) to match unified interface
+                    createdAt: data.createdAt?.toDate() || new Date(),
+                    updatedAt: data.updatedAt?.toDate() || new Date(),
+                    scheduledStartTime: data.scheduledStartTime?.toDate() || null,
+                    actualStartTime: data.actualStartTime?.toDate() || null,
+                    endTime: data.endTime?.toDate() || null
                 };
             });
 
             // Filter for public visibility (only show visible streams)
-            const publicStreams = allStreams.filter(stream => stream.isVisible !== false);
+            const publicStreams = allStreams.filter(stream => stream.isVisible === true);
+            
+            console.log('📺 [MEMORIAL_PAGE] Public streams after visibility filter:', {
+                total: publicStreams.length,
+                streams: publicStreams.map(s => ({
+                    id: s.id,
+                    title: s.title,
+                    status: s.status,
+                    isVisible: s.isVisible,
+                    recordingReady: s.recordingReady
+                }))
+            });
 
             // Organize streams by status - SAME structure as MemorialStreamsResponse
             const liveStreams = publicStreams.filter(s => s.status === 'live');
             const scheduledStreams = publicStreams.filter(s => s.status === 'scheduled');
             const readyStreams = publicStreams.filter(s => s.status === 'ready');
             const recordedStreams = publicStreams.filter(s => s.status === 'completed');
-            const publicRecordedStreams = recordedStreams.filter(s => s.recordingReady && s.isVisible !== false);
+            const publicRecordedStreams = recordedStreams.filter(s => s.recordingReady === true && s.isVisible === true);
+            
+            console.log('📺 [MEMORIAL_PAGE] Streams categorized by status:', {
+                live: liveStreams.map(s => s.title),
+                scheduled: scheduledStreams.map(s => s.title),
+                ready: readyStreams.map(s => s.title),
+                completed: recordedStreams.map(s => s.title),
+                publicRecorded: publicRecordedStreams.map(s => s.title)
+            });
+
+            // Fetch recordings for all streams
+            console.log('📹 [MEMORIAL_PAGE] Fetching recordings for all streams...');
+            const allRecordings = [];
+            
+            for (const stream of publicStreams) {
+                try {
+                    // Get recordings from the recordings array in the stream document
+                    const recordings = stream.recordings || [];
+                    
+                    // Also include legacy single recording for backward compatibility
+                    if (stream.recordingReady && stream.recordingUrl) {
+                        const legacyRecording = {
+                            id: 'legacy',
+                            cloudflareVideoId: stream.cloudflareId,
+                            recordingUrl: stream.recordingUrl,
+                            playbackUrl: stream.playbackUrl || `https://cloudflarestream.com/${stream.cloudflareId}/iframe`,
+                            duration: stream.recordingDuration,
+                            createdAt: stream.createdAt,
+                            title: `${stream.title} - Recording`,
+                            sequenceNumber: 0,
+                            recordingReady: true,
+                            streamId: stream.id,
+                            streamTitle: stream.title
+                        };
+                        allRecordings.push(legacyRecording);
+                    }
+                    
+                    // Add new recordings with stream context
+                    recordings.forEach(recording => {
+                        if (recording.recordingReady && recording.recordingUrl) {
+                            allRecordings.push({
+                                ...recording,
+                                streamId: stream.id,
+                                streamTitle: stream.title
+                            });
+                        }
+                    });
+                    
+                } catch (recordingError) {
+                    console.error('❌ [MEMORIAL_PAGE] Error processing recordings for stream:', stream.id, recordingError);
+                }
+            }
+            
+            // Sort recordings by sequence number and created date
+            allRecordings.sort((a, b) => {
+                if (a.sequenceNumber !== b.sequenceNumber) {
+                    return a.sequenceNumber - b.sequenceNumber;
+                }
+                return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+            });
+            
+            console.log('📹 [MEMORIAL_PAGE] Total recordings found:', allRecordings.length);
 
             // Create response matching MemorialStreamsResponse interface
             streamsData = {
@@ -137,7 +223,8 @@ export const load: PageServerLoad = async ({ params }) => {
                 recordedStreams,
                 publicRecordedStreams,
                 totalStreams: publicStreams.length,
-                allStreams: publicStreams
+                allStreams: publicStreams,
+                recordings: allRecordings // Add recordings to server response
             };
 
             console.log('📺 [MEMORIAL_PAGE] Streams organized by status:', {

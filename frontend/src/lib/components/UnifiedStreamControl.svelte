@@ -49,17 +49,12 @@
 	});
 	
 	function setupRealtimeListener() {
-		if (!memorialId || !db) {
-			console.log('🔄 [UNIFIED_STREAM] Skipping real-time listener - no memorialId or db not available');
-			return;
-		}
 		
 		try {
 			// Create real-time query for memorial streams
 			const streamsQuery = query(
 				collection(db, 'streams'),
-				where('memorialId', '==', memorialId),
-				orderBy('actualStartTime', 'desc')
+				where('memorialId', '==', memorialId)
 			);
 			
 			console.log('🔄 [UNIFIED_STREAM] Setting up real-time listener for memorial:', memorialId);
@@ -80,15 +75,42 @@
 				const previousStreams = [...streams];
 				
 				// Convert Firestore documents to Stream objects
-				const updatedStreams = snapshot.docs.map(doc => ({
-					id: doc.id,
-					...doc.data(),
-					createdAt: doc.data().createdAt?.toDate(),
-					updatedAt: doc.data().updatedAt?.toDate(),
-					scheduledStartTime: doc.data().scheduledStartTime?.toDate(),
-					actualStartTime: doc.data().actualStartTime?.toDate(),
-					endTime: doc.data().endTime?.toDate()
-				})) as Stream[];
+				const updatedStreams = snapshot.docs.map(doc => {
+					const data = doc.data();
+					return {
+						id: doc.id,
+						title: data.title || 'Untitled Stream',
+						description: data.description || '',
+						memorialId: data.memorialId || '',
+						memorialName: data.memorialName || '',
+						cloudflareId: data.cloudflareId || null,
+						streamKey: data.streamKey || null,
+						streamUrl: data.streamUrl || null,
+						playbackUrl: data.playbackUrl || null,
+						status: data.status || 'ready',
+						recordingReady: data.recordingReady === true,
+						recordingUrl: data.recordingUrl || null,
+						recordingDuration: data.recordingDuration || null,
+						isVisible: data.isVisible !== false, // Default to true if null/undefined
+						isPublic: data.isPublic || false,    // Default to false if null/undefined
+						createdBy: data.createdBy || '',
+						allowedUsers: data.allowedUsers || [],
+						displayOrder: data.displayOrder || 0,
+						viewerCount: data.viewerCount || 0,
+						createdAt: data.createdAt?.toDate() || new Date(),
+						updatedAt: data.updatedAt?.toDate() || new Date(),
+						scheduledStartTime: data.scheduledStartTime?.toDate() || null,
+						actualStartTime: data.actualStartTime?.toDate() || null,
+						endTime: data.endTime?.toDate() || null
+					};
+				}) as Stream[];
+				
+				// Sort by actualStartTime (most recent first) - client-side sorting
+				updatedStreams.sort((a, b) => {
+					const timeA = a.actualStartTime || a.createdAt || new Date(0);
+					const timeB = b.actualStartTime || b.createdAt || new Date(0);
+					return timeB.getTime() - timeA.getTime();
+				});
 				
 				// Organize streams by status (same logic as API)
 				const liveStreams = updatedStreams.filter(s => s.status === 'live');
@@ -381,37 +403,7 @@
 		}
 	}
 
-	async function startStream(stream: Stream) {
-		console.log('▶️ [UNIFIED_STREAM] Starting stream:', { id: stream.id, title: stream.title, status: stream.status });
-		loading = true;
-		error = '';
-
-		try {
-			console.log('📡 [UNIFIED_STREAM] Calling API to start stream...');
-			const credentials = await streamAPI.startStream(stream.id);
-			console.log('✅ [UNIFIED_STREAM] Stream started, credentials received:', credentials);
-			streamCredentials = credentials;
-			
-			// Update stream status
-			console.log('🔄 [UNIFIED_STREAM] Updating stream status to live');
-			const updatedStream = { ...stream, status: 'live' as const };
-			streams = streams.map(s => s.id === stream.id ? updatedStream : s);
-			selectedStream = updatedStream;
-			console.log('📊 [UNIFIED_STREAM] Stream status updated:', { id: updatedStream.id, status: updatedStream.status });
-		} catch (err) {
-			console.error('❌ [UNIFIED_STREAM] Error starting stream:', err);
-			console.error('❌ [UNIFIED_STREAM] Start error details:', {
-				message: err instanceof Error ? err.message : 'Unknown error',
-				stack: err instanceof Error ? err.stack : undefined,
-				streamId: stream.id,
-				streamTitle: stream.title
-			});
-			error = err instanceof Error ? err.message : 'Failed to start stream';
-		} finally {
-			loading = false;
-			console.log('🏁 [UNIFIED_STREAM] startStream() completed');
-		}
-	}
+	// REMOVED: Manual stream starting - streams only start via external encoders
 
 	async function stopStream(stream: Stream) {
 		console.log('⏹️ [UNIFIED_STREAM] Stopping stream:', { id: stream.id, title: stream.title, status: stream.status });
@@ -490,6 +482,194 @@
 			loading = false;
 			console.log('🏁 [UNIFIED_STREAM] syncRecordings() completed');
 		}
+	}
+
+	async function requestCameraAccess(stream: Stream) {
+		console.log('📹 [UNIFIED_STREAM] Requesting camera access for stream:', { id: stream.id, title: stream.title });
+		loading = true;
+		error = '';
+
+		try {
+			// Request camera and microphone permissions
+			console.log('📡 [UNIFIED_STREAM] Requesting media permissions...');
+			const mediaStream = await navigator.mediaDevices.getUserMedia({
+				video: {
+					width: { ideal: 1920 },
+					height: { ideal: 1080 },
+					frameRate: { ideal: 30 }
+				},
+				audio: {
+					echoCancellation: true,
+					noiseSuppression: true,
+					autoGainControl: true
+				}
+			});
+
+			console.log('✅ [UNIFIED_STREAM] Camera access granted:', {
+				videoTracks: mediaStream.getVideoTracks().length,
+				audioTracks: mediaStream.getAudioTracks().length
+			});
+
+			// Store the media stream for later use
+			localVideoStream = mediaStream;
+			
+			// Show preview in video element if available
+			if (videoPreview) {
+				videoPreview.srcObject = mediaStream;
+				isWebcamPreviewing = true;
+			}
+
+			// TODO: Set up WHIP connection and start streaming
+			console.log('🎥 [UNIFIED_STREAM] Media stream ready for WHIP streaming');
+			
+		} catch (err) {
+			console.error('❌ [UNIFIED_STREAM] Error requesting camera access:', err);
+			console.error('❌ [UNIFIED_STREAM] Camera error details:', {
+				message: err instanceof Error ? err.message : 'Unknown error',
+				name: err instanceof Error ? err.name : undefined,
+				streamId: stream.id,
+				streamTitle: stream.title
+			});
+			
+			if (err instanceof Error) {
+				if (err.name === 'NotAllowedError') {
+					error = 'Camera access denied. Please allow camera permissions and try again.';
+				} else if (err.name === 'NotFoundError') {
+					error = 'No camera found. Please connect a camera and try again.';
+				} else {
+					error = `Camera error: ${err.message}`;
+				}
+			} else {
+				error = 'Failed to access camera';
+			}
+		} finally {
+			loading = false;
+			console.log('🏁 [UNIFIED_STREAM] requestCameraAccess() completed');
+		}
+	}
+
+	async function requestRTMPSettings(stream: Stream) {
+		console.log('📡 [UNIFIED_STREAM] Requesting RTMP settings for stream:', { id: stream.id, title: stream.title });
+		loading = true;
+		error = '';
+
+		try {
+			console.log('📡 [UNIFIED_STREAM] Fetching RTMP credentials from API...');
+			
+			// Get RTMP credentials WITHOUT starting the stream
+			const result = await streamAPI.getStreamCredentials(stream.id);
+			console.log('✅ [UNIFIED_STREAM] RTMP credentials received:', {
+				hasStreamKey: !!result.streamKey,
+				hasStreamUrl: !!result.streamUrl,
+				streamId: stream.id
+			});
+
+			// Store credentials for display
+			streamCredentials = {
+				streamKey: result.streamKey,
+				streamUrl: result.streamUrl,
+				whipEndpoint: result.whipEndpoint,
+				playbackUrl: result.playbackUrl
+			};
+
+			// Update stream status to ready for RTMP streaming
+			const updatedStream = { 
+				...stream, 
+				status: 'ready' as const,
+				streamKey: result.streamKey,
+				streamUrl: result.streamUrl,
+				playbackUrl: result.playbackUrl,
+				// Mark that RTMP settings have been requested
+				rtmpSettingsRequested: true
+			};
+			streams = streams.map(s => s.id === stream.id ? updatedStream : s);
+			selectedStream = updatedStream;
+
+			console.log('📊 [UNIFIED_STREAM] Stream updated with RTMP settings:', { 
+				id: updatedStream.id, 
+				status: updatedStream.status,
+				hasCredentials: !!streamCredentials,
+				rtmpSettingsRequested: true
+			});
+
+			// Start monitoring for live status from external encoder
+			startLiveStatusMonitoring(stream.id);
+			
+		} catch (err) {
+			console.error('❌ [UNIFIED_STREAM] Error requesting RTMP settings:', err);
+			console.error('❌ [UNIFIED_STREAM] RTMP error details:', {
+				message: err instanceof Error ? err.message : 'Unknown error',
+				stack: err instanceof Error ? err.stack : undefined,
+				streamId: stream.id,
+				streamTitle: stream.title
+			});
+			error = err instanceof Error ? err.message : 'Failed to get RTMP settings';
+		} finally {
+			loading = false;
+			console.log('🏁 [UNIFIED_STREAM] requestRTMPSettings() completed');
+		}
+	}
+
+	// Monitor for live status from external RTMP encoder
+	function startLiveStatusMonitoring(streamId: string) {
+		console.log('👀 [UNIFIED_STREAM] Starting live status monitoring for stream:', streamId);
+		
+		// Poll every 5 seconds to check if stream went live
+		const monitorInterval = setInterval(async () => {
+			try {
+				console.log('🔍 [UNIFIED_STREAM] Checking status for stream:', streamId);
+				const response = await fetch(`/api/streams/${streamId}/status`);
+				
+				if (!response.ok) {
+					console.error('❌ [UNIFIED_STREAM] Status check failed:', {
+						status: response.status,
+						statusText: response.statusText,
+						streamId
+					});
+					const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+					console.error('❌ [UNIFIED_STREAM] Error details:', errorData);
+					return;
+				}
+				
+				const statusData = await response.json();
+				
+				console.log('📊 [UNIFIED_STREAM] Status check result:', {
+					streamId,
+					status: statusData.status,
+					isLive: statusData.status === 'live',
+					cloudflare: statusData.cloudflare
+				});
+
+				// If stream went live, update UI
+				if (statusData.status === 'live') {
+					console.log('🔴 [UNIFIED_STREAM] Stream went live! Updating UI...');
+					
+					// Update stream in local state
+					const updatedStream = streams.find(s => s.id === streamId);
+					if (updatedStream) {
+						updatedStream.status = 'live';
+						updatedStream.actualStartTime = new Date();
+						streams = [...streams]; // Trigger reactivity
+						
+						if (selectedStream?.id === streamId) {
+							selectedStream = updatedStream;
+						}
+					}
+					
+					// Stop monitoring once live
+					clearInterval(monitorInterval);
+					console.log('✅ [UNIFIED_STREAM] Live status monitoring stopped - stream is now live');
+				}
+			} catch (err) {
+				console.error('❌ [UNIFIED_STREAM] Error checking live status:', err);
+			}
+		}, 5000); // Check every 5 seconds
+
+		// Stop monitoring after 30 minutes if stream never goes live
+		setTimeout(() => {
+			clearInterval(monitorInterval);
+			console.log('⏰ [UNIFIED_STREAM] Live status monitoring timeout - stopped after 30 minutes');
+		}, 30 * 60 * 1000);
 	}
 
 	async function startWebcamPreview() {
@@ -578,22 +758,12 @@
 			
 			console.log('🎉 [UNIFIED_STREAM] WHIP connection established successfully!');
 			
-			// Update stream status to live (only if not already live)
-			if (selectedStream && selectedStream.status !== 'live') {
-				console.log('🔄 [UNIFIED_STREAM] Updating stream status to live...');
-				try {
-					await streamAPI.startStream(selectedStream.id);
-					
-					// Update local state
-					const updatedStream = { ...selectedStream, status: 'live' as const };
-					streams = streams.map(s => s.id === selectedStream.id ? updatedStream : s);
-					selectedStream = updatedStream;
-					
-					console.log('✅ [UNIFIED_STREAM] Stream status updated to live');
-				} catch (statusErr) {
-					console.error('⚠️ [UNIFIED_STREAM] Could not update stream status:', statusErr);
-					// Continue anyway - WHIP connection is established
-				}
+			// WHIP connection established - external monitoring will detect live status
+			console.log('✅ [UNIFIED_STREAM] WHIP connection ready - waiting for external status detection');
+			
+			// Start monitoring for live status (external encoder will trigger this)
+			if (selectedStream) {
+				startLiveStatusMonitoring(selectedStream.id);
 			}
 			
 			// Update states
@@ -792,15 +962,36 @@
 							{/if}
 						</div>
 
-						<div class="flex gap-2">
-							{#if canStart(stream)}
+						<div class="flex gap-3">
+							{#if canStart(stream) && !stream.rtmpSettingsRequested}
+								<!-- Clean, Simple Buttons -->
 								<button 
-									onclick={() => startStream(stream)}
+									onclick={() => requestCameraAccess(stream)}
 									disabled={loading}
-									class="px-3 py-1 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 disabled:opacity-50 transition-colors"
+									class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-all duration-200 flex items-center gap-2 font-medium"
 								>
-									Start Stream
+									📹 Camera Source
 								</button>
+								
+								<button 
+									onclick={() => requestRTMPSettings(stream)}
+									disabled={loading}
+									class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 transition-all duration-200 flex items-center gap-2 font-medium"
+								>
+									📡 RTMP Stream
+								</button>
+							{:else if stream.rtmpSettingsRequested && stream.status !== 'live'}
+								<!-- Clean Status Indicator -->
+								<div class="px-4 py-2 bg-orange-50 border border-orange-200 rounded-lg flex items-center gap-3">
+									<div class="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+									<span class="text-orange-800 font-medium">Ready for OBS connection</span>
+								</div>
+							{:else if stream.status === 'live'}
+								<!-- Live Status -->
+								<div class="px-4 py-2 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
+									<div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+									<span class="text-green-800 font-medium">LIVE</span>
+								</div>
 							{/if}
 
 							{#if canStop(stream)}
@@ -1030,6 +1221,104 @@
 					{/if}
 				</div>
 			{/each}
+		</div>
+	{/if}
+
+	<!-- RTMP Settings Display (Prominent when requested) -->
+	{#if streamCredentials && selectedStream?.rtmpSettingsRequested}
+		<div class="mt-8 p-6 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl border-2 border-purple-200">
+			<div class="flex items-center justify-between mb-4">
+				<h3 class="text-xl font-bold text-purple-900 flex items-center gap-2">
+					📡 RTMP Streaming Settings
+				</h3>
+				<div class="flex items-center gap-2 text-sm">
+					{#if selectedStream.status === 'live'}
+						<div class="flex items-center gap-1 text-green-600">
+							<div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+							<span class="font-medium">LIVE</span>
+						</div>
+					{:else}
+						<div class="flex items-center gap-1 text-orange-600">
+							<div class="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+							<span class="font-medium">Waiting for connection</span>
+						</div>
+					{/if}
+				</div>
+			</div>
+
+			<div class="grid md:grid-cols-2 gap-6">
+				<!-- RTMP Server Settings -->
+				<div class="space-y-4">
+					<h4 class="font-semibold text-purple-800 text-lg">🎥 OBS/Streamlabs Setup</h4>
+					
+					{#if streamCredentials.streamUrl}
+						<div>
+							<label class="block font-medium text-purple-700 mb-2">RTMP Server URL:</label>
+							<div class="flex items-center space-x-2">
+								<code class="flex-1 bg-white px-4 py-3 rounded-lg border-2 border-purple-200 text-sm font-mono break-all">{streamCredentials.streamUrl}</code>
+								<button 
+									onclick={() => navigator.clipboard.writeText(streamCredentials.streamUrl)}
+									class="px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-1"
+								>
+									📋 Copy
+								</button>
+							</div>
+						</div>
+					{/if}
+					
+					{#if streamCredentials.streamKey}
+						<div>
+							<label class="block font-medium text-purple-700 mb-2">Stream Key:</label>
+							<div class="flex items-center space-x-2">
+								<code class="flex-1 bg-white px-4 py-3 rounded-lg border-2 border-purple-200 text-sm font-mono break-all">{streamCredentials.streamKey}</code>
+								<button 
+									onclick={() => navigator.clipboard.writeText(streamCredentials.streamKey)}
+									class="px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-1"
+								>
+									📋 Copy
+								</button>
+							</div>
+						</div>
+					{/if}
+				</div>
+
+				<!-- Instructions -->
+				<div class="space-y-4">
+					<h4 class="font-semibold text-purple-800 text-lg">📋 Quick Setup Guide</h4>
+					<div class="bg-white p-4 rounded-lg border border-purple-200">
+						<ol class="list-decimal list-inside space-y-2 text-sm text-gray-700">
+							<li>Open OBS Studio or Streamlabs</li>
+							<li>Go to Settings → Stream</li>
+							<li>Select "Custom" as Service</li>
+							<li>Copy the Server URL above</li>
+							<li>Copy the Stream Key above</li>
+							<li>Click "Start Streaming"</li>
+						</ol>
+					</div>
+					
+					{#if selectedStream.status !== 'live'}
+						<div class="bg-orange-100 border border-orange-300 rounded-lg p-3">
+							<div class="flex items-center gap-2 text-orange-800">
+								<div class="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
+								<span class="font-medium text-sm">Monitoring for connection...</span>
+							</div>
+							<p class="text-xs text-orange-700 mt-1">
+								Start streaming in OBS and this page will automatically detect when you go live.
+							</p>
+						</div>
+					{:else}
+						<div class="bg-green-100 border border-green-300 rounded-lg p-3">
+							<div class="flex items-center gap-2 text-green-800">
+								<div class="w-2 h-2 bg-green-500 rounded-full"></div>
+								<span class="font-medium text-sm">Stream is LIVE!</span>
+							</div>
+							<p class="text-xs text-green-700 mt-1">
+								Your stream is now broadcasting to memorial visitors.
+							</p>
+						</div>
+					{/if}
+				</div>
+			</div>
 		</div>
 	{/if}
 

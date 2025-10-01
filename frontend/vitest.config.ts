@@ -3,7 +3,10 @@ import path from 'path';
 
 export default defineConfig({
   test: {
-    include: ['src/**/*.{test,spec}.{js,ts}'],
+    include: [
+      'src/**/*.{test,spec}.{js,ts}',
+      'tests/**/*.{test,spec}.{js,ts}' // Include our new test directories
+    ],
     exclude: ['src/routes/**/+*.test.ts'], // Only exclude SvelteKit page/layout tests
     environment: 'jsdom',
     setupFiles: ['src/test-setup.ts'],

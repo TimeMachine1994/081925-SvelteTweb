@@ -98,6 +98,22 @@ export class StreamAPI {
   }
 
   // Stream Lifecycle
+  async getStreamCredentials(id: string): Promise<StreamCredentials & { streamId: string; cloudflareId: string }> {
+    const response = await fetch(`${this.baseUrl}/streams/${id}/credentials`);
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || `Failed to get stream credentials: ${response.statusText}`);
+    }
+    
+    const result = await response.json();
+    return {
+      streamId: result.streamId,
+      cloudflareId: result.cloudflareId,
+      ...result.credentials
+    };
+  }
+
   async startStream(id: string): Promise<StreamCredentials & { streamId: string; cloudflareId: string }> {
     const response = await fetch(`${this.baseUrl}/streams/${id}/start`, {
       method: 'POST'

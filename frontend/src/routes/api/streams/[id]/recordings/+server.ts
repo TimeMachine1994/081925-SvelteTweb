@@ -8,7 +8,7 @@ const STREAMS_COLLECTION = 'streams';
 
 /**
  * GET /api/streams/[id]/recordings
- * Get recording status and URLs for a stream
+ * Get ALL recordings for a stream (supports multiple recordings)
  */
 export const GET: RequestHandler = async ({ params, locals }) => {
   try {
@@ -35,17 +35,39 @@ export const GET: RequestHandler = async ({ params, locals }) => {
       return json({ error: 'Permission denied' }, { status: 403 });
     }
 
-    const recordings = {
+    // Get multiple recordings from new recordings array
+    const recordings = streamData.recordings || [];
+    
+    // Also include legacy single recording for backward compatibility
+    const legacyRecording = {
+      id: 'legacy',
+      cloudflareVideoId: streamData.cloudflareId,
+      recordingUrl: streamData.recordingUrl,
+      playbackUrl: streamData.playbackUrl,
+      duration: streamData.recordingDuration,
+      createdAt: streamData.createdAt || streamData.updatedAt,
+      title: `${streamData.title} - Recording`,
+      sequenceNumber: 0,
+      recordingReady: streamData.recordingReady || false
+    };
+
+    // Combine legacy + new recordings
+    const allRecordings = [
+      ...(streamData.recordingReady && legacyRecording.recordingUrl ? [legacyRecording] : []),
+      ...recordings
+    ].filter(r => r.recordingReady && r.recordingUrl);
+
+    const result = {
       streamId: id,
-      recordingReady: streamData.recordingReady || false,
-      recordingUrl: streamData.recordingUrl || null,
-      recordingDuration: streamData.recordingDuration || null,
-      playbackUrl: streamData.playbackUrl || null,
+      totalRecordings: allRecordings.length,
+      recordings: allRecordings.sort((a, b) => a.sequenceNumber - b.sequenceNumber),
       cloudflareId: streamData.cloudflareId || null,
       lastChecked: new Date()
     };
 
-    return json(recordings);
+    console.log('📹 [RECORDINGS] Retrieved', result.totalRecordings, 'recordings for stream:', id);
+
+    return json(result);
 
   } catch (error) {
     console.error('❌ [RECORDINGS] Error:', error);
@@ -120,45 +142,80 @@ export const POST: RequestHandler = async ({ params, locals }) => {
 
     console.log('🎥 [RECORDINGS] Found', recordedVideos.length, 'recorded videos');
 
+    // Get existing recordings array
+    const existingRecordings = streamData.recordings || [];
+    const existingVideoIds = existingRecordings.map((r: any) => r.cloudflareVideoId);
+
     let updateData: any = {
       updatedAt: new Date()
     };
 
+    let newRecordings = [...existingRecordings];
+    let foundNewRecording = false;
+
     if (recordedVideos.length > 0) {
-      // Get the most recent ready recording
-      const readyVideo = recordedVideos.find((video: any) => 
+      // Process each ready recording
+      const readyVideos = recordedVideos.filter((video: any) => 
         video.status?.state === 'ready'
       );
 
-      if (readyVideo) {
+      for (const video of readyVideos) {
+        // Skip if we already have this recording
+        if (existingVideoIds.includes(video.uid)) {
+          continue;
+        }
+
+        // Create new recording entry
+        const newRecording = {
+          id: `recording_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          cloudflareVideoId: video.uid,
+          recordingUrl: video.playback?.hls || video.playback?.dash,
+          playbackUrl: `https://cloudflarestream.com/${video.uid}/iframe`,
+          duration: video.duration,
+          createdAt: new Date(video.created),
+          title: `${streamData.title} - Recording ${newRecordings.length + 1}`,
+          sequenceNumber: newRecordings.length + 1,
+          recordingReady: true
+        };
+
+        newRecordings.push(newRecording);
+        foundNewRecording = true;
+
+        console.log('✅ [RECORDINGS] Added new recording:', {
+          videoId: video.uid,
+          duration: video.duration,
+          sequenceNumber: newRecording.sequenceNumber,
+          title: newRecording.title
+        });
+      }
+
+      // Update legacy fields for backward compatibility (use most recent)
+      if (readyVideos.length > 0) {
+        const mostRecent = readyVideos[readyVideos.length - 1];
         updateData = {
           ...updateData,
           recordingReady: true,
-          recordingUrl: readyVideo.playback?.hls || readyVideo.playback?.dash,
-          recordingDuration: readyVideo.duration,
-          playbackUrl: `https://cloudflarestream.com/${readyVideo.uid}/iframe`
+          recordingUrl: mostRecent.playback?.hls || mostRecent.playback?.dash,
+          recordingDuration: mostRecent.duration,
+          playbackUrl: `https://cloudflarestream.com/${mostRecent.uid}/iframe`
         };
+      }
 
-        console.log('✅ [RECORDINGS] Found ready recording:', {
-          videoId: readyVideo.uid,
-          duration: readyVideo.duration,
-          url: updateData.recordingUrl
-        });
-      } else {
-        // Check if any are still processing
-        const processingVideo = recordedVideos.find((video: any) => 
-          video.status?.state === 'inprogress' || video.status?.state === 'queued'
-        );
+      // Check if any are still processing
+      const processingVideos = recordedVideos.filter((video: any) => 
+        video.status?.state === 'inprogress' || video.status?.state === 'queued'
+      );
 
-        if (processingVideo) {
-          updateData.recordingReady = false;
-          console.log('⏳ [RECORDINGS] Recording still processing:', processingVideo.uid);
-        }
+      if (processingVideos.length > 0) {
+        console.log('⏳ [RECORDINGS] Still processing:', processingVideos.length, 'recordings');
       }
     } else {
       console.log('📭 [RECORDINGS] No recordings found yet');
       updateData.recordingReady = false;
     }
+
+    // Update recordings array
+    updateData.recordings = newRecordings;
 
     // Update stream document
     await docRef.update(updateData);
@@ -166,6 +223,9 @@ export const POST: RequestHandler = async ({ params, locals }) => {
     const result = {
       streamId: id,
       recordingsFound: recordedVideos.length,
+      totalRecordings: newRecordings.length,
+      newRecordingsAdded: foundNewRecording ? newRecordings.length - existingRecordings.length : 0,
+      recordings: newRecordings,
       recordingReady: updateData.recordingReady || false,
       recordingUrl: updateData.recordingUrl || null,
       recordingDuration: updateData.recordingDuration || null,
