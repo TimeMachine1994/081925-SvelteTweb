@@ -7,18 +7,18 @@ import type { Memorial } from '$lib/types/memorial';
 export type PaymentStatus = 'complete' | 'incomplete' | 'none';
 
 /**
- * 💳 Determines the payment status for a memorial based on livestream configuration
+ * 💳 Determines the payment status for a memorial based on service configuration
  */
 export function getPaymentStatus(memorial: Memorial): PaymentStatus {
 	console.log('💳 Checking payment status for memorial:', memorial.id);
 	
-	if (!memorial.livestreamConfig) {
-		console.log('📋 No livestream config found - status: none');
+	if (!memorial.services?.paymentStatus) {
+		console.log('📋 No payment status found - status: none');
 		return 'none';
 	}
 	
-	const status = memorial.livestreamConfig.status;
-	console.log('🔍 Livestream config status:', status);
+	const status = memorial.services.paymentStatus;
+	console.log('🔍 Service payment status:', status);
 	
 	if (status === 'paid') {
 		console.log('✅ Payment complete!');

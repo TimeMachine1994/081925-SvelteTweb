@@ -9,7 +9,7 @@ export interface AuditEvent {
 	userEmail: string;
 	userRole: 'admin' | 'owner' | 'funeral_director';
 	action: AuditAction;
-	resourceType: 'memorial' | 'user' | 'schedule' | 'payment' | 'livestream' | 'system';
+	resourceType: 'memorial' | 'user' | 'schedule' | 'payment' | 'system';
 	resourceId: string;
 	details: Record<string, any>;
 	ipAddress?: string;
@@ -25,8 +25,6 @@ export type AuditAction =
 	| 'user_login' | 'user_logout' | 'user_created' | 'role_changed'
 	// Schedule actions
 	| 'schedule_updated' | 'schedule_locked' | 'payment_completed' | 'payment_failed'
-	// Livestream actions
-	| 'livestream_started' | 'livestream_stopped' | 'livestream_configured'
 	// Admin actions
 	| 'funeral_director_approved' | 'funeral_director_rejected'
 	| 'admin_memorial_created' | 'system_config_changed'
@@ -204,29 +202,6 @@ export async function logPaymentAction(
 	});
 }
 
-/**
- * Convenience function for logging livestream actions
- */
-export async function logLivestreamAction(
-	userContext: ReturnType<typeof extractUserContext>,
-	action: Extract<AuditAction, 'livestream_started' | 'livestream_stopped' | 'livestream_configured'>,
-	memorialId: string,
-	details: Record<string, any> = {},
-	success: boolean = true,
-	errorMessage?: string
-): Promise<void> {
-	if (!userContext) return;
-
-	await logAuditEvent({
-		...userContext,
-		action,
-		resourceType: 'livestream',
-		resourceId: memorialId,
-		details,
-		success,
-		errorMessage
-	});
-}
 
 /**
  * Convenience function for logging API access denials

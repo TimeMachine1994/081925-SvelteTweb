@@ -110,15 +110,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       allowComments: memorialData.memorial.allowComments,
       allowPhotos: memorialData.memorial.allowPhotos,
       allowTributes: memorialData.memorial.allowTributes,
-      enableLivestream: memorialData.memorial.enableLivestream,
 
       // Additional options
       options: memorialData.options,
 
       // Permissions
       permissions: {
-        funeralDirectorCanEdit: true,
-        funeralDirectorCanStream: memorialData.memorial.enableLivestream
+        funeralDirectorCanEdit: true
       },
 
       // Metadata
@@ -129,8 +127,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       
       // Status
       status: 'active',
-      livestreamEnabled: memorialData.memorial.enableLivestream,
-      activeStreams: 0
     };
 
     // Create owner user account

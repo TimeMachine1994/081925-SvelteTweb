@@ -39,16 +39,6 @@ export async function requirePhotoUploadAccess(request: MemorialRequest): Promis
 	return accessResult;
 }
 
-export async function requireLivestreamAccess(request: MemorialRequest): Promise<AccessCheckResult> {
-	const accessResult = await MemorialAccessVerifier.checkLivestreamAccess(request.memorialId, request.user);
-	
-	if (!accessResult.hasAccess) {
-		console.error('❌ Livestream access denied:', accessResult.reason);
-		throw error(403, `Livestream access denied: ${accessResult.reason}`);
-	}
-	
-	return accessResult;
-}
 
 export function createUserContext(user: any): UserContext {
 	return {

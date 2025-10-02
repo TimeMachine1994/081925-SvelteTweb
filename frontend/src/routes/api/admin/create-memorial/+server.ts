@@ -80,7 +80,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			allowComments: true,
 			allowPhotos: true,
 			allowTributes: true,
-			livestreamEnabled: false,
 			createdByAdmin: true,
 			adminCreator: {
 				uid: locals.user.uid,

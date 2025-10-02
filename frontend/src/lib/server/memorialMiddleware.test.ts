@@ -12,8 +12,7 @@ vi.mock('$lib/utils/memorialAccess', () => ({
   logAccessAttempt: vi.fn(),
   MemorialAccessVerifier: {
     checkViewAccess: vi.fn(),
-    checkEditAccess: vi.fn(),
-    checkLivestreamAccess: vi.fn()
+    checkEditAccess: vi.fn()
   }
 }));
 

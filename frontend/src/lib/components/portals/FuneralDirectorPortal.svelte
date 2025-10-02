@@ -65,8 +65,8 @@
 						<Video class="w-5 h-5 text-red-600" />
 					</div>
 					<div>
-						<p class="text-2xl font-bold text-gray-900">{memorials.filter(m => m.livestreamEnabled).length}</p>
-						<p class="text-sm text-gray-600">Live Ready</p>
+						<p class="text-2xl font-bold text-gray-900">{memorials.filter(m => m.isPublic).length}</p>
+						<p class="text-sm text-gray-600">Public</p>
 					</div>
 				</div>
 			</div>
@@ -138,12 +138,6 @@
 											<Calendar class="w-4 h-4 mr-1" />
 											{memorial.serviceDate ? new Date(memorial.serviceDate).toLocaleDateString() : 'Not scheduled'}
 										</span>
-										{#if memorial.livestreamEnabled}
-											<span class="flex items-center text-green-600">
-												<Video class="w-4 h-4 mr-1" />
-												Live Ready
-											</span>
-										{/if}
 									</div>
 								</div>
 							</div>
@@ -157,30 +151,13 @@
 									<span>Manage</span>
 								</a>
 								
-								{#if memorial.serviceDate}
-									<button class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-1">
-										<Calendar class="w-4 h-4" />
-										<span>Schedule</span>
-									</button>
-								{/if}
-								
-								{#if memorial.livestreamEnabled}
-									<a 
-										href="/memorials/{memorial.id}/streams"
-										class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center space-x-1"
-									>
-										<Video class="w-4 h-4" />
-										<span>Manage Streams</span>
-									</a>
-								{:else}
-									<a 
-										href="/memorials/{memorial.id}/streams"
-										class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-1"
-									>
-										<Video class="w-4 h-4" />
-										<span>Setup Stream</span>
-									</a>
-								{/if}
+								<a 
+									href="/schedule/{memorial.id}"
+									class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-1"
+								>
+									<Calendar class="w-4 h-4" />
+									<span>Schedule</span>
+								</a>
 								
 								<a 
 									href="/{memorial.slug}"

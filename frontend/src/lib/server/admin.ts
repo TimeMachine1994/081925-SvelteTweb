@@ -156,16 +156,16 @@ export class AdminService {
 				.where('createdAt', '>=', oneWeekAgo)
 				.get();
 
-			// Count active streams (simplified - in production would check actual stream status)
-			const activeStreamsSnap = await adminDb
+			// Count public memorials
+			const publicMemorialsSnap = await adminDb
 				.collection('memorials')
-				.where('livestreamActive', '==', true)
+				.where('isPublic', '==', true)
 				.get();
 
 			return {
 				totalUsers: usersSnap.size,
 				totalMemorials: memorialsSnap.size,
-				activeStreams: activeStreamsSnap.size,
+				publicMemorials: publicMemorialsSnap.size,
 				newUsersThisWeek: newUsersSnap.size,
 				newMemorialsThisWeek: newMemorialsSnap.size
 			};

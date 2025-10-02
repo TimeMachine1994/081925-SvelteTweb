@@ -226,9 +226,6 @@
 			'schedule_locked': '🔒',
 			'payment_completed': '💳',
 			'payment_failed': '❌',
-			'livestream_started': '📺',
-			'livestream_stopped': '⏹️',
-			'livestream_configured': '⚙️',
 			'funeral_director_approved': '✅',
 			'funeral_director_rejected': '❌',
 			'admin_memorial_created': '👑',
@@ -406,10 +403,10 @@
 										<td class="px-4 py-3 text-white">{memorial.lovedOneName}</td>
 										<td class="px-4 py-3 text-white/70 text-sm">{memorial.creatorEmail}</td>
 										<td class="px-4 py-3">
-											{#if memorial.livestream}
-												<span class="px-2 py-1 bg-green-500 text-white text-xs rounded">Live</span>
+											{#if memorial.isPublic}
+												<span class="px-2 py-1 bg-green-500 text-white text-xs rounded">Public</span>
 											{:else}
-												<span class="px-2 py-1 bg-gray-500 text-white text-xs rounded">Inactive</span>
+												<span class="px-2 py-1 bg-gray-500 text-white text-xs rounded">Private</span>
 											{/if}
 										</td>
 										<td class="px-4 py-3">
@@ -588,7 +585,6 @@
 							<option value="user">User</option>
 							<option value="schedule">Schedule</option>
 							<option value="payment">Payment</option>
-							<option value="livestream">Livestream</option>
 						</select>
 					</div>
 					<div>

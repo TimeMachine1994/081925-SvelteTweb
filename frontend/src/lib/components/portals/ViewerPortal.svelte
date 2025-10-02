@@ -70,8 +70,8 @@
                         <Eye class="w-5 h-5 text-blue-600" />
                     </div>
                     <div>
-                        <p class="text-2xl font-bold text-gray-900">{memorials.filter(m => m.livestreamEnabled).length}</p>
-                        <p class="text-sm text-gray-600">Live Ready</p>
+                        <p class="text-2xl font-bold text-gray-900">{memorials.filter(m => m.isPublic).length}</p>
+                        <p class="text-sm text-gray-600">Public</p>
                     </div>
                 </div>
             </div>
@@ -131,12 +131,6 @@
                                             <Calendar class="w-4 h-4 mr-1" />
                                             {memorial.serviceDate ? new Date(memorial.serviceDate).toLocaleDateString() : 'Date TBD'}
                                         </span>
-                                        {#if memorial.livestreamEnabled}
-                                            <span class="flex items-center text-green-600">
-                                                <Eye class="w-4 h-4 mr-1" />
-                                                Live Ready
-                                            </span>
-                                        {/if}
                                         <span class="flex items-center">
                                             <Users class="w-4 h-4 mr-1" />
                                             {memorial.followerCount || 0} followers

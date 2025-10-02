@@ -14,7 +14,6 @@ export const GET: RequestHandler = async () => {
 			slug: doc.data().slug,
 			ownerUid: doc.data().ownerUid,
 			funeralDirectorUid: doc.data().funeralDirectorUid,
-			livestreamEnabled: doc.data().livestreamEnabled,
 			serviceDate: doc.data().serviceDate,
 			createdAt: doc.data().createdAt
 		}));

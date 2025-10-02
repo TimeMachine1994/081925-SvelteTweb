@@ -1,5 +1,4 @@
 import type { Timestamp } from 'firebase/firestore';
-// import type { CloudflareStream } from './livestream'; // Commented out until livestream types are available
 
 export interface Embed {
 	id: string;
@@ -10,7 +9,7 @@ export interface Embed {
 	updatedAt: Timestamp;
 }
 
-// Service Detail Interfaces (moved from LivestreamConfig)
+// Service Detail Interfaces
 export interface ServiceDetails {
 	location: LocationInfo;         // Service location
 	time: TimeInfo;                 // Service time
@@ -65,8 +64,6 @@ export interface Memorial {
 	imageUrl?: string; // Adding optional fields that might be missing from schema but used in code
 	birthDate?: string;
 	deathDate?: string;
-	livestream?: any; // CloudflareStream when available
-	livestreamConfig?: any; // Holds data from the calculator/booking form
 	photos?: string[];
 	embeds?: Embed[];
 	
@@ -87,7 +84,6 @@ export interface Memorial {
 	serviceTime?: string;
 	location?: string;
 	duration?: number;
-	livestreamEnabled?: boolean;
 	followerCount?: number;
 	
 	// Access control - required fields

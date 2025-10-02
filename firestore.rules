@@ -54,73 +54,7 @@ service cloud.firestore {
         allow update: if false; // No updates allowed.
       }
 
-      // Legacy livestream rules (keeping for backward compatibility)
-      match /livestreams/{streamId} {
-        // Funeral director who created the memorial can manage streams
-        allow read, write: if request.auth != null &&
-          get(/databases/$(database)/documents/memorials/$(memorialId)).data.funeralDirector.id == request.auth.uid;
-        
-        // Memorial owner can view and manage streams
-        allow read, write: if request.auth != null &&
-          get(/databases/$(database)/documents/memorials/$(memorialId)).data.creatorUid == request.auth.uid;
-        
-        // Public streams can be viewed by anyone
-        allow read: if resource.data.isPublic == true;
-        
-        // Allowed viewers can read private streams
-        allow read: if request.auth != null && 
-          request.auth.uid in resource.data.allowedViewers;
-      }
     }
 
-    // Unified streams collection rules (NEW)
-    match /streams/{streamId} {
-      // Helper function to check if user can manage the associated memorial
-      function canManageMemorial(memorialId) {
-        let memorial = get(/databases/$(database)/documents/memorials/$(memorialId)).data;
-        return isAdmin() ||
-               (request.auth != null && request.auth.uid == memorial.ownerUid) ||
-               (request.auth != null && request.auth.uid == memorial.funeralDirectorUid);
-      }
-      
-      // Helper function to check if memorial is public
-      function isMemorialPublic(memorialId) {
-        let memorial = get(/databases/$(database)/documents/memorials/$(memorialId)).data;
-        return memorial.isPublic == true;
-      }
-      
-      // READ RULES
-      // 1. Stream managers (funeral directors, memorial owners, admins) can read all streams
-      allow read: if resource.data.memorialId != null && 
-                     canManageMemorial(resource.data.memorialId);
-      
-      // 2. Public can read visible streams from public memorials
-      allow read: if (resource.data.isVisible == true || resource.data.isVisible == null) && 
-                     resource.data.memorialId != null &&
-                     isMemorialPublic(resource.data.memorialId);
-      
-      // 3. Authenticated users can read visible streams they're explicitly allowed to view
-      allow read: if request.auth != null && 
-                     (resource.data.isVisible == true || resource.data.isVisible == null) &&
-                     request.auth.uid in resource.data.allowedUsers;
-      
-      // 4. Public streams (not tied to memorials) can be read by anyone if visible
-      allow read: if (resource.data.isPublic == true || resource.data.isPublic == null) && 
-                     (resource.data.isVisible == true || resource.data.isVisible == null);
-      
-      // WRITE RULES
-      // 1. Only stream managers can create streams
-      allow create: if request.auth != null && 
-                       request.resource.data.memorialId != null &&
-                       canManageMemorial(request.resource.data.memorialId);
-      
-      // 2. Only stream managers can update/delete streams
-      allow update, delete: if resource.data.memorialId != null && 
-                               canManageMemorial(resource.data.memorialId);
-      
-      // 3. Admins can create public streams without memorial association
-      allow create: if isAdmin() && 
-                       request.resource.data.isPublic == true;
-    }
   }
 }

@@ -46,7 +46,6 @@ describe('AdminPortal', () => {
 			totalUsers: 150,
 			totalMemorials: 75,
 			pendingApplications: 5,
-			activeStreams: 3,
 			newUsersThisWeek: 12,
 			newMemorialsThisWeek: 8
 		};

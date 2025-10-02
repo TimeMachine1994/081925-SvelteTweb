@@ -45,15 +45,6 @@ describe('Admin Role Memorial Access', () => {
 			});
 		});
 
-		it('should grant admin livestream control access', async () => {
-			const result = await MemorialAccessVerifier.checkLivestreamAccess('memorial123', adminUser);
-
-			expect(result).toEqual({
-				hasAccess: true,
-				accessLevel: 'admin',
-				reason: 'Admin privileges'
-			});
-		});
 
 		it('should deny admin photo upload permission in V1', () => {
 			const hasPermission = hasPhotoUploadPermission('admin', false);

@@ -43,7 +43,6 @@ export const ErrorCodes = {
   // Network & External Services
   NETWORK_ERROR: 'NETWORK_ERROR',
   FIREBASE_ERROR: 'FIREBASE_ERROR',
-  CLOUDFLARE_ERROR: 'CLOUDFLARE_ERROR',
   
   // General
   UNKNOWN_ERROR: 'UNKNOWN_ERROR',
@@ -65,7 +64,6 @@ export const ErrorMessages = {
   [ErrorCodes.VALIDATION_ERROR]: 'Please check your input and try again',
   [ErrorCodes.NETWORK_ERROR]: 'Network connection issue. Please check your internet',
   [ErrorCodes.FIREBASE_ERROR]: 'Database connection issue. Please try again',
-  [ErrorCodes.CLOUDFLARE_ERROR]: 'Video service unavailable. Please try again later',
   [ErrorCodes.UNKNOWN_ERROR]: 'An unexpected error occurred',
   [ErrorCodes.TIMEOUT_ERROR]: 'Request timed out. Please try again'
 } as const;
@@ -96,13 +94,12 @@ export function createAppError(
  * Determine if an error is recoverable (user can retry)
  */
 function isRecoverableError(code: keyof typeof ErrorCodes): boolean {
-  const recoverableErrors = [
-    ErrorCodes.NETWORK_ERROR,
-    ErrorCodes.FIREBASE_ERROR,
-    ErrorCodes.CLOUDFLARE_ERROR,
-    ErrorCodes.SAVE_FAILED,
-    ErrorCodes.LOAD_FAILED,
-    ErrorCodes.TIMEOUT_ERROR
+  const recoverableErrors: (keyof typeof ErrorCodes)[] = [
+    'NETWORK_ERROR',
+    'FIREBASE_ERROR',
+    'SAVE_FAILED',
+    'LOAD_FAILED',
+    'TIMEOUT_ERROR'
   ];
   
   return recoverableErrors.includes(code);

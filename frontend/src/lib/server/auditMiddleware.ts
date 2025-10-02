@@ -97,12 +97,6 @@ function determineAuditAction(pathname: string, method: string): string | null {
 		if (method === 'POST') return 'payment_completed';
 	}
 
-	// Livestream routes
-	if (pathname.includes('/livestream') || pathname.includes('/stream')) {
-		if (method === 'POST' && pathname.includes('/start')) return 'livestream_started';
-		if (method === 'POST' && pathname.includes('/stop')) return 'livestream_stopped';
-		if (method === 'PUT' || method === 'PATCH') return 'livestream_configured';
-	}
 
 	// Admin routes
 	if (pathname.includes('/admin/')) {
@@ -136,7 +130,7 @@ function determineAuditAction(pathname: string, method: string): string | null {
 /**
  * Extract resource type and ID from pathname
  */
-function extractResourceInfo(pathname: string): { type: 'memorial' | 'user' | 'schedule' | 'payment' | 'livestream' | 'system', id: string } {
+function extractResourceInfo(pathname: string): { type: 'memorial' | 'user' | 'schedule' | 'payment' | 'system', id: string } {
 	// Extract memorial ID from various routes
 	const memorialMatch = pathname.match(/\/memorials\/([^\/]+)/);
 	if (memorialMatch) {
@@ -160,11 +154,6 @@ function extractResourceInfo(pathname: string): { type: 'memorial' | 'user' | 's
 		return { type: 'payment', id: 'unknown' };
 	}
 
-	// Livestream routes
-	if (pathname.includes('livestream') || pathname.includes('stream')) {
-		const streamMatch = pathname.match(/\/livestream\/([^\/]+)/) || pathname.match(/\/stream\/([^\/]+)/);
-		return { type: 'livestream', id: streamMatch?.[1] || 'unknown' };
-	}
 
 	// Default to system
 	return { type: 'system', id: pathname };

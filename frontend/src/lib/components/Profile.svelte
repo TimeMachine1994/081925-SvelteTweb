@@ -104,29 +104,6 @@
 		}
 	}
 
-	async function startStream(memorialId: string) {
-		try {
-			const response = await fetch(`/api/memorials/${memorialId}/livestream`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({ streamTitle: 'Memorial Livestream' }), // Default title
-			});
-
-			if (!response.ok) {
-				throw new Error('Failed to start livestream session.');
-			}
-
-			// On success, navigate to the memorial streams management page
-			await goto(`/memorials/${memorialId}/streams`);
-
-		} catch (err) {
-			console.error('Error starting stream:', err);
-			// TODO: Show a user-friendly error message
-			alert('Could not start the stream. Please try again.');
-		}
-	}
 </script>
 
 <div class="min-h-screen bg-gradient-to-br {roleInfo.bgGradient} relative overflow-hidden">
@@ -279,12 +256,6 @@
 															<Calendar class="w-4 h-4 mr-1" />
 															{new Date(memorial.createdAt).toLocaleDateString()}
 														</span>
-														{#if memorial.livestreamEnabled}
-															<span class="flex items-center text-green-600">
-																<Video class="w-4 h-4 mr-1" />
-																Live Ready
-															</span>
-														{/if}
 													</div>
 												</div>
 											</div>
@@ -297,12 +268,6 @@
 													<Clock class="w-3 h-3 mr-1" />
 													Schedule
 												</a>
-												{#if userRole === 'funeral_director'}
-													<button onclick={() => startStream(memorial.id)} class="px-4 py-2 rounded-xl bg-red-600 text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center">
-														<Video class="w-3 h-3 mr-1" />
-														Setup Stream
-													</button>
-												{/if}
 											</div>
 										</div>
 									</div>

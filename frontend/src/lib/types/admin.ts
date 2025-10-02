@@ -25,7 +25,7 @@ export interface UserManagementData {
 export interface AdminDashboardStats {
 	totalUsers: number;
 	totalMemorials: number;
-	activeStreams: number;
+	publicMemorials: number;
 	newUsersThisWeek: number;
 	newMemorialsThisWeek: number;
 }

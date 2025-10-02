@@ -228,58 +228,6 @@ export class MemorialAccessVerifier {
 		};
 	}
 
-	/**
-	 * Check livestream control permissions
-	 */
-	static async checkLivestreamAccess(memorialId: string, user: UserContext): Promise<AccessCheckResult> {
-		console.log('📺 Checking livestream access for memorial:', memorialId);
-
-		await initializeAdminDb(); // Ensure DB is initialized
-
-		// Only admin, owner, and funeral director can control livestream
-		if (user.role === 'admin' || user.isAdmin) {
-			return {
-				hasAccess: true,
-				accessLevel: 'admin',
-				reason: 'Admin privileges'
-			};
-		}
-
-		const memorialDoc = await adminDb.collection('memorials').doc(memorialId).get();
-		if (!memorialDoc.exists) {
-			return {
-				hasAccess: false,
-				accessLevel: 'none',
-				reason: 'Memorial not found'
-			};
-		}
-
-		const memorial = memorialDoc.data() as Memorial;
-
-		// Owner can control livestream
-		if (memorial.ownerUid === user.uid) {
-			return {
-				hasAccess: true,
-				accessLevel: 'admin',
-				reason: 'Memorial owner'
-			};
-		}
-
-		// Assigned funeral director can control livestream
-		if (user.role === 'funeral_director' && memorial.funeralDirectorUid === user.uid) {
-			return {
-				hasAccess: true,
-				accessLevel: 'edit',
-				reason: 'Assigned funeral director'
-			};
-		}
-
-		return {
-			hasAccess: false,
-			accessLevel: 'none',
-			reason: 'Livestream control requires owner or funeral director permissions'
-		};
-	}
 
 	/**
 	 * Get user's accessible memorials with their access levels

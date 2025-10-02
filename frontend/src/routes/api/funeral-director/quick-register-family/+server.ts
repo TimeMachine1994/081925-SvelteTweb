@@ -107,7 +107,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       allowComments: true,
       allowPhotos: true,
       allowTributes: true,
-      livestreamEnabled: true,
       
       // Timestamps
       createdAt: Timestamp.now(),
@@ -136,7 +135,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       success: true,
       message: 'Family memorial created successfully',
       memorialId: memorialRef.id,
-      streamKey: `mobile_${memorialRef.id}_${Date.now()}`,
       memorialUrl: `/${memorialRef.id}`
     });
 

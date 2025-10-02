@@ -126,7 +126,6 @@ export interface FuneralDirectorMemorialRequest {
     allowComments: boolean;
     allowPhotos: boolean;
     allowTributes: boolean;
-    enableLivestream: boolean;
     customSlug?: string;
   };
   
@@ -141,47 +140,3 @@ export interface FuneralDirectorMemorialRequest {
   };
 }
 
-export interface LivestreamSession {
-  id: string;
-  
-  // Stream Details
-  title: string;
-  description?: string;
-  scheduledStartTime: Timestamp;
-  actualStartTime?: Timestamp;
-  endTime?: Timestamp;
-  
-  // Stream Configuration
-  streamConfig: {
-    provider: 'youtube' | 'facebook' | 'custom' | 'internal';
-    streamUrl?: string;
-    streamKey?: string;
-    embedCode?: string;
-    maxViewers?: number;
-  };
-  
-  // Status
-  status: 'scheduled' | 'live' | 'ended' | 'cancelled' | 'error';
-  
-  // Permissions
-  isPublic: boolean;
-  requiresPassword: boolean;
-  password?: string;
-  allowedViewers?: string[];
-  
-  // Analytics
-  analytics: {
-    peakViewers: number;
-    totalViews: number;
-    averageWatchTime: number;
-    chatMessages: number;
-  };
-  
-  // Funeral Director Info
-  funeralDirectorId: string;
-  createdBy: string;
-  
-  // Metadata
-  createdAt: Timestamp;
-  updatedAt: Timestamp;
-}

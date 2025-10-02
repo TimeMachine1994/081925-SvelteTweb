@@ -109,14 +109,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       allowPhotos: formData.memorial.allowPhotos,
       allowTributes: formData.memorial.allowTributes,
 
-      // Livestreaming
-      livestreamEnabled: formData.service.enableLivestream,
-      activeStreams: 0,
 
       // Permissions
       permissions: {
-        funeralDirectorCanEdit: true,
-        funeralDirectorCanStream: formData.service.enableLivestream
+        funeralDirectorCanEdit: true
       },
 
       // Metadata
