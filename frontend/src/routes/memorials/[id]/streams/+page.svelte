@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
-	import { Plus, Play, Square, Eye, EyeOff, Calendar, MapPin, Clock, Users, Settings, Trash2 } from 'lucide-svelte';
+	import { onMount, onDestroy } from 'svelte';
+	import { Plus, Play, Square, Eye, EyeOff, Calendar, MapPin, Clock, Users, Settings, Trash2, Copy, Check, Key, Radio } from 'lucide-svelte';
 	import type { PageData } from './$types';
 	import type { Stream } from '$lib/types/stream';
 
@@ -16,17 +16,36 @@
 	let newStreamDescription = $state('');
 	let newStreamDate = $state('');
 	let newStreamTime = $state('');
+	let copiedStreamKey = $state<string | null>(null);
+	let copiedRtmpUrl = $state<string | null>(null);
+	let pollingInterval: NodeJS.Timeout | null = null;
 
 	const memorial = data.memorial;
 	const memorialId = memorial.id;
 
-	// Load streams on mount
+	// Load streams on mount and start polling
 	onMount(async () => {
 		await loadStreams();
+		
+		// Poll for stream status updates every 5 seconds
+		pollingInterval = setInterval(async () => {
+			await loadStreams();
+		}, 5000);
+	});
+
+	// Clean up polling on unmount
+	onDestroy(() => {
+		if (pollingInterval) {
+			clearInterval(pollingInterval);
+		}
 	});
 
 	async function loadStreams() {
-		loading = true;
+		// Don't show loading spinner during background polling
+		const isInitialLoad = streams.length === 0;
+		if (isInitialLoad) {
+			loading = true;
+		}
 		error = '';
 		
 		try {
@@ -39,9 +58,13 @@
 			streams = (result.streams || []) as Stream[];
 		} catch (err) {
 			console.error('Error loading streams:', err);
-			error = 'Failed to load streams';
+			if (isInitialLoad) {
+				error = 'Failed to load streams';
+			}
 		} finally {
-			loading = false;
+			if (isInitialLoad) {
+				loading = false;
+			}
 		}
 	}
 
@@ -91,47 +114,18 @@
 		}
 	}
 
-	async function startStream(streamId: string) {
-		loading = true;
-		error = '';
-		
+	async function copyToClipboard(text: string, type: 'key' | 'url', streamId: string) {
 		try {
-			const response = await fetch(`/api/streams/${streamId}/start`, {
-				method: 'POST'
-			});
-
-			if (!response.ok) {
-				throw new Error(`Failed to start stream: ${response.statusText}`);
+			await navigator.clipboard.writeText(text);
+			if (type === 'key') {
+				copiedStreamKey = streamId;
+				setTimeout(() => copiedStreamKey = null, 2000);
+			} else {
+				copiedRtmpUrl = streamId;
+				setTimeout(() => copiedRtmpUrl = null, 2000);
 			}
-
-			await loadStreams(); // Refresh streams
 		} catch (err) {
-			console.error('Error starting stream:', err);
-			error = 'Failed to start stream';
-		} finally {
-			loading = false;
-		}
-	}
-
-	async function stopStream(streamId: string) {
-		loading = true;
-		error = '';
-		
-		try {
-			const response = await fetch(`/api/streams/${streamId}/stop`, {
-				method: 'POST'
-			});
-
-			if (!response.ok) {
-				throw new Error(`Failed to stop stream: ${response.statusText}`);
-			}
-
-			await loadStreams(); // Refresh streams
-		} catch (err) {
-			console.error('Error stopping stream:', err);
-			error = 'Failed to stop stream';
-		} finally {
-			loading = false;
+			console.error('Failed to copy:', err);
 		}
 	}
 
@@ -302,9 +296,17 @@
 							<!-- Stream Header -->
 							<div class="p-6 border-b border-gray-100">
 								<div class="flex items-start justify-between mb-3">
-									<h3 class="text-lg font-semibold text-gray-900 truncate">
-										{stream.title}
-									</h3>
+									<div class="flex items-center gap-2">
+										{#if stream.status === 'live'}
+											<div class="relative flex items-center">
+												<Radio class="w-5 h-5 text-red-600 animate-pulse" />
+												<span class="absolute inset-0 w-5 h-5 bg-red-600 rounded-full opacity-20 animate-ping"></span>
+											</div>
+										{/if}
+										<h3 class="text-lg font-semibold text-gray-900 truncate">
+											{stream.title}
+										</h3>
+									</div>
 									<span class="px-2 py-1 text-xs font-medium rounded-full {getStatusColor(stream.status)}">
 										{getStatusText(stream.status)}
 									</span>
@@ -334,62 +336,94 @@
 								</div>
 							</div>
 
-							<!-- Stream Actions -->
-							<div class="p-4 bg-gray-50">
-								<div class="flex items-center justify-between">
-									<!-- Control Buttons -->
-									<div class="flex items-center gap-2">
-										{#if stream.status === 'ready' || stream.status === 'scheduled'}
+							<!-- Stream Credentials -->
+							<div class="p-4 bg-gray-50 border-t border-gray-100">
+								<!-- RTMP URL -->
+								{#if stream.rtmpUrl}
+									<div class="mb-3">
+										<label class="block text-xs font-medium text-gray-600 mb-1">RTMP URL</label>
+										<div class="flex items-center gap-2">
+											<input
+												type="text"
+												value={stream.rtmpUrl}
+												readonly
+												class="flex-1 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg font-mono text-gray-700"
+											/>
 											<button
-												onclick={() => startStream(stream.id)}
-												class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
+												onclick={() => copyToClipboard(stream.rtmpUrl!, 'url', stream.id)}
+												class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-colors"
+												title="Copy RTMP URL"
 											>
-												<Play class="w-4 h-4 mr-1" />
-												Start
+												{#if copiedRtmpUrl === stream.id}
+													<Check class="w-4 h-4 text-green-600" />
+												{:else}
+													<Copy class="w-4 h-4" />
+												{/if}
 											</button>
-										{:else if stream.status === 'live'}
+										</div>
+									</div>
+								{/if}
+
+								<!-- Stream Key -->
+								{#if stream.streamKey}
+									<div class="mb-3">
+										<label class="block text-xs font-medium text-gray-600 mb-1">
+											<Key class="w-3 h-3 inline mr-1" />
+											Stream Key
+										</label>
+										<div class="flex items-center gap-2">
+											<input
+												type="password"
+												value={stream.streamKey}
+												readonly
+												class="flex-1 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg font-mono text-gray-700"
+											/>
 											<button
-												onclick={() => stopStream(stream.id)}
-												class="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
+												onclick={() => copyToClipboard(stream.streamKey!, 'key', stream.id)}
+												class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-colors"
+												title="Copy Stream Key"
 											>
-												<Square class="w-4 h-4 mr-1" />
-												Stop
+												{#if copiedStreamKey === stream.id}
+													<Check class="w-4 h-4 text-green-600" />
+												{:else}
+													<Copy class="w-4 h-4" />
+												{/if}
 											</button>
+										</div>
+									</div>
+								{/if}
+
+								<!-- Utility Buttons -->
+								<div class="flex items-center justify-end gap-1">
+									<!-- Visibility Toggle -->
+									<button
+										onclick={() => toggleVisibility(stream.id, stream.isVisible)}
+										class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-colors"
+										title={stream.isVisible ? 'Hide from public' : 'Show to public'}
+									>
+										{#if stream.isVisible}
+											<Eye class="w-4 h-4" />
+										{:else}
+											<EyeOff class="w-4 h-4" />
 										{/if}
-									</div>
+									</button>
 
-									<!-- Utility Buttons -->
-									<div class="flex items-center gap-1">
-										<!-- Visibility Toggle -->
-										<button
-											onclick={() => toggleVisibility(stream.id, stream.isVisible)}
-											class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-colors"
-											title={stream.isVisible ? 'Hide from public' : 'Show to public'}
-										>
-											{#if stream.isVisible}
-												<Eye class="w-4 h-4" />
-											{:else}
-												<EyeOff class="w-4 h-4" />
-											{/if}
-										</button>
+									<!-- Settings -->
+									<button
+										class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-colors"
+										title="Stream settings"
+									>
+										<Settings class="w-4 h-4" />
+									</button>
 
-										<!-- Settings -->
-										<button
-											class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-colors"
-											title="Stream settings"
-										>
-											<Settings class="w-4 h-4" />
-										</button>
-
-										<!-- Delete -->
-										<button
-											onclick={() => deleteStream(stream.id)}
-											class="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-											title="Delete stream"
-										>
-											<Trash2 class="w-4 h-4" />
-										</button>
-									</div>
+									<!-- Delete -->
+									<button
+										onclick={() => deleteStream(stream.id)}
+										class="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+										title="Delete stream"
+									>
+										<Trash2 class="w-4 h-4" />
+									</button>
 								</div>
 							</div>
 						</div>

@@ -2,6 +2,7 @@ import { adminAuth, adminDb, FieldValue } from '$lib/server/firebase';
 import { error as SvelteKitError, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import type { Stream } from '$lib/types/stream';
+import { createLiveInput, isCloudflareConfigured } from '$lib/server/cloudflare-stream';
 
 // GET - Fetch all streams for a memorial
 export const GET: RequestHandler = async ({ locals, params }) => {
@@ -120,6 +121,10 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			throw SvelteKitError(403, 'Permission denied');
 		}
 
+		// Generate unique stream key (standard format)
+		const streamKey = `${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
+		const rtmpUrl = 'rtmp://live.tributestream.com/live';
+
 		// Create stream object
 		const streamData: Omit<Stream, 'id'> = {
 			title: title.trim(),
@@ -127,6 +132,8 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			memorialId,
 			status: scheduledStartTime ? 'scheduled' : 'ready',
 			isVisible: true,
+			streamKey,
+			rtmpUrl,
 			scheduledStartTime: scheduledStartTime || undefined,
 			createdBy: userId,
 			createdAt: new Date().toISOString(),

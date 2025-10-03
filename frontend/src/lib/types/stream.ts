@@ -14,6 +14,11 @@ export interface Stream {
 	playbackUrl?: string;
 	thumbnailUrl?: string;
 	
+	// Stream Key & RTMP
+	streamKey?: string;
+	rtmpUrl?: string;
+	clientId?: string;
+	
 	// Scheduling
 	scheduledStartTime?: string;
 	scheduledEndTime?: string;
@@ -34,6 +39,10 @@ export interface Stream {
 	updatedAt: string;
 	startedAt?: string;
 	endedAt?: string;
+	
+	// Error tracking
+	errorCode?: string;
+	errorMessage?: string;
 }
 
 export type StreamStatus = 
