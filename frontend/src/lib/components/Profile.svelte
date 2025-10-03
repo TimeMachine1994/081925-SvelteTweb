@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { enhance } from '$app/forms';
-	import { User, Mail, Edit3, LogOut, Heart, Calendar, Users, Crown, Building2, Video, Settings, Sparkles, Clock, Eye } from 'lucide-svelte';
+	import { User, Mail, Edit3, LogOut, Heart, Calendar, Users, Crown, Building2, Video, Settings, Sparkles, Clock, Eye, Play } from 'lucide-svelte';
 	import { onMount } from 'svelte';
 
 	let { data, form } = $props();
@@ -264,9 +264,13 @@
 													<Eye class="w-3 h-3 mr-1" />
 													View
 												</a>
-													<a href={`/schedule/${memorial.id}`} class="px-4 py-2 rounded-xl bg-amber-600 text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center">
+												<a href={`/schedule/${memorial.id}`} class="px-4 py-2 rounded-xl bg-amber-600 text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center">
 													<Clock class="w-3 h-3 mr-1" />
 													Schedule
+												</a>
+												<a href={`/memorials/${memorial.id}/streams`} class="px-4 py-2 rounded-xl bg-purple-600 text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center">
+													<Play class="w-3 h-3 mr-1" />
+													Manage Streams
 												</a>
 											</div>
 										</div>

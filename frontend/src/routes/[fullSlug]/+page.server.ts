@@ -63,6 +63,46 @@ export const load: PageServerLoad = async ({ params }) => {
             isPublic: memorial.isPublic
         });
 
+        // Load streams for this memorial
+        console.log('🎬 [MEMORIAL_PAGE] Loading streams for memorial:', memorial.id);
+        const streamsSnapshot = await adminDb
+            .collection('streams')
+            .where('memorialId', '==', memorial.id)
+            .where('isVisible', '!=', false)
+            .orderBy('createdAt', 'desc')
+            .get();
+
+        const streams = streamsSnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                title: data.title || '',
+                description: data.description || '',
+                memorialId: data.memorialId || memorial.id,
+                status: data.status || 'ready',
+                isVisible: data.isVisible !== false,
+                cloudflareStreamId: data.cloudflareStreamId || null,
+                cloudflareInputId: data.cloudflareInputId || null,
+                playbackUrl: data.playbackUrl || null,
+                thumbnailUrl: data.thumbnailUrl || null,
+                scheduledStartTime: data.scheduledStartTime || null,
+                scheduledEndTime: data.scheduledEndTime || null,
+                recordingUrl: data.recordingUrl || null,
+                recordingReady: data.recordingReady || false,
+                recordingDuration: data.recordingDuration || null,
+                viewerCount: data.viewerCount || null,
+                peakViewerCount: data.peakViewerCount || null,
+                totalViews: data.totalViews || null,
+                createdBy: data.createdBy || '',
+                createdAt: data.createdAt || new Date().toISOString(),
+                updatedAt: data.updatedAt || new Date().toISOString(),
+                startedAt: data.startedAt || null,
+                endedAt: data.endedAt || null
+            };
+        });
+
+        console.log('🎬 [MEMORIAL_PAGE] Found', streams.length, 'visible streams');
+
         // Security check: Only show content from public memorials to unauthenticated users
         if (memorial.isPublic !== true) {
             console.log('🔒 [MEMORIAL_PAGE] Memorial is private, returning basic info only');
@@ -74,15 +114,20 @@ export const load: PageServerLoad = async ({ params }) => {
                     content: memorial.content,
                     isPublic: false,
                     services: null,
+                    imageUrl: memorial.imageUrl,
+                    birthDate: memorial.birthDate,
+                    deathDate: memorial.deathDate,
                     createdAt: memorial.createdAt,
                     updatedAt: memorial.updatedAt
-                }
+                },
+                streams: [] // No streams for private memorials
             };
         }
 
         // Return full memorial data for public memorials
         return {
-            memorial
+            memorial,
+            streams
         };
 
     } catch (err) {

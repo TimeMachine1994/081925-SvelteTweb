@@ -10,7 +10,7 @@
   let { data } = $props();
   
   // Get memorial ID from route params
-  const memorialId = $page.params.memorialId;
+  const memorialId = $page.params.memorialId as string;
   
   // Loading state
   let pageLoaded = $state(true);
@@ -422,8 +422,8 @@
         
         // Update UI toggles based on additional services
         const additionalServices = autoSavedData.services.additional || [];
-        const locationService = additionalServices.find(s => s.type === 'location');
-        const dayService = additionalServices.find(s => s.type === 'day');
+        const locationService = additionalServices.find((s: any) => s.type === 'location');
+        const dayService = additionalServices.find((s: any) => s.type === 'day');
         
         if (locationService) {
           additionalLocation = {
