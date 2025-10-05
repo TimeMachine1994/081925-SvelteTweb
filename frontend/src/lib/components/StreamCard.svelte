@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { Calendar, Users, Settings, Trash2, Copy, Check, Key, Radio, Eye, EyeOff, Circle } from 'lucide-svelte';
+	import { Calendar, Users, Settings, Trash2, Copy, Check, Key, Radio, Eye, EyeOff, Circle, Camera } from 'lucide-svelte';
 	import type { Stream } from '$lib/types/stream';
+	import BrowserStreamer from './BrowserStreamer.svelte';
 
 	type Props = {
 		stream: Stream;
@@ -19,6 +20,24 @@
 		copiedStreamKey, 
 		copiedRtmpUrl 
 	} = $props<Props>();
+
+	// WHIP streaming state
+	let showBrowserStreamer = $state(false);
+
+	function toggleBrowserStreamer() {
+		showBrowserStreamer = !showBrowserStreamer;
+	}
+
+	function handleStreamStart() {
+		console.log('🎬 [STREAM_CARD] Browser stream started for:', stream.id);
+		// The polling system will automatically detect the stream is live
+	}
+
+	function handleStreamEnd() {
+		console.log('🎬 [STREAM_CARD] Browser stream ended for:', stream.id);
+		showBrowserStreamer = false;
+		// The polling system will automatically detect the stream ended
+	}
 
 	function getStatusColor(status: string) {
 		switch (status) {
@@ -148,6 +167,17 @@
 
 		<!-- Action Buttons -->
 		<div class="flex items-center justify-end gap-1">
+			<!-- WHIP Browser Streaming (only for ready/scheduled streams) -->
+			{#if stream.status === 'ready' || stream.status === 'scheduled'}
+				<button
+					onclick={toggleBrowserStreamer}
+					class="p-2 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded-lg transition-colors"
+					title="Stream from Browser"
+				>
+					<Camera class="w-4 h-4" />
+				</button>
+			{/if}
+			
 			<!-- Visibility Toggle -->
 			<button
 				onclick={() => onToggleVisibility(stream.id, stream.isVisible)}
@@ -179,4 +209,16 @@
 			</button>
 		</div>
 	</div>
+	
+	<!-- Browser Streamer Component -->
+	{#if showBrowserStreamer}
+		<div class="border-t border-gray-100 p-6">
+			<BrowserStreamer 
+				streamId={stream.id}
+				streamTitle={stream.title}
+				onStreamStart={handleStreamStart}
+				onStreamEnd={handleStreamEnd}
+			/>
+		</div>
+	{/if}
 </div>
