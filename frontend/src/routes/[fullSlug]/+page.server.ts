@@ -87,9 +87,16 @@ export const load: PageServerLoad = async ({ params }) => {
                 thumbnailUrl: data.thumbnailUrl || null,
                 scheduledStartTime: data.scheduledStartTime || null,
                 scheduledEndTime: data.scheduledEndTime || null,
-                recordingUrl: data.recordingUrl || null,
+                // Updated recording fields to match our current system
+                recordingUrl: data.recordingUrl || null, // Legacy field
+                recordingPlaybackUrl: data.recordingPlaybackUrl || null, // New field
                 recordingReady: data.recordingReady || false,
                 recordingDuration: data.recordingDuration || null,
+                recordingSize: data.recordingSize || null,
+                recordingThumbnail: data.recordingThumbnail || null,
+                recordingProcessedAt: data.recordingProcessedAt || null,
+                recordingCount: data.recordingCount || null,
+                cloudflareRecordings: data.cloudflareRecordings || [],
                 viewerCount: data.viewerCount || null,
                 peakViewerCount: data.peakViewerCount || null,
                 totalViews: data.totalViews || null,

@@ -11,21 +11,50 @@
 	let { streams, memorialName }: Props = $props();
 
 	let currentTime = $state(new Date());
-	let interval: NodeJS.Timeout;
+	let currentStreams = $state(streams || []);
+	let timeInterval: NodeJS.Timeout;
+	let pollingInterval: NodeJS.Timeout;
 
 	// Ensure streams is always an array
-	let safeStreams = $derived(streams || []);
+	let safeStreams = $derived(currentStreams || []);
+
+	// Update streams when props change
+	$effect(() => {
+		currentStreams = streams || [];
+		console.log('🎬 [MEMORIAL] Streams updated:', {
+			count: currentStreams.length,
+			streams: currentStreams.map(s => ({ id: s.id, title: s.title, status: s.status }))
+		});
+	});
 
 	// Update current time every second for countdown
 	onMount(() => {
-		interval = setInterval(() => {
+		timeInterval = setInterval(() => {
 			currentTime = new Date();
 		}, 1000);
+		
+		// Poll for stream updates every 15 seconds (less frequent than management page)
+		console.log('🎬 [MEMORIAL] Starting polling for stream updates...');
+		pollingInterval = setInterval(async () => {
+			await checkForUpdates();
+		}, 15000);
 	});
 
 	onDestroy(() => {
-		if (interval) clearInterval(interval);
+		if (timeInterval) clearInterval(timeInterval);
+		if (pollingInterval) clearInterval(pollingInterval);
 	});
+
+	// Check for stream updates
+	async function checkForUpdates() {
+		try {
+			console.log('🎬 [MEMORIAL] Checking for stream updates...');
+			// Reload the page to get fresh data - simple but effective
+			window.location.reload();
+		} catch (error) {
+			console.error('🎬 [MEMORIAL] Error checking for updates:', error);
+		}
+	}
 
 	// Categorize streams by status and priority
 	let categorizedStreams = $derived.by(() => {
@@ -37,7 +66,27 @@
 			const scheduledTime = new Date(s.scheduledStartTime).getTime();
 			return scheduledTime > now; // Future scheduled streams
 		});
-		const recordedStreams = safeStreams.filter(s => s.status === 'completed' && s.recordingUrl);
+		// Updated to use our new recording fields
+		const recordedStreams = safeStreams.filter(s => 
+			s.status === 'completed' && 
+			s.recordingReady && 
+			(s.recordingPlaybackUrl || s.cloudflareStreamId)
+		);
+
+		console.log('🎬 [MEMORIAL] Stream categorization:', {
+			total: safeStreams.length,
+			live: liveStreams.length,
+			scheduled: scheduledStreams.length,
+			recorded: recordedStreams.length,
+			streams: safeStreams.map(s => ({
+				id: s.id,
+				title: s.title,
+				status: s.status,
+				recordingReady: s.recordingReady,
+				recordingPlaybackUrl: !!s.recordingPlaybackUrl,
+				cloudflareStreamId: !!s.cloudflareStreamId
+			}))
+		});
 
 		return { liveStreams, scheduledStreams, recordedStreams };
 	});
@@ -74,9 +123,21 @@
 
 	// Generate Cloudflare Stream player URL
 	function getStreamPlayerUrl(stream: Stream): string {
+		console.log('🎬 [MEMORIAL] Getting player URL for stream:', {
+			id: stream.id,
+			title: stream.title,
+			status: stream.status,
+			cloudflareStreamId: stream.cloudflareStreamId,
+			recordingPlaybackUrl: stream.recordingPlaybackUrl
+		});
+		
 		if (stream.cloudflareStreamId) {
-			return `https://iframe.cloudflarestream.com/${stream.cloudflareStreamId}`;
+			const url = `https://customer-dyz4fsbg86xy3krn.cloudflarestream.com/${stream.cloudflareStreamId}/iframe`;
+			console.log('🎬 [MEMORIAL] Using Cloudflare iframe URL:', url);
+			return url;
 		}
+		
+		console.log('🎬 [MEMORIAL] No cloudflareStreamId found');
 		return '';
 	}
 </script>
