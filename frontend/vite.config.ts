@@ -7,6 +7,15 @@ export default defineConfig(({ mode }) => ({
 		// Disable type checking during development for faster builds
 		typeCheck: mode === 'production'
 	})],
+	server: {
+		allowedHosts: [
+			'localhost',
+			'127.0.0.1',
+			'lenticularly-swingeing-aleisha.ngrok-free.dev',
+			'.ngrok.io',
+			'.ngrok-free.dev'
+		]
+	},
 	test: {
 		include: ['src/**/*.{test,spec}.{js,ts}'],
 		environment: 'jsdom',

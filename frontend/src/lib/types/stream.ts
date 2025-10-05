@@ -28,6 +28,14 @@ export interface Stream {
 	recordingReady?: boolean;
 	recordingDuration?: number;
 	
+	// New recording fields for Cloudflare integration
+	recordingPlaybackUrl?: string;     // HLS/DASH URL for playback
+	recordingThumbnail?: string;       // Thumbnail URL
+	recordingSize?: number;            // File size in bytes
+	recordingProcessedAt?: string;     // When recording became ready
+	recordingCount?: number;           // Number of recordings found
+	cloudflareRecordings?: any[];      // Full Cloudflare recording metadata
+	
 	// Analytics
 	viewerCount?: number;
 	peakViewerCount?: number;

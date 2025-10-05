@@ -45,7 +45,6 @@ export const GET: RequestHandler = async ({ locals, params }) => {
 		const streamsSnapshot = await adminDb
 			.collection('streams')
 			.where('memorialId', '==', memorialId)
-			.orderBy('createdAt', 'desc')
 			.get();
 
 		const streams: Stream[] = [];
@@ -54,6 +53,13 @@ export const GET: RequestHandler = async ({ locals, params }) => {
 				id: doc.id,
 				...doc.data()
 			} as Stream);
+		});
+
+		// Sort by createdAt descending (newest first)
+		streams.sort((a, b) => {
+			const aTime = new Date(a.createdAt || 0).getTime();
+			const bTime = new Date(b.createdAt || 0).getTime();
+			return bTime - aTime;
 		});
 
 		console.log('✅ [STREAMS API] Found', streams.length, 'streams');
@@ -121,11 +127,42 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			throw SvelteKitError(403, 'Permission denied');
 		}
 
-		// Generate unique stream key (standard format)
-		const streamKey = `${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`;
-		const rtmpUrl = 'rtmp://live.tributestream.com/live';
+		// Create Cloudflare Live Input for real RTMP streaming
+		console.log('🎬 [STREAMS API] Creating Cloudflare Live Input...');
+		let cloudflareInput: any = null;
+		let streamKey = '';
+		let rtmpUrl = '';
+		let cloudflareInputId = '';
 
-		// Create stream object
+		if (isCloudflareConfigured()) {
+			try {
+				cloudflareInput = await createLiveInput({
+					name: `${memorial.lovedOneName} - ${title.trim()}`,
+					recording: true,
+					recordingTimeout: 30
+				});
+
+				// Extract real Cloudflare credentials
+				streamKey = cloudflareInput.rtmps.streamKey;
+				rtmpUrl = cloudflareInput.rtmps.url;
+				cloudflareInputId = cloudflareInput.uid;
+
+				console.log('✅ [STREAMS API] Cloudflare Live Input created:', cloudflareInputId);
+				console.log('🔑 [STREAMS API] RTMP URL:', rtmpUrl);
+				console.log('🔑 [STREAMS API] Stream Key:', streamKey.substring(0, 8) + '...');
+			} catch (error) {
+				console.error('❌ [STREAMS API] Failed to create Cloudflare Live Input:', error);
+				// Fall back to placeholder values for development
+				streamKey = `dev_${Math.random().toString(36).substring(2, 15)}`;
+				rtmpUrl = 'rtmp://live.tributestream.com/live';
+			}
+		} else {
+			console.warn('⚠️ [STREAMS API] Cloudflare not configured, using development placeholders');
+			streamKey = `dev_${Math.random().toString(36).substring(2, 15)}`;
+			rtmpUrl = 'rtmp://live.tributestream.com/live';
+		}
+
+		// Create stream object with real Cloudflare data
 		const streamData: Omit<Stream, 'id'> = {
 			title: title.trim(),
 			description: description?.trim() || '',
@@ -134,6 +171,7 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			isVisible: true,
 			streamKey,
 			rtmpUrl,
+			cloudflareInputId: cloudflareInputId || undefined,
 			scheduledStartTime: scheduledStartTime || undefined,
 			createdBy: userId,
 			createdAt: new Date().toISOString(),

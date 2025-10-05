@@ -2,6 +2,7 @@ import { adminAuth, adminDb } from '$lib/server/firebase';
 import { error as SvelteKitError, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import type { Stream } from '$lib/types/stream';
+import { deleteLiveInput, isCloudflareConfigured } from '$lib/server/cloudflare-stream';
 
 // PUT - Update stream properties
 export const PUT: RequestHandler = async ({ locals, params, request }) => {
@@ -114,7 +115,19 @@ export const DELETE: RequestHandler = async ({ locals, params }) => {
 			throw SvelteKitError(403, 'Permission denied');
 		}
 
-		// Delete stream
+		// Clean up Cloudflare Live Input if it exists
+		if (streamData.cloudflareInputId && isCloudflareConfigured()) {
+			try {
+				console.log('🗑️ [STREAM API] Deleting Cloudflare Live Input:', streamData.cloudflareInputId);
+				await deleteLiveInput(streamData.cloudflareInputId);
+				console.log('✅ [STREAM API] Cloudflare Live Input deleted');
+			} catch (error) {
+				console.error('⚠️ [STREAM API] Failed to delete Cloudflare Live Input:', error);
+				// Continue with stream deletion even if Cloudflare cleanup fails
+			}
+		}
+
+		// Delete stream from database
 		await adminDb.collection('streams').doc(streamId).delete();
 		
 		console.log('✅ [STREAM API] Stream deleted:', streamId);

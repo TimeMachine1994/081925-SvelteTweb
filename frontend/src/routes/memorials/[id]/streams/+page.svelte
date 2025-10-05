@@ -2,9 +2,11 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { onMount, onDestroy } from 'svelte';
-	import { Plus, Play, Square, Eye, EyeOff, Calendar, MapPin, Clock, Users, Settings, Trash2, Copy, Check, Key, Radio } from 'lucide-svelte';
+	import { Plus, Play, Eye } from 'lucide-svelte';
 	import type { PageData } from './$types';
 	import type { Stream } from '$lib/types/stream';
+	import StreamCard from '$lib/components/StreamCard.svelte';
+	import CompletedStreamCard from '$lib/components/CompletedStreamCard.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -25,12 +27,17 @@
 
 	// Load streams on mount and start polling
 	onMount(async () => {
+		console.log('🚀 [INIT] Component mounted, starting initialization...');
 		await loadStreams();
 		
-		// Poll for stream status updates every 5 seconds
+		// Poll for live status updates every 10 seconds (more efficient)
+		console.log('⏰ [INIT] Starting polling interval (10 seconds)...');
 		pollingInterval = setInterval(async () => {
-			await loadStreams();
-		}, 5000);
+			console.log('⏰ [POLLING] Polling interval triggered');
+			await checkLiveStatus();
+		}, 10000);
+		
+		console.log('🚀 [INIT] Initialization completed');
 	});
 
 	// Clean up polling on unmount
@@ -43,6 +50,8 @@
 	async function loadStreams() {
 		// Don't show loading spinner during background polling
 		const isInitialLoad = streams.length === 0;
+		console.log('📥 [LOAD] Loading streams...', { isInitialLoad, memorialId });
+		
 		if (isInitialLoad) {
 			loading = true;
 		}
@@ -50,14 +59,34 @@
 		
 		try {
 			const response = await fetch(`/api/memorials/${memorialId}/streams`);
+			console.log('📥 [LOAD] API response status:', response.status);
+			
 			if (!response.ok) {
 				throw new Error(`Failed to load streams: ${response.statusText}`);
 			}
 			
 			const result = await response.json();
-			streams = (result.streams || []) as Stream[];
+			console.log('📥 [LOAD] API response data:', result);
+			
+			const newStreams = (result.streams || []) as Stream[];
+			console.log('📥 [LOAD] Loaded streams:', newStreams.length);
+			
+			// Log each stream's recording status
+			newStreams.forEach((stream, index) => {
+				console.log(`📥 [LOAD] Stream ${index + 1} (${stream.id}):`, {
+					title: stream.title,
+					status: stream.status,
+					recordingReady: stream.recordingReady,
+					recordingPlaybackUrl: stream.recordingPlaybackUrl,
+					recordingCount: stream.recordingCount,
+					cloudflareStreamId: stream.cloudflareStreamId
+				});
+			});
+			
+			streams = newStreams;
+			console.log('📥 [LOAD] Streams updated in state');
 		} catch (err) {
-			console.error('Error loading streams:', err);
+			console.error('❌ [LOAD] Error loading streams:', err);
 			if (isInitialLoad) {
 				error = 'Failed to load streams';
 			}
@@ -65,7 +94,116 @@
 			if (isInitialLoad) {
 				loading = false;
 			}
+			console.log('📥 [LOAD] Load streams completed');
 		}
+	}
+
+	async function checkLiveStatus() {
+		console.log('🔍 [POLLING] Starting live status check...');
+		
+		// Check streams that could potentially be live
+		const liveStreamIds = streams
+			.filter(stream => ['scheduled', 'ready', 'live'].includes(stream.status))
+			.map(stream => stream.id);
+
+		// Check completed streams AND scheduled streams that might have recordings
+		const completedStreamIds = streams
+			.filter(stream => 
+				(stream.status === 'completed' || stream.status === 'scheduled') && 
+				!stream.recordingReady
+			)
+			.map(stream => stream.id);
+
+		console.log('🔍 [POLLING] Stream analysis:', {
+			totalStreams: streams.length,
+			liveStreamIds,
+			completedStreamIds,
+			streamsNeedingRecordingCheck: completedStreamIds.length
+		});
+
+		// Log detailed stream info
+		streams.forEach(stream => {
+			console.log(`📊 [POLLING] Stream ${stream.id}:`, {
+				title: stream.title,
+				status: stream.status,
+				recordingReady: stream.recordingReady,
+				recordingPlaybackUrl: stream.recordingPlaybackUrl,
+				recordingCount: stream.recordingCount
+			});
+		});
+
+		let hasUpdates = false;
+
+		// Check live status
+		if (liveStreamIds.length > 0) {
+			try {
+				const response = await fetch('/api/streams/check-live-status', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({ streamIds: liveStreamIds })
+				});
+
+				if (response.ok) {
+					const result = await response.json();
+					console.log('🔍 Live status check:', result.summary);
+					
+					if (result.summary.updated > 0) {
+						hasUpdates = true;
+					}
+				}
+			} catch (err) {
+				console.error('Error checking live status:', err);
+			}
+		}
+
+		// Check recordings for completed streams
+		if (completedStreamIds.length > 0) {
+			console.log('🎥 [POLLING] Checking recordings for', completedStreamIds.length, 'streams:', completedStreamIds);
+			
+			for (const streamId of completedStreamIds) {
+				try {
+					console.log(`🎥 [POLLING] Calling recordings API for stream: ${streamId}`);
+					const response = await fetch(`/api/streams/${streamId}/recordings`);
+					
+					if (response.ok) {
+						const result = await response.json();
+						console.log(`🎥 [POLLING] Recordings API response for ${streamId}:`, {
+							success: result.success,
+							recordingCount: result.recordingCount,
+							readyRecordings: result.readyRecordings,
+							hasLatestRecording: !!result.latestRecording,
+							latestRecordingReady: result.latestRecording?.isReady
+						});
+						
+						if (result.recordingCount > 0) {
+							console.log(`✅ [POLLING] Found ${result.recordingCount} recordings for stream: ${streamId}`);
+							hasUpdates = true;
+						} else {
+							console.log(`⚠️ [POLLING] No recordings found for stream: ${streamId}`);
+						}
+					} else {
+						console.error(`❌ [POLLING] Recordings API failed for ${streamId}:`, response.status, response.statusText);
+					}
+				} catch (err) {
+					console.error(`❌ [POLLING] Error checking recordings for stream ${streamId}:`, err);
+				}
+			}
+		} else {
+			console.log('🎥 [POLLING] No streams need recording checks');
+		}
+
+		// Only reload if we detected changes
+		if (hasUpdates) {
+			console.log('🔄 [POLLING] Changes detected, reloading streams...');
+			await loadStreams();
+			console.log('🔄 [POLLING] Streams reloaded successfully');
+		} else {
+			console.log('🔄 [POLLING] No changes detected, skipping reload');
+		}
+		
+		console.log('🔍 [POLLING] Live status check completed');
 	}
 
 	async function createStream() {
@@ -157,6 +295,28 @@
 		}
 	}
 
+	async function checkRecordings(streamId: string) {
+		try {
+			console.log('🎥 Checking recordings for stream:', streamId);
+			const response = await fetch(`/api/streams/${streamId}/recordings`);
+			
+			if (!response.ok) {
+				throw new Error(`Failed to check recordings: ${response.statusText}`);
+			}
+
+			const result = await response.json();
+			console.log('✅ Recording check result:', result);
+			
+			// Reload streams to show updated recording status
+			await loadStreams();
+			
+			return result;
+		} catch (err) {
+			console.error('Error checking recordings:', err);
+			throw err;
+		}
+	}
+
 	async function deleteStream(streamId: string) {
 		if (!confirm('Are you sure you want to delete this stream? This action cannot be undone.')) {
 			return;
@@ -195,25 +355,6 @@
 		newStreamTime = '';
 	}
 
-	function getStatusColor(status: string) {
-		switch (status) {
-			case 'live': return 'text-red-600 bg-red-100';
-			case 'ready': return 'text-green-600 bg-green-100';
-			case 'scheduled': return 'text-blue-600 bg-blue-100';
-			case 'completed': return 'text-gray-600 bg-gray-100';
-			default: return 'text-gray-600 bg-gray-100';
-		}
-	}
-
-	function getStatusText(status: string) {
-		switch (status) {
-			case 'live': return 'LIVE';
-			case 'ready': return 'Ready';
-			case 'scheduled': return 'Scheduled';
-			case 'completed': return 'Completed';
-			default: return 'Unknown';
-		}
-	}
 </script>
 
 <svelte:head>
@@ -292,147 +433,39 @@
 				<!-- Streams Grid -->
 				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 					{#each streams as stream (stream.id)}
-						<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
-							<!-- Stream Header -->
-							<div class="p-6 border-b border-gray-100">
-								<div class="flex items-start justify-between mb-3">
-									<div class="flex items-center gap-2">
-										{#if stream.status === 'live'}
-											<div class="relative flex items-center">
-												<Radio class="w-5 h-5 text-red-600 animate-pulse" />
-												<span class="absolute inset-0 w-5 h-5 bg-red-600 rounded-full opacity-20 animate-ping"></span>
-											</div>
-										{/if}
-										<h3 class="text-lg font-semibold text-gray-900 truncate">
-											{stream.title}
-										</h3>
-									</div>
-									<span class="px-2 py-1 text-xs font-medium rounded-full {getStatusColor(stream.status)}">
-										{getStatusText(stream.status)}
-									</span>
-								</div>
-								
-								{#if stream.description}
-									<p class="text-gray-600 text-sm mb-4 line-clamp-2">
-										{stream.description}
-									</p>
-								{/if}
-
-								<!-- Stream Info -->
-								<div class="space-y-2 text-sm text-gray-500">
-									{#if stream.scheduledStartTime}
-										<div class="flex items-center">
-											<Calendar class="w-4 h-4 mr-2" />
-											{new Date(stream.scheduledStartTime).toLocaleDateString()}
-										</div>
-									{/if}
-									
-									{#if stream.viewerCount !== undefined}
-										<div class="flex items-center">
-											<Users class="w-4 h-4 mr-2" />
-											{stream.viewerCount} viewers
-										</div>
-									{/if}
-								</div>
-							</div>
-
-							<!-- Stream Credentials -->
-							<div class="p-4 bg-gray-50 border-t border-gray-100">
-								<!-- RTMP URL -->
-								{#if stream.rtmpUrl}
-									<div class="mb-3">
-										<label class="block text-xs font-medium text-gray-600 mb-1">RTMP URL</label>
-										<div class="flex items-center gap-2">
-											<input
-												type="text"
-												value={stream.rtmpUrl}
-												readonly
-												class="flex-1 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg font-mono text-gray-700"
-											/>
-											<button
-												onclick={() => copyToClipboard(stream.rtmpUrl!, 'url', stream.id)}
-												class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-colors"
-												title="Copy RTMP URL"
-											>
-												{#if copiedRtmpUrl === stream.id}
-													<Check class="w-4 h-4 text-green-600" />
-												{:else}
-													<Copy class="w-4 h-4" />
-												{/if}
-											</button>
-										</div>
-									</div>
-								{/if}
-
-								<!-- Stream Key -->
-								{#if stream.streamKey}
-									<div class="mb-3">
-										<label class="block text-xs font-medium text-gray-600 mb-1">
-											<Key class="w-3 h-3 inline mr-1" />
-											Stream Key
-										</label>
-										<div class="flex items-center gap-2">
-											<input
-												type="password"
-												value={stream.streamKey}
-												readonly
-												class="flex-1 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg font-mono text-gray-700"
-											/>
-											<button
-												onclick={() => copyToClipboard(stream.streamKey!, 'key', stream.id)}
-												class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-colors"
-												title="Copy Stream Key"
-											>
-												{#if copiedStreamKey === stream.id}
-													<Check class="w-4 h-4 text-green-600" />
-												{:else}
-													<Copy class="w-4 h-4" />
-												{/if}
-											</button>
-										</div>
-									</div>
-								{/if}
-
-								<!-- Utility Buttons -->
-								<div class="flex items-center justify-end gap-1">
-									<!-- Visibility Toggle -->
-									<button
-										onclick={() => toggleVisibility(stream.id, stream.isVisible)}
-										class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-colors"
-										title={stream.isVisible ? 'Hide from public' : 'Show to public'}
-									>
-										{#if stream.isVisible}
-											<Eye class="w-4 h-4" />
-										{:else}
-											<EyeOff class="w-4 h-4" />
-										{/if}
-									</button>
-
-									<!-- Settings -->
-									<button
-										class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-colors"
-										title="Stream settings"
-									>
-										<Settings class="w-4 h-4" />
-									</button>
-
-									<!-- Delete -->
-									<button
-										onclick={() => deleteStream(stream.id)}
-										class="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-										title="Delete stream"
-									>
-										<Trash2 class="w-4 h-4" />
-									</button>
-								</div>
-							</div>
-						</div>
+						{#if stream.status === 'completed'}
+							{@const _ = console.log(`🎬 [RENDER] Rendering CompletedStreamCard for stream ${stream.id}:`, {
+								title: stream.title,
+								status: stream.status,
+								recordingReady: stream.recordingReady,
+								recordingPlaybackUrl: stream.recordingPlaybackUrl,
+								recordingCount: stream.recordingCount
+							})}
+							<CompletedStreamCard 
+								{stream}
+								onVisibilityToggle={toggleVisibility}
+								onCheckRecordings={checkRecordings}
+								canManage={true}
+							/>
+						{:else}
+							{@const _ = console.log(`🎬 [RENDER] Rendering StreamCard for stream ${stream.id}:`, {
+								title: stream.title,
+								status: stream.status
+							})}
+							<StreamCard 
+								{stream}
+								onToggleVisibility={toggleVisibility}
+								onDelete={deleteStream}
+								onCopy={copyToClipboard}
+								{copiedStreamKey}
+								{copiedRtmpUrl}
+							/>
+						{/if}
 					{/each}
 				</div>
 			{/if}
 		{/if}
 	</div>
-</div>
 
 <!-- Create Stream Modal -->
 {#if showCreateModal}
@@ -520,3 +553,4 @@
 		</div>
 	</div>
 {/if}
+</div>
