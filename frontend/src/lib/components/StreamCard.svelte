@@ -21,6 +21,16 @@
 		copiedRtmpUrl 
 	} = $props<Props>();
 
+	// WHEP Browser Source URL state
+	let copiedWhepUrl = $state(false);
+	let whepUrl = $state<string | null>(null);
+	let loadingWhepUrl = $state(false);
+	
+	// HLS Stream URL state
+	let copiedHlsUrl = $state(false);
+	let hlsUrl = $state<string | null>(null);
+	let loadingHlsUrl = $state(false);
+
 	// WHIP streaming state
 	let showBrowserStreamer = $state(false);
 
@@ -58,6 +68,79 @@
 			default: return 'Unknown';
 		}
 	}
+
+	async function fetchWhepUrl() {
+		if (!stream.id || loadingWhepUrl) return;
+		
+		loadingWhepUrl = true;
+		try {
+			const response = await fetch(`/api/streams/${stream.id}/whep`);
+			const data = await response.json();
+			
+			if (data.success) {
+				// Create the browser source URL (we'll create this endpoint)
+				whepUrl = `${window.location.origin}/whep/${stream.id}`;
+			} else {
+				console.error('Failed to get WHEP URL:', data.error);
+			}
+		} catch (error) {
+			console.error('Error fetching WHEP URL:', error);
+		} finally {
+			loadingWhepUrl = false;
+		}
+	}
+	
+	async function fetchHlsUrl() {
+		if (!stream.id || loadingHlsUrl) return;
+		
+		loadingHlsUrl = true;
+		try {
+			const response = await fetch(`/api/streams/${stream.id}/hls`);
+			const data = await response.json();
+			
+			if (data.success) {
+				hlsUrl = data.hlsUrl;
+			} else {
+				console.error('Failed to get HLS URL:', data.error);
+			}
+		} catch (error) {
+			console.error('Error fetching HLS URL:', error);
+		} finally {
+			loadingHlsUrl = false;
+		}
+	}
+
+	async function copyWhepUrl() {
+		if (!whepUrl) {
+			await fetchWhepUrl();
+		}
+		
+		if (whepUrl) {
+			await navigator.clipboard.writeText(whepUrl);
+			copiedWhepUrl = true;
+			setTimeout(() => copiedWhepUrl = false, 2000);
+		}
+	}
+	
+	async function copyHlsUrl() {
+		if (!hlsUrl) {
+			await fetchHlsUrl();
+		}
+		
+		if (hlsUrl) {
+			await navigator.clipboard.writeText(hlsUrl);
+			copiedHlsUrl = true;
+			setTimeout(() => copiedHlsUrl = false, 2000);
+		}
+	}
+
+	// Auto-fetch URLs when stream goes live
+	$effect(() => {
+		if (stream.status === 'live') {
+			if (!whepUrl) fetchWhepUrl();
+			if (!hlsUrl) fetchHlsUrl();
+		}
+	});
 </script>
 
 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
@@ -162,6 +245,97 @@
 						{/if}
 					</button>
 				</div>
+			</div>
+		{/if}
+
+		<!-- OBS Stream URLs (only when live) -->
+		{#if stream.status === 'live'}
+			<!-- HLS Stream URL (Recommended for OBS) -->
+			<div class="mb-3">
+				<label class="block text-xs font-medium text-gray-600 mb-1">
+					<Radio class="w-3 h-3 inline mr-1 text-green-600" />
+					OBS Media Source URL (Recommended)
+				</label>
+				<div class="flex items-center gap-2">
+					{#if hlsUrl}
+						<input
+							type="text"
+							value={hlsUrl}
+							readonly
+							class="flex-1 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg font-mono text-gray-700"
+						/>
+						<button
+							onclick={copyHlsUrl}
+							class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-colors"
+							title="Copy HLS Stream URL"
+						>
+							{#if copiedHlsUrl}
+								<Check class="w-4 h-4 text-green-600" />
+							{:else}
+								<Copy class="w-4 h-4" />
+							{/if}
+						</button>
+					{:else}
+						<div class="flex-1 px-3 py-2 text-sm bg-gray-100 border border-gray-300 rounded-lg text-gray-500 italic">
+							{loadingHlsUrl ? 'Generating URL...' : 'Click to generate HLS URL'}
+						</div>
+						<button
+							onclick={fetchHlsUrl}
+							disabled={loadingHlsUrl}
+							class="p-2 text-green-600 hover:text-green-900 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50"
+							title="Generate HLS Stream URL"
+						>
+							<Radio class="w-4 h-4" />
+						</button>
+					{/if}
+				</div>
+				<p class="text-xs text-gray-500 mt-1">
+					Use this URL in OBS Media Source. Reliable but 10-30s latency.
+				</p>
+			</div>
+			
+			<!-- WHEP Browser Source URL (Advanced) -->
+			<div class="mb-3">
+				<label class="block text-xs font-medium text-gray-600 mb-1">
+					<Radio class="w-3 h-3 inline mr-1 text-blue-600" />
+					OBS Browser Source URL (Low Latency)
+				</label>
+				<div class="flex items-center gap-2">
+					{#if whepUrl}
+						<input
+							type="text"
+							value={whepUrl}
+							readonly
+							class="flex-1 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg font-mono text-gray-700"
+						/>
+						<button
+							onclick={copyWhepUrl}
+							class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-colors"
+							title="Copy WHEP Browser Source URL"
+						>
+							{#if copiedWhepUrl}
+								<Check class="w-4 h-4 text-green-600" />
+							{:else}
+								<Copy class="w-4 h-4" />
+							{/if}
+						</button>
+					{:else}
+						<div class="flex-1 px-3 py-2 text-sm bg-gray-100 border border-gray-300 rounded-lg text-gray-500 italic">
+							{loadingWhepUrl ? 'Generating URL...' : 'Click to generate WHEP URL'}
+						</div>
+						<button
+							onclick={fetchWhepUrl}
+							disabled={loadingWhepUrl}
+							class="p-2 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50"
+							title="Generate WHEP Browser Source URL"
+						>
+							<Radio class="w-4 h-4" />
+						</button>
+					{/if}
+				</div>
+				<p class="text-xs text-gray-500 mt-1">
+					Use this URL in OBS Browser Source (1920x1080). &lt;1s latency but may be less stable.
+				</p>
 			</div>
 		{/if}
 

@@ -1,5 +1,4 @@
 import { env } from '$env/dynamic/private';
-
 const CLOUDFLARE_ACCOUNT_ID = env.CLOUDFLARE_ACCOUNT_ID;
 const CLOUDFLARE_API_TOKEN = env.CLOUDFLARE_API_TOKEN;
 const CLOUDFLARE_STREAM_API_BASE = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/stream`;
@@ -18,6 +17,9 @@ interface CloudflareLiveInput {
 		streamId: string;
 	};
 	webRTC?: {
+		url: string;
+	};
+	webRTCPlayback?: {
 		url: string;
 	};
 	created: string;
@@ -185,6 +187,41 @@ export async function listLiveInputs(): Promise<CloudflareLiveInput[]> {
 		console.error('❌ [CLOUDFLARE] Failed to list live inputs:', error);
 		throw error;
 	}
+}
+
+/**
+ * Get the WHEP playback URL for a live input (for OBS Browser Source)
+ */
+export function getWHEPPlaybackURL(input: CloudflareLiveInput): string | undefined {
+	return input.webRTCPlayback?.url;
+}
+
+/**
+ * Get the HLS playback URL for a live input (for OBS Media Source)
+ * Cloudflare Live Inputs provide HLS at: https://customer-{customer-code}.cloudflarestream.com/{uid}/manifest/video.m3u8
+ */
+export function getHLSPlaybackURL(input: CloudflareLiveInput): string | undefined {
+	console.log('🔍 [HLS] Live input data:', {
+		uid: input.uid,
+		rtmps: input.rtmps?.url,
+		webRTC: input.webRTC?.url,
+		rtmpsPlayback: input.rtmpsPlayback?.url
+	});
+	
+	// Use the known working customer code from our Cloudflare account
+	// This is more reliable than trying to extract it from URLs
+	const customerCode = 'dyz4fsbg86xy3krn';
+	
+	if (!input.uid) {
+		console.log('❌ [HLS] No UID found in live input');
+		return undefined;
+	}
+	
+	// Construct HLS URL: https://customer-{customer-code}.cloudflarestream.com/{uid}/manifest/video.m3u8
+	const hlsUrl = `https://customer-${customerCode}.cloudflarestream.com/${input.uid}/manifest/video.m3u8`;
+	console.log('🎯 [HLS] Generated HLS URL:', hlsUrl);
+	
+	return hlsUrl;
 }
 
 /**
