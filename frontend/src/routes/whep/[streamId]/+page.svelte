@@ -15,7 +15,7 @@
 		console.log('🎬 [WHEP] Starting WHEP client for stream:', streamId);
 		
 		await fetchWHEPUrl(streamId);
-		if (whepUrl) {
+		if (whepUrl && videoElement) {
 			await connectStream();
 		}
 	});

@@ -99,7 +99,8 @@
 			const data = await response.json();
 			
 			if (data.success) {
-				hlsUrl = data.hlsUrl;
+				// Create the clean embedding URL for OBS
+				hlsUrl = `${window.location.origin}/hls/${stream.id}`;
 			} else {
 				console.error('Failed to get HLS URL:', data.error);
 			}
@@ -267,7 +268,7 @@
 						<button
 							onclick={copyHlsUrl}
 							class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-colors"
-							title="Copy HLS Stream URL"
+							title="Copy HLS Embedding URL"
 						>
 							{#if copiedHlsUrl}
 								<Check class="w-4 h-4 text-green-600" />
@@ -277,20 +278,20 @@
 						</button>
 					{:else}
 						<div class="flex-1 px-3 py-2 text-sm bg-gray-100 border border-gray-300 rounded-lg text-gray-500 italic">
-							{loadingHlsUrl ? 'Generating URL...' : 'Click to generate HLS URL'}
+							{loadingHlsUrl ? 'Generating URL...' : 'Click to generate HLS embedding URL'}
 						</div>
 						<button
 							onclick={fetchHlsUrl}
 							disabled={loadingHlsUrl}
 							class="p-2 text-green-600 hover:text-green-900 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50"
-							title="Generate HLS Stream URL"
+							title="Generate HLS Embedding URL"
 						>
 							<Radio class="w-4 h-4" />
 						</button>
 					{/if}
 				</div>
 				<p class="text-xs text-gray-500 mt-1">
-					Use this URL in OBS Media Source. Reliable but 10-30s latency.
+					Clean embedding page for OBS Media Source. Stable, supports multiple viewers. 10-30s latency.
 				</p>
 			</div>
 			

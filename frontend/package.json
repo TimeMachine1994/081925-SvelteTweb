@@ -4,7 +4,7 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
-		"dev": "DEV=true vite dev",
+		"dev": "cross-env DEV=true vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
@@ -37,6 +37,7 @@
 		"@vitest/coverage-v8": "^1.6.0",
 		"autoprefixer": "^10.4.21",
 		"axios": "^1.11.0",
+		"cross-env": "^10.1.0",
 		"eslint": "^9.18.0",
 		"eslint-config-prettier": "^10.0.1",
 		"eslint-plugin-svelte": "^3.0.0",
