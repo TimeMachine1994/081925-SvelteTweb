@@ -110,11 +110,28 @@ export const POST: RequestHandler = async ({ request }) => {
 				if (isCurrentlyLive && !wasLive) {
 					// Stream went live
 					console.log('🔴 [LIVE STATUS] Stream went live:', streamId);
-					await adminDb.collection('streams').doc(streamId).update({
+					
+					// Check if this is a WHIP stream (browser streaming)
+					const isWhipStream = stream.whipEnabled === true;
+					console.log('🎬 [LIVE STATUS] Stream type:', isWhipStream ? 'WHIP (browser)' : 'RTMP (external)');
+					
+					const updateData: any = {
 						status: 'live',
 						startedAt: new Date().toISOString(),
 						updatedAt: new Date().toISOString()
-					});
+					};
+					
+					// Hide WHIP streams by default (for production feeds)
+					// Keep RTMP streams visible by default (for public viewing)
+					// Note: Users can still manually toggle visibility later
+					if (isWhipStream) {
+						updateData.isVisible = false;
+						console.log('🙈 [LIVE STATUS] Hiding WHIP stream for production use:', streamId);
+					} else {
+						console.log('👁️ [LIVE STATUS] Keeping RTMP stream visible for public:', streamId);
+					}
+					
+					await adminDb.collection('streams').doc(streamId).update(updateData);
 					updated = true;
 					updatedCount++;
 				} else if (!isCurrentlyLive && wasLive) {
