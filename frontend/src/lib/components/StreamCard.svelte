@@ -21,15 +21,10 @@
 		copiedRtmpUrl 
 	} = $props<Props>();
 
-	// WHEP Browser Source URL state
-	let copiedWhepUrl = $state(false);
-	let whepUrl = $state<string | null>(null);
-	let loadingWhepUrl = $state(false);
-	
-	// HLS Stream URL state
-	let copiedHlsUrl = $state(false);
-	let hlsUrl = $state<string | null>(null);
-	let loadingHlsUrl = $state(false);
+	// Embed URL state
+	let copiedEmbedUrl = $state(false);
+	let embedUrl = $state<string | null>(null);
+	let loadingEmbedUrl = $state(false);
 
 	// WHIP streaming state
 	let showBrowserStreamer = $state(false);
@@ -69,77 +64,59 @@
 		}
 	}
 
-	async function fetchWhepUrl() {
-		if (!stream.id || loadingWhepUrl) return;
+	async function fetchEmbedUrl() {
+		if (!stream.id || loadingEmbedUrl) return;
 		
-		loadingWhepUrl = true;
+		console.log('🔄 [STREAM_CARD] Fetching embed URL for stream:', stream.id);
+		loadingEmbedUrl = true;
 		try {
-			const response = await fetch(`/api/streams/${stream.id}/whep`);
+			const response = await fetch(`/api/streams/${stream.id}/embed`);
+			console.log('📡 [STREAM_CARD] Embed API response status:', response.status);
+			
+			if (!response.ok) {
+				const errorText = await response.text();
+				console.error('❌ [STREAM_CARD] API error:', response.status, errorText);
+				return;
+			}
+			
 			const data = await response.json();
+			console.log('📋 [STREAM_CARD] Embed API response:', data);
 			
 			if (data.success) {
-				// Create the browser source URL (we'll create this endpoint)
-				whepUrl = `${window.location.origin}/whep/${stream.id}`;
+				embedUrl = data.embedUrl;
+				console.log('✅ [STREAM_CARD] Embed URL set:', embedUrl);
 			} else {
-				console.error('Failed to get WHEP URL:', data.error);
+				console.error('❌ [STREAM_CARD] Failed to get embed URL:', data.error);
 			}
 		} catch (error) {
-			console.error('Error fetching WHEP URL:', error);
+			console.error('❌ [STREAM_CARD] Error fetching embed URL:', error);
 		} finally {
-			loadingWhepUrl = false;
-		}
-	}
-	
-	async function fetchHlsUrl() {
-		if (!stream.id || loadingHlsUrl) return;
-		
-		loadingHlsUrl = true;
-		try {
-			const response = await fetch(`/api/streams/${stream.id}/hls`);
-			const data = await response.json();
-			
-			if (data.success) {
-				// Create the clean embedding URL for OBS
-				hlsUrl = `${window.location.origin}/hls/${stream.id}`;
-			} else {
-				console.error('Failed to get HLS URL:', data.error);
-			}
-		} catch (error) {
-			console.error('Error fetching HLS URL:', error);
-		} finally {
-			loadingHlsUrl = false;
+			loadingEmbedUrl = false;
 		}
 	}
 
-	async function copyWhepUrl() {
-		if (!whepUrl) {
-			await fetchWhepUrl();
+	async function copyEmbedUrl() {
+		if (!embedUrl) {
+			await fetchEmbedUrl();
 		}
 		
-		if (whepUrl) {
-			await navigator.clipboard.writeText(whepUrl);
-			copiedWhepUrl = true;
-			setTimeout(() => copiedWhepUrl = false, 2000);
-		}
-	}
-	
-	async function copyHlsUrl() {
-		if (!hlsUrl) {
-			await fetchHlsUrl();
-		}
-		
-		if (hlsUrl) {
-			await navigator.clipboard.writeText(hlsUrl);
-			copiedHlsUrl = true;
-			setTimeout(() => copiedHlsUrl = false, 2000);
+		if (embedUrl) {
+			await navigator.clipboard.writeText(embedUrl);
+			copiedEmbedUrl = true;
+			setTimeout(() => copiedEmbedUrl = false, 2000);
 		}
 	}
 
-	// Auto-fetch URLs when stream goes live
+	// Auto-fetch embed URL when stream goes live
 	$effect(() => {
+		console.log('🔄 [STREAM_CARD] Effect triggered - stream status:', stream.status, 'embedUrl:', !!embedUrl);
 		if (stream.status === 'live') {
-			if (!whepUrl) fetchWhepUrl();
-			if (!hlsUrl) fetchHlsUrl();
+			if (!embedUrl) {
+				console.log('🚀 [STREAM_CARD] Auto-fetching embed URL for live stream');
+				fetchEmbedUrl();
+			} else {
+				console.log('✅ [STREAM_CARD] Embed URL already exists:', embedUrl);
+			}
 		}
 	});
 </script>
@@ -249,72 +226,27 @@
 			</div>
 		{/if}
 
-		<!-- OBS Stream URLs (only when live) -->
+		<!-- Stream Embed URL (only when live) -->
 		{#if stream.status === 'live'}
-			<!-- HLS Stream URL (Recommended for OBS) -->
-			<div class="mb-3">
-				<label class="block text-xs font-medium text-gray-600 mb-1">
-					<Radio class="w-3 h-3 inline mr-1 text-green-600" />
-					OBS Media Source URL (Recommended)
-				</label>
-				<div class="flex items-center gap-2">
-					{#if hlsUrl}
-						<input
-							type="text"
-							value={hlsUrl}
-							readonly
-							class="flex-1 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg font-mono text-gray-700"
-						/>
-						<button
-							onclick={copyHlsUrl}
-							class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-colors"
-							title="Copy HLS Embedding URL"
-						>
-							{#if copiedHlsUrl}
-								<Check class="w-4 h-4 text-green-600" />
-							{:else}
-								<Copy class="w-4 h-4" />
-							{/if}
-						</button>
-					{:else}
-						<div class="flex-1 px-3 py-2 text-sm bg-gray-100 border border-gray-300 rounded-lg text-gray-500 italic">
-							{loadingHlsUrl ? 'Generating URL...' : 'Click to generate HLS embedding URL'}
-						</div>
-						<button
-							onclick={fetchHlsUrl}
-							disabled={loadingHlsUrl}
-							class="p-2 text-green-600 hover:text-green-900 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50"
-							title="Generate HLS Embedding URL"
-						>
-							<Radio class="w-4 h-4" />
-						</button>
-					{/if}
-				</div>
-				<p class="text-xs text-gray-500 mt-1">
-					Clean embedding page for OBS Media Source. Stable, supports multiple viewers. 10-30s latency.
-				</p>
-			</div>
-			
-			<!-- WHEP Browser Source URL (Advanced) -->
 			<div class="mb-3">
 				<label class="block text-xs font-medium text-gray-600 mb-1">
 					<Radio class="w-3 h-3 inline mr-1 text-blue-600" />
-					OBS Browser Source URL (Low Latency)
+					Stream Embed URL
 				</label>
 				<div class="flex items-center gap-2">
-					{#if whepUrl}
+					{#if embedUrl}
 						<input
 							type="text"
-							value={whepUrl}
+							value={embedUrl}
 							readonly
 							class="flex-1 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg font-mono text-gray-700"
 						/>
 						<button
-							onclick={copyWhepUrl}
+							onclick={copyEmbedUrl}
 							class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-colors"
-							title="Copy WHEP Browser Source URL"
+							title="Copy Stream Embed URL"
 						>
-							{#if copiedWhepUrl}
+							{#if copiedEmbedUrl}
 								<Check class="w-4 h-4 text-green-600" />
 							{:else}
 								<Copy class="w-4 h-4" />
@@ -322,20 +254,20 @@
 						</button>
 					{:else}
 						<div class="flex-1 px-3 py-2 text-sm bg-gray-100 border border-gray-300 rounded-lg text-gray-500 italic">
-							{loadingWhepUrl ? 'Generating URL...' : 'Click to generate WHEP URL'}
+							{loadingEmbedUrl ? 'Generating URL...' : 'Click to generate embed URL'}
 						</div>
 						<button
-							onclick={fetchWhepUrl}
-							disabled={loadingWhepUrl}
+							onclick={fetchEmbedUrl}
+							disabled={loadingEmbedUrl}
 							class="p-2 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50"
-							title="Generate WHEP Browser Source URL"
+							title="Generate Stream Embed URL"
 						>
 							<Radio class="w-4 h-4" />
 						</button>
 					{/if}
 				</div>
 				<p class="text-xs text-gray-500 mt-1">
-					Use this URL in OBS Browser Source (1920x1080). &lt;1s latency but may be less stable.
+					Cloudflare Stream embed script URL. Use as iframe src or script src for embedding.
 				</p>
 			</div>
 		{/if}
@@ -352,6 +284,15 @@
 					<Camera class="w-4 h-4" />
 				</button>
 			{/if}
+			
+			<!-- DEBUG: Manual Embed URL Test -->
+			<button
+				onclick={fetchEmbedUrl}
+				class="p-2 text-purple-600 hover:text-purple-900 hover:bg-purple-50 rounded-lg transition-colors"
+				title="DEBUG: Test Embed URL"
+			>
+				<Radio class="w-4 h-4" />
+			</button>
 			
 			<!-- Visibility Toggle -->
 			<button
