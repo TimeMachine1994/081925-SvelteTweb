@@ -144,12 +144,24 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 
 				// Extract real Cloudflare credentials
 				streamKey = cloudflareInput.rtmps.streamKey;
-				rtmpUrl = cloudflareInput.rtmps.url;
 				cloudflareInputId = cloudflareInput.uid;
 
+				// DEBUG: Log all available URLs from Cloudflare
+				console.log('🔍 [STREAMS API DEBUG] Full Cloudflare input data:', JSON.stringify(cloudflareInput, null, 2));
+				console.log('🔍 [STREAMS API DEBUG] Available URLs:', {
+					rtmps: cloudflareInput.rtmps?.url,
+					rtmp: cloudflareInput.rtmp?.url,
+					srt: cloudflareInput.srt?.url,
+					webRTC: cloudflareInput.webRTC?.url
+				});
+
+				// Use RTMP (non-secure) if available, fallback to RTMPS
+				rtmpUrl = cloudflareInput.rtmp?.url || cloudflareInput.rtmps?.url;
+				
 				console.log('✅ [STREAMS API] Cloudflare Live Input created:', cloudflareInputId);
 				console.log('🔑 [STREAMS API] RTMP URL:', rtmpUrl);
 				console.log('🔑 [STREAMS API] Stream Key:', streamKey.substring(0, 8) + '...');
+				console.log('🔍 [STREAMS API] URL Type:', rtmpUrl?.startsWith('rtmps://') ? 'RTMPS (Secure)' : 'RTMP (Standard)');
 			} catch (error) {
 				console.error('❌ [STREAMS API] Failed to create Cloudflare Live Input:', error);
 				// Fall back to placeholder values for development

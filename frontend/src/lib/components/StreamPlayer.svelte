@@ -11,21 +11,11 @@
 	let { streams, memorialName }: Props = $props();
 
 	let currentTime = $state(new Date());
-	let currentStreams = $state(streams || []);
 	let timeInterval: NodeJS.Timeout;
 	let pollingInterval: NodeJS.Timeout;
 
-	// Ensure streams is always an array
-	let safeStreams = $derived(currentStreams || []);
-
-	// Update streams when props change
-	$effect(() => {
-		currentStreams = streams || [];
-		console.log('🎬 [MEMORIAL] Streams updated:', {
-			count: currentStreams.length,
-			streams: currentStreams.map(s => ({ id: s.id, title: s.title, status: s.status }))
-		});
-	});
+	// Derive directly from props to avoid infinite loop
+	let safeStreams = $derived(streams || []);
 
 	// Update current time every second for countdown
 	onMount(() => {

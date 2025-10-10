@@ -9,6 +9,10 @@ interface CloudflareLiveInput {
 		url: string;
 		streamKey: string;
 	};
+	rtmp?: {
+		url: string;
+		streamKey: string;
+	};
 	rtmpsPlayback: {
 		url: string;
 	};
