@@ -8,20 +8,38 @@
 	let memorial = $derived(data.memorial);
 	let streams = $derived(data.streams || []);
 	
-	// Format date helper
+	// Enhanced date formatting with better error handling
 	function formatDate(dateString: string | null): string {
 		if (!dateString) return 'Date TBD';
 		try {
-			return new Date(dateString).toLocaleDateString('en-US', {
+			const date = new Date(dateString);
+			if (isNaN(date.getTime())) {
+				console.warn('Invalid date string:', dateString);
+				return dateString;
+			}
+			return date.toLocaleDateString('en-US', {
 				weekday: 'long',
 				year: 'numeric',
 				month: 'long',
 				day: 'numeric'
 			});
-		} catch {
-			return dateString;
+		} catch (error) {
+			console.error('Date formatting error:', error, 'for date:', dateString);
+			return dateString || 'Date TBD';
 		}
 	}
+	
+	// Log memorial and streams data for debugging
+	$effect(() => {
+		if (memorial) {
+			console.log(' [MEMORIAL_PAGE] Memorial loaded:', {
+				id: memorial.id,
+				name: memorial.lovedOneName,
+				isPublic: memorial.isPublic,
+				streamCount: streams.length
+			});
+		}
+	});
 </script>
 
 <svelte:head>

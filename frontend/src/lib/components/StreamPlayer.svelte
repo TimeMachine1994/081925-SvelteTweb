@@ -23,11 +23,11 @@
 			currentTime = new Date();
 		}, 1000);
 		
-		// Poll for stream updates every 15 seconds (less frequent than management page)
+		// Poll for stream updates every 5 seconds for faster RTMP detection
 		console.log('🎬 [MEMORIAL] Starting polling for stream updates...');
 		pollingInterval = setInterval(async () => {
 			await checkForUpdates();
-		}, 15000);
+		}, 5000);
 	});
 
 	onDestroy(() => {
@@ -46,22 +46,91 @@
 		}
 	}
 
-	// Categorize streams by status and priority
+	// Categorize streams by status and priority with flexible logic
 	let categorizedStreams = $derived.by(() => {
 		const now = currentTime.getTime();
 		
-		const liveStreams = safeStreams.filter(s => s.status === 'live');
-		const scheduledStreams = safeStreams.filter(s => {
-			if (s.status !== 'scheduled' || !s.scheduledStartTime) return false;
-			const scheduledTime = new Date(s.scheduledStartTime).getTime();
-			return scheduledTime > now; // Future scheduled streams
+		// More flexible live stream detection with enhanced debugging
+		const liveStreams = safeStreams.filter(s => {
+			console.log(`🔍 [STREAM_DEBUG] Checking stream ${s.id}:`, {
+				title: s.title,
+				status: s.status,
+				startedAt: s.startedAt,
+				endedAt: s.endedAt,
+				isLive: (s as any).isLive,
+				cloudflareInputId: s.cloudflareInputId,
+				cloudflareStreamId: s.cloudflareStreamId
+			});
+			
+			// Primary: explicit live status
+			if (s.status === 'live') {
+				console.log(`✅ [STREAM_DEBUG] Stream ${s.id} is LIVE (status: live)`);
+				return true;
+			}
+			
+			// Fallback: started but not ended (legacy support)
+			if (s.status === 'ready' && s.startedAt && !s.endedAt) {
+				console.log(`✅ [STREAM_DEBUG] Stream ${s.id} is LIVE (started but not ended)`);
+				return true;
+			}
+			
+			// Legacy: isLive field support
+			if (s.status === 'ready' && (s as any).isLive) {
+				console.log(`✅ [STREAM_DEBUG] Stream ${s.id} is LIVE (isLive flag)`);
+				return true;
+			}
+			
+			console.log(`❌ [STREAM_DEBUG] Stream ${s.id} is NOT live`);
+			return false;
 		});
-		// Updated to use our new recording fields
-		const recordedStreams = safeStreams.filter(s => 
-			s.status === 'completed' && 
-			s.recordingReady && 
-			(s.recordingPlaybackUrl || s.cloudflareStreamId)
-		);
+		
+		// Better scheduled stream logic with fallbacks
+		const scheduledStreams = safeStreams.filter(s => {
+			if (!s.scheduledStartTime) return false;
+			
+			try {
+				const scheduledTime = new Date(s.scheduledStartTime).getTime();
+				if (isNaN(scheduledTime)) return false;
+				
+				// Must be in the future
+				if (scheduledTime <= now) return false;
+				
+				// Primary: explicit scheduled status
+				if (s.status === 'scheduled') return true;
+				
+				// Fallback: ready status with future scheduled time
+				if (s.status === 'ready' && !s.startedAt) return true;
+				
+				return false;
+			} catch {
+				return false;
+			}
+		});
+		
+		// More flexible recording detection with multiple fallbacks
+		const recordedStreams = safeStreams.filter(s => {
+			// Check if we have any form of playable content
+			const hasPlayableContent = s.recordingPlaybackUrl || 
+									  s.cloudflareStreamId || 
+									  s.playbackUrl || 
+									  s.recordingUrl;
+			
+			if (!hasPlayableContent) return false;
+			
+			// Primary: explicit completed status with recording ready
+			if (s.status === 'completed' && s.recordingReady) return true;
+			
+			// Fallback: completed status with any playback URL
+			if (s.status === 'completed' && hasPlayableContent) return true;
+			
+			// Fallback: ended stream with recording
+			if (s.endedAt && hasPlayableContent) return true;
+			
+			// Fallback: recording ready flag with content
+			if (s.recordingReady && hasPlayableContent) return true;
+			
+			return false;
+		});
 
 		console.log('🎬 [MEMORIAL] Stream categorization:', {
 			total: safeStreams.length,
@@ -72,9 +141,12 @@
 				id: s.id,
 				title: s.title,
 				status: s.status,
+				scheduledStartTime: s.scheduledStartTime,
+				startedAt: s.startedAt,
+				endedAt: s.endedAt,
 				recordingReady: s.recordingReady,
-				recordingPlaybackUrl: !!s.recordingPlaybackUrl,
-				cloudflareStreamId: !!s.cloudflareStreamId
+				hasPlaybackUrl: !!(s.recordingPlaybackUrl || s.cloudflareStreamId || s.playbackUrl),
+				isLive: (s as any).isLive
 			}))
 		});
 
@@ -111,23 +183,83 @@
 		});
 	}
 
-	// Generate Cloudflare Stream player URL
+	// Generate player URL with live stream support
 	function getStreamPlayerUrl(stream: Stream): string {
 		console.log('🎬 [MEMORIAL] Getting player URL for stream:', {
 			id: stream.id,
 			title: stream.title,
 			status: stream.status,
 			cloudflareStreamId: stream.cloudflareStreamId,
-			recordingPlaybackUrl: stream.recordingPlaybackUrl
+			cloudflareInputId: stream.cloudflareInputId,
+			recordingPlaybackUrl: stream.recordingPlaybackUrl,
+			playbackUrl: stream.playbackUrl,
+			recordingUrl: stream.recordingUrl
 		});
 		
+		// For LIVE streams, prioritize live playback URLs
+		if (stream.status === 'live') {
+			// Priority 1: Cloudflare Stream ID for live streams
+			if (stream.cloudflareStreamId) {
+				const url = `https://customer-dyz4fsbg86xy3krn.cloudflarestream.com/${stream.cloudflareStreamId}/iframe`;
+				console.log('🎬 [MEMORIAL] Using Cloudflare iframe URL for LIVE stream:', url);
+				return url;
+			}
+			
+			// Priority 2: Use Input ID for live streams (Cloudflare Live Input)
+			if (stream.cloudflareInputId) {
+				const url = `https://customer-dyz4fsbg86xy3krn.cloudflarestream.com/${stream.cloudflareInputId}/iframe`;
+				console.log('🎬 [MEMORIAL] Using Cloudflare Input iframe URL for LIVE stream:', url);
+				return url;
+			}
+			
+			// Priority 3: Live playback URL if available
+			if (stream.playbackUrl) {
+				console.log('🎬 [MEMORIAL] Using playback URL for LIVE stream:', stream.playbackUrl);
+				return stream.playbackUrl;
+			}
+		}
+		
+		// For RECORDED/COMPLETED streams
+		if (stream.status === 'completed') {
+			// Priority 1: Recording playback URL (for completed streams)
+			if (stream.recordingPlaybackUrl) {
+				console.log('🎬 [MEMORIAL] Using recording playback URL:', stream.recordingPlaybackUrl);
+				return stream.recordingPlaybackUrl;
+			}
+			
+			// Priority 2: Cloudflare Stream ID (for recordings)
+			if (stream.cloudflareStreamId) {
+				const url = `https://customer-dyz4fsbg86xy3krn.cloudflarestream.com/${stream.cloudflareStreamId}/iframe`;
+				console.log('🎬 [MEMORIAL] Using Cloudflare iframe URL for recording:', url);
+				return url;
+			}
+			
+			// Priority 3: Legacy recording URL
+			if (stream.recordingUrl) {
+				console.log('🎬 [MEMORIAL] Using legacy recording URL:', stream.recordingUrl);
+				return stream.recordingUrl;
+			}
+		}
+		
+		// Fallback for any status: try all available URLs
 		if (stream.cloudflareStreamId) {
 			const url = `https://customer-dyz4fsbg86xy3krn.cloudflarestream.com/${stream.cloudflareStreamId}/iframe`;
-			console.log('🎬 [MEMORIAL] Using Cloudflare iframe URL:', url);
+			console.log('🎬 [MEMORIAL] Using Cloudflare iframe URL (fallback):', url);
 			return url;
 		}
 		
-		console.log('🎬 [MEMORIAL] No cloudflareStreamId found');
+		if (stream.cloudflareInputId) {
+			const url = `https://customer-dyz4fsbg86xy3krn.cloudflarestream.com/${stream.cloudflareInputId}/iframe`;
+			console.log('🎬 [MEMORIAL] Using Cloudflare Input iframe URL (fallback):', url);
+			return url;
+		}
+		
+		if (stream.playbackUrl) {
+			console.log('🎬 [MEMORIAL] Using playback URL (fallback):', stream.playbackUrl);
+			return stream.playbackUrl;
+		}
+		
+		console.log('🎬 [MEMORIAL] No playback URL found for stream');
 		return '';
 	}
 </script>
@@ -139,6 +271,7 @@
 			🔴 Live Memorial Services
 		</h2>
 		{#each categorizedStreams.liveStreams as stream (stream.id)}
+			{@const streamUrl = getStreamPlayerUrl(stream)}
 			<div class="stream-card live-card">
 				<div class="stream-header">
 					<h3 class="stream-title">{stream.title}</h3>
@@ -153,9 +286,9 @@
 				{/if}
 
 				<div class="video-container">
-					{#if getStreamPlayerUrl(stream)}
+					{#if streamUrl}
 						<iframe
-							src={getStreamPlayerUrl(stream)}
+							src={streamUrl}
 							class="stream-player"
 							allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
 							allowfullscreen
@@ -165,6 +298,7 @@
 						<div class="stream-placeholder">
 							<Play class="placeholder-icon" />
 							<p>Stream starting soon...</p>
+							<p class="debug-info">Debug: No playback URL found</p>
 						</div>
 					{/if}
 				</div>
@@ -514,6 +648,13 @@
 		font-weight: 600;
 		margin-bottom: 0.5rem;
 		color: #374151;
+	}
+
+	.debug-info {
+		font-size: 0.8rem;
+		color: #ef4444;
+		margin-top: 0.5rem;
+		font-family: monospace;
 	}
 
 	@media (max-width: 768px) {

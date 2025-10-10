@@ -74,37 +74,64 @@ export const load: PageServerLoad = async ({ params }) => {
 
         const streams = streamsSnapshot.docs.map(doc => {
             const data = doc.data();
+            
+            // Helper function for defensive timestamp handling
+            const convertTimestamp = (timestamp: any) => {
+                if (!timestamp) return null;
+                if (typeof timestamp === 'string') return timestamp;
+                if (timestamp.toDate) return timestamp.toDate().toISOString();
+                if (timestamp instanceof Date) return timestamp.toISOString();
+                try {
+                    return new Date(timestamp).toISOString();
+                } catch {
+                    return null;
+                }
+            };
+            
             return {
                 id: doc.id,
-                title: data.title || '',
+                title: data.title || `Stream ${doc.id.slice(-6)}`,
                 description: data.description || '',
                 memorialId: data.memorialId || memorial.id,
-                status: data.status || 'ready',
+                
+                // Status with fallback logic for legacy data
+                status: data.status || (data.isLive ? 'live' : 'ready'),
                 isVisible: data.isVisible !== false,
-                cloudflareStreamId: data.cloudflareStreamId || null,
-                cloudflareInputId: data.cloudflareInputId || null,
+                
+                // Cloudflare integration with multiple field name support
+                cloudflareStreamId: data.cloudflareStreamId || data.streamId || null,
+                cloudflareInputId: data.cloudflareInputId || data.inputId || null,
+                
+                // Legacy playback fields
                 playbackUrl: data.playbackUrl || null,
                 thumbnailUrl: data.thumbnailUrl || null,
-                scheduledStartTime: data.scheduledStartTime || null,
-                scheduledEndTime: data.scheduledEndTime || null,
-                // Updated recording fields to match our current system
+                
+                // Scheduling with proper timestamp conversion
+                scheduledStartTime: convertTimestamp(data.scheduledStartTime),
+                scheduledEndTime: convertTimestamp(data.scheduledEndTime),
+                startedAt: convertTimestamp(data.startedAt),
+                endedAt: convertTimestamp(data.endedAt),
+                
+                // Recording fields with intelligent fallbacks
                 recordingUrl: data.recordingUrl || null, // Legacy field
-                recordingPlaybackUrl: data.recordingPlaybackUrl || null, // New field
-                recordingReady: data.recordingReady || false,
+                recordingPlaybackUrl: data.recordingPlaybackUrl || data.recordingUrl || null,
+                recordingReady: data.recordingReady || !!data.recordingUrl || !!data.recordingPlaybackUrl || !!data.cloudflareStreamId,
                 recordingDuration: data.recordingDuration || null,
                 recordingSize: data.recordingSize || null,
-                recordingThumbnail: data.recordingThumbnail || null,
-                recordingProcessedAt: data.recordingProcessedAt || null,
+                recordingThumbnail: data.recordingThumbnail || data.thumbnailUrl || null,
+                recordingProcessedAt: convertTimestamp(data.recordingProcessedAt),
                 recordingCount: data.recordingCount || null,
-                cloudflareRecordings: data.cloudflareRecordings || [],
-                viewerCount: data.viewerCount || null,
-                peakViewerCount: data.peakViewerCount || null,
-                totalViews: data.totalViews || null,
+                cloudflareRecordings: Array.isArray(data.cloudflareRecordings) ? data.cloudflareRecordings : [],
+                
+                // Analytics with safe defaults
+                viewerCount: typeof data.viewerCount === 'number' ? data.viewerCount : null,
+                peakViewerCount: typeof data.peakViewerCount === 'number' ? data.peakViewerCount : null,
+                totalViews: typeof data.totalViews === 'number' ? data.totalViews : null,
+                
+                // Metadata with defensive handling
                 createdBy: data.createdBy || '',
-                createdAt: data.createdAt || new Date().toISOString(),
-                updatedAt: data.updatedAt || new Date().toISOString(),
-                startedAt: data.startedAt || null,
-                endedAt: data.endedAt || null
+                createdAt: convertTimestamp(data.createdAt) || new Date().toISOString(),
+                updatedAt: convertTimestamp(data.updatedAt) || new Date().toISOString()
             };
         });
 
