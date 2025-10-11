@@ -68,11 +68,16 @@ export const load: PageServerLoad = async ({ params }) => {
         const streamsSnapshot = await adminDb
             .collection('streams')
             .where('memorialId', '==', memorial.id)
-            .where('isVisible', '!=', false)
             .orderBy('createdAt', 'desc')
             .get();
 
-        const streams = streamsSnapshot.docs.map(doc => {
+        const streams = streamsSnapshot.docs
+            .filter(doc => {
+                const data = doc.data();
+                // Filter out hidden streams (isVisible === false)
+                return data.isVisible !== false;
+            })
+            .map(doc => {
             const data = doc.data();
             
             // Helper function for defensive timestamp handling

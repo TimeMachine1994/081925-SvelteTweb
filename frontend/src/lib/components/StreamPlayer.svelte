@@ -115,20 +115,38 @@
 									  s.playbackUrl || 
 									  s.recordingUrl;
 			
-			if (!hasPlayableContent) return false;
+			console.log(`🎥 [FILTER] Stream ${s.id}: status=${s.status}, hasContent=${hasPlayableContent}, recordingReady=${s.recordingReady}, cloudflareStreamId=${s.cloudflareStreamId}`);
+			
+			if (!hasPlayableContent) {
+				console.log(`❌ [FILTER] Stream ${s.id} rejected: no playable content`);
+				return false;
+			}
 			
 			// Primary: explicit completed status with recording ready
-			if (s.status === 'completed' && s.recordingReady) return true;
+			if (s.status === 'completed' && s.recordingReady) {
+				console.log(`✅ [FILTER] Stream ${s.id} accepted: completed + recordingReady`);
+				return true;
+			}
 			
 			// Fallback: completed status with any playback URL
-			if (s.status === 'completed' && hasPlayableContent) return true;
+			if (s.status === 'completed' && hasPlayableContent) {
+				console.log(`✅ [FILTER] Stream ${s.id} accepted: completed + hasPlayableContent`);
+				return true;
+			}
 			
 			// Fallback: ended stream with recording
-			if (s.endedAt && hasPlayableContent) return true;
+			if (s.endedAt && hasPlayableContent) {
+				console.log(`✅ [FILTER] Stream ${s.id} accepted: endedAt + hasPlayableContent`);
+				return true;
+			}
 			
 			// Fallback: recording ready flag with content
-			if (s.recordingReady && hasPlayableContent) return true;
+			if (s.recordingReady && hasPlayableContent) {
+				console.log(`✅ [FILTER] Stream ${s.id} accepted: recordingReady + hasPlayableContent`);
+				return true;
+			}
 			
+			console.log(`❌ [FILTER] Stream ${s.id} rejected: no conditions matched`);
 			return false;
 		});
 
@@ -221,17 +239,17 @@
 		
 		// For RECORDED/COMPLETED streams
 		if (stream.status === 'completed') {
-			// Priority 1: Recording playback URL (for completed streams)
-			if (stream.recordingPlaybackUrl) {
-				console.log('🎬 [MEMORIAL] Using recording playback URL:', stream.recordingPlaybackUrl);
-				return stream.recordingPlaybackUrl;
-			}
-			
-			// Priority 2: Cloudflare Stream ID (for recordings)
+			// Priority 1: Cloudflare Stream ID (for recordings) - USE IFRAME, NOT MANIFEST
 			if (stream.cloudflareStreamId) {
 				const url = `https://customer-dyz4fsbg86xy3krn.cloudflarestream.com/${stream.cloudflareStreamId}/iframe`;
 				console.log('🎬 [MEMORIAL] Using Cloudflare iframe URL for recording:', url);
 				return url;
+			}
+			
+			// Priority 2: Recording playback URL (only if no cloudflareStreamId)
+			if (stream.recordingPlaybackUrl && !stream.recordingPlaybackUrl.includes('.m3u8')) {
+				console.log('🎬 [MEMORIAL] Using recording playback URL:', stream.recordingPlaybackUrl);
+				return stream.recordingPlaybackUrl;
 			}
 			
 			// Priority 3: Legacy recording URL
@@ -368,6 +386,7 @@
 
 <!-- Recorded Streams Section -->
 {#if categorizedStreams.recordedStreams.length > 0}
+	{@const _ = console.log(`🎬 [RENDER] Rendering ${categorizedStreams.recordedStreams.length} recorded streams`)}
 	<div class="stream-section recorded-section">
 		<h2 class="section-title recorded-title">
 			🎥 Recorded Memorial Services
@@ -387,8 +406,10 @@
 
 				<div class="video-container">
 					{#if getStreamPlayerUrl(stream)}
+						{@const playerUrl = getStreamPlayerUrl(stream)}
+						{@const _ = console.log(`🎬 [RECORDED] Player URL for ${stream.id}:`, playerUrl)}
 						<iframe
-							src={getStreamPlayerUrl(stream)}
+							src={playerUrl}
 							class="stream-player"
 							allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
 							allowfullscreen
