@@ -10,45 +10,51 @@ import type { Memorial } from '$lib/types/memorial';
  * Secures the route and fetches the logged-in funeral director's profile.
  */
 export const load: PageServerLoad = async ({ locals }) => {
-	console.log('🔐 [FD-REG] Verifying user is a logged-in funeral director...');
+	console.log('🔐 [FD-REG] Loading funeral director registration page...');
 
-	// 1. Check for logged-in user with 'funeral_director' role
-	if (!locals.user || locals.user.role !== 'funeral_director') {
-		console.log('🛑 [FD-REG] User not authorized. Redirecting to login.');
-		redirect(303, '/login?redirect=/register/funeral-director');
-	}
+	// Check if user is already logged in as funeral director
+	if (locals.user && locals.user.role === 'funeral_director') {
+		const directorUid = locals.user.uid;
+		console.log(`✅ [FD-REG] User ${directorUid} is authorized. Fetching director profile...`);
 
-	const directorUid = locals.user.uid;
-	console.log(`✅ [FD-REG] User ${directorUid} is authorized. Fetching director profile...`);
+		try {
+			// Fetch the funeral director's specific profile from the 'funeral_directors' collection
+			const directorDocSnap = await adminDb.collection('funeral_directors').doc(directorUid).get();
 
-	try {
-		// 2. Fetch the funeral director's specific profile from the 'funeral_directors' collection
-		const directorDocSnap = await adminDb.collection('funeral_directors').doc(directorUid).get();
+			if (!directorDocSnap.exists) {
+				console.error(`❌ [FD-REG] No funeral director profile found for UID: ${directorUid}`);
+				throw SvelteKitError(
+					404,
+					'Your funeral director profile was not found. Please complete your registration or contact support.'
+				);
+			}
 
-		if (!directorDocSnap.exists) {
-			console.error(`❌ [FD-REG] No funeral director profile found for UID: ${directorUid}`);
-						throw SvelteKitError(404, 'Your funeral director profile was not found. Please complete your registration or contact support.');
+			const directorData = directorDocSnap.data()!;
+			const funeralDirector = {
+				id: directorDocSnap.id,
+				companyName: directorData.companyName || '',
+				contactPerson: directorData.contactPerson || '',
+				email: directorData.email || ''
+			};
+
+			console.log(`✅ [FD-REG] Successfully fetched profile for: ${funeralDirector.companyName}`);
+
+			return {
+				funeralDirector,
+				isExistingDirector: true
+			};
+		} catch (error) {
+			console.error('❌ [FD-REG] Error loading funeral director profile:', error);
+			throw SvelteKitError(500, 'Failed to load funeral director information.');
 		}
-
-		const directorData = directorDocSnap.data()!;
-		const funeralDirector = {
-			id: directorDocSnap.id,
-			companyName: directorData.companyName || '',
-			contactPerson: directorData.contactPerson || '',
-			email: directorData.email || ''
-		};
-
-		console.log(`✅ [FD-REG] Successfully fetched profile for: ${funeralDirector.companyName}`);
-
-		// 3. Return the specific funeral director's data
-		return {
-			funeralDirector
-		};
-
-	} catch (error) {
-		console.error('❌ [FD-REG] Error loading funeral director profile:', error);
-				throw SvelteKitError(500, 'Failed to load funeral director information.');
 	}
+
+	// For new registrations, return empty data - prefilled data will come from sessionStorage
+	console.log('📝 [FD-REG] New funeral director registration');
+	return {
+		funeralDirector: null,
+		isExistingDirector: false
+	};
 };
 
 // Helper function to generate a random password
@@ -70,8 +76,7 @@ function generateSlug(lovedOneName: string): string {
 		.replace(/[^a-z0-9\s-]/g, '')
 		.replace(/\s+/g, '-')
 		.replace(/-+/g, '-')
-		.replace(/^-|-$/g, '')}`
-		.substring(0, 100);
+		.replace(/^-|-$/g, '')}`.substring(0, 100);
 	return slug;
 }
 
@@ -82,13 +87,105 @@ function isValidEmail(email: string): boolean {
 }
 
 export const actions: Actions = {
+	registerFuneralDirector: async ({ request }) => {
+		console.log('🏛️ [FD-REG] Funeral director registration started');
+		const data = await request.formData();
+
+		// Extract form data
+		const name = (data.get('name') as string)?.trim();
+		const email = (data.get('email') as string)?.trim();
+		const password = (data.get('password') as string)?.trim();
+		const companyName = (data.get('companyName') as string)?.trim();
+		const phone = (data.get('phone') as string)?.trim();
+		const licenseNumber = (data.get('licenseNumber') as string)?.trim();
+
+		// Validation
+		if (!name || !email || !password || !companyName) {
+			return fail(400, {
+				message: 'Name, email, password, and company name are required'
+			});
+		}
+
+		if (!isValidEmail(email)) {
+			return fail(400, {
+				message: 'Please enter a valid email address'
+			});
+		}
+
+		try {
+			// Create Firebase user
+			const userRecord = await adminAuth.createUser({
+				email,
+				password,
+				displayName: name
+			});
+
+			// Set custom claims for funeral director role
+			await adminAuth.setCustomUserClaims(userRecord.uid, {
+				role: 'funeral_director',
+				isFuneralDirector: true
+			});
+
+			// Create user profile in users collection
+			await adminDb.collection('users').doc(userRecord.uid).set({
+				email,
+				displayName: name,
+				role: 'funeral_director',
+				isFuneralDirector: true,
+				createdAt: new Date().toISOString(),
+				updatedAt: new Date().toISOString()
+			});
+
+			// Create funeral director profile in funeral_directors collection
+			await adminDb
+				.collection('funeral_directors')
+				.doc(userRecord.uid)
+				.set({
+					email,
+					contactPerson: name,
+					companyName,
+					phone: phone || '',
+					licenseNumber: licenseNumber || '',
+					createdAt: new Date().toISOString(),
+					updatedAt: new Date().toISOString(),
+					isActive: true
+				});
+
+			console.log(`✅ [FD-REG] Funeral director created successfully: ${email}`);
+
+			// Create custom token for immediate login
+			const customToken = await adminAuth.createCustomToken(userRecord.uid);
+
+			return {
+				success: true,
+				customToken
+			};
+		} catch (error: any) {
+			console.error('❌ [FD-REG] Error creating funeral director:', error);
+			let errorMessage = 'Registration failed. Please try again.';
+
+			if (error.code === 'auth/email-already-exists') {
+				errorMessage = 'An account with this email already exists.';
+			} else if (error.code === 'auth/weak-password') {
+				errorMessage = 'Password should be at least 6 characters.';
+			} else if (error.message) {
+				errorMessage = error.message;
+			}
+
+			return fail(400, {
+				message: errorMessage
+			});
+		}
+	},
 	default: async ({ request, locals }) => {
 		console.log('🎯 [FD-REG] Memorial registration started by funeral director');
 		const data = await request.formData();
 
 		// Security check: Ensure a logged-in funeral director is making the request
 		if (!locals.user || locals.user.role !== 'funeral_director') {
-			return fail(403, { error: 'You must be a logged-in funeral director to perform this action.' });
+			return fail(403, {
+				error: 'You must be a logged-in funeral director to perform this action.'
+			});
 		}
 		const directorUid = locals.user.uid;
 
@@ -161,7 +258,7 @@ export const actions: Actions = {
 				funeralDirectorUid: directorUid, // The logged-in FD manages it
 				creatorEmail: directorData.email,
 				familyContactEmail,
-				
+
 				// New services structure
 				services: {
 					main: {
@@ -179,7 +276,7 @@ export const actions: Actions = {
 					},
 					additional: [] // Empty initially
 				},
-				
+
 				// Funeral director information
 				funeralDirector: {
 					id: directorUid,
@@ -188,7 +285,7 @@ export const actions: Actions = {
 					phone: directorData.phone || '',
 					email: directorData.email
 				},
-				
+
 				// Family contact information
 				family: {
 					primaryContact: {
@@ -198,12 +295,12 @@ export const actions: Actions = {
 						contactPreference: contactPreference
 					}
 				},
-				
+
 				// Memorial settings
 				isPublic: true,
 				content: additionalNotes || '',
 				custom_html: null,
-				
+
 				createdAt: new Date(),
 				updatedAt: new Date()
 			};
@@ -226,7 +323,6 @@ export const actions: Actions = {
 				success: true,
 				memorialLink: `/${slug}`
 			};
-
 		} catch (error: any) {
 			let errorMessage = 'An unexpected error occurred.';
 			if (error.code === 'auth/email-already-exists') {

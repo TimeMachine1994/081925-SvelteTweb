@@ -1,13 +1,13 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import StreamPlayer from '$lib/components/StreamPlayer.svelte';
-	
+
 	let { data }: { data: PageData } = $props();
-	
+
 	// Extract memorial and streams data from server load
 	let memorial = $derived(data.memorial);
 	let streams = $derived(data.streams || []);
-	
+
 	// Enhanced date formatting with better error handling
 	function formatDate(dateString: string | null): string {
 		if (!dateString) return 'Date TBD';
@@ -28,7 +28,7 @@
 			return dateString || 'Date TBD';
 		}
 	}
-	
+
 	// Log memorial and streams data for debugging
 	$effect(() => {
 		if (memorial) {
@@ -81,7 +81,7 @@
 
 		<!-- Streams Section -->
 		<div class="streams-section">
-			<StreamPlayer streams={streams} memorialName={memorial.lovedOneName} memorialId={memorial.id} />
+			<StreamPlayer {streams} memorialName={memorial.lovedOneName} memorialId={memorial.id} />
 		</div>
 	{:else}
 		<div class="loading">

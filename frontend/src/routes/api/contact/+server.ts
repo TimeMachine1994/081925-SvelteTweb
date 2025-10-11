@@ -13,19 +13,13 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		// Validate required fields
 		if (!name || !email || !subject || !message) {
-			return json(
-				{ error: 'All fields are required' },
-				{ status: 400 }
-			);
+			return json({ error: 'All fields are required' }, { status: 400 });
 		}
 
 		// Validate email format
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 		if (!emailRegex.test(email)) {
-			return json(
-				{ error: 'Please enter a valid email address' },
-				{ status: 400 }
-			);
+			return json({ error: 'Please enter a valid email address' }, { status: 400 });
 		}
 
 		// Email to your support team
@@ -114,36 +108,29 @@ export const POST: RequestHandler = async ({ request }) => {
 		};
 
 		// Send both emails
-		await Promise.all([
-			sgMail.send(supportEmail),
-			sgMail.send(confirmationEmail)
-		]);
+		await Promise.all([sgMail.send(supportEmail), sgMail.send(confirmationEmail)]);
 
 		return json(
-			{ 
-				success: true, 
-				message: 'Message sent successfully. Confirmation email sent to your inbox.' 
+			{
+				success: true,
+				message: 'Message sent successfully. Confirmation email sent to your inbox.'
 			},
 			{ status: 200 }
 		);
-
 	} catch (error) {
 		console.error('Contact form error:', error);
-		
+
 		// Handle SendGrid specific errors
 		if (error && typeof error === 'object' && 'response' in error) {
 			const sgError = error as any;
 			console.error('SendGrid error:', sgError.response?.body);
-			
+
 			return json(
 				{ error: 'Failed to send email. Please try again or contact us directly.' },
 				{ status: 500 }
 			);
 		}
 
-		return json(
-			{ error: 'An unexpected error occurred. Please try again.' },
-			{ status: 500 }
-		);
+		return json({ error: 'An unexpected error occurred. Please try again.' }, { status: 500 });
 	}
 };

@@ -13,7 +13,7 @@ export interface FormAutoSaveOptions {
 
 /**
  * GENERIC FORM AUTO-SAVE COMPOSABLE
- * 
+ *
  * Provides auto-save functionality for any form using cookies or localStorage
  * Includes debouncing, data persistence, and cleanup
  */
@@ -55,7 +55,7 @@ export function useFormAutoSave<T extends Record<string, any>>(options: FormAuto
 				// Save to cookie
 				const expires = new Date();
 				expires.setDate(expires.getDate() + cookieExpireDays);
-				
+
 				document.cookie = `${storageKey}=${encodeURIComponent(dataString)}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
 				console.log('✅ [FORM AUTO-SAVE] Data saved to cookie');
 			}
@@ -83,21 +83,17 @@ export function useFormAutoSave<T extends Record<string, any>>(options: FormAuto
 			} else {
 				// Load from cookie
 				const cookies = document.cookie.split(';');
-				const targetCookie = cookies.find(cookie => 
-					cookie.trim().startsWith(`${storageKey}=`)
-				);
-				
+				const targetCookie = cookies.find((cookie) => cookie.trim().startsWith(`${storageKey}=`));
+
 				if (targetCookie) {
-					dataString = decodeURIComponent(
-						targetCookie.split('=')[1]
-					);
+					dataString = decodeURIComponent(targetCookie.split('=')[1]);
 				}
 			}
 
 			if (dataString) {
 				const parsedData = JSON.parse(dataString);
 				console.log('✅ [FORM AUTO-SAVE] Data loaded from storage');
-				
+
 				// Remove internal metadata before returning
 				const { _timestamp, _autoSaved, ...cleanData } = parsedData;
 				onLoad?.(cleanData);
@@ -141,7 +137,7 @@ export function useFormAutoSave<T extends Record<string, any>>(options: FormAuto
 	 */
 	function triggerAutoSave(formData: T): void {
 		const dataString = JSON.stringify(formData);
-		
+
 		// Skip if data hasn't changed
 		if (dataString === lastSaveData) {
 			return;
@@ -184,9 +180,7 @@ export function useFormAutoSave<T extends Record<string, any>>(options: FormAuto
 				return localStorage.getItem(storageKey) !== null;
 			} else {
 				const cookies = document.cookie.split(';');
-				return cookies.some(cookie => 
-					cookie.trim().startsWith(`${storageKey}=`)
-				);
+				return cookies.some((cookie) => cookie.trim().startsWith(`${storageKey}=`));
 			}
 		} catch (error) {
 			console.error('❌ [FORM AUTO-SAVE] Error checking for saved data:', error);
@@ -207,10 +201,8 @@ export function useFormAutoSave<T extends Record<string, any>>(options: FormAuto
 				dataString = localStorage.getItem(storageKey);
 			} else {
 				const cookies = document.cookie.split(';');
-				const targetCookie = cookies.find(cookie => 
-					cookie.trim().startsWith(`${storageKey}=`)
-				);
-				
+				const targetCookie = cookies.find((cookie) => cookie.trim().startsWith(`${storageKey}=`));
+
 				if (targetCookie) {
 					dataString = decodeURIComponent(targetCookie.split('=')[1]);
 				}
@@ -251,7 +243,7 @@ export function useFormAutoSave<T extends Record<string, any>>(options: FormAuto
 
 /**
  * FORM FIELD AUTO-SAVE HELPER
- * 
+ *
  * Creates reactive auto-save for individual form fields
  */
 export function createFormFieldAutoSave<T extends Record<string, any>>(

@@ -10,19 +10,19 @@ import type { RequestHandler } from './$types';
 // });
 
 export const POST: RequestHandler = async ({ request }) => {
-  try {
-    const { paymentIntentId } = await request.json();
+	try {
+		const { paymentIntentId } = await request.json();
 
-    if (!paymentIntentId) {
-      return json({ error: 'Payment Intent ID is required' }, { status: 400 });
-    }
+		if (!paymentIntentId) {
+			return json({ error: 'Payment Intent ID is required' }, { status: 400 });
+		}
 
-    console.log('🔍 Checking payment status for:', paymentIntentId);
+		console.log('🔍 Checking payment status for:', paymentIntentId);
 
-    // Mock implementation for development
-    // TODO: Replace with actual Stripe integration
-    
-    /* 
+		// Mock implementation for development
+		// TODO: Replace with actual Stripe integration
+
+		/* 
     // Actual Stripe implementation:
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
     
@@ -37,23 +37,19 @@ export const POST: RequestHandler = async ({ request }) => {
     });
     */
 
-    // Mock response for development
-    const mockStatuses = ['succeeded', 'processing', 'requires_payment_method', 'failed'];
-    const randomStatus = mockStatuses[Math.floor(Math.random() * mockStatuses.length)];
-    
-    return json({
-      status: randomStatus,
-      paymentIntentId,
-      canRetry: randomStatus === 'requires_payment_method' || randomStatus === 'failed',
-      development_mode: true,
-      message: 'This is a development mock. Configure Stripe keys for production.'
-    });
+		// Mock response for development
+		const mockStatuses = ['succeeded', 'processing', 'requires_payment_method', 'failed'];
+		const randomStatus = mockStatuses[Math.floor(Math.random() * mockStatuses.length)];
 
-  } catch (error) {
-    console.error('Payment status check failed:', error);
-    return json(
-      { error: 'Failed to check payment status' },
-      { status: 500 }
-    );
-  }
+		return json({
+			status: randomStatus,
+			paymentIntentId,
+			canRetry: randomStatus === 'requires_payment_method' || randomStatus === 'failed',
+			development_mode: true,
+			message: 'This is a development mock. Configure Stripe keys for production.'
+		});
+	} catch (error) {
+		console.error('Payment status check failed:', error);
+		return json({ error: 'Failed to check payment status' }, { status: 500 });
+	}
 };

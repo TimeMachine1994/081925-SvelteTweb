@@ -5,7 +5,7 @@ import StreamPlayer from './StreamPlayer.svelte';
 // Mock the lucide-svelte icons
 vi.mock('lucide-svelte', () => ({
 	Calendar: 'div',
-	Clock: 'div', 
+	Clock: 'div',
 	Play: 'div',
 	Users: 'div'
 }));
@@ -16,7 +16,7 @@ describe('StreamPlayer', () => {
 			streams: [],
 			memorialName: 'Test Memorial'
 		});
-		
+
 		expect(container).toBeTruthy();
 	});
 
@@ -48,7 +48,7 @@ describe('StreamPlayer', () => {
 	it('prioritizes iframe URL over manifest URL for completed streams', () => {
 		const recordedStreamWithManifest = {
 			id: 'test-stream',
-			title: 'Test Stream', 
+			title: 'Test Stream',
 			status: 'completed' as const,
 			memorialId: 'test-memorial',
 			cloudflareStreamId: 'bcc928786efe7ad7bc88345765aa5599',

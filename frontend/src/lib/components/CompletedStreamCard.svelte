@@ -16,11 +16,11 @@
 	// Format duration from seconds to MM:SS or HH:MM:SS
 	function formatDuration(seconds: number | undefined): string {
 		if (!seconds) return '0:00';
-		
+
 		const hours = Math.floor(seconds / 3600);
 		const minutes = Math.floor((seconds % 3600) / 60);
 		const secs = Math.floor(seconds % 60);
-		
+
 		if (hours > 0) {
 			return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 		}
@@ -30,7 +30,7 @@
 	// Format file size
 	function formatFileSize(bytes: number | undefined): string {
 		if (!bytes) return '';
-		
+
 		const sizes = ['B', 'KB', 'MB', 'GB'];
 		const i = Math.floor(Math.log(bytes) / Math.log(1024));
 		return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
@@ -38,7 +38,7 @@
 
 	async function handleCheckRecordings() {
 		if (!onCheckRecordings) return;
-		
+
 		checkingRecordings = true;
 		try {
 			await onCheckRecordings(stream.id);
@@ -54,7 +54,7 @@
 
 	// Determine the recording status - simplified approach
 	let recordingStatus = $state('checking');
-	
+
 	$effect(() => {
 		console.log(`🎬 [CARD] Recording status check for stream ${stream.id}:`, {
 			title: stream.title,
@@ -63,18 +63,20 @@
 			recordingCount: stream.recordingCount,
 			cloudflareStreamId: stream.cloudflareStreamId
 		});
-		
+
 		if (stream.recordingReady && stream.recordingPlaybackUrl) {
 			console.log(`🎬 [CARD] Stream ${stream.id} status: READY (has recording)`);
 			recordingStatus = 'ready';
 		} else if (stream.recordingCount && stream.recordingCount > 0) {
-			console.log(`🎬 [CARD] Stream ${stream.id} status: PROCESSING (${stream.recordingCount} recordings found)`);
+			console.log(
+				`🎬 [CARD] Stream ${stream.id} status: PROCESSING (${stream.recordingCount} recordings found)`
+			);
 			recordingStatus = 'processing';
 		} else {
 			console.log(`🎬 [CARD] Stream ${stream.id} status: CHECKING (no recordings yet)`);
 			recordingStatus = 'checking';
 		}
-		
+
 		console.log(`🎬 [CARD] Final status for stream ${stream.id}: ${recordingStatus}`);
 	});
 </script>
@@ -148,7 +150,7 @@
 							<span class="file-size">{formatFileSize(stream.recordingSize)}</span>
 						{/if}
 					</div>
-					
+
 					{#if stream.recordingProcessedAt}
 						<div class="processed-time">
 							Processed {new Date(stream.recordingProcessedAt).toLocaleString()}
@@ -178,7 +180,7 @@
 							<!-- HLS Video (Fallback) -->
 							<div class="hls-fallback">
 								<p>Direct video playback not supported. Please use the Cloudflare Stream player.</p>
-								<a href="{stream.recordingPlaybackUrl}" target="_blank" class="play-external-btn">
+								<a href={stream.recordingPlaybackUrl} target="_blank" class="play-external-btn">
 									<Play size={16} />
 									Open in New Tab
 								</a>
@@ -198,7 +200,6 @@
 					</div>
 				{/if}
 			</div>
-
 		{:else if recordingStatus === 'processing'}
 			<!-- Processing -->
 			<div class="recording-processing">
@@ -214,7 +215,6 @@
 					</div>
 				</div>
 			</div>
-
 		{:else}
 			<!-- Checking/No Recording -->
 			<div class="recording-checking">
@@ -312,7 +312,9 @@
 		flex-shrink: 0;
 	}
 
-	.visibility-btn, .check-recordings-btn, .check-again-btn {
+	.visibility-btn,
+	.check-recordings-btn,
+	.check-again-btn {
 		display: inline-flex;
 		align-items: center;
 		gap: 0.5rem;
@@ -327,7 +329,9 @@
 		transition: all 0.2s ease;
 	}
 
-	.visibility-btn:hover, .check-recordings-btn:hover, .check-again-btn:hover {
+	.visibility-btn:hover,
+	.check-recordings-btn:hover,
+	.check-again-btn:hover {
 		background: #f9fafb;
 		border-color: #9ca3af;
 	}
@@ -360,7 +364,8 @@
 		margin-bottom: 0.5rem;
 	}
 
-	.duration, .file-size {
+	.duration,
+	.file-size {
 		color: #6b7280;
 		font-size: 0.875rem;
 	}
@@ -376,7 +381,8 @@
 		background: #000;
 	}
 
-	.recording-video, .recording-iframe {
+	.recording-video,
+	.recording-iframe {
 		width: 100%;
 		height: 300px;
 		border: none;
@@ -411,7 +417,8 @@
 		background: #2563eb;
 	}
 
-	.recording-processing, .recording-checking {
+	.recording-processing,
+	.recording-checking {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
@@ -421,20 +428,23 @@
 		border-radius: 8px;
 	}
 
-	.processing-indicator, .checking-indicator {
+	.processing-indicator,
+	.checking-indicator {
 		display: flex;
 		align-items: center;
 		gap: 1rem;
 	}
 
-	.processing-text h4, .checking-text h4 {
+	.processing-text h4,
+	.checking-text h4 {
 		margin: 0 0 0.25rem 0;
 		font-size: 1rem;
 		font-weight: 600;
 		color: #111827;
 	}
 
-	.processing-text p, .checking-text p {
+	.processing-text p,
+	.checking-text p {
 		margin: 0;
 		color: #6b7280;
 		font-size: 0.875rem;
@@ -464,8 +474,12 @@
 	}
 
 	@keyframes spin {
-		from { transform: rotate(0deg); }
-		to { transform: rotate(360deg); }
+		from {
+			transform: rotate(0deg);
+		}
+		to {
+			transform: rotate(360deg);
+		}
 	}
 
 	@media (max-width: 640px) {
@@ -482,7 +496,8 @@
 			display: none;
 		}
 
-		.recording-processing, .recording-checking {
+		.recording-processing,
+		.recording-checking {
 			flex-direction: column;
 			align-items: stretch;
 			text-align: center;

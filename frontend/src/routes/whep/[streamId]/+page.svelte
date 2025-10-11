@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
-	
+
 	let whepUrl = $state<string | null>(null);
 	let error = $state<string | null>(null);
 	let pc: RTCPeerConnection | null = null;
@@ -13,7 +13,7 @@
 	onMount(async () => {
 		const streamId = $page.params.streamId;
 		console.log('🎬 [WHEP] Starting WHEP client for stream:', streamId);
-		
+
 		await fetchWHEPUrl(streamId);
 		if (whepUrl && videoElement) {
 			await connectStream();
@@ -48,7 +48,7 @@
 		try {
 			console.log('🔗 [WHEP] Starting WebRTC connection...');
 			connectionStatus = retryCount > 0 ? 'retrying' : 'connecting';
-			
+
 			// Clean up existing connection
 			if (pc) {
 				pc.close();
@@ -74,12 +74,12 @@
 
 			pc.onconnectionstatechange = () => {
 				console.log('🔄 [WHEP] Connection state:', pc?.connectionState);
-				
+
 				if (pc?.connectionState === 'connected') {
 					connectionStatus = 'connected';
 				} else if (pc?.connectionState === 'failed' || pc?.connectionState === 'disconnected') {
 					console.log('❌ [WHEP] Connection failed/disconnected');
-					
+
 					// Only retry if it's not a 409 conflict and we haven't exceeded max retries
 					if (!error?.includes('already in use') && retryCount < maxRetries) {
 						retryCount++;
@@ -115,10 +115,14 @@
 
 			if (!response.ok) {
 				if (response.status === 409) {
-					throw new Error('Stream already in use by another viewer. Only one WHEP connection allowed at a time.');
+					throw new Error(
+						'Stream already in use by another viewer. Only one WHEP connection allowed at a time.'
+					);
 				} else {
 					const errorText = await response.text();
-					throw new Error(`WHEP request failed: ${response.status} ${response.statusText} - ${errorText}`);
+					throw new Error(
+						`WHEP request failed: ${response.status} ${response.statusText} - ${errorText}`
+					);
 				}
 			}
 
@@ -128,14 +132,13 @@
 				type: 'answer',
 				sdp: answerSdp
 			});
-			
-			console.log('✅ [WHEP] SDP exchange completed, waiting for media...');
 
+			console.log('✅ [WHEP] SDP exchange completed, waiting for media...');
 		} catch (err) {
 			console.error('❌ [WHEP] Connection error:', err);
 			error = err instanceof Error ? err.message : 'Connection failed';
 			connectionStatus = 'error';
-			
+
 			// Don't retry on 409 conflicts
 			if (error?.includes('already in use')) {
 				retryCount = maxRetries; // Prevent further retries
@@ -151,14 +154,14 @@
 </script>
 
 <svelte:head>
-<title>WHEP Stream for OBS</title>
-<style>
-body { 
-margin: 0; 
-padding: 0; 
-background: #000; 
-}
-</style>
+	<title>WHEP Stream for OBS</title>
+	<style>
+		body {
+			margin: 0;
+			padding: 0;
+			background: #000;
+		}
+	</style>
 </svelte:head>
 
 <div class="whep-container">
@@ -182,9 +185,7 @@ background: #000;
 						💡 Try using the HLS Media Source URL instead for multiple viewers
 					</p>
 				{:else if retryCount >= maxRetries}
-					<button class="retry-button" onclick={retry}>
-						🔄 Retry Connection
-					</button>
+					<button class="retry-button" onclick={retry}> 🔄 Retry Connection </button>
 				{/if}
 			{/if}
 		</div>
@@ -204,102 +205,106 @@ background: #000;
 </div>
 
 <style>
-.whep-container {
-width: 100vw;
-height: 100vh;
-position: relative;
-background: #000;
-display: flex;
-align-items: center;
-justify-content: center;
-}
+	.whep-container {
+		width: 100vw;
+		height: 100vh;
+		position: relative;
+		background: #000;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
 
-.video-player {
-width: 100%;
-height: 100%;
-object-fit: contain;
-background: #000;
-}
+	.video-player {
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+		background: #000;
+	}
 
-.video-player.connected {
-display: block;
-}
+	.video-player.connected {
+		display: block;
+	}
 
-.status-overlay {
-position: absolute;
-top: 50%;
-left: 50%;
-transform: translate(-50%, -50%);
-text-align: center;
-color: white;
-z-index: 10;
-max-width: 80%;
-}
+	.status-overlay {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		text-align: center;
+		color: white;
+		z-index: 10;
+		max-width: 80%;
+	}
 
-.status-overlay.error {
-color: #ff6b6b;
-}
+	.status-overlay.error {
+		color: #ff6b6b;
+	}
 
-.error-text {
-font-size: 0.9em;
-opacity: 0.8;
-margin-top: 10px;
-}
+	.error-text {
+		font-size: 0.9em;
+		opacity: 0.8;
+		margin-top: 10px;
+	}
 
-.help-text {
-font-size: 0.8em;
-color: #ffd700;
-margin-top: 15px;
-background: rgba(0,0,0,0.7);
-padding: 10px;
-border-radius: 5px;
-}
+	.help-text {
+		font-size: 0.8em;
+		color: #ffd700;
+		margin-top: 15px;
+		background: rgba(0, 0, 0, 0.7);
+		padding: 10px;
+		border-radius: 5px;
+	}
 
-.retry-button {
-background: #007bff;
-color: white;
-border: none;
-padding: 10px 20px;
-border-radius: 5px;
-cursor: pointer;
-margin-top: 15px;
-font-size: 0.9em;
-}
+	.retry-button {
+		background: #007bff;
+		color: white;
+		border: none;
+		padding: 10px 20px;
+		border-radius: 5px;
+		cursor: pointer;
+		margin-top: 15px;
+		font-size: 0.9em;
+	}
 
-.retry-button:hover {
-background: #0056b3;
-}
+	.retry-button:hover {
+		background: #0056b3;
+	}
 
-.spinner {
-width: 40px;
-height: 40px;
-border: 4px solid #333;
-border-top: 4px solid #fff;
-border-radius: 50%;
-animation: spin 1s linear infinite;
-margin: 0 auto 20px;
-}
+	.spinner {
+		width: 40px;
+		height: 40px;
+		border: 4px solid #333;
+		border-top: 4px solid #fff;
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+		margin: 0 auto 20px;
+	}
 
-.live-indicator {
-position: absolute;
-top: 20px;
-left: 20px;
-background: rgba(255, 0, 0, 0.9);
-color: white;
-padding: 8px 16px;
-border-radius: 20px;
-font-weight: bold;
-font-size: 14px;
-z-index: 10;
-}
+	.live-indicator {
+		position: absolute;
+		top: 20px;
+		left: 20px;
+		background: rgba(255, 0, 0, 0.9);
+		color: white;
+		padding: 8px 16px;
+		border-radius: 20px;
+		font-weight: bold;
+		font-size: 14px;
+		z-index: 10;
+	}
 
-@keyframes spin {
-0% { transform: rotate(0deg); }
-100% { transform: rotate(360deg); }
-}
+	@keyframes spin {
+		0% {
+			transform: rotate(0deg);
+		}
+		100% {
+			transform: rotate(360deg);
+		}
+	}
 
-p {
-margin: 0;
-font-family: Arial, sans-serif;
-}
+	p {
+		margin: 0;
+		font-family: Arial, sans-serif;
+	}
 </style>

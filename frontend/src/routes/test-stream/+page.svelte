@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	
+
 	let streamId = $state('');
 	let testResults = $state<any>({});
 	let testing = $state(false);
@@ -20,7 +20,7 @@
 		testing = true;
 		testResults = {};
 		logs = [];
-		
+
 		addLog('🧪 Starting stream tests...');
 
 		// Test 1: Check if stream exists in database
@@ -28,7 +28,7 @@
 			addLog('📋 Test 1: Checking stream in database...');
 			const streamResponse = await fetch(`/api/streams/${streamId}`);
 			const streamData = await streamResponse.json();
-			
+
 			if (streamData.success) {
 				testResults.streamExists = true;
 				testResults.streamData = streamData.stream;
@@ -47,7 +47,7 @@
 			addLog('📺 Test 2: Testing HLS API endpoint...');
 			const hlsResponse = await fetch(`/api/streams/${streamId}/hls`);
 			const hlsData = await hlsResponse.json();
-			
+
 			if (hlsData.success) {
 				testResults.hlsApi = true;
 				testResults.hlsUrl = hlsData.hlsUrl;
@@ -66,7 +66,7 @@
 			try {
 				addLog('🔗 Test 3: Testing direct HLS URL...');
 				const directResponse = await fetch(testResults.hlsUrl, { method: 'HEAD' });
-				
+
 				if (directResponse.ok) {
 					testResults.hlsUrlAccessible = true;
 					addLog(`✅ Direct HLS URL accessible (${directResponse.status})`);
@@ -84,7 +84,7 @@
 		try {
 			addLog('🌐 Test 4: Testing HLS embedding page...');
 			const embedResponse = await fetch(`/hls/${streamId}`, { method: 'HEAD' });
-			
+
 			if (embedResponse.ok) {
 				testResults.embedPageAccessible = true;
 				addLog(`✅ HLS embedding page accessible (${embedResponse.status})`);
@@ -102,7 +102,7 @@
 			addLog('🎯 Test 5: Testing WHEP API endpoint...');
 			const whepResponse = await fetch(`/api/streams/${streamId}/whep`);
 			const whepData = await whepResponse.json();
-			
+
 			if (whepData.success) {
 				testResults.whepApi = true;
 				testResults.whepUrl = whepData.whepUrl;
@@ -126,52 +126,60 @@
 	}
 </script>
 
-<div class="max-w-4xl mx-auto p-6">
-	<h1 class="text-3xl font-bold mb-6">🧪 Stream Testing Tool</h1>
-	
-	<div class="bg-white rounded-lg shadow p-6 mb-6">
-		<h2 class="text-xl font-semibold mb-4">Test Stream URLs</h2>
-		
-		<div class="flex gap-4 mb-4">
+<div class="mx-auto max-w-4xl p-6">
+	<h1 class="mb-6 text-3xl font-bold">🧪 Stream Testing Tool</h1>
+
+	<div class="mb-6 rounded-lg bg-white p-6 shadow">
+		<h2 class="mb-4 text-xl font-semibold">Test Stream URLs</h2>
+
+		<div class="mb-4 flex gap-4">
 			<input
 				bind:value={streamId}
 				placeholder="Enter Stream ID"
-				class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+				class="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
 			/>
 			<button
 				onclick={testStream}
 				disabled={testing}
-				class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+				class="rounded-lg bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
 			>
 				{testing ? '🔄 Testing...' : '🧪 Run Tests'}
 			</button>
 		</div>
 
 		{#if Object.keys(testResults).length > 0}
-			<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+			<div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
 				<!-- Stream Status -->
-				<div class="p-4 rounded-lg {testResults.streamExists ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}">
-					<h3 class="font-semibold mb-2">📋 Stream Database</h3>
+				<div
+					class="rounded-lg p-4 {testResults.streamExists
+						? 'border border-green-200 bg-green-50'
+						: 'border border-red-200 bg-red-50'}"
+				>
+					<h3 class="mb-2 font-semibold">📋 Stream Database</h3>
 					<p class="text-sm">
 						{testResults.streamExists ? '✅ Found' : '❌ Not Found'}
 					</p>
 					{#if testResults.streamData}
-						<p class="text-xs text-gray-600 mt-1">
+						<p class="mt-1 text-xs text-gray-600">
 							Status: {testResults.streamData.status} | Title: {testResults.streamData.title}
 						</p>
 					{/if}
 				</div>
 
 				<!-- HLS API -->
-				<div class="p-4 rounded-lg {testResults.hlsApi ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}">
-					<h3 class="font-semibold mb-2">📺 HLS API</h3>
+				<div
+					class="rounded-lg p-4 {testResults.hlsApi
+						? 'border border-green-200 bg-green-50'
+						: 'border border-red-200 bg-red-50'}"
+				>
+					<h3 class="mb-2 font-semibold">📺 HLS API</h3>
 					<p class="text-sm">
 						{testResults.hlsApi ? '✅ Working' : '❌ Failed'}
 					</p>
 					{#if testResults.hlsUrl}
-						<button 
+						<button
 							onclick={() => copyToClipboard(testResults.hlsUrl)}
-							class="text-xs text-blue-600 hover:text-blue-800 mt-1"
+							class="mt-1 text-xs text-blue-600 hover:text-blue-800"
 						>
 							📋 Copy HLS URL
 						</button>
@@ -179,23 +187,31 @@
 				</div>
 
 				<!-- Direct HLS -->
-				<div class="p-4 rounded-lg {testResults.hlsUrlAccessible ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}">
-					<h3 class="font-semibold mb-2">🔗 Direct HLS URL</h3>
+				<div
+					class="rounded-lg p-4 {testResults.hlsUrlAccessible
+						? 'border border-green-200 bg-green-50'
+						: 'border border-red-200 bg-red-50'}"
+				>
+					<h3 class="mb-2 font-semibold">🔗 Direct HLS URL</h3>
 					<p class="text-sm">
 						{testResults.hlsUrlAccessible ? '✅ Accessible' : '❌ Not Accessible'}
 					</p>
 				</div>
 
 				<!-- Embedding Page -->
-				<div class="p-4 rounded-lg {testResults.embedPageAccessible ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}">
-					<h3 class="font-semibold mb-2">🌐 Embedding Page</h3>
+				<div
+					class="rounded-lg p-4 {testResults.embedPageAccessible
+						? 'border border-green-200 bg-green-50'
+						: 'border border-red-200 bg-red-50'}"
+				>
+					<h3 class="mb-2 font-semibold">🌐 Embedding Page</h3>
 					<p class="text-sm">
 						{testResults.embedPageAccessible ? '✅ Accessible' : '❌ Not Accessible'}
 					</p>
 					{#if testResults.embedPageAccessible}
-						<button 
+						<button
 							onclick={() => copyToClipboard(`${window.location.origin}/hls/${streamId}`)}
-							class="text-xs text-blue-600 hover:text-blue-800 mt-1"
+							class="mt-1 text-xs text-blue-600 hover:text-blue-800"
 						>
 							📋 Copy Embed URL
 						</button>
@@ -203,15 +219,19 @@
 				</div>
 
 				<!-- WHEP API -->
-				<div class="p-4 rounded-lg {testResults.whepApi ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'}">
-					<h3 class="font-semibold mb-2">🎯 WHEP API</h3>
+				<div
+					class="rounded-lg p-4 {testResults.whepApi
+						? 'border border-green-200 bg-green-50'
+						: 'border border-red-200 bg-red-50'}"
+				>
+					<h3 class="mb-2 font-semibold">🎯 WHEP API</h3>
 					<p class="text-sm">
 						{testResults.whepApi ? '✅ Working' : '❌ Failed'}
 					</p>
 					{#if testResults.whepUrl}
-						<button 
+						<button
 							onclick={() => copyToClipboard(testResults.whepUrl)}
-							class="text-xs text-blue-600 hover:text-blue-800 mt-1"
+							class="mt-1 text-xs text-blue-600 hover:text-blue-800"
 						>
 							📋 Copy WHEP URL
 						</button>
@@ -223,16 +243,18 @@
 
 	<!-- OBS Instructions -->
 	{#if testResults.hlsUrl || testResults.embedPageAccessible}
-		<div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
-			<h2 class="text-xl font-semibold mb-4">🎬 OBS Setup Instructions</h2>
-			
+		<div class="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-6">
+			<h2 class="mb-4 text-xl font-semibold">🎬 OBS Setup Instructions</h2>
+
 			{#if testResults.hlsUrl}
 				<div class="mb-4">
-					<h3 class="font-semibold text-green-700 mb-2">✅ Option 1: Media Source (Recommended)</h3>
-					<ol class="list-decimal list-inside text-sm space-y-1 ml-4">
+					<h3 class="mb-2 font-semibold text-green-700">✅ Option 1: Media Source (Recommended)</h3>
+					<ol class="ml-4 list-inside list-decimal space-y-1 text-sm">
 						<li>Add → Media Source</li>
 						<li>Uncheck "Local File"</li>
-						<li>Input: <code class="bg-gray-100 px-2 py-1 rounded text-xs">{testResults.hlsUrl}</code></li>
+						<li>
+							Input: <code class="rounded bg-gray-100 px-2 py-1 text-xs">{testResults.hlsUrl}</code>
+						</li>
 						<li>Check "Restart playback when source becomes active"</li>
 					</ol>
 				</div>
@@ -240,10 +262,14 @@
 
 			{#if testResults.embedPageAccessible}
 				<div class="mb-4">
-					<h3 class="font-semibold text-blue-700 mb-2">✅ Option 2: Browser Source</h3>
-					<ol class="list-decimal list-inside text-sm space-y-1 ml-4">
+					<h3 class="mb-2 font-semibold text-blue-700">✅ Option 2: Browser Source</h3>
+					<ol class="ml-4 list-inside list-decimal space-y-1 text-sm">
 						<li>Add → Browser Source</li>
-						<li>URL: <code class="bg-gray-100 px-2 py-1 rounded text-xs">{window.location.origin}/hls/{streamId}</code></li>
+						<li>
+							URL: <code class="rounded bg-gray-100 px-2 py-1 text-xs"
+								>{window.location.origin}/hls/{streamId}</code
+							>
+						</li>
 						<li>Width: 1920, Height: 1080</li>
 						<li>Check "Control audio via OBS"</li>
 					</ol>
@@ -254,9 +280,9 @@
 
 	<!-- Logs -->
 	{#if logs.length > 0}
-		<div class="bg-gray-50 rounded-lg p-6">
-			<h2 class="text-xl font-semibold mb-4">📝 Test Logs</h2>
-			<div class="bg-black text-green-400 p-4 rounded font-mono text-sm max-h-64 overflow-y-auto">
+		<div class="rounded-lg bg-gray-50 p-6">
+			<h2 class="mb-4 text-xl font-semibold">📝 Test Logs</h2>
+			<div class="max-h-64 overflow-y-auto rounded bg-black p-4 font-mono text-sm text-green-400">
 				{#each logs as log}
 					<div>{log}</div>
 				{/each}

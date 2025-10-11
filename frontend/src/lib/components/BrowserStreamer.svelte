@@ -32,7 +32,7 @@
 		if (videoElement && mediaStream && hasPermission) {
 			console.log('🔄 [BROWSER_STREAM] Effect: Updating video element with stream');
 			videoElement.srcObject = mediaStream;
-			videoElement.play().catch(err => {
+			videoElement.play().catch((err) => {
 				console.error('❌ [BROWSER_STREAM] Effect: Video play error:', err);
 			});
 		} else {
@@ -47,7 +47,7 @@
 	async function requestPermissions() {
 		console.log('🎥 [BROWSER_STREAM] Requesting camera and microphone permissions...');
 		error = '';
-		
+
 		try {
 			mediaStream = await navigator.mediaDevices.getUserMedia({
 				video: {
@@ -68,26 +68,26 @@
 				videoElement: !!videoElement
 			});
 			hasPermission = true;
-			
+
 			// Show preview with retry mechanism
 			if (mediaStream) {
 				console.log('📺 [BROWSER_STREAM] Setting up video preview...');
-				
+
 				// Wait for video element to be ready
 				setTimeout(() => {
 					if (videoElement) {
 						videoElement.srcObject = mediaStream;
-						videoElement.play().catch(e => console.error('Play error:', e));
+						videoElement.play().catch((e) => console.error('Play error:', e));
 						console.log('✅ [BROWSER_STREAM] Video preview setup complete');
 					}
 				}, 100);
 			} else {
 				console.error('❌ [BROWSER_STREAM] No media stream available');
 			}
-
 		} catch (err) {
 			console.error('❌ [BROWSER_STREAM] Permission denied:', err);
-			error = 'Camera and microphone access is required to stream. Please allow permissions and try again.';
+			error =
+				'Camera and microphone access is required to stream. Please allow permissions and try again.';
 			hasPermission = false;
 		}
 	}
@@ -123,7 +123,7 @@
 			});
 
 			// 3. Add media tracks
-			mediaStream.getTracks().forEach(track => {
+			mediaStream.getTracks().forEach((track) => {
 				if (peerConnection && mediaStream) {
 					peerConnection.addTrack(track, mediaStream);
 				}
@@ -145,12 +145,18 @@
 				body: offer.sdp
 			});
 
-			console.log('📥 [BROWSER_STREAM] WHIP response status:', whipResponse.status, whipResponse.statusText);
-			
+			console.log(
+				'📥 [BROWSER_STREAM] WHIP response status:',
+				whipResponse.status,
+				whipResponse.statusText
+			);
+
 			if (!whipResponse.ok) {
 				const errorText = await whipResponse.text();
 				console.error('❌ [BROWSER_STREAM] WHIP error response:', errorText);
-				throw new Error(`WHIP request failed: ${whipResponse.status} ${whipResponse.statusText} - ${errorText}`);
+				throw new Error(
+					`WHIP request failed: ${whipResponse.status} ${whipResponse.statusText} - ${errorText}`
+				);
 			}
 
 			const answerSdp = await whipResponse.text();
@@ -165,7 +171,7 @@
 			// 7. Monitor connection state
 			peerConnection.onconnectionstatechange = () => {
 				console.log('🔗 [BROWSER_STREAM] Connection state:', peerConnection?.connectionState);
-				
+
 				if (peerConnection?.connectionState === 'connected') {
 					console.log('✅ [BROWSER_STREAM] Successfully connected to Cloudflare Stream');
 					isStreaming = true;
@@ -179,9 +185,11 @@
 			};
 
 			peerConnection.oniceconnectionstatechange = () => {
-				console.log('🧊 [BROWSER_STREAM] ICE connection state:', peerConnection?.iceConnectionState);
+				console.log(
+					'🧊 [BROWSER_STREAM] ICE connection state:',
+					peerConnection?.iceConnectionState
+				);
 			};
-
 		} catch (err) {
 			console.error('❌ [BROWSER_STREAM] Error starting stream:', err);
 			error = err instanceof Error ? err.message : 'Failed to start streaming';
@@ -201,9 +209,9 @@
 			peerConnection.close();
 			peerConnection = null;
 		}
-		
+
 		if (mediaStream) {
-			mediaStream.getTracks().forEach(track => track.stop());
+			mediaStream.getTracks().forEach((track) => track.stop());
 			mediaStream = null;
 		}
 
@@ -273,7 +281,7 @@
 				oncanplay={() => console.log('📺 [BROWSER_STREAM] Video can play')}
 				onerror={(e) => console.error('❌ [BROWSER_STREAM] Video error:', e)}
 			></video>
-			
+
 			<!-- Debug overlay -->
 			{#if hasPermission && !mediaStream}
 				<div class="video-overlay">
@@ -284,7 +292,7 @@
 					<p>No video tracks found</p>
 				</div>
 			{/if}
-			
+
 			{#if hasPermission}
 				<div class="video-controls">
 					<button
@@ -298,7 +306,7 @@
 							<CameraOff size={20} />
 						{/if}
 					</button>
-					
+
 					<button
 						onclick={toggleMicrophone}
 						class="control-btn {micEnabled ? 'enabled' : 'disabled'}"
@@ -493,7 +501,9 @@
 		justify-content: center;
 	}
 
-	.start-btn, .stop-btn, .connecting-btn {
+	.start-btn,
+	.stop-btn,
+	.connecting-btn {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
@@ -560,7 +570,9 @@
 			height: 200px;
 		}
 
-		.start-btn, .stop-btn, .connecting-btn {
+		.start-btn,
+		.stop-btn,
+		.connecting-btn {
 			padding: 0.75rem 1.5rem;
 			font-size: 0.875rem;
 		}

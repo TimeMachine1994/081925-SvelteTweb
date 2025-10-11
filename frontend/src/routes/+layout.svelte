@@ -63,5 +63,4 @@
 		max-width: none;
 		padding: 0;
 	}
-
 </style>

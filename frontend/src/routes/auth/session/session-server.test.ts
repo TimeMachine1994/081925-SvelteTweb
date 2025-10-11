@@ -67,7 +67,9 @@ describe('Auth Session Server Load Function', () => {
 	});
 
 	it('should handle slug with special characters', async () => {
-		const mockUrl = new URL('http://localhost/auth/session?token=test-token&slug=test-memorial-with-dashes');
+		const mockUrl = new URL(
+			'http://localhost/auth/session?token=test-token&slug=test-memorial-with-dashes'
+		);
 		const mockEvent = {
 			url: mockUrl
 		};
@@ -82,7 +84,9 @@ describe('Auth Session Server Load Function', () => {
 	});
 
 	it('should handle multiple query parameters', async () => {
-		const mockUrl = new URL('http://localhost/auth/session?token=test-token&slug=test-slug&extra=ignored');
+		const mockUrl = new URL(
+			'http://localhost/auth/session?token=test-token&slug=test-slug&extra=ignored'
+		);
 		const mockEvent = {
 			url: mockUrl
 		};

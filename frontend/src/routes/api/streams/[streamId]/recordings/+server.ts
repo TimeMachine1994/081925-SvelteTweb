@@ -6,28 +6,34 @@ import type { RequestHandler } from './$types';
 // GET - Get Cloudflare Stream recordings for a stream
 export const GET: RequestHandler = async ({ params }) => {
 	const { streamId } = params;
-	
+
 	console.log('🎥 [RECORDINGS] Fetching recordings for stream:', streamId);
 
 	try {
 		// Get stream from database
 		const streamDoc = await adminDb.collection('streams').doc(streamId).get();
-		
+
 		if (!streamDoc.exists) {
-			return json({
-				success: false,
-				error: 'Stream not found'
-			}, { status: 404 });
+			return json(
+				{
+					success: false,
+					error: 'Stream not found'
+				},
+				{ status: 404 }
+			);
 		}
 
 		const stream = streamDoc.data()!;
 		const cloudflareInputId = stream.cloudflareInputId;
 
 		if (!cloudflareInputId) {
-			return json({
-				success: false,
-				error: 'No Cloudflare Input ID found for this stream'
-			}, { status: 400 });
+			return json(
+				{
+					success: false,
+					error: 'No Cloudflare Input ID found for this stream'
+				},
+				{ status: 400 }
+			);
 		}
 
 		console.log('🔍 [RECORDINGS] Checking recordings for Live Input:', cloudflareInputId);
@@ -36,12 +42,12 @@ export const GET: RequestHandler = async ({ params }) => {
 		let recordings = [];
 		try {
 			const videosUrl = `https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCOUNT_ID}/stream/live_inputs/${cloudflareInputId}/videos`;
-			
+
 			console.log('🔍 [RECORDINGS] Trying direct videos endpoint:', videosUrl);
-			
+
 			const videosResponse = await fetch(videosUrl, {
 				headers: {
-					'Authorization': `Bearer ${env.CLOUDFLARE_API_TOKEN}`,
+					Authorization: `Bearer ${env.CLOUDFLARE_API_TOKEN}`,
 					'Content-Type': 'application/json'
 				}
 			});
@@ -53,7 +59,10 @@ export const GET: RequestHandler = async ({ params }) => {
 				recordings = Array.isArray(videosData.result) ? videosData.result : [];
 				console.log('✅ [RECORDINGS] Found', recordings.length, 'recordings via videos endpoint');
 			} else {
-				console.log('⚠️ [RECORDINGS] Videos endpoint failed:', videosData.errors?.[0]?.message || 'Unknown error');
+				console.log(
+					'⚠️ [RECORDINGS] Videos endpoint failed:',
+					videosData.errors?.[0]?.message || 'Unknown error'
+				);
 			}
 		} catch (error) {
 			console.log('⚠️ [RECORDINGS] Videos endpoint error:', error);
@@ -62,10 +71,10 @@ export const GET: RequestHandler = async ({ params }) => {
 		// Method 2: If no direct videos endpoint, search all streams
 		if (recordings.length === 0) {
 			const streamsUrl = `https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCOUNT_ID}/stream`;
-			
+
 			const streamsResponse = await fetch(streamsUrl, {
 				headers: {
-					'Authorization': `Bearer ${env.CLOUDFLARE_API_TOKEN}`,
+					Authorization: `Bearer ${env.CLOUDFLARE_API_TOKEN}`,
 					'Content-Type': 'application/json'
 				}
 			});
@@ -75,12 +84,14 @@ export const GET: RequestHandler = async ({ params }) => {
 			}
 
 			const streamsData = await streamsResponse.json();
-			
+
 			// Filter streams associated with this Live Input
 			recordings = streamsData.result.filter((cfStream: any) => {
-				return cfStream.input?.uid === cloudflareInputId ||
-					   cfStream.liveInput === cloudflareInputId ||
-					   cfStream.meta?.name?.includes(cloudflareInputId);
+				return (
+					cfStream.input?.uid === cloudflareInputId ||
+					cfStream.liveInput === cloudflareInputId ||
+					cfStream.meta?.name?.includes(cloudflareInputId)
+				);
 			});
 
 			console.log('🔍 [RECORDINGS] Found', recordings.length, 'recordings via streams search');
@@ -114,27 +125,27 @@ export const GET: RequestHandler = async ({ params }) => {
 		if (processedRecordings.length > 0) {
 			console.log('💾 [RECORDINGS] Preparing database update for stream:', streamId);
 			const latestRecording = processedRecordings[0]; // Most recent
-			
+
 			const updateData: any = {
 				updatedAt: new Date().toISOString(),
 				cloudflareRecordings: processedRecordings,
 				recordingCount: processedRecordings.length
 			};
-			
+
 			console.log('💾 [RECORDINGS] Base update data:', {
 				recordingCount: updateData.recordingCount,
 				hasCloudflareRecordings: !!updateData.cloudflareRecordings
 			});
 
 			// If we have a ready recording, update the main recording fields
-			const readyRecording = processedRecordings.find(r => r.isReady);
+			const readyRecording = processedRecordings.find((r) => r.isReady);
 			console.log('💾 [RECORDINGS] Ready recording check:', {
 				totalRecordings: processedRecordings.length,
-				readyRecordings: processedRecordings.filter(r => r.isReady).length,
+				readyRecordings: processedRecordings.filter((r) => r.isReady).length,
 				hasReadyRecording: !!readyRecording,
 				readyRecordingUid: readyRecording?.uid
 			});
-			
+
 			if (readyRecording) {
 				console.log('✅ [RECORDINGS] Found ready recording, updating main fields:', {
 					uid: readyRecording.uid,
@@ -142,15 +153,16 @@ export const GET: RequestHandler = async ({ params }) => {
 					hlsUrl: readyRecording.playbackUrls.hls,
 					dashUrl: readyRecording.playbackUrls.dash
 				});
-				
+
 				updateData.cloudflareStreamId = readyRecording.uid;
 				updateData.recordingReady = true;
-				updateData.recordingPlaybackUrl = readyRecording.playbackUrls.hls || readyRecording.playbackUrls.dash;
+				updateData.recordingPlaybackUrl =
+					readyRecording.playbackUrls.hls || readyRecording.playbackUrls.dash;
 				updateData.recordingThumbnail = readyRecording.thumbnail;
 				updateData.recordingDuration = readyRecording.duration;
 				updateData.recordingSize = readyRecording.size;
 				updateData.recordingProcessedAt = new Date().toISOString();
-				
+
 				// If stream is still scheduled but has recordings, mark it as completed
 				if (stream.status === 'scheduled') {
 					updateData.status = 'completed';
@@ -177,17 +189,19 @@ export const GET: RequestHandler = async ({ params }) => {
 			cloudflareInputId,
 			recordings: processedRecordings,
 			recordingCount: processedRecordings.length,
-			readyRecordings: processedRecordings.filter(r => r.isReady).length,
+			readyRecordings: processedRecordings.filter((r) => r.isReady).length,
 			latestRecording: processedRecordings[0] || null
 		});
-
 	} catch (error: any) {
 		console.error('❌ [RECORDINGS] Error fetching recordings:', error);
-		
-		return json({
-			success: false,
-			error: error.message,
-			streamId
-		}, { status: 500 });
+
+		return json(
+			{
+				success: false,
+				error: error.message,
+				streamId
+			},
+			{ status: 500 }
+		);
 	}
 };

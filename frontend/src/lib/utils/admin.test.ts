@@ -263,13 +263,11 @@ describe('AdminService', () => {
 			});
 
 			// Should not throw even if logging fails
-			await expect(AdminService.logAdminAction(
-				'admin123',
-				'user_suspended',
-				'user',
-				'user456',
-				{ reason: 'Test suspension' }
-			)).resolves.toBeUndefined();
+			await expect(
+				AdminService.logAdminAction('admin123', 'user_suspended', 'user', 'user456', {
+					reason: 'Test suspension'
+				})
+			).resolves.toBeUndefined();
 
 			expect(mockDocRef.set).toHaveBeenCalledWith({
 				adminId: 'admin123',
@@ -291,13 +289,9 @@ describe('AdminService', () => {
 			});
 
 			// Should not throw
-			await expect(AdminService.logAdminAction(
-				'admin123',
-				'user_created',
-				'user',
-				'user456',
-				{}
-			)).resolves.toBeUndefined();
+			await expect(
+				AdminService.logAdminAction('admin123', 'user_created', 'user', 'user456', {})
+			).resolves.toBeUndefined();
 		});
 	});
 });

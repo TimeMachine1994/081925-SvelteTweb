@@ -20,17 +20,17 @@ export const PUT: RequestHandler = async ({ locals, params, request }) => {
 	try {
 		// Parse request body
 		const updates = await request.json();
-		
+
 		// Fetch and verify stream exists
 		const streamDoc = await adminDb.collection('streams').doc(streamId).get();
-		
+
 		if (!streamDoc.exists) {
 			console.log('❌ [STREAM API] Stream not found:', streamId);
 			throw SvelteKitError(404, 'Stream not found');
 		}
 
 		const streamData = streamDoc.data() as Stream;
-		
+
 		// Check permissions
 		const memorialDoc = await adminDb.collection('memorials').doc(streamData.memorialId).get();
 		if (!memorialDoc.exists) {
@@ -38,7 +38,7 @@ export const PUT: RequestHandler = async ({ locals, params, request }) => {
 		}
 
 		const memorial = memorialDoc.data()!;
-		const hasPermission = 
+		const hasPermission =
 			locals.user.role === 'admin' ||
 			memorial.ownerUid === userId ||
 			memorial.funeralDirectorUid === userId;
@@ -55,21 +55,20 @@ export const PUT: RequestHandler = async ({ locals, params, request }) => {
 		};
 
 		await adminDb.collection('streams').doc(streamId).update(updateData);
-		
+
 		console.log('✅ [STREAM API] Stream updated:', streamId, updates);
-		
+
 		return json({
 			success: true,
 			message: 'Stream updated successfully'
 		});
-
 	} catch (error: any) {
 		console.error('❌ [STREAM API] Error updating stream:', error);
-		
+
 		if (error && typeof error === 'object' && 'status' in error) {
 			throw error;
 		}
-		
+
 		throw SvelteKitError(500, 'Failed to update stream');
 	}
 };
@@ -90,14 +89,14 @@ export const DELETE: RequestHandler = async ({ locals, params }) => {
 	try {
 		// Fetch and verify stream exists
 		const streamDoc = await adminDb.collection('streams').doc(streamId).get();
-		
+
 		if (!streamDoc.exists) {
 			console.log('❌ [STREAM API] Stream not found:', streamId);
 			throw SvelteKitError(404, 'Stream not found');
 		}
 
 		const streamData = streamDoc.data() as Stream;
-		
+
 		// Check permissions
 		const memorialDoc = await adminDb.collection('memorials').doc(streamData.memorialId).get();
 		if (!memorialDoc.exists) {
@@ -105,7 +104,7 @@ export const DELETE: RequestHandler = async ({ locals, params }) => {
 		}
 
 		const memorial = memorialDoc.data()!;
-		const hasPermission = 
+		const hasPermission =
 			locals.user.role === 'admin' ||
 			memorial.ownerUid === userId ||
 			memorial.funeralDirectorUid === userId;
@@ -118,7 +117,10 @@ export const DELETE: RequestHandler = async ({ locals, params }) => {
 		// Clean up Cloudflare Live Input if it exists
 		if (streamData.cloudflareInputId && isCloudflareConfigured()) {
 			try {
-				console.log('🗑️ [STREAM API] Deleting Cloudflare Live Input:', streamData.cloudflareInputId);
+				console.log(
+					'🗑️ [STREAM API] Deleting Cloudflare Live Input:',
+					streamData.cloudflareInputId
+				);
 				await deleteLiveInput(streamData.cloudflareInputId);
 				console.log('✅ [STREAM API] Cloudflare Live Input deleted');
 			} catch (error) {
@@ -129,21 +131,20 @@ export const DELETE: RequestHandler = async ({ locals, params }) => {
 
 		// Delete stream from database
 		await adminDb.collection('streams').doc(streamId).delete();
-		
+
 		console.log('✅ [STREAM API] Stream deleted:', streamId);
-		
+
 		return json({
 			success: true,
 			message: 'Stream deleted successfully'
 		});
-
 	} catch (error: any) {
 		console.error('❌ [STREAM API] Error deleting stream:', error);
-		
+
 		if (error && typeof error === 'object' && 'status' in error) {
 			throw error;
 		}
-		
+
 		throw SvelteKitError(500, 'Failed to delete stream');
 	}
 };

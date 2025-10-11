@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { user } from '$lib/auth';
 	import { goto } from '$app/navigation';
-	
+
 	function handleFuneralDirectorClick() {
 		if ($user) {
 			// User is logged in, go to funeral director registration
@@ -22,11 +22,15 @@
 				families and friends to a celebration of life.
 			</p>
 			<p>We don't make videos, we make documentaries.</p>
-			<button onclick={handleFuneralDirectorClick} class="footer-link funeral-director-btn">Funeral Director Form</button>
+			<button onclick={handleFuneralDirectorClick} class="footer-link funeral-director-btn"
+				>Funeral Director Form</button
+			>
 		</div>
 		<div class="footer-section">
 			<h3 class="footer-heading">COVERAGE LOCATIONS</h3>
-			<p>Orange, Lake, Osceola, Seminole, Marion, Sumter, Volusia, Flagler, and Brevard counties.</p>
+			<p>
+				Orange, Lake, Osceola, Seminole, Marion, Sumter, Volusia, Flagler, and Brevard counties.
+			</p>
 			<p>Please call if your location is not listed:</p>
 			<p>(407) 221-5922</p>
 			<p>Email: Contact@tributestream.com</p>
@@ -48,7 +52,9 @@
 		</div>
 	</div>
 	<div class="footer-bottom">
-		<p>© {new Date().getFullYear()} All rights reserved | Tributestream is a Registered Trademark</p>
+		<p>
+			© {new Date().getFullYear()} All rights reserved | Tributestream is a Registered Trademark
+		</p>
 	</div>
 </footer>
 

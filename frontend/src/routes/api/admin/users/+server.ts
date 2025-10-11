@@ -26,15 +26,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		const userData = await request.json();
 		await AdminService.createUser(userData);
-		
+
 		// Log admin action
-		await AdminService.logAdminAction(
-			locals.user.uid,
-			'user_created',
-			'user',
-			userData.email,
-			{ userData }
-		);
+		await AdminService.logAdminAction(locals.user.uid, 'user_created', 'user', userData.email, {
+			userData
+		});
 
 		return json({ success: true });
 	} catch (error) {

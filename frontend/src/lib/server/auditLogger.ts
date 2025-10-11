@@ -18,18 +18,30 @@ export interface AuditEvent {
 	errorMessage?: string;
 }
 
-export type AuditAction = 
+export type AuditAction =
 	// Memorial actions
-	| 'memorial_created' | 'memorial_updated' | 'memorial_deleted' | 'memorial_viewed'
-	// User actions  
-	| 'user_login' | 'user_logout' | 'user_created' | 'role_changed'
+	| 'memorial_created'
+	| 'memorial_updated'
+	| 'memorial_deleted'
+	| 'memorial_viewed'
+	// User actions
+	| 'user_login'
+	| 'user_logout'
+	| 'user_created'
+	| 'role_changed'
 	// Schedule actions
-	| 'schedule_updated' | 'schedule_locked' | 'payment_completed' | 'payment_failed'
+	| 'schedule_updated'
+	| 'schedule_locked'
+	| 'payment_completed'
+	| 'payment_failed'
 	// Admin actions
-	| 'funeral_director_approved' | 'funeral_director_rejected'
-	| 'admin_memorial_created' | 'system_config_changed'
+	| 'funeral_director_approved'
+	| 'funeral_director_rejected'
+	| 'admin_memorial_created'
+	| 'system_config_changed'
 	// API actions
-	| 'api_access_denied' | 'api_error';
+	| 'api_access_denied'
+	| 'api_error';
 
 /**
  * Main audit logging function
@@ -42,11 +54,12 @@ export async function logAuditEvent(event: Omit<AuditEvent, 'id' | 'timestamp'>)
 		};
 
 		// Log to console for development
-		console.log(`🔍 [AUDIT] ${auditEvent.action} by ${auditEvent.userEmail} (${auditEvent.userRole}) on ${auditEvent.resourceType}:${auditEvent.resourceId}`);
-		
+		console.log(
+			`🔍 [AUDIT] ${auditEvent.action} by ${auditEvent.userEmail} (${auditEvent.userRole}) on ${auditEvent.resourceType}:${auditEvent.resourceId}`
+		);
+
 		// Save to Firestore
 		await adminDb.collection('audit_logs').add(auditEvent);
-		
 	} catch (error) {
 		console.error('❌ [AUDIT] Failed to log audit event:', error);
 		// Don't throw - audit logging should not break the main flow
@@ -56,7 +69,9 @@ export async function logAuditEvent(event: Omit<AuditEvent, 'id' | 'timestamp'>)
 /**
  * Extract user context from SvelteKit request event
  */
-export function extractUserContext(event: RequestEvent): Pick<AuditEvent, 'uid' | 'userEmail' | 'userRole' | 'ipAddress' | 'userAgent'> | null {
+export function extractUserContext(
+	event: RequestEvent
+): Pick<AuditEvent, 'uid' | 'userEmail' | 'userRole' | 'ipAddress' | 'userAgent'> | null {
 	if (!event.locals.user) {
 		return null;
 	}
@@ -68,9 +83,10 @@ export function extractUserContext(event: RequestEvent): Pick<AuditEvent, 'uid' 
 	} catch (error) {
 		console.warn('⚠️ Could not determine client address:', error);
 		// Try to get from headers as fallback
-		ipAddress = event.request.headers.get('x-forwarded-for') || 
-		           event.request.headers.get('x-real-ip') || 
-		           'localhost';
+		ipAddress =
+			event.request.headers.get('x-forwarded-for') ||
+			event.request.headers.get('x-real-ip') ||
+			'localhost';
 	}
 
 	return {
@@ -87,7 +103,10 @@ export function extractUserContext(event: RequestEvent): Pick<AuditEvent, 'uid' 
  */
 export async function logMemorialAction(
 	userContext: ReturnType<typeof extractUserContext>,
-	action: Extract<AuditAction, 'memorial_created' | 'memorial_updated' | 'memorial_deleted' | 'memorial_viewed'>,
+	action: Extract<
+		AuditAction,
+		'memorial_created' | 'memorial_updated' | 'memorial_deleted' | 'memorial_viewed'
+	>,
 	memorialId: string,
 	details: Record<string, any> = {},
 	success: boolean = true,
@@ -135,7 +154,13 @@ export async function logUserAction(
  */
 export async function logAdminAction(
 	userContext: ReturnType<typeof extractUserContext>,
-	action: Extract<AuditAction, 'funeral_director_approved' | 'funeral_director_rejected' | 'admin_memorial_created' | 'system_config_changed'>,
+	action: Extract<
+		AuditAction,
+		| 'funeral_director_approved'
+		| 'funeral_director_rejected'
+		| 'admin_memorial_created'
+		| 'system_config_changed'
+	>,
 	resourceId: string,
 	details: Record<string, any> = {},
 	success: boolean = true,
@@ -201,7 +226,6 @@ export async function logPaymentAction(
 		errorMessage
 	});
 }
-
 
 /**
  * Convenience function for logging API access denials

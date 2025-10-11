@@ -8,30 +8,29 @@ console.log('🔍 Checking Cloudflare API response for:', cloudflareInputId);
 console.log('URL:', cloudflareUrl);
 
 try {
-    const response = await fetch(cloudflareUrl, {
-        headers: {
-            'Authorization': `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
-            'Content-Type': 'application/json'
-        }
-    });
+	const response = await fetch(cloudflareUrl, {
+		headers: {
+			Authorization: `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`,
+			'Content-Type': 'application/json'
+		}
+	});
 
-    if (!response.ok) {
-        console.log('❌ API Error:', response.status, response.statusText);
-        process.exit(1);
-    }
+	if (!response.ok) {
+		console.log('❌ API Error:', response.status, response.statusText);
+		process.exit(1);
+	}
 
-    const data = await response.json();
-    console.log('📡 Full Cloudflare Response:');
-    console.log(JSON.stringify(data, null, 2));
+	const data = await response.json();
+	console.log('📡 Full Cloudflare Response:');
+	console.log(JSON.stringify(data, null, 2));
 
-    if (data.result) {
-        console.log('\n🔍 Live Input Status Analysis:');
-        console.log('- result.status:', data.result.status);
-        console.log('- result.status?.current:', data.result.status?.current);
-        console.log('- result.status?.current?.connected:', data.result.status?.current?.connected);
-        console.log('- result.meta:', data.result.meta);
-    }
-
+	if (data.result) {
+		console.log('\n🔍 Live Input Status Analysis:');
+		console.log('- result.status:', data.result.status);
+		console.log('- result.status?.current:', data.result.status?.current);
+		console.log('- result.status?.current?.connected:', data.result.status?.current?.connected);
+		console.log('- result.meta:', data.result.meta);
+	}
 } catch (error) {
-    console.error('❌ Error:', error);
+	console.error('❌ Error:', error);
 }

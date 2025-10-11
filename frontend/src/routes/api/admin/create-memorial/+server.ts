@@ -54,15 +54,18 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 
 		if (!userExists) {
-			await adminDb.collection('users').doc(userUid).set({
-				email: formData.creatorEmail,
-				displayName: formData.creatorName || formData.lovedOneName + ' Family',
-				role: 'owner',
-				createdAt: Timestamp.now(),
-				updatedAt: Timestamp.now(),
-				createdByAdmin: true,
-				createdBy: locals.user.uid
-			});
+			await adminDb
+				.collection('users')
+				.doc(userUid)
+				.set({
+					email: formData.creatorEmail,
+					displayName: formData.creatorName || formData.lovedOneName + ' Family',
+					role: 'owner',
+					createdAt: Timestamp.now(),
+					updatedAt: Timestamp.now(),
+					createdByAdmin: true,
+					createdBy: locals.user.uid
+				});
 		}
 
 		const memorial = {
@@ -133,7 +136,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					familyContactPhone: '',
 					contactPreference: 'email',
 					directorName: 'TributeStream Admin',
-					funeralHomeName: 'TributeStream',
+					funeralHomeName: 'TributeStream'
 				});
 			} catch (emailError) {
 				console.error('⚠️ [ADMIN API] Failed to send welcome email:', emailError);
@@ -149,16 +152,18 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			userCreated: !userExists,
 			memorialUrl: `/${fullSlug}`
 		});
-
 	} catch (error: any) {
 		console.error('💥 [ADMIN API] Error creating memorial:', {
 			error: error.message,
 			stack: error.stack,
 			user: locals.user?.email
 		});
-		
-		return json({ 
-			error: 'Internal server error occurred while creating memorial' 
-		}, { status: 500 });
+
+		return json(
+			{
+				error: 'Internal server error occurred while creating memorial'
+			},
+			{ status: 500 }
+		);
 	}
 };

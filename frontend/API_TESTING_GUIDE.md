@@ -17,23 +17,26 @@ Run the automated test suite:
 **Purpose**: Receives webhooks from Cloudflare when stream status changes.
 
 #### Health Check (GET)
+
 ```bash
 curl -X GET "http://localhost:5173/api/webhooks/stream-status" \
   -H "Content-Type: application/json" | jq .
 ```
 
 **Expected Response**:
+
 ```json
 {
-  "status": "ok",
-  "endpoint": "stream-status-webhook",
-  "message": "Webhook endpoint is active",
-  "timestamp": "2025-10-05T00:28:32.883Z",
-  "supportedFormats": ["live_input_webhooks", "stream_webhooks", "manual_polling"]
+	"status": "ok",
+	"endpoint": "stream-status-webhook",
+	"message": "Webhook endpoint is active",
+	"timestamp": "2025-10-05T00:28:32.883Z",
+	"supportedFormats": ["live_input_webhooks", "stream_webhooks", "manual_polling"]
 }
 ```
 
 #### Live Input Webhook (POST)
+
 ```bash
 curl -X POST "http://localhost:5173/api/webhooks/stream-status" \
   -H "Content-Type: application/json" \
@@ -46,11 +49,13 @@ curl -X POST "http://localhost:5173/api/webhooks/stream-status" \
 ```
 
 **Supported Event Types**:
+
 - `live_input.connected` - Stream started
 - `live_input.disconnected` - Stream ended
 - `live_input.errored` - Stream error
 
 #### Stream Webhook (POST)
+
 ```bash
 curl -X POST "http://localhost:5173/api/webhooks/stream-status" \
   -H "Content-Type: application/json" \
@@ -63,6 +68,7 @@ curl -X POST "http://localhost:5173/api/webhooks/stream-status" \
 ```
 
 **Supported States**:
+
 - `ready` - Stream is ready for playback
 - `error` - Stream processing error
 
@@ -71,27 +77,26 @@ curl -X POST "http://localhost:5173/api/webhooks/stream-status" \
 **Purpose**: Polls Cloudflare API to check live status of multiple streams.
 
 #### Health Check (GET)
+
 ```bash
 curl -X GET "http://localhost:5173/api/streams/check-live-status" \
   -H "Content-Type: application/json" | jq .
 ```
 
 **Expected Response**:
+
 ```json
 {
-  "status": "ok",
-  "endpoint": "check-live-status",
-  "message": "Live status polling endpoint is active",
-  "timestamp": "2025-10-05T00:28:32.883Z",
-  "features": [
-    "cloudflare_live_input_status",
-    "batch_status_checking",
-    "automatic_updates"
-  ]
+	"status": "ok",
+	"endpoint": "check-live-status",
+	"message": "Live status polling endpoint is active",
+	"timestamp": "2025-10-05T00:28:32.883Z",
+	"features": ["cloudflare_live_input_status", "batch_status_checking", "automatic_updates"]
 }
 ```
 
 #### Check Stream Status (POST)
+
 ```bash
 curl -X POST "http://localhost:5173/api/streams/check-live-status" \
   -H "Content-Type: application/json" \
@@ -101,28 +106,29 @@ curl -X POST "http://localhost:5173/api/streams/check-live-status" \
 ```
 
 **Expected Response**:
+
 ```json
 {
-  "success": true,
-  "message": "Checked 2 streams, updated 0",
-  "results": [
-    {
-      "streamId": "stream-id-1",
-      "cloudflareInputId": "cf-input-123",
-      "wasLive": false,
-      "isLive": true,
-      "status": "live",
-      "updated": true,
-      "lastConnected": "2025-10-05T00:28:32.883Z"
-    }
-  ],
-  "summary": {
-    "total": 2,
-    "updated": 1,
-    "errors": 0,
-    "live": 1
-  },
-  "timestamp": "2025-10-05T00:28:32.883Z"
+	"success": true,
+	"message": "Checked 2 streams, updated 0",
+	"results": [
+		{
+			"streamId": "stream-id-1",
+			"cloudflareInputId": "cf-input-123",
+			"wasLive": false,
+			"isLive": true,
+			"status": "live",
+			"updated": true,
+			"lastConnected": "2025-10-05T00:28:32.883Z"
+		}
+	],
+	"summary": {
+		"total": 2,
+		"updated": 1,
+		"errors": 0,
+		"live": 1
+	},
+	"timestamp": "2025-10-05T00:28:32.883Z"
 }
 ```
 
@@ -131,23 +137,26 @@ curl -X POST "http://localhost:5173/api/streams/check-live-status" \
 Both endpoints provide consistent error responses:
 
 ### 400 Bad Request
+
 ```json
 {
-  "message": "streamIds array required"
+	"message": "streamIds array required"
 }
 ```
 
 ### 401 Unauthorized
+
 ```json
 {
-  "message": "Authentication required"
+	"message": "Authentication required"
 }
 ```
 
 ### 500 Internal Server Error
+
 ```json
 {
-  "message": "Failed to process request"
+	"message": "Failed to process request"
 }
 ```
 
@@ -156,12 +165,14 @@ Both endpoints provide consistent error responses:
 To test with actual streams from your database:
 
 1. **Get stream IDs from database**:
+
    ```bash
    # Use Firebase Admin SDK or Firestore console
    # Look for documents in the 'streams' collection
    ```
 
 2. **Test with real stream ID**:
+
    ```bash
    curl -X POST "http://localhost:5173/api/streams/check-live-status" \
      -H "Content-Type: application/json" \
@@ -177,13 +188,17 @@ To test with actual streams from your database:
 ## Integration Testing
 
 ### Frontend Integration
+
 The live status polling is integrated into:
+
 - Stream management pages (`/memorials/[id]/streams`)
 - Public memorial pages (`/[fullSlug]`)
 - Stream cards and status indicators
 
 ### Webhook Integration
+
 Webhooks are automatically processed when:
+
 - Cloudflare sends Live Input status changes
 - Cloudflare sends Stream processing updates
 - Manual webhook testing (as shown above)
@@ -211,6 +226,7 @@ Webhooks are automatically processed when:
 ### Debug Mode
 
 Enable detailed logging by checking your SvelteKit console output. All API calls include comprehensive logging with prefixes:
+
 - `🔍 [LIVE STATUS]` - Live status polling operations
 - `🎬 [CLOUDFLARE WEBHOOK]` - Webhook processing
 - `✅/❌` - Success/failure indicators
@@ -218,6 +234,7 @@ Enable detailed logging by checking your SvelteKit console output. All API calls
 ## Automated Testing
 
 The test suite (`simple-api-test.sh`) covers:
+
 - ✅ Health checks for both endpoints
 - ✅ Valid payload processing
 - ✅ Error handling for invalid data
@@ -225,6 +242,7 @@ The test suite (`simple-api-test.sh`) covers:
 - ✅ Edge cases (empty arrays, non-existent streams)
 
 Run tests regularly to ensure API stability, especially after:
+
 - Code changes to endpoint handlers
 - Environment configuration updates
 - Database schema modifications

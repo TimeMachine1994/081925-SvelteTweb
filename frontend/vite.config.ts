@@ -3,10 +3,13 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig(({ mode }) => ({
-	plugins: [tailwindcss(), sveltekit({
-		// Disable type checking during development for faster builds
-		typeCheck: mode === 'production'
-	})],
+	plugins: [
+		tailwindcss(),
+		sveltekit({
+			// Disable type checking during development for faster builds
+			typeCheck: mode === 'production'
+		})
+	],
 	server: {
 		allowedHosts: [
 			'localhost',

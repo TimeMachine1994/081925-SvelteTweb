@@ -35,13 +35,24 @@ export const TIER_PRICING: Record<Tier, TierInfo> = {
 	standard: {
 		name: 'Standard',
 		price: 199,
-		features: ['Multiple camera angles', 'HD streaming', 'Professional recording', 'Chat moderation'],
+		features: [
+			'Multiple camera angles',
+			'HD streaming',
+			'Professional recording',
+			'Chat moderation'
+		],
 		popular: true
 	},
 	premium: {
 		name: 'Premium',
 		price: 299,
-		features: ['Multiple camera angles', '4K streaming', 'Professional recording', 'Chat moderation', 'Priority support']
+		features: [
+			'Multiple camera angles',
+			'4K streaming',
+			'Professional recording',
+			'Chat moderation',
+			'Priority support'
+		]
 	},
 	legacy: {
 		name: 'Legacy',

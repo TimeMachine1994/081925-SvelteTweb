@@ -29,14 +29,14 @@
 	onMount(async () => {
 		console.log('🚀 [INIT] Component mounted, starting initialization...');
 		await loadStreams();
-		
+
 		// Poll for live status updates every 10 seconds (more efficient)
 		console.log('⏰ [INIT] Starting polling interval (10 seconds)...');
 		pollingInterval = setInterval(async () => {
 			console.log('⏰ [POLLING] Polling interval triggered');
 			await checkLiveStatus();
 		}, 10000);
-		
+
 		console.log('🚀 [INIT] Initialization completed');
 	});
 
@@ -51,26 +51,26 @@
 		// Don't show loading spinner during background polling
 		const isInitialLoad = streams.length === 0;
 		console.log('📥 [LOAD] Loading streams...', { isInitialLoad, memorialId });
-		
+
 		if (isInitialLoad) {
 			loading = true;
 		}
 		error = '';
-		
+
 		try {
 			const response = await fetch(`/api/memorials/${memorialId}/streams`);
 			console.log('📥 [LOAD] API response status:', response.status);
-			
+
 			if (!response.ok) {
 				throw new Error(`Failed to load streams: ${response.statusText}`);
 			}
-			
+
 			const result = await response.json();
 			console.log('📥 [LOAD] API response data:', result);
-			
+
 			const newStreams = (result.streams || []) as Stream[];
 			console.log('📥 [LOAD] Loaded streams:', newStreams.length);
-			
+
 			// Log each stream's recording status
 			newStreams.forEach((stream, index) => {
 				console.log(`📥 [LOAD] Stream ${index + 1} (${stream.id}):`, {
@@ -82,7 +82,7 @@
 					cloudflareStreamId: stream.cloudflareStreamId
 				});
 			});
-			
+
 			streams = newStreams;
 			console.log('📥 [LOAD] Streams updated in state');
 		} catch (err) {
@@ -100,19 +100,19 @@
 
 	async function checkLiveStatus() {
 		console.log('🔍 [POLLING] Starting live status check...');
-		
+
 		// Check streams that could potentially be live
 		const liveStreamIds = streams
-			.filter(stream => ['scheduled', 'ready', 'live'].includes(stream.status))
-			.map(stream => stream.id);
+			.filter((stream) => ['scheduled', 'ready', 'live'].includes(stream.status))
+			.map((stream) => stream.id);
 
 		// Check completed streams AND scheduled streams that might have recordings
 		const completedStreamIds = streams
-			.filter(stream => 
-				(stream.status === 'completed' || stream.status === 'scheduled') && 
-				!stream.recordingReady
+			.filter(
+				(stream) =>
+					(stream.status === 'completed' || stream.status === 'scheduled') && !stream.recordingReady
 			)
-			.map(stream => stream.id);
+			.map((stream) => stream.id);
 
 		console.log('🔍 [POLLING] Stream analysis:', {
 			totalStreams: streams.length,
@@ -122,7 +122,7 @@
 		});
 
 		// Log detailed stream info
-		streams.forEach(stream => {
+		streams.forEach((stream) => {
 			console.log(`📊 [POLLING] Stream ${stream.id}:`, {
 				title: stream.title,
 				status: stream.status,
@@ -148,7 +148,7 @@
 				if (response.ok) {
 					const result = await response.json();
 					console.log('🔍 Live status check:', result.summary);
-					
+
 					if (result.summary.updated > 0) {
 						hasUpdates = true;
 					}
@@ -160,13 +160,18 @@
 
 		// Check recordings for completed streams
 		if (completedStreamIds.length > 0) {
-			console.log('🎥 [POLLING] Checking recordings for', completedStreamIds.length, 'streams:', completedStreamIds);
-			
+			console.log(
+				'🎥 [POLLING] Checking recordings for',
+				completedStreamIds.length,
+				'streams:',
+				completedStreamIds
+			);
+
 			for (const streamId of completedStreamIds) {
 				try {
 					console.log(`🎥 [POLLING] Calling recordings API for stream: ${streamId}`);
 					const response = await fetch(`/api/streams/${streamId}/recordings`);
-					
+
 					if (response.ok) {
 						const result = await response.json();
 						console.log(`🎥 [POLLING] Recordings API response for ${streamId}:`, {
@@ -176,15 +181,21 @@
 							hasLatestRecording: !!result.latestRecording,
 							latestRecordingReady: result.latestRecording?.isReady
 						});
-						
+
 						if (result.recordingCount > 0) {
-							console.log(`✅ [POLLING] Found ${result.recordingCount} recordings for stream: ${streamId}`);
+							console.log(
+								`✅ [POLLING] Found ${result.recordingCount} recordings for stream: ${streamId}`
+							);
 							hasUpdates = true;
 						} else {
 							console.log(`⚠️ [POLLING] No recordings found for stream: ${streamId}`);
 						}
 					} else {
-						console.error(`❌ [POLLING] Recordings API failed for ${streamId}:`, response.status, response.statusText);
+						console.error(
+							`❌ [POLLING] Recordings API failed for ${streamId}:`,
+							response.status,
+							response.statusText
+						);
 					}
 				} catch (err) {
 					console.error(`❌ [POLLING] Error checking recordings for stream ${streamId}:`, err);
@@ -202,16 +213,16 @@
 		} else {
 			console.log('🔄 [POLLING] No changes detected, skipping reload');
 		}
-		
+
 		console.log('🔍 [POLLING] Live status check completed');
 	}
 
 	async function createStream() {
 		if (!newStreamTitle.trim()) return;
-		
+
 		loading = true;
 		error = '';
-		
+
 		try {
 			// Combine date and time into scheduledStartTime if both are provided
 			let scheduledStartTime = null;
@@ -237,7 +248,7 @@
 
 			const result = await response.json();
 			streams = [...streams, result.stream as Stream];
-			
+
 			// Reset form
 			newStreamTitle = '';
 			newStreamDescription = '';
@@ -257,10 +268,10 @@
 			await navigator.clipboard.writeText(text);
 			if (type === 'key') {
 				copiedStreamKey = streamId;
-				setTimeout(() => copiedStreamKey = null, 2000);
+				setTimeout(() => (copiedStreamKey = null), 2000);
 			} else {
 				copiedRtmpUrl = streamId;
-				setTimeout(() => copiedRtmpUrl = null, 2000);
+				setTimeout(() => (copiedRtmpUrl = null), 2000);
 			}
 		} catch (err) {
 			console.error('Failed to copy:', err);
@@ -270,7 +281,7 @@
 	async function toggleVisibility(streamId: string, currentVisibility: boolean) {
 		loading = true;
 		error = '';
-		
+
 		try {
 			const response = await fetch(`/api/streams/${streamId}`, {
 				method: 'PUT',
@@ -299,17 +310,17 @@
 		try {
 			console.log('🎥 Checking recordings for stream:', streamId);
 			const response = await fetch(`/api/streams/${streamId}/recordings`);
-			
+
 			if (!response.ok) {
 				throw new Error(`Failed to check recordings: ${response.statusText}`);
 			}
 
 			const result = await response.json();
 			console.log('✅ Recording check result:', result);
-			
+
 			// Reload streams to show updated recording status
 			await loadStreams();
-			
+
 			return result;
 		} catch (err) {
 			console.error('Error checking recordings:', err);
@@ -321,10 +332,10 @@
 		if (!confirm('Are you sure you want to delete this stream? This action cannot be undone.')) {
 			return;
 		}
-		
+
 		loading = true;
 		error = '';
-		
+
 		try {
 			const response = await fetch(`/api/streams/${streamId}`, {
 				method: 'DELETE'
@@ -334,7 +345,7 @@
 				throw new Error(`Failed to delete stream: ${response.statusText}`);
 			}
 
-			streams = streams.filter(s => s.id !== streamId);
+			streams = streams.filter((s) => s.id !== streamId);
 		} catch (err) {
 			console.error('Error deleting stream:', err);
 			error = 'Failed to delete stream';
@@ -354,7 +365,6 @@
 		newStreamDate = '';
 		newStreamTime = '';
 	}
-
 </script>
 
 <svelte:head>
@@ -367,29 +377,27 @@
 		<div class="mb-8">
 			<div class="flex items-center justify-between">
 				<div>
-					<h1 class="text-3xl font-bold text-gray-900 mb-2">
-						Stream Management
-					</h1>
+					<h1 class="mb-2 text-3xl font-bold text-gray-900">Stream Management</h1>
 					<p class="text-gray-600">
 						Manage livestreams for <span class="font-semibold">{memorial.lovedOneName}</span>
 					</p>
 				</div>
-				
+
 				<div class="flex items-center gap-4">
-					<a 
-						href="/{memorial.fullSlug}" 
+					<a
+						href="/{memorial.fullSlug}"
 						target="_blank"
-						class="inline-flex items-center px-4 py-2 rounded-lg bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
+						class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50"
 					>
-						<Eye class="w-4 h-4 mr-2" />
+						<Eye class="mr-2 h-4 w-4" />
 						View Memorial
 					</a>
-					
-					<button 
+
+					<button
 						onclick={openCreateModal}
-						class="inline-flex items-center px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105"
+						class="inline-flex items-center rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-3 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
 					>
-						<Plus class="w-4 h-4 mr-2" />
+						<Plus class="mr-2 h-4 w-4" />
 						Create Stream
 					</button>
 				</div>
@@ -398,7 +406,7 @@
 
 		<!-- Error Message -->
 		{#if error}
-			<div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+			<div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
 				<p class="text-red-800">{error}</p>
 			</div>
 		{/if}
@@ -406,7 +414,7 @@
 		<!-- Loading State -->
 		{#if loading}
 			<div class="flex items-center justify-center py-12">
-				<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+				<div class="h-8 w-8 animate-spin rounded-full border-b-2 border-purple-600"></div>
 				<span class="ml-3 text-gray-600">Loading streams...</span>
 			</div>
 		{/if}
@@ -415,33 +423,38 @@
 		{#if !loading}
 			{#if streams.length === 0}
 				<!-- Empty State -->
-				<div class="text-center py-12">
-					<div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-						<Play class="w-12 h-12 text-gray-400" />
-					</div>
-					<h3 class="text-xl font-semibold text-gray-900 mb-2">No streams yet</h3>
-					<p class="text-gray-600 mb-6">Create your first livestream to get started</p>
-					<button 
-						onclick={openCreateModal}
-						class="inline-flex items-center px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105"
+				<div class="py-12 text-center">
+					<div
+						class="mx-auto mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-gray-100"
 					>
-						<Plus class="w-4 h-4 mr-2" />
+						<Play class="h-12 w-12 text-gray-400" />
+					</div>
+					<h3 class="mb-2 text-xl font-semibold text-gray-900">No streams yet</h3>
+					<p class="mb-6 text-gray-600">Create your first livestream to get started</p>
+					<button
+						onclick={openCreateModal}
+						class="inline-flex items-center rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-3 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
+					>
+						<Plus class="mr-2 h-4 w-4" />
 						Create First Stream
 					</button>
 				</div>
 			{:else}
 				<!-- Streams Grid -->
-				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+				<div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 					{#each streams as stream (stream.id)}
 						{#if stream.status === 'completed'}
-							{@const _ = console.log(`🎬 [RENDER] Rendering CompletedStreamCard for stream ${stream.id}:`, {
-								title: stream.title,
-								status: stream.status,
-								recordingReady: stream.recordingReady,
-								recordingPlaybackUrl: stream.recordingPlaybackUrl,
-								recordingCount: stream.recordingCount
-							})}
-							<CompletedStreamCard 
+							{@const _ = console.log(
+								`🎬 [RENDER] Rendering CompletedStreamCard for stream ${stream.id}:`,
+								{
+									title: stream.title,
+									status: stream.status,
+									recordingReady: stream.recordingReady,
+									recordingPlaybackUrl: stream.recordingPlaybackUrl,
+									recordingCount: stream.recordingCount
+								}
+							)}
+							<CompletedStreamCard
 								{stream}
 								onVisibilityToggle={toggleVisibility}
 								onCheckRecordings={checkRecordings}
@@ -452,7 +465,7 @@
 								title: stream.title,
 								status: stream.status
 							})}
-							<StreamCard 
+							<StreamCard
 								{stream}
 								onToggleVisibility={toggleVisibility}
 								onDelete={deleteStream}
@@ -467,90 +480,95 @@
 		{/if}
 	</div>
 
-<!-- Create Stream Modal -->
-{#if showCreateModal}
-	<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-		<div class="bg-white rounded-xl shadow-xl max-w-md w-full">
-			<div class="p-6">
-				<h2 class="text-xl font-semibold text-gray-900 mb-4">Create New Stream</h2>
-				
-				<form onsubmit={(e) => { e.preventDefault(); createStream(); }}>
-					<div class="mb-4">
-						<label for="streamTitle" class="block text-sm font-medium text-gray-700 mb-2">
-							Stream Title *
-						</label>
-						<input
-							id="streamTitle"
-							type="text"
-							bind:value={newStreamTitle}
-							placeholder="e.g., Memorial Service"
-							class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-							required
-						/>
-					</div>
-					
-					<div class="mb-4">
-						<label for="streamDescription" class="block text-sm font-medium text-gray-700 mb-2">
-							Description
-						</label>
-						<textarea
-							id="streamDescription"
-							bind:value={newStreamDescription}
-							placeholder="Optional description for this stream"
-							rows="3"
-							class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-						></textarea>
-					</div>
-					
-					<!-- Scheduling Section -->
-					<div class="mb-4">
-						<h3 class="text-sm font-medium text-gray-700 mb-3">Schedule Stream (Optional)</h3>
-						<div class="grid grid-cols-2 gap-3">
-							<div>
-								<label for="streamDate" class="block text-xs font-medium text-gray-600 mb-1">
-									Date
-								</label>
-								<input
-									id="streamDate"
-									type="date"
-									bind:value={newStreamDate}
-									class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
-								/>
-							</div>
-							<div>
-								<label for="streamTime" class="block text-xs font-medium text-gray-600 mb-1">
-									Time
-								</label>
-								<input
-									id="streamTime"
-									type="time"
-									bind:value={newStreamTime}
-									class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
-								/>
-							</div>
+	<!-- Create Stream Modal -->
+	{#if showCreateModal}
+		<div class="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black p-4">
+			<div class="w-full max-w-md rounded-xl bg-white shadow-xl">
+				<div class="p-6">
+					<h2 class="mb-4 text-xl font-semibold text-gray-900">Create New Stream</h2>
+
+					<form
+						onsubmit={(e) => {
+							e.preventDefault();
+							createStream();
+						}}
+					>
+						<div class="mb-4">
+							<label for="streamTitle" class="mb-2 block text-sm font-medium text-gray-700">
+								Stream Title *
+							</label>
+							<input
+								id="streamTitle"
+								type="text"
+								bind:value={newStreamTitle}
+								placeholder="e.g., Memorial Service"
+								class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-purple-500"
+								required
+							/>
 						</div>
-						<p class="text-xs text-gray-500 mt-1">Leave empty to create an unscheduled stream</p>
-					</div>
-					
-					<div class="flex items-center justify-end gap-3">
-						<button
-							type="button"
-							onclick={closeCreateModal}
-							class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-						>
-							Cancel
-						</button>
-						<button
-							type="submit"
-							disabled={!newStreamTitle.trim() || loading}
-							class="px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-						>
-							{loading ? 'Creating...' : 'Create Stream'}
-						</button>
-					</div>
-				</form>
+
+						<div class="mb-4">
+							<label for="streamDescription" class="mb-2 block text-sm font-medium text-gray-700">
+								Description
+							</label>
+							<textarea
+								id="streamDescription"
+								bind:value={newStreamDescription}
+								placeholder="Optional description for this stream"
+								rows="3"
+								class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-purple-500"
+							></textarea>
+						</div>
+
+						<!-- Scheduling Section -->
+						<div class="mb-4">
+							<h3 class="mb-3 text-sm font-medium text-gray-700">Schedule Stream (Optional)</h3>
+							<div class="grid grid-cols-2 gap-3">
+								<div>
+									<label for="streamDate" class="mb-1 block text-xs font-medium text-gray-600">
+										Date
+									</label>
+									<input
+										id="streamDate"
+										type="date"
+										bind:value={newStreamDate}
+										class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-purple-500"
+									/>
+								</div>
+								<div>
+									<label for="streamTime" class="mb-1 block text-xs font-medium text-gray-600">
+										Time
+									</label>
+									<input
+										id="streamTime"
+										type="time"
+										bind:value={newStreamTime}
+										class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-transparent focus:ring-2 focus:ring-purple-500"
+									/>
+								</div>
+							</div>
+							<p class="mt-1 text-xs text-gray-500">Leave empty to create an unscheduled stream</p>
+						</div>
+
+						<div class="flex items-center justify-end gap-3">
+							<button
+								type="button"
+								onclick={closeCreateModal}
+								class="rounded-lg bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-200"
+							>
+								Cancel
+							</button>
+							<button
+								type="submit"
+								disabled={!newStreamTitle.trim() || loading}
+								class="rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-2 text-white transition-all duration-300 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
+							>
+								{loading ? 'Creating...' : 'Create Stream'}
+							</button>
+						</div>
+					</form>
+				</div>
 			</div>
 		</div>
-	</div>
-{/if}
+	{/if}
 </div>

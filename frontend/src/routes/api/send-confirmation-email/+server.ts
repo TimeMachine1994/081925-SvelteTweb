@@ -5,71 +5,76 @@ import { SENDGRID_API_KEY, FROM_EMAIL } from '$env/static/private';
 
 // Initialize SendGrid
 if (SENDGRID_API_KEY && SENDGRID_API_KEY !== 'mock_key') {
-  sgMail.setApiKey(SENDGRID_API_KEY);
+	sgMail.setApiKey(SENDGRID_API_KEY);
 }
 
 export const POST: RequestHandler = async ({ request }) => {
-  try {
-    const { memorialId, paymentIntentId, customerEmail, lovedOneName, amount } = await request.json();
+	try {
+		const { memorialId, paymentIntentId, customerEmail, lovedOneName, amount } =
+			await request.json();
 
-    if (!memorialId || !paymentIntentId || !customerEmail || !lovedOneName || !amount) {
-      return json({ error: 'Missing required data' }, { status: 400 });
-    }
+		if (!memorialId || !paymentIntentId || !customerEmail || !lovedOneName || !amount) {
+			return json({ error: 'Missing required data' }, { status: 400 });
+		}
 
-    console.log('📧 Sending confirmation email to:', customerEmail);
+		console.log('📧 Sending confirmation email to:', customerEmail);
 
-    // Generate email content
-    const emailHtml = generateConfirmationEmailHTML({
-      memorialId,
-      paymentIntentId,
-      customerEmail,
-      lovedOneName,
-      amount,
-      paymentDate: new Date()
-    });
+		// Generate email content
+		const emailHtml = generateConfirmationEmailHTML({
+			memorialId,
+			paymentIntentId,
+			customerEmail,
+			lovedOneName,
+			amount,
+			paymentDate: new Date()
+		});
 
-    // Send email with SendGrid
-    if (SENDGRID_API_KEY && SENDGRID_API_KEY !== 'mock_key') {
-      await sgMail.send({
-        from: FROM_EMAIL || 'TributeStream <noreply@tributestream.com>',
-        to: customerEmail,
-        subject: `TributeStream Service Confirmation - ${lovedOneName}`,
-        html: emailHtml,
-      });
+		// Send email with SendGrid
+		if (SENDGRID_API_KEY && SENDGRID_API_KEY !== 'mock_key') {
+			await sgMail.send({
+				from: FROM_EMAIL || 'TributeStream <noreply@tributestream.com>',
+				to: customerEmail,
+				subject: `TributeStream Service Confirmation - ${lovedOneName}`,
+				html: emailHtml
+			});
 
-      console.log('✅ Confirmation email sent successfully via SendGrid');
-    } else {
-      // Mock for development
-      console.log('✅ Confirmation email sent successfully (mock - configure SENDGRID_API_KEY for production)');
-    }
+			console.log('✅ Confirmation email sent successfully via SendGrid');
+		} else {
+			// Mock for development
+			console.log(
+				'✅ Confirmation email sent successfully (mock - configure SENDGRID_API_KEY for production)'
+			);
+		}
 
-    return json({ 
-      success: true, 
-      message: 'Confirmation email sent successfully'
-    });
-
-  } catch (error) {
-    console.error('Failed to send confirmation email:', error);
-    return json(
-      { error: 'Failed to send confirmation email', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
-  }
+		return json({
+			success: true,
+			message: 'Confirmation email sent successfully'
+		});
+	} catch (error) {
+		console.error('Failed to send confirmation email:', error);
+		return json(
+			{
+				error: 'Failed to send confirmation email',
+				details: error instanceof Error ? error.message : 'Unknown error'
+			},
+			{ status: 500 }
+		);
+	}
 };
 
 interface EmailData {
-  memorialId: string;
-  paymentIntentId: string;
-  customerEmail: string;
-  lovedOneName: string;
-  amount: number;
-  paymentDate: Date;
+	memorialId: string;
+	paymentIntentId: string;
+	customerEmail: string;
+	lovedOneName: string;
+	amount: number;
+	paymentDate: Date;
 }
 
 function generateConfirmationEmailHTML(data: EmailData): string {
-  const { memorialId, paymentIntentId, customerEmail, lovedOneName, amount, paymentDate } = data;
-  
-  return `
+	const { memorialId, paymentIntentId, customerEmail, lovedOneName, amount, paymentDate } = data;
+
+	return `
 <!DOCTYPE html>
 <html>
 <head>

@@ -12,15 +12,9 @@ export const POST: RequestHandler = async ({ params, locals }) => {
 		const { uid } = params;
 
 		await AdminService.activateUser(uid);
-		
+
 		// Log admin action
-		await AdminService.logAdminAction(
-			locals.user.uid,
-			'user_activated',
-			'user',
-			uid,
-			{}
-		);
+		await AdminService.logAdminAction(locals.user.uid, 'user_activated', 'user', uid, {});
 
 		return json({ success: true });
 	} catch (error) {

@@ -49,7 +49,7 @@ describe('Auth Session Page', () => {
 		};
 
 		render(AuthSessionPage, { props: { data: mockData } });
-		
+
 		expect(screen.getByText('Signing in...')).toBeInTheDocument();
 		expect(screen.getByText('Please wait while we securely sign you in.')).toBeInTheDocument();
 	});
@@ -62,7 +62,7 @@ describe('Auth Session Page', () => {
 		};
 
 		render(AuthSessionPage, { props: { data: mockData } });
-		
+
 		await waitFor(() => {
 			expect(screen.getByText('No authentication token provided.')).toBeInTheDocument();
 		});
@@ -110,9 +110,9 @@ describe('Auth Session Page', () => {
 				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ 
-					idToken: mockIdToken, 
-					slug: 'test-memorial' 
+				body: JSON.stringify({
+					idToken: mockIdToken,
+					slug: 'test-memorial'
 				})
 			});
 		});
@@ -131,13 +131,15 @@ describe('Auth Session Page', () => {
 
 		const firebaseError = new Error('Firebase: Error (auth/invalid-custom-token).') as any;
 		firebaseError.code = 'auth/invalid-custom-token';
-		
+
 		mockSignInWithCustomToken.mockRejectedValue(firebaseError);
 
 		render(AuthSessionPage, { props: { data: mockData } });
 
 		await waitFor(() => {
-			expect(screen.getByText('Authentication failed. Please try logging in manually.')).toBeInTheDocument();
+			expect(
+				screen.getByText('Authentication failed. Please try logging in manually.')
+			).toBeInTheDocument();
 		});
 	});
 
@@ -203,9 +205,9 @@ describe('Auth Session Page', () => {
 				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ 
-					idToken: 'mock-id-token', 
-					slug: null 
+				body: JSON.stringify({
+					idToken: 'mock-id-token',
+					slug: null
 				})
 			});
 		});
@@ -236,7 +238,9 @@ describe('Auth Session Page', () => {
 		render(AuthSessionPage, { props: { data: mockData } });
 
 		await waitFor(() => {
-			expect(screen.getByText('Authentication failed. Please try logging in manually.')).toBeInTheDocument();
+			expect(
+				screen.getByText('Authentication failed. Please try logging in manually.')
+			).toBeInTheDocument();
 		});
 	});
 });

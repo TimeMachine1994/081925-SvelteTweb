@@ -64,7 +64,7 @@ export const actions: Actions = {
 
 			// Wait for user propagation in Firebase
 			console.log('⏳ Waiting for Firebase user propagation...');
-			await new Promise(resolve => setTimeout(resolve, 2000));
+			await new Promise((resolve) => setTimeout(resolve, 2000));
 
 			// 3. Create user profile in Firestore
 			await adminDb.collection('users').doc(userRecord.uid).set({
@@ -84,7 +84,7 @@ export const actions: Actions = {
 				ownerUid: userRecord.uid, // V1: Single source of truth for ownership
 				creatorEmail: email,
 				familyContactEmail: email,
-				
+
 				// Service Details - basic structure for family registration
 				services: {
 					main: {
@@ -102,12 +102,12 @@ export const actions: Actions = {
 					},
 					additional: [] // Empty initially
 				},
-				
+
 				// Basic memorial settings
 				isPublic: false,
 				content: '',
 				custom_html: null,
-				
+
 				createdAt: new Date(),
 				updatedAt: new Date()
 			};
@@ -133,7 +133,7 @@ export const actions: Actions = {
 				console.log('✅ User record verified before token creation');
 			} catch (verifyError) {
 				console.log('⚠️ User not found, waiting additional time...');
-				await new Promise(resolve => setTimeout(resolve, 1000));
+				await new Promise((resolve) => setTimeout(resolve, 1000));
 			}
 			// Create custom token with additional claims to prevent tenant errors
 			const customToken = await adminAuth.createCustomToken(userRecord.uid, {

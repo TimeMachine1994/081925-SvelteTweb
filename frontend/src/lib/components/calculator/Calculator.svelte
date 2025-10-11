@@ -22,12 +22,11 @@
 		data: { memorial: Memorial | null; config: LivestreamConfig | null };
 	} = $props();
 
-
 	let currentStep = $state<'booking' | 'payment' | 'payNow'>('booking');
 	let clientSecret = $state<string | null>(null);
 	let configId = $state<string | null>(null);
 	let selectedTier = $state<Tier>('solo');
-	
+
 	// Auto-save functionality
 	let autoSaveEnabled = $state(false);
 	let showAutoSaveStatus = $state(false);
@@ -69,21 +68,21 @@
 	let funeralDirectorName = $state(data.memorial?.funeralDirectorName || '');
 	let funeralHome = $state(data.memorial?.funeralHome || '');
 
-
-
 	// Initialize auto-save when memorialId is available
-	const autoSave = memorialId ? useAutoSave(memorialId, {
-		delay: 3000,
-		onSave: (success, error) => {
-			showAutoSaveStatus = true;
-			if (!success && error) {
-				console.error('Auto-save failed:', error);
-			}
-			setTimeout(() => {
-				showAutoSaveStatus = false;
-			}, 2000);
-		}
-	}) : null;
+	const autoSave = memorialId
+		? useAutoSave(memorialId, {
+				delay: 3000,
+				onSave: (success, error) => {
+					showAutoSaveStatus = true;
+					if (!success && error) {
+						console.error('Auto-save failed:', error);
+					}
+					setTimeout(() => {
+						showAutoSaveStatus = false;
+					}, 2000);
+				}
+			})
+		: null;
 
 	onMount(async () => {
 		// Load existing data if available
@@ -106,12 +105,14 @@
 				services.main = data.memorial.services.main;
 				services.additional = data.memorial.services.additional || [];
 			}
-			
+
 			// Try to load auto-saved data
 			if (autoSave && memorialId) {
 				const autoSavedData = await autoSave.loadAutoSavedData();
 				if (autoSavedData) {
-					const shouldRestore = confirm('We found an auto-saved version of your schedule. Would you like to restore it?');
+					const shouldRestore = confirm(
+						'We found an auto-saved version of your schedule. Would you like to restore it?'
+					);
 					if (shouldRestore) {
 						if (autoSavedData.services) {
 							services = autoSavedData.services;
@@ -126,13 +127,12 @@
 				}
 			}
 		}
-		
+
 		// Enable auto-save after initial load
 		if (memorialId) {
 			autoSaveEnabled = true;
 		}
 	});
-
 
 	const TIER_PRICES: Record<string, number> = {
 		solo: 599,
@@ -182,7 +182,7 @@
 		}
 
 		// 3. Additional Location
-		const additionalLocation = services.additional.find(s => s.type === 'location');
+		const additionalLocation = services.additional.find((s) => s.type === 'location');
 		if (additionalLocation) {
 			items.push({
 				id: 'addl_location_fee',
@@ -206,7 +206,7 @@
 		}
 
 		// 4. Additional Day
-		const additionalDay = services.additional.find(s => s.type === 'day');
+		const additionalDay = services.additional.find((s) => s.type === 'day');
 		if (additionalDay) {
 			items.push({
 				id: 'addl_day_fee',
@@ -320,7 +320,7 @@
 			liveMusician: false,
 			woodenUsbDrives: tier === 'legacy' ? 1 : 0
 		};
-		
+
 		// Trigger auto-save when tier changes
 		if (autoSaveEnabled && autoSave) {
 			autoSave.triggerAutoSave({ services, calculatorData });
@@ -353,7 +353,7 @@
 			alert('Unable to calculate booking items. Please check your selections.');
 			return;
 		}
-		
+
 		// Prepare payload for API
 		const payload = {
 			services,
@@ -361,7 +361,7 @@
 			bookingItems,
 			totalPrice: bookingItems.reduce((sum, item) => sum + item.total, 0)
 		};
-		
+
 		try {
 			const response = await fetch(`/api/memorials/${memorialId}/schedule`, {
 				method: 'PATCH',
@@ -378,7 +378,7 @@
 				if (autoSave) {
 					autoSave.clearAutoSave?.();
 				}
-				
+
 				if (!isPayNowFlow) {
 					alert('Schedule saved successfully!');
 				}
@@ -424,27 +424,43 @@
 	}
 </script>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-	<div class="lg:col-span-2 space-y-8">
+<div class="grid grid-cols-1 items-start gap-8 lg:grid-cols-3">
+	<div class="space-y-8 lg:col-span-2">
 		<!-- Auto-save Status -->
 		{#if autoSaveEnabled && showAutoSaveStatus && autoSave}
 			<div class="fixed top-4 right-4 z-50 transition-all duration-300">
 				{#if autoSave.isSaving()}
-					<div class="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2">
-						<div class="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+					<div
+						class="flex items-center space-x-2 rounded-lg bg-blue-500 px-4 py-2 text-white shadow-lg"
+					>
+						<div
+							class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
+						></div>
 						<span class="text-sm">Auto-saving...</span>
 					</div>
 				{:else if autoSave.lastSaved()}
-					<div class="bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2">
-						<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-							<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+					<div
+						class="flex items-center space-x-2 rounded-lg bg-green-500 px-4 py-2 text-white shadow-lg"
+					>
+						<svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+							<path
+								fill-rule="evenodd"
+								d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+								clip-rule="evenodd"
+							></path>
 						</svg>
 						<span class="text-sm">Auto-saved</span>
 					</div>
 				{:else if autoSave.hasUnsavedChanges()}
-					<div class="bg-yellow-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center space-x-2">
-						<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-							<path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+					<div
+						class="flex items-center space-x-2 rounded-lg bg-yellow-500 px-4 py-2 text-white shadow-lg"
+					>
+						<svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+							<path
+								fill-rule="evenodd"
+								d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+								clip-rule="evenodd"
+							></path>
 						</svg>
 						<span class="text-sm">Unsaved changes</span>
 					</div>
@@ -455,43 +471,49 @@
 		{#if currentStep === 'booking'}
 			<TierSelector {selectedTier} onchange={handleTierChange} />
 			{#if selectedTier}
-				<BookingForm 
-					bind:services 
-					bind:calculatorData 
-					bind:lovedOneName 
-					bind:funeralDirectorName 
-					bind:funeralHome 
+				<BookingForm
+					bind:services
+					bind:calculatorData
+					bind:lovedOneName
+					bind:funeralDirectorName
+					bind:funeralHome
 				/>
 			{/if}
 		{:else if currentStep === 'payNow'}
 			{#if memorialId}
 				<StripeCheckout amount={total} {memorialId} {lovedOneName} />
 			{/if}
+		{:else if clientSecret && configId && memorialId}
+			<StripeCheckout amount={total} {memorialId} {lovedOneName} />
 		{:else}
-			{#if clientSecret && configId && memorialId}
-				<StripeCheckout
-					amount={total}
-					{memorialId}
-					{lovedOneName}
-				/>
-			{:else}
-				<div class="card p-4 text-center">
-					<p>There was an error preparing the payment form. Please try again.</p>
-					<button class="btn preset-filled-primary mt-4" onclick={() => currentStep = 'booking'}>Go Back</button>
-				</div>
-			{/if}
+			<div class="card p-4 text-center">
+				<p>There was an error preparing the payment form. Please try again.</p>
+				<button class="btn preset-filled-primary mt-4" onclick={() => (currentStep = 'booking')}
+					>Go Back</button
+				>
+			</div>
 		{/if}
 	</div>
 
 	<div class="lg:col-span-1">
-		<Summary {bookingItems} {total} onsave={() => saveAndPayLater()} onpay={proceedToPayment} onpayNow={handlePayNow} />
-		
+		<Summary
+			{bookingItems}
+			{total}
+			onsave={() => saveAndPayLater()}
+			onpay={proceedToPayment}
+			onpayNow={handlePayNow}
+		/>
+
 		<!-- Auto-save Info Panel -->
 		{#if autoSaveEnabled && autoSave}
-			<div class="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-				<div class="flex items-center space-x-2 mb-2">
-					<svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-						<path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+			<div class="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
+				<div class="mb-2 flex items-center space-x-2">
+					<svg class="h-4 w-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+						<path
+							fill-rule="evenodd"
+							d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+							clip-rule="evenodd"
+						></path>
 					</svg>
 					<span class="text-sm font-medium text-gray-700">Auto-save</span>
 				</div>
@@ -503,7 +525,7 @@
 					{/if}
 				</p>
 				{#if autoSave.hasUnsavedChanges()}
-					<p class="text-xs text-yellow-600 mt-1">You have unsaved changes</p>
+					<p class="mt-1 text-xs text-yellow-600">You have unsaved changes</p>
 				{/if}
 			</div>
 		{/if}

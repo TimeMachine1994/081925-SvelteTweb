@@ -20,16 +20,16 @@ export const GET: RequestHandler = async ({ locals, params }) => {
 	try {
 		// Verify memorial exists and user has access
 		const memorialDoc = await adminDb.collection('memorials').doc(memorialId).get();
-		
+
 		if (!memorialDoc.exists) {
 			console.log('❌ [STREAMS API] Memorial not found:', memorialId);
 			throw SvelteKitError(404, 'Memorial not found');
 		}
 
 		const memorial = memorialDoc.data()!;
-		
+
 		// Check permissions
-		const hasPermission = 
+		const hasPermission =
 			locals.user.role === 'admin' ||
 			memorial.ownerUid === userId ||
 			memorial.funeralDirectorUid === userId;
@@ -41,14 +41,14 @@ export const GET: RequestHandler = async ({ locals, params }) => {
 
 		// Fetch streams from the streams collection
 		console.log('🔍 [STREAMS API] Querying streams collection for memorial:', memorialId);
-		
+
 		const streamsSnapshot = await adminDb
 			.collection('streams')
 			.where('memorialId', '==', memorialId)
 			.get();
 
 		const streams: Stream[] = [];
-		streamsSnapshot.forEach(doc => {
+		streamsSnapshot.forEach((doc) => {
 			streams.push({
 				id: doc.id,
 				...doc.data()
@@ -63,7 +63,7 @@ export const GET: RequestHandler = async ({ locals, params }) => {
 		});
 
 		console.log('✅ [STREAMS API] Found', streams.length, 'streams');
-		
+
 		return json({
 			success: true,
 			streams,
@@ -73,14 +73,13 @@ export const GET: RequestHandler = async ({ locals, params }) => {
 				fullSlug: memorial.fullSlug
 			}
 		});
-
 	} catch (error: any) {
 		console.error('❌ [STREAMS API] Error fetching streams:', error);
-		
+
 		if (error && typeof error === 'object' && 'status' in error) {
 			throw error;
 		}
-		
+
 		throw SvelteKitError(500, 'Failed to fetch streams');
 	}
 };
@@ -101,23 +100,23 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 	try {
 		// Parse request body
 		const { title, description, scheduledStartTime } = await request.json();
-		
+
 		if (!title || typeof title !== 'string' || title.trim().length === 0) {
 			throw SvelteKitError(400, 'Stream title is required');
 		}
 
 		// Verify memorial exists and user has access
 		const memorialDoc = await adminDb.collection('memorials').doc(memorialId).get();
-		
+
 		if (!memorialDoc.exists) {
 			console.log('❌ [STREAMS API] Memorial not found:', memorialId);
 			throw SvelteKitError(404, 'Memorial not found');
 		}
 
 		const memorial = memorialDoc.data()!;
-		
+
 		// Check permissions
-		const hasPermission = 
+		const hasPermission =
 			locals.user.role === 'admin' ||
 			memorial.ownerUid === userId ||
 			memorial.funeralDirectorUid === userId;
@@ -147,7 +146,10 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 				cloudflareInputId = cloudflareInput.uid;
 
 				// DEBUG: Log all available URLs from Cloudflare
-				console.log('🔍 [STREAMS API DEBUG] Full Cloudflare input data:', JSON.stringify(cloudflareInput, null, 2));
+				console.log(
+					'🔍 [STREAMS API DEBUG] Full Cloudflare input data:',
+					JSON.stringify(cloudflareInput, null, 2)
+				);
 				console.log('🔍 [STREAMS API DEBUG] Available URLs:', {
 					rtmps: cloudflareInput.rtmps?.url,
 					rtmp: cloudflareInput.rtmp?.url,
@@ -157,11 +159,14 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 
 				// Use RTMP (non-secure) if available, fallback to RTMPS
 				rtmpUrl = cloudflareInput.rtmp?.url || cloudflareInput.rtmps?.url;
-				
+
 				console.log('✅ [STREAMS API] Cloudflare Live Input created:', cloudflareInputId);
 				console.log('🔑 [STREAMS API] RTMP URL:', rtmpUrl);
 				console.log('🔑 [STREAMS API] Stream Key:', streamKey.substring(0, 8) + '...');
-				console.log('🔍 [STREAMS API] URL Type:', rtmpUrl?.startsWith('rtmps://') ? 'RTMPS (Secure)' : 'RTMP (Standard)');
+				console.log(
+					'🔍 [STREAMS API] URL Type:',
+					rtmpUrl?.startsWith('rtmps://') ? 'RTMPS (Secure)' : 'RTMP (Standard)'
+				);
 			} catch (error) {
 				console.error('❌ [STREAMS API] Failed to create Cloudflare Live Input:', error);
 				// Fall back to placeholder values for development
@@ -193,27 +198,26 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 		// Save to streams collection
 		console.log('💾 [STREAMS API] Saving stream to Firestore...');
 		const streamRef = await adminDb.collection('streams').add(streamData);
-		
+
 		const createdStream: Stream = {
 			id: streamRef.id,
 			...streamData
 		};
 
 		console.log('✅ [STREAMS API] Stream created and saved:', streamRef.id);
-		
+
 		return json({
 			success: true,
 			stream: createdStream,
 			message: 'Stream created successfully'
 		});
-
 	} catch (error: any) {
 		console.error('❌ [STREAMS API] Error creating stream:', error);
-		
+
 		if (error && typeof error === 'object' && 'status' in error) {
 			throw error;
 		}
-		
+
 		throw SvelteKitError(500, 'Failed to create stream');
 	}
 };

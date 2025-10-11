@@ -62,13 +62,17 @@ export const POST: RequestHandler = async ({ request }) => {
 
 				const response = await fetch(cloudflareUrl, {
 					headers: {
-						'Authorization': `Bearer ${env.CLOUDFLARE_API_TOKEN}`,
+						Authorization: `Bearer ${env.CLOUDFLARE_API_TOKEN}`,
 						'Content-Type': 'application/json'
 					}
 				});
 
 				if (!response.ok) {
-					console.log('❌ [LIVE STATUS] Cloudflare API error for stream:', streamId, response.status);
+					console.log(
+						'❌ [LIVE STATUS] Cloudflare API error for stream:',
+						streamId,
+						response.status
+					);
 					results.push({
 						streamId,
 						cloudflareInputId,
@@ -102,7 +106,14 @@ export const POST: RequestHandler = async ({ request }) => {
 				const isCurrentlyLive = liveInput.status?.current?.state === 'connected';
 				const wasLive = stream.status === 'live';
 
-				console.log('🔍 [LIVE STATUS] Stream', streamId, '- Was live:', wasLive, 'Is live:', isCurrentlyLive);
+				console.log(
+					'🔍 [LIVE STATUS] Stream',
+					streamId,
+					'- Was live:',
+					wasLive,
+					'Is live:',
+					isCurrentlyLive
+				);
 
 				let updated = false;
 
@@ -110,17 +121,20 @@ export const POST: RequestHandler = async ({ request }) => {
 				if (isCurrentlyLive && !wasLive) {
 					// Stream went live
 					console.log('🔴 [LIVE STATUS] Stream went live:', streamId);
-					
+
 					// Check if this is a WHIP stream (browser streaming)
 					const isWhipStream = stream.whipEnabled === true;
-					console.log('🎬 [LIVE STATUS] Stream type:', isWhipStream ? 'WHIP (browser)' : 'RTMP (external)');
-					
+					console.log(
+						'🎬 [LIVE STATUS] Stream type:',
+						isWhipStream ? 'WHIP (browser)' : 'RTMP (external)'
+					);
+
 					const updateData: any = {
 						status: 'live',
 						startedAt: new Date().toISOString(),
 						updatedAt: new Date().toISOString()
 					};
-					
+
 					// Hide WHIP streams by default (for production feeds)
 					// Keep RTMP streams visible by default (for public viewing)
 					// Note: Users can still manually toggle visibility later
@@ -130,7 +144,7 @@ export const POST: RequestHandler = async ({ request }) => {
 					} else {
 						console.log('👁️ [LIVE STATUS] Keeping RTMP stream visible for public:', streamId);
 					}
-					
+
 					await adminDb.collection('streams').doc(streamId).update(updateData);
 					updated = true;
 					updatedCount++;
@@ -149,11 +163,21 @@ export const POST: RequestHandler = async ({ request }) => {
 					// Check for recordings after a short delay (Cloudflare needs time to process)
 					setTimeout(async () => {
 						try {
-							console.log('🎥 [LIVE STATUS] Checking for recordings after stream completion:', streamId);
-							const recordingsResponse = await fetch(`http://localhost:5173/api/streams/${streamId}/recordings`);
+							console.log(
+								'🎥 [LIVE STATUS] Checking for recordings after stream completion:',
+								streamId
+							);
+							const recordingsResponse = await fetch(
+								`http://localhost:5173/api/streams/${streamId}/recordings`
+							);
 							if (recordingsResponse.ok) {
 								const recordingsData = await recordingsResponse.json();
-								console.log('✅ [LIVE STATUS] Recording check completed for:', streamId, 'Found:', recordingsData.recordingCount);
+								console.log(
+									'✅ [LIVE STATUS] Recording check completed for:',
+									streamId,
+									'Found:',
+									recordingsData.recordingCount
+								);
 							}
 						} catch (error) {
 							console.error('❌ [LIVE STATUS] Error checking recordings:', error);
@@ -166,12 +190,12 @@ export const POST: RequestHandler = async ({ request }) => {
 					cloudflareInputId,
 					wasLive,
 					isLive: isCurrentlyLive,
-					status: isCurrentlyLive ? 'live' : (wasLive ? 'completed' : stream.status),
+					status: isCurrentlyLive ? 'live' : wasLive ? 'completed' : stream.status,
 					updated,
-					lastConnected: liveInput.status?.current?.startTimeSeconds ? 
-						new Date(liveInput.status.current.startTimeSeconds * 1000).toISOString() : null
+					lastConnected: liveInput.status?.current?.startTimeSeconds
+						? new Date(liveInput.status.current.startTimeSeconds * 1000).toISOString()
+						: null
 				});
-
 			} catch (error: any) {
 				console.error('❌ [LIVE STATUS] Error checking stream:', streamId, error);
 				results.push({
@@ -195,12 +219,11 @@ export const POST: RequestHandler = async ({ request }) => {
 			summary: {
 				total: streamIds.length,
 				updated: updatedCount,
-				errors: results.filter(r => r.error).length,
-				live: results.filter(r => r.isLive).length
+				errors: results.filter((r) => r.error).length,
+				live: results.filter((r) => r.isLive).length
 			},
 			timestamp: new Date().toISOString()
 		});
-
 	} catch (error: any) {
 		console.error('❌ [LIVE STATUS] Error processing request:', error);
 

@@ -1,15 +1,24 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { loadStripe, type Stripe, type StripeElements, type StripeCardElement } from '@stripe/stripe-js';
-	
-	let { amount, memorialId, lovedOneName } = $props<{ amount: number, memorialId: string, lovedOneName: string }>();
+	import {
+		loadStripe,
+		type Stripe,
+		type StripeElements,
+		type StripeCardElement
+	} from '@stripe/stripe-js';
+
+	let { amount, memorialId, lovedOneName } = $props<{
+		amount: number;
+		memorialId: string;
+		lovedOneName: string;
+	}>();
 	let stripe: Stripe | null = $state(null);
 	let elements: StripeElements | null = $state(null);
 	let cardElement: StripeCardElement | null = $state(null);
 	let processing = $state(false);
 	let error: string | null = $state(null);
 	let clientSecret: string | null = $state(null);
-	
+
 	onMount(async () => {
 		console.log('StripeCheckout component mounted 💳');
 		const stripeKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY;

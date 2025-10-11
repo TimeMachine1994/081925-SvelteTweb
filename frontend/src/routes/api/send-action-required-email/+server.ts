@@ -7,71 +7,77 @@ const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || 'http://localhost:5173';
 
 // Initialize SendGrid
 if (SENDGRID_API_KEY && SENDGRID_API_KEY !== 'mock_key') {
-  sgMail.setApiKey(SENDGRID_API_KEY);
+	sgMail.setApiKey(SENDGRID_API_KEY);
 }
 
 export const POST: RequestHandler = async ({ request }) => {
-  try {
-    const { memorialId, paymentIntentId, customerEmail, lovedOneName, nextActionUrl } = await request.json();
+	try {
+		const { memorialId, paymentIntentId, customerEmail, lovedOneName, nextActionUrl } =
+			await request.json();
 
-    if (!memorialId || !paymentIntentId || !customerEmail || !lovedOneName) {
-      return json({ error: 'Missing required data' }, { status: 400 });
-    }
+		if (!memorialId || !paymentIntentId || !customerEmail || !lovedOneName) {
+			return json({ error: 'Missing required data' }, { status: 400 });
+		}
 
-    console.log('📧 Sending action required email to:', customerEmail);
+		console.log('📧 Sending action required email to:', customerEmail);
 
-    // Generate email content
-    const emailHtml = generateActionRequiredEmailHTML({
-      memorialId,
-      paymentIntentId,
-      customerEmail,
-      lovedOneName,
-      nextActionUrl,
-      actionDate: new Date()
-    });
+		// Generate email content
+		const emailHtml = generateActionRequiredEmailHTML({
+			memorialId,
+			paymentIntentId,
+			customerEmail,
+			lovedOneName,
+			nextActionUrl,
+			actionDate: new Date()
+		});
 
-    // Send email with SendGrid
-    if (SENDGRID_API_KEY && SENDGRID_API_KEY !== 'mock_key') {
-      await sgMail.send({
-        from: FROM_EMAIL || 'TributeStream <noreply@tributestream.com>',
-        to: customerEmail,
-        subject: `TributeStream Payment Action Required - ${lovedOneName}`,
-        html: emailHtml,
-      });
+		// Send email with SendGrid
+		if (SENDGRID_API_KEY && SENDGRID_API_KEY !== 'mock_key') {
+			await sgMail.send({
+				from: FROM_EMAIL || 'TributeStream <noreply@tributestream.com>',
+				to: customerEmail,
+				subject: `TributeStream Payment Action Required - ${lovedOneName}`,
+				html: emailHtml
+			});
 
-      console.log('✅ Action required email sent successfully via SendGrid');
-    } else {
-      // Mock for development
-      console.log('✅ Action required email sent successfully (mock - configure SENDGRID_API_KEY for production)');
-    }
+			console.log('✅ Action required email sent successfully via SendGrid');
+		} else {
+			// Mock for development
+			console.log(
+				'✅ Action required email sent successfully (mock - configure SENDGRID_API_KEY for production)'
+			);
+		}
 
-    return json({ 
-      success: true, 
-      message: 'Action required email sent successfully'
-    });
-
-  } catch (error) {
-    console.error('Failed to send action required email:', error);
-    return json(
-      { error: 'Failed to send action required email', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
-  }
+		return json({
+			success: true,
+			message: 'Action required email sent successfully'
+		});
+	} catch (error) {
+		console.error('Failed to send action required email:', error);
+		return json(
+			{
+				error: 'Failed to send action required email',
+				details: error instanceof Error ? error.message : 'Unknown error'
+			},
+			{ status: 500 }
+		);
+	}
 };
 
 interface ActionRequiredEmailData {
-  memorialId: string;
-  paymentIntentId: string;
-  customerEmail: string;
-  lovedOneName: string;
-  nextActionUrl?: string;
-  actionDate: Date;
+	memorialId: string;
+	paymentIntentId: string;
+	customerEmail: string;
+	lovedOneName: string;
+	nextActionUrl?: string;
+	actionDate: Date;
 }
 
 function generateActionRequiredEmailHTML(data: ActionRequiredEmailData): string {
-  const { memorialId, paymentIntentId, customerEmail, lovedOneName, nextActionUrl, actionDate } = data;
-  
-  return `
+	const { memorialId, paymentIntentId, customerEmail, lovedOneName, nextActionUrl, actionDate } =
+		data;
+
+	return `
 <!DOCTYPE html>
 <html>
 <head>
@@ -117,17 +123,21 @@ function generateActionRequiredEmailHTML(data: ActionRequiredEmailData): string 
           <li>Complete any required authentication steps</li>
         </ol>
         
-        ${nextActionUrl ? `
+        ${
+					nextActionUrl
+						? `
         <p>Complete your payment verification:</p>
         <a href="${nextActionUrl}" class="action-button">
           Complete Payment Verification
         </a>
-        ` : `
+        `
+						: `
         <p>Return to your booking to complete the payment:</p>
         <a href="${PUBLIC_BASE_URL || 'https://tributestream.com'}/schedule/${memorialId}" class="action-button">
           Complete Payment
         </a>
-        `}
+        `
+				}
       </div>
       
       <p><strong>Important:</strong> Your memorial service reservation is held for 24 hours while you complete this verification. Please complete the process as soon as possible to secure your booking.</p>

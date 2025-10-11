@@ -80,7 +80,14 @@
 					</div>
 					<div class="form-group">
 						<label for="name" class="form-label">Your Name *</label>
-						<input id="name" name="name" type="text" required bind:value={name} class="form-input" />
+						<input
+							id="name"
+							name="name"
+							type="text"
+							required
+							bind:value={name}
+							class="form-input"
+						/>
 					</div>
 					<div class="form-group">
 						<label for="email" class="form-label">Your Email *</label>
@@ -142,7 +149,7 @@
 	/* Styles adapted from funeral-director registration */
 	.registration-container {
 		min-height: 100vh;
-		background: linear-gradient(135deg, #D5BA7F 0%, #B8A06B 100%);
+		background: linear-gradient(135deg, #d5ba7f 0%, #b8a06b 100%);
 		padding: 2rem 1rem;
 		display: flex;
 		align-items: center;
@@ -152,7 +159,9 @@
 	.registration-card {
 		background: white;
 		border-radius: 16px;
-		box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+		box-shadow:
+			0 20px 25px -5px rgba(0, 0, 0, 0.1),
+			0 10px 10px -5px rgba(0, 0, 0, 0.04);
 		max-width: 800px;
 		width: 100%;
 		overflow: hidden;
@@ -160,7 +169,7 @@
 
 	.form-header {
 		background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-		color: #D5BA7F;
+		color: #d5ba7f;
 		padding: 2rem;
 		text-align: center;
 	}
@@ -228,7 +237,7 @@
 
 	.form-input:focus {
 		outline: none;
-		border-color: #D5BA7F;
+		border-color: #d5ba7f;
 		box-shadow: 0 0 0 3px rgba(213, 186, 127, 0.1);
 	}
 
@@ -290,7 +299,7 @@
 	}
 
 	.submit-button {
-		background: linear-gradient(135deg, #D5BA7F 0%, #B8A06B 100%);
+		background: linear-gradient(135deg, #d5ba7f 0%, #b8a06b 100%);
 		color: #1a1a1a;
 		border: none;
 		padding: 1rem 2rem;
@@ -304,7 +313,7 @@
 	}
 
 	.submit-button:hover {
-		background: linear-gradient(135deg, #E5CA8F 0%, #C5AA6F 100%);
+		background: linear-gradient(135deg, #e5ca8f 0%, #c5aa6f 100%);
 		transform: translateY(-1px);
 		box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1);
 	}

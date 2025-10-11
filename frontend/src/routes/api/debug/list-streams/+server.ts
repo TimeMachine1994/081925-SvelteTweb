@@ -7,10 +7,7 @@ export const GET: RequestHandler = async () => {
 	console.log('🔍 [DEBUG] Listing streams for testing');
 
 	try {
-		const streamsSnapshot = await adminDb
-			.collection('streams')
-			.limit(10)
-			.get();
+		const streamsSnapshot = await adminDb.collection('streams').limit(10).get();
 
 		if (streamsSnapshot.empty) {
 			return json({
@@ -25,10 +22,10 @@ export const GET: RequestHandler = async () => {
 		const streams: any[] = [];
 		const streamIds: string[] = [];
 
-		streamsSnapshot.forEach(doc => {
+		streamsSnapshot.forEach((doc) => {
 			const data = doc.data();
 			streamIds.push(doc.id);
-			
+
 			streams.push({
 				id: doc.id,
 				title: data.title || 'N/A',
@@ -52,14 +49,16 @@ export const GET: RequestHandler = async () => {
 			count: streams.length,
 			testCommand
 		});
-
 	} catch (error: any) {
 		console.error('❌ [DEBUG] Error listing streams:', error);
-		
-		return json({
-			success: false,
-			message: 'Failed to list streams',
-			error: error.message
-		}, { status: 500 });
+
+		return json(
+			{
+				success: false,
+				message: 'Failed to list streams',
+				error: error.message
+			},
+			{ status: 500 }
+		);
 	}
 };

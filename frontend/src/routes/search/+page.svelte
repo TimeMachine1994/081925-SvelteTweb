@@ -23,7 +23,7 @@
 					query: searchQuery
 				}
 			});
-			
+
 			searchResults = response.results?.hits || [];
 		} catch (error) {
 			console.error('Error searching Algolia:', error);
@@ -43,17 +43,17 @@
 </script>
 
 <div class="container mx-auto p-4 md:p-8 lg:p-12">
-	<h1 class="h1 text-center mb-8">Search Tributes</h1>
-	<div class="max-w-2xl mx-auto">
+	<h1 class="h1 mb-8 text-center">Search Tributes</h1>
+	<div class="mx-auto max-w-2xl">
 		<input
 			type="text"
 			placeholder="Search for a loved one..."
-			class="w-full px-4 py-3 rounded-md border border-gray-300 text-lg"
+			class="w-full rounded-md border border-gray-300 px-4 py-3 text-lg"
 			bind:value={searchQuery}
 		/>
 
 		{#if loading}
-			<p class="text-center mt-4">Searching...</p>
+			<p class="mt-4 text-center">Searching...</p>
 		{/if}
 
 		<div class="mt-8">
@@ -61,7 +61,10 @@
 				<ul class="space-y-4">
 					{#each searchResults as hit}
 						<li>
-							<a href="/{hit.fullSlug || `tributes/${hit.slug}`}" class="block p-4 border rounded-lg hover:bg-gray-100">
+							<a
+								href="/{hit.fullSlug || `tributes/${hit.slug}`}"
+								class="block rounded-lg border p-4 hover:bg-gray-100"
+							>
 								<h2 class="text-xl font-bold">{hit.lovedOneName}</h2>
 								{#if hit.createdAt?._seconds}
 									<p class="text-gray-600">
@@ -73,7 +76,7 @@
 					{/each}
 				</ul>
 			{:else if searchQuery.length >= 2 && !loading}
-				<p class="text-center mt-4">No results found for "{searchQuery}".</p>
+				<p class="mt-4 text-center">No results found for "{searchQuery}".</p>
 			{/if}
 		</div>
 	</div>

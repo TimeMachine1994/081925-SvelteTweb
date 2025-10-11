@@ -55,17 +55,17 @@
 </script>
 
 <div class="card p-4 md:p-6">
-	<h2 class="h2 text-center mb-6">Choose Your Package</h2>
-	<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+	<h2 class="h2 mb-6 text-center">Choose Your Package</h2>
+	<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
 		{#each tiers as tier}
 			<button
-				class="card preset-filled-surface-200-800 p-4 text-left space-y-4 transition-all duration-200 card-hover"
+				class="card preset-filled-surface-200-800 card-hover space-y-4 p-4 text-left transition-all duration-200"
 				class:preset-outlined-primary-500={selectedTier === tier.alias}
 				onclick={() => selectTier(tier.alias as Tier)}
 			>
 				<h3 class="h3">{tier.name}</h3>
-				<p class="h1 font-bold text-primary-500">${tier.price}</p>
-				<ul class="list-disc list-inside space-y-2">
+				<p class="h1 text-primary-500 font-bold">${tier.price}</p>
+				<ul class="list-inside list-disc space-y-2">
 					{#each tier.features as feature}
 						<li>{feature}</li>
 					{/each}

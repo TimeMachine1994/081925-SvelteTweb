@@ -3,6 +3,7 @@
 ## Ready to Go! ✅
 
 You have everything configured:
+
 - ✅ Webhook endpoint with signature verification
 - ✅ Environment variables (CLOUDFLARE_WEBHOOK_SECRET, etc.)
 - ✅ StreamCard component with live/not live icons
@@ -43,15 +44,17 @@ ngrok http 5173
 ## 🔍 What to Watch For
 
 ### Before OBS Connection:
+
 ```
 StreamCard: [  ] Stream Title                [Scheduled]
 Terminal: No webhook logs
 ```
 
 ### After OBS Connection:
+
 ```
 StreamCard: [🔴] Stream Title (pulsing)      [LIVE]
-Terminal: 
+Terminal:
 🎬 [CLOUDFLARE WEBHOOK] Received stream status update
 ✅ [CLOUDFLARE WEBHOOK] Signature verified
 📡 [CLOUDFLARE WEBHOOK] Payload: { "data": { "event_type": "live_input.connected", ... } }
@@ -61,15 +64,18 @@ Terminal:
 ## 🛠️ Troubleshooting
 
 ### No webhook received?
+
 - ✅ Check ngrok is running and URL is correct
 - ✅ Verify Cloudflare webhook URL includes `/api/webhooks/stream-status`
 - ✅ Test endpoint: Visit `https://your-ngrok-url.ngrok.io/api/webhooks/stream-status` in browser
 
 ### Webhook received but signature error?
+
 - ✅ Check your `CLOUDFLARE_WEBHOOK_SECRET` in `.env`
 - ✅ Verify the secret matches what's configured in Cloudflare
 
 ### Status updates but UI doesn't change?
+
 - ✅ Wait 5 seconds for polling to update
 - ✅ Refresh the page to see database changes
 - ✅ Check browser console for errors
@@ -88,6 +94,7 @@ Terminal:
 ---
 
 **Next Steps After Success:**
+
 - Deploy to production and update webhook to production URL
 - Test recording webhooks for archive functionality
 - Add viewer count and stream analytics

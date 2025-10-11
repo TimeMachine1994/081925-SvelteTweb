@@ -17,7 +17,7 @@
 
 	// Use reactive state for streams that can be updated
 	let currentStreams = $state(streams || []);
-	
+
 	// Update currentStreams when props change
 	$effect(() => {
 		currentStreams = streams || [];
@@ -31,7 +31,7 @@
 		timeInterval = setInterval(() => {
 			currentTime = new Date();
 		}, 1000);
-		
+
 		// Poll for stream updates with smart intervals
 		console.log('🎬 [MEMORIAL] Starting smart polling for stream updates...');
 		pollingInterval = setInterval(async () => {
@@ -51,7 +51,7 @@
 		};
 
 		document.addEventListener('visibilitychange', handleVisibilityChange);
-		
+
 		// Cleanup visibility listener
 		return () => {
 			document.removeEventListener('visibilitychange', handleVisibilityChange);
@@ -67,7 +67,7 @@
 	async function checkForUpdates() {
 		try {
 			console.log('🎬 [MEMORIAL] Checking for stream updates...');
-			
+
 			// Fetch only stream data, not entire page
 			const response = await fetch(`/api/memorials/${memorialId}/streams`);
 			if (response.ok) {
@@ -88,9 +88,9 @@
 	// Categorize streams by status and priority with flexible logic
 	let categorizedStreams = $derived.by(() => {
 		const now = currentTime.getTime();
-		
+
 		// More flexible live stream detection with enhanced debugging
-		const liveStreams = safeStreams.filter(s => {
+		const liveStreams = safeStreams.filter((s) => {
 			console.log(`🔍 [STREAM_DEBUG] Checking stream ${s.id}:`, {
 				title: s.title,
 				status: s.status,
@@ -100,91 +100,91 @@
 				cloudflareInputId: s.cloudflareInputId,
 				cloudflareStreamId: s.cloudflareStreamId
 			});
-			
+
 			// Primary: explicit live status
 			if (s.status === 'live') {
 				console.log(`✅ [STREAM_DEBUG] Stream ${s.id} is LIVE (status: live)`);
 				return true;
 			}
-			
+
 			// Fallback: started but not ended (legacy support)
 			if (s.status === 'ready' && s.startedAt && !s.endedAt) {
 				console.log(`✅ [STREAM_DEBUG] Stream ${s.id} is LIVE (started but not ended)`);
 				return true;
 			}
-			
+
 			// Legacy: isLive field support
 			if (s.status === 'ready' && (s as any).isLive) {
 				console.log(`✅ [STREAM_DEBUG] Stream ${s.id} is LIVE (isLive flag)`);
 				return true;
 			}
-			
+
 			console.log(`❌ [STREAM_DEBUG] Stream ${s.id} is NOT live`);
 			return false;
 		});
-		
+
 		// Better scheduled stream logic with fallbacks
-		const scheduledStreams = safeStreams.filter(s => {
+		const scheduledStreams = safeStreams.filter((s) => {
 			if (!s.scheduledStartTime) return false;
-			
+
 			try {
 				const scheduledTime = new Date(s.scheduledStartTime).getTime();
 				if (isNaN(scheduledTime)) return false;
-				
+
 				// Must be in the future
 				if (scheduledTime <= now) return false;
-				
+
 				// Primary: explicit scheduled status
 				if (s.status === 'scheduled') return true;
-				
+
 				// Fallback: ready status with future scheduled time
 				if (s.status === 'ready' && !s.startedAt) return true;
-				
+
 				return false;
 			} catch {
 				return false;
 			}
 		});
-		
+
 		// More flexible recording detection with multiple fallbacks
-		const recordedStreams = safeStreams.filter(s => {
+		const recordedStreams = safeStreams.filter((s) => {
 			// Check if we have any form of playable content
-			const hasPlayableContent = s.recordingPlaybackUrl || 
-									  s.cloudflareStreamId || 
-									  s.playbackUrl || 
-									  s.recordingUrl;
-			
-			console.log(`🎥 [FILTER] Stream ${s.id}: status=${s.status}, hasContent=${hasPlayableContent}, recordingReady=${s.recordingReady}, cloudflareStreamId=${s.cloudflareStreamId}`);
-			
+			const hasPlayableContent =
+				s.recordingPlaybackUrl || s.cloudflareStreamId || s.playbackUrl || s.recordingUrl;
+
+			console.log(
+				`🎥 [FILTER] Stream ${s.id}: status=${s.status}, hasContent=${hasPlayableContent}, recordingReady=${s.recordingReady}, cloudflareStreamId=${s.cloudflareStreamId}`
+			);
+
 			if (!hasPlayableContent) {
 				console.log(`❌ [FILTER] Stream ${s.id} rejected: no playable content`);
 				return false;
 			}
-			
+
 			// Primary: explicit completed status with recording ready
 			if (s.status === 'completed' && s.recordingReady) {
 				console.log(`✅ [FILTER] Stream ${s.id} accepted: completed + recordingReady`);
 				return true;
 			}
-			
+
 			// Fallback: completed status with any playback URL
 			if (s.status === 'completed' && hasPlayableContent) {
 				console.log(`✅ [FILTER] Stream ${s.id} accepted: completed + hasPlayableContent`);
 				return true;
 			}
-			
+
 			// Fallback: ended stream with recording
 			if (s.endedAt && hasPlayableContent) {
 				console.log(`✅ [FILTER] Stream ${s.id} accepted: endedAt + hasPlayableContent`);
 				return true;
 			}
-			
+
 			// Fallback: recording ready flag with content
 			if (s.recordingReady && hasPlayableContent) {
 				console.log(`✅ [FILTER] Stream ${s.id} accepted: recordingReady + hasPlayableContent`);
 				return true;
 			}
-			
+
 			console.log(`❌ [FILTER] Stream ${s.id} rejected: no conditions matched`);
 			return false;
 		});
@@ -194,7 +194,7 @@
 			live: liveStreams.length,
 			scheduled: scheduledStreams.length,
 			recorded: recordedStreams.length,
-			streams: safeStreams.map(s => ({
+			streams: safeStreams.map((s) => ({
 				id: s.id,
 				title: s.title,
 				status: s.status,
@@ -211,7 +211,13 @@
 	});
 
 	// Get countdown for scheduled stream
-	function getCountdown(scheduledTime: string): { days: number; hours: number; minutes: number; seconds: number; isStarted: boolean } {
+	function getCountdown(scheduledTime: string): {
+		days: number;
+		hours: number;
+		minutes: number;
+		seconds: number;
+		isStarted: boolean;
+	} {
 		const now = currentTime.getTime();
 		const target = new Date(scheduledTime).getTime();
 		const diff = target - now;
@@ -252,7 +258,7 @@
 			playbackUrl: stream.playbackUrl,
 			recordingUrl: stream.recordingUrl
 		});
-		
+
 		// For LIVE streams, prioritize live playback URLs
 		if (stream.status === 'live') {
 			// Priority 1: Cloudflare Stream ID for live streams
@@ -261,21 +267,21 @@
 				console.log('🎬 [MEMORIAL] Using Cloudflare iframe URL for LIVE stream:', url);
 				return url;
 			}
-			
+
 			// Priority 2: Use Input ID for live streams (Cloudflare Live Input)
 			if (stream.cloudflareInputId) {
 				const url = `https://customer-dyz4fsbg86xy3krn.cloudflarestream.com/${stream.cloudflareInputId}/iframe`;
 				console.log('🎬 [MEMORIAL] Using Cloudflare Input iframe URL for LIVE stream:', url);
 				return url;
 			}
-			
+
 			// Priority 3: Live playback URL if available
 			if (stream.playbackUrl) {
 				console.log('🎬 [MEMORIAL] Using playback URL for LIVE stream:', stream.playbackUrl);
 				return stream.playbackUrl;
 			}
 		}
-		
+
 		// For RECORDED/COMPLETED streams
 		if (stream.status === 'completed') {
 			// Priority 1: Cloudflare Stream ID (for recordings) - USE IFRAME, NOT MANIFEST
@@ -284,38 +290,38 @@
 				console.log('🎬 [MEMORIAL] Using Cloudflare iframe URL for recording:', url);
 				return url;
 			}
-			
+
 			// Priority 2: Recording playback URL (only if no cloudflareStreamId)
 			if (stream.recordingPlaybackUrl && !stream.recordingPlaybackUrl.includes('.m3u8')) {
 				console.log('🎬 [MEMORIAL] Using recording playback URL:', stream.recordingPlaybackUrl);
 				return stream.recordingPlaybackUrl;
 			}
-			
+
 			// Priority 3: Legacy recording URL
 			if (stream.recordingUrl) {
 				console.log('🎬 [MEMORIAL] Using legacy recording URL:', stream.recordingUrl);
 				return stream.recordingUrl;
 			}
 		}
-		
+
 		// Fallback for any status: try all available URLs
 		if (stream.cloudflareStreamId) {
 			const url = `https://customer-dyz4fsbg86xy3krn.cloudflarestream.com/${stream.cloudflareStreamId}/iframe`;
 			console.log('🎬 [MEMORIAL] Using Cloudflare iframe URL (fallback):', url);
 			return url;
 		}
-		
+
 		if (stream.cloudflareInputId) {
 			const url = `https://customer-dyz4fsbg86xy3krn.cloudflarestream.com/${stream.cloudflareInputId}/iframe`;
 			console.log('🎬 [MEMORIAL] Using Cloudflare Input iframe URL (fallback):', url);
 			return url;
 		}
-		
+
 		if (stream.playbackUrl) {
 			console.log('🎬 [MEMORIAL] Using playback URL (fallback):', stream.playbackUrl);
 			return stream.playbackUrl;
 		}
-		
+
 		console.log('🎬 [MEMORIAL] No playback URL found for stream');
 		return '';
 	}
@@ -324,9 +330,7 @@
 <!-- Live Streams Section -->
 {#if categorizedStreams.liveStreams.length > 0}
 	<div class="stream-section live-section">
-		<h2 class="section-title live-title">
-			🔴 Live Memorial Services
-		</h2>
+		<h2 class="section-title live-title">🔴 Live Memorial Services</h2>
 		{#each categorizedStreams.liveStreams as stream (stream.id)}
 			{@const streamUrl = getStreamPlayerUrl(stream)}
 			<div class="stream-card live-card">
@@ -337,7 +341,7 @@
 						LIVE
 					</div>
 				</div>
-				
+
 				{#if stream.description}
 					<p class="stream-description">{stream.description}</p>
 				{/if}
@@ -374,9 +378,7 @@
 <!-- Scheduled Streams Section -->
 {#if categorizedStreams.scheduledStreams.length > 0}
 	<div class="stream-section scheduled-section">
-		<h2 class="section-title scheduled-title">
-			📅 Upcoming Memorial Services
-		</h2>
+		<h2 class="section-title scheduled-title">📅 Upcoming Memorial Services</h2>
 		{#each categorizedStreams.scheduledStreams as stream (stream.id)}
 			{@const countdown = getCountdown(stream.scheduledStartTime!)}
 			<div class="stream-card scheduled-card">
@@ -387,7 +389,7 @@
 						SCHEDULED
 					</div>
 				</div>
-				
+
 				{#if stream.description}
 					<p class="stream-description">{stream.description}</p>
 				{/if}
@@ -425,20 +427,18 @@
 
 <!-- Recorded Streams Section -->
 {#if categorizedStreams.recordedStreams.length > 0}
-	{@const _ = console.log(`🎬 [RENDER] Rendering ${categorizedStreams.recordedStreams.length} recorded streams`)}
+	{@const _ = console.log(
+		`🎬 [RENDER] Rendering ${categorizedStreams.recordedStreams.length} recorded streams`
+	)}
 	<div class="stream-section recorded-section">
-		<h2 class="section-title recorded-title">
-			🎥 Recorded Memorial Services
-		</h2>
+		<h2 class="section-title recorded-title">🎥 Recorded Memorial Services</h2>
 		{#each categorizedStreams.recordedStreams as stream (stream.id)}
 			<div class="stream-card recorded-card">
 				<div class="stream-header">
 					<h3 class="stream-title">{stream.title}</h3>
-					<div class="recorded-indicator">
-						RECORDED
-					</div>
+					<div class="recorded-indicator">RECORDED</div>
 				</div>
-				
+
 				{#if stream.description}
 					<p class="stream-description">{stream.description}</p>
 				{/if}
@@ -566,8 +566,13 @@
 	}
 
 	@keyframes pulse {
-		0%, 100% { opacity: 1; }
-		50% { opacity: 0.5; }
+		0%,
+		100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.5;
+		}
 	}
 
 	.scheduled-indicator {

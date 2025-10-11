@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import Hls from 'hls.js';
-	
+
 	let hlsUrl = $state<string | null>(null);
 	let error = $state<string | null>(null);
 	let videoElement: HTMLVideoElement | undefined = $state();
@@ -14,7 +14,7 @@
 	onMount(async () => {
 		const streamId = $page.params.streamId;
 		console.log('📺 [HLS] Starting HLS player for stream:', streamId);
-		
+
 		await fetchHLSUrl(streamId);
 		if (hlsUrl && videoElement) {
 			setupVideoEvents();
@@ -95,7 +95,7 @@
 
 				hls.on(Hls.Events.ERROR, (event, data) => {
 					console.error('❌ [HLS] Error:', data);
-					
+
 					if (data.fatal) {
 						switch (data.type) {
 							case Hls.ErrorTypes.NETWORK_ERROR:
@@ -121,7 +121,6 @@
 						}
 					}
 				});
-
 			} else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
 				// Native HLS support (Safari)
 				videoElement.src = hlsUrl;
@@ -135,7 +134,6 @@
 			} else {
 				throw new Error('HLS is not supported in this browser');
 			}
-
 		} catch (err) {
 			console.error('❌ [HLS] Player initialization error:', err);
 			error = err instanceof Error ? err.message : 'Player initialization failed';
@@ -153,7 +151,7 @@
 	// Handle video events - called from onMount to avoid timeout issues
 	function setupVideoEvents() {
 		if (!videoElement) return;
-		
+
 		videoElement.addEventListener('waiting', () => {
 			if (connectionStatus === 'connected') {
 				connectionStatus = 'buffering';
@@ -171,15 +169,15 @@
 </script>
 
 <svelte:head>
-<title>HLS Stream for OBS</title>
-<style>
-body { 
-margin: 0; 
-padding: 0; 
-background: #000; 
-overflow: hidden;
-}
-</style>
+	<title>HLS Stream for OBS</title>
+	<style>
+		body {
+			margin: 0;
+			padding: 0;
+			background: #000;
+			overflow: hidden;
+		}
+	</style>
 </svelte:head>
 
 <div class="hls-container">
@@ -198,9 +196,7 @@ overflow: hidden;
 			<p>❌ Stream Error</p>
 			{#if error}
 				<p class="error-text">{error}</p>
-				<button class="retry-button" onclick={retry}>
-					🔄 Retry
-				</button>
+				<button class="retry-button" onclick={retry}> 🔄 Retry </button>
 			{/if}
 		</div>
 	{/if}
@@ -220,101 +216,110 @@ overflow: hidden;
 </div>
 
 <style>
-.hls-container {
-width: 100vw;
-height: 100vh;
-position: relative;
-background: #000;
-display: flex;
-align-items: center;
-justify-content: center;
-overflow: hidden;
-}
+	.hls-container {
+		width: 100vw;
+		height: 100vh;
+		position: relative;
+		background: #000;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		overflow: hidden;
+	}
 
-.video-player {
-width: 100%;
-height: 100%;
-object-fit: contain;
-background: #000;
-}
+	.video-player {
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+		background: #000;
+	}
 
-.video-player.connected {
-display: block;
-}
+	.video-player.connected {
+		display: block;
+	}
 
-.status-overlay {
-position: absolute;
-top: 50%;
-left: 50%;
-transform: translate(-50%, -50%);
-text-align: center;
-color: white;
-z-index: 10;
-max-width: 80%;
-}
+	.status-overlay {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		text-align: center;
+		color: white;
+		z-index: 10;
+		max-width: 80%;
+	}
 
-.status-overlay.error {
-color: #ff6b6b;
-}
+	.status-overlay.error {
+		color: #ff6b6b;
+	}
 
-.error-text {
-font-size: 0.9em;
-opacity: 0.8;
-margin-top: 10px;
-word-wrap: break-word;
-}
+	.error-text {
+		font-size: 0.9em;
+		opacity: 0.8;
+		margin-top: 10px;
+		word-wrap: break-word;
+	}
 
-.retry-button {
-background: #007bff;
-color: white;
-border: none;
-padding: 10px 20px;
-border-radius: 5px;
-cursor: pointer;
-margin-top: 15px;
-font-size: 0.9em;
-}
+	.retry-button {
+		background: #007bff;
+		color: white;
+		border: none;
+		padding: 10px 20px;
+		border-radius: 5px;
+		cursor: pointer;
+		margin-top: 15px;
+		font-size: 0.9em;
+	}
 
-.retry-button:hover {
-background: #0056b3;
-}
+	.retry-button:hover {
+		background: #0056b3;
+	}
 
-.spinner {
-width: 40px;
-height: 40px;
-border: 4px solid #333;
-border-top: 4px solid #fff;
-border-radius: 50%;
-animation: spin 1s linear infinite;
-margin: 0 auto 20px;
-}
+	.spinner {
+		width: 40px;
+		height: 40px;
+		border: 4px solid #333;
+		border-top: 4px solid #fff;
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+		margin: 0 auto 20px;
+	}
 
-.live-indicator {
-position: absolute;
-top: 20px;
-left: 20px;
-background: rgba(255, 0, 0, 0.9);
-color: white;
-padding: 8px 16px;
-border-radius: 20px;
-font-weight: bold;
-font-size: 14px;
-z-index: 10;
-animation: pulse 2s infinite;
-}
+	.live-indicator {
+		position: absolute;
+		top: 20px;
+		left: 20px;
+		background: rgba(255, 0, 0, 0.9);
+		color: white;
+		padding: 8px 16px;
+		border-radius: 20px;
+		font-weight: bold;
+		font-size: 14px;
+		z-index: 10;
+		animation: pulse 2s infinite;
+	}
 
-@keyframes spin {
-0% { transform: rotate(0deg); }
-100% { transform: rotate(360deg); }
-}
+	@keyframes spin {
+		0% {
+			transform: rotate(0deg);
+		}
+		100% {
+			transform: rotate(360deg);
+		}
+	}
 
-@keyframes pulse {
-0%, 100% { opacity: 1; }
-50% { opacity: 0.7; }
-}
+	@keyframes pulse {
+		0%,
+		100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.7;
+		}
+	}
 
-p {
-margin: 0;
-font-family: Arial, sans-serif;
-}
+	p {
+		margin: 0;
+		font-family: Arial, sans-serif;
+	}
 </style>

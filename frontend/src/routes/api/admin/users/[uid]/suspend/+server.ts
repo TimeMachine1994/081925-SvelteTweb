@@ -13,15 +13,9 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 		const { reason } = await request.json();
 
 		await AdminService.suspendUser(uid, reason);
-		
+
 		// Log admin action
-		await AdminService.logAdminAction(
-			locals.user.uid,
-			'user_suspended',
-			'user',
-			uid,
-			{ reason }
-		);
+		await AdminService.logAdminAction(locals.user.uid, 'user_suspended', 'user', uid, { reason });
 
 		return json({ success: true });
 	} catch (error) {

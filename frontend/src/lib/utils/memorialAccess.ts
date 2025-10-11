@@ -2,14 +2,14 @@
 let adminDb: any;
 
 async function initializeAdminDb() {
-  if (typeof process !== 'undefined' && process.env.NODE_ENV !== 'test' && !adminDb) {
-    try {
-      const { adminDb: db } = await import('$lib/firebase-admin');
-      adminDb = db;
-    } catch (error) {
-      console.warn('Failed to initialize Firebase Admin DB:', error);
-    }
-  }
+	if (typeof process !== 'undefined' && process.env.NODE_ENV !== 'test' && !adminDb) {
+		try {
+			const { adminDb: db } = await import('$lib/firebase-admin');
+			adminDb = db;
+		} catch (error) {
+			console.warn('Failed to initialize Firebase Admin DB:', error);
+		}
+	}
 }
 import type { Memorial } from '$lib/types/memorial';
 
@@ -29,7 +29,11 @@ export interface UserContext {
 /**
  * Legacy function exports for backward compatibility with tests
  */
-export async function verifyMemorialAccess(user: any, memorialId: string, memorial?: any): Promise<AccessCheckResult> {
+export async function verifyMemorialAccess(
+	user: any,
+	memorialId: string,
+	memorial?: any
+): Promise<AccessCheckResult> {
 	try {
 		const userContext: UserContext = {
 			uid: user.uid,
@@ -113,7 +117,6 @@ export function logAccessAttempt(details: any) {
  * Checks permissions for different user roles and actions
  */
 export class MemorialAccessVerifier {
-	
 	/**
 	 * Check if user has access to view a memorial
 	 */
@@ -169,7 +172,6 @@ export class MemorialAccessVerifier {
 				accessLevel: 'none',
 				reason: 'Insufficient permissions'
 			};
-
 		} catch (error) {
 			console.error('💥 Error checking view access:', error);
 			return {
@@ -207,7 +209,10 @@ export class MemorialAccessVerifier {
 	/**
 	 * V1: Family member access removed - simplified to owner/funeral_director only
 	 */
-	static async checkFamilyMemberAccess(memorialId: string, user: UserContext): Promise<AccessCheckResult> {
+	static async checkFamilyMemberAccess(
+		memorialId: string,
+		user: UserContext
+	): Promise<AccessCheckResult> {
 		// Family member role removed in V1
 		return {
 			hasAccess: false,
@@ -219,7 +224,10 @@ export class MemorialAccessVerifier {
 	/**
 	 * V1: Photo upload functionality removed
 	 */
-	static async checkPhotoUploadAccess(memorialId: string, user: UserContext): Promise<AccessCheckResult> {
+	static async checkPhotoUploadAccess(
+		memorialId: string,
+		user: UserContext
+	): Promise<AccessCheckResult> {
 		// Photo upload removed in V1
 		return {
 			hasAccess: false,
@@ -228,13 +236,14 @@ export class MemorialAccessVerifier {
 		};
 	}
 
-
 	/**
 	 * Get user's accessible memorials with their access levels
 	 */
-	static async getUserAccessibleMemorials(user: UserContext): Promise<Array<{memorial: Memorial, accessLevel: string}>> {
+	static async getUserAccessibleMemorials(
+		user: UserContext
+	): Promise<Array<{ memorial: Memorial; accessLevel: string }>> {
 		console.log('📋 Getting accessible memorials for user:', user.uid);
-		
+
 		try {
 			await initializeAdminDb();
 			if (!adminDb) {
@@ -242,7 +251,7 @@ export class MemorialAccessVerifier {
 				return [];
 			}
 
-			const accessibleMemorials: Array<{memorial: Memorial, accessLevel: string}> = [];
+			const accessibleMemorials: Array<{ memorial: Memorial; accessLevel: string }> = [];
 
 			// Admin gets all memorials with full access
 			if (user.role === 'admin' || user.isAdmin) {

@@ -137,9 +137,9 @@ describe('Admin API Endpoints', () => {
 				user: { uid: 'admin123', role: 'admin' }
 			};
 
-			const response = await usersPOST({ 
-				request: mockRequest, 
-				locals: mockLocals 
+			const response = await usersPOST({
+				request: mockRequest,
+				locals: mockLocals
 			} as any);
 			const data = await response.json();
 
@@ -160,9 +160,9 @@ describe('Admin API Endpoints', () => {
 				user: { uid: 'user123', role: 'owner' }
 			};
 
-			const response = await usersPOST({ 
-				request: { json: () => Promise.resolve({}) }, 
-				locals: mockLocals 
+			const response = await usersPOST({
+				request: { json: () => Promise.resolve({}) },
+				locals: mockLocals
 			} as any);
 
 			expect(response.status).toBe(403);
@@ -218,9 +218,9 @@ describe('Admin API Endpoints', () => {
 				user: { uid: 'admin123', role: 'admin' }
 			};
 
-			const response = await approveApplication({ 
-				params: mockParams, 
-				locals: mockLocals 
+			const response = await approveApplication({
+				params: mockParams,
+				locals: mockLocals
 			} as any);
 			const data = await response.json();
 
@@ -242,9 +242,9 @@ describe('Admin API Endpoints', () => {
 				user: { uid: 'user123', role: 'owner' }
 			};
 
-			const response = await approveApplication({ 
-				params: mockParams, 
-				locals: mockLocals 
+			const response = await approveApplication({
+				params: mockParams,
+				locals: mockLocals
 			} as any);
 
 			expect(response.status).toBe(403);
@@ -265,18 +265,18 @@ describe('Admin API Endpoints', () => {
 				user: { uid: 'admin123', role: 'admin' }
 			};
 
-			const response = await rejectApplication({ 
+			const response = await rejectApplication({
 				params: mockParams,
-				request: mockRequest, 
-				locals: mockLocals 
+				request: mockRequest,
+				locals: mockLocals
 			} as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(200);
 			expect(data.success).toBe(true);
 			expect(AdminService.rejectApplication).toHaveBeenCalledWith(
-				'app123', 
-				'admin123', 
+				'app123',
+				'admin123',
 				'Incomplete documentation'
 			);
 			expect(AdminService.logAdminAction).toHaveBeenCalledWith(
@@ -302,10 +302,10 @@ describe('Admin API Endpoints', () => {
 				user: { uid: 'admin123', role: 'admin' }
 			};
 
-			const response = await suspendUser({ 
+			const response = await suspendUser({
 				params: mockParams,
-				request: mockRequest, 
-				locals: mockLocals 
+				request: mockRequest,
+				locals: mockLocals
 			} as any);
 			const data = await response.json();
 
@@ -327,10 +327,10 @@ describe('Admin API Endpoints', () => {
 				user: { uid: 'user456', role: 'owner' }
 			};
 
-			const response = await suspendUser({ 
+			const response = await suspendUser({
 				params: mockParams,
-				request: { json: () => Promise.resolve({}) }, 
-				locals: mockLocals 
+				request: { json: () => Promise.resolve({}) },
+				locals: mockLocals
 			} as any);
 
 			expect(response.status).toBe(403);
@@ -348,9 +348,9 @@ describe('Admin API Endpoints', () => {
 				user: { uid: 'admin123', role: 'admin' }
 			};
 
-			const response = await activateUser({ 
-				params: mockParams, 
-				locals: mockLocals 
+			const response = await activateUser({
+				params: mockParams,
+				locals: mockLocals
 			} as any);
 			const data = await response.json();
 
@@ -374,9 +374,9 @@ describe('Admin API Endpoints', () => {
 				user: { uid: 'admin123', role: 'admin' }
 			};
 
-			const response = await activateUser({ 
-				params: mockParams, 
-				locals: mockLocals 
+			const response = await activateUser({
+				params: mockParams,
+				locals: mockLocals
 			} as any);
 			const data = await response.json();
 

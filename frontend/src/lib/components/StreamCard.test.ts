@@ -30,21 +30,21 @@ describe('StreamCard', () => {
 
 	it('renders stream title and description', () => {
 		const { getByText } = render(StreamCard, mockProps);
-		
+
 		expect(getByText('Test Memorial Service')).toBeInTheDocument();
 		expect(getByText('A test stream for the memorial service')).toBeInTheDocument();
 	});
 
 	it('shows correct status badge for ready stream', () => {
 		const { getByText } = render(StreamCard, mockProps);
-		
+
 		expect(getByText('Ready')).toBeInTheDocument();
 	});
 
 	it('shows live indicator for live streams', () => {
 		const liveStream = { ...mockStream, status: 'live' as const };
 		const { container } = render(StreamCard, { ...mockProps, stream: liveStream });
-		
+
 		// Check for animated radio icon (live indicator)
 		const radioIcon = container.querySelector('.animate-pulse');
 		expect(radioIcon).toBeInTheDocument();
@@ -53,7 +53,7 @@ describe('StreamCard', () => {
 	it('shows not live indicator for ready streams', () => {
 		const readyStream = { ...mockStream, status: 'ready' as const };
 		const { container } = render(StreamCard, { ...mockProps, stream: readyStream });
-		
+
 		// Check for Circle icon (not live indicator)
 		const circleIcon = container.querySelector('svg');
 		expect(circleIcon).toBeInTheDocument();
@@ -64,17 +64,17 @@ describe('StreamCard', () => {
 
 	it('displays RTMP URL and stream key', () => {
 		const { getByDisplayValue } = render(StreamCard, mockProps);
-		
+
 		expect(getByDisplayValue('rtmps://live.cloudflare.com/live/')).toBeInTheDocument();
 		expect(getByDisplayValue('test-stream-key-123')).toBeInTheDocument();
 	});
 
 	it('calls onCopy when copy buttons are clicked', async () => {
 		const { getAllByTitle } = render(StreamCard, mockProps);
-		
+
 		const copyButtons = getAllByTitle(/Copy/);
 		await fireEvent.click(copyButtons[0]); // RTMP URL copy
-		
+
 		expect(mockProps.onCopy).toHaveBeenCalledWith(
 			'rtmps://live.cloudflare.com/live/',
 			'url',
@@ -84,30 +84,30 @@ describe('StreamCard', () => {
 
 	it('calls onToggleVisibility when visibility button is clicked', async () => {
 		const { getByTitle } = render(StreamCard, mockProps);
-		
+
 		const visibilityButton = getByTitle('Hide from public');
 		await fireEvent.click(visibilityButton);
-		
+
 		expect(mockProps.onToggleVisibility).toHaveBeenCalledWith('test-stream-1', true);
 	});
 
 	it('calls onDelete when delete button is clicked', async () => {
 		const { getByTitle } = render(StreamCard, mockProps);
-		
+
 		const deleteButton = getByTitle('Delete stream');
 		await fireEvent.click(deleteButton);
-		
+
 		expect(mockProps.onDelete).toHaveBeenCalledWith('test-stream-1');
 	});
 
 	it('shows scheduled date when stream is scheduled', () => {
-		const scheduledStream = { 
-			...mockStream, 
+		const scheduledStream = {
+			...mockStream,
 			status: 'scheduled' as const,
 			scheduledStartTime: '2024-12-25T10:00:00Z'
 		};
 		const { getByText } = render(StreamCard, { ...mockProps, stream: scheduledStream });
-		
+
 		expect(getByText('12/25/2024')).toBeInTheDocument();
 	});
 });

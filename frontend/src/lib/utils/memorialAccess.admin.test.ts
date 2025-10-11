@@ -45,7 +45,6 @@ describe('Admin Role Memorial Access', () => {
 			});
 		});
 
-
 		it('should deny admin photo upload permission in V1', () => {
 			const hasPermission = hasPhotoUploadPermission('admin', false);
 			expect(hasPermission).toBe(false);
@@ -124,9 +123,9 @@ describe('Admin Role Memorial Access', () => {
 		it('should deny photo upload access for all users in V1', async () => {
 			const adminUser = { uid: 'admin-123', role: 'admin', email: 'admin@test.com' };
 			const memorial = { id: 'memorial-123', ownerUid: 'owner-123' };
-			
+
 			const result = await MemorialAccessVerifier.checkPhotoUploadAccess('memorial-123', adminUser);
-			
+
 			expect(result).toEqual({
 				hasAccess: false,
 				accessLevel: 'none',
@@ -240,7 +239,7 @@ describe('Admin Role Memorial Access', () => {
 				uid: 'admin123',
 				email: 'admin@test.com',
 				role: 'owner', // Different role
-				isAdmin: true   // But admin flag is set
+				isAdmin: true // But admin flag is set
 			};
 
 			const result = await MemorialAccessVerifier.checkViewAccess('memorial123', adminUser);

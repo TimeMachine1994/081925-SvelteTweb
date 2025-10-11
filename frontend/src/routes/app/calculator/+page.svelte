@@ -14,6 +14,6 @@
 </svelte:head>
 
 <div class="container mx-auto p-4 md:p-8 lg:p-12">
-	<h1 class="h1 text-center mb-8">Livestream Calculator</h1>
+	<h1 class="h1 mb-8 text-center">Livestream Calculator</h1>
 	<Calculator {memorialId} {data} />
 </div>

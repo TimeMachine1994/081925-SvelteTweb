@@ -58,6 +58,7 @@ node test-cloudflare-integration.js
 ```
 
 Expected output:
+
 ```
 🎬 Testing Cloudflare Stream Integration...
 
@@ -80,6 +81,7 @@ Expected output:
 ## What Changed
 
 ### Before (Fake Implementation)
+
 ```javascript
 // ❌ Old way - fake credentials
 const streamKey = `${Math.random().toString(36)}...`;
@@ -87,17 +89,18 @@ const rtmpUrl = 'rtmp://live.tributestream.com/live'; // Doesn't exist!
 ```
 
 ### After (Real Cloudflare Integration)
+
 ```javascript
 // ✅ New way - real Cloudflare credentials
 const cloudflareInput = await createLiveInput({
-    name: `${memorial.lovedOneName} - ${title}`,
-    recording: true,
-    recordingTimeout: 30
+	name: `${memorial.lovedOneName} - ${title}`,
+	recording: true,
+	recordingTimeout: 30
 });
 
-const streamKey = cloudflareInput.rtmps.streamKey;  // Real key from Cloudflare
-const rtmpUrl = cloudflareInput.rtmps.url;          // Real RTMP URL
-const cloudflareInputId = cloudflareInput.uid;     // For tracking
+const streamKey = cloudflareInput.rtmps.streamKey; // Real key from Cloudflare
+const rtmpUrl = cloudflareInput.rtmps.url; // Real RTMP URL
+const cloudflareInputId = cloudflareInput.uid; // For tracking
 ```
 
 ## Stream Workflow
@@ -113,6 +116,7 @@ const cloudflareInputId = cloudflareInput.uid;     // For tracking
 ## Fallback Behavior
 
 If Cloudflare is not configured:
+
 - System falls back to development placeholders
 - Streams still work in UI but won't actually stream
 - Console shows warnings about missing configuration
@@ -120,19 +124,23 @@ If Cloudflare is not configured:
 ## Troubleshooting
 
 ### "Cloudflare not configured" Warning
+
 - Check that all 3 environment variables are set
 - Restart your development server after adding variables
 
 ### API Token Errors
+
 - Ensure token has **Stream:Edit** permissions
 - Check that Account Resources includes your account
 - Verify the token hasn't expired
 
 ### Account ID Issues
+
 - Make sure you're using the Account ID, not Zone ID
 - Account ID is shown in Stream dashboard sidebar
 
 ### Customer Code Problems
+
 - Look for existing Stream videos/inputs to find the code
 - Format: `customer-XXXXXXXXX.cloudflarestream.com`
 - Use only the `XXXXXXXXX` part
@@ -140,6 +148,7 @@ If Cloudflare is not configured:
 ## Production Deployment
 
 For production, ensure:
+
 1. All environment variables are set in your hosting platform
 2. Cloudflare webhooks are configured (for recording notifications)
 3. API token has appropriate production permissions
@@ -148,6 +157,7 @@ For production, ensure:
 ## Support
 
 If you encounter issues:
+
 1. Run the test script first
 2. Check Cloudflare Dashboard for Live Inputs
 3. Verify API token permissions

@@ -26,10 +26,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 				sampleMemorialLoaded: !singleMemorialSnap.empty
 			}
 		};
-
 	} catch (error: any) {
 		console.error('❌ [ADMIN TEST] Error during testing:', error);
-		
+
 		return {
 			user: locals.user,
 			testResults: {

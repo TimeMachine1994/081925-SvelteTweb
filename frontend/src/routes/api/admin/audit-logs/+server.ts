@@ -68,7 +68,7 @@ export const GET: RequestHandler = async ({ request, locals, getClientAddress })
 
 		// Execute query
 		const snapshot = await query.get();
-		const logs = snapshot.docs.map(doc => ({
+		const logs = snapshot.docs.map((doc) => ({
 			id: doc.id,
 			...doc.data()
 		}));
@@ -98,7 +98,6 @@ export const GET: RequestHandler = async ({ request, locals, getClientAddress })
 			count: logs.length,
 			filters: { action, userEmail, resourceType, dateFrom, dateTo, limit }
 		});
-
 	} catch (error) {
 		console.error('❌ [ADMIN API] Error loading audit logs:', error);
 
@@ -117,10 +116,10 @@ export const GET: RequestHandler = async ({ request, locals, getClientAddress })
 		});
 
 		return json(
-			{ 
+			{
 				error: 'Failed to load audit logs',
 				details: error instanceof Error ? error.message : 'Unknown error'
-			}, 
+			},
 			{ status: 500 }
 		);
 	}

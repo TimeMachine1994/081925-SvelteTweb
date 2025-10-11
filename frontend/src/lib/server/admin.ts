@@ -12,7 +12,7 @@ export class AdminService {
 
 			for (const doc of usersSnap.docs) {
 				const userData = doc.data();
-				
+
 				// Count memorials for this user
 				const memorialsSnap = await adminDb
 					.collection('memorials')
@@ -178,7 +178,13 @@ export class AdminService {
 	/**
 	 * Log admin action for audit trail
 	 */
-	static async logAdminAction(adminId: string, action: string, targetType: string, targetId: string, details: Record<string, any>): Promise<void> {
+	static async logAdminAction(
+		adminId: string,
+		action: string,
+		targetType: string,
+		targetId: string,
+		details: Record<string, any>
+	): Promise<void> {
 		try {
 			const auditRef = adminDb.collection('admin_audit_logs').doc();
 			await auditRef.set({

@@ -4,10 +4,10 @@
 	import type { PageData } from './$types';
 
 	let { data, form }: { data: PageData; form: any } = $props();
-	
+
 	// Debug logging
 	console.log('Dashboard data:', data);
-	
+
 	// Form state
 	let formData = $state({
 		companyName: data.funeralDirector?.companyName || '',
@@ -24,50 +24,58 @@
 </script>
 
 <div class="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50">
-	<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-		
+	<div class="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
 		<!-- Header -->
 		<div class="mb-8">
-			<div class="flex items-center mb-4">
-				<a href="/profile" class="flex items-center text-amber-600 hover:text-amber-700 transition-colors mr-4">
-					<ArrowLeft class="w-5 h-5 mr-2" />
+			<div class="mb-4 flex items-center">
+				<a
+					href="/profile"
+					class="mr-4 flex items-center text-amber-600 transition-colors hover:text-amber-700"
+				>
+					<ArrowLeft class="mr-2 h-5 w-5" />
 					Back to Profile
 				</a>
 			</div>
-			<h1 class="text-3xl font-bold text-gray-900 flex items-center">
-				<Building2 class="w-8 h-8 mr-3 text-amber-600" />
+			<h1 class="flex items-center text-3xl font-bold text-gray-900">
+				<Building2 class="mr-3 h-8 w-8 text-amber-600" />
 				Funeral Director Dashboard
 			</h1>
-			<p class="text-gray-600 mt-2">Manage your business information and profile settings</p>
+			<p class="mt-2 text-gray-600">Manage your business information and profile settings</p>
 		</div>
 
 		<!-- Debug/Error Info -->
 		{#if data.error}
-			<div class="mb-6 p-4 rounded-xl bg-yellow-50 border border-yellow-200">
-				<p class="text-yellow-800 font-medium">Debug Info: {data.error}</p>
+			<div class="mb-6 rounded-xl border border-yellow-200 bg-yellow-50 p-4">
+				<p class="font-medium text-yellow-800">Debug Info: {data.error}</p>
 			</div>
 		{/if}
 
 		<!-- Main Form -->
-		<div class="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8">
-			<form method="POST" action="?/updateProfile" use:enhance={() => {
-				isSubmitting = true;
-				return async ({ update }) => {
-					await update({ reset: false }); // Don't reset the form
-					isSubmitting = false;
-				};
-			}} class="space-y-8">
-
+		<div class="rounded-3xl border border-white/20 bg-white/70 p-8 shadow-2xl backdrop-blur-xl">
+			<form
+				method="POST"
+				action="?/updateProfile"
+				use:enhance={() => {
+					isSubmitting = true;
+					return async ({ update }) => {
+						await update({ reset: false }); // Don't reset the form
+						isSubmitting = false;
+					};
+				}}
+				class="space-y-8"
+			>
 				<!-- Company Information -->
 				<div class="space-y-6">
-					<h2 class="text-xl font-semibold text-gray-900 flex items-center border-b border-gray-200 pb-3">
-						<Building2 class="w-6 h-6 mr-3 text-amber-600" />
+					<h2
+						class="flex items-center border-b border-gray-200 pb-3 text-xl font-semibold text-gray-900"
+					>
+						<Building2 class="mr-3 h-6 w-6 text-amber-600" />
 						Company Information
 					</h2>
-					
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+					<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 						<div>
-							<label for="companyName" class="block text-sm font-medium text-gray-700 mb-2">
+							<label for="companyName" class="mb-2 block text-sm font-medium text-gray-700">
 								Company Name *
 							</label>
 							<input
@@ -76,13 +84,13 @@
 								name="companyName"
 								bind:value={formData.companyName}
 								required
-								class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all bg-white/50 backdrop-blur-sm"
+								class="w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-3 backdrop-blur-sm transition-all focus:border-transparent focus:ring-2 focus:ring-amber-500"
 								placeholder="Smith & Sons Funeral Home"
 							/>
 						</div>
 
 						<div>
-							<label for="contactPerson" class="block text-sm font-medium text-gray-700 mb-2">
+							<label for="contactPerson" class="mb-2 block text-sm font-medium text-gray-700">
 								Contact Person *
 							</label>
 							<input
@@ -91,7 +99,7 @@
 								name="contactPerson"
 								bind:value={formData.contactPerson}
 								required
-								class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all bg-white/50 backdrop-blur-sm"
+								class="w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-3 backdrop-blur-sm transition-all focus:border-transparent focus:ring-2 focus:ring-amber-500"
 								placeholder="John Director"
 							/>
 						</div>
@@ -100,14 +108,16 @@
 
 				<!-- Contact Information -->
 				<div class="space-y-6">
-					<h2 class="text-xl font-semibold text-gray-900 flex items-center border-b border-gray-200 pb-3">
-						<Mail class="w-6 h-6 mr-3 text-amber-600" />
+					<h2
+						class="flex items-center border-b border-gray-200 pb-3 text-xl font-semibold text-gray-900"
+					>
+						<Mail class="mr-3 h-6 w-6 text-amber-600" />
 						Contact Information
 					</h2>
-					
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+					<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 						<div>
-							<label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+							<label for="email" class="mb-2 block text-sm font-medium text-gray-700">
 								Email Address *
 							</label>
 							<input
@@ -116,13 +126,13 @@
 								name="email"
 								bind:value={formData.email}
 								required
-								class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all bg-white/50 backdrop-blur-sm"
+								class="w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-3 backdrop-blur-sm transition-all focus:border-transparent focus:ring-2 focus:ring-amber-500"
 								placeholder="director@funeral-home.com"
 							/>
 						</div>
 
 						<div>
-							<label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
+							<label for="phone" class="mb-2 block text-sm font-medium text-gray-700">
 								Phone Number *
 							</label>
 							<input
@@ -131,7 +141,7 @@
 								name="phone"
 								bind:value={formData.phone}
 								required
-								class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all bg-white/50 backdrop-blur-sm"
+								class="w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-3 backdrop-blur-sm transition-all focus:border-transparent focus:ring-2 focus:ring-amber-500"
 								placeholder="(555) 123-4567"
 							/>
 						</div>
@@ -140,14 +150,16 @@
 
 				<!-- Address Information -->
 				<div class="space-y-6">
-					<h2 class="text-xl font-semibold text-gray-900 flex items-center border-b border-gray-200 pb-3">
-						<MapPin class="w-6 h-6 mr-3 text-amber-600" />
+					<h2
+						class="flex items-center border-b border-gray-200 pb-3 text-xl font-semibold text-gray-900"
+					>
+						<MapPin class="mr-3 h-6 w-6 text-amber-600" />
 						Business Address
 					</h2>
-					
+
 					<div class="space-y-4">
 						<div>
-							<label for="street" class="block text-sm font-medium text-gray-700 mb-2">
+							<label for="street" class="mb-2 block text-sm font-medium text-gray-700">
 								Street Address
 							</label>
 							<input
@@ -155,14 +167,14 @@
 								id="street"
 								name="street"
 								bind:value={formData.street}
-								class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all bg-white/50 backdrop-blur-sm"
+								class="w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-3 backdrop-blur-sm transition-all focus:border-transparent focus:ring-2 focus:ring-amber-500"
 								placeholder="123 Memorial Drive"
 							/>
 						</div>
 
-						<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+						<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
 							<div>
-								<label for="city" class="block text-sm font-medium text-gray-700 mb-2">
+								<label for="city" class="mb-2 block text-sm font-medium text-gray-700">
 									City
 								</label>
 								<input
@@ -170,13 +182,13 @@
 									id="city"
 									name="city"
 									bind:value={formData.city}
-									class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all bg-white/50 backdrop-blur-sm"
+									class="w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-3 backdrop-blur-sm transition-all focus:border-transparent focus:ring-2 focus:ring-amber-500"
 									placeholder="Orlando"
 								/>
 							</div>
 
 							<div>
-								<label for="state" class="block text-sm font-medium text-gray-700 mb-2">
+								<label for="state" class="mb-2 block text-sm font-medium text-gray-700">
 									State
 								</label>
 								<input
@@ -184,13 +196,13 @@
 									id="state"
 									name="state"
 									bind:value={formData.state}
-									class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all bg-white/50 backdrop-blur-sm"
+									class="w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-3 backdrop-blur-sm transition-all focus:border-transparent focus:ring-2 focus:ring-amber-500"
 									placeholder="FL"
 								/>
 							</div>
 
 							<div>
-								<label for="zipCode" class="block text-sm font-medium text-gray-700 mb-2">
+								<label for="zipCode" class="mb-2 block text-sm font-medium text-gray-700">
 									ZIP Code
 								</label>
 								<input
@@ -198,7 +210,7 @@
 									id="zipCode"
 									name="zipCode"
 									bind:value={formData.zipCode}
-									class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all bg-white/50 backdrop-blur-sm"
+									class="w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-3 backdrop-blur-sm transition-all focus:border-transparent focus:ring-2 focus:ring-amber-500"
 									placeholder="32801"
 								/>
 							</div>
@@ -208,25 +220,25 @@
 
 				<!-- Form Messages -->
 				{#if form?.error}
-					<div class="p-4 rounded-xl bg-red-50 border border-red-200">
-						<p class="text-red-800 font-medium">{form.error}</p>
+					<div class="rounded-xl border border-red-200 bg-red-50 p-4">
+						<p class="font-medium text-red-800">{form.error}</p>
 					</div>
 				{/if}
 
 				{#if form?.success}
-					<div class="p-4 rounded-xl bg-green-50 border border-green-200">
-						<p class="text-green-800 font-medium">{form.message}</p>
+					<div class="rounded-xl border border-green-200 bg-green-50 p-4">
+						<p class="font-medium text-green-800">{form.message}</p>
 					</div>
 				{/if}
 
 				<!-- Submit Button -->
-				<div class="flex justify-end pt-6 border-t border-gray-200">
+				<div class="flex justify-end border-t border-gray-200 pt-6">
 					<button
 						type="submit"
 						disabled={isSubmitting}
-						class="flex items-center px-8 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white font-medium rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+						class="flex items-center rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-8 py-3 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
 					>
-						<Save class="w-5 h-5 mr-2" />
+						<Save class="mr-2 h-5 w-5" />
 						{isSubmitting ? 'Saving...' : 'Save Changes'}
 					</button>
 				</div>

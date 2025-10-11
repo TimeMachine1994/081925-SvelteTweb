@@ -1,12 +1,31 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { enhance } from '$app/forms';
-	import { User, Mail, Edit3, LogOut, Heart, Calendar, Users, Crown, Building2, Video, Settings, Sparkles, Clock, Eye, Play } from 'lucide-svelte';
+	import {
+		User,
+		Mail,
+		Edit3,
+		LogOut,
+		Heart,
+		Calendar,
+		Users,
+		Crown,
+		Building2,
+		Video,
+		Settings,
+		Sparkles,
+		Clock,
+		Eye,
+		Play
+	} from 'lucide-svelte';
 	import { onMount } from 'svelte';
 
 	let { data, form } = $props();
 	let displayName = $state(data.profile?.displayName || '');
 	let isEditing = $state(false);
+	let showCreateMemorialModal = $state(false);
+	let lovedOneName = $state('');
+	let isCreatingMemorial = $state(false);
 	let showScheduleModal = $state(false);
 	let selectedMemorial = $state(null);
 	let scheduleForm = $state({
@@ -71,7 +90,9 @@
 	function openScheduleModal(memorial: any) {
 		selectedMemorial = memorial;
 		// Pre-fill with existing data if available
-		scheduleForm.serviceDate = memorial.serviceDate ? new Date(memorial.serviceDate).toISOString().split('T')[0] : '';
+		scheduleForm.serviceDate = memorial.serviceDate
+			? new Date(memorial.serviceDate).toISOString().split('T')[0]
+			: '';
 		scheduleForm.serviceTime = memorial.serviceTime || '';
 		scheduleForm.duration = memorial.duration || 2;
 		scheduleForm.location.name = memorial.location?.name || '';
@@ -103,50 +124,69 @@
 			alert('Network error occurred');
 		}
 	}
-
 </script>
 
 <div class="min-h-screen bg-gradient-to-br {roleInfo.bgGradient} relative overflow-hidden">
 	<!-- Animated background elements -->
-	<div class="absolute inset-0 overflow-hidden pointer-events-none">
-		<div class="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-white/10 to-transparent rounded-full blur-3xl animate-pulse"></div>
-		<div class="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-tr from-white/5 to-transparent rounded-full blur-3xl animate-pulse delay-1000"></div>
-		<div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-white/5 to-transparent rounded-full blur-2xl animate-spin" style="animation-duration: 20s;"></div>
+	<div class="pointer-events-none absolute inset-0 overflow-hidden">
+		<div
+			class="absolute -top-40 -right-40 h-80 w-80 animate-pulse rounded-full bg-gradient-to-br from-white/10 to-transparent blur-3xl"
+		></div>
+		<div
+			class="absolute -bottom-40 -left-40 h-96 w-96 animate-pulse rounded-full bg-gradient-to-tr from-white/5 to-transparent blur-3xl delay-1000"
+		></div>
+		<div
+			class="absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 transform animate-spin rounded-full bg-gradient-to-r from-white/5 to-transparent blur-2xl"
+			style="animation-duration: 20s;"
+		></div>
 	</div>
 
-	<div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+	<div class="relative z-10 mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
 		{#if data.profile}
 			<!-- Header Section -->
-			<div class="text-center mb-12 {mounted ? 'animate-fade-in-up' : 'opacity-0'}" style="animation-delay: 0.1s;">
-				<div class="relative inline-block mb-6">
-					<div class="w-32 h-32 mx-auto rounded-full bg-gradient-to-r {roleInfo.gradient} p-1 shadow-2xl">
-						<div class="w-full h-full rounded-full bg-white flex items-center justify-center">
-							{@render roleInfo.icon({ class: "w-16 h-16 text-gray-700" })}
+			<div
+				class="mb-12 text-center {mounted ? 'animate-fade-in-up' : 'opacity-0'}"
+				style="animation-delay: 0.1s;"
+			>
+				<div class="relative mb-6 inline-block">
+					<div
+						class="mx-auto h-32 w-32 rounded-full bg-gradient-to-r {roleInfo.gradient} p-1 shadow-2xl"
+					>
+						<div class="flex h-full w-full items-center justify-center rounded-full bg-white">
+							<svelte:component this={roleInfo.icon} class="h-16 w-16 text-gray-700" />
 						</div>
 					</div>
-					<div class="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r {roleInfo.gradient} rounded-full flex items-center justify-center shadow-lg">
-						<Sparkles class="w-4 h-4 text-white" />
+					<div
+						class="absolute -top-2 -right-2 h-8 w-8 bg-gradient-to-r {roleInfo.gradient} flex items-center justify-center rounded-full shadow-lg"
+					>
+						<Sparkles class="h-4 w-4 text-white" />
 					</div>
 				</div>
-				
-				<h1 class="text-4xl font-bold text-gray-900 mb-2">
+
+				<h1 class="mb-2 text-4xl font-bold text-gray-900">
 					{displayName || 'Welcome'}
 				</h1>
-				<div class="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r {roleInfo.gradient} text-white font-medium shadow-lg">
-					{@render roleInfo.icon({ class: "w-4 h-4 mr-2" })}
+				<div
+					class="inline-flex items-center rounded-full bg-gradient-to-r px-4 py-2 {roleInfo.gradient} font-medium text-white shadow-lg"
+				>
+					<svelte:component this={roleInfo.icon} class="mr-2 h-4 w-4" />
 					{roleInfo.title}
 				</div>
 			</div>
 
 			<!-- Main Content Grid -->
-			<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-				
+			<div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
 				<!-- Profile Info Card -->
-				<div class="lg:col-span-1 {mounted ? 'animate-fade-in-up' : 'opacity-0'}" style="animation-delay: 0.2s;">
-					<div class="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 hover:shadow-3xl transition-all duration-500 hover:scale-105">
-						<div class="flex items-center justify-between mb-6">
-							<h2 class="text-2xl font-bold text-gray-900 flex items-center">
-								<User class="w-6 h-6 mr-3 text-{roleInfo.accentColor}-600" />
+				<div
+					class="lg:col-span-1 {mounted ? 'animate-fade-in-up' : 'opacity-0'}"
+					style="animation-delay: 0.2s;"
+				>
+					<div
+						class="hover:shadow-3xl rounded-3xl border border-white/20 bg-white/70 p-8 shadow-2xl backdrop-blur-xl transition-all duration-500 hover:scale-105"
+					>
+						<div class="mb-6 flex items-center justify-between">
+							<h2 class="flex items-center text-2xl font-bold text-gray-900">
+								<User class="mr-3 h-6 w-6 text-{roleInfo.accentColor}-600" />
 								Profile
 							</h2>
 						</div>
@@ -154,63 +194,78 @@
 						<div class="space-y-6">
 							{#if userRole === 'funeral_director' && data.funeralDirector}
 								<!-- Funeral Director Business Info -->
-								<div class="flex items-center space-x-4 p-4 rounded-2xl bg-gradient-to-r from-{roleInfo.accentColor}-50 to-white border border-{roleInfo.accentColor}-100">
-									<Building2 class="w-5 h-5 text-{roleInfo.accentColor}-600" />
+								<div
+									class="flex items-center space-x-4 rounded-2xl bg-gradient-to-r p-4 from-{roleInfo.accentColor}-50 border to-white border-{roleInfo.accentColor}-100"
+								>
+									<Building2 class="h-5 w-5 text-{roleInfo.accentColor}-600" />
 									<div>
 										<p class="text-sm text-{roleInfo.accentColor}-600 font-medium">Company</p>
-										<p class="text-gray-900 font-semibold">{data.funeralDirector.companyName}</p>
+										<p class="font-semibold text-gray-900">{data.funeralDirector.companyName}</p>
 									</div>
 								</div>
 
-								<div class="flex items-center space-x-4 p-4 rounded-2xl bg-gradient-to-r from-gray-50 to-white border border-gray-100">
-									<User class="w-5 h-5 text-gray-500" />
+								<div
+									class="flex items-center space-x-4 rounded-2xl border border-gray-100 bg-gradient-to-r from-gray-50 to-white p-4"
+								>
+									<User class="h-5 w-5 text-gray-500" />
 									<div>
-										<p class="text-sm text-gray-500 font-medium">Contact Person</p>
-										<p class="text-gray-900 font-semibold">{data.funeralDirector.contactPerson}</p>
+										<p class="text-sm font-medium text-gray-500">Contact Person</p>
+										<p class="font-semibold text-gray-900">{data.funeralDirector.contactPerson}</p>
 									</div>
 								</div>
 
-								<div class="flex items-center space-x-4 p-4 rounded-2xl bg-gradient-to-r from-gray-50 to-white border border-gray-100">
-									<Mail class="w-5 h-5 text-gray-500" />
+								<div
+									class="flex items-center space-x-4 rounded-2xl border border-gray-100 bg-gradient-to-r from-gray-50 to-white p-4"
+								>
+									<Mail class="h-5 w-5 text-gray-500" />
 									<div>
-										<p class="text-sm text-gray-500 font-medium">Email</p>
-										<p class="text-gray-900 font-semibold">{data.funeralDirector.email}</p>
+										<p class="text-sm font-medium text-gray-500">Email</p>
+										<p class="font-semibold text-gray-900">{data.funeralDirector.email}</p>
 									</div>
 								</div>
 
-								<div class="flex items-center space-x-4 p-4 rounded-2xl bg-gradient-to-r from-gray-50 to-white border border-gray-100">
-									<User class="w-5 h-5 text-gray-500" />
+								<div
+									class="flex items-center space-x-4 rounded-2xl border border-gray-100 bg-gradient-to-r from-gray-50 to-white p-4"
+								>
+									<User class="h-5 w-5 text-gray-500" />
 									<div>
-										<p class="text-sm text-gray-500 font-medium">Phone</p>
-										<p class="text-gray-900 font-semibold">{data.funeralDirector.phone}</p>
+										<p class="text-sm font-medium text-gray-500">Phone</p>
+										<p class="font-semibold text-gray-900">{data.funeralDirector.phone}</p>
 									</div>
 								</div>
 
-								<div class="flex items-center space-x-4 p-4 rounded-2xl bg-gradient-to-r from-gray-50 to-white border border-gray-100">
-									<Building2 class="w-5 h-5 text-gray-500" />
+								<div
+									class="flex items-center space-x-4 rounded-2xl border border-gray-100 bg-gradient-to-r from-gray-50 to-white p-4"
+								>
+									<Building2 class="h-5 w-5 text-gray-500" />
 									<div>
-										<p class="text-sm text-gray-500 font-medium">Address</p>
-										<p class="text-gray-900 font-semibold">
-											{data.funeralDirector.address.street}<br>
-											{data.funeralDirector.address.city}, {data.funeralDirector.address.state} {data.funeralDirector.address.zipCode}
+										<p class="text-sm font-medium text-gray-500">Address</p>
+										<p class="font-semibold text-gray-900">
+											{data.funeralDirector.address.street}<br />
+											{data.funeralDirector.address.city}, {data.funeralDirector.address.state}
+											{data.funeralDirector.address.zipCode}
 										</p>
 									</div>
 								</div>
 							{:else}
 								<!-- Regular user profile -->
-								<div class="flex items-center space-x-4 p-4 rounded-2xl bg-gradient-to-r from-gray-50 to-white border border-gray-100">
-									<Mail class="w-5 h-5 text-gray-500" />
+								<div
+									class="flex items-center space-x-4 rounded-2xl border border-gray-100 bg-gradient-to-r from-gray-50 to-white p-4"
+								>
+									<Mail class="h-5 w-5 text-gray-500" />
 									<div>
-										<p class="text-sm text-gray-500 font-medium">Email</p>
-										<p class="text-gray-900 font-semibold">{data.profile.email}</p>
+										<p class="text-sm font-medium text-gray-500">Email</p>
+										<p class="font-semibold text-gray-900">{data.profile.email}</p>
 									</div>
 								</div>
 
-								<div class="flex items-center space-x-4 p-4 rounded-2xl bg-gradient-to-r from-{roleInfo.accentColor}-50 to-white border border-{roleInfo.accentColor}-100">
-									<User class="w-5 h-5 text-{roleInfo.accentColor}-600" />
+								<div
+									class="flex items-center space-x-4 rounded-2xl bg-gradient-to-r p-4 from-{roleInfo.accentColor}-50 border to-white border-{roleInfo.accentColor}-100"
+								>
+									<User class="h-5 w-5 text-{roleInfo.accentColor}-600" />
 									<div>
 										<p class="text-sm text-{roleInfo.accentColor}-600 font-medium">Display Name</p>
-										<p class="text-gray-900 font-semibold">{displayName || 'Not set'}</p>
+										<p class="font-semibold text-gray-900">{displayName || 'Not set'}</p>
 									</div>
 								</div>
 							{/if}
@@ -219,15 +274,22 @@
 				</div>
 
 				<!-- Memorials/Dashboard Card -->
-				<div class="lg:col-span-2 {mounted ? 'animate-fade-in-up' : 'opacity-0'}" style="animation-delay: 0.3s;">
-					<div class="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 hover:shadow-3xl transition-all duration-500">
-						<div class="flex items-center justify-between mb-8">
-							<h2 class="text-2xl font-bold text-gray-900 flex items-center">
-								<Heart class="w-6 h-6 mr-3 text-{roleInfo.accentColor}-600" />
+				<div
+					class="lg:col-span-2 {mounted ? 'animate-fade-in-up' : 'opacity-0'}"
+					style="animation-delay: 0.3s;"
+				>
+					<div
+						class="hover:shadow-3xl rounded-3xl border border-white/20 bg-white/70 p-8 shadow-2xl backdrop-blur-xl transition-all duration-500"
+					>
+						<div class="mb-8 flex items-center justify-between">
+							<h2 class="flex items-center text-2xl font-bold text-gray-900">
+								<Heart class="mr-3 h-6 w-6 text-{roleInfo.accentColor}-600" />
 								{userRole === 'funeral_director' ? 'Managed Memorials' : 'Your Memorials'}
 							</h2>
 							<div class="flex items-center space-x-2">
-								<span class="px-3 py-1 rounded-full bg-{roleInfo.accentColor}-100 text-{roleInfo.accentColor}-800 text-sm font-medium">
+								<span
+									class="rounded-full px-3 py-1 bg-{roleInfo.accentColor}-100 text-{roleInfo.accentColor}-800 text-sm font-medium"
+								>
 									{data.memorials?.length || 0} Total
 								</span>
 							</div>
@@ -236,40 +298,58 @@
 						{#if data.memorials && data.memorials.length > 0}
 							<div class="grid gap-4">
 								{#each data.memorials as memorial, index}
-									<div 
-										class="group p-6 rounded-2xl bg-gradient-to-r from-white/80 to-white/60 border border-white/30 hover:shadow-xl transition-all duration-300 hover:scale-[1.02] {mounted ? 'animate-fade-in-up' : 'opacity-0'}"
+									<div
+										class="group rounded-2xl border border-white/30 bg-gradient-to-r from-white/80 to-white/60 p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl {mounted
+											? 'animate-fade-in-up'
+											: 'opacity-0'}"
 										style="animation-delay: {0.4 + index * 0.1}s;"
 									>
 										<div class="flex items-center justify-between">
 											<div class="flex items-center space-x-4">
-												<div class="w-12 h-12 rounded-full bg-gradient-to-r {roleInfo.gradient} flex items-center justify-center shadow-lg">
-													<span class="text-white font-bold text-lg">
+												<div
+													class="h-12 w-12 rounded-full bg-gradient-to-r {roleInfo.gradient} flex items-center justify-center shadow-lg"
+												>
+													<span class="text-lg font-bold text-white">
 														{memorial.lovedOneName?.charAt(0) || memorial.title?.charAt(0) || 'M'}
 													</span>
 												</div>
 												<div>
-													<h3 class="font-bold text-gray-900 group-hover:text-{roleInfo.accentColor}-600 transition-colors">
+													<h3
+														class="font-bold text-gray-900 group-hover:text-{roleInfo.accentColor}-600 transition-colors"
+													>
 														{memorial.lovedOneName || memorial.title}
 													</h3>
 													<div class="flex items-center space-x-4 text-sm text-gray-500">
 														<span class="flex items-center">
-															<Calendar class="w-4 h-4 mr-1" />
+															<Calendar class="mr-1 h-4 w-4" />
 															{new Date(memorial.createdAt).toLocaleDateString()}
 														</span>
 													</div>
 												</div>
 											</div>
-											<div class="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-												<a href={`/${memorial.fullSlug}`} target="_blank" class="px-4 py-2 rounded-xl bg-green-600 text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center">
-													<Eye class="w-3 h-3 mr-1" />
+											<div
+												class="flex space-x-2 opacity-0 transition-opacity group-hover:opacity-100"
+											>
+												<a
+													href={`/${memorial.fullSlug}`}
+													target="_blank"
+													class="flex items-center rounded-xl bg-green-600 px-4 py-2 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
+												>
+													<Eye class="mr-1 h-3 w-3" />
 													View
 												</a>
-												<a href={`/schedule/${memorial.id}`} class="px-4 py-2 rounded-xl bg-amber-600 text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center">
-													<Clock class="w-3 h-3 mr-1" />
+												<a
+													href={`/schedule/${memorial.id}`}
+													class="flex items-center rounded-xl bg-amber-600 px-4 py-2 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
+												>
+													<Clock class="mr-1 h-3 w-3" />
 													Schedule
 												</a>
-												<a href={`/memorials/${memorial.id}/streams`} class="px-4 py-2 rounded-xl bg-purple-600 text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center">
-													<Play class="w-3 h-3 mr-1" />
+												<a
+													href={`/memorials/${memorial.id}/streams`}
+													class="flex items-center rounded-xl bg-purple-600 px-4 py-2 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
+												>
+													<Play class="mr-1 h-3 w-3" />
 													Manage Streams
 												</a>
 											</div>
@@ -278,88 +358,149 @@
 								{/each}
 							</div>
 						{:else}
-							<div class="text-center py-12">
-								<div class="w-24 h-24 mx-auto rounded-full bg-gradient-to-r {roleInfo.gradient} animate-spin mb-4"></div>
-								<h3 class="text-xl font-semibold text-gray-900 mb-2">No memorials yet</h3>
-								<p class="text-gray-500 mb-6">Create your first memorial to get started</p>
+							<div class="py-12 text-center">
+								<div
+									class="mx-auto h-24 w-24 rounded-full bg-gradient-to-r {roleInfo.gradient} mb-4 animate-spin"
+								></div>
+								<h3 class="mb-2 text-xl font-semibold text-gray-900">No memorials yet</h3>
+								<p class="mb-6 text-gray-500">Create your first memorial to get started</p>
 								{#if userRole === 'funeral_director'}
-									<a 
+									<a
 										href="/register/funeral-director"
-										class="inline-flex items-center px-6 py-3 rounded-xl bg-gradient-to-r {roleInfo.gradient} text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105"
+										class="inline-flex items-center rounded-xl bg-gradient-to-r px-6 py-3 {roleInfo.gradient} font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
 									>
-										<Heart class="w-4 h-4 mr-2" />
+										<Heart class="mr-2 h-4 w-4" />
 										Create Memorial
 									</a>
+								{:else if userRole === 'owner'}
+									<div class="space-y-4">
+										<button 
+											onclick={() => showCreateMemorialModal = true}
+											class="inline-flex items-center px-6 py-3 rounded-xl bg-gradient-to-r {roleInfo.gradient} text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105"
+										>
+											<Heart class="w-4 h-4 mr-2" />
+											Create Memorial
+										</button>
+										
+										<!-- Debug Test Button -->
+										<form method="POST" action="?/testAction" class="inline">
+											<button 
+												type="submit"
+												class="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700"
+											>
+												🧪 Test Server Action
+											</button>
+										</form>
+									</div>
 								{:else}
-									<p class="text-gray-500">Please contact your funeral director to create a new memorial.</p>
+									<p class="text-gray-500">
+										Please contact your funeral director to create a new memorial.
+									</p>
+								{/if}
+							</div>
+						{/if}
+
+						<!-- Create Memorial Button for Owners with existing memorials -->
+						{#if userRole === 'owner' && data.memorials && data.memorials.length > 0}
+							<div class="mt-6 text-center">
+								{#if data.profile?.memorialCount > 0 && !data.profile?.hasPaidForMemorial}
+									<div class="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
+										<p class="text-sm text-amber-800">
+											<strong>Payment Required:</strong> Please complete payment for your existing memorial
+											before creating a new one.
+										</p>
+										<button
+											class="mt-2 rounded-lg bg-amber-600 px-4 py-2 text-white transition-colors hover:bg-amber-700"
+										>
+											Complete Payment
+										</button>
+									</div>
+								{:else}
+									<button
+										onclick={() => (showCreateMemorialModal = true)}
+										class="inline-flex items-center rounded-xl bg-gradient-to-r px-6 py-3 {roleInfo.gradient} font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
+									>
+										<Heart class="mr-2 h-4 w-4" />
+										Create Another Memorial
+									</button>
 								{/if}
 							</div>
 						{/if}
 					</div>
 				</div>
-			</div>
 
-			<!-- Actions Section -->
-			<div class="mt-12 {mounted ? 'animate-fade-in-up' : 'opacity-0'}" style="animation-delay: 0.5s;">
-				<div class="bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 p-8 space-y-6">
-					{#if userRole === 'admin'}
-						<!-- Site Admin Section -->
-						<div class="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0 pb-6 border-b border-gray-200">
+				<!-- Actions Section -->
+				<div
+					class="mt-12 {mounted ? 'animate-fade-in-up' : 'opacity-0'}"
+					style="animation-delay: 0.5s;"
+				>
+					<div
+						class="space-y-6 rounded-3xl border border-white/20 bg-white/70 p-8 shadow-2xl backdrop-blur-xl"
+					>
+						{#if userRole === 'admin'}
+							<!-- Site Admin Section -->
+							<div
+								class="flex flex-col items-center justify-between space-y-4 border-b border-gray-200 pb-6 sm:flex-row sm:space-y-0"
+							>
+								<div class="flex items-center space-x-4">
+									<Crown class="h-6 w-6 text-red-600" />
+									<div>
+										<h3 class="font-semibold text-gray-900">Site Admin</h3>
+										<p class="text-sm text-gray-500">Administrative dashboard and controls</p>
+									</div>
+								</div>
+								<div class="flex space-x-4">
+									<a
+										href="/admin"
+										class="rounded-xl bg-gradient-to-r from-red-500 to-pink-600 px-6 py-3 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
+									>
+										Admin Dashboard
+									</a>
+								</div>
+							</div>
+						{/if}
+
+						<!-- Account Settings Section -->
+						<div
+							class="flex flex-col items-center justify-between space-y-4 sm:flex-row sm:space-y-0"
+						>
 							<div class="flex items-center space-x-4">
-								<Crown class="w-6 h-6 text-red-600" />
+								<Settings class="h-6 w-6 text-gray-600" />
 								<div>
-									<h3 class="font-semibold text-gray-900">Site Admin</h3>
-									<p class="text-sm text-gray-500">Administrative dashboard and controls</p>
+									<h3 class="font-semibold text-gray-900">Account Settings</h3>
+									<p class="text-sm text-gray-500">Manage your account and preferences</p>
 								</div>
 							</div>
 							<div class="flex space-x-4">
-								<a 
-									href="/admin"
-									class="px-6 py-3 rounded-xl bg-gradient-to-r from-red-500 to-pink-600 text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105"
-								>
-									Admin Dashboard
-								</a>
+								{#if userRole === 'funeral_director'}
+									<a
+										href="/funeral-director/dashboard"
+										class="rounded-xl bg-gradient-to-r from-yellow-500 to-amber-600 px-6 py-3 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
+									>
+										Director Dashboard
+									</a>
+								{/if}
+								<form method="POST" action="/logout" class="inline">
+									<button
+										type="submit"
+										class="flex items-center rounded-xl border border-gray-200 px-6 py-3 text-gray-600 transition-all duration-300 hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+									>
+										<LogOut class="mr-2 h-4 w-4" />
+										Sign Out
+									</button>
+								</form>
 							</div>
-						</div>
-					{/if}
-					
-					<!-- Account Settings Section -->
-					<div class="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
-						<div class="flex items-center space-x-4">
-							<Settings class="w-6 h-6 text-gray-600" />
-							<div>
-								<h3 class="font-semibold text-gray-900">Account Settings</h3>
-								<p class="text-sm text-gray-500">Manage your account and preferences</p>
-							</div>
-						</div>
-						<div class="flex space-x-4">
-							{#if userRole === 'funeral_director'}
-								<a 
-									href="/funeral-director/dashboard"
-									class="px-6 py-3 rounded-xl bg-gradient-to-r from-yellow-500 to-amber-600 text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105"
-								>
-									Director Dashboard
-								</a>
-							{/if}
-							<form method="POST" action="/logout" class="inline">
-								<button
-									type="submit"
-									class="flex items-center px-6 py-3 rounded-xl border border-gray-200 text-gray-600 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all duration-300"
-								>
-									<LogOut class="w-4 h-4 mr-2" />
-									Sign Out
-								</button>
-							</form>
 						</div>
 					</div>
 				</div>
 			</div>
-
 		{:else}
-			<div class="flex justify-center items-center min-h-[60vh]">
+			<div class="flex min-h-[60vh] items-center justify-center">
 				<div class="text-center">
-					<div class="w-16 h-16 mx-auto rounded-full bg-gradient-to-r {roleInfo.gradient} animate-spin mb-4"></div>
-					<p class="text-gray-600 font-medium">Loading your profile...</p>
+					<div
+						class="mx-auto h-16 w-16 rounded-full bg-gradient-to-r {roleInfo.gradient} mb-4 animate-spin"
+					></div>
+					<p class="font-medium text-gray-600">Loading your profile...</p>
 				</div>
 			</div>
 		{/if}
@@ -368,62 +509,87 @@
 
 <!-- Schedule Editing Modal -->
 {#if showScheduleModal && selectedMemorial}
-	<div class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-		<div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-3xl bg-white/90 backdrop-blur-xl">
+	<div class="bg-opacity-50 fixed inset-0 z-50 h-full w-full overflow-y-auto bg-gray-600">
+		<div
+			class="relative top-20 mx-auto w-96 rounded-3xl border bg-white/90 p-5 shadow-lg backdrop-blur-xl"
+		>
 			<div class="mt-3">
-				<div class="flex items-center justify-between mb-6">
-					<h3 class="text-xl font-bold text-gray-900 flex items-center">
-						<Clock class="w-6 h-6 mr-3 text-amber-600" />
+				<div class="mb-6 flex items-center justify-between">
+					<h3 class="flex items-center text-xl font-bold text-gray-900">
+						<Clock class="mr-3 h-6 w-6 text-amber-600" />
 						Edit Schedule
 					</h3>
 					<button
-						onclick={() => showScheduleModal = false}
-						class="text-gray-400 hover:text-gray-600 transition-colors"
+						onclick={() => (showScheduleModal = false)}
+						class="text-gray-400 transition-colors hover:text-gray-600"
 						aria-label="Close modal"
 					>
-						<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+						<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M6 18L18 6M6 6l12 12"
+							></path>
 						</svg>
 					</button>
 				</div>
-				
-				<div class="mb-4 p-4 rounded-2xl bg-gradient-to-r {roleInfo.bgGradient} border border-white/20">
-					<p class="font-semibold text-gray-900">{selectedMemorial.lovedOneName || selectedMemorial.title}</p>
+
+				<div
+					class="mb-4 rounded-2xl bg-gradient-to-r p-4 {roleInfo.bgGradient} border border-white/20"
+				>
+					<p class="font-semibold text-gray-900">
+						{selectedMemorial.lovedOneName || selectedMemorial.title}
+					</p>
 					<p class="text-sm text-gray-600">Memorial Service Schedule</p>
 				</div>
-				
-				<form onsubmit={(e) => { e.preventDefault(); updateSchedule(); }} class="space-y-6">
+
+				<form
+					onsubmit={(e) => {
+						e.preventDefault();
+						updateSchedule();
+					}}
+					class="space-y-6"
+				>
 					<!-- Date and Time Section -->
-					<div class="p-4 rounded-2xl bg-gradient-to-r from-yellow-50 to-amber-50 border border-yellow-100">
-						<h4 class="font-semibold text-gray-900 mb-4 flex items-center">
-							<Calendar class="w-4 h-4 mr-2 text-amber-600" />
+					<div
+						class="rounded-2xl border border-yellow-100 bg-gradient-to-r from-yellow-50 to-amber-50 p-4"
+					>
+						<h4 class="mb-4 flex items-center font-semibold text-gray-900">
+							<Calendar class="mr-2 h-4 w-4 text-amber-600" />
 							Service Date & Time
 						</h4>
-						<div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+						<div class="grid grid-cols-1 items-end gap-4 md:grid-cols-3">
 							<div>
-								<label for="serviceDate" class="block text-sm font-medium text-gray-700 mb-2">Date of Service</label>
+								<label for="serviceDate" class="mb-2 block text-sm font-medium text-gray-700"
+									>Date of Service</label
+								>
 								<input
 									type="date"
 									id="serviceDate"
 									bind:value={scheduleForm.serviceDate}
 									disabled={scheduleForm.timeIsUnknown}
-									class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all bg-white/70 backdrop-blur-sm disabled:bg-gray-100 disabled:text-gray-500"
+									class="w-full rounded-xl border border-gray-200 bg-white/70 px-4 py-3 backdrop-blur-sm transition-all focus:border-transparent focus:ring-2 focus:ring-amber-500 disabled:bg-gray-100 disabled:text-gray-500"
 								/>
 							</div>
 							<div>
-								<label for="serviceTime" class="block text-sm font-medium text-gray-700 mb-2">Time of Service</label>
+								<label for="serviceTime" class="mb-2 block text-sm font-medium text-gray-700"
+									>Time of Service</label
+								>
 								<input
 									type="time"
 									id="serviceTime"
 									bind:value={scheduleForm.serviceTime}
 									disabled={scheduleForm.timeIsUnknown}
-									class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all bg-white/70 backdrop-blur-sm disabled:bg-gray-100 disabled:text-gray-500"
+									class="w-full rounded-xl border border-gray-200 bg-white/70 px-4 py-3 backdrop-blur-sm transition-all focus:border-transparent focus:ring-2 focus:ring-amber-500 disabled:bg-gray-100 disabled:text-gray-500"
 								/>
 							</div>
 							<button
 								type="button"
-								onclick={() => scheduleForm.timeIsUnknown = !scheduleForm.timeIsUnknown}
-								class="px-4 py-3 rounded-xl font-medium transition-all {scheduleForm.timeIsUnknown ? 'bg-amber-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}"
+								onclick={() => (scheduleForm.timeIsUnknown = !scheduleForm.timeIsUnknown)}
+								class="rounded-xl px-4 py-3 font-medium transition-all {scheduleForm.timeIsUnknown
+									? 'bg-amber-600 text-white'
+									: 'bg-gray-200 text-gray-700 hover:bg-gray-300'}"
 							>
 								Unknown
 							</button>
@@ -431,14 +597,17 @@
 					</div>
 
 					<!-- Duration Section -->
-					<div class="p-4 rounded-2xl bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100">
-						<h4 class="font-semibold text-gray-900 mb-4 flex items-center">
-							<Clock class="w-4 h-4 mr-2 text-green-600" />
+					<div
+						class="rounded-2xl border border-green-100 bg-gradient-to-r from-green-50 to-emerald-50 p-4"
+					>
+						<h4 class="mb-4 flex items-center font-semibold text-gray-900">
+							<Clock class="mr-2 h-4 w-4 text-green-600" />
 							Service Duration
 						</h4>
 						<div class="space-y-3">
 							<div class="block text-sm font-medium text-gray-700">
-								Service Duration: {scheduleForm.duration} {scheduleForm.duration === 1 ? 'hour' : 'hours'}
+								Service Duration: {scheduleForm.duration}
+								{scheduleForm.duration === 1 ? 'hour' : 'hours'}
 							</div>
 							<div class="relative">
 								<input
@@ -447,10 +616,13 @@
 									min="0.5"
 									max="8"
 									step="0.5"
-									class="w-full h-3 bg-gradient-to-r from-yellow-200 to-amber-200 rounded-lg appearance-none cursor-pointer slider focus:outline-none focus:ring-2 focus:ring-amber-500"
-									style="background: linear-gradient(to right, #f59e0b 0%, #d97706 {(scheduleForm.duration - 0.5) / 7.5 * 100}%, #e5e7eb {(scheduleForm.duration - 0.5) / 7.5 * 100}%, #e5e7eb 100%)"
+									class="slider h-3 w-full cursor-pointer appearance-none rounded-lg bg-gradient-to-r from-yellow-200 to-amber-200 focus:ring-2 focus:ring-amber-500 focus:outline-none"
+									style="background: linear-gradient(to right, #f59e0b 0%, #d97706 {((scheduleForm.duration -
+										0.5) /
+										7.5) *
+										100}%, #e5e7eb {((scheduleForm.duration - 0.5) / 7.5) * 100}%, #e5e7eb 100%)"
 								/>
-								<div class="flex justify-between text-xs text-gray-500 mt-1">
+								<div class="mt-1 flex justify-between text-xs text-gray-500">
 									<span>30 min</span>
 									<span>4 hrs</span>
 									<span>8 hrs</span>
@@ -460,41 +632,51 @@
 					</div>
 
 					<!-- Location Section -->
-					<div class="p-4 rounded-2xl bg-gradient-to-r from-orange-50 to-red-50 border border-orange-100">
-						<h4 class="font-semibold text-gray-900 mb-4 flex items-center">
-							<Building2 class="w-4 h-4 mr-2 text-orange-600" />
+					<div
+						class="rounded-2xl border border-orange-100 bg-gradient-to-r from-orange-50 to-red-50 p-4"
+					>
+						<h4 class="mb-4 flex items-center font-semibold text-gray-900">
+							<Building2 class="mr-2 h-4 w-4 text-orange-600" />
 							Service Location
 						</h4>
 						<div class="space-y-4">
-							<div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+							<div class="grid grid-cols-1 items-end gap-4 md:grid-cols-3">
 								<div class="md:col-span-2">
-									<label for="locationName" class="block text-sm font-medium text-gray-700 mb-2">Location Name</label>
+									<label for="locationName" class="mb-2 block text-sm font-medium text-gray-700"
+										>Location Name</label
+									>
 									<input
 										type="text"
 										id="locationName"
 										bind:value={scheduleForm.location.name}
 										disabled={scheduleForm.location.isUnknown}
 										placeholder="e.g., St. Mary's Church"
-										class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-white/70 backdrop-blur-sm disabled:bg-gray-100 disabled:text-gray-500"
+										class="w-full rounded-xl border border-gray-200 bg-white/70 px-4 py-3 backdrop-blur-sm transition-all focus:border-transparent focus:ring-2 focus:ring-orange-500 disabled:bg-gray-100 disabled:text-gray-500"
 									/>
 								</div>
 								<button
 									type="button"
-									onclick={() => scheduleForm.location.isUnknown = !scheduleForm.location.isUnknown}
-									class="px-4 py-3 rounded-xl font-medium transition-all {scheduleForm.location.isUnknown ? 'bg-orange-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}"
+									onclick={() =>
+										(scheduleForm.location.isUnknown = !scheduleForm.location.isUnknown)}
+									class="rounded-xl px-4 py-3 font-medium transition-all {scheduleForm.location
+										.isUnknown
+										? 'bg-orange-600 text-white'
+										: 'bg-gray-200 text-gray-700 hover:bg-gray-300'}"
 								>
 									Unknown
 								</button>
 							</div>
 							<div>
-								<label for="locationAddress" class="block text-sm font-medium text-gray-700 mb-2">Location Address</label>
+								<label for="locationAddress" class="mb-2 block text-sm font-medium text-gray-700"
+									>Location Address</label
+								>
 								<input
 									type="text"
 									id="locationAddress"
 									bind:value={scheduleForm.location.address}
 									disabled={scheduleForm.location.isUnknown}
 									placeholder="123 Main St, Anytown, USA"
-									class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all bg-white/70 backdrop-blur-sm disabled:bg-gray-100 disabled:text-gray-500"
+									class="w-full rounded-xl border border-gray-200 bg-white/70 px-4 py-3 backdrop-blur-sm transition-all focus:border-transparent focus:ring-2 focus:ring-orange-500 disabled:bg-gray-100 disabled:text-gray-500"
 								/>
 							</div>
 						</div>
@@ -503,16 +685,124 @@
 					<div class="flex justify-end space-x-3 pt-4">
 						<button
 							type="button"
-							onclick={() => showScheduleModal = false}
-							class="px-6 py-3 text-sm font-medium text-gray-700 bg-gray-200 rounded-xl hover:bg-gray-300 transition-colors"
+							onclick={() => (showScheduleModal = false)}
+							class="rounded-xl bg-gray-200 px-6 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-300"
 						>
 							Cancel
 						</button>
 						<button
 							type="submit"
-							class="px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105"
+							class="rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-3 text-sm font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
 						>
 							Update Schedule
+						</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+{/if}
+
+<!-- Create Memorial Modal -->
+{#if showCreateMemorialModal}
+	<div class="bg-opacity-50 fixed inset-0 z-50 h-full w-full overflow-y-auto bg-gray-600">
+		<div
+			class="relative top-20 mx-auto w-96 rounded-3xl border bg-white/90 p-5 shadow-lg backdrop-blur-xl"
+		>
+			<div class="mt-3">
+				<div class="mb-6 flex items-center justify-between">
+					<h3 class="flex items-center text-xl font-bold text-gray-900">
+						<Heart class="mr-3 h-6 w-6 text-amber-600" />
+						Create Memorial
+					</h3>
+					<button
+						onclick={() => (showCreateMemorialModal = false)}
+						class="text-gray-400 transition-colors hover:text-gray-600"
+						aria-label="Close modal"
+					>
+						<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M6 18L18 6M6 6l12 12"
+							></path>
+						</svg>
+					</button>
+				</div>
+
+				<form
+					method="POST"
+					action="?/createMemorial"
+					class="space-y-6"
+					onsubmit={() => {
+						console.log('🎯 [PROFILE] Form submitting...');
+						isCreatingMemorial = true;
+					}}
+				>
+					<div
+						class="rounded-2xl border border-amber-100 bg-gradient-to-r from-amber-50 to-orange-50 p-4"
+					>
+						<label for="lovedOneName" class="mb-2 block text-sm font-medium text-gray-700">
+							Loved One's Name *
+						</label>
+						<input
+							type="text"
+							id="lovedOneName"
+							name="lovedOneName"
+							bind:value={lovedOneName}
+							placeholder="Enter the name of your loved one"
+							required
+							class="w-full rounded-xl border border-gray-200 bg-white/70 px-4 py-3 backdrop-blur-sm transition-all focus:border-transparent focus:ring-2 focus:ring-amber-500"
+						/>
+						<p class="mt-2 text-xs text-gray-500">
+							This will be the main name displayed on the memorial page.
+						</p>
+					</div>
+
+					{#if form?.message}
+						<div class="p-4 rounded-xl {form.success ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}">
+							<p class="text-sm {form.success ? 'text-green-600' : 'text-red-600'}">{form.message}</p>
+							{#if form.success && form.memorialUrl}
+								<a 
+									href={form.memorialUrl} 
+									target="_blank"
+									class="mt-2 inline-flex items-center text-sm font-medium text-green-700 hover:text-green-800"
+								>
+									View Memorial →
+								</a>
+							{/if}
+						</div>
+					{/if}
+
+					<div class="rounded-xl border border-blue-200 bg-blue-50 p-4">
+						<h4 class="mb-2 font-semibold text-blue-900">What happens next?</h4>
+						<ul class="space-y-1 text-sm text-blue-800">
+							<li>• Your memorial will be created and immediately accessible</li>
+							<li>• You can customize it with photos, stories, and service details</li>
+							<li>• You'll get a unique URL to share with family and friends</li>
+							<li>• You can only create one memorial until payment is completed</li>
+						</ul>
+					</div>
+
+					<div class="flex justify-end space-x-3 pt-4">
+						<button
+							type="button"
+							onclick={() => (showCreateMemorialModal = false)}
+							class="rounded-xl bg-gray-200 px-6 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-300"
+						>
+							Cancel
+						</button>
+						<button
+							type="submit"
+							disabled={isCreatingMemorial}
+							class="px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+						>
+							{#if isCreatingMemorial}
+								Creating Memorial...
+							{:else}
+								Create Memorial
+							{/if}
 						</button>
 					</div>
 				</form>
@@ -532,11 +822,11 @@
 			transform: translateY(0);
 		}
 	}
-	
+
 	.animate-fade-in-up {
 		animation: fade-in-up 0.8s ease-out forwards;
 	}
-	
+
 	.shadow-3xl {
 		box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25);
 	}

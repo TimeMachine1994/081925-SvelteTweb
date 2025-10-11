@@ -3,10 +3,26 @@
 	import { goto } from '$app/navigation';
 	import { auth } from '$lib/firebase';
 	import { signInWithCustomToken, getIdToken } from 'firebase/auth';
-	import { Building2, User, Mail, Phone, MapPin, FileText, Shield, Award, CheckCircle, Save, ArrowRight, Sparkles } from 'lucide-svelte';
+	import {
+		Building2,
+		User,
+		Mail,
+		Phone,
+		MapPin,
+		FileText,
+		Shield,
+		Award,
+		CheckCircle,
+		Save,
+		ArrowRight,
+		Sparkles
+	} from 'lucide-svelte';
 	import { useFormAutoSave } from '$lib/composables/useFormAutoSave';
 
-	let { form }: { form?: { error?: any; success?: boolean; message?: string; applicationId?: string } } = $props();
+	let {
+		form
+	}: { form?: { error?: any; success?: boolean; message?: string; applicationId?: string } } =
+		$props();
 
 	// Form state using Svelte 5 runes
 	let companyName = $state('');
@@ -42,7 +58,13 @@
 				email = data.email || '';
 				password = data.password || '';
 				phone = data.phone || '';
-				address = data.address || { street: '', city: '', state: '', zipCode: '', country: 'United States' };
+				address = data.address || {
+					street: '',
+					city: '',
+					state: '',
+					zipCode: '',
+					country: 'United States'
+				};
 				website = data.website || '';
 			}
 		}
@@ -59,7 +81,7 @@
 			address,
 			website
 		};
-		
+
 		// Only auto-save if we have some meaningful data
 		if (companyName || contactPerson || email) {
 			autoSave.triggerAutoSave(formData);
@@ -85,7 +107,7 @@
 					const loginFormData = new FormData();
 					loginFormData.append('idToken', idToken);
 
-										const loginResponse = await fetch('/login?/login', {
+					const loginResponse = await fetch('/login?/login', {
 						method: 'POST',
 						body: loginFormData
 					});
@@ -100,7 +122,9 @@
 				} catch (error) {
 					console.error('Auto-login process failed:', error);
 					// If auto-login fails, send user to the manual login page as a fallback
-					alert('Your account was created, but we could not log you in automatically. Please log in manually.');
+					alert(
+						'Your account was created, but we could not log you in automatically. Please log in manually.'
+					);
 					await goto('/login');
 				} finally {
 					isSubmitting = false;
@@ -113,33 +137,39 @@
 
 <svelte:head>
 	<title>Register Your Funeral Home - TributeStream</title>
-	<meta name="description" content="Join TributeStream's network of professional funeral directors and provide families with beautiful memorial experiences." />
+	<meta
+		name="description"
+		content="Join TributeStream's network of professional funeral directors and provide families with beautiful memorial experiences."
+	/>
 </svelte:head>
 
 <div class="min-h-screen bg-gradient-to-br from-yellow-50 to-white">
 	<div class="container mx-auto px-4 py-12">
-		
 		<!-- Header -->
-		<div class="text-center mb-12">
-			<div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-yellow-600 to-amber-600 rounded-full mb-6">
-				<Building2 class="w-8 h-8 text-white" />
+		<div class="mb-12 text-center">
+			<div
+				class="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-yellow-600 to-amber-600"
+			>
+				<Building2 class="h-8 w-8 text-white" />
 			</div>
-			<h1 class="text-4xl font-bold text-gray-900 mb-4">Register Your Funeral Home</h1>
-			<p class="text-xl text-gray-600 max-w-2xl mx-auto">
-				Join TributeStream's network of professional funeral directors and provide families with beautiful, lasting memorial experiences.
+			<h1 class="mb-4 text-4xl font-bold text-gray-900">Register Your Funeral Home</h1>
+			<p class="mx-auto max-w-2xl text-xl text-gray-600">
+				Join TributeStream's network of professional funeral directors and provide families with
+				beautiful, lasting memorial experiences.
 			</p>
 		</div>
 
-
 		<!-- Form -->
-		<div class="max-w-4xl mx-auto">
-			<div class="bg-white rounded-2xl shadow-xl p-8">
+		<div class="mx-auto max-w-4xl">
+			<div class="rounded-2xl bg-white p-8 shadow-xl">
 				<!-- Auto-save Status Indicator -->
 				{#if autoSave.hasSavedData()}
-					<div class="mb-6 p-3 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3">
-						<Save class="w-4 h-4 text-green-600" />
+					<div
+						class="mb-6 flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 p-3"
+					>
+						<Save class="h-4 w-4 text-green-600" />
 						<div class="flex-1">
-							<p class="text-sm text-green-800 font-medium">Form data auto-saved</p>
+							<p class="text-sm font-medium text-green-800">Form data auto-saved</p>
 							<p class="text-xs text-green-600">
 								Last saved: {autoSave.getLastSaveTime()?.toLocaleString() || 'Recently'}
 							</p>
@@ -147,29 +177,32 @@
 						<button
 							type="button"
 							onclick={() => autoSave.clearStorage()}
-							class="text-xs text-green-600 hover:text-green-800 underline"
+							class="text-xs text-green-600 underline hover:text-green-800"
 						>
 							Clear saved data
 						</button>
 					</div>
-				{/if}<form method="POST" use:enhance={() => {
-					isSubmitting = true;
-					return async ({ update }) => {
-						await update({ reset: false });
-						isSubmitting = false;
-					};
-				}}>
-						
+				{/if}
+				<form
+					method="POST"
+					use:enhance={() => {
+						isSubmitting = true;
+						return async ({ update }) => {
+							await update({ reset: false });
+							isSubmitting = false;
+						};
+					}}
+				>
 					<div class="space-y-6">
-						<div class="text-center mb-8">
-							<h2 class="text-2xl font-bold text-gray-900 mb-2">Account & Business Information</h2>
+						<div class="mb-8 text-center">
+							<h2 class="mb-2 text-2xl font-bold text-gray-900">Account & Business Information</h2>
 							<p class="text-gray-600">Create your account and tell us about your funeral home.</p>
 						</div>
-				
-						<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+						<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 							<div>
-								<label for="companyName" class="block text-sm font-medium text-gray-700 mb-2">
-									<Building2 class="w-4 h-4 inline mr-1" />
+								<label for="companyName" class="mb-2 block text-sm font-medium text-gray-700">
+									<Building2 class="mr-1 inline h-4 w-4" />
 									Funeral Home Name *
 								</label>
 								<input
@@ -177,16 +210,16 @@
 									id="companyName"
 									name="companyName"
 									bind:value={companyName}
-									onchange={(e) => companyName = e.currentTarget.value}
+									onchange={(e) => (companyName = e.currentTarget.value)}
 									required
-									class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
+									class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
 									placeholder="Smith & Sons Funeral Home"
 								/>
 							</div>
-				
+
 							<div>
-								<label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-									<Shield class="w-4 h-4 inline mr-1" />
+								<label for="password" class="mb-2 block text-sm font-medium text-gray-700">
+									<Shield class="mr-1 inline h-4 w-4" />
 									Password *
 								</label>
 								<input
@@ -194,17 +227,17 @@
 									id="password"
 									name="password"
 									bind:value={password}
-									onchange={(e) => password = e.currentTarget.value}
+									onchange={(e) => (password = e.currentTarget.value)}
 									required
 									minlength="6"
-									class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
+									class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
 									placeholder="Choose a secure password"
 								/>
 							</div>
-				
+
 							<div>
-								<label for="contactPerson" class="block text-sm font-medium text-gray-700 mb-2">
-									<User class="w-4 h-4 inline mr-1" />
+								<label for="contactPerson" class="mb-2 block text-sm font-medium text-gray-700">
+									<User class="mr-1 inline h-4 w-4" />
 									Primary Contact Name *
 								</label>
 								<input
@@ -212,17 +245,16 @@
 									id="contactPerson"
 									name="contactPerson"
 									bind:value={contactPerson}
-									onchange={(e) => contactPerson = e.currentTarget.value}
+									onchange={(e) => (contactPerson = e.currentTarget.value)}
 									required
-									class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
+									class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
 									placeholder="John Smith"
 								/>
 							</div>
-				
-				
+
 							<div>
-								<label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-									<Mail class="w-4 h-4 inline mr-1" />
+								<label for="email" class="mb-2 block text-sm font-medium text-gray-700">
+									<Mail class="mr-1 inline h-4 w-4" />
 									Email Address *
 								</label>
 								<input
@@ -230,16 +262,16 @@
 									id="email"
 									name="email"
 									bind:value={email}
-									onchange={(e) => email = e.currentTarget.value}
+									onchange={(e) => (email = e.currentTarget.value)}
 									required
-									class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
+									class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
 									placeholder="john@smithfuneralhome.com"
 								/>
 							</div>
-				
+
 							<div>
-								<label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
-									<Phone class="w-4 h-4 inline mr-1" />
+								<label for="phone" class="mb-2 block text-sm font-medium text-gray-700">
+									<Phone class="mr-1 inline h-4 w-4" />
 									Phone Number *
 								</label>
 								<input
@@ -247,29 +279,29 @@
 									id="phone"
 									name="phone"
 									bind:value={phone}
-									onchange={(e) => phone = e.currentTarget.value}
+									onchange={(e) => (phone = e.currentTarget.value)}
 									required
-									class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
+									class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
 									placeholder="(555) 123-4567"
 								/>
 							</div>
 						</div>
-				
+
 						<!-- Address Section -->
 						<div class="border-t pt-6">
-							<h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-								<MapPin class="w-5 h-5 mr-2" />
+							<h3 class="mb-4 flex items-center text-lg font-semibold text-gray-900">
+								<MapPin class="mr-2 h-5 w-5" />
 								Business Address
 							</h3>
-							<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 								<div class="md:col-span-2">
 									<input
 										type="text"
 										name="address.street"
 										bind:value={address.street}
-										onchange={(e) => address.street = e.currentTarget.value}
+										onchange={(e) => (address.street = e.currentTarget.value)}
 										required
-										class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
+										class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
 										placeholder="Street Address"
 									/>
 								</div>
@@ -278,9 +310,9 @@
 										type="text"
 										name="address.city"
 										bind:value={address.city}
-										onchange={(e) => address.city = e.currentTarget.value}
+										onchange={(e) => (address.city = e.currentTarget.value)}
 										required
-										class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
+										class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
 										placeholder="City"
 									/>
 								</div>
@@ -289,9 +321,9 @@
 										type="text"
 										name="address.state"
 										bind:value={address.state}
-										onchange={(e) => address.state = e.currentTarget.value}
+										onchange={(e) => (address.state = e.currentTarget.value)}
 										required
-										class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
+										class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
 										placeholder="State"
 									/>
 								</div>
@@ -300,9 +332,9 @@
 										type="text"
 										name="address.zipCode"
 										bind:value={address.zipCode}
-										onchange={(e) => address.zipCode = e.currentTarget.value}
+										onchange={(e) => (address.zipCode = e.currentTarget.value)}
 										required
-										class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
+										class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
 										placeholder="ZIP Code"
 									/>
 								</div>
@@ -311,27 +343,27 @@
 										type="text"
 										name="address.country"
 										bind:value={address.country}
-										onchange={(e) => address.country = e.currentTarget.value}
-										class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all"
+										onchange={(e) => (address.country = e.currentTarget.value)}
+										class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
 										placeholder="Country"
 									/>
 								</div>
 							</div>
 						</div>
 					</div>
-				
+
 					{#if form?.error}
-						<div class="mt-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+						<div class="mt-6 rounded-xl border border-red-200 bg-red-50 p-4">
 							<p class="text-red-800">❌ {form.error}</p>
 						</div>
 					{/if}
-				
+
 					<!-- Navigation Buttons -->
-					<div class="flex justify-end mt-8 pt-6 border-t">
+					<div class="mt-8 flex justify-end border-t pt-6">
 						<button
 							type="submit"
 							disabled={isSubmitting}
-							class="px-8 py-3 bg-gradient-to-r from-yellow-600 to-amber-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+							class="rounded-xl bg-gradient-to-r from-yellow-600 to-amber-600 px-8 py-3 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
 						>
 							{isSubmitting ? 'Creating Account...' : 'Create Account & Get Started'}
 						</button>

@@ -6,28 +6,30 @@ export interface AutoSaveData {
 	calculatorData?: CalculatorFormData;
 }
 
-export function useAutoSave(memorialId: string, options?: {
-	delay?: number;
-	onSave?: (success: boolean, error?: string) => void;
-	onLoad?: (data: AutoSaveData | null) => void;
-}) {
+export function useAutoSave(
+	memorialId: string,
+	options?: {
+		delay?: number;
+		onSave?: (success: boolean, error?: string) => void;
+		onLoad?: (data: AutoSaveData | null) => void;
+	}
+) {
 	let saveTimeout: NodeJS.Timeout | null = null;
 	let lastSaveData: string | null = null;
 	let isSaving = false;
 	let lastSaved: Date | null = null;
 	let hasUnsavedChanges = false;
-	
+
 	const delay = options?.delay || 2000;
 	const onSave = options?.onSave;
 	const onLoad = options?.onLoad;
-
 
 	// Auto-save function
 	async function autoSave(data: AutoSaveData) {
 		if (!data.services && !data.calculatorData) {
 			return;
 		}
-		
+
 		const dataString = JSON.stringify(data);
 		if (dataString === lastSaveData) {
 			return;
@@ -68,7 +70,7 @@ export function useAutoSave(memorialId: string, options?: {
 	// Trigger auto-save
 	function triggerAutoSave(data: AutoSaveData) {
 		hasUnsavedChanges = true;
-		
+
 		if (saveTimeout) {
 			clearTimeout(saveTimeout);
 		}
@@ -86,28 +88,27 @@ export function useAutoSave(memorialId: string, options?: {
 
 			if (response.ok && result.success && result.hasAutoSave) {
 				const data: AutoSaveData = {};
-				
+
 				if (result.services) {
 					data.services = result.services;
 				}
-				
+
 				if (result.autoSave?.formData) {
 					data.calculatorData = result.autoSave.formData;
 				}
-				
+
 				if (data.services || data.calculatorData) {
 					onLoad?.(data);
 					return data;
 				}
 			}
-			
+
 			return null;
 		} catch (error) {
 			onLoad?.(null);
 			return null;
 		}
 	}
-
 
 	// Manual save function
 	function saveNow(data: AutoSaveData): Promise<void> {
@@ -116,7 +117,7 @@ export function useAutoSave(memorialId: string, options?: {
 				clearTimeout(saveTimeout);
 				saveTimeout = null;
 			}
-			
+
 			await autoSave(data);
 			resolve();
 		});

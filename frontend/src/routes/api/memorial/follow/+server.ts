@@ -22,7 +22,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		// Update user's followed memorials
 		const userRef = adminDb.collection('users').doc(user.uid);
-		
+
 		if (action === 'follow') {
 			await userRef.update({
 				followedMemorials: FieldValue.arrayUnion(memorialId)
@@ -35,7 +35,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		// Update memorial's followers count
 		const memorialRef = adminDb.collection('memorials').doc(memorialId);
-		
+
 		if (action === 'follow') {
 			await memorialRef.update({
 				followers: FieldValue.arrayUnion(user.uid),
@@ -48,17 +48,14 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			});
 		}
 
-		return json({ 
-			success: true, 
+		return json({
+			success: true,
 			action,
-			message: action === 'follow' ? 'Memorial followed successfully' : 'Memorial unfollowed successfully'
+			message:
+				action === 'follow' ? 'Memorial followed successfully' : 'Memorial unfollowed successfully'
 		});
-
 	} catch (error) {
 		console.error('Memorial follow/unfollow error:', error);
-		return json(
-			{ error: 'Failed to update follow status' },
-			{ status: 500 }
-		);
+		return json({ error: 'Failed to update follow status' }, { status: 500 });
 	}
 };

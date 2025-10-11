@@ -28,54 +28,54 @@ describe('Admin Page Server Load', () => {
 
 	it('should redirect to login if user is not authenticated', async () => {
 		const locals = { user: null };
-		
+
 		// Mock redirect to throw (simulating SvelteKit behavior)
 		mockRedirect.mockImplementation(() => {
 			throw new Error('Redirect');
 		});
-		
+
 		await expect(load({ locals } as any)).rejects.toThrow();
 		expect(mockRedirect).toHaveBeenCalledWith(302, '/login');
 	});
 
 	it('should redirect to profile if user is not admin', async () => {
-		const locals = { 
-			user: { 
-				email: 'user@test.com', 
-				admin: false, 
-				role: 'owner' 
-			} 
+		const locals = {
+			user: {
+				email: 'user@test.com',
+				admin: false,
+				role: 'owner'
+			}
 		};
-		
+
 		// Mock redirect to throw (simulating SvelteKit behavior)
 		mockRedirect.mockImplementation(() => {
 			throw new Error('Redirect');
 		});
-		
+
 		await expect(load({ locals } as any)).rejects.toThrow();
 		expect(mockRedirect).toHaveBeenCalledWith(302, '/profile');
 	});
 
 	it('should allow access for admin users with admin flag', async () => {
-		const locals = { 
-			user: { 
-				email: 'admin@test.com', 
-				admin: true, 
+		const locals = {
+			user: {
+				email: 'admin@test.com',
+				admin: true,
 				role: 'owner',
 				uid: 'admin-123'
-			} 
+			}
 		};
 
 		// Mock Firestore collections to return empty results
 		mockAdminDb.collection.mockReturnValue({
-			get: vi.fn().mockResolvedValue({ 
+			get: vi.fn().mockResolvedValue({
 				docs: [],
 				size: 0
 			})
 		});
 
 		const result = await load({ locals } as any);
-		
+
 		expect(result).toHaveProperty('adminUser');
 		expect(result).toHaveProperty('recentMemorials');
 		expect(result).toHaveProperty('pendingFuneralDirectors');
@@ -84,37 +84,37 @@ describe('Admin Page Server Load', () => {
 	});
 
 	it('should allow access for admin users with admin role', async () => {
-		const locals = { 
-			user: { 
-				email: 'admin@test.com', 
-				admin: true, 
+		const locals = {
+			user: {
+				email: 'admin@test.com',
+				admin: true,
 				role: 'admin',
 				uid: 'admin-456'
-			} 
+			}
 		};
 
 		// Mock basic Firestore responses
 		mockAdminDb.collection.mockReturnValue({
-			get: vi.fn().mockResolvedValue({ 
+			get: vi.fn().mockResolvedValue({
 				docs: [],
 				size: 0
 			})
 		});
 
 		const result = await load({ locals } as any);
-		
+
 		expect(result).toHaveProperty('adminUser');
 		expect(result.adminUser.email).toBe('admin@test.com');
 	});
 
 	it('should handle database errors gracefully', async () => {
-		const locals = { 
-			user: { 
-				email: 'admin@test.com', 
-				admin: true, 
+		const locals = {
+			user: {
+				email: 'admin@test.com',
+				admin: true,
 				role: 'admin',
 				uid: 'admin-789'
-			} 
+			}
 		};
 
 		// Mock database error
@@ -124,7 +124,7 @@ describe('Admin Page Server Load', () => {
 
 		// Should not throw an error, but return error state
 		const result = await load({ locals } as any);
-		
+
 		expect(result).toHaveProperty('error');
 		expect(result).toHaveProperty('adminUser');
 		expect(result.adminUser.email).toBe('admin@test.com');

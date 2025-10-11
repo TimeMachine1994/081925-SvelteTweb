@@ -16,12 +16,12 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 	try {
 		console.log('Creating session cookie...');
 		const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
-		const options = { 
-			maxAge: expiresIn, 
-			httpOnly: true, 
+		const options = {
+			maxAge: expiresIn,
+			httpOnly: true,
 			secure: false, // Allow non-HTTPS in development
 			sameSite: 'lax' as const,
-			path: '/' 
+			path: '/'
 		};
 		cookies.set('session', sessionCookie, options);
 		console.log('Session cookie created and set successfully.');

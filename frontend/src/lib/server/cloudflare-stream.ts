@@ -66,7 +66,7 @@ export async function createLiveInput(options: {
 		const response = await fetch(`${CLOUDFLARE_STREAM_API_BASE}/live_inputs`, {
 			method: 'POST',
 			headers: {
-				'Authorization': `Bearer ${CLOUDFLARE_API_TOKEN}`,
+				Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`,
 				'Content-Type': 'application/json'
 			},
 			body: JSON.stringify({
@@ -91,12 +91,11 @@ export async function createLiveInput(options: {
 
 		if (!data.success) {
 			console.error('❌ [CLOUDFLARE] API returned errors:', data.errors);
-			throw new Error(`Cloudflare API error: ${data.errors.map(e => e.message).join(', ')}`);
+			throw new Error(`Cloudflare API error: ${data.errors.map((e) => e.message).join(', ')}`);
 		}
 
 		console.log('✅ [CLOUDFLARE] Live input created:', data.result.uid);
 		return data.result;
-
 	} catch (error) {
 		console.error('❌ [CLOUDFLARE] Failed to create live input:', error);
 		throw error;
@@ -125,16 +124,19 @@ export async function getLiveInput(inputId: string): Promise<CloudflareLiveInput
 		const url = `${CLOUDFLARE_STREAM_API_BASE}/live_inputs/${inputId}`;
 		console.log('🔍 [CLOUDFLARE_GET_LIVE] Making API request to:', url);
 		console.log('🔍 [CLOUDFLARE_GET_LIVE] API base:', CLOUDFLARE_STREAM_API_BASE);
-		
+
 		const response = await fetch(url, {
 			headers: {
-				'Authorization': `Bearer ${CLOUDFLARE_API_TOKEN}`
+				Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`
 			}
 		});
 
 		console.log('📞 [CLOUDFLARE_GET_LIVE] Response status:', response.status);
 		console.log('📞 [CLOUDFLARE_GET_LIVE] Response ok:', response.ok);
-		console.log('📞 [CLOUDFLARE_GET_LIVE] Response headers:', Object.fromEntries(response.headers.entries()));
+		console.log(
+			'📞 [CLOUDFLARE_GET_LIVE] Response headers:',
+			Object.fromEntries(response.headers.entries())
+		);
 
 		if (!response.ok) {
 			const errorText = await response.text();
@@ -146,12 +148,14 @@ export async function getLiveInput(inputId: string): Promise<CloudflareLiveInput
 		console.log('📋 [CLOUDFLARE_GET_LIVE] Full API response:', JSON.stringify(data, null, 2));
 		console.log('📋 [CLOUDFLARE_GET_LIVE] Result data:', JSON.stringify(data.result, null, 2));
 		return data.result;
-
 	} catch (error) {
 		console.error('❌ [CLOUDFLARE_GET_LIVE] ===== ERROR GETTING LIVE INPUT =====');
 		console.error('❌ [CLOUDFLARE_GET_LIVE] Failed to get live input:', error);
 		console.error('❌ [CLOUDFLARE_GET_LIVE] Error type:', typeof error);
-		console.error('❌ [CLOUDFLARE_GET_LIVE] Error message:', error instanceof Error ? error.message : 'Unknown');
+		console.error(
+			'❌ [CLOUDFLARE_GET_LIVE] Error message:',
+			error instanceof Error ? error.message : 'Unknown'
+		);
 		throw error;
 	}
 }
@@ -170,7 +174,7 @@ export async function deleteLiveInput(inputId: string): Promise<void> {
 		const response = await fetch(`${CLOUDFLARE_STREAM_API_BASE}/live_inputs/${inputId}`, {
 			method: 'DELETE',
 			headers: {
-				'Authorization': `Bearer ${CLOUDFLARE_API_TOKEN}`
+				Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`
 			}
 		});
 
@@ -179,7 +183,6 @@ export async function deleteLiveInput(inputId: string): Promise<void> {
 		}
 
 		console.log('✅ [CLOUDFLARE] Live input deleted:', inputId);
-
 	} catch (error) {
 		console.error('❌ [CLOUDFLARE] Failed to delete live input:', error);
 		throw error;
@@ -199,7 +202,7 @@ export async function listLiveInputs(): Promise<CloudflareLiveInput[]> {
 	try {
 		const response = await fetch(`${CLOUDFLARE_STREAM_API_BASE}/live_inputs`, {
 			headers: {
-				'Authorization': `Bearer ${CLOUDFLARE_API_TOKEN}`
+				Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`
 			}
 		});
 
@@ -209,7 +212,6 @@ export async function listLiveInputs(): Promise<CloudflareLiveInput[]> {
 
 		const data: CloudflareApiResponse<CloudflareLiveInput[]> = await response.json();
 		return data.result;
-
 	} catch (error) {
 		console.error('❌ [CLOUDFLARE] Failed to list live inputs:', error);
 		throw error;
@@ -234,20 +236,20 @@ export function getHLSPlaybackURL(input: CloudflareLiveInput): string | undefine
 		webRTC: input.webRTC?.url,
 		rtmpsPlayback: input.rtmpsPlayback?.url
 	});
-	
+
 	// Use the known working customer code from our Cloudflare account
 	// This is more reliable than trying to extract it from URLs
 	const customerCode = 'dyz4fsbg86xy3krn';
-	
+
 	if (!input.uid) {
 		console.log('❌ [HLS] No UID found in live input');
 		return undefined;
 	}
-	
+
 	// Construct HLS URL: https://customer-{customer-code}.cloudflarestream.com/{uid}/manifest/video.m3u8
 	const hlsUrl = `https://customer-${customerCode}.cloudflarestream.com/${input.uid}/manifest/video.m3u8`;
 	console.log('🎯 [HLS] Generated HLS URL:', hlsUrl);
-	
+
 	return hlsUrl;
 }
 
@@ -272,16 +274,19 @@ export async function getEmbedCode(inputId: string): Promise<string> {
 		const url = `${CLOUDFLARE_STREAM_API_BASE}/${inputId}/embed`;
 		console.log('🔍 [CLOUDFLARE_EMBED] Making embed API request to:', url);
 		console.log('🔍 [CLOUDFLARE_EMBED] API base:', CLOUDFLARE_STREAM_API_BASE);
-		
+
 		const response = await fetch(url, {
 			headers: {
-				'Authorization': `Bearer ${CLOUDFLARE_API_TOKEN}`
+				Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`
 			}
 		});
 
 		console.log('📞 [CLOUDFLARE_EMBED] Response status:', response.status);
 		console.log('📞 [CLOUDFLARE_EMBED] Response ok:', response.ok);
-		console.log('📞 [CLOUDFLARE_EMBED] Response headers:', Object.fromEntries(response.headers.entries()));
+		console.log(
+			'📞 [CLOUDFLARE_EMBED] Response headers:',
+			Object.fromEntries(response.headers.entries())
+		);
 
 		if (!response.ok) {
 			const errorText = await response.text();
@@ -295,12 +300,14 @@ export async function getEmbedCode(inputId: string): Promise<string> {
 		console.log('✅ [CLOUDFLARE_EMBED] Embed HTML preview:', embedHtml.substring(0, 200) + '...');
 		console.log('✅ [CLOUDFLARE_EMBED] Embed HTML length:', embedHtml.length);
 		return embedHtml;
-
 	} catch (error) {
 		console.error('❌ [CLOUDFLARE_EMBED] ===== ERROR GETTING EMBED CODE =====');
 		console.error('❌ [CLOUDFLARE_EMBED] Failed to get embed code:', error);
 		console.error('❌ [CLOUDFLARE_EMBED] Error type:', typeof error);
-		console.error('❌ [CLOUDFLARE_EMBED] Error message:', error instanceof Error ? error.message : 'Unknown');
+		console.error(
+			'❌ [CLOUDFLARE_EMBED] Error message:',
+			error instanceof Error ? error.message : 'Unknown'
+		);
 		throw error;
 	}
 }
@@ -315,31 +322,31 @@ export function extractEmbedIframeUrl(embedHtml: string): string | undefined {
 	console.log('🔍 [EXTRACT_IFRAME] Embed HTML input:', embedHtml);
 	console.log('🔍 [EXTRACT_IFRAME] Embed HTML type:', typeof embedHtml);
 	console.log('🔍 [EXTRACT_IFRAME] Embed HTML length:', embedHtml?.length);
-	
+
 	// Look for the stream id attribute in the <stream> tag
 	console.log('🔍 [EXTRACT_IFRAME] Looking for stream id pattern...');
 	const streamIdMatch = embedHtml.match(/id="([^"]+)"/);
 	console.log('🔍 [EXTRACT_IFRAME] Regex match result:', streamIdMatch);
-	
+
 	if (streamIdMatch && streamIdMatch[1]) {
 		const videoId = streamIdMatch[1];
 		console.log('✅ [EXTRACT_IFRAME] Extracted video ID:', videoId);
 		console.log('✅ [EXTRACT_IFRAME] Video ID length:', videoId.length);
-		
+
 		// Use the same customer code as in HLS function
 		const customerCode = 'dyz4fsbg86xy3krn';
 		console.log('🔍 [EXTRACT_IFRAME] Using customer code:', customerCode);
-		
+
 		// Construct the iframe src URL
 		const iframeUrl = `https://customer-${customerCode}.cloudflarestream.com/${videoId}/iframe`;
 		console.log('✅ [EXTRACT_IFRAME] Constructed iframe URL:', iframeUrl);
 		console.log('✅ [EXTRACT_IFRAME] Iframe URL length:', iframeUrl.length);
-		
+
 		return iframeUrl;
 	}
-	
+
 	console.log('❌ [EXTRACT_IFRAME] No video ID found in embed HTML');
-	console.log('❌ [EXTRACT_IFRAME] Tried to match pattern: /id="([^"]+)"/'); 
+	console.log('❌ [EXTRACT_IFRAME] Tried to match pattern: /id="([^"]+)"/');
 	return undefined;
 }
 

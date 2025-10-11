@@ -47,7 +47,7 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 		const userId = locals.user.uid;
 
 		// Check permissions (V1: simplified roles)
-		const hasPermission = 
+		const hasPermission =
 			userRole === 'admin' ||
 			memorial?.ownerUid === userId ||
 			memorial?.funeralDirectorUid === userId;
@@ -78,7 +78,7 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 		if (calculatorData) {
 			const calculatorConfig: Partial<CalculatorConfig> = {
 				formData: {
-					...calculatorData as CalculatorFormData,
+					...(calculatorData as CalculatorFormData),
 					memorialId,
 					updatedAt: new Date(),
 					autoSaved: true
@@ -107,11 +107,13 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 			timestamp: timestamp || Date.now(),
 			message: 'Schedule auto-saved successfully'
 		});
-
 	} catch (error) {
 		console.error('💥 Error in schedule auto-save:', error);
 		return json(
-			{ error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
+			{
+				error: 'Internal server error',
+				details: error instanceof Error ? error.message : 'Unknown error'
+			},
 			{ status: 500 }
 		);
 	}
@@ -144,7 +146,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		const userId = locals.user.uid;
 
 		// Check permissions (V1: simplified roles)
-		const hasPermission = 
+		const hasPermission =
 			userRole === 'admin' ||
 			memorial?.ownerUid === userId ||
 			memorial?.funeralDirectorUid === userId;
@@ -156,7 +158,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		// Return services and calculator config data
 		const services = memorial?.services;
 		const calculatorConfig = memorial?.calculatorConfig;
-		
+
 		if (services || (calculatorConfig && calculatorConfig.autoSave)) {
 			console.log('✅ Auto-saved schedule found for memorial:', memorialId);
 			return json({
@@ -173,11 +175,13 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 				hasAutoSave: false
 			});
 		}
-
 	} catch (error) {
 		console.error('💥 Error getting auto-saved schedule:', error);
 		return json(
-			{ error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' },
+			{
+				error: 'Internal server error',
+				details: error instanceof Error ? error.message : 'Unknown error'
+			},
 			{ status: 500 }
 		);
 	}

@@ -12,25 +12,25 @@
 			console.log('🔄 Processing custom token client-side...');
 			console.log('🔄 Token:', data.token.substring(0, 20) + '...');
 			console.log('🔄 Slug:', data.slug);
-			
+
 			try {
 				// Import Firebase dynamically to avoid SSR issues
 				const { auth } = await import('$lib/firebase');
 				const { signInWithCustomToken } = await import('firebase/auth');
-				
+
 				console.log('🔄 Attempting signInWithCustomToken...');
 				console.log('🔄 Auth instance:', auth);
 				console.log('🔄 Auth config:', auth.config);
-				
+
 				// Add timeout to prevent hanging
 				const signInPromise = signInWithCustomToken(auth, data.token);
-				const timeoutPromise = new Promise((_, reject) => 
+				const timeoutPromise = new Promise((_, reject) =>
 					setTimeout(() => reject(new Error('Authentication timeout')), 10000)
 				);
-				
-				const userCredential = await Promise.race([signInPromise, timeoutPromise]) as any;
+
+				const userCredential = (await Promise.race([signInPromise, timeoutPromise])) as any;
 				console.log('✅ Custom token sign-in successful, user:', userCredential.user.uid);
-				
+
 				console.log('🔄 Getting ID token...');
 				const idToken = await userCredential.user.getIdToken();
 				console.log('✅ ID token obtained, length:', idToken.length);
@@ -53,7 +53,7 @@
 					window.location.href = result.redirectTo;
 					return;
 				}
-				
+
 				error = result.message || 'Failed to create session.';
 				console.error('❌ Session creation failed:', result);
 			} catch (e: any) {
@@ -64,10 +64,11 @@
 					code: e.code,
 					stack: e.stack
 				});
-				
+
 				// Provide more specific error messages
 				if (e.code === 'auth/network-request-failed') {
-					error = 'Network connection failed. Please check if Firebase emulators are running properly.';
+					error =
+						'Network connection failed. Please check if Firebase emulators are running properly.';
 				} else if (e.code === 'auth/invalid-custom-token') {
 					error = 'Invalid authentication token. Please try registering again.';
 				} else if (e.message?.includes('timeout')) {
@@ -81,7 +82,7 @@
 		} else {
 			error = 'Invalid authentication data.';
 		}
-		
+
 		isLoading = false;
 	});
 </script>

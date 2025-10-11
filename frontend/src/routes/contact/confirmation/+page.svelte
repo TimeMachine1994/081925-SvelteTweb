@@ -4,53 +4,61 @@
 
 <svelte:head>
 	<title>Message Sent - TributeStream</title>
-	<meta name="description" content="Your message has been sent successfully. We'll get back to you soon." />
+	<meta
+		name="description"
+		content="Your message has been sent successfully. We'll get back to you soon."
+	/>
 </svelte:head>
 
-<div class="bg-gradient-to-b from-yellow-50 to-white min-h-screen flex items-center justify-center px-4">
-	<div class="max-w-md mx-auto text-center">
-		<div class="bg-white p-8 rounded-2xl shadow-lg border border-yellow-200">
+<div
+	class="flex min-h-screen items-center justify-center bg-gradient-to-b from-yellow-50 to-white px-4"
+>
+	<div class="mx-auto max-w-md text-center">
+		<div class="rounded-2xl border border-yellow-200 bg-white p-8 shadow-lg">
 			<!-- Success Icon -->
-			<div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-				<CheckCircle class="w-8 h-8 text-green-600" />
+			<div
+				class="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-100"
+			>
+				<CheckCircle class="h-8 w-8 text-green-600" />
 			</div>
-			
+
 			<!-- Success Message -->
-			<h1 class="text-2xl font-bold text-gray-900 mb-4">Message Sent Successfully!</h1>
-			<p class="text-gray-600 mb-6">
-				Thank you for contacting us. We've received your message and will get back to you within 24 hours.
+			<h1 class="mb-4 text-2xl font-bold text-gray-900">Message Sent Successfully!</h1>
+			<p class="mb-6 text-gray-600">
+				Thank you for contacting us. We've received your message and will get back to you within 24
+				hours.
 			</p>
-			
+
 			<!-- Confirmation Details -->
-			<div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-				<div class="flex items-center justify-center mb-2">
-					<Mail class="w-5 h-5 text-yellow-600 mr-2" />
+			<div class="mb-6 rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+				<div class="mb-2 flex items-center justify-center">
+					<Mail class="mr-2 h-5 w-5 text-yellow-600" />
 					<span class="text-sm font-medium text-yellow-800">Confirmation Email Sent</span>
 				</div>
 				<p class="text-sm text-yellow-700">
 					A confirmation email has been sent to your inbox with a copy of your message.
 				</p>
 			</div>
-			
+
 			<!-- Action Buttons -->
 			<div class="space-y-3">
 				<a
 					href="/contact"
-					class="inline-flex items-center justify-center w-full px-6 py-3 bg-gradient-to-r from-yellow-600 to-amber-600 text-white rounded-lg hover:from-yellow-700 hover:to-amber-700 transition-all duration-300 font-semibold"
+					class="inline-flex w-full items-center justify-center rounded-lg bg-gradient-to-r from-yellow-600 to-amber-600 px-6 py-3 font-semibold text-white transition-all duration-300 hover:from-yellow-700 hover:to-amber-700"
 				>
 					Send Another Message
 				</a>
-				
+
 				<a
 					href="/"
-					class="inline-flex items-center justify-center w-full px-6 py-3 border-2 border-gray-200 text-gray-700 rounded-lg hover:border-yellow-500 hover:text-yellow-600 transition-all duration-300 font-medium"
+					class="inline-flex w-full items-center justify-center rounded-lg border-2 border-gray-200 px-6 py-3 font-medium text-gray-700 transition-all duration-300 hover:border-yellow-500 hover:text-yellow-600"
 				>
-					<ArrowLeft class="w-4 h-4 mr-2" />
+					<ArrowLeft class="mr-2 h-4 w-4" />
 					Back to Home
 				</a>
 			</div>
 		</div>
-		
+
 		<!-- Additional Info -->
 		<div class="mt-8 text-center">
 			<p class="text-sm text-gray-500">

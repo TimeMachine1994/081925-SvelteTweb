@@ -7,58 +7,58 @@ export interface Stream {
 	memorialId: string;
 	status: StreamStatus;
 	isVisible: boolean;
-	
+
 	// Cloudflare Stream Integration
 	cloudflareStreamId?: string;
 	cloudflareInputId?: string;
 	playbackUrl?: string;
 	thumbnailUrl?: string;
-	
+
 	// Stream Key & RTMP
 	streamKey?: string;
 	rtmpUrl?: string;
 	clientId?: string;
-	
+
 	// Scheduling
 	scheduledStartTime?: string;
 	scheduledEndTime?: string;
-	
+
 	// Recording
 	recordingUrl?: string;
 	recordingReady?: boolean;
 	recordingDuration?: number;
-	
+
 	// New recording fields for Cloudflare integration
-	recordingPlaybackUrl?: string;     // HLS/DASH URL for playback
-	recordingThumbnail?: string;       // Thumbnail URL
-	recordingSize?: number;            // File size in bytes
-	recordingProcessedAt?: string;     // When recording became ready
-	recordingCount?: number;           // Number of recordings found
-	cloudflareRecordings?: any[];      // Full Cloudflare recording metadata
-	
+	recordingPlaybackUrl?: string; // HLS/DASH URL for playback
+	recordingThumbnail?: string; // Thumbnail URL
+	recordingSize?: number; // File size in bytes
+	recordingProcessedAt?: string; // When recording became ready
+	recordingCount?: number; // Number of recordings found
+	cloudflareRecordings?: any[]; // Full Cloudflare recording metadata
+
 	// Analytics
 	viewerCount?: number;
 	peakViewerCount?: number;
 	totalViews?: number;
-	
+
 	// Metadata
 	createdBy: string;
 	createdAt: string;
 	updatedAt: string;
 	startedAt?: string;
 	endedAt?: string;
-	
+
 	// Error tracking
 	errorCode?: string;
 	errorMessage?: string;
 }
 
-export type StreamStatus = 
-	| 'scheduled'  // Stream is scheduled but not started
-	| 'ready'      // Stream is ready to start
-	| 'live'       // Stream is currently live
-	| 'completed'  // Stream has ended
-	| 'error';     // Stream encountered an error
+export type StreamStatus =
+	| 'scheduled' // Stream is scheduled but not started
+	| 'ready' // Stream is ready to start
+	| 'live' // Stream is currently live
+	| 'completed' // Stream has ended
+	| 'error'; // Stream encountered an error
 
 export interface StreamCreateRequest {
 	title: string;

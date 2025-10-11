@@ -16,7 +16,11 @@ export const POST: RequestHandler = async ({ locals, params }) => {
 	const { uid } = locals.user;
 
 	try {
-		const followerRef = adminDb.collection('memorials').doc(memorialId).collection('followers').doc(uid);
+		const followerRef = adminDb
+			.collection('memorials')
+			.doc(memorialId)
+			.collection('followers')
+			.doc(uid);
 
 		await followerRef.set({
 			userId: uid,
@@ -25,7 +29,6 @@ export const POST: RequestHandler = async ({ locals, params }) => {
 
 		console.log(`✅ User ${uid} is now following memorial ${memorialId}.`);
 		return json({ success: true, status: 'followed' }, { status: 201 });
-
 	} catch (err) {
 		console.error('🔥 An unexpected error occurred:', err);
 		throw error(500, 'An unexpected error occurred while following the memorial.');
@@ -45,13 +48,16 @@ export const DELETE: RequestHandler = async ({ locals, params }) => {
 	const { uid } = locals.user;
 
 	try {
-		const followerRef = adminDb.collection('memorials').doc(memorialId).collection('followers').doc(uid);
+		const followerRef = adminDb
+			.collection('memorials')
+			.doc(memorialId)
+			.collection('followers')
+			.doc(uid);
 
 		await followerRef.delete();
 
 		console.log(`✅ User ${uid} has unfollowed memorial ${memorialId}.`);
 		return json({ success: true, status: 'unfollowed' });
-
 	} catch (err) {
 		console.error('🔥 An unexpected error occurred:', err);
 		throw error(500, 'An unexpected error occurred while unfollowing the memorial.');

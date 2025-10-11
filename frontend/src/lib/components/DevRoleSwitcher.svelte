@@ -2,9 +2,9 @@
 	import { user } from '$lib/auth';
 	import { goto } from '$app/navigation';
 	import { Crown, Building2, User, Settings } from 'lucide-svelte';
-	
+
 	let isOpen = $state(false);
-	
+
 	const testAccounts = [
 		{
 			role: 'admin',
@@ -39,27 +39,27 @@
 			color: 'bg-blue-600'
 		}
 	];
-	
-	async function switchToRole(account: typeof testAccounts[0]) {
+
+	async function switchToRole(account: (typeof testAccounts)[0]) {
 		try {
 			console.log(`Switching to ${account.role}: ${account.email}`);
-			
+
 			// First logout current user if any
 			try {
 				await fetch('/logout?dev=true', { method: 'POST' });
 			} catch (e) {
 				console.log('No current session to logout');
 			}
-			
+
 			// Use server-side authentication to avoid browser Firebase issues
 			const response = await fetch('/api/dev-role-switch', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify({ 
-					email: account.email, 
-					password: account.password 
+				body: JSON.stringify({
+					email: account.email,
+					password: account.password
 				})
 			});
 
@@ -78,10 +78,12 @@
 			}
 		} catch (error: any) {
 			console.error('Error switching roles:', error);
-			
+
 			// Handle different error types
 			if (error.code === 'auth/user-not-found') {
-				alert(`Test account ${account.email} not found. Test accounts have been created - please try again.`);
+				alert(
+					`Test account ${account.email} not found. Test accounts have been created - please try again.`
+				);
 			} else if (error.code === 'auth/network-request-failed') {
 				alert('Network error. Please check your internet connection and Firebase configuration.');
 			} else if (error.code === 'auth/wrong-password') {
@@ -91,16 +93,16 @@
 			}
 		}
 	}
-	
+
 	// Only show in development
 	const isDev = import.meta.env.DEV;
 </script>
 
 {#if isDev}
-	<div class="fixed top-0 left-0 right-0 z-[9999] bg-red-600 text-white text-xs">
+	<div class="fixed top-0 right-0 left-0 z-[9999] bg-red-600 text-xs text-white">
 		<div class="flex items-center justify-between px-4 py-1">
 			<div class="flex items-center gap-2">
-				<Settings class="w-3 h-3" />
+				<Settings class="h-3 w-3" />
 				<span class="font-medium">DEV MODE</span>
 				{#if $user}
 					<span>Current: {$user.email} ({$user.role || 'unknown'})</span>
@@ -108,26 +110,26 @@
 					<span>Not logged in</span>
 				{/if}
 			</div>
-			
+
 			<button
-				onclick={() => isOpen = !isOpen}
-				class="px-2 py-0.5 bg-red-700 hover:bg-red-800 rounded text-xs transition-colors"
+				onclick={() => (isOpen = !isOpen)}
+				class="rounded bg-red-700 px-2 py-0.5 text-xs transition-colors hover:bg-red-800"
 			>
 				Switch Role
 			</button>
 		</div>
-		
+
 		{#if isOpen}
-			<div class="bg-red-700 border-t border-red-500 px-4 py-2">
+			<div class="border-t border-red-500 bg-red-700 px-4 py-2">
 				<div class="grid grid-cols-3 gap-2">
 					{#each testAccounts as account}
 						{@const IconComponent = account.icon}
 						<button
 							onclick={() => switchToRole(account)}
-							class="flex items-center gap-2 p-2 bg-white text-gray-900 rounded hover:bg-gray-100 transition-colors text-xs"
+							class="flex items-center gap-2 rounded bg-white p-2 text-xs text-gray-900 transition-colors hover:bg-gray-100"
 						>
-							<div class="w-4 h-4 {account.color} rounded-full flex items-center justify-center">
-								<IconComponent class="w-2.5 h-2.5 text-white" />
+							<div class="h-4 w-4 {account.color} flex items-center justify-center rounded-full">
+								<IconComponent class="h-2.5 w-2.5 text-white" />
 							</div>
 							<div class="text-left">
 								<div class="font-medium">{account.name}</div>

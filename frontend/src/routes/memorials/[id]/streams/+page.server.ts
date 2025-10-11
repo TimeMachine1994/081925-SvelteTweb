@@ -40,13 +40,15 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 		};
 
 		// 3. Check if user has permission to manage streams
-		const hasPermission = 
+		const hasPermission =
 			locals.user.role === 'admin' ||
 			memorial.ownerUid === userId ||
 			memorial.funeralDirectorUid === userId;
 
 		if (!hasPermission) {
-			console.error(`❌ [STREAMS] User ${userId} does not have permission to manage streams for memorial ${memorialId}`);
+			console.error(
+				`❌ [STREAMS] User ${userId} does not have permission to manage streams for memorial ${memorialId}`
+			);
 			throw SvelteKitError(403, 'You do not have permission to manage streams for this memorial');
 		}
 
@@ -64,7 +66,6 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 			},
 			streams: [] // Placeholder for streams data
 		};
-
 	} catch (error: any) {
 		console.error('❌ [STREAMS] Error loading streams management:', error);
 		if (error && typeof error === 'object' && 'status' in error) {

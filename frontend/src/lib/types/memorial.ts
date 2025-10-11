@@ -11,28 +11,28 @@ export interface Embed {
 
 // Service Detail Interfaces
 export interface ServiceDetails {
-	location: LocationInfo;         // Service location
-	time: TimeInfo;                 // Service time
-	hours: number;                  // Duration in hours
+	location: LocationInfo; // Service location
+	time: TimeInfo; // Service time
+	hours: number; // Duration in hours
 }
 
 export interface AdditionalServiceDetails {
-	enabled: boolean;               // Whether service is enabled
-	location: LocationInfo;         // Service location
-	time: TimeInfo;                 // Service time
-	hours: number;                  // Duration in hours
+	enabled: boolean; // Whether service is enabled
+	location: LocationInfo; // Service location
+	time: TimeInfo; // Service time
+	hours: number; // Duration in hours
 }
 
 export interface LocationInfo {
-	name: string;                   // Location name
-	address: string;                // Location address
-	isUnknown: boolean;             // Unknown location flag
+	name: string; // Location name
+	address: string; // Location address
+	isUnknown: boolean; // Unknown location flag
 }
 
 export interface TimeInfo {
-	date: string | null;            // Service date
-	time: string | null;            // Service time
-	isUnknown: boolean;             // Unknown time flag
+	date: string | null; // Service date
+	time: string | null; // Service time
+	isUnknown: boolean; // Unknown time flag
 }
 
 export interface Memorial {
@@ -44,13 +44,13 @@ export interface Memorial {
 	creatorName: string;
 	directorFullName?: string;
 	funeralHomeName?: string;
-	
+
 	// Service Details - consolidated structure
 	services: {
-		main: ServiceDetails;         // Primary service details
+		main: ServiceDetails; // Primary service details
 		additional: AdditionalServiceDetails[]; // Additional locations/days
 	};
-	
+
 	// Legacy fields (deprecated - will be removed after migration)
 	memorialDate?: string;
 	memorialTime?: string;
@@ -66,26 +66,26 @@ export interface Memorial {
 	deathDate?: string;
 	photos?: string[];
 	embeds?: Embed[];
-	
+
 	// New fields for Phase 1 refactoring - Family contact information
 	familyContactName?: string;
 	familyContactEmail?: string;
 	familyContactPhone?: string;
 	familyContactPreference?: 'phone' | 'email';
-	
+
 	// New fields for Phase 1 refactoring - Director information
 	directorEmail?: string;
-	
+
 	// New fields for Phase 1 refactoring - Additional notes
 	additionalNotes?: string;
-	
+
 	// Missing properties used in ViewerPortal and other components
 	serviceDate?: string;
 	serviceTime?: string;
 	location?: string;
 	duration?: number;
 	followerCount?: number;
-	
+
 	// Access control - required fields
 	funeralDirectorUid?: string;
 }

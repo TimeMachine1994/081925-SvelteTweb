@@ -7,71 +7,77 @@ const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || 'http://localhost:5173';
 
 // Initialize SendGrid
 if (SENDGRID_API_KEY && SENDGRID_API_KEY !== 'mock_key') {
-  sgMail.setApiKey(SENDGRID_API_KEY);
+	sgMail.setApiKey(SENDGRID_API_KEY);
 }
 
 export const POST: RequestHandler = async ({ request }) => {
-  try {
-    const { memorialId, paymentIntentId, customerEmail, lovedOneName, failureReason } = await request.json();
+	try {
+		const { memorialId, paymentIntentId, customerEmail, lovedOneName, failureReason } =
+			await request.json();
 
-    if (!memorialId || !paymentIntentId || !customerEmail || !lovedOneName || !failureReason) {
-      return json({ error: 'Missing required data' }, { status: 400 });
-    }
+		if (!memorialId || !paymentIntentId || !customerEmail || !lovedOneName || !failureReason) {
+			return json({ error: 'Missing required data' }, { status: 400 });
+		}
 
-    console.log('📧 Sending payment failure email to:', customerEmail);
+		console.log('📧 Sending payment failure email to:', customerEmail);
 
-    // Generate email content
-    const emailHtml = generateFailureEmailHTML({
-      memorialId,
-      paymentIntentId,
-      customerEmail,
-      lovedOneName,
-      failureReason,
-      failureDate: new Date()
-    });
+		// Generate email content
+		const emailHtml = generateFailureEmailHTML({
+			memorialId,
+			paymentIntentId,
+			customerEmail,
+			lovedOneName,
+			failureReason,
+			failureDate: new Date()
+		});
 
-    // Send email with SendGrid
-    if (SENDGRID_API_KEY && SENDGRID_API_KEY !== 'mock_key') {
-      await sgMail.send({
-        from: FROM_EMAIL || 'TributeStream <noreply@tributestream.com>',
-        to: customerEmail,
-        subject: `TributeStream Payment Issue - ${lovedOneName}`,
-        html: emailHtml,
-      });
+		// Send email with SendGrid
+		if (SENDGRID_API_KEY && SENDGRID_API_KEY !== 'mock_key') {
+			await sgMail.send({
+				from: FROM_EMAIL || 'TributeStream <noreply@tributestream.com>',
+				to: customerEmail,
+				subject: `TributeStream Payment Issue - ${lovedOneName}`,
+				html: emailHtml
+			});
 
-      console.log('✅ Payment failure email sent successfully via SendGrid');
-    } else {
-      // Mock for development
-      console.log('✅ Payment failure email sent successfully (mock - configure SENDGRID_API_KEY for production)');
-    }
+			console.log('✅ Payment failure email sent successfully via SendGrid');
+		} else {
+			// Mock for development
+			console.log(
+				'✅ Payment failure email sent successfully (mock - configure SENDGRID_API_KEY for production)'
+			);
+		}
 
-    return json({ 
-      success: true, 
-      message: 'Payment failure email sent successfully'
-    });
-
-  } catch (error) {
-    console.error('Failed to send payment failure email:', error);
-    return json(
-      { error: 'Failed to send payment failure email', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
-  }
+		return json({
+			success: true,
+			message: 'Payment failure email sent successfully'
+		});
+	} catch (error) {
+		console.error('Failed to send payment failure email:', error);
+		return json(
+			{
+				error: 'Failed to send payment failure email',
+				details: error instanceof Error ? error.message : 'Unknown error'
+			},
+			{ status: 500 }
+		);
+	}
 };
 
 interface FailureEmailData {
-  memorialId: string;
-  paymentIntentId: string;
-  customerEmail: string;
-  lovedOneName: string;
-  failureReason: string;
-  failureDate: Date;
+	memorialId: string;
+	paymentIntentId: string;
+	customerEmail: string;
+	lovedOneName: string;
+	failureReason: string;
+	failureDate: Date;
 }
 
 function generateFailureEmailHTML(data: FailureEmailData): string {
-  const { memorialId, paymentIntentId, customerEmail, lovedOneName, failureReason, failureDate } = data;
-  
-  return `
+	const { memorialId, paymentIntentId, customerEmail, lovedOneName, failureReason, failureDate } =
+		data;
+
+	return `
 <!DOCTYPE html>
 <html>
 <head>

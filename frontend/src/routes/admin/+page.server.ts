@@ -3,12 +3,12 @@ import { adminDb } from '$lib/server/firebase';
 
 /**
  * SIMPLIFIED ADMIN DASHBOARD SERVER LOAD
- * 
+ *
  * Purpose: Load essential data for admin operations:
  * 1. Pending funeral directors (for approval workflow)
  * 2. Recent memorials (for oversight)
  * 3. Basic system stats
- * 
+ *
  * Follows established patterns from memorial flow analysis
  */
 export const load = async ({ locals }: any) => {
@@ -39,18 +39,15 @@ export const load = async ({ locals }: any) => {
 
 		const [recentMemorialsSnap] = await Promise.all([
 			// Load recent memorials for oversight (last 30 days)
-			adminDb.collection('memorials')
-				.orderBy('createdAt', 'desc')
-				.limit(20)
-				.get()
+			adminDb.collection('memorials').orderBy('createdAt', 'desc').limit(20).get()
 		]);
 
 		// === PROCESS RECENT MEMORIALS ===
 		// Following memorial collection structure from flow analysis
-		const recentMemorials = recentMemorialsSnap.docs.map(doc => {
+		const recentMemorials = recentMemorialsSnap.docs.map((doc) => {
 			const data = doc.data();
 			console.log(`💝 [ADMIN LOAD] Processing memorial: ${data.lovedOneName}`);
-			
+
 			return {
 				id: doc.id,
 				lovedOneName: data.lovedOneName || 'Unknown',
@@ -95,14 +92,13 @@ export const load = async ({ locals }: any) => {
 				uid: locals.user.uid
 			}
 		};
-
 	} catch (error: any) {
 		console.error('💥 [ADMIN LOAD] Error loading admin dashboard:', {
 			error: error.message,
 			stack: error.stack,
 			user: locals.user?.email
 		});
-		
+
 		// Return safe fallback data to prevent 500 errors
 		return {
 			pendingFuneralDirectors: [],

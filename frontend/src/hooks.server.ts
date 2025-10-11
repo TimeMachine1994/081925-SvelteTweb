@@ -8,17 +8,17 @@ const authHandle: Handle = async ({ event, resolve }) => {
 	if (event.url.pathname === '/logout') {
 		return resolve(event);
 	}
-	
+
 	console.log('🔐 Authentication check for:', event.url.pathname);
-	
+
 	const sessionCookie = event.cookies.get('session');
 	console.log('🍪 Session cookie present:', !!sessionCookie);
-	
+
 	if (sessionCookie) {
 		console.log('🔍 Session cookie found, verifying...');
 		console.log('🍪 Cookie length:', sessionCookie.length);
 		console.log('🍪 Cookie preview:', sessionCookie.substring(0, 50) + '...');
-		
+
 		try {
 			console.log('🔐 Verifying session cookie with Firebase Admin...');
 			const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
@@ -28,13 +28,13 @@ const authHandle: Handle = async ({ event, resolve }) => {
 			console.log('  - email:', decodedClaims.email);
 			console.log('  - iat:', new Date(decodedClaims.iat * 1000));
 			console.log('  - exp:', new Date(decodedClaims.exp * 1000));
-			
+
 			console.log('👤 Fetching user record...');
 			// Add retry logic for user record fetching to handle propagation delays
 			let userRecord;
 			let retryCount = 0;
 			const maxRetries = 3;
-			
+
 			while (retryCount < maxRetries) {
 				try {
 					userRecord = await adminAuth.getUser(decodedClaims.uid);
@@ -42,7 +42,7 @@ const authHandle: Handle = async ({ event, resolve }) => {
 				} catch (userError: any) {
 					if (userError.code === 'auth/user-not-found' && retryCount < maxRetries - 1) {
 						console.log(`⏳ User not found, retry ${retryCount + 1}/${maxRetries} in 1s...`);
-						await new Promise(resolve => setTimeout(resolve, 1000));
+						await new Promise((resolve) => setTimeout(resolve, 1000));
 						retryCount++;
 					} else {
 						throw userError;
@@ -55,7 +55,7 @@ const authHandle: Handle = async ({ event, resolve }) => {
 			console.log('  - email:', userRecord.email);
 			console.log('  - displayName:', userRecord.displayName);
 			console.log('  - customClaims:', userRecord.customClaims);
-			
+
 			event.locals.user = {
 				uid: userRecord.uid,
 				email: userRecord.email || null,
@@ -63,7 +63,7 @@ const authHandle: Handle = async ({ event, resolve }) => {
 				role: userRecord.customClaims?.role || 'owner',
 				isAdmin: userRecord.customClaims?.admin || false
 			};
-			
+
 			console.log('✅ User set in event.locals:', event.locals.user);
 
 			// Log successful login
@@ -74,12 +74,14 @@ const authHandle: Handle = async ({ event, resolve }) => {
 					userAgent: userContext.userAgent
 				});
 			}
-			
 		} catch (error) {
 			console.error('❌ Session verification failed:', error);
-			console.error('📍 Error type:', error instanceof Error ? error.constructor.name : typeof error);
+			console.error(
+				'📍 Error type:',
+				error instanceof Error ? error.constructor.name : typeof error
+			);
 			console.error('📍 Error message:', error instanceof Error ? error.message : String(error));
-			
+
 			if (error instanceof Error && error.message.includes('expired')) {
 				console.error('⏰ Session cookie has expired');
 			} else if (error instanceof Error && error.message.includes('invalid signature')) {
@@ -88,7 +90,7 @@ const authHandle: Handle = async ({ event, resolve }) => {
 				event.cookies.delete('session', { path: '/' });
 				console.log('🗑️ Cleared invalid session cookie');
 			}
-			
+
 			event.locals.user = null;
 			console.log('❌ User set to null due to verification failure');
 		}
@@ -99,7 +101,7 @@ const authHandle: Handle = async ({ event, resolve }) => {
 
 	console.log('🏁 Authentication check complete for:', event.url.pathname);
 	console.log('👤 Final user state:', event.locals.user ? 'authenticated' : 'not authenticated');
-	
+
 	return resolve(event);
 };
 
@@ -107,7 +109,7 @@ const authHandle: Handle = async ({ event, resolve }) => {
 export const handle: Handle = async ({ event, resolve }) => {
 	// First run authentication
 	const authResponse = await authHandle({ event, resolve: (e) => Promise.resolve(new Response()) });
-	
+
 	// Then run audit middleware
 	return auditMiddleware({ event, resolve });
 };

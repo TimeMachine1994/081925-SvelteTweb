@@ -16,7 +16,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		// Server-side authentication using Firebase Admin SDK
 		// Get user by email first
 		const userRecord = await adminAuth.getUserByEmail(email);
-		
+
 		// Verify this is a test account (basic security check)
 		const testEmails = ['admin@test.com', 'director@test.com', 'owner@test.com', 'viewer@test.com'];
 		if (!testEmails.includes(email)) {
@@ -57,7 +57,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		// Create session cookie
 		const expiresIn = 60 * 60 * 24 * 1000; // 24 hours
 		const sessionCookie = await adminAuth.createSessionCookie(idToken, { expiresIn });
-		
+
 		const cookieOptions = {
 			maxAge: expiresIn,
 			httpOnly: true,
@@ -65,7 +65,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			sameSite: 'lax' as const,
 			path: '/'
 		};
-		
+
 		cookies.set('session', sessionCookie, cookieOptions);
 		console.log(`✅ Session cookie created for ${email}`);
 
@@ -88,12 +88,14 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			role: role,
 			redirectTo: redirectTo
 		});
-
 	} catch (error: any) {
 		console.error('Dev role switch error:', error);
-		return json({ 
-			success: false, 
-			error: error.message || 'Authentication failed' 
-		}, { status: 500 });
+		return json(
+			{
+				success: false,
+				error: error.message || 'Authentication failed'
+			},
+			{ status: 500 }
+		);
 	}
 };

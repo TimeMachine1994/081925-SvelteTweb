@@ -22,13 +22,17 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 	}
 
 	try {
-		const embedRef = await adminDb.collection('memorials').doc(memorialId).collection('embeds').add({
-			title,
-			type,
-			embedUrl,
-			createdAt: FieldValue.serverTimestamp(),
-			updatedAt: FieldValue.serverTimestamp()
-		});
+		const embedRef = await adminDb
+			.collection('memorials')
+			.doc(memorialId)
+			.collection('embeds')
+			.add({
+				title,
+				type,
+				embedUrl,
+				createdAt: FieldValue.serverTimestamp(),
+				updatedAt: FieldValue.serverTimestamp()
+			});
 
 		const newEmbed = await embedRef.get();
 		return json({ id: newEmbed.id, ...newEmbed.data() }, { status: 201 });
@@ -50,7 +54,11 @@ export const PUT: RequestHandler = async ({ locals, params, request }) => {
 	}
 
 	try {
-		const embedRef = adminDb.collection('memorials').doc(memorialId).collection('embeds').doc(embedId);
+		const embedRef = adminDb
+			.collection('memorials')
+			.doc(memorialId)
+			.collection('embeds')
+			.doc(embedId);
 		await embedRef.update({
 			...data,
 			updatedAt: FieldValue.serverTimestamp()
@@ -76,7 +84,12 @@ export const DELETE: RequestHandler = async ({ locals, params, request }) => {
 	}
 
 	try {
-		await adminDb.collection('memorials').doc(memorialId).collection('embeds').doc(embedId).delete();
+		await adminDb
+			.collection('memorials')
+			.doc(memorialId)
+			.collection('embeds')
+			.doc(embedId)
+			.delete();
 		return json({ success: true }, { status: 200 });
 	} catch (err) {
 		console.error('Error deleting embed:', err);

@@ -6,7 +6,7 @@ import { getAuth } from 'firebase-admin/auth';
 
 /**
  * FUNERAL DIRECTOR REGISTRATION SERVER
- * 
+ *
  * Handles new funeral director applications
  * Creates pending applications for admin approval
  */
@@ -42,7 +42,13 @@ export const actions: Actions = {
 			});
 
 			// Validate required fields (first page)
-			const requiredFields = ['companyName', 'contactPerson', 'email', 'password', 'phone'] as const;
+			const requiredFields = [
+				'companyName',
+				'contactPerson',
+				'email',
+				'password',
+				'phone'
+			] as const;
 			const missing = requiredFields.filter((f) => {
 				const v = applicationData[f];
 				return !v || (typeof v === 'string' && v.trim() === '');
@@ -71,7 +77,8 @@ export const actions: Actions = {
 			} catch (createErr: any) {
 				console.error('❌ [FUNERAL HOME REG] Failed to create auth user:', createErr);
 				// Common case: email already exists
-				const message = createErr?.errorInfo?.message || createErr?.message || 'Failed to create user';
+				const message =
+					createErr?.errorInfo?.message || createErr?.message || 'Failed to create user';
 				return fail(400, { error: message });
 			}
 
@@ -140,12 +147,13 @@ export const actions: Actions = {
 				directorId: uid,
 				customToken
 			};
-
 		} catch (error) {
 			console.error('💥 [FUNERAL HOME REG] Registration failed:', {
 				error: error instanceof Error ? error.message : String(error)
 			});
-			return fail(500, { error: 'An error occurred while processing your registration. Please try again.' });
+			return fail(500, {
+				error: 'An error occurred while processing your registration. Please try again.'
+			});
 		}
 	}
 };

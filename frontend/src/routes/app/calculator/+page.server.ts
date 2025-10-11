@@ -62,13 +62,13 @@ export const actions: Actions = {
 	saveAndPayLater: async ({ request, locals }) => {
 		console.log('🚀 saveAndPayLater server action called');
 		console.log('👤 Checking user authentication...');
-		
+
 		if (!locals.user) {
 			console.error('🚨 Unauthorized attempt to save!');
 			console.error('📍 locals.user is:', locals.user);
 			return fail(401, { error: 'Unauthorized' });
 		}
-		
+
 		console.log('✅ User authenticated:');
 		console.log('  - uid:', locals.user.uid);
 		console.log('  - email:', locals.user.email);
@@ -78,16 +78,19 @@ export const actions: Actions = {
 		try {
 			console.log('🎬 saveAndPayLater action started');
 			console.log('📥 Extracting FormData from request...');
-			
+
 			const data = await request.formData();
 			console.log('✅ FormData received');
-			
+
 			// Log all FormData entries
 			console.log('📋 FormData entries:');
 			for (const [key, value] of data.entries()) {
-				console.log(`  - ${key}:`, typeof value === 'string' ? value.substring(0, 100) + '...' : value);
+				console.log(
+					`  - ${key}:`,
+					typeof value === 'string' ? value.substring(0, 100) + '...' : value
+				);
 			}
-			
+
 			console.log('🔍 Extracting individual fields...');
 			const formDataRaw = data.get('formData') as string;
 			const bookingItemsRaw = data.get('bookingItems') as string;
@@ -101,18 +104,18 @@ export const actions: Actions = {
 			console.log('  - bookingItems length:', bookingItemsRaw?.length);
 			console.log('  - total type:', typeof totalRaw);
 			console.log('  - total value:', totalRaw);
-			
+
 			// Validate required fields
 			if (!formDataRaw) {
 				console.error('❌ Missing formData field');
 				return fail(400, { error: 'Missing formData' });
 			}
-			
+
 			if (!bookingItemsRaw) {
 				console.error('❌ Missing bookingItems field');
 				return fail(400, { error: 'Missing bookingItems' });
 			}
-			
+
 			if (!totalRaw) {
 				console.error('❌ Missing total field');
 				return fail(400, { error: 'Missing total' });
@@ -122,15 +125,15 @@ export const actions: Actions = {
 				console.error('❌ Missing memorialId field');
 				return fail(400, { error: 'Missing memorialId' });
 			}
-			
+
 			console.log('✅ All required fields present');
-			
+
 			// Parse JSON data
 			console.log('🔄 Parsing JSON data...');
 			let parsedFormData;
 			let parsedBookingItems;
 			let parsedTotal;
-			
+
 			try {
 				console.log('📝 Parsing formData JSON...');
 				parsedFormData = JSON.parse(formDataRaw);
@@ -141,7 +144,7 @@ export const actions: Actions = {
 				console.error('📍 Raw formData:', formDataRaw);
 				return fail(400, { error: 'Invalid formData JSON' });
 			}
-			
+
 			try {
 				console.log('📝 Parsing bookingItems JSON...');
 				parsedBookingItems = JSON.parse(bookingItemsRaw);
@@ -152,12 +155,12 @@ export const actions: Actions = {
 				console.error('📍 Raw bookingItems:', bookingItemsRaw);
 				return fail(400, { error: 'Invalid bookingItems JSON' });
 			}
-			
+
 			try {
 				console.log('📝 Parsing total value...');
 				parsedTotal = parseFloat(totalRaw);
 				console.log('✅ total parsed successfully:', parsedTotal);
-				
+
 				if (isNaN(parsedTotal) || parsedTotal <= 0) {
 					console.error('❌ Invalid total value:', parsedTotal);
 					return fail(400, { error: 'Invalid total amount' });
@@ -193,7 +196,7 @@ export const actions: Actions = {
 				createdAt: Timestamp.now(),
 				memorialId: memorialId
 			};
-			
+
 			console.log('📄 Document data prepared:');
 			console.log('  - userId:', docData.userId);
 			console.log('  - status:', docData.status);

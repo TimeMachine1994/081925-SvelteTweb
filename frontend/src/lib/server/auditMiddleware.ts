@@ -8,13 +8,14 @@ import { extractUserContext, logAuditEvent, logAccessDenied } from './auditLogge
 export const auditMiddleware: Handle = async ({ event, resolve }) => {
 	const startTime = Date.now();
 	const userContext = extractUserContext(event);
-	
+
 	// Only log API routes and authenticated actions
 	const isApiRoute = event.url.pathname.startsWith('/api/');
-	const isAuthenticatedRoute = event.url.pathname.startsWith('/admin') || 
-								 event.url.pathname.startsWith('/profile') ||
-								 event.url.pathname.startsWith('/schedule');
-	
+	const isAuthenticatedRoute =
+		event.url.pathname.startsWith('/admin') ||
+		event.url.pathname.startsWith('/profile') ||
+		event.url.pathname.startsWith('/schedule');
+
 	if (!isApiRoute && !isAuthenticatedRoute) {
 		return resolve(event);
 	}
@@ -32,11 +33,11 @@ export const auditMiddleware: Handle = async ({ event, resolve }) => {
 		if (userContext && (isApiRoute || isAuthenticatedRoute)) {
 			const duration = Date.now() - startTime;
 			const success = !error && (!response || response.status < 400);
-			
+
 			// Determine action based on route and method
 			const action = determineAuditAction(event.url.pathname, event.request.method);
 			const resourceInfo = extractResourceInfo(event.url.pathname);
-			
+
 			if (action) {
 				await logAuditEvent({
 					...userContext,
@@ -57,17 +58,11 @@ export const auditMiddleware: Handle = async ({ event, resolve }) => {
 
 			// Log access denied specifically
 			if (response?.status === 403 && userContext) {
-				await logAccessDenied(
-					userContext,
-					resourceInfo.type,
-					resourceInfo.id,
-					'Access denied',
-					{
-						method: event.request.method,
-						path: event.url.pathname,
-						statusCode: response.status
-					}
-				);
+				await logAccessDenied(userContext, resourceInfo.type, resourceInfo.id, 'Access denied', {
+					method: event.request.method,
+					path: event.url.pathname,
+					statusCode: response.status
+				});
 			}
 		}
 	}
@@ -96,7 +91,6 @@ function determineAuditAction(pathname: string, method: string): string | null {
 	if (pathname.includes('/payment') || pathname.includes('/create-payment-intent')) {
 		if (method === 'POST') return 'payment_completed';
 	}
-
 
 	// Admin routes
 	if (pathname.includes('/admin/')) {
@@ -130,7 +124,10 @@ function determineAuditAction(pathname: string, method: string): string | null {
 /**
  * Extract resource type and ID from pathname
  */
-function extractResourceInfo(pathname: string): { type: 'memorial' | 'user' | 'schedule' | 'payment' | 'system', id: string } {
+function extractResourceInfo(pathname: string): {
+	type: 'memorial' | 'user' | 'schedule' | 'payment' | 'system';
+	id: string;
+} {
 	// Extract memorial ID from various routes
 	const memorialMatch = pathname.match(/\/memorials\/([^\/]+)/);
 	if (memorialMatch) {
@@ -144,7 +141,8 @@ function extractResourceInfo(pathname: string): { type: 'memorial' | 'user' | 's
 	}
 
 	// Extract user ID from admin routes
-	const userMatch = pathname.match(/\/(approve|reject)-funeral-director/) || pathname.match(/\/users\/([^\/]+)/);
+	const userMatch =
+		pathname.match(/\/(approve|reject)-funeral-director/) || pathname.match(/\/users\/([^\/]+)/);
 	if (userMatch || pathname.includes('funeral-director') || pathname.includes('/register')) {
 		return { type: 'user', id: 'unknown' };
 	}
@@ -153,7 +151,6 @@ function extractResourceInfo(pathname: string): { type: 'memorial' | 'user' | 's
 	if (pathname.includes('payment')) {
 		return { type: 'payment', id: 'unknown' };
 	}
-
 
 	// Default to system
 	return { type: 'system', id: pathname };

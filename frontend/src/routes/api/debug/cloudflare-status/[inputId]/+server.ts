@@ -5,7 +5,7 @@ import type { RequestHandler } from './$types';
 // GET - Debug Cloudflare Live Input status
 export const GET: RequestHandler = async ({ params }) => {
 	const { inputId } = params;
-	
+
 	console.log('🔍 [DEBUG] Checking Cloudflare status for input:', inputId);
 
 	try {
@@ -15,25 +15,28 @@ export const GET: RequestHandler = async ({ params }) => {
 
 		const response = await fetch(cloudflareUrl, {
 			headers: {
-				'Authorization': `Bearer ${env.CLOUDFLARE_API_TOKEN}`,
+				Authorization: `Bearer ${env.CLOUDFLARE_API_TOKEN}`,
 				'Content-Type': 'application/json'
 			}
 		});
 
 		if (!response.ok) {
 			console.log('❌ [DEBUG] Cloudflare API error:', response.status);
-			return json({
-				success: false,
-				error: `Cloudflare API error: ${response.status}`,
-				inputId
-			}, { status: response.status });
+			return json(
+				{
+					success: false,
+					error: `Cloudflare API error: ${response.status}`,
+					inputId
+				},
+				{ status: response.status }
+			);
 		}
 
 		const data = await response.json();
 		console.log('📡 [DEBUG] Full Cloudflare response:', JSON.stringify(data, null, 2));
 
 		const liveInput = data.result;
-		
+
 		// Analyze the status structure
 		const statusAnalysis = {
 			hasStatus: !!liveInput?.status,
@@ -53,14 +56,16 @@ export const GET: RequestHandler = async ({ params }) => {
 			isLiveDetected: liveInput?.status?.current?.connected || false,
 			timestamp: new Date().toISOString()
 		});
-
 	} catch (error: any) {
 		console.error('❌ [DEBUG] Error checking Cloudflare status:', error);
-		
-		return json({
-			success: false,
-			error: error.message,
-			inputId
-		}, { status: 500 });
+
+		return json(
+			{
+				success: false,
+				error: error.message,
+				inputId
+			},
+			{ status: 500 }
+		);
 	}
 };

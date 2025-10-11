@@ -48,7 +48,7 @@ export async function sendEnhancedRegistrationEmail(data: EnhancedRegistrationEm
 		to: data.email,
 		from: FROM_EMAIL,
 		subject: `Welcome to TributeStream - Memorial for ${data.lovedOneName}`,
-		html: htmlContent,
+		html: htmlContent
 	};
 
 	try {
@@ -83,7 +83,7 @@ export async function sendRegistrationEmail(email: string, password: string, lov
 		to: email,
 		from: FROM_EMAIL,
 		subject: 'Your TributeStream Account Details',
-		html: htmlContent,
+		html: htmlContent
 	};
 
 	try {
@@ -118,7 +118,7 @@ export async function sendInvitationEmail(data: InvitationEmailData) {
 		to: data.to,
 		from: FROM_EMAIL,
 		subject: `An invitation to contribute to the memorial for ${data.memorialName}`,
-		html: htmlContent,
+		html: htmlContent
 	};
 
 	try {

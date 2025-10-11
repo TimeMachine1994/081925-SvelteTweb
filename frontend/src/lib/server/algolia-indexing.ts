@@ -13,7 +13,7 @@ export async function indexMemorial(memorial: Memorial) {
 		lovedOneName: memorial.lovedOneName,
 		slug: memorial.slug,
 		fullSlug: memorial.fullSlug,
-		createdAt: memorial.createdAt,
+		createdAt: memorial.createdAt
 		// Add any other fields you want to be searchable
 	};
 

@@ -11,7 +11,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		// Get raw body for signature verification
 		const rawBody = await request.text();
 		const signature = request.headers.get('cf-webhook-signature');
-		
+
 		// Verify webhook signature if secret is configured
 		if (env.CLOUDFLARE_WEBHOOK_SECRET && signature) {
 			const crypto = await import('crypto');
@@ -19,7 +19,7 @@ export const POST: RequestHandler = async ({ request }) => {
 				.createHmac('sha256', env.CLOUDFLARE_WEBHOOK_SECRET)
 				.update(rawBody)
 				.digest('hex');
-			
+
 			if (signature !== expectedSignature) {
 				console.log('❌ [CLOUDFLARE WEBHOOK] Invalid signature');
 				throw SvelteKitError(401, 'Invalid webhook signature');
@@ -35,10 +35,10 @@ export const POST: RequestHandler = async ({ request }) => {
 		// Handle both webhook formats:
 		// Live Input: { name, text, data: { input_id, event_type, updated_at, ... }, ts }
 		// Stream: { uid, readyToStream, status: { state }, meta, created, modified, ... }
-		
+
 		let streamId = null;
 		let eventType = null;
-		
+
 		if (body.data && body.data.input_id && body.data.event_type) {
 			// Live Input webhook format
 			console.log('📡 [CLOUDFLARE WEBHOOK] Live Input webhook detected');
@@ -61,7 +61,7 @@ export const POST: RequestHandler = async ({ request }) => {
 			.where('cloudflareInputId', '==', streamId)
 			.limit(1)
 			.get();
-		
+
 		// If not found by inputId, try by streamId (for Stream webhooks)
 		if (streamsSnapshot.empty) {
 			streamsSnapshot = await adminDb
@@ -95,11 +95,14 @@ export const POST: RequestHandler = async ({ request }) => {
 			case 'stream.ready':
 				// Stream processing complete
 				console.log('✅ [CLOUDFLARE WEBHOOK] Stream ready:', docId);
-				await adminDb.collection('streams').doc(docId).update({
-					status: 'ready',
-					readyToStream: body.readyToStream || true,
-					updatedAt: new Date().toISOString()
-				});
+				await adminDb
+					.collection('streams')
+					.doc(docId)
+					.update({
+						status: 'ready',
+						readyToStream: body.readyToStream || true,
+						updatedAt: new Date().toISOString()
+					});
 				break;
 
 			case 'live_input.disconnected':
@@ -116,23 +119,29 @@ export const POST: RequestHandler = async ({ request }) => {
 				// Stream encountered an error
 				const errorInfo = body.data?.live_input_errored || {};
 				console.log('❌ [CLOUDFLARE WEBHOOK] Stream error:', docId, errorInfo);
-				await adminDb.collection('streams').doc(docId).update({
-					status: 'error',
-					updatedAt: new Date().toISOString(),
-					errorCode: errorInfo.error?.code || 'UNKNOWN',
-					errorMessage: errorInfo.error?.message || 'Stream error'
-				});
+				await adminDb
+					.collection('streams')
+					.doc(docId)
+					.update({
+						status: 'error',
+						updatedAt: new Date().toISOString(),
+						errorCode: errorInfo.error?.code || 'UNKNOWN',
+						errorMessage: errorInfo.error?.message || 'Stream error'
+					});
 				break;
 
 			case 'stream.error':
 				// Stream processing error
 				console.log('❌ [CLOUDFLARE WEBHOOK] Stream processing error:', docId);
-				await adminDb.collection('streams').doc(docId).update({
-					status: 'error',
-					updatedAt: new Date().toISOString(),
-					errorCode: body.status?.errorReasonCode || 'UNKNOWN',
-					errorMessage: body.status?.errorReasonText || 'Stream processing error'
-				});
+				await adminDb
+					.collection('streams')
+					.doc(docId)
+					.update({
+						status: 'error',
+						updatedAt: new Date().toISOString(),
+						errorCode: body.status?.errorReasonCode || 'UNKNOWN',
+						errorMessage: body.status?.errorReasonText || 'Stream processing error'
+					});
 				break;
 
 			default:
@@ -145,7 +154,6 @@ export const POST: RequestHandler = async ({ request }) => {
 			streamId: docId,
 			eventType
 		});
-
 	} catch (error: any) {
 		console.error('❌ [STREAM WEBHOOK] Error processing webhook:', error);
 

@@ -7,7 +7,7 @@ import { env } from '$env/dynamic/public';
 
 // Firebase configuration with environment variables and fallbacks
 const firebaseConfig = {
-	apiKey: dev ? 'dummy' : (env.PUBLIC_FIREBASE_API_KEY || 'AIzaSyAXmTxzYRc-LhMEW75nZjjjQCZov1gpiw0'),
+	apiKey: dev ? 'dummy' : env.PUBLIC_FIREBASE_API_KEY || 'AIzaSyAXmTxzYRc-LhMEW75nZjjjQCZov1gpiw0',
 	authDomain: env.PUBLIC_FIREBASE_AUTH_DOMAIN || 'fir-tweb.firebaseapp.com',
 	projectId: env.PUBLIC_FIREBASE_PROJECT_ID || 'fir-tweb',
 	storageBucket: env.PUBLIC_FIREBASE_STORAGE_BUCKET || 'fir-tweb.firebasestorage.app',
@@ -38,7 +38,7 @@ if (browser) {
 	if (dev) {
 		try {
 			console.log('🔥 Connecting to Firebase emulators...');
-			
+
 			// Connect to Auth emulator
 			try {
 				console.log('🔄 Connecting to Auth emulator...');
@@ -53,7 +53,7 @@ if (browser) {
 					console.warn('⚠️ Auth emulator connection failed:', authError);
 				}
 			}
-			
+
 			// Connect to Firestore emulator
 			try {
 				connectFirestoreEmulator(db, '127.0.0.1', 8080);
@@ -66,7 +66,7 @@ if (browser) {
 					console.warn('⚠️ Firestore emulator connection failed:', firestoreError);
 				}
 			}
-			
+
 			// Connect to Storage emulator
 			try {
 				connectStorageEmulator(storage, '127.0.0.1', 9199);
@@ -79,7 +79,7 @@ if (browser) {
 					console.warn('⚠️ Storage emulator connection failed:', storageError);
 				}
 			}
-			
+
 			console.log('🎉 Firebase emulator connections completed');
 		} catch (error) {
 			console.error('❌ Error connecting to Firebase emulators:', error);

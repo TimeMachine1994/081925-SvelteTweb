@@ -2,15 +2,15 @@
 	import type { BookingItem } from '$lib/types/livestream';
 	import { onMount } from 'svelte';
 
-	let { 
-		bookingItems, 
-		total, 
-		onsave, 
-		onpay, 
-		onpayNow 
-	}: { 
-		bookingItems: BookingItem[]; 
-		total: number; 
+	let {
+		bookingItems,
+		total,
+		onsave,
+		onpay,
+		onpayNow
+	}: {
+		bookingItems: BookingItem[];
+		total: number;
 		onsave: () => void;
 		onpay: () => void;
 		onpayNow: () => void;
@@ -21,17 +21,14 @@
 
 	let groupedItems = $derived.by(() => {
 		console.log('🔄 Recalculating grouped items...');
-		const result = bookingItems.reduce(
-			(acc: Record<string, BookingItem[]>, item: BookingItem) => {
-				const pkg = item.package;
-				if (!acc[pkg]) {
-					acc[pkg] = [];
-				}
-				acc[pkg].push(item);
-				return acc;
-			},
-			{}
-		);
+		const result = bookingItems.reduce((acc: Record<string, BookingItem[]>, item: BookingItem) => {
+			const pkg = item.package;
+			if (!acc[pkg]) {
+				acc[pkg] = [];
+			}
+			acc[pkg].push(item);
+			return acc;
+		}, {});
 		console.log('📦 Grouped items:', result);
 		return result;
 	});
@@ -59,7 +56,7 @@
 
 <div bind:this={sentinel}></div>
 <div
-	class="card preset-filled-surface-100-900 p-4 md:p-6 space-y-4 transition-all duration-300"
+	class="card preset-filled-surface-100-900 space-y-4 p-4 transition-all duration-300 md:p-6"
 	class:sticky={isSticky}
 	class:shadow-lg={isSticky}
 	bind:this={summaryEl}
@@ -77,17 +74,20 @@
 	{/if}
 
 	{#if bookingItems.length === 0}
-		<p class="text-center opacity-60 py-8">Please select a package to begin.</p>
+		<p class="py-8 text-center opacity-60">Please select a package to begin.</p>
 	{:else}
 		<div class="space-y-6">
 			{#each Object.entries(groupedItems) as [pkg, items]}
 				{@const typedItems = items as BookingItem[]}
 				<div class="space-y-2">
-					<h4 class="h4 font-semibold border-b border-surface-300-700 pb-2">{pkg}</h4>
+					<h4 class="h4 border-surface-300-700 border-b pb-2 font-semibold">{pkg}</h4>
 					<div class="space-y-1">
 						{#each typedItems as item}
-							<div class="flex justify-between items-baseline">
-								<span>{item.name} {#if item.quantity > 1}(x{item.quantity}){/if}</span>
+							<div class="flex items-baseline justify-between">
+								<span
+									>{item.name}
+									{#if item.quantity > 1}(x{item.quantity}){/if}</span
+								>
 								<span class="font-medium">${item.total}</span>
 							</div>
 						{/each}
@@ -96,15 +96,33 @@
 			{/each}
 		</div>
 		<hr class="!border-surface-300-700" />
-		<div class="flex justify-between items-center text-xl">
+		<div class="flex items-center justify-between text-xl">
 			<h3 class="h3">Total</h3>
-			<span class="font-bold text-primary-500">${total}</span>
+			<span class="text-primary-500 font-bold">${total}</span>
 		</div>
 	{/if}
 
 	<div class="grid grid-cols-2 gap-2 pt-4">
-		<button class="btn preset-tonal-surface" onclick={() => { console.log('💾 Calling save function'); onsave(); }}>Save and Pay Later</button>
-		<button class="btn preset-tonal-surface" onclick={() => { console.log('💳 Calling payNow function'); onpayNow(); }}>Pay Now</button>
-		<button class="btn preset-filled-primary col-span-2" onclick={() => { console.log('💳 Calling pay function'); onpay(); }}>Continue to Payment</button>
+		<button
+			class="btn preset-tonal-surface"
+			onclick={() => {
+				console.log('💾 Calling save function');
+				onsave();
+			}}>Save and Pay Later</button
+		>
+		<button
+			class="btn preset-tonal-surface"
+			onclick={() => {
+				console.log('💳 Calling payNow function');
+				onpayNow();
+			}}>Pay Now</button
+		>
+		<button
+			class="btn preset-filled-primary col-span-2"
+			onclick={() => {
+				console.log('💳 Calling pay function');
+				onpay();
+			}}>Continue to Payment</button
+		>
 	</div>
 </div>

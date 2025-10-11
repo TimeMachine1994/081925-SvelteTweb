@@ -3,7 +3,7 @@
 	import type { ServiceDetails } from '$lib/types/memorial';
 
 	// New props structure - direct services and calculator data
-	let { 
+	let {
 		services = $bindable(),
 		calculatorData = $bindable(),
 		lovedOneName = $bindable(''),
@@ -27,26 +27,30 @@
 
 	// Helper functions for additional services
 	function getAdditionalLocation() {
-		return services.additional.find(s => s.type === 'location') || {
-			type: 'location' as const,
-			location: { name: '', address: '', isUnknown: false },
-			time: { date: null, time: null, isUnknown: false },
-			hours: 2
-		};
+		return (
+			services.additional.find((s) => s.type === 'location') || {
+				type: 'location' as const,
+				location: { name: '', address: '', isUnknown: false },
+				time: { date: null, time: null, isUnknown: false },
+				hours: 2
+			}
+		);
 	}
 
 	function getAdditionalDay() {
-		return services.additional.find(s => s.type === 'day') || {
-			type: 'day' as const,
-			location: { name: '', address: '', isUnknown: false },
-			time: { date: null, time: null, isUnknown: false },
-			hours: 2
-		};
+		return (
+			services.additional.find((s) => s.type === 'day') || {
+				type: 'day' as const,
+				location: { name: '', address: '', isUnknown: false },
+				time: { date: null, time: null, isUnknown: false },
+				hours: 2
+			}
+		);
 	}
 
 	function toggleAdditionalLocation(enabled: boolean) {
 		if (enabled) {
-			const existing = services.additional.find(s => s.type === 'location');
+			const existing = services.additional.find((s) => s.type === 'location');
 			if (!existing) {
 				services.additional.push({
 					type: 'location',
@@ -56,13 +60,13 @@
 				});
 			}
 		} else {
-			services.additional = services.additional.filter(s => s.type !== 'location');
+			services.additional = services.additional.filter((s) => s.type !== 'location');
 		}
 	}
 
 	function toggleAdditionalDay(enabled: boolean) {
 		if (enabled) {
-			const existing = services.additional.find(s => s.type === 'day');
+			const existing = services.additional.find((s) => s.type === 'day');
 			if (!existing) {
 				services.additional.push({
 					type: 'day',
@@ -72,20 +76,19 @@
 				});
 			}
 		} else {
-			services.additional = services.additional.filter(s => s.type !== 'day');
+			services.additional = services.additional.filter((s) => s.type !== 'day');
 		}
 	}
 
 	// Derived state for UI
-	let hasAdditionalLocation = $derived(services.additional.some(s => s.type === 'location'));
-	let hasAdditionalDay = $derived(services.additional.some(s => s.type === 'day'));
+	let hasAdditionalLocation = $derived(services.additional.some((s) => s.type === 'location'));
+	let hasAdditionalDay = $derived(services.additional.some((s) => s.type === 'day'));
 	let additionalLocation = $derived(getAdditionalLocation());
 	let additionalDay = $derived(getAdditionalDay());
-
 </script>
 
 <div class="space-y-8">
-	<div class="card p-4 md:p-6 space-y-4">
+	<div class="card space-y-4 p-4 md:p-6">
 		<h3 class="h3">In Loving Memory Of</h3>
 		<label class="label">
 			<span>Your Loved One's Name</span>
@@ -93,9 +96,9 @@
 		</label>
 	</div>
 
-	<div class="card p-4 md:p-6 space-y-4">
+	<div class="card space-y-4 p-4 md:p-6">
 		<h3 class="h3">Main Service Details</h3>
-		<div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+		<div class="grid grid-cols-1 items-end gap-4 md:grid-cols-3">
 			<label class="label">
 				<span>Date of Service</span>
 				<input
@@ -115,7 +118,9 @@
 				/>
 			</label>
 			<button
-				class="btn {services.main.time.isUnknown ? 'preset-filled-primary' : 'preset-tonal-surface'}"
+				class="btn {services.main.time.isUnknown
+					? 'preset-filled-primary'
+					: 'preset-tonal-surface'}"
 				onclick={() => (services.main.time.isUnknown = !services.main.time.isUnknown)}
 			>
 				Unknown
@@ -123,16 +128,9 @@
 		</div>
 		<label class="label">
 			<span>Number of Hours (Main Location): <strong>{services.main.hours}</strong></span>
-			<input
-				type="range"
-				bind:value={services.main.hours}
-				min="1"
-				max="8"
-				step="1"
-				class="range"
-			/>
+			<input type="range" bind:value={services.main.hours} min="1" max="8" step="1" class="range" />
 		</label>
-		<div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+		<div class="grid grid-cols-1 items-end gap-4 md:grid-cols-3">
 			<label class="label md:col-span-2">
 				<span>Location Name</span>
 				<input
@@ -154,18 +152,19 @@
 				/>
 			</label>
 			<button
-				class="btn {services.main.location.isUnknown ? 'preset-filled-primary' : 'preset-tonal-surface'} md:col-start-3"
-				onclick={() =>
-					(services.main.location.isUnknown = !services.main.location.isUnknown)}
+				class="btn {services.main.location.isUnknown
+					? 'preset-filled-primary'
+					: 'preset-tonal-surface'} md:col-start-3"
+				onclick={() => (services.main.location.isUnknown = !services.main.location.isUnknown)}
 			>
 				Unknown
 			</button>
 		</div>
 	</div>
 
-	<div class="card p-4 md:p-6 space-y-4">
+	<div class="card space-y-4 p-4 md:p-6">
 		<h3 class="h3">Funeral Professional Information (Optional)</h3>
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+		<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 			<label class="label">
 				<span>Funeral Director Name</span>
 				<input class="input" type="text" bind:value={funeralDirectorName} />
@@ -177,9 +176,9 @@
 		</div>
 	</div>
 
-	<div class="card p-4 md:p-6 space-y-6">
+	<div class="card space-y-6 p-4 md:p-6">
 		<h3 class="h3">Additional Services</h3>
-		<div class="flex justify-between items-center">
+		<div class="flex items-center justify-between">
 			<span>Add a second location for the same day?</span>
 			<div class="btn-group">
 				<button
@@ -198,9 +197,9 @@
 		</div>
 
 		{#if hasAdditionalLocation}
-			<div class="card preset-tonal-surface p-4 space-y-4">
+			<div class="card preset-tonal-surface space-y-4 p-4">
 				<h4 class="h4">Additional Location Details</h4>
-				<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+				<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
 					<label class="label">
 						<span>Location Name</span>
 						<input class="input" type="text" bind:value={additionalLocation.location.name} />
@@ -228,7 +227,7 @@
 			</div>
 		{/if}
 
-		<div class="flex justify-between items-center">
+		<div class="flex items-center justify-between">
 			<span>Add another day of service?</span>
 			<div class="btn-group">
 				<button
@@ -243,9 +242,9 @@
 		</div>
 
 		{#if hasAdditionalDay}
-			<div class="card preset-tonal-surface p-4 space-y-4">
+			<div class="card preset-tonal-surface space-y-4 p-4">
 				<h4 class="h4">Additional Day Details</h4>
-				<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+				<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
 					<label class="label md:col-span-3">
 						<span>Location Name</span>
 						<input class="input" type="text" bind:value={additionalDay.location.name} />
@@ -278,31 +277,35 @@
 		{/if}
 	</div>
 
-	<div class="card p-4 md:p-6 space-y-4">
+	<div class="card space-y-4 p-4 md:p-6">
 		<h3 class="h3">Add-ons</h3>
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-			<label class="card preset-tonal-surface p-4 flex items-center space-x-4">
+		<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+			<label class="card preset-tonal-surface flex items-center space-x-4 p-4">
 				<input class="checkbox" type="checkbox" bind:checked={calculatorData.addons.photography} />
 				<div class="flex-1">
 					<span>Photography</span>
-					<span class="text-sm opacity-75 block">$400</span>
+					<span class="block text-sm opacity-75">$400</span>
 				</div>
 			</label>
-			<label class="card preset-tonal-surface p-4 flex items-center space-x-4">
-				<input class="checkbox" type="checkbox" bind:checked={calculatorData.addons.audioVisualSupport} />
+			<label class="card preset-tonal-surface flex items-center space-x-4 p-4">
+				<input
+					class="checkbox"
+					type="checkbox"
+					bind:checked={calculatorData.addons.audioVisualSupport}
+				/>
 				<div class="flex-1">
 					<span>Audio/Visual Support</span>
-					<span class="text-sm opacity-75 block">$200</span>
+					<span class="block text-sm opacity-75">$200</span>
 				</div>
 			</label>
-			<label class="card preset-tonal-surface p-4 flex items-center space-x-4">
+			<label class="card preset-tonal-surface flex items-center space-x-4 p-4">
 				<input class="checkbox" type="checkbox" bind:checked={calculatorData.addons.liveMusician} />
 				<div class="flex-1">
 					<span>Live Musician</span>
-					<span class="text-sm opacity-75 block">$500</span>
+					<span class="block text-sm opacity-75">$500</span>
 				</div>
 			</label>
-			<label class="card preset-tonal-surface p-4 flex items-center space-x-4">
+			<label class="card preset-tonal-surface flex items-center space-x-4 p-4">
 				<input
 					type="number"
 					bind:value={calculatorData.addons.woodenUsbDrives}
@@ -311,7 +314,7 @@
 				/>
 				<div class="flex-1">
 					<span>Wooden USB Drive</span>
-					<span class="text-sm opacity-75 block">$300 (first) / $100 (each add'l)</span>
+					<span class="block text-sm opacity-75">$300 (first) / $100 (each add'l)</span>
 				</div>
 			</label>
 		</div>

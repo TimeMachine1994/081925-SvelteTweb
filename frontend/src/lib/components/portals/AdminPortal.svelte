@@ -4,20 +4,22 @@
 	import { invalidateAll } from '$app/navigation';
 
 	// Props from parent component
-	let { 
-		memorials, 
-		allUsers, 
-		pendingFuneralDirectors = [], 
-		approvedFuneralDirectors = [] 
-	}: { 
-		memorials: Memorial[], 
-		allUsers: {uid: string, email: string, displayName: string, role?: string}[], 
-		pendingFuneralDirectors?: any[],
-		approvedFuneralDirectors?: any[]
+	let {
+		memorials,
+		allUsers,
+		pendingFuneralDirectors = [],
+		approvedFuneralDirectors = []
+	}: {
+		memorials: Memorial[];
+		allUsers: { uid: string; email: string; displayName: string; role?: string }[];
+		pendingFuneralDirectors?: any[];
+		approvedFuneralDirectors?: any[];
 	} = $props();
 
 	// Active tab state
-	let activeTab = $state<'overview' | 'funeral-directors' | 'memorials' | 'create-memorial' | 'audit-logs'>('overview');
+	let activeTab = $state<
+		'overview' | 'funeral-directors' | 'memorials' | 'create-memorial' | 'audit-logs'
+	>('overview');
 
 	// Memorial creation form state
 	let newMemorialForm = $state({
@@ -214,59 +216,72 @@
 	 */
 	function getActionEmoji(action: string): string {
 		const emojiMap: Record<string, string> = {
-			'memorial_created': '🆕',
-			'memorial_updated': '✏️',
-			'memorial_deleted': '🗑️',
-			'memorial_viewed': '👁️',
-			'user_login': '🔐',
-			'user_logout': '🚪',
-			'user_created': '👤',
-			'role_changed': '🔄',
-			'schedule_updated': '📅',
-			'schedule_locked': '🔒',
-			'payment_completed': '💳',
-			'payment_failed': '❌',
-			'funeral_director_approved': '✅',
-			'funeral_director_rejected': '❌',
-			'admin_memorial_created': '👑',
-			'system_config_changed': '⚙️',
-			'api_access_denied': '🚫'
+			memorial_created: '🆕',
+			memorial_updated: '✏️',
+			memorial_deleted: '🗑️',
+			memorial_viewed: '👁️',
+			user_login: '🔐',
+			user_logout: '🚪',
+			user_created: '👤',
+			role_changed: '🔄',
+			schedule_updated: '📅',
+			schedule_locked: '🔒',
+			payment_completed: '💳',
+			payment_failed: '❌',
+			funeral_director_approved: '✅',
+			funeral_director_rejected: '❌',
+			admin_memorial_created: '👑',
+			system_config_changed: '⚙️',
+			api_access_denied: '🚫'
 		};
 		return emojiMap[action] || '📝';
 	}
 </script>
 
 <!-- Simplified Admin Dashboard with Tabs -->
-<div class="backdrop-blur-md bg-white/10 rounded-2xl border border-white/20 p-6 shadow-2xl">
+<div class="rounded-2xl border border-white/20 bg-white/10 p-6 shadow-2xl backdrop-blur-md">
 	<!-- Tab Navigation -->
-	<div class="flex space-x-4 mb-6 border-b border-white/20 pb-4">
-		<button 
-			onclick={() => activeTab = 'overview'}
-			class="px-4 py-2 rounded-lg transition-all duration-200 {activeTab === 'overview' ? 'bg-amber-500 text-white' : 'text-white/70 hover:text-white hover:bg-white/10'}"
+	<div class="mb-6 flex space-x-4 border-b border-white/20 pb-4">
+		<button
+			onclick={() => (activeTab = 'overview')}
+			class="rounded-lg px-4 py-2 transition-all duration-200 {activeTab === 'overview'
+				? 'bg-amber-500 text-white'
+				: 'text-white/70 hover:bg-white/10 hover:text-white'}"
 		>
 			📊 Overview
 		</button>
-		<button 
-			onclick={() => activeTab = 'funeral-directors'}
-			class="px-4 py-2 rounded-lg transition-all duration-200 {activeTab === 'funeral-directors' ? 'bg-amber-500 text-white' : 'text-white/70 hover:text-white hover:bg-white/10'}"
+		<button
+			onclick={() => (activeTab = 'funeral-directors')}
+			class="rounded-lg px-4 py-2 transition-all duration-200 {activeTab === 'funeral-directors'
+				? 'bg-amber-500 text-white'
+				: 'text-white/70 hover:bg-white/10 hover:text-white'}"
 		>
 			🏥 Funeral Directors
 		</button>
-		<button 
-			onclick={() => activeTab = 'memorials'}
-			class="px-4 py-2 rounded-lg transition-all duration-200 {activeTab === 'memorials' ? 'bg-amber-500 text-white' : 'text-white/70 hover:text-white hover:bg-white/10'}"
+		<button
+			onclick={() => (activeTab = 'memorials')}
+			class="rounded-lg px-4 py-2 transition-all duration-200 {activeTab === 'memorials'
+				? 'bg-amber-500 text-white'
+				: 'text-white/70 hover:bg-white/10 hover:text-white'}"
 		>
 			💝 Memorials
 		</button>
-		<button 
-			onclick={() => activeTab = 'create-memorial'}
-			class="px-4 py-2 rounded-lg transition-all duration-200 {activeTab === 'create-memorial' ? 'bg-amber-500 text-white' : 'text-white/70 hover:text-white hover:bg-white/10'}"
+		<button
+			onclick={() => (activeTab = 'create-memorial')}
+			class="rounded-lg px-4 py-2 transition-all duration-200 {activeTab === 'create-memorial'
+				? 'bg-amber-500 text-white'
+				: 'text-white/70 hover:bg-white/10 hover:text-white'}"
 		>
 			➕ Create Memorial
 		</button>
-		<button 
-			onclick={() => { activeTab = 'audit-logs'; loadAuditLogs(); }}
-			class="px-4 py-2 rounded-lg transition-all duration-200 {activeTab === 'audit-logs' ? 'bg-amber-500 text-white' : 'text-white/70 hover:text-white hover:bg-white/10'}"
+		<button
+			onclick={() => {
+				activeTab = 'audit-logs';
+				loadAuditLogs();
+			}}
+			class="rounded-lg px-4 py-2 transition-all duration-200 {activeTab === 'audit-logs'
+				? 'bg-amber-500 text-white'
+				: 'text-white/70 hover:bg-white/10 hover:text-white'}"
 		>
 			🔍 Audit Logs
 		</button>
@@ -275,39 +290,39 @@
 	<!-- Overview Tab -->
 	{#if activeTab === 'overview'}
 		<div class="space-y-6">
-			<h2 class="text-2xl font-bold text-white mb-4">System Overview</h2>
-			
-			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-				<div class="bg-white/5 rounded-xl p-4 border border-white/10">
-					<div class="text-white/70 text-sm">Total Memorials</div>
+			<h2 class="mb-4 text-2xl font-bold text-white">System Overview</h2>
+
+			<div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+				<div class="rounded-xl border border-white/10 bg-white/5 p-4">
+					<div class="text-sm text-white/70">Total Memorials</div>
 					<div class="text-2xl font-bold text-white">{memorials.length}</div>
 				</div>
-				<div class="bg-white/5 rounded-xl p-4 border border-white/10">
-					<div class="text-white/70 text-sm">Total Users</div>
+				<div class="rounded-xl border border-white/10 bg-white/5 p-4">
+					<div class="text-sm text-white/70">Total Users</div>
 					<div class="text-2xl font-bold text-white">{allUsers.length}</div>
 				</div>
-				<div class="bg-white/5 rounded-xl p-4 border border-white/10">
-					<div class="text-white/70 text-sm">Pending Approvals</div>
+				<div class="rounded-xl border border-white/10 bg-white/5 p-4">
+					<div class="text-sm text-white/70">Pending Approvals</div>
 					<div class="text-2xl font-bold text-amber-400">{pendingFuneralDirectors.length}</div>
 				</div>
-				<div class="bg-white/5 rounded-xl p-4 border border-white/10">
-					<div class="text-white/70 text-sm">Approved Directors</div>
+				<div class="rounded-xl border border-white/10 bg-white/5 p-4">
+					<div class="text-sm text-white/70">Approved Directors</div>
 					<div class="text-2xl font-bold text-green-400">{approvedFuneralDirectors.length}</div>
 				</div>
 			</div>
 
-			<div class="bg-white/5 rounded-xl p-4 border border-white/10">
-				<h3 class="text-lg font-semibold text-white mb-3">Quick Actions</h3>
+			<div class="rounded-xl border border-white/10 bg-white/5 p-4">
+				<h3 class="mb-3 text-lg font-semibold text-white">Quick Actions</h3>
 				<div class="flex flex-wrap gap-3">
-					<button 
-						onclick={() => activeTab = 'funeral-directors'}
-						class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors"
+					<button
+						onclick={() => (activeTab = 'funeral-directors')}
+						class="rounded-lg bg-amber-500 px-4 py-2 text-white transition-colors hover:bg-amber-600"
 					>
 						Review Pending Directors ({pendingFuneralDirectors.length})
 					</button>
-					<button 
-						onclick={() => activeTab = 'create-memorial'}
-						class="px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors"
+					<button
+						onclick={() => (activeTab = 'create-memorial')}
+						class="rounded-lg bg-purple-500 px-4 py-2 text-white transition-colors hover:bg-purple-600"
 					>
 						Create New Memorial
 					</button>
@@ -319,34 +334,36 @@
 	<!-- Funeral Directors Tab -->
 	{#if activeTab === 'funeral-directors'}
 		<div class="space-y-6">
-			<h2 class="text-2xl font-bold text-white mb-4">Funeral Director Management</h2>
-			
+			<h2 class="mb-4 text-2xl font-bold text-white">Funeral Director Management</h2>
+
 			<!-- Pending Approvals -->
 			{#if pendingFuneralDirectors.length > 0}
-				<div class="bg-white/5 rounded-xl p-4 border border-white/10">
-					<h3 class="text-lg font-semibold text-amber-400 mb-4">⏳ Pending Approvals ({pendingFuneralDirectors.length})</h3>
+				<div class="rounded-xl border border-white/10 bg-white/5 p-4">
+					<h3 class="mb-4 text-lg font-semibold text-amber-400">
+						⏳ Pending Approvals ({pendingFuneralDirectors.length})
+					</h3>
 					<div class="space-y-3">
 						{#each pendingFuneralDirectors as director}
-							<div class="bg-white/5 rounded-lg p-4 border border-white/10">
-								<div class="flex justify-between items-start">
+							<div class="rounded-lg border border-white/10 bg-white/5 p-4">
+								<div class="flex items-start justify-between">
 									<div class="flex-1">
-										<h4 class="text-white font-semibold">{director.companyName}</h4>
-										<p class="text-white/70 text-sm">Contact: {director.contactPerson}</p>
-										<p class="text-white/70 text-sm">Email: {director.email}</p>
-										<p class="text-white/70 text-sm">License: {director.licenseNumber}</p>
-										<p class="text-white/70 text-sm">Business Type: {director.businessType}</p>
+										<h4 class="font-semibold text-white">{director.companyName}</h4>
+										<p class="text-sm text-white/70">Contact: {director.contactPerson}</p>
+										<p class="text-sm text-white/70">Email: {director.email}</p>
+										<p class="text-sm text-white/70">License: {director.licenseNumber}</p>
+										<p class="text-sm text-white/70">Business Type: {director.businessType}</p>
 									</div>
 									<div class="flex gap-2">
-										<button 
+										<button
 											onclick={() => approveFuneralDirector(director.id)}
 											disabled={isApproving}
-											class="px-4 py-2 bg-green-500 hover:bg-green-600 disabled:bg-green-300 text-white rounded-lg transition-colors text-sm"
+											class="rounded-lg bg-green-500 px-4 py-2 text-sm text-white transition-colors hover:bg-green-600 disabled:bg-green-300"
 										>
 											{isApproving ? 'Approving...' : '✅ Approve'}
 										</button>
-										<button 
+										<button
 											onclick={() => rejectFuneralDirector(director.id)}
-											class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors text-sm"
+											class="rounded-lg bg-red-500 px-4 py-2 text-sm text-white transition-colors hover:bg-red-600"
 										>
 											❌ Reject
 										</button>
@@ -357,21 +374,23 @@
 					</div>
 				</div>
 			{:else}
-				<div class="bg-white/5 rounded-xl p-4 border border-white/10 text-center">
+				<div class="rounded-xl border border-white/10 bg-white/5 p-4 text-center">
 					<p class="text-white/70">No pending funeral director applications</p>
 				</div>
 			{/if}
 
 			<!-- Approved Directors -->
 			{#if approvedFuneralDirectors.length > 0}
-				<div class="bg-white/5 rounded-xl p-4 border border-white/10">
-					<h3 class="text-lg font-semibold text-green-400 mb-4">✅ Approved Directors ({approvedFuneralDirectors.length})</h3>
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+				<div class="rounded-xl border border-white/10 bg-white/5 p-4">
+					<h3 class="mb-4 text-lg font-semibold text-green-400">
+						✅ Approved Directors ({approvedFuneralDirectors.length})
+					</h3>
+					<div class="grid grid-cols-1 gap-3 md:grid-cols-2">
 						{#each approvedFuneralDirectors as director}
-							<div class="bg-white/5 rounded-lg p-3 border border-white/10">
-								<h4 class="text-white font-semibold text-sm">{director.companyName}</h4>
-								<p class="text-white/70 text-xs">{director.contactPerson}</p>
-								<p class="text-white/70 text-xs">{director.email}</p>
+							<div class="rounded-lg border border-white/10 bg-white/5 p-3">
+								<h4 class="text-sm font-semibold text-white">{director.companyName}</h4>
+								<p class="text-xs text-white/70">{director.contactPerson}</p>
+								<p class="text-xs text-white/70">{director.email}</p>
 							</div>
 						{/each}
 					</div>
@@ -383,17 +402,17 @@
 	<!-- Memorials Tab -->
 	{#if activeTab === 'memorials'}
 		<div class="space-y-6">
-			<h2 class="text-2xl font-bold text-white mb-4">Memorial Management</h2>
-			
-			<div class="bg-white/5 rounded-xl border border-white/10 overflow-hidden">
+			<h2 class="mb-4 text-2xl font-bold text-white">Memorial Management</h2>
+
+			<div class="overflow-hidden rounded-xl border border-white/10 bg-white/5">
 				<div class="overflow-x-auto">
 					<table class="w-full">
 						<thead class="bg-white/10">
 							<tr>
-								<th class="px-4 py-3 text-left text-white font-semibold">Loved One</th>
-								<th class="px-4 py-3 text-left text-white font-semibold">Creator</th>
-								<th class="px-4 py-3 text-left text-white font-semibold">Status</th>
-								<th class="px-4 py-3 text-left text-white font-semibold">Actions</th>
+								<th class="px-4 py-3 text-left font-semibold text-white">Loved One</th>
+								<th class="px-4 py-3 text-left font-semibold text-white">Creator</th>
+								<th class="px-4 py-3 text-left font-semibold text-white">Status</th>
+								<th class="px-4 py-3 text-left font-semibold text-white">Actions</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -401,25 +420,34 @@
 								{#each memorials as memorial}
 									<tr class="border-b border-white/10 hover:bg-white/5">
 										<td class="px-4 py-3 text-white">{memorial.lovedOneName}</td>
-										<td class="px-4 py-3 text-white/70 text-sm">{memorial.creatorEmail}</td>
+										<td class="px-4 py-3 text-sm text-white/70">{memorial.creatorEmail}</td>
 										<td class="px-4 py-3">
 											{#if memorial.isPublic}
-												<span class="px-2 py-1 bg-green-500 text-white text-xs rounded">Public</span>
+												<span class="rounded bg-green-500 px-2 py-1 text-xs text-white">Public</span
+												>
 											{:else}
-												<span class="px-2 py-1 bg-gray-500 text-white text-xs rounded">Private</span>
+												<span class="rounded bg-gray-500 px-2 py-1 text-xs text-white">Private</span
+												>
 											{/if}
 										</td>
 										<td class="px-4 py-3">
 											<div class="flex gap-2">
-												<a href="/{memorial.fullSlug}" class="text-blue-400 hover:text-blue-300 text-sm">View</a>
-												<a href="/schedule?memorialId={memorial.id}" class="text-purple-400 hover:text-purple-300 text-sm">Schedule</a>
+												<a
+													href="/{memorial.fullSlug}"
+													class="text-sm text-blue-400 hover:text-blue-300">View</a
+												>
+												<a
+													href="/schedule?memorialId={memorial.id}"
+													class="text-sm text-purple-400 hover:text-purple-300">Schedule</a
+												>
 											</div>
 										</td>
 									</tr>
 								{/each}
 							{:else}
 								<tr>
-									<td colspan="4" class="px-4 py-8 text-center text-white/70">No memorials found</td>
+									<td colspan="4" class="px-4 py-8 text-center text-white/70">No memorials found</td
+									>
 								</tr>
 							{/if}
 						</tbody>
@@ -432,104 +460,104 @@
 	<!-- Create Memorial Tab -->
 	{#if activeTab === 'create-memorial'}
 		<div class="space-y-6">
-			<h2 class="text-2xl font-bold text-white mb-4">Create New Memorial</h2>
-			
-			<div class="bg-white/5 rounded-xl p-6 border border-white/10">
+			<h2 class="mb-4 text-2xl font-bold text-white">Create New Memorial</h2>
+
+			<div class="rounded-xl border border-white/10 bg-white/5 p-6">
 				<form onsubmit={createMemorial} class="space-y-4">
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<div>
-							<label class="block text-white font-semibold mb-2">Loved One's Name *</label>
-							<input 
-								type="text" 
+							<label class="mb-2 block font-semibold text-white">Loved One's Name *</label>
+							<input
+								type="text"
 								bind:value={newMemorialForm.lovedOneName}
-								class="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-amber-400"
+								class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white placeholder-white/50 focus:border-amber-400 focus:outline-none"
 								placeholder="Enter the loved one's name"
 								required
 							/>
 						</div>
 						<div>
-							<label class="block text-white font-semibold mb-2">Creator Email *</label>
-							<input 
-								type="email" 
+							<label class="mb-2 block font-semibold text-white">Creator Email *</label>
+							<input
+								type="email"
 								bind:value={newMemorialForm.creatorEmail}
-								class="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-amber-400"
+								class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white placeholder-white/50 focus:border-amber-400 focus:outline-none"
 								placeholder="Family contact email"
 								required
 							/>
 						</div>
 					</div>
 
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<div>
-							<label class="block text-white font-semibold mb-2">Creator Name</label>
-							<input 
-								type="text" 
+							<label class="mb-2 block font-semibold text-white">Creator Name</label>
+							<input
+								type="text"
 								bind:value={newMemorialForm.creatorName}
-								class="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-amber-400"
+								class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white placeholder-white/50 focus:border-amber-400 focus:outline-none"
 								placeholder="Family contact name"
 							/>
 						</div>
 						<div>
-							<label class="block text-white font-semibold mb-2">Location</label>
-							<input 
-								type="text" 
+							<label class="mb-2 block font-semibold text-white">Location</label>
+							<input
+								type="text"
 								bind:value={newMemorialForm.location}
-								class="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-amber-400"
+								class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white placeholder-white/50 focus:border-amber-400 focus:outline-none"
 								placeholder="Service location"
 							/>
 						</div>
 					</div>
 
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<div>
-							<label class="block text-white font-semibold mb-2">Service Date</label>
-							<input 
-								type="date" 
+							<label class="mb-2 block font-semibold text-white">Service Date</label>
+							<input
+								type="date"
 								bind:value={newMemorialForm.serviceDate}
-								class="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-amber-400"
+								class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white focus:border-amber-400 focus:outline-none"
 							/>
 						</div>
 						<div>
-							<label class="block text-white font-semibold mb-2">Service Time</label>
-							<input 
-								type="time" 
+							<label class="mb-2 block font-semibold text-white">Service Time</label>
+							<input
+								type="time"
 								bind:value={newMemorialForm.serviceTime}
-								class="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-amber-400"
+								class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white focus:border-amber-400 focus:outline-none"
 							/>
 						</div>
 					</div>
 
 					<div>
-						<label class="block text-white font-semibold mb-2">Memorial Description</label>
-						<textarea 
+						<label class="mb-2 block font-semibold text-white">Memorial Description</label>
+						<textarea
 							bind:value={newMemorialForm.content}
-							class="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-amber-400 h-24 resize-none"
+							class="h-24 w-full resize-none rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white placeholder-white/50 focus:border-amber-400 focus:outline-none"
 							placeholder="Brief description or obituary text"
 						></textarea>
 					</div>
 
 					<div class="flex items-center gap-3">
-						<input 
-							type="checkbox" 
+						<input
+							type="checkbox"
 							bind:checked={newMemorialForm.isPublic}
 							id="isPublic"
-							class="w-4 h-4 text-amber-400 bg-white/10 border-white/20 rounded focus:ring-amber-400"
+							class="h-4 w-4 rounded border-white/20 bg-white/10 text-amber-400 focus:ring-amber-400"
 						/>
 						<label for="isPublic" class="text-white">Make memorial publicly visible</label>
 					</div>
 
 					<div class="flex gap-4 pt-4">
-						<button 
+						<button
 							type="submit"
 							disabled={isCreatingMemorial}
-							class="px-6 py-3 bg-amber-500 hover:bg-amber-600 disabled:bg-amber-300 text-white font-semibold rounded-lg transition-colors"
+							class="rounded-lg bg-amber-500 px-6 py-3 font-semibold text-white transition-colors hover:bg-amber-600 disabled:bg-amber-300"
 						>
 							{isCreatingMemorial ? 'Creating...' : '✨ Create Memorial'}
 						</button>
-						<button 
+						<button
 							type="button"
-							onclick={() => activeTab = 'overview'}
-							class="px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-lg transition-colors"
+							onclick={() => (activeTab = 'overview')}
+							class="rounded-lg bg-white/10 px-6 py-3 font-semibold text-white transition-colors hover:bg-white/20"
 						>
 							Cancel
 						</button>
@@ -542,17 +570,17 @@
 	<!-- Audit Logs Tab -->
 	{#if activeTab === 'audit-logs'}
 		<div class="space-y-6">
-			<h2 class="text-2xl font-bold text-white mb-4">🔍 Audit Logs</h2>
-			
+			<h2 class="mb-4 text-2xl font-bold text-white">🔍 Audit Logs</h2>
+
 			<!-- Filters -->
-			<div class="bg-white/5 rounded-xl p-4 border border-white/10">
-				<h3 class="text-lg font-semibold text-white mb-4">Filters</h3>
-				<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+			<div class="rounded-xl border border-white/10 bg-white/5 p-4">
+				<h3 class="mb-4 text-lg font-semibold text-white">Filters</h3>
+				<div class="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-6">
 					<div>
-						<label class="block text-white/70 text-sm mb-1">Action</label>
-						<select 
+						<label class="mb-1 block text-sm text-white/70">Action</label>
+						<select
 							bind:value={auditFilters.action}
-							class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:border-amber-400"
+							class="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white focus:border-amber-400 focus:outline-none"
 						>
 							<option value="">All Actions</option>
 							<option value="memorial_created">Memorial Created</option>
@@ -566,19 +594,19 @@
 						</select>
 					</div>
 					<div>
-						<label class="block text-white/70 text-sm mb-1">User Email</label>
-						<input 
+						<label class="mb-1 block text-sm text-white/70">User Email</label>
+						<input
 							type="email"
 							bind:value={auditFilters.userEmail}
 							placeholder="Filter by user"
-							class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm placeholder-white/50 focus:outline-none focus:border-amber-400"
+							class="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white placeholder-white/50 focus:border-amber-400 focus:outline-none"
 						/>
 					</div>
 					<div>
-						<label class="block text-white/70 text-sm mb-1">Resource Type</label>
-						<select 
+						<label class="mb-1 block text-sm text-white/70">Resource Type</label>
+						<select
 							bind:value={auditFilters.resourceType}
-							class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:border-amber-400"
+							class="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white focus:border-amber-400 focus:outline-none"
 						>
 							<option value="">All Types</option>
 							<option value="memorial">Memorial</option>
@@ -588,26 +616,26 @@
 						</select>
 					</div>
 					<div>
-						<label class="block text-white/70 text-sm mb-1">Date From</label>
-						<input 
+						<label class="mb-1 block text-sm text-white/70">Date From</label>
+						<input
 							type="date"
 							bind:value={auditFilters.dateFrom}
-							class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:border-amber-400"
+							class="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white focus:border-amber-400 focus:outline-none"
 						/>
 					</div>
 					<div>
-						<label class="block text-white/70 text-sm mb-1">Date To</label>
-						<input 
+						<label class="mb-1 block text-sm text-white/70">Date To</label>
+						<input
 							type="date"
 							bind:value={auditFilters.dateTo}
-							class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:border-amber-400"
+							class="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white focus:border-amber-400 focus:outline-none"
 						/>
 					</div>
 					<div>
-						<label class="block text-white/70 text-sm mb-1">Limit</label>
-						<select 
+						<label class="mb-1 block text-sm text-white/70">Limit</label>
+						<select
 							bind:value={auditFilters.limit}
-							class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm focus:outline-none focus:border-amber-400"
+							class="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white focus:border-amber-400 focus:outline-none"
 						>
 							<option value={25}>25</option>
 							<option value={50}>50</option>
@@ -616,15 +644,15 @@
 						</select>
 					</div>
 				</div>
-				<div class="flex gap-2 mt-4">
-					<button 
+				<div class="mt-4 flex gap-2">
+					<button
 						onclick={loadAuditLogs}
 						disabled={auditLoading}
-						class="px-4 py-2 bg-amber-500 hover:bg-amber-600 disabled:bg-amber-300 text-white font-semibold rounded-lg transition-colors"
+						class="rounded-lg bg-amber-500 px-4 py-2 font-semibold text-white transition-colors hover:bg-amber-600 disabled:bg-amber-300"
 					>
 						{auditLoading ? 'Loading...' : '🔍 Search'}
 					</button>
-					<button 
+					<button
 						onclick={() => {
 							auditFilters.action = '';
 							auditFilters.userEmail = '';
@@ -634,7 +662,7 @@
 							auditFilters.limit = 50;
 							loadAuditLogs();
 						}}
-						class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-lg transition-colors"
+						class="rounded-lg bg-white/10 px-4 py-2 font-semibold text-white transition-colors hover:bg-white/20"
 					>
 						🔄 Clear Filters
 					</button>
@@ -642,7 +670,7 @@
 			</div>
 
 			<!-- Audit Logs Table -->
-			<div class="bg-white/5 rounded-xl border border-white/10 overflow-hidden">
+			<div class="overflow-hidden rounded-xl border border-white/10 bg-white/5">
 				{#if auditLoading}
 					<div class="p-8 text-center">
 						<div class="text-white/70">Loading audit logs...</div>
@@ -656,18 +684,18 @@
 						<table class="w-full">
 							<thead class="bg-white/10">
 								<tr>
-									<th class="px-4 py-3 text-left text-white font-semibold">Timestamp</th>
-									<th class="px-4 py-3 text-left text-white font-semibold">Action</th>
-									<th class="px-4 py-3 text-left text-white font-semibold">User</th>
-									<th class="px-4 py-3 text-left text-white font-semibold">Resource</th>
-									<th class="px-4 py-3 text-left text-white font-semibold">Details</th>
-									<th class="px-4 py-3 text-left text-white font-semibold">IP Address</th>
+									<th class="px-4 py-3 text-left font-semibold text-white">Timestamp</th>
+									<th class="px-4 py-3 text-left font-semibold text-white">Action</th>
+									<th class="px-4 py-3 text-left font-semibold text-white">User</th>
+									<th class="px-4 py-3 text-left font-semibold text-white">Resource</th>
+									<th class="px-4 py-3 text-left font-semibold text-white">Details</th>
+									<th class="px-4 py-3 text-left font-semibold text-white">IP Address</th>
 								</tr>
 							</thead>
 							<tbody>
 								{#each auditLogs as log, index}
 									<tr class="border-t border-white/10 {index % 2 === 0 ? 'bg-white/5' : ''}">
-										<td class="px-4 py-3 text-white/90 text-sm">
+										<td class="px-4 py-3 text-sm text-white/90">
 											{formatTimestamp(log.timestamp)}
 										</td>
 										<td class="px-4 py-3 text-white/90">
@@ -676,7 +704,7 @@
 												<span class="text-sm">{log.action}</span>
 											</span>
 										</td>
-										<td class="px-4 py-3 text-white/90 text-sm">
+										<td class="px-4 py-3 text-sm text-white/90">
 											<div>
 												<div class="font-medium">{log.userEmail || 'Unknown'}</div>
 												{#if log.userRole}
@@ -684,26 +712,28 @@
 												{/if}
 											</div>
 										</td>
-										<td class="px-4 py-3 text-white/90 text-sm">
+										<td class="px-4 py-3 text-sm text-white/90">
 											{#if log.resourceType && log.resourceId}
 												<div>
 													<div class="font-medium">{log.resourceType}</div>
-													<div class="text-xs text-white/60 font-mono">{log.resourceId}</div>
+													<div class="font-mono text-xs text-white/60">{log.resourceId}</div>
 												</div>
 											{:else}
 												<span class="text-white/50">-</span>
 											{/if}
 										</td>
-										<td class="px-4 py-3 text-white/90 text-sm max-w-xs">
+										<td class="max-w-xs px-4 py-3 text-sm text-white/90">
 											{#if log.details}
 												<div class="truncate" title={JSON.stringify(log.details, null, 2)}>
-													{typeof log.details === 'string' ? log.details : JSON.stringify(log.details)}
+													{typeof log.details === 'string'
+														? log.details
+														: JSON.stringify(log.details)}
 												</div>
 											{:else}
 												<span class="text-white/50">-</span>
 											{/if}
 										</td>
-										<td class="px-4 py-3 text-white/90 text-sm font-mono">
+										<td class="px-4 py-3 font-mono text-sm text-white/90">
 											{log.ipAddress || '-'}
 										</td>
 									</tr>
@@ -716,30 +746,30 @@
 
 			<!-- Summary Stats -->
 			{#if auditLogs.length > 0}
-				<div class="bg-white/5 rounded-xl p-4 border border-white/10">
-					<h3 class="text-lg font-semibold text-white mb-2">Summary</h3>
-					<div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+				<div class="rounded-xl border border-white/10 bg-white/5 p-4">
+					<h3 class="mb-2 text-lg font-semibold text-white">Summary</h3>
+					<div class="grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
 						<div>
 							<div class="text-white/70">Total Events</div>
-							<div class="text-white font-semibold text-lg">{auditLogs.length}</div>
+							<div class="text-lg font-semibold text-white">{auditLogs.length}</div>
 						</div>
 						<div>
 							<div class="text-white/70">Unique Users</div>
-							<div class="text-white font-semibold text-lg">
-								{new Set(auditLogs.map(log => log.userEmail).filter(Boolean)).size}
+							<div class="text-lg font-semibold text-white">
+								{new Set(auditLogs.map((log) => log.userEmail).filter(Boolean)).size}
 							</div>
 						</div>
 						<div>
 							<div class="text-white/70">Access Denied</div>
-							<div class="text-white font-semibold text-lg">
-								{auditLogs.filter(log => log.action === 'api_access_denied').length}
+							<div class="text-lg font-semibold text-white">
+								{auditLogs.filter((log) => log.action === 'api_access_denied').length}
 							</div>
 						</div>
 						<div>
 							<div class="text-white/70">Date Range</div>
-							<div class="text-white font-semibold text-sm">
+							<div class="text-sm font-semibold text-white">
 								{#if auditLogs.length > 0}
-									{formatTimestamp(auditLogs[auditLogs.length - 1].timestamp).split(',')[0]} - 
+									{formatTimestamp(auditLogs[auditLogs.length - 1].timestamp).split(',')[0]} -
 									{formatTimestamp(auditLogs[0].timestamp).split(',')[0]}
 								{/if}
 							</div>
