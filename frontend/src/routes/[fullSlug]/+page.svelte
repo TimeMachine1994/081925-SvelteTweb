@@ -81,7 +81,7 @@
 
 		<!-- Streams Section -->
 		<div class="streams-section">
-			<StreamPlayer streams={streams} memorialName={memorial.lovedOneName} />
+			<StreamPlayer streams={streams} memorialName={memorial.lovedOneName} memorialId={memorial.id} />
 		</div>
 	{:else}
 		<div class="loading">

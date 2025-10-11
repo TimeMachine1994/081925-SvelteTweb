@@ -6,16 +6,25 @@
 	interface Props {
 		streams?: Stream[];
 		memorialName: string;
+		memorialId: string;
 	}
 
-	let { streams, memorialName }: Props = $props();
+	let { streams, memorialName, memorialId }: Props = $props();
 
 	let currentTime = $state(new Date());
 	let timeInterval: NodeJS.Timeout;
 	let pollingInterval: NodeJS.Timeout;
 
-	// Derive directly from props to avoid infinite loop
-	let safeStreams = $derived(streams || []);
+	// Use reactive state for streams that can be updated
+	let currentStreams = $state(streams || []);
+	
+	// Update currentStreams when props change
+	$effect(() => {
+		currentStreams = streams || [];
+	});
+
+	// Derive from currentStreams instead of props
+	let safeStreams = $derived(currentStreams || []);
 
 	// Update current time every second for countdown
 	onMount(() => {
@@ -23,11 +32,30 @@
 			currentTime = new Date();
 		}, 1000);
 		
-		// Poll for stream updates every 5 seconds for faster RTMP detection
-		console.log('🎬 [MEMORIAL] Starting polling for stream updates...');
+		// Poll for stream updates with smart intervals
+		console.log('🎬 [MEMORIAL] Starting smart polling for stream updates...');
 		pollingInterval = setInterval(async () => {
-			await checkForUpdates();
-		}, 5000);
+			// Only poll if tab is visible to save resources
+			if (!document.hidden) {
+				await checkForUpdates();
+			}
+		}, 10000); // Reduced frequency to 10 seconds
+
+		// Handle visibility changes to optimize polling
+		const handleVisibilityChange = () => {
+			if (!document.hidden) {
+				// Tab became visible, check for updates immediately
+				console.log('🎬 [MEMORIAL] Tab visible, checking for updates...');
+				checkForUpdates();
+			}
+		};
+
+		document.addEventListener('visibilitychange', handleVisibilityChange);
+		
+		// Cleanup visibility listener
+		return () => {
+			document.removeEventListener('visibilitychange', handleVisibilityChange);
+		};
 	});
 
 	onDestroy(() => {
@@ -39,10 +67,21 @@
 	async function checkForUpdates() {
 		try {
 			console.log('🎬 [MEMORIAL] Checking for stream updates...');
-			// Reload the page to get fresh data - simple but effective
-			window.location.reload();
+			
+			// Fetch only stream data, not entire page
+			const response = await fetch(`/api/memorials/${memorialId}/streams`);
+			if (response.ok) {
+				const data = await response.json();
+				if (data.success && data.streams) {
+					// Update streams state without page reload
+					currentStreams = data.streams;
+					console.log('✅ [MEMORIAL] Streams updated via API:', data.streams.length);
+				}
+			} else {
+				console.warn('⚠️ [MEMORIAL] Failed to fetch stream updates:', response.status);
+			}
 		} catch (error) {
-			console.error('🎬 [MEMORIAL] Error checking for updates:', error);
+			console.error('❌ [MEMORIAL] Error checking for updates:', error);
 		}
 	}
 
