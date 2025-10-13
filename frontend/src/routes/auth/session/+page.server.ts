@@ -2,18 +2,18 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ url }) => {
 	const token = url.searchParams.get('token');
-	const slug = url.searchParams.get('slug');
+	const fullSlug = url.searchParams.get('fullSlug');
 
 	console.log('🔐 [AUTH SESSION] Processing custom token for client-side exchange...');
 	console.log('🔐 [AUTH SESSION] Token present:', !!token);
-	console.log('🔐 [AUTH SESSION] Slug:', slug);
+	console.log('🔐 [AUTH SESSION] FullSlug:', fullSlug);
 
 	if (!token) {
 		console.error('❌ [AUTH SESSION] No token provided');
 		return {
 			error: 'missing-token',
 			token: null,
-			slug: null
+			fullSlug: null
 		};
 	}
 
@@ -21,7 +21,7 @@ export const load: PageServerLoad = async ({ url }) => {
 	// Custom tokens must be exchanged for ID tokens on the client-side
 	return {
 		token,
-		slug,
+		fullSlug,
 		error: null
 	};
 };

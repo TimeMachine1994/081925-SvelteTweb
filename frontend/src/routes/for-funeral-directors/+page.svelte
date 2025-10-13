@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { ArrowRight, CheckCircle, Video, Users, Sparkles, Shield, Star } from 'lucide-svelte';
+	import Button from '$lib/ui/primitives/Button.svelte';
 </script>
 
 <svelte:head>
@@ -26,13 +27,16 @@
 				Empower the families you serve with beautiful, reliable memorial livestreams and interactive
 				digital guestbooks. Simple for you, meaningful for them.
 			</p>
-			<a
+			<Button
+				variant="role"
+				role="funeral_director"
+				size="lg"
+				rounded="lg"
 				href="/register/funeral-home"
-				class="inline-flex transform items-center justify-center rounded-xl bg-yellow-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-yellow-700"
 			>
 				Register Your Funeral Home
 				<ArrowRight class="ml-2 h-5 w-5" />
-			</a>
+			</Button>
 		</div>
 	</div>
 
@@ -147,12 +151,15 @@
 				Join our network of forward-thinking funeral directors today. Registration is free and takes
 				just a few minutes.
 			</p>
-			<a
+			<Button
+				variant="role"
+				role="funeral_director"
+				size="xl"
+				rounded="lg"
 				href="/register/funeral-home"
-				class="inline-flex transform items-center justify-center rounded-xl bg-yellow-600 px-10 py-5 text-xl font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-yellow-700"
 			>
 				Get Started Now
-			</a>
+			</Button>
 		</div>
 	</div>
 </div>

@@ -12,7 +12,7 @@
 			{#each memorials as memorial}
 				<div class="TODO: replace-with-theme-class">
 					<h2 class="TODO: replace-with-theme-class">{memorial.lovedOneName}</h2>
-					<a href="/{memorial.fullSlug || memorial.slug}" class="TODO: replace-with-theme-class"
+					<a href="/{memorial.fullSlug}" class="TODO: replace-with-theme-class"
 						>View Memorial</a
 					>
 					<a href="/profile" class="TODO: replace-with-theme-class">Manage Memorial</a>

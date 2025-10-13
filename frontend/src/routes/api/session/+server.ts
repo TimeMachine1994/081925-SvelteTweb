@@ -4,7 +4,7 @@ import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	console.log('Starting session creation...');
-	const { idToken, slug } = await request.json();
+	const { idToken, fullSlug } = await request.json();
 
 	if (typeof idToken !== 'string' || !idToken) {
 		console.error('idToken is missing or not a string');
@@ -39,9 +39,9 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		if (decodedToken.role === 'admin') {
 			console.log('Admin user detected, redirecting to admin dashboard...');
 			return json({ redirectTo: '/admin' });
-		} else if (slug && typeof slug === 'string') {
-			console.log(`Redirecting to /${slug}...`);
-			return json({ redirectTo: `/${slug}` });
+		} else if (fullSlug && typeof fullSlug === 'string') {
+			console.log(`Redirecting to /${fullSlug}...`);
+			return json({ redirectTo: `/${fullSlug}` });
 		} else {
 			console.log('Regular user, redirecting to my-portal...');
 			return json({ redirectTo: '/my-portal' });

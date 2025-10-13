@@ -11,7 +11,7 @@ export const GET: RequestHandler = async () => {
 		const memorials = memorialsSnapshot.docs.map((doc) => ({
 			id: doc.id,
 			lovedOneName: doc.data().lovedOneName,
-			slug: doc.data().slug,
+			fullSlug: doc.data().fullSlug,
 			ownerUid: doc.data().ownerUid,
 			funeralDirectorUid: doc.data().funeralDirectorUid,
 			serviceDate: doc.data().serviceDate,

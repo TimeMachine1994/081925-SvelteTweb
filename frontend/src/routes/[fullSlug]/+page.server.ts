@@ -14,21 +14,15 @@ export const load: PageServerLoad = async ({ params }) => {
 	}
 
 	try {
-		// Find memorial by fullSlug first, then fallback to slug
+		// Find memorial by fullSlug only - no legacy slug fallback
 		console.log('🏠 [MEMORIAL_PAGE] Querying memorials collection for fullSlug:', fullSlug);
 		const memorialsRef = adminDb.collection('memorials');
-		let snapshot = await memorialsRef.where('fullSlug', '==', fullSlug).limit(1).get();
-		
-		// If not found by fullSlug, try slug as fallback
-		if (snapshot.empty) {
-			console.log('🏠 [MEMORIAL_PAGE] No memorial found by fullSlug, trying slug:', fullSlug);
-			snapshot = await memorialsRef.where('slug', '==', fullSlug).limit(1).get();
-		}
+		const snapshot = await memorialsRef.where('fullSlug', '==', fullSlug).limit(1).get();
 		
 		console.log('🏠 [MEMORIAL_PAGE] Memorial query completed, found docs:', snapshot.docs.length);
 
 		if (snapshot.empty) {
-			console.log('🏠 [MEMORIAL_PAGE] No memorial found for fullSlug or slug:', fullSlug);
+			console.log('🏠 [MEMORIAL_PAGE] No memorial found for fullSlug:', fullSlug);
 			throw error(404, 'Memorial not found');
 		}
 
@@ -50,7 +44,6 @@ export const load: PageServerLoad = async ({ params }) => {
 		const memorial = {
 			id: memorialDoc.id,
 			lovedOneName: memorialData.lovedOneName || '',
-			slug: memorialData.slug || fullSlug,
 			fullSlug: memorialData.fullSlug || fullSlug,
 			content: memorialData.content || '',
 			isPublic: memorialData.isPublic || false,
@@ -79,7 +72,7 @@ export const load: PageServerLoad = async ({ params }) => {
 		console.log('🏠 [MEMORIAL_PAGE] Memorial found:', {
 			id: memorial.id,
 			lovedOneName: memorial.lovedOneName,
-			slug: memorial.slug,
+			fullSlug: memorial.fullSlug,
 			isPublic: memorial.isPublic
 		});
 
@@ -175,7 +168,7 @@ export const load: PageServerLoad = async ({ params }) => {
 				memorial: {
 					id: memorial.id,
 					lovedOneName: memorial.lovedOneName,
-					slug: memorial.slug,
+					fullSlug: memorial.fullSlug,
 					content: memorial.content,
 					isPublic: false,
 					services: null,

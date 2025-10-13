@@ -154,7 +154,7 @@
 
 							<div class="flex space-x-2">
 								<a
-									href="/{memorial.slug}"
+									href="/{memorial.fullSlug}"
 									class="flex items-center space-x-1 rounded-lg bg-pink-600 px-4 py-2 text-white transition-colors hover:bg-pink-700"
 								>
 									<Eye class="h-4 w-4" />

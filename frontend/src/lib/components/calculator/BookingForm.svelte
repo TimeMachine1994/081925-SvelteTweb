@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { CalculatorFormData, Addons } from '$lib/types/livestream';
 	import type { ServiceDetails } from '$lib/types/memorial';
+	import Button from '$lib/ui/primitives/Button.svelte';
 
 	// New props structure - direct services and calculator data
 	let {
@@ -180,19 +181,21 @@
 		<h3 class="h3">Additional Services</h3>
 		<div class="flex items-center justify-between">
 			<span>Add a second location for the same day?</span>
-			<div class="btn-group">
-				<button
-					class="btn {hasAdditionalLocation ? 'preset-filled-primary' : 'preset-tonal-surface'}"
+			<div class="flex gap-2">
+				<Button
+					variant={hasAdditionalLocation ? 'primary' : 'outline'}
+					size="sm"
 					onclick={() => toggleAdditionalLocation(true)}
 				>
 					Yes
-				</button>
-				<button
-					class="btn {!hasAdditionalLocation ? 'preset-filled-primary' : 'preset-tonal-surface'}"
+				</Button>
+				<Button
+					variant={!hasAdditionalLocation ? 'primary' : 'outline'}
+					size="sm"
 					onclick={() => toggleAdditionalLocation(false)}
 				>
 					No
-				</button>
+				</Button>
 			</div>
 		</div>
 
@@ -229,15 +232,21 @@
 
 		<div class="flex items-center justify-between">
 			<span>Add another day of service?</span>
-			<div class="btn-group">
-				<button
-					class="btn {hasAdditionalDay ? 'preset-filled-primary' : 'preset-tonal-surface'}"
-					onclick={() => toggleAdditionalDay(true)}>Yes</button
+			<div class="flex gap-2">
+				<Button
+					variant={hasAdditionalDay ? 'primary' : 'outline'}
+					size="sm"
+					onclick={() => toggleAdditionalDay(true)}
 				>
-				<button
-					class="btn {!hasAdditionalDay ? 'preset-filled-primary' : 'preset-tonal-surface'}"
-					onclick={() => toggleAdditionalDay(false)}>No</button
+					Yes
+				</Button>
+				<Button
+					variant={!hasAdditionalDay ? 'primary' : 'outline'}
+					size="sm"
+					onclick={() => toggleAdditionalDay(false)}
 				>
+					No
+				</Button>
 			</div>
 		</div>
 

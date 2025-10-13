@@ -11,7 +11,7 @@
 		if (data?.token) {
 			console.log('🔄 Processing custom token client-side...');
 			console.log('🔄 Token:', data.token.substring(0, 20) + '...');
-			console.log('🔄 Slug:', data.slug);
+			console.log('🔄 FullSlug:', data.fullSlug);
 
 			try {
 				// Import Firebase dynamically to avoid SSR issues
@@ -41,21 +41,27 @@
 					headers: {
 						'Content-Type': 'application/json'
 					},
-					body: JSON.stringify({ idToken, slug: data.slug })
+					body: JSON.stringify({ idToken, fullSlug: data.fullSlug })
 				});
 
 				console.log('🔄 Session API response status:', response.status);
 				const result = await response.json();
 				console.log('🔄 Session API response:', result);
 
-				if (response.ok && result.redirectTo) {
-					console.log('✅ Client-side auth successful, redirecting to:', result.redirectTo);
-					window.location.href = result.redirectTo;
-					return;
+				if (response.ok) {
+					console.log('✅ Session created successfully!');
+					// Redirect to memorial page if fullSlug provided, otherwise to profile
+					if (data.fullSlug) {
+						console.log('🔄 Redirecting to memorial:', data.fullSlug);
+						window.location.href = `/${data.fullSlug}`;
+					} else {
+						console.log('🔄 Redirecting to profile');
+						window.location.href = '/profile';
+					}
+				} else {
+					error = result.message || 'Failed to create session.';
+					console.error('❌ Session creation failed:', result);
 				}
-
-				error = result.message || 'Failed to create session.';
-				console.error('❌ Session creation failed:', result);
 			} catch (e: any) {
 				console.error('❌ Client-side auth failed:', e);
 				console.error('❌ Error details:', {

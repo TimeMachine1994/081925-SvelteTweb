@@ -68,16 +68,16 @@ function generateRandomPassword(length = 12) {
 	return password;
 }
 
-// Helper function to generate slug from loved one's name
-function generateSlug(lovedOneName: string): string {
-	const slug = `celebration-of-life-for-${lovedOneName
+// Helper function to generate fullSlug from loved one's name
+function generateFullSlug(lovedOneName: string): string {
+	const fullSlug = `celebration-of-life-for-${lovedOneName
 		.trim()
 		.toLowerCase()
 		.replace(/[^a-z0-9\s-]/g, '')
 		.replace(/\s+/g, '-')
 		.replace(/-+/g, '-')
 		.replace(/^-|-$/g, '')}`.substring(0, 100);
-	return slug;
+	return fullSlug;
 }
 
 // Helper function to validate email format
@@ -243,7 +243,7 @@ export const actions: Actions = {
 			}
 
 			const password = generateRandomPassword();
-			const slug = generateSlug(lovedOneName);
+			const fullSlug = generateFullSlug(lovedOneName);
 			
 			console.log('🔐 [FD-REG] Creating Firebase user for family member...');
 			// 1. Create user for the family member
@@ -271,8 +271,7 @@ export const actions: Actions = {
 			// 4. Create the memorial with new services structure
 			const memorialData = {
 				lovedOneName,
-				slug,
-				fullSlug: slug, // Use clean slug without timestamp
+				fullSlug, // Use clean fullSlug without timestamp
 				ownerUid: userRecord.uid, // The family member owns the memorial
 				funeralDirectorUid: directorUid, // The logged-in FD manages it
 				creatorEmail: directorData.email,
@@ -339,7 +338,7 @@ export const actions: Actions = {
 				await sendEnhancedRegistrationEmail({
 					email: familyContactEmail,
 					lovedOneName,
-					memorialUrl: `https://yoursite.com/${slug}`,
+					memorialUrl: `https://yoursite.com/${fullSlug}`,
 					ownerName: familyContactName,
 					password // Pass the generated password
 				});
@@ -352,7 +351,7 @@ export const actions: Actions = {
 			// 7. Return success with the shareable link
 			return {
 				success: true,
-				memorialLink: `/${slug}`
+				memorialLink: `/${fullSlug}`
 			};
 		} catch (error: any) {
 			console.error('💥 [FD-REG] Unexpected error during memorial creation:', error);

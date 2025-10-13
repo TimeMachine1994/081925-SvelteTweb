@@ -191,7 +191,7 @@
 								</a>
 
 								<a
-									href="/{memorial.slug}"
+									href="/{memorial.fullSlug}"
 									class="rounded-lg bg-yellow-600 px-4 py-2 text-white transition-colors hover:bg-yellow-700"
 								>
 									View

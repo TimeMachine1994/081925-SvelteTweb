@@ -7,6 +7,7 @@
 	import type { Stream } from '$lib/types/stream';
 	import { StreamCard } from '$lib/ui';
 	import CompletedStreamCard from '$lib/components/CompletedStreamCard.svelte';
+	import Button from '$lib/ui/primitives/Button.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -393,13 +394,16 @@
 						View Memorial
 					</a>
 
-					<button
+					<Button
+						variant="role"
+						role="owner"
+						size="md"
+						rounded="lg"
 						onclick={openCreateModal}
-						class="inline-flex items-center rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-3 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
 					>
 						<Plus class="mr-2 h-4 w-4" />
 						Create Stream
-					</button>
+					</Button>
 				</div>
 			</div>
 		</div>
@@ -431,13 +435,16 @@
 					</div>
 					<h3 class="mb-2 text-xl font-semibold text-gray-900">No streams yet</h3>
 					<p class="mb-6 text-gray-600">Create your first livestream to get started</p>
-					<button
+					<Button
+						variant="role"
+						role="owner"
+						size="md"
+						rounded="lg"
 						onclick={openCreateModal}
-						class="inline-flex items-center rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-3 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
 					>
 						<Plus class="mr-2 h-4 w-4" />
 						Create First Stream
-					</button>
+					</Button>
 				</div>
 			{:else}
 				<!-- Streams Grid -->
@@ -551,20 +558,24 @@
 						</div>
 
 						<div class="flex items-center justify-end gap-3">
-							<button
+							<Button
 								type="button"
+								variant="secondary"
+								size="md"
 								onclick={closeCreateModal}
-								class="rounded-lg bg-gray-100 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-200"
 							>
 								Cancel
-							</button>
-							<button
+							</Button>
+							<Button
 								type="submit"
+								variant="role"
+								role="owner"
+								size="md"
 								disabled={!newStreamTitle.trim() || loading}
-								class="rounded-lg bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-2 text-white transition-all duration-300 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
+								loading={loading}
 							>
 								{loading ? 'Creating...' : 'Create Stream'}
-							</button>
+							</Button>
 						</div>
 					</form>
 				</div>

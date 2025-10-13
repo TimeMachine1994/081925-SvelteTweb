@@ -65,7 +65,7 @@
 					{#each searchResults as hit}
 						<li>
 							<a
-								href="/{hit.fullSlug || `tributes/${hit.slug}`}"
+								href="/{hit.fullSlug}"
 								class="block rounded-lg border p-4 hover:bg-gray-100"
 							>
 								<h2 class="text-xl font-bold">{hit.lovedOneName}</h2>

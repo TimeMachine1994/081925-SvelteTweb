@@ -51,7 +51,6 @@ export const load = async ({ locals }: any) => {
 			return {
 				id: doc.id,
 				lovedOneName: data.lovedOneName || 'Unknown',
-				slug: data.slug,
 				fullSlug: data.fullSlug,
 				creatorEmail: data.creatorEmail || '',
 				createdAt: data.createdAt?.toDate?.()?.toISOString() || null,

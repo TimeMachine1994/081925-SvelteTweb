@@ -153,7 +153,7 @@ export const actions: Actions = {
 		}
 
 		try {
-			// Generate base slug from loved one's name
+			// Generate base fullSlug from loved one's name
 			const baseSlug = `celebration-of-life-for-${lovedOneName
 				.toLowerCase()
 				.replace(/[^a-z0-9\s-]/g, '')
@@ -161,33 +161,32 @@ export const actions: Actions = {
 				.replace(/-+/g, '-')
 				.replace(/^-|-$/g, '')}`.substring(0, 80);
 
-			// Check for existing slugs and make unique
-			let slug = baseSlug;
+			// Check for existing fullSlugs and make unique
+			let fullSlug = baseSlug;
 			let counter = 1;
 			let isUnique = false;
 
 			while (!isUnique) {
 				const existingMemorial = await adminDb
 					.collection('memorials')
-					.where('slug', '==', slug)
+					.where('fullSlug', '==', fullSlug)
 					.limit(1)
 					.get();
 
 				if (existingMemorial.empty) {
 					isUnique = true;
 				} else {
-					slug = `${baseSlug}-${counter}`;
+					fullSlug = `${baseSlug}-${counter}`;
 					counter++;
 				}
 			}
 
-			console.log(`[PROFILE] Creating memorial with unique slug: ${slug}`);
+			console.log(`[PROFILE] Creating memorial with unique fullSlug: ${fullSlug}`);
 
 			// Create the memorial
 			const memorialData = {
 				lovedOneName,
-				slug,
-				fullSlug: slug,
+				fullSlug,
 				ownerUid: locals.user.uid,
 				ownerEmail: locals.user.email,
 				
@@ -241,9 +240,9 @@ export const actions: Actions = {
 			return {
 				success: true,
 				memorialId: memorialRef.id,
-				memorialSlug: slug,
-				memorialUrl: `/${slug}`,
-				message: `Celebration of Life for ${lovedOneName} created successfully! You can view it at /${slug}`
+				memorialSlug: fullSlug,
+				memorialUrl: `/${fullSlug}`,
+				message: `Celebration of Life for ${lovedOneName} created successfully! You can view it at /${fullSlug}`
 			};
 		} catch (error) {
 			console.error('Error creating memorial:', error);

@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { ArrowRight, Heart, Users, Camera, Shield, Star, CheckCircle } from 'lucide-svelte';
-	import { goto } from '$app/navigation';
+	import { ArrowRight, Heart, Users, Video, Star, Shield, Clock } from 'lucide-svelte';
 	import { Button } from '$lib/ui';
+	import { goto } from '$app/navigation';
 
 	let lovedOneName = $state('');
-
 	function handleCreateMemorial() {
 		if (lovedOneName.trim()) {
 			// Redirect to registration with the loved one's name pre-filled
@@ -79,13 +78,16 @@
 
 			<p class="mb-6 text-sm text-gray-500">Free to start • No credit card required</p>
 
-			<a
+			<Button
+				variant="role"
+				role="owner"
+				size="lg"
+				rounded="lg"
 				href="/register/loved-one"
-				class="inline-flex transform items-center justify-center rounded-xl bg-yellow-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:bg-yellow-700"
 			>
 				Get Started Now
 				<ArrowRight class="ml-2 h-5 w-5" />
-			</a>
+			</Button>
 		</div>
 	</div>
 

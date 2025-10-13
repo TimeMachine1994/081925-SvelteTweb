@@ -16,10 +16,10 @@ function generateRandomPassword(length = 12) {
 	return password;
 }
 
-// Helper function to generate slug from loved one's name
-function generateSlug(lovedOneName: string): string {
-	console.log('🔗 Generating slug for:', lovedOneName);
-	const slug = `celebration-of-life-for-${lovedOneName
+// Helper function to generate fullSlug from loved one's name
+function generateFullSlug(lovedOneName: string): string {
+	console.log('🔗 Generating fullSlug for:', lovedOneName);
+	const fullSlug = `celebration-of-life-for-${lovedOneName
 		.trim()
 		.toLowerCase()
 		.replace(/[^a-z0-9\s-]/g, '') // Remove special characters
@@ -27,8 +27,8 @@ function generateSlug(lovedOneName: string): string {
 		.replace(/-+/g, '-') // Replace multiple hyphens with single
 		.replace(/^-|-$/g, '')}` // Remove leading/trailing hyphens
 		.substring(0, 100); // Limit length
-	console.log('🔗 Generated slug:', slug);
-	return slug;
+	console.log('🔗 Generated fullSlug:', fullSlug);
+	return fullSlug;
 }
 
 export const actions: Actions = {
@@ -45,8 +45,7 @@ export const actions: Actions = {
 		}
 
 		const password = generateRandomPassword();
-		const slug = generateSlug(lovedOneName);
-		const fullSlug = slug;
+		const fullSlug = generateFullSlug(lovedOneName);
 
 		try {
 			// 1. Create user in Firebase Auth
@@ -79,7 +78,6 @@ export const actions: Actions = {
 			// 4. Create memorial
 			const memorialData = {
 				lovedOneName: lovedOneName,
-				slug,
 				fullSlug,
 				ownerUid: userRecord.uid, // V1: Single source of truth for ownership
 				creatorEmail: email,
@@ -112,7 +110,7 @@ export const actions: Actions = {
 				updatedAt: new Date()
 			};
 			const memorialRef = await adminDb.collection('memorials').add(memorialData);
-			console.log(`Memorial created for ${lovedOneName} with slug: ${slug} 🕊️`);
+			console.log(`Memorial created for ${lovedOneName} with fullSlug: ${fullSlug} 🕊️`);
 
 			// Index the new memorial in Algolia
 			await indexMemorial({ ...memorialData, id: memorialRef.id } as unknown as Memorial);
@@ -143,7 +141,7 @@ export const actions: Actions = {
 			console.log(`Custom token created for ${email} 🎟️`);
 
 			// 7. Redirect to the session creation page
-			const redirectUrl = `/auth/session?token=${customToken}&slug=${slug}`;
+			const redirectUrl = `/auth/session?token=${customToken}&fullSlug=${fullSlug}`;
 			redirect(303, redirectUrl);
 		} catch (error: any) {
 			if (isRedirect(error)) {
