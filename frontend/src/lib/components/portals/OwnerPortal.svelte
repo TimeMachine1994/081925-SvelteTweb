@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { Memorial } from '$lib/types/memorial';
-	import type { Invitation } from '$lib/types/invitation';
 	import { getPaymentStatus, getDefaultMemorial } from '$lib/utils/payment';
 
 	// Import new UI components
@@ -10,8 +9,11 @@
 	import ActionButtons from '$lib/components/ui/ActionButtons.svelte';
 	import LivestreamScheduleTable from '$lib/components/ui/LivestreamScheduleTable.svelte';
 	import PayNowButton from '$lib/components/ui/PayNowButton.svelte';
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+	import { Button } from '$lib/ui';
 
-	let { memorials, invitations }: { memorials: Memorial[]; invitations: Invitation[] } = $props();
+	let { memorials, invitations }: { memorials: Memorial[]; invitations: [] } = $props();
 
 	console.log('👑 OwnerPortal rendering with', memorials.length, 'memorials');
 
@@ -113,12 +115,15 @@
 						bind:value={inviteEmails[currentMemorial.id]}
 						class="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-purple-500 focus:ring-2 focus:ring-purple-500 focus:outline-none"
 					/>
-					<button
+					<Button
 						onclick={() => handleInvite(currentMemorial.id)}
-						class="rounded-md bg-purple-600 px-4 py-2 text-white transition-colors hover:bg-purple-700"
+						variant="role"
+						role="owner"
+						size="md"
+						rounded="md"
 					>
 						Invite
-					</button>
+					</Button>
 				</div>
 
 				<!-- Display Invitations -->
@@ -168,12 +173,13 @@
 	<!-- Logout Button -->
 	<div class="mt-12 text-center">
 		<form method="POST" action="/logout">
-			<button
+			<Button
 				type="submit"
-				class="text-sm text-gray-500 transition-colors hover:text-gray-700 hover:underline"
+				variant="ghost"
+				size="sm"
 			>
 				Log Out
-			</button>
+			</Button>
 		</form>
 	</div>
 </div>

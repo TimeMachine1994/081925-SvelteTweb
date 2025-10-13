@@ -177,63 +177,82 @@ export const actions: Actions = {
 			});
 		}
 	},
-	default: async ({ request, locals }) => {
+	createMemorial: async ({ request, locals }) => {
 		console.log('🎯 [FD-REG] Memorial registration started by funeral director');
-		const data = await request.formData();
-
-		// Security check: Ensure a logged-in funeral director is making the request
-		if (!locals.user || locals.user.role !== 'funeral_director') {
-			return fail(403, {
-				error: 'You must be a logged-in funeral director to perform this action.'
-			});
-		}
-		const directorUid = locals.user.uid;
-
-		// Fetch the director's profile to get authoritative data
-		const directorDoc = await adminDb.collection('funeral_directors').doc(directorUid).get();
-		if (!directorDoc.exists) {
-			return fail(404, { error: 'Funeral director profile not found.' });
-		}
-		const directorData = directorDoc.data()!;
-
-		// Extract form data
-		const lovedOneName = (data.get('lovedOneName') as string)?.trim();
-		const familyContactName = (data.get('familyContactName') as string)?.trim();
-		const familyContactEmail = (data.get('familyContactEmail') as string)?.trim();
-		const familyContactPhone = (data.get('familyContactPhone') as string)?.trim();
-		const locationName = (data.get('locationName') as string)?.trim();
-		const locationAddress = (data.get('locationAddress') as string)?.trim();
-		const memorialDate = (data.get('memorialDate') as string)?.trim();
-		const memorialTime = (data.get('memorialTime') as string)?.trim();
-		const contactPreference = (data.get('contactPreference') as string)?.trim() || 'email';
-		const additionalNotes = (data.get('additionalNotes') as string)?.trim();
-
-		// Validation
-		const errors: Record<string, string> = {};
-		if (!lovedOneName) errors.lovedOneName = "Loved one's name is required";
-		if (!familyContactName) errors.familyContactName = 'Family contact name is required';
-		if (!familyContactEmail || !isValidEmail(familyContactEmail)) {
-			errors.familyContactEmail = 'A valid family contact email is required';
-		}
-		if (!familyContactPhone) errors.familyContactPhone = 'Family contact phone is required';
-
-		if (Object.keys(errors).length > 0) {
-			return fail(400, {
-				data: Object.fromEntries(data.entries()), // Return submitted data
-				errors
-			});
-		}
-
-		const password = generateRandomPassword();
-		const slug = generateSlug(lovedOneName);
-
+		
 		try {
+			const data = await request.formData();
+			console.log('📝 [FD-REG] Form data received:', Object.fromEntries(data.entries()));
+
+			// Security check: Ensure a logged-in funeral director is making the request
+			if (!locals.user || locals.user.role !== 'funeral_director') {
+				console.error('❌ [FD-REG] Unauthorized access attempt');
+				return fail(403, {
+					error: 'You must be a logged-in funeral director to perform this action.'
+				});
+			}
+			const directorUid = locals.user.uid;
+			console.log('✅ [FD-REG] Authorized funeral director:', directorUid);
+
+			// Fetch the director's profile to get authoritative data
+			console.log('🔍 [FD-REG] Fetching director profile...');
+			const directorDoc = await adminDb.collection('funeral_directors').doc(directorUid).get();
+			if (!directorDoc.exists) {
+				console.error('❌ [FD-REG] Director profile not found for UID:', directorUid);
+				return fail(404, { error: 'Funeral director profile not found.' });
+			}
+			const directorData = directorDoc.data()!;
+			console.log('✅ [FD-REG] Director profile found:', directorData.companyName);
+
+			// Extract form data
+			console.log('📋 [FD-REG] Extracting form data...');
+			const lovedOneName = (data.get('lovedOneName') as string)?.trim();
+			const familyContactName = (data.get('familyContactName') as string)?.trim();
+			const familyContactEmail = (data.get('familyContactEmail') as string)?.trim();
+			const familyContactPhone = (data.get('familyContactPhone') as string)?.trim();
+			const locationName = (data.get('locationName') as string)?.trim();
+			const locationAddress = (data.get('locationAddress') as string)?.trim();
+			const memorialDate = (data.get('memorialDate') as string)?.trim();
+			const memorialTime = (data.get('memorialTime') as string)?.trim();
+			const contactPreference = (data.get('contactPreference') as string)?.trim() || 'email';
+			const additionalNotes = (data.get('additionalNotes') as string)?.trim();
+			
+			console.log('📝 [FD-REG] Extracted data:', {
+				lovedOneName,
+				familyContactName,
+				familyContactEmail,
+				familyContactPhone
+			});
+
+			// Validation
+			console.log('✅ [FD-REG] Validating form data...');
+			const errors: Record<string, string> = {};
+			if (!lovedOneName) errors.lovedOneName = "Loved one's name is required";
+			if (!familyContactName) errors.familyContactName = 'Family contact name is required';
+			if (!familyContactEmail || !isValidEmail(familyContactEmail)) {
+				errors.familyContactEmail = 'A valid family contact email is required';
+			}
+			if (!familyContactPhone) errors.familyContactPhone = 'Family contact phone is required';
+
+			if (Object.keys(errors).length > 0) {
+				console.error('❌ [FD-REG] Validation errors:', errors);
+				return fail(400, {
+					data: Object.fromEntries(data.entries()), // Return submitted data
+					errors
+				});
+			}
+
+			const password = generateRandomPassword();
+			const slug = generateSlug(lovedOneName);
+			
+			console.log('🔐 [FD-REG] Creating Firebase user for family member...');
 			// 1. Create user for the family member
 			const userRecord = await adminAuth.createUser({
 				email: familyContactEmail,
 				password,
 				displayName: familyContactName
 			});
+			console.log('✅ [FD-REG] Firebase user created:', userRecord.uid);
 
 			// 2. Set 'owner' role for the new family member user
 			await adminAuth.setCustomUserClaims(userRecord.uid, { role: 'owner' });
@@ -306,17 +325,29 @@ export const actions: Actions = {
 			};
 			const memorialRef = await adminDb.collection('memorials').add(memorialData);
 
-			// 5. Index in Algolia
-			await indexMemorial({ ...memorialData, id: memorialRef.id } as unknown as Memorial);
+			// 5. Index in Algolia (non-blocking)
+			try {
+				await indexMemorial({ ...memorialData, id: memorialRef.id } as unknown as Memorial);
+				console.log('✅ [FD-REG] Memorial indexed in Algolia successfully');
+			} catch (error) {
+				console.error('⚠️ [FD-REG] Failed to index memorial in Algolia:', error);
+				// Don't fail the entire operation for search indexing
+			}
 
-			// 6. Send registration email to the family member
-			await sendEnhancedRegistrationEmail({
-				email: familyContactEmail,
-				lovedOneName,
-				memorialUrl: `https://yoursite.com/${slug}`,
-				ownerName: familyContactName,
-				password // Pass the generated password
-			});
+			// 6. Send registration email to the family member (non-blocking)
+			try {
+				await sendEnhancedRegistrationEmail({
+					email: familyContactEmail,
+					lovedOneName,
+					memorialUrl: `https://yoursite.com/${slug}`,
+					ownerName: familyContactName,
+					password // Pass the generated password
+				});
+				console.log('✅ [FD-REG] Registration email sent successfully');
+			} catch (error) {
+				console.error('⚠️ [FD-REG] Failed to send registration email:', error);
+				// Don't fail the entire operation for email sending
+			}
 
 			// 7. Return success with the shareable link
 			return {
@@ -324,9 +355,10 @@ export const actions: Actions = {
 				memorialLink: `/${slug}`
 			};
 		} catch (error: any) {
+			console.error('💥 [FD-REG] Unexpected error during memorial creation:', error);
 			let errorMessage = 'An unexpected error occurred.';
 			if (error.code === 'auth/email-already-exists') {
-				errorMessage = `An account with email ${familyContactEmail} already exists.`;
+				errorMessage = `An account with this email already exists.`;
 			} else if (error.message) {
 				errorMessage = `Registration failed: ${error.message}`;
 			}

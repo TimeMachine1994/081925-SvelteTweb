@@ -14,20 +14,37 @@ export const load: PageServerLoad = async ({ params }) => {
 	}
 
 	try {
-		// Find memorial by slug
-		console.log('🏠 [MEMORIAL_PAGE] Querying memorials collection for slug:', fullSlug);
+		// Find memorial by fullSlug first, then fallback to slug
+		console.log('🏠 [MEMORIAL_PAGE] Querying memorials collection for fullSlug:', fullSlug);
 		const memorialsRef = adminDb.collection('memorials');
-		const snapshot = await memorialsRef.where('slug', '==', fullSlug).limit(1).get();
+		let snapshot = await memorialsRef.where('fullSlug', '==', fullSlug).limit(1).get();
+		
+		// If not found by fullSlug, try slug as fallback
+		if (snapshot.empty) {
+			console.log('🏠 [MEMORIAL_PAGE] No memorial found by fullSlug, trying slug:', fullSlug);
+			snapshot = await memorialsRef.where('slug', '==', fullSlug).limit(1).get();
+		}
+		
 		console.log('🏠 [MEMORIAL_PAGE] Memorial query completed, found docs:', snapshot.docs.length);
 
 		if (snapshot.empty) {
-			console.log('🏠 [MEMORIAL_PAGE] No memorial found for slug:', fullSlug);
+			console.log('🏠 [MEMORIAL_PAGE] No memorial found for fullSlug or slug:', fullSlug);
 			throw error(404, 'Memorial not found');
 		}
 
 		const memorialDoc = snapshot.docs[0];
 		const memorialData = memorialDoc.data();
 		console.log('🏠 [MEMORIAL_PAGE] Memorial data keys:', Object.keys(memorialData));
+
+		// Check if this is a legacy memorial - has custom_html and minimal structured content
+		const isLegacyMemorial = !!(
+			memorialData.custom_html && 
+			memorialData.createdByUserId === 'MIGRATION_SCRIPT'
+		);
+		
+		console.log('🏠 [MEMORIAL_PAGE] Memorial type:', isLegacyMemorial ? 'Legacy (custom_html)' : 'Standard');
+		console.log('🏠 [MEMORIAL_PAGE] Has custom_html:', !!memorialData.custom_html);
+		console.log('🏠 [MEMORIAL_PAGE] Created by migration:', memorialData.createdByUserId === 'MIGRATION_SCRIPT');
 
 		// Create memorial object with proper serialization (no Firestore objects)
 		const memorial = {
@@ -51,6 +68,9 @@ export const load: PageServerLoad = async ({ params }) => {
 			directorFullName: memorialData.directorFullName || null,
 			directorEmail: memorialData.directorEmail || null,
 			additionalNotes: memorialData.additionalNotes || null,
+			custom_html: memorialData.custom_html || null,
+			isLegacy: isLegacyMemorial,
+			createdByUserId: memorialData.createdByUserId || null,
 			// Convert Firestore timestamps to strings for serialization
 			createdAt: memorialData.createdAt?.toDate()?.toISOString() || null,
 			updatedAt: memorialData.updatedAt?.toDate()?.toISOString() || null
@@ -174,8 +194,23 @@ export const load: PageServerLoad = async ({ params }) => {
 			memorial,
 			streams
 		};
-	} catch (err) {
+	} catch (err: any) {
 		console.error('🏠 [MEMORIAL_PAGE] Error loading memorial:', err);
-		throw error(500, 'Failed to load memorial');
+		console.error('🏠 [MEMORIAL_PAGE] Error details:', {
+			message: err?.message,
+			code: err?.code,
+			stack: err?.stack
+		});
+		
+		// More specific error handling
+		if (err?.code === 'permission-denied') {
+			console.error('🏠 [MEMORIAL_PAGE] Firebase permission denied - check service account');
+			throw error(500, 'Database access denied');
+		} else if (err?.code === 'unavailable') {
+			console.error('🏠 [MEMORIAL_PAGE] Firebase unavailable - connection issue');
+			throw error(500, 'Database temporarily unavailable');
+		} else {
+			throw error(500, `Failed to load memorial: ${err?.message || 'Unknown error'}`);
+		}
 	}
 };

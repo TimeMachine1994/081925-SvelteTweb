@@ -4,6 +4,7 @@
 	import Navbar from '$lib/components/Navbar.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import DevRoleSwitcher from '$lib/components/DevRoleSwitcher.svelte';
+	import { getTheme } from '$lib/design-tokens/minimal-modern-theme';
 
 	import { user } from '$lib/auth';
 	import { page } from '$app/stores';
@@ -11,6 +12,8 @@
 	import type { Snippet } from 'svelte';
 
 	let { children, data }: { children: Snippet; data: LayoutData } = $props();
+
+	const theme = getTheme('minimal');
 
 	$effect(() => {
 		user.set(data.user);
@@ -21,7 +24,7 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<div class="app-container">
+<div class="app-container {theme.root}" style="font-family: {theme.font.body}">
 	<DevRoleSwitcher />
 	<Navbar />
 	<main

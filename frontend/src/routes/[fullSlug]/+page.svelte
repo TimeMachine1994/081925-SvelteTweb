@@ -1,12 +1,15 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import StreamPlayer from '$lib/components/StreamPlayer.svelte';
+	import { getTheme } from '$lib/design-tokens/minimal-modern-theme.js';
+	import { Card, Button, Badge } from '$lib/components/minimal-modern';
 
 	let { data }: { data: PageData } = $props();
 
 	// Extract memorial and streams data from server load
 	let memorial = $derived(data.memorial);
 	let streams = $derived(data.streams || []);
+	const theme = getTheme('minimal');
 
 	// Enhanced date formatting with better error handling
 	function formatDate(dateString: string | null): string {

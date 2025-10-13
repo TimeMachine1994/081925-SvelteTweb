@@ -2,6 +2,7 @@
 	import { enhance } from '$app/forms';
 	import LiveUrlPreview from '$lib/components/LiveUrlPreview.svelte';
 	import { page } from '$app/stores';
+	import { Button } from '$lib/ui';
 
 	console.log('🎯 Loved-One Registration form initializing');
 
@@ -135,7 +136,16 @@
 			{/if}
 
 			<div class="submit-section">
-				<button type="submit" class="submit-button"> 🚀 Create Memorial </button>
+				<Button
+					type="submit"
+					variant="role"
+					role="owner"
+					size="xl"
+					fullWidth
+					rounded="lg"
+				>
+					🚀 Create Memorial
+				</Button>
 				<p class="submit-note">
 					By submitting this form, you'll create your account and set up the memorial page. Login
 					credentials will be sent to your email address.
@@ -296,6 +306,7 @@
 		padding: 2rem;
 		background: #f9fafb;
 		text-align: center;
+		margin: 1rem 0 0 0;
 	}
 
 	.submit-button {

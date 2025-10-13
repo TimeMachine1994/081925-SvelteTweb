@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+	import { Button } from '$lib/ui';
 	import type { Memorial } from '$lib/types/memorial';
 	import {
 		Calendar,
@@ -335,12 +338,13 @@
 	<!-- Logout Button -->
 	<div class="mt-12 text-center">
 		<form method="POST" action="/logout">
-			<button
+			<Button
 				type="submit"
-				class="text-sm text-gray-500 transition-colors hover:text-gray-700 hover:underline"
+				variant="ghost"
+				size="sm"
 			>
 				Log Out
-			</button>
+			</Button>
 		</form>
 	</div>
 </div>

@@ -19,6 +19,7 @@
 			memorialLink?: string;
 			message?: string;
 			customToken?: string;
+			errors?: Record<string, string>;
 		};
 		data: PageData;
 	} = $props();
@@ -184,7 +185,8 @@
 					return async ({ result }) => {
 						loading = false;
 						if (result.type === 'failure') {
-							error = result.data?.message || 'Registration failed';
+							const failureData = result.data as { message?: string };
+							error = failureData?.message || 'Registration failed';
 						}
 						await applyAction(result);
 					};
@@ -334,13 +336,17 @@
 
 			<form
 				method="POST"
+				action="?/createMemorial"
 				use:enhance={({}) => {
 					return async ({ result }) => {
-						if (result.type === 'success' && result.data?.success) {
-							await goto(result.data.memorialLink);
-						} else {
-							await applyAction(result);
+						if (result.type === 'success') {
+							const data = result.data as { success?: boolean; memorialLink?: string };
+							if (data?.success && data?.memorialLink) {
+								await goto(data.memorialLink);
+								return;
+							}
 						}
+						await applyAction(result);
 					};
 				}}
 				class="grid grid-cols-1 gap-8 p-10 md:grid-cols-2"

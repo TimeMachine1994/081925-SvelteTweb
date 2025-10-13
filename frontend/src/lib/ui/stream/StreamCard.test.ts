@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, fireEvent } from '@testing-library/svelte';
-import StreamCard from './StreamCard.svelte';
+import { StreamCard } from '$lib/ui';
 import type { Stream } from '$lib/types/stream';
 
 describe('StreamCard', () => {

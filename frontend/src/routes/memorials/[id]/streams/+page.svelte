@@ -5,7 +5,7 @@
 	import { Plus, Play, Eye } from 'lucide-svelte';
 	import type { PageData } from './$types';
 	import type { Stream } from '$lib/types/stream';
-	import StreamCard from '$lib/components/StreamCard.svelte';
+	import { StreamCard } from '$lib/ui';
 	import CompletedStreamCard from '$lib/components/CompletedStreamCard.svelte';
 
 	let { data }: { data: PageData } = $props();

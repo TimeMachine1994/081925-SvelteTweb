@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { ArrowRight, Heart, Users, Camera, Shield, Star, CheckCircle } from 'lucide-svelte';
 	import { goto } from '$app/navigation';
+	import { Button } from '$lib/ui';
 
 	let lovedOneName = $state('');
 
@@ -62,13 +63,17 @@
 							class="w-full rounded-lg border-2 border-gray-200 px-4 py-3 transition-colors focus:border-yellow-500 focus:outline-none"
 						/>
 					</div>
-					<button
+					<Button
 						onclick={handleCreateMemorial}
-						class="flex w-full transform items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-yellow-600 to-amber-600 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-yellow-700 hover:to-amber-700"
+						variant="role"
+						role="owner"
+						size="lg"
+						fullWidth
+						rounded="lg"
 					>
 						<Heart class="h-5 w-5" />
 						Create Memorial
-					</button>
+					</Button>
 				</div>
 			</div>
 
@@ -203,12 +208,15 @@
 							Creating a memorial is simple and takes just a few minutes. No technical skills
 							required.
 						</p>
-						<button
+						<Button
 							onclick={handleQuickStart}
-							class="rounded-lg bg-gradient-to-r from-yellow-600 to-amber-600 px-8 py-3 font-semibold text-white transition-all duration-300 hover:from-yellow-700 hover:to-amber-700"
+							variant="role"
+							role="owner"
+							size="lg"
+							rounded="lg"
 						>
 							Create Memorial Now
-						</button>
+						</Button>
 					</div>
 				</div>
 			</div>
@@ -269,13 +277,16 @@
 				memorial today.
 			</p>
 			<div class="space-y-4">
-				<button
+				<Button
 					onclick={handleCreateMemorial}
-					class="inline-flex transform items-center justify-center rounded-xl bg-gradient-to-r from-yellow-600 to-amber-600 px-10 py-5 text-xl font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-yellow-700 hover:to-amber-700"
+					variant="role"
+					role="owner"
+					size="xl"
+					rounded="lg"
 				>
 					<Heart class="mr-2 h-6 w-6" />
 					Create Memorial
-				</button>
+				</Button>
 				<p class="text-sm text-gray-400">Free to start • Setup takes less than 5 minutes</p>
 			</div>
 		</div>

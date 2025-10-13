@@ -13,6 +13,7 @@
 	import { onMount } from 'svelte';
 	import { auth } from '$lib/firebase';
 	import { useAutoSave } from '$lib/composables/useAutoSave';
+	import { Button } from '$lib/ui';
 
 	let {
 		memorialId,
@@ -488,9 +489,14 @@
 		{:else}
 			<div class="card p-4 text-center">
 				<p>There was an error preparing the payment form. Please try again.</p>
-				<button class="btn preset-filled-primary mt-4" onclick={() => (currentStep = 'booking')}
-					>Go Back</button
+				<Button
+					variant="primary"
+					size="md"
+					onclick={() => (currentStep = 'booking')}
+					rounded="lg"
 				>
+					Go Back
+				</Button>
 			</div>
 		{/if}
 	</div>

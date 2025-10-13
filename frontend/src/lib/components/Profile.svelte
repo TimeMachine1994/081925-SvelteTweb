@@ -8,17 +8,22 @@
 		LogOut,
 		Heart,
 		Calendar,
+		MapPin,
+		Clock,
+		Plus,
+		Building2,
+		Shield,
 		Users,
 		Crown,
-		Building2,
 		Video,
 		Settings,
 		Sparkles,
-		Clock,
 		Eye,
 		Play
 	} from 'lucide-svelte';
 	import { onMount } from 'svelte';
+	import { getTheme } from '$lib/design-tokens/minimal-modern-theme';
+	import { Button, Input, Card, Toast, Badge, Stats } from '$lib/components/minimal-modern';
 
 	let { data, form } = $props();
 	let displayName = $state(data.profile?.displayName || '');
@@ -43,6 +48,7 @@
 
 	// Get user role from locals or profile data
 	const userRole = data.user?.role || 'owner';
+	const theme = getTheme('minimal');
 
 	onMount(() => {
 		mounted = true;
@@ -374,22 +380,27 @@
 									</a>
 								{:else if userRole === 'owner'}
 									<div class="space-y-4">
-										<button 
+										<Button
 											onclick={() => showCreateMemorialModal = true}
-											class="inline-flex items-center px-6 py-3 rounded-xl bg-gradient-to-r {roleInfo.gradient} text-white font-medium hover:shadow-lg transition-all duration-300 hover:scale-105"
+											variant="role"
+											role="owner"
+											size="lg"
+											rounded="lg"
 										>
 											<Heart class="w-4 h-4 mr-2" />
 											Create Memorial
-										</button>
+										</Button>
 										
 										<!-- Debug Test Button -->
 										<form method="POST" action="?/testAction" class="inline">
-											<button 
+											<Button
 												type="submit"
-												class="inline-flex items-center px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700"
+												variant="primary"
+												size="sm"
+												rounded="lg"
 											>
 												🧪 Test Server Action
-											</button>
+											</Button>
 										</form>
 									</div>
 								{:else}
@@ -409,20 +420,26 @@
 											<strong>Payment Required:</strong> Please complete payment for your existing memorial
 											before creating a new one.
 										</p>
-										<button
-											class="mt-2 rounded-lg bg-amber-600 px-4 py-2 text-white transition-colors hover:bg-amber-700"
+										<Button
+											variant="role"
+											role="owner"
+											size="md"
+											rounded="lg"
 										>
 											Complete Payment
-										</button>
+										</Button>
 									</div>
 								{:else}
-									<button
+									<Button
 										onclick={() => (showCreateMemorialModal = true)}
-										class="inline-flex items-center rounded-xl bg-gradient-to-r px-6 py-3 {roleInfo.gradient} font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
+										variant="role"
+										role="owner"
+										size="lg"
+										rounded="lg"
 									>
 										<Heart class="mr-2 h-4 w-4" />
 										Create Another Memorial
-									</button>
+									</Button>
 								{/if}
 							</div>
 						{/if}
@@ -481,13 +498,15 @@
 									</a>
 								{/if}
 								<form method="POST" action="/logout" class="inline">
-									<button
+									<Button
 										type="submit"
-										class="flex items-center rounded-xl border border-gray-200 px-6 py-3 text-gray-600 transition-all duration-300 hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+										variant="outline"
+										size="lg"
+										rounded="lg"
 									>
 										<LogOut class="mr-2 h-4 w-4" />
 										Sign Out
-									</button>
+									</Button>
 								</form>
 							</div>
 						</div>
@@ -584,15 +603,15 @@
 									class="w-full rounded-xl border border-gray-200 bg-white/70 px-4 py-3 backdrop-blur-sm transition-all focus:border-transparent focus:ring-2 focus:ring-amber-500 disabled:bg-gray-100 disabled:text-gray-500"
 								/>
 							</div>
-							<button
-								type="button"
+							<Button
+								variant={scheduleForm.timeIsUnknown ? "role" : "secondary"}
+								role={scheduleForm.timeIsUnknown ? "owner" : undefined}
+								size="md"
 								onclick={() => (scheduleForm.timeIsUnknown = !scheduleForm.timeIsUnknown)}
-								class="rounded-xl px-4 py-3 font-medium transition-all {scheduleForm.timeIsUnknown
-									? 'bg-amber-600 text-white'
-									: 'bg-gray-200 text-gray-700 hover:bg-gray-300'}"
+								rounded="lg"
 							>
 								Unknown
-							</button>
+							</Button>
 						</div>
 					</div>
 
@@ -654,17 +673,16 @@
 										class="w-full rounded-xl border border-gray-200 bg-white/70 px-4 py-3 backdrop-blur-sm transition-all focus:border-transparent focus:ring-2 focus:ring-orange-500 disabled:bg-gray-100 disabled:text-gray-500"
 									/>
 								</div>
-								<button
-									type="button"
+								<Button
+									variant={scheduleForm.location.isUnknown ? "role" : "secondary"}
+									role={scheduleForm.location.isUnknown ? "owner" : undefined}
+									size="md"
 									onclick={() =>
 										(scheduleForm.location.isUnknown = !scheduleForm.location.isUnknown)}
-									class="rounded-xl px-4 py-3 font-medium transition-all {scheduleForm.location
-										.isUnknown
-										? 'bg-orange-600 text-white'
-										: 'bg-gray-200 text-gray-700 hover:bg-gray-300'}"
+									rounded="lg"
 								>
 									Unknown
-								</button>
+								</Button>
 							</div>
 							<div>
 								<label for="locationAddress" class="mb-2 block text-sm font-medium text-gray-700"
@@ -683,19 +701,23 @@
 					</div>
 
 					<div class="flex justify-end space-x-3 pt-4">
-						<button
-							type="button"
+						<Button
+							variant="secondary"
+							size="md"
 							onclick={() => (showScheduleModal = false)}
-							class="rounded-xl bg-gray-200 px-6 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-300"
+							rounded="lg"
 						>
 							Cancel
-						</button>
-						<button
+						</Button>
+						<Button
 							type="submit"
-							class="rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-3 text-sm font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
+							variant="role"
+							role="owner"
+							size="md"
+							rounded="lg"
 						>
 							Update Schedule
-						</button>
+						</Button>
 					</div>
 				</form>
 			</div>
@@ -786,24 +808,29 @@
 					</div>
 
 					<div class="flex justify-end space-x-3 pt-4">
-						<button
-							type="button"
+						<Button
+							variant="secondary"
+							size="md"
 							onclick={() => (showCreateMemorialModal = false)}
-							class="rounded-xl bg-gray-200 px-6 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-300"
+							rounded="lg"
 						>
 							Cancel
-						</button>
-						<button
+						</Button>
+						<Button
 							type="submit"
+							variant="role"
+							role="owner"
+							size="md"
 							disabled={isCreatingMemorial}
-							class="px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl hover:shadow-lg transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+							loading={isCreatingMemorial}
+							rounded="lg"
 						>
 							{#if isCreatingMemorial}
-								Creating Memorial...
+								Creating...
 							{:else}
 								Create Memorial
 							{/if}
-						</button>
+						</Button>
 					</div>
 				</form>
 			</div>

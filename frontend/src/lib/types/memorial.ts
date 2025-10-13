@@ -59,8 +59,9 @@ export interface Memorial {
 	isPublic: boolean;
 	content: string;
 	custom_html: string | null;
+	isLegacy?: boolean; // Indicates if this memorial uses custom_html instead of structured data
+	createdByUserId?: string; // Used to identify migration script created memorials
 	createdAt: Timestamp;
-	updatedAt: Timestamp;
 	imageUrl?: string; // Adding optional fields that might be missing from schema but used in code
 	birthDate?: string;
 	deathDate?: string;

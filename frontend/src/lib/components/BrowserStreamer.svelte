@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { onDestroy } from 'svelte';
-	import { Camera, CameraOff, Mic, MicOff, Square, Play, AlertCircle } from 'lucide-svelte';
+	import { onMount, onDestroy } from 'svelte';
+	import { Camera, CameraOff, Mic, MicOff, Play, Square } from 'lucide-svelte';
+	import { Button } from '$lib/ui';
 
 	interface Props {
 		streamId: string;
@@ -264,9 +265,9 @@
 				<Camera size={48} class="permission-icon" />
 				<h4>Camera & Microphone Access Required</h4>
 				<p>To stream from your browser, we need access to your camera and microphone.</p>
-				<button onclick={requestPermissions} class="permission-btn">
+				<Button onclick={requestPermissions} variant="primary" size="lg" rounded="lg">
 					Allow Camera & Microphone
-				</button>
+				</Button>
 			</div>
 		</div>
 	{:else}
@@ -324,20 +325,19 @@
 
 		<div class="stream-actions">
 			{#if !isStreaming && !isConnecting}
-				<button onclick={startStreaming} class="start-btn" disabled={!hasPermission}>
+				<Button onclick={startStreaming} variant="primary" size="lg" disabled={!hasPermission} rounded="lg">
 					<Play size={20} />
 					Start Streaming
-				</button>
+				</Button>
 			{:else if isConnecting}
-				<button class="connecting-btn" disabled>
-					<div class="spinner"></div>
+				<Button variant="primary" size="lg" disabled loading rounded="lg">
 					Connecting...
-				</button>
+				</Button>
 			{:else}
-				<button onclick={stopStreaming} class="stop-btn">
+				<Button onclick={stopStreaming} variant="danger" size="lg" rounded="lg">
 					<Square size={20} />
 					Stop Streaming
-				</button>
+				</Button>
 			{/if}
 		</div>
 	{/if}

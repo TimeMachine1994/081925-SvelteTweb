@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { CheckCircle, ArrowLeft, Mail } from 'lucide-svelte';
+	import { CheckCircle, ArrowLeft, Home } from 'lucide-svelte';
+	import { Button } from '$lib/ui';
 </script>
 
 <svelte:head>
@@ -42,12 +43,16 @@
 
 			<!-- Action Buttons -->
 			<div class="space-y-3">
-				<a
+				<Button
 					href="/contact"
-					class="inline-flex w-full items-center justify-center rounded-lg bg-gradient-to-r from-yellow-600 to-amber-600 px-6 py-3 font-semibold text-white transition-all duration-300 hover:from-yellow-700 hover:to-amber-700"
+					variant="role"
+					role="owner"
+					size="lg"
+					fullWidth
+					rounded="lg"
 				>
 					Send Another Message
-				</a>
+				</Button>
 
 				<a
 					href="/"

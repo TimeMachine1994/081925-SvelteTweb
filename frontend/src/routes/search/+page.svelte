@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { getTheme } from '$lib/design-tokens/minimal-modern-theme';
+	import { Input, Card, Badge, Button } from '$lib/components/minimal-modern';
 
 	let { data } = $props();
 	const { query, client, indexName } = data;
@@ -7,6 +9,7 @@
 	let searchQuery = $state(query);
 	let searchResults = $state<any[]>([]);
 	let loading = $state(false);
+	const theme = getTheme('minimal');
 
 	async function performSearch() {
 		if (searchQuery.length < 2) {

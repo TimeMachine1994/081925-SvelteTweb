@@ -1,7 +1,9 @@
 <!-- Simplified Admin Portal - Funeral Director Approval & Memorial Management -->
 <script lang="ts">
 	import type { Memorial } from '$lib/types/memorial';
-	import { invalidateAll } from '$app/navigation';
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+	import { Button } from '$lib/ui';
 
 	// Props from parent component
 	let {
@@ -242,49 +244,54 @@
 <div class="rounded-2xl border border-white/20 bg-white/10 p-6 shadow-2xl backdrop-blur-md">
 	<!-- Tab Navigation -->
 	<div class="mb-6 flex space-x-4 border-b border-white/20 pb-4">
-		<button
+		<Button
 			onclick={() => (activeTab = 'overview')}
-			class="rounded-lg px-4 py-2 transition-all duration-200 {activeTab === 'overview'
-				? 'bg-amber-500 text-white'
-				: 'text-white/70 hover:bg-white/10 hover:text-white'}"
+			variant={activeTab === 'overview' ? 'role' : 'ghost'}
+			role={activeTab === 'overview' ? 'admin' : undefined}
+			size="md"
+			rounded="lg"
 		>
 			📊 Overview
-		</button>
-		<button
+		</Button>
+		<Button
 			onclick={() => (activeTab = 'funeral-directors')}
-			class="rounded-lg px-4 py-2 transition-all duration-200 {activeTab === 'funeral-directors'
-				? 'bg-amber-500 text-white'
-				: 'text-white/70 hover:bg-white/10 hover:text-white'}"
+			variant={activeTab === 'funeral-directors' ? 'role' : 'ghost'}
+			role={activeTab === 'funeral-directors' ? 'admin' : undefined}
+			size="md"
+			rounded="lg"
 		>
 			🏥 Funeral Directors
-		</button>
-		<button
+		</Button>
+		<Button
 			onclick={() => (activeTab = 'memorials')}
-			class="rounded-lg px-4 py-2 transition-all duration-200 {activeTab === 'memorials'
-				? 'bg-amber-500 text-white'
-				: 'text-white/70 hover:bg-white/10 hover:text-white'}"
+			variant={activeTab === 'memorials' ? 'role' : 'ghost'}
+			role={activeTab === 'memorials' ? 'admin' : undefined}
+			size="md"
+			rounded="lg"
 		>
 			💝 Memorials
-		</button>
-		<button
+		</Button>
+		<Button
 			onclick={() => (activeTab = 'create-memorial')}
-			class="rounded-lg px-4 py-2 transition-all duration-200 {activeTab === 'create-memorial'
-				? 'bg-amber-500 text-white'
-				: 'text-white/70 hover:bg-white/10 hover:text-white'}"
+			variant={activeTab === 'create-memorial' ? 'role' : 'ghost'}
+			role={activeTab === 'create-memorial' ? 'admin' : undefined}
+			size="md"
+			rounded="lg"
 		>
 			➕ Create Memorial
-		</button>
-		<button
+		</Button>
+		<Button
 			onclick={() => {
 				activeTab = 'audit-logs';
 				loadAuditLogs();
 			}}
-			class="rounded-lg px-4 py-2 transition-all duration-200 {activeTab === 'audit-logs'
-				? 'bg-amber-500 text-white'
-				: 'text-white/70 hover:bg-white/10 hover:text-white'}"
+			variant={activeTab === 'audit-logs' ? 'role' : 'ghost'}
+			role={activeTab === 'audit-logs' ? 'admin' : undefined}
+			size="md"
+			rounded="lg"
 		>
 			🔍 Audit Logs
-		</button>
+		</Button>
 	</div>
 
 	<!-- Overview Tab -->
@@ -314,18 +321,23 @@
 			<div class="rounded-xl border border-white/10 bg-white/5 p-4">
 				<h3 class="mb-3 text-lg font-semibold text-white">Quick Actions</h3>
 				<div class="flex flex-wrap gap-3">
-					<button
+					<Button
 						onclick={() => (activeTab = 'funeral-directors')}
-						class="rounded-lg bg-amber-500 px-4 py-2 text-white transition-colors hover:bg-amber-600"
+						variant="role"
+						role="admin"
+						size="md"
+						rounded="lg"
 					>
 						Review Pending Directors ({pendingFuneralDirectors.length})
-					</button>
-					<button
+					</Button>
+					<Button
 						onclick={() => (activeTab = 'create-memorial')}
-						class="rounded-lg bg-purple-500 px-4 py-2 text-white transition-colors hover:bg-purple-600"
+						variant="secondary"
+						size="md"
+						rounded="lg"
 					>
 						Create New Memorial
-					</button>
+					</Button>
 				</div>
 			</div>
 		</div>
@@ -354,19 +366,24 @@
 										<p class="text-sm text-white/70">Business Type: {director.businessType}</p>
 									</div>
 									<div class="flex gap-2">
-										<button
+										<Button
 											onclick={() => approveFuneralDirector(director.id)}
 											disabled={isApproving}
-											class="rounded-lg bg-green-500 px-4 py-2 text-sm text-white transition-colors hover:bg-green-600 disabled:bg-green-300"
+											loading={isApproving}
+											variant="primary"
+											size="sm"
+											rounded="lg"
 										>
 											{isApproving ? 'Approving...' : '✅ Approve'}
-										</button>
-										<button
+										</Button>
+										<Button
 											onclick={() => rejectFuneralDirector(director.id)}
-											class="rounded-lg bg-red-500 px-4 py-2 text-sm text-white transition-colors hover:bg-red-600"
+											variant="danger"
+											size="sm"
+											rounded="lg"
 										>
 											❌ Reject
-										</button>
+										</Button>
 									</div>
 								</div>
 							</div>
@@ -547,20 +564,25 @@
 					</div>
 
 					<div class="flex gap-4 pt-4">
-						<button
+						<Button
 							type="submit"
 							disabled={isCreatingMemorial}
-							class="rounded-lg bg-amber-500 px-6 py-3 font-semibold text-white transition-colors hover:bg-amber-600 disabled:bg-amber-300"
+							loading={isCreatingMemorial}
+							variant="role"
+							role="admin"
+							size="lg"
+							rounded="lg"
 						>
 							{isCreatingMemorial ? 'Creating...' : '✨ Create Memorial'}
-						</button>
-						<button
-							type="button"
+						</Button>
+						<Button
+							variant="secondary"
+							size="lg"
 							onclick={() => (activeTab = 'overview')}
-							class="rounded-lg bg-white/10 px-6 py-3 font-semibold text-white transition-colors hover:bg-white/20"
+							rounded="lg"
 						>
 							Cancel
-						</button>
+						</Button>
 					</div>
 				</form>
 			</div>
@@ -645,27 +667,31 @@
 					</div>
 				</div>
 				<div class="mt-4 flex gap-2">
-					<button
+					<Button
 						onclick={loadAuditLogs}
 						disabled={auditLoading}
-						class="rounded-lg bg-amber-500 px-4 py-2 font-semibold text-white transition-colors hover:bg-amber-600 disabled:bg-amber-300"
+						loading={auditLoading}
+						variant="role"
+						role="admin"
+						size="md"
+						rounded="lg"
 					>
 						{auditLoading ? 'Loading...' : '🔍 Search'}
-					</button>
-					<button
+					</Button>
+					<Button
 						onclick={() => {
 							auditFilters.action = '';
 							auditFilters.userEmail = '';
-							auditFilters.resourceType = '';
-							auditFilters.dateFrom = '';
-							auditFilters.dateTo = '';
-							auditFilters.limit = 50;
-							loadAuditLogs();
+							auditFilters.startDate = '';
+							auditFilters.endDate = '';
+							auditLogs = [];
 						}}
-						class="rounded-lg bg-white/10 px-4 py-2 font-semibold text-white transition-colors hover:bg-white/20"
+						variant="secondary"
+						size="md"
+						rounded="lg"
 					>
 						🔄 Clear Filters
-					</button>
+					</Button>
 				</div>
 			</div>
 

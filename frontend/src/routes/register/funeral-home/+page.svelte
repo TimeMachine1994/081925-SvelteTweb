@@ -18,6 +18,7 @@
 		Sparkles
 	} from 'lucide-svelte';
 	import { useFormAutoSave } from '$lib/composables/useFormAutoSave';
+	import { Button } from '$lib/ui';
 
 	let {
 		form
@@ -360,13 +361,17 @@
 
 					<!-- Navigation Buttons -->
 					<div class="mt-8 flex justify-end border-t pt-6">
-						<button
+						<Button
 							type="submit"
+							variant="role"
+							role="funeral_director"
+							size="lg"
+							rounded="lg"
 							disabled={isSubmitting}
-							class="rounded-xl bg-gradient-to-r from-yellow-600 to-amber-600 px-8 py-3 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
+							loading={isSubmitting}
 						>
 							{isSubmitting ? 'Creating Account...' : 'Create Account & Get Started'}
-						</button>
+						</Button>
 					</div>
 				</form>
 			</div>

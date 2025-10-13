@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { user } from '$lib/auth';
 	import { goto } from '$app/navigation';
+	import { getTheme } from '$lib/design-tokens/minimal-modern-theme';
+
+	const theme = getTheme('minimal');
 
 	function handleFuneralDirectorClick() {
 		if ($user) {

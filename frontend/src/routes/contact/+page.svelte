@@ -1,6 +1,8 @@
 <script lang="ts">
-	import { Mail, Phone, MapPin, Send, CheckCircle } from 'lucide-svelte';
+	import { ArrowRight, Mail, Phone, MapPin, Send, CheckCircle } from 'lucide-svelte';
 	import { goto } from '$app/navigation';
+	import { getTheme } from '$lib/design-tokens/minimal-modern-theme';
+	import { Button, Input, Card, Toast, FAQ } from '$lib/components/minimal-modern';
 
 	let name = $state('');
 	let email = $state('');
@@ -9,6 +11,23 @@
 	let isSubmitting = $state(false);
 	let error = $state('');
 	let success = $state(false);
+
+	const theme = getTheme('minimal');
+
+	const faqItems = [
+		{ 
+			q: "How quickly can I set up a memorial?", 
+			a: "Most memorials can be set up within minutes. Our team is also available to help with setup if needed." 
+		},
+		{ 
+			q: "Do you offer technical support during services?", 
+			a: "Yes, we provide live technical support during memorial services to ensure everything runs smoothly." 
+		},
+		{ 
+			q: "Can I customize the memorial page?", 
+			a: "Absolutely! You can add photos, videos, stories, and customize the design to reflect your loved one's personality." 
+		}
+	];
 
 	async function handleSubmit(event: SubmitEvent) {
 		event.preventDefault();
@@ -68,88 +87,85 @@
 	/>
 </svelte:head>
 
-<div class="min-h-screen bg-gradient-to-b from-yellow-50 to-white">
+<div class="{theme.root} min-h-screen" style="font-family: {theme.font.body}">
 	<!-- Hero Section -->
-	<div class="px-4 py-16 text-center">
-		<div class="mx-auto max-w-4xl">
-			<h1 class="mb-6 text-4xl leading-tight font-bold text-gray-900 md:text-5xl">Get in Touch</h1>
-			<p class="mx-auto max-w-2xl text-lg text-gray-600 md:text-xl">
-				We're here to help you create meaningful memorials and support you through every step of the
-				process.
+	<section class="{theme.hero.wrap}">
+		<div class="{theme.hero.decoration}" aria-hidden="true"></div>
+		<div class="relative z-10 mx-auto max-w-4xl px-6 text-center">
+			<h1 class="text-4xl md:text-5xl font-bold {theme.hero.heading} mb-6" style="font-family: {theme.font.heading}">
+				Get in Touch
+			</h1>
+			<p class="text-lg md:text-xl {theme.hero.sub} max-w-2xl mx-auto">
+				We're here to help you create meaningful memorials and support you through every step of the process.
 			</p>
 		</div>
-	</div>
+	</section>
 
-	<div class="mx-auto max-w-6xl px-4 pb-16">
+	<div class="mx-auto max-w-6xl px-6 pb-16">
 		<div class="grid gap-12 lg:grid-cols-2">
 			<!-- Contact Form -->
-			<div class="rounded-2xl border border-yellow-200 bg-white p-8 shadow-lg">
-				<h2 class="mb-6 text-2xl font-bold text-gray-900">Send us a Message</h2>
-
+			<Card title="Send us a Message" theme="minimal" class="p-8">
 				{#if success}
-					<div class="mb-6 rounded-lg border border-green-200 bg-green-50 p-4">
-						<div class="flex items-center">
-							<CheckCircle class="mr-2 h-5 w-5 text-green-600" />
-							<p class="font-medium text-green-800">Message sent successfully!</p>
-						</div>
-						<p class="mt-1 text-sm text-green-700">
-							We'll get back to you within 24 hours. Redirecting to confirmation page...
-						</p>
-					</div>
+					<Toast 
+						theme="minimal" 
+						message="Message sent successfully! We'll get back to you within 24 hours. Redirecting to confirmation page..." 
+						type="success" 
+						class="mb-6"
+					/>
 				{/if}
 
 				{#if error}
-					<div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
-						<p class="text-red-800">{error}</p>
-					</div>
+					<Toast 
+						theme="minimal" 
+						message={error} 
+						type="error" 
+						class="mb-6"
+					/>
 				{/if}
 
 				<form onsubmit={handleSubmit} class="space-y-6">
 					<div class="grid gap-6 md:grid-cols-2">
 						<div>
-							<label for="name" class="mb-2 block text-sm font-medium text-gray-700">
+							<label for="name" class="block text-sm font-medium {theme.text} mb-2">
 								Full Name *
 							</label>
-							<input
-								id="name"
+							<Input
 								type="text"
 								bind:value={name}
 								required
-								class="w-full rounded-lg border-2 border-gray-200 px-4 py-3 transition-colors focus:border-yellow-500 focus:outline-none"
 								placeholder="Your full name"
+								theme="minimal"
 							/>
 						</div>
 						<div>
-							<label for="email" class="mb-2 block text-sm font-medium text-gray-700">
+							<label for="email" class="block text-sm font-medium {theme.text} mb-2">
 								Email Address *
 							</label>
-							<input
-								id="email"
+							<Input
 								type="email"
 								bind:value={email}
 								required
-								class="w-full rounded-lg border-2 border-gray-200 px-4 py-3 transition-colors focus:border-yellow-500 focus:outline-none"
 								placeholder="your@email.com"
+								theme="minimal"
 							/>
 						</div>
 					</div>
 
 					<div>
-						<label for="subject" class="mb-2 block text-sm font-medium text-gray-700">
+						<label for="subject" class="block text-sm font-medium {theme.text} mb-2">
 							Subject *
 						</label>
-						<input
-							id="subject"
+						<Input
 							type="text"
 							bind:value={subject}
 							required
-							class="w-full rounded-lg border-2 border-gray-200 px-4 py-3 transition-colors focus:border-yellow-500 focus:outline-none"
 							placeholder="What can we help you with?"
+							theme="minimal"
 						/>
 					</div>
 
 					<div>
-						<label for="message" class="mb-2 block text-sm font-medium text-gray-700">
+						<label for="message" class="block text-sm font-medium {theme.text} mb-2">
 							Message *
 						</label>
 						<textarea
@@ -157,110 +173,91 @@
 							bind:value={message}
 							required
 							rows="6"
-							class="resize-vertical w-full rounded-lg border-2 border-gray-200 px-4 py-3 transition-colors focus:border-yellow-500 focus:outline-none"
+							class="{theme.input} resize-vertical h-32"
 							placeholder="Tell us more about how we can help you..."
 						></textarea>
 					</div>
 
-					<button
+					<Button
 						type="submit"
+						theme="minimal"
+						class="w-full"
 						disabled={isSubmitting}
-						class="flex w-full transform items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-yellow-600 to-amber-600 px-6 py-4 font-semibold text-white shadow-lg transition-all duration-300 hover:scale-105 hover:from-yellow-700 hover:to-amber-700 disabled:transform-none disabled:cursor-not-allowed disabled:opacity-50"
 					>
 						{#if isSubmitting}
-							<div
-								class="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"
-							></div>
-							Sending...
+							Sending Message...
 						{:else}
-							<Send class="h-5 w-5" />
+							<Send class="h-5 w-5 mr-2" />
 							Send Message
 						{/if}
-					</button>
+					</Button>
 				</form>
-			</div>
+			</Card>
 
-			<!-- Contact Information -->
+			<!-- Contact Information & FAQ -->
 			<div class="space-y-8">
-				<div class="rounded-2xl border border-yellow-200 bg-white p-8 shadow-lg">
-					<h3 class="mb-6 text-xl font-bold text-gray-900">Contact Information</h3>
-					<div class="space-y-4">
+				<Card title="Contact Information" theme="minimal" class="p-8">
+					<div class="space-y-6">
 						<div class="flex items-start space-x-4">
-							<div
-								class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-yellow-100"
-							>
-								<Mail class="h-5 w-5 text-yellow-600" />
+							<div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-[#D5BA7F]/20">
+								<Mail class="h-6 w-6 text-[#D5BA7F]" />
 							</div>
 							<div>
-								<h4 class="font-semibold text-gray-900">Email</h4>
-								<p class="text-gray-600">support@tributestream.com</p>
-								<p class="text-sm text-gray-500">We typically respond within 24 hours</p>
+								<h4 class="font-semibold {theme.text}">Email</h4>
+								<p class="{theme.hero.sub}">support@tributestream.com</p>
+								<p class="text-sm opacity-70">We typically respond within 24 hours</p>
 							</div>
 						</div>
 
 						<div class="flex items-start space-x-4">
-							<div
-								class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-amber-100"
-							>
-								<Phone class="h-5 w-5 text-amber-600" />
+							<div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-[#D5BA7F]/20">
+								<Phone class="h-6 w-6 text-[#D5BA7F]" />
 							</div>
 							<div>
-								<h4 class="font-semibold text-gray-900">Phone</h4>
-								<p class="text-gray-600">1-800-TRIBUTE</p>
-								<p class="text-sm text-gray-500">Monday - Friday, 9 AM - 6 PM EST</p>
+								<h4 class="font-semibold {theme.text}">Phone</h4>
+								<p class="{theme.hero.sub}">
+									<a href="tel:407-221-5922" class="{theme.link}">407-221-5922</a>
+								</p>
+								<p class="text-sm opacity-70">Monday - Friday, 9 AM - 6 PM EST</p>
 							</div>
 						</div>
 
 						<div class="flex items-start space-x-4">
-							<div
-								class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-orange-100"
-							>
-								<MapPin class="h-5 w-5 text-orange-600" />
+							<div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-[#D5BA7F]/20">
+								<MapPin class="h-6 w-6 text-[#D5BA7F]" />
 							</div>
 							<div>
-								<h4 class="font-semibold text-gray-900">Address</h4>
-								<p class="text-gray-600">
-									TributeStream<br />
-									123 Memorial Way<br />
-									Suite 100<br />
-									Anytown, ST 12345
+								<h4 class="font-semibold {theme.text}">Service Area</h4>
+								<p class="{theme.hero.sub}">
+									Central Florida<br />
+									Orlando, Winter Park, Kissimmee<br />
+									and surrounding areas
 								</p>
 							</div>
 						</div>
 					</div>
-				</div>
+				</Card>
 
 				<!-- FAQ Section -->
-				<div class="rounded-2xl border border-yellow-200 bg-white p-8 shadow-lg">
-					<h3 class="mb-6 text-xl font-bold text-gray-900">Frequently Asked Questions</h3>
-					<div class="space-y-4">
-						<div>
-							<h4 class="mb-2 font-semibold text-gray-900">How quickly can I set up a memorial?</h4>
-							<p class="text-sm text-gray-600">
-								Most memorials can be set up within minutes. Our team is also available to help with
-								setup if needed.
-							</p>
-						</div>
+				<Card title="Frequently Asked Questions" theme="minimal" class="p-8">
+					<FAQ theme="minimal" items={faqItems} />
+				</Card>
 
-						<div>
-							<h4 class="mb-2 font-semibold text-gray-900">
-								Do you offer technical support during services?
-							</h4>
-							<p class="text-sm text-gray-600">
-								Yes, we provide live technical support during memorial services to ensure everything
-								runs smoothly.
-							</p>
+				<!-- Emergency Contact -->
+				<Card title="Emergency Support" theme="minimal" class="p-6 bg-amber-50 border-amber-200">
+					<div class="text-center">
+						<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-100 flex items-center justify-center">
+							<Phone class="h-8 w-8 text-amber-600" />
 						</div>
-
-						<div>
-							<h4 class="mb-2 font-semibold text-gray-900">Can I customize the memorial page?</h4>
-							<p class="text-sm text-gray-600">
-								Absolutely! You can add photos, videos, stories, and customize the design to reflect
-								your loved one's personality.
-							</p>
-						</div>
+						<h4 class="font-semibold {theme.text} mb-2">Need immediate assistance?</h4>
+						<p class="text-sm {theme.hero.sub} mb-4">
+							For urgent technical support during a service, call our emergency line:
+						</p>
+						<Button theme="minimal" class="bg-amber-600 text-white hover:bg-amber-700">
+							<a href="tel:407-221-5922" class="no-underline text-white">Call Emergency Line</a>
+						</Button>
 					</div>
-				</div>
+				</Card>
 			</div>
 		</div>
 	</div>
