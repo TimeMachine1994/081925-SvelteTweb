@@ -87,7 +87,21 @@
 	onMount(() => {
 		console.log('📹 Homepage mounted');
 		if (video) {
+			console.log('📹 Video element found, setting up...');
 			video.playbackRate = 0.5;
+			
+			// Force play the video (some browsers need this)
+			video.play().then(() => {
+				console.log('📹 Background video started playing');
+			}).catch((error) => {
+				console.error('📹 Background video autoplay failed:', error);
+				// Fallback: try to play on user interaction
+				document.addEventListener('click', () => {
+					video.play().catch(e => console.error('📹 Manual play failed:', e));
+				}, { once: true });
+			});
+		} else {
+			console.error('📹 Video element not found');
 		}
 	});
 
@@ -134,13 +148,33 @@
 
 <div class="bg-white text-gray-900" style="font-family: {theme.font.body}">
 	<!-- Hero Section with Dual-Path CTAs -->
-	<section class="bg-gradient-to-br from-slate-50 to-amber-50 min-h-[90vh] flex items-center">
+	<section class="relative min-h-[90vh] flex items-center overflow-hidden">
+		<!-- Video Background -->
+		<video 
+			bind:this={video}
+			class="absolute inset-0 w-full h-full object-cover z-0"
+			autoplay 
+			muted 
+			loop 
+			playsinline
+			preload="auto"
+			onloadstart={() => console.log('Video loading started')}
+			oncanplay={() => console.log('Video can play')}
+			onerror={(e) => console.error('Video error:', e)}
+		>
+			<source src="https://firebasestorage.googleapis.com/v0/b/fir-tweb.firebasestorage.app/o/tributestream_advertisment%20(720p)%20(1).mp4?alt=media&token=301d3835-f64a-4ba3-8619-343600cb1117" type="video/mp4">
+			Your browser does not support the video tag.
+		</video>
+		
+		<!-- Dark overlay for text readability -->
+		<div class="absolute inset-0 bg-black bg-opacity-50 z-5"></div>
+		
 		<div class="relative z-10 mx-auto max-w-7xl px-6">
 			<div class="text-center mb-12">
-				<h1 class="text-4xl md:text-6xl font-bold text-slate-900 mb-6" style="font-family: {theme.font.heading}">
+				<h1 class="text-4xl md:text-6xl font-bold text-white mb-6" style="font-family: {theme.font.heading}">
 					Beautiful, reliable memorial livestreams
 				</h1>
-				<p class="text-xl md:text-2xl text-slate-700 max-w-3xl mx-auto">
+				<p class="text-xl md:text-2xl text-white max-w-3xl mx-auto">
 					Bring everyone together—at church, graveside, or from home
 				</p>
 			</div>
@@ -149,7 +183,7 @@
 			<div class="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto mb-16">
 				<!-- Families CTA Cluster -->
 				<div class="text-center">
-					<h3 class="text-2xl font-semibold text-slate-900 mb-6">For Families</h3>
+					<h3 class="text-2xl font-semibold text-white mb-6">For Families</h3>
 					<div class="space-y-4">
 						<div class="flex gap-2">
 							<Input
@@ -159,7 +193,7 @@
 								theme="minimal"
 								class="flex-1"
 							/>
-							<Button theme="minimal" onclick={handleCreateTribute} class="bg-[#D5BA7F] text-white hover:bg-[#C5AA6F]">
+							<Button theme="minimal" onclick={handleCreateTribute} class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F]">
 								Create Memorial
 							</Button>
 						</div>
@@ -180,7 +214,7 @@
 
 				<!-- Directors CTA Cluster -->
 				<div class="text-center">
-					<h3 class="text-2xl font-semibold text-slate-900 mb-6">For Funeral Directors</h3>
+					<h3 class="text-2xl font-semibold text-white mb-6">For Funeral Directors</h3>
 					<div class="space-y-4">
 						<Button theme="minimal" onclick={handleBookDemo} class="w-full bg-slate-900 text-white hover:bg-slate-800">
 							<Phone class="h-4 w-4 mr-2" />
@@ -196,7 +230,7 @@
 			<!-- Trust Mini-Strip -->
 			<div class="flex justify-center items-center gap-8 flex-wrap">
 				{#each trustBadges as badge}
-					<div class="flex items-center gap-2 text-sm text-slate-600">
+					<div class="flex items-center gap-2 text-sm text-white">
 						<svelte:component this={badge.icon} class="h-5 w-5 text-[#D5BA7F]" />
 						<span>{badge.text}</span>
 					</div>
@@ -286,12 +320,20 @@
 		<div class="max-w-6xl mx-auto px-6">
 			<div class="grid md:grid-cols-2 gap-12 items-center">
 				<div>
-					<VideoPlayer 
-						theme="minimal"
-						title="Memorial Service Demo"
-						poster="https://via.placeholder.com/640x360/D5BA7F/FFFFFF?text=Memorial+Service+Demo"
-						muted={true}
-					/>
+					<div class="video-player-gold rounded-lg overflow-hidden shadow-lg">
+						<video 
+							class="w-full aspect-video"
+							controls
+							preload="metadata"
+							poster="https://via.placeholder.com/640x360/D5BA7F/FFFFFF?text=TributeStream+About+Us"
+							onloadstart={() => console.log('About Us video loading started')}
+							oncanplay={() => console.log('About Us video can play')}
+							onerror={(e) => console.error('About Us video error:', e)}
+						>
+							<source src="https://firebasestorage.googleapis.com/v0/b/fir-tweb.firebasestorage.app/o/tributestream_-_about_us%20(1080p).mp4?alt=media&token=54cb483c-aa04-4b60-8f3d-15a3085a365a" type="video/mp4">
+							Your browser does not support the video tag.
+						</video>
+					</div>
 				</div>
 				<div>
 					<h3 class="text-2xl font-bold text-slate-900 mb-6">Professional Streaming Technology</h3>
@@ -379,3 +421,56 @@
 		</div>
 	</section>
 </div>
+
+<style>
+	/* Gold video player controls */
+	:global(.video-player-gold video) {
+		background-color: #000;
+	}
+
+	/* Webkit (Chrome/Safari) video controls styling */
+	:global(.video-player-gold video::-webkit-media-controls-panel) {
+		background-color: rgba(213, 186, 127, 0.9);
+	}
+
+	:global(.video-player-gold video::-webkit-media-controls-play-button) {
+		background-color: #D5BA7F;
+		border-radius: 50%;
+		filter: invert(0);
+	}
+
+	:global(.video-player-gold video::-webkit-media-controls-mute-button) {
+		background-color: #D5BA7F;
+		border-radius: 4px;
+		filter: invert(0);
+	}
+
+	:global(.video-player-gold video::-webkit-media-controls-fullscreen-button) {
+		background-color: #D5BA7F;
+		border-radius: 4px;
+		filter: invert(0);
+	}
+
+	:global(.video-player-gold video::-webkit-media-controls-timeline) {
+		background-color: rgba(213, 186, 127, 0.3);
+		border-radius: 2px;
+	}
+
+	:global(.video-player-gold video::-webkit-media-controls-current-time-display),
+	:global(.video-player-gold video::-webkit-media-controls-time-remaining-display) {
+		color: #D5BA7F;
+		text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+		font-weight: bold;
+	}
+
+	/* Firefox video controls */
+	:global(.video-player-gold video::-moz-media-controls) {
+		background-color: rgba(213, 186, 127, 0.9);
+	}
+
+	/* General video styling */
+	:global(.video-player-gold video:focus) {
+		outline: 2px solid #D5BA7F;
+		outline-offset: 2px;
+	}
+</style>

@@ -80,14 +80,14 @@
 				<li>
 					<Button
 						theme="minimal"
-						class="bg-[#D5BA7F] text-white hover:bg-[#C5AA6F]"
+						class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F]"
 					>
 						{#if $user}
-							<a href={getUserPortalLink($user)} class="no-underline text-white">
+							<a href={getUserPortalLink($user)} class="no-underline text-black">
 								My Portal
 							</a>
 						{:else}
-							<a href="/register/loved-one" class="no-underline text-white">
+							<a href="/register/loved-one" class="no-underline text-black">
 								Create Memorial
 							</a>
 						{/if}
@@ -133,15 +133,15 @@
 				<li class="pt-4">
 					<Button
 						theme="minimal"
-						class="w-full bg-[#D5BA7F] text-white hover:bg-[#C5AA6F]"
+						class="w-full bg-[#D5BA7F] text-black hover:bg-[#C5AA6F]"
 						onclick={closeMobileMenu}
 					>
 						{#if $user}
-							<a href={getUserPortalLink($user)} class="no-underline text-white">
+							<a href={getUserPortalLink($user)} class="no-underline text-black">
 								My Portal
 							</a>
 						{:else}
-							<a href="/register/loved-one" class="no-underline text-white">
+							<a href="/register/loved-one" class="no-underline text-black">
 								Create Memorial
 							</a>
 						{/if}

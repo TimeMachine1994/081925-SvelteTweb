@@ -14,6 +14,20 @@ service firebase.storage {
              firestore.get(/databases/(default)/documents/invitations/$(invitationId)).data.status == 'accepted';
     }
 
+    // Public videos (homepage background, about us, etc.)
+    // - Publicly readable for marketing/promotional content
+    match /tributestream_advertisment{allPaths=**} {
+      allow read;
+    }
+    
+    match /tributestream_-_about_us{allPaths=**} {
+      allow read;
+    }
+    
+    match /Background.jpg {
+      allow read;
+    }
+
     // Memorial photos:
     // - Publicly readable.
     // - Writable by the memorial owner OR an invited family member.

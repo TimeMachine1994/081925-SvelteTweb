@@ -1,23 +1,39 @@
 #!/usr/bin/env node
 
-// Create a test memorial for testing the streams page
-import { initializeApp, getApps } from 'firebase-admin/app';
+// List all memorials in the production Firebase database
+import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+import dotenv from 'dotenv';
 
-// Initialize Firebase Admin for emulators
+// Load environment variables
+dotenv.config();
+
+// Initialize Firebase Admin for PRODUCTION
 let adminApp;
 if (getApps().length === 0) {
-	console.log('🔥 Initializing Firebase Admin for emulators...');
+	console.log('🔥 Initializing Firebase Admin for PRODUCTION...');
 
-	// Set emulator environment variables
-	process.env.FIREBASE_AUTH_EMULATOR_HOST = '127.0.0.1:9099';
-	process.env.FIRESTORE_EMULATOR_HOST = '127.0.0.1:8080';
-
-	adminApp = initializeApp({
-		projectId: 'fir-tweb' // Use the emulator project ID
-	});
-
-	console.log('✅ Firebase Admin initialized');
+	try {
+		const serviceAccountJson = process.env.PRIVATE_FIREBASE_SERVICE_ACCOUNT_KEY;
+		const storageBucket = process.env.PRIVATE_FIREBASE_STORAGE_BUCKET;
+		
+		if (serviceAccountJson) {
+			const serviceAccount = JSON.parse(serviceAccountJson);
+			adminApp = initializeApp({
+				credential: cert(serviceAccount),
+				storageBucket: storageBucket
+			});
+			console.log('✅ Firebase Admin initialized with service account');
+			console.log('📋 Project ID:', serviceAccount.project_id);
+			console.log('🪣 Storage Bucket:', storageBucket);
+		} else {
+			console.error('❌ No service account key found in environment');
+			process.exit(1);
+		}
+	} catch (error) {
+		console.error('❌ Firebase initialization error:', error);
+		process.exit(1);
+	}
 } else {
 	adminApp = getApps()[0];
 	console.log('✅ Using existing Firebase Admin app');
@@ -25,66 +41,144 @@ if (getApps().length === 0) {
 
 const adminDb = getFirestore(adminApp);
 
-async function createTestMemorial() {
-	console.log('🎬 Creating test memorial for streams testing...');
-
-	const testMemorialId = 'test-memorial-streams';
-	const testMemorial = {
-		id: testMemorialId,
-		lovedOneName: 'John Doe',
-		fullSlug: 'john-doe-memorial',
-		ownerUid: 'owner-test-uid', // Links to our test owner account
-		funeralDirectorUid: 'director-test-uid', // Links to our test funeral director
-		createdAt: new Date(),
-		updatedAt: new Date(),
-		isPublic: true,
-		services: {
-			main: {
-				location: {
-					name: 'Memorial Chapel',
-					address: '123 Memorial Drive, Orlando, FL 32801',
-					isUnknown: false
-				},
-				time: {
-					date: '2024-12-25',
-					time: '14:00',
-					isUnknown: false
-				},
-				hours: 2
-			},
-			additional: []
-		},
-		// Add some basic memorial info
-		birthDate: '1950-01-15',
-		deathDate: '2024-10-01',
-		biography: 'A loving father and grandfather who will be deeply missed.',
-		photos: [],
-		followers: [],
-		customStreams: {} // For our streams system
-	};
-
+async function listAllMemorials() {
 	try {
-		await adminDb.collection('memorials').doc(testMemorialId).set(testMemorial);
-		console.log('✅ Test memorial created successfully!');
-		console.log(`📍 Memorial ID: ${testMemorialId}`);
-		console.log(`👤 Owner: owner@test.com (owner-test-uid)`);
-		console.log(`🏢 Funeral Director: director@test.com (director-test-uid)`);
-		console.log(`🔗 Test URL: http://localhost:5173/memorials/${testMemorialId}/streams`);
-		console.log('\n🎯 To test:');
-		console.log('1. Login as owner@test.com or director@test.com (password: test123)');
-		console.log('2. Navigate to the streams URL above');
-		console.log('3. You should see the streams management page');
+		console.log('\n📋 Querying memorials collection in PRODUCTION Firebase...');
+		
+		// Get all memorials
+		const snapshot = await adminDb.collection('memorials').get();
+		
+		console.log(`\n🎯 Found ${snapshot.docs.length} memorials in collection:\n`);
+		
+		if (snapshot.empty) {
+			console.log('📭 No memorials found in the collection.');
+			console.log('💡 This explains why "celebration-of-life-for-janet-pusey" returns 404.');
+			return [];
+		}
+		
+		const memorials = [];
+		
+		snapshot.docs.forEach((doc, index) => {
+			const data = doc.data();
+			const memorial = {
+				id: doc.id,
+				...data
+			};
+			
+			memorials.push(memorial);
+			
+			console.log(`${index + 1}. Memorial ID: ${doc.id}`);
+			console.log(`   Name: ${data.lovedOneName || 'No name'}`);
+			console.log(`   Slug: ${data.slug || 'No slug'}`);
+			console.log(`   Full Slug: ${data.fullSlug || 'No fullSlug'}`);
+			console.log(`   Public: ${data.isPublic ? 'Yes' : 'No'}`);
+			console.log(`   Created: ${data.createdAt ? (data.createdAt.toDate ? data.createdAt.toDate().toISOString() : data.createdAt) : 'Unknown'}`);
+			console.log(`   Legacy: ${data.custom_html ? 'Yes' : 'No'}`);
+			console.log(`   Migration: ${data.createdByUserId === 'MIGRATION_SCRIPT' ? 'Yes' : 'No'}`);
+			console.log(`   Owner: ${data.ownerUid || data.createdBy || 'Unknown'}`);
+			console.log(`   Fields: ${Object.keys(data).length} total`);
+			console.log('   ---');
+		});
+		
+		// Check specifically for janet-pusey related memorials
+		console.log('\n🔍 Searching for Janet Pusey related memorials...');
+		const janetMemorials = memorials.filter(m => 
+			(m.lovedOneName && m.lovedOneName.toLowerCase().includes('janet')) ||
+			(m.slug && m.slug.includes('janet')) ||
+			(m.fullSlug && m.fullSlug.includes('janet'))
+		);
+		
+		// Also search for the exact fullSlug
+		console.log('\n🎯 Searching for EXACT fullSlug: "celebration-of-life-for-janet-pusey"...');
+		const exactMatch = memorials.find(m => m.fullSlug === 'celebration-of-life-for-janet-pusey');
+		
+		if (exactMatch) {
+			console.log('✅ FOUND EXACT MATCH:');
+			console.log(`   ID: ${exactMatch.id}`);
+			console.log(`   Name: ${exactMatch.lovedOneName}`);
+			console.log(`   FullSlug: ${exactMatch.fullSlug}`);
+			console.log(`   Public: ${exactMatch.isPublic}`);
+			console.log(`   Legacy: ${exactMatch.custom_html ? 'Yes' : 'No'}`);
+			console.log(`   Migration: ${exactMatch.createdByUserId === 'MIGRATION_SCRIPT' ? 'Yes' : 'No'}`);
+		} else {
+			console.log('❌ NO EXACT MATCH found for "celebration-of-life-for-janet-pusey"');
+		}
+		
+		if (janetMemorials.length > 0) {
+			console.log(`\n✅ Found ${janetMemorials.length} Janet-related memorials:`);
+			janetMemorials.forEach(m => {
+				console.log(`   - ${m.lovedOneName} (${m.fullSlug}) - Public: ${m.isPublic}`);
+			});
+		} else {
+			console.log('\n❌ No Janet-related memorials found at all.');
+		}
+		
+		// Direct query test
+		console.log('\n🔍 Testing DIRECT query for the exact fullSlug...');
+		try {
+			const directQuery = await adminDb.collection('memorials')
+				.where('fullSlug', '==', 'celebration-of-life-for-janet-pusey')
+				.get();
+			console.log(`   Direct query result: ${directQuery.docs.length} documents found`);
+			
+			if (!directQuery.empty) {
+				const doc = directQuery.docs[0];
+				const data = doc.data();
+				console.log('   ✅ DIRECT QUERY SUCCESS:');
+				console.log(`      ID: ${doc.id}`);
+				console.log(`      Name: ${data.lovedOneName}`);
+				console.log(`      FullSlug: ${data.fullSlug}`);
+				console.log(`      Public: ${data.isPublic}`);
+				console.log(`      Created: ${data.createdAt ? data.createdAt.toDate().toISOString() : 'Unknown'}`);
+			}
+		} catch (directError) {
+			console.error('   ❌ Direct query failed:', directError.message);
+		}
+		
+		// Check for memorials with fullSlug field
+		console.log('\n📊 Memorial fullSlug analysis:');
+		const withFullSlug = memorials.filter(m => m.fullSlug);
+		const withoutFullSlug = memorials.filter(m => !m.fullSlug);
+		
+		console.log(`   Memorials with fullSlug: ${withFullSlug.length}`);
+		console.log(`   Memorials without fullSlug: ${withoutFullSlug.length}`);
+		
+		if (withFullSlug.length > 0) {
+			console.log('\n   Available fullSlugs you can test:');
+			withFullSlug.forEach(m => {
+				console.log(`   - http://localhost:5173/${m.fullSlug} (${m.lovedOneName})`);
+			});
+		}
+		
+		return memorials;
+		
 	} catch (error) {
-		console.error('❌ Error creating test memorial:', error);
+		console.error('❌ Error listing memorials:', error);
+		
+		if (error.code === 'permission-denied') {
+			console.error('🔒 Permission denied - check Firebase rules and service account permissions');
+		} else if (error.code === 'unavailable') {
+			console.error('🌐 Firebase unavailable - check internet connection');
+		}
+		
+		throw error;
 	}
 }
 
-createTestMemorial()
-	.then(() => {
-		console.log('\n🎉 Test memorial ready for streams testing!');
+listAllMemorials()
+	.then((memorials) => {
+		console.log('\n🎉 Memorial listing completed!');
+		console.log(`📊 Total memorials: ${memorials.length}`);
+		
+		if (memorials.length === 0) {
+			console.log('\n💡 Next steps:');
+			console.log('   1. Create test memorials using: node src/scripts/create-test-data.js');
+			console.log('   2. Or create the specific "janet-pusey" memorial for testing');
+		}
+		
 		process.exit(0);
 	})
 	.catch((error) => {
-		console.error('❌ Setup failed:', error);
+		console.error('💥 Script failed:', error);
 		process.exit(1);
 	});
