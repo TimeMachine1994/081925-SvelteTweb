@@ -2,7 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { getTheme } from '$lib/design-tokens/minimal-modern-theme';
 	import { Button, Input, Card, Stats, FAQ, Comparison, Steps, Timeline, VideoPlayer } from '$lib/components/minimal-modern';
-	import { Star, Shield, Users, Play, Search, Phone, Clock, Pause, Volume2, Maximize } from 'lucide-svelte';
+	import { Star, Shield, Users, Play, Search, Phone, Clock, Pause, Volume2, Maximize, CheckCircle } from 'lucide-svelte';
 
 	let lovedOneName = $state('');
 	let searchQuery = $state('');
@@ -65,26 +65,26 @@
 	const packages = [
 		{ 
 			name: "DIY", 
-			price: "$395", 
+			description: "Perfect for intimate services",
 			features: ["2 hour broadcast", "Private link", "HD recording", "Mobile ready"],
 			popular: false,
-			familyCta: "Start Online",
+			familyCta: "Select Package",
 			directorCta: "Get Quote"
 		},
 		{ 
 			name: "Standard", 
-			price: "$895", 
+			description: "Most popular choice",
 			popular: true,
 			features: ["Multi-camera setup", "On-site technician", "Live support", "Custom graphics"],
-			familyCta: "Start Online",
+			familyCta: "Select Package",
 			directorCta: "Get Quote"
 		},
 		{ 
 			name: "Premium", 
-			price: "$1,695", 
+			description: "Complete professional service",
 			features: ["3+ locations", "Wireless audio", "Professional editing", "Extended archive"],
 			popular: false,
-			familyCta: "Start Online",
+			familyCta: "Select Package",
 			directorCta: "Get Quote"
 		}
 	];
@@ -122,6 +122,7 @@
 
 	// Video player functions
 	function togglePlay() {
+		if (!video) return;
 		if (video.paused) {
 			video.play();
 			isPlaying = true;
@@ -132,14 +133,17 @@
 	}
 
 	function handleTimeUpdate() {
+		if (!video) return;
 		currentTime = video.currentTime;
 	}
 
 	function handleLoadedMetadata() {
+		if (!video) return;
 		duration = video.duration;
 	}
 
 	function handleSeek(event: Event) {
+		if (!video) return;
 		const target = event.target as HTMLInputElement;
 		const time = (parseFloat(target.value) / 100) * duration;
 		video.currentTime = time;
@@ -147,21 +151,31 @@
 	}
 
 	function handleVolumeChange(event: Event) {
+		if (!video) return;
 		const target = event.target as HTMLInputElement;
 		volume = parseFloat(target.value) / 100;
 		video.volume = volume;
 	}
 
 	function toggleFullscreen() {
-		if (video.requestFullscreen) {
-			video.requestFullscreen();
-		}
+		if (!video || !video.requestFullscreen) return;
+		video.requestFullscreen();
 	}
 
 	function formatTime(seconds: number): string {
 		const mins = Math.floor(seconds / 60);
 		const secs = Math.floor(seconds % 60);
 		return `${mins}:${secs.toString().padStart(2, '0')}`;
+	}
+
+	function handlePackageSelection(packageName: string) {
+		console.log('📦 Package selected:', packageName);
+		const params = new URLSearchParams();
+		params.set('package', packageName.toLowerCase());
+		if (lovedOneName.trim()) {
+			params.set('name', lovedOneName.trim());
+		}
+		goto(`/register/loved-one?${params.toString()}`);
 	}
 </script>
 
@@ -328,12 +342,17 @@
 		<div class="max-w-6xl mx-auto px-6">
 			<div class="grid md:grid-cols-2 gap-12 items-center">
 				<div>
-					<div class="video-player-gold rounded-lg overflow-hidden shadow-lg">
+					<div class="video-player-custom rounded-lg overflow-hidden shadow-lg bg-black">
+						<!-- Video Element -->
 						<video 
-							class="w-full aspect-video"
-							controls
+							bind:this={video}
+							class="w-full aspect-video bg-black"
 							preload="metadata"
 							poster="https://via.placeholder.com/640x360/D5BA7F/FFFFFF?text=TributeStream+About+Us"
+							ontimeupdate={handleTimeUpdate}
+							onloadedmetadata={handleLoadedMetadata}
+							onplay={() => isPlaying = true}
+							onpause={() => isPlaying = false}
 							onloadstart={() => console.log('About Us video loading started')}
 							oncanplay={() => console.log('About Us video can play')}
 							onerror={(e) => console.error('About Us video error:', e)}
@@ -342,6 +361,66 @@
 							<track kind="captions" src="" srclang="en" label="English captions" default>
 							Your browser does not support the video tag.
 						</video>
+						
+						<!-- Custom Control Bar -->
+						<div class="bg-gradient-to-r from-[#D5BA7F] to-[#C5AA6F] p-4 border-t border-[#B59A5F]">
+							<div class="flex items-center space-x-4">
+								<!-- Play/Pause Button -->
+								<button 
+									onclick={togglePlay}
+									class="flex items-center justify-center w-12 h-12 bg-black text-[#D5BA7F] rounded-full hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl"
+								>
+									{#if isPlaying}
+										<Pause class="h-6 w-6" />
+									{:else}
+										<Play class="h-6 w-6 ml-0.5" />
+									{/if}
+								</button>
+								
+								<!-- Progress Bar -->
+								<div class="flex-1 flex items-center space-x-3">
+									<span class="text-black text-sm font-bold min-w-[45px] tabular-nums">
+										{formatTime(currentTime)}
+									</span>
+									<div class="flex-1 relative">
+										<input
+											type="range"
+											min="0"
+											max="100"
+											value={duration ? (currentTime / duration) * 100 : 0}
+											oninput={handleSeek}
+											class="w-full progress-slider"
+										/>
+									</div>
+									<span class="text-black text-sm font-bold min-w-[45px] tabular-nums">
+										{formatTime(duration)}
+									</span>
+								</div>
+								
+								<!-- Volume Control -->
+								<div class="flex items-center space-x-2">
+									<Volume2 class="h-5 w-5 text-black" />
+									<div class="w-24">
+										<input
+											type="range"
+											min="0"
+											max="100"
+											value={volume * 100}
+											oninput={handleVolumeChange}
+											class="w-full volume-slider"
+										/>
+									</div>
+								</div>
+								
+								<!-- Fullscreen Button -->
+								<button 
+									onclick={toggleFullscreen}
+									class="flex items-center justify-center w-10 h-10 text-black hover:bg-black/10 rounded-lg transition-colors"
+								>
+									<Maximize class="h-5 w-5" />
+								</button>
+							</div>
+						</div>
 					</div>
 				</div>
 				<div>
@@ -382,7 +461,35 @@
 					Professional memorial streaming options for every family's needs
 				</p>
 			</div>
-			<Comparison theme="minimal" tiers={packages} />
+			<!-- Custom Package Cards -->
+			<div class="grid md:grid-cols-3 gap-8">
+				{#each packages as pkg}
+					<Card theme="minimal" class="relative p-8 text-center {pkg.popular ? 'ring-2 ring-[#D5BA7F] ring-offset-2' : ''}">
+						{#if pkg.popular}
+							<div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#D5BA7F] text-black px-4 py-1 rounded-full text-sm font-semibold">
+								Most Popular
+							</div>
+						{/if}
+						<h3 class="text-2xl font-bold text-slate-900 mb-2">{pkg.name}</h3>
+						<p class="text-slate-600 mb-6">{pkg.description}</p>
+						<ul class="space-y-3 mb-8">
+							{#each pkg.features as feature}
+								<li class="flex items-center justify-center space-x-2">
+									<CheckCircle class="h-4 w-4 text-[#D5BA7F] flex-shrink-0" />
+									<span class="text-slate-700">{feature}</span>
+								</li>
+							{/each}
+						</ul>
+						<Button 
+							theme="minimal" 
+							class="w-full {pkg.popular ? 'bg-[#D5BA7F] text-black hover:bg-[#C5AA6F]' : ''}"
+							onclick={() => handlePackageSelection(pkg.name)}
+						>
+							{pkg.familyCta}
+						</Button>
+					</Card>
+				{/each}
+			</div>
 		</div>
 	</section>
 
@@ -411,7 +518,7 @@
 	</section>
 
 	<!-- FAQ Section -->
-	<section class="py-16 bg-slate-50">
+	<section id="faq" class="py-16 bg-slate-50">
 		<div class="max-w-4xl mx-auto px-6">
 			<div class="text-center mb-12">
 				<h2 class="text-3xl font-bold text-slate-900" style="font-family: {theme.font.heading}">
@@ -432,54 +539,125 @@
 </div>
 
 <style>
-	/* Gold video player controls */
-	:global(.video-player-gold video) {
+	/* Custom video player styling */
+	:global(.video-player-custom video) {
 		background-color: #000;
 	}
 
-	/* Webkit (Chrome/Safari) video controls styling */
-	:global(.video-player-gold video::-webkit-media-controls-panel) {
-		background-color: rgba(213, 186, 127, 0.9);
-	}
-
-	:global(.video-player-gold video::-webkit-media-controls-play-button) {
-		background-color: #D5BA7F;
-		border-radius: 50%;
-		filter: invert(0);
-	}
-
-	:global(.video-player-gold video::-webkit-media-controls-mute-button) {
-		background-color: #D5BA7F;
-		border-radius: 4px;
-		filter: invert(0);
-	}
-
-	:global(.video-player-gold video::-webkit-media-controls-fullscreen-button) {
-		background-color: #D5BA7F;
-		border-radius: 4px;
-		filter: invert(0);
-	}
-
-	:global(.video-player-gold video::-webkit-media-controls-timeline) {
-		background-color: rgba(213, 186, 127, 0.3);
-		border-radius: 2px;
-	}
-
-	:global(.video-player-gold video::-webkit-media-controls-current-time-display),
-	:global(.video-player-gold video::-webkit-media-controls-time-remaining-display) {
-		color: #D5BA7F;
-		text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
-		font-weight: bold;
-	}
-
-	/* Firefox video controls */
-	:global(.video-player-gold video::-moz-media-controls) {
-		background-color: rgba(213, 186, 127, 0.9);
-	}
-
-	/* General video styling */
-	:global(.video-player-gold video:focus) {
+	:global(.video-player-custom video:focus) {
 		outline: 2px solid #D5BA7F;
 		outline-offset: 2px;
+	}
+
+	/* Progress Slider Styling */
+	:global(.progress-slider) {
+		-webkit-appearance: none;
+		appearance: none;
+		height: 6px;
+		background: rgba(0, 0, 0, 0.3);
+		border-radius: 3px;
+		outline: none;
+		cursor: pointer;
+	}
+
+	:global(.progress-slider::-webkit-slider-thumb) {
+		-webkit-appearance: none;
+		appearance: none;
+		width: 18px;
+		height: 18px;
+		border-radius: 50%;
+		background: #000;
+		border: 3px solid #D5BA7F;
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+		cursor: pointer;
+		margin-top: -6px;
+		transition: all 0.2s ease;
+	}
+
+	:global(.progress-slider::-webkit-slider-thumb:hover) {
+		transform: scale(1.15);
+		box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+	}
+
+	:global(.progress-slider::-moz-range-thumb) {
+		width: 18px;
+		height: 18px;
+		border-radius: 50%;
+		background: #000;
+		border: 3px solid #D5BA7F;
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+		cursor: pointer;
+		-moz-appearance: none;
+		transition: all 0.2s ease;
+	}
+
+	:global(.progress-slider::-moz-range-track) {
+		height: 6px;
+		background: rgba(0, 0, 0, 0.3);
+		border-radius: 3px;
+		border: none;
+	}
+
+	/* Volume Slider Styling */
+	:global(.volume-slider) {
+		-webkit-appearance: none;
+		appearance: none;
+		height: 4px;
+		background: rgba(0, 0, 0, 0.3);
+		border-radius: 2px;
+		outline: none;
+		cursor: pointer;
+	}
+
+	:global(.volume-slider::-webkit-slider-thumb) {
+		-webkit-appearance: none;
+		appearance: none;
+		width: 14px;
+		height: 14px;
+		border-radius: 50%;
+		background: #000;
+		border: 2px solid #D5BA7F;
+		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+		cursor: pointer;
+		margin-top: -5px; /* Centers 14px thumb on 4px track */
+		transition: all 0.2s ease;
+	}
+
+	:global(.volume-slider::-webkit-slider-thumb:hover) {
+		transform: scale(1.1);
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+	}
+
+	:global(.volume-slider::-moz-range-thumb) {
+		width: 14px;
+		height: 14px;
+		border-radius: 50%;
+		background: #000;
+		border: 2px solid #D5BA7F;
+		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+		cursor: pointer;
+		-moz-appearance: none;
+		transition: all 0.2s ease;
+		margin-top: 0;
+	}
+
+	:global(.volume-slider::-moz-range-track) {
+		height: 4px;
+		background: rgba(0, 0, 0, 0.3);
+		border-radius: 2px;
+		border: none;
+	}
+
+	/* Progress bar fill effect */
+	:global(.progress-slider::-webkit-slider-runnable-track) {
+		background: linear-gradient(
+			to right,
+			#000 0%,
+			#000 var(--progress, 0%),
+			rgba(0, 0, 0, 0.2) var(--progress, 0%),
+			rgba(0, 0, 0, 0.2) 100%
+		);
+		height: 8px;
+		border-radius: 4px;
 	}
 </style>

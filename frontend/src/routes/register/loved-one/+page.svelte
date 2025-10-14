@@ -3,6 +3,7 @@
 	import LiveUrlPreview from '$lib/components/LiveUrlPreview.svelte';
 	import { page } from '$app/stores';
 	import { Button } from '$lib/ui';
+	import { CheckCircle, Package } from 'lucide-svelte';
 
 	console.log('🎯 Loved-One Registration form initializing');
 
@@ -10,6 +11,7 @@
 
 	// Pre-fill lovedOneName from URL parameter
 	let lovedOneName = $state($page.url.searchParams.get('name') || '');
+	let selectedPackage = $state($page.url.searchParams.get('package') || '');
 	let name = $state('');
 	let email = $state('');
 	let phone = $state('');
@@ -57,6 +59,28 @@
 				Enter your loved one's name to create a beautiful memorial page.
 			</p>
 		</div>
+
+		<!-- Package Selection Banner -->
+		{#if selectedPackage}
+			<div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+				<div class="flex items-center space-x-3">
+					<div class="flex-shrink-0">
+						<CheckCircle class="h-6 w-6 text-green-600" />
+					</div>
+					<div class="flex-1">
+						<h3 class="text-sm font-semibold text-green-800 capitalize">
+							{selectedPackage} Package Selected
+						</h3>
+						<p class="text-sm text-green-700">
+							Your package has been selected. Create a memorial to continue.
+						</p>
+					</div>
+					<div class="flex-shrink-0">
+						<Package class="h-5 w-5 text-green-600" />
+					</div>
+				</div>
+			</div>
+		{/if}
 
 		<form method="POST" use:enhance onsubmit={handleSubmit}>
 			<section class="form-section">
