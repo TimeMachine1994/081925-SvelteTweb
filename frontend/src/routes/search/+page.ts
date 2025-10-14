@@ -1,14 +1,28 @@
-import { algoliasearch } from 'algoliasearch';
-import { PUBLIC_ALGOLIA_APP_ID, PUBLIC_ALGOLIA_SEARCH_ONLY_API_KEY } from '$env/static/public';
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = ({ url }) => {
-	const client = algoliasearch(PUBLIC_ALGOLIA_APP_ID, PUBLIC_ALGOLIA_SEARCH_ONLY_API_KEY);
+export const load: PageLoad = async ({ url, fetch }) => {
 	const query = url.searchParams.get('q') || '';
 
-	return {
-		query,
-		client,
-		indexName: 'memorials'
-	};
+	try {
+		// Use server-side API to load memorials
+		const response = await fetch('/api/memorials/search');
+		
+		if (!response.ok) {
+			throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+		}
+		
+		const data = await response.json();
+		const memorials = data.memorials || [];
+
+		return {
+			query,
+			memorials
+		};
+	} catch (error) {
+		console.error('Error loading memorials:', error);
+		return {
+			query,
+			memorials: []
+		};
+	}
 };

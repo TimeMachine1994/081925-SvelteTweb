@@ -1,6 +1,61 @@
 <script lang="ts">
-	import { ArrowRight, CheckCircle, Video, Users, Sparkles, Shield, Star } from 'lucide-svelte';
-	import Button from '$lib/ui/primitives/Button.svelte';
+	import { ArrowRight, CheckCircle, Video, Users, Sparkles, Shield, Star, Phone, Calendar, Gift, Play, Clock } from 'lucide-svelte';
+	import { goto } from '$app/navigation';
+	import { getTheme } from '$lib/design-tokens/minimal-modern-theme';
+	import { Button, Card, Steps, Timeline, Comparison } from '$lib/components/minimal-modern';
+
+	const theme = getTheme('minimal');
+
+	const benefits = [
+		{ 
+			icon: Video, 
+			title: "Professional Streaming", 
+			description: "1080p HLS streaming with automatic failover systems. 99.9% uptime guarantee for your most important services." 
+		},
+		{ 
+			icon: Users, 
+			title: "Enhanced Family Experience", 
+			description: "Dedicated memorial pages with digital guestbooks, photo galleries, and private access for invited guests only." 
+		},
+		{ 
+			icon: Shield, 
+			title: "Your Brand Featured", 
+			description: "Your funeral home's name and branding prominently displayed on each memorial page, reinforcing your value." 
+		}
+	];
+
+	const steps = [
+		{ title: "Schedule Demo", description: "Book a free on-site demonstration" },
+		{ title: "Partner Setup", description: "Simple onboarding and training process" },
+		{ title: "Go Live", description: "Start offering streaming to families" }
+	];
+
+	const packages = [
+		{ 
+			name: "Basic Partnership", 
+			price: "No Cost", 
+			features: ["Commission-based model", "Basic training", "Phone support", "Standard branding"],
+			popular: false,
+			familyCta: "Learn More",
+			directorCta: "Get Started"
+		},
+		{ 
+			name: "Premium Partnership", 
+			price: "Contact Us", 
+			popular: true,
+			features: ["Revenue sharing", "On-site training", "Priority support", "Custom branding", "Marketing materials"],
+			familyCta: "Learn More",
+			directorCta: "Schedule Demo"
+		}
+	];
+
+	function handleBookDemo() {
+		goto('/book-demo');
+	}
+
+	function handleRegister() {
+		goto('/register/funeral-home');
+	}
 </script>
 
 <svelte:head>
@@ -11,155 +66,152 @@
 	/>
 </svelte:head>
 
-<div class="bg-gradient-to-b from-slate-50 to-white">
+<div class="bg-white text-gray-900" style="font-family: {theme.font.body}">
 	<!-- Hero Section -->
-	<div class="px-4 py-20 text-center md:py-32">
-		<div class="mx-auto max-w-4xl">
-			<div
-				class="mb-4 inline-block rounded-full bg-yellow-100 px-4 py-1 text-sm font-semibold text-yellow-700"
-			>
+	<section class="{theme.hero.wrap}">
+		<div class="{theme.hero.decoration}" aria-hidden="true"></div>
+		<div class="relative z-10 mx-auto max-w-4xl px-6 text-center">
+			<div class="mb-4 inline-block rounded-full bg-[#D5BA7F]/20 px-4 py-2 text-sm font-semibold text-[#D5BA7F]">
 				Partner with TributeStream
 			</div>
-			<h1 class="mb-6 text-4xl leading-tight font-bold text-gray-900 md:text-6xl">
+			<h1 class="text-4xl md:text-6xl font-bold {theme.hero.heading} mb-6" style="font-family: {theme.font.heading}">
 				Modernize Your Memorial Services
 			</h1>
-			<p class="mx-auto mb-10 max-w-2xl text-lg text-gray-600 md:text-xl">
-				Empower the families you serve with beautiful, reliable memorial livestreams and interactive
-				digital guestbooks. Simple for you, meaningful for them.
+			<p class="text-lg md:text-xl {theme.hero.sub} max-w-2xl mx-auto mb-10">
+				Empower the families you serve with beautiful, reliable memorial livestreams and interactive digital guestbooks. Simple for you, meaningful for them.
 			</p>
-			<Button
-				variant="role"
-				role="funeral_director"
-				size="lg"
-				rounded="lg"
-				href="/register/funeral-home"
-			>
-				Register Your Funeral Home
-				<ArrowRight class="ml-2 h-5 w-5" />
-			</Button>
+			<div class="flex flex-col sm:flex-row gap-4 justify-center">
+				<Button theme="minimal" onclick={handleBookDemo} class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F] flex items-center justify-center">
+					<Calendar class="h-5 w-5 mr-2" />
+					Book Free Demo
+				</Button>
+				<Button theme="minimal" variant="secondary" onclick={handleRegister} class="flex items-center justify-center">
+					<ArrowRight class="h-5 w-5 mr-2" />
+					Register Your Home
+				</Button>
+			</div>
 		</div>
-	</div>
+	</section>
 
 	<!-- Benefits Section -->
-	<div class="px-4 py-20">
-		<div class="mx-auto max-w-6xl">
-			<div class="mb-16 text-center">
-				<h2 class="text-3xl font-bold text-gray-900 md:text-4xl">
+	<section class="py-16 bg-white">
+		<div class="max-w-6xl mx-auto px-6">
+			<div class="text-center mb-12">
+				<h2 class="text-3xl font-bold text-slate-900 mb-4" style="font-family: {theme.font.heading}">
 					Why Partner with TributeStream?
 				</h2>
-				<p class="mx-auto mt-4 max-w-2xl text-lg text-gray-600">
-					Enhance your offerings, streamline your workflow, and provide unparalleled value to
-					families.
+				<p class="text-lg text-slate-600 max-w-2xl mx-auto">
+					Enhance your offerings, streamline your workflow, and provide unparalleled value to families.
 				</p>
 			</div>
-			<div class="grid gap-10 md:grid-cols-3">
-				<!-- Benefit 1 -->
-				<div class="rounded-2xl bg-white p-8 shadow-md transition-shadow hover:shadow-xl">
-					<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100">
-						<Video class="h-6 w-6 text-yellow-600" />
-					</div>
-					<h3 class="mb-2 text-xl font-bold text-gray-900">Effortless Livestreaming</h3>
-					<p class="text-gray-600">
-						Go live in minutes with our simple, reliable streaming technology. No technical
-						expertise required. Just click and stream from any device.
-					</p>
-				</div>
-				<!-- Benefit 2 -->
-				<div class="rounded-2xl bg-white p-8 shadow-md transition-shadow hover:shadow-xl">
-					<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-						<Users class="h-6 w-6 text-green-600" />
-					</div>
-					<h3 class="mb-2 text-xl font-bold text-gray-900">Enhanced Family Experience</h3>
-					<p class="text-gray-600">
-						Provide a dedicated, ad-free page for each memorial, complete with a digital guestbook,
-						photo galleries, and service details.
-					</p>
-				</div>
-				<!-- Benefit 3 -->
-				<div class="rounded-2xl bg-white p-8 shadow-md transition-shadow hover:shadow-xl">
-					<div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100">
-						<Sparkles class="h-6 w-6 text-amber-600" />
-					</div>
-					<h3 class="mb-2 text-xl font-bold text-gray-900">Professional Branding</h3>
-					<p class="text-gray-600">
-						Your funeral home's name and branding are featured on each memorial page, reinforcing
-						your value to the family and community.
-					</p>
-				</div>
+			<div class="grid md:grid-cols-3 gap-8">
+				{#each benefits as benefit}
+					{@const IconComponent = benefit.icon}
+					<Card theme="minimal" class="p-8 text-center">
+						<div class="flex h-12 w-12 items-center justify-center rounded-full bg-[#D5BA7F]/20 mx-auto mb-4">
+							<IconComponent class="h-6 w-6 text-[#D5BA7F]" />
+						</div>
+						<h3 class="text-xl font-bold text-slate-900 mb-4">{benefit.title}</h3>
+						<p class="text-slate-600">{benefit.description}</p>
+					</Card>
+				{/each}
 			</div>
 		</div>
-	</div>
+	</section>
 
 	<!-- How It Works Section -->
-	<div class="bg-slate-50 px-4 py-20">
-		<div class="mx-auto max-w-5xl">
-			<div class="mb-16 text-center">
-				<h2 class="text-3xl font-bold text-gray-900 md:text-4xl">Simple Steps to Get Started</h2>
+	<section class="py-16 bg-slate-50">
+		<div class="max-w-6xl mx-auto px-6">
+			<div class="text-center mb-12">
+				<h2 class="text-3xl font-bold text-slate-900 mb-4" style="font-family: {theme.font.heading}">
+					Simple Steps to Get Started
+				</h2>
+				<p class="text-lg text-slate-600">
+					Partner with us in three easy steps
+				</p>
 			</div>
-			<div
-				class="flex flex-col items-center justify-between space-y-12 md:flex-row md:space-y-0 md:space-x-8"
-			>
-				<!-- Step 1 -->
-				<div class="flex-1 text-center">
-					<div
-						class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border-2 border-yellow-500 bg-white text-2xl font-bold text-yellow-600"
-					>
-						1
-					</div>
-					<h3 class="mb-2 text-xl font-semibold text-gray-800">Register Your Home</h3>
-					<p class="text-gray-600">
-						Complete a simple, one-time registration to create your funeral home's account.
+			<div class="grid md:grid-cols-2 gap-12 items-center">
+				<div>
+					<Steps theme="minimal" items={steps.map(s => s.title)} current={0} />
+					<p class="mt-6 text-slate-600">
+						Getting started is simple. Book a free demo to see our technology in action, complete our partner onboarding, and start offering streaming services to the families you serve.
 					</p>
 				</div>
-				<div class="hidden text-gray-300 md:block"><ArrowRight size={32} /></div>
-				<!-- Step 2 -->
-				<div class="flex-1 text-center">
-					<div
-						class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border-2 border-yellow-500 bg-white text-2xl font-bold text-yellow-600"
-					>
-						2
+				<Card theme="minimal" class="p-8">
+					<h3 class="text-xl font-bold text-slate-900 mb-6">What You Get</h3>
+					<div class="space-y-4">
+						<div class="flex items-center space-x-3">
+							<Gift class="h-5 w-5 text-[#D5BA7F]" />
+							<span class="text-slate-700">Free marketing materials</span>
+						</div>
+						<div class="flex items-center space-x-3">
+							<Phone class="h-5 w-5 text-[#D5BA7F]" />
+							<span class="text-slate-700">Dedicated support line</span>
+						</div>
+						<div class="flex items-center space-x-3">
+							<Shield class="h-5 w-5 text-[#D5BA7F]" />
+							<span class="text-slate-700">Professional training</span>
+						</div>
+						<div class="flex items-center space-x-3">
+							<Users class="h-5 w-5 text-[#D5BA7F]" />
+							<span class="text-slate-700">Revenue sharing opportunities</span>
+						</div>
 					</div>
-					<h3 class="mb-2 text-xl font-semibold text-gray-800">Create a Memorial</h3>
-					<p class="text-gray-600">
-						After approval, you can instantly create memorial pages for the families you serve.
-					</p>
-				</div>
-				<div class="hidden text-gray-300 md:block"><ArrowRight size={32} /></div>
-				<!-- Step 3 -->
-				<div class="flex-1 text-center">
-					<div
-						class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border-2 border-yellow-500 bg-white text-2xl font-bold text-yellow-600"
-					>
-						3
-					</div>
-					<h3 class="mb-2 text-xl font-semibold text-gray-800">Go Live</h3>
-					<p class="text-gray-600">
-						Start the livestream with a single click, connecting friends and family from anywhere.
-					</p>
-				</div>
+				</Card>
 			</div>
 		</div>
-	</div>
+	</section>
+
+	<!-- Partnership Packages -->
+	<section class="py-16 bg-white">
+		<div class="max-w-6xl mx-auto px-6">
+			<div class="text-center mb-12">
+				<h2 class="text-3xl font-bold text-slate-900 mb-4" style="font-family: {theme.font.heading}">
+					Partnership Options
+				</h2>
+				<p class="text-lg text-slate-600">
+					Choose the partnership level that works best for your funeral home
+				</p>
+			</div>
+			<Comparison theme="minimal" tiers={packages} />
+		</div>
+	</section>
 
 	<!-- Final CTA -->
-	<div class="px-4 py-24 text-center">
-		<div class="mx-auto max-w-3xl">
-			<h2 class="mb-6 text-3xl font-bold text-gray-900 md:text-4xl">
+	<section class="py-16 bg-slate-50">
+		<div class="max-w-4xl mx-auto px-6 text-center">
+			<h2 class="text-3xl font-bold text-slate-900 mb-6" style="font-family: {theme.font.heading}">
 				Ready to Elevate Your Services?
 			</h2>
-			<p class="mb-10 text-lg text-gray-600">
-				Join our network of forward-thinking funeral directors today. Registration is free and takes
-				just a few minutes.
+			<p class="text-lg text-slate-600 mb-8 max-w-2xl mx-auto">
+				Join our network of forward-thinking funeral directors. See our technology in action with a free on-site demonstration.
 			</p>
-			<Button
-				variant="role"
-				role="funeral_director"
-				size="xl"
-				rounded="lg"
-				href="/register/funeral-home"
-			>
-				Get Started Now
-			</Button>
+			<div class="flex flex-col sm:flex-row gap-4 justify-center">
+				<Button theme="minimal" onclick={handleBookDemo} class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F] flex items-center justify-center">
+					<Calendar class="h-5 w-5 mr-2" />
+					Schedule Free Demo
+				</Button>
+				<Button theme="minimal" onclick={handleRegister} class="flex items-center justify-center">
+					<ArrowRight class="h-5 w-5 mr-2" />
+					Register Now
+				</Button>
+			</div>
+			
+			<!-- Contact Information -->
+			<div class="mt-12 pt-8 border-t border-slate-200">
+				<div class="grid md:grid-cols-2 gap-8 text-center">
+					<div>
+						<Phone class="h-6 w-6 text-[#D5BA7F] mx-auto mb-2" />
+						<h4 class="font-semibold text-slate-900 mb-1">Call Direct</h4>
+						<a href="tel:407-221-5922" class="text-[#D5BA7F] hover:underline">407-221-5922</a>
+					</div>
+					<div>
+						<Clock class="h-6 w-6 text-[#D5BA7F] mx-auto mb-2" />
+						<h4 class="font-semibold text-slate-900 mb-1">Service Area</h4>
+						<p class="text-slate-600">Central Florida & Surrounding Areas</p>
+					</div>
+				</div>
+			</div>
 		</div>
-	</div>
+	</section>
 </div>

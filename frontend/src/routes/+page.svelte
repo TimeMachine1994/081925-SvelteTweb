@@ -1,11 +1,9 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { getTheme } from '$lib/design-tokens/minimal-modern-theme';
 	import { Button, Input, Card, Stats, FAQ, Comparison, Steps, Timeline, VideoPlayer } from '$lib/components/minimal-modern';
 	import { Star, Shield, Users, Play, Search, Phone, Clock } from 'lucide-svelte';
 
-	let video: HTMLVideoElement;
 	let lovedOneName = $state('');
 	let searchQuery = $state('');
 	let activeTab = $state('families');
@@ -41,9 +39,9 @@
 
 	// Timeline example
 	const sampleTimeline = [
-		{ time: "2:00 PM", title: "Service Begins", description: "Welcome and opening remarks", isLive: false },
-		{ time: "2:30 PM", title: "Live Stream", description: "Memorial service broadcast", isLive: true },
-		{ time: "3:30 PM", title: "Recording Available", description: "Download link sent to family", isLive: false }
+		{ time: "2:00 PM", title: "Service Begins", detail: "Welcome and opening remarks" },
+		{ time: "2:30 PM", title: "Live Stream", detail: "Memorial service broadcast" },
+		{ time: "3:30 PM", title: "Recording Available", detail: "Download link sent to family" }
 	];
 
 	const faqItems = [
@@ -84,26 +82,6 @@
 		}
 	];
 
-	onMount(() => {
-		console.log('📹 Homepage mounted');
-		if (video) {
-			console.log('📹 Video element found, setting up...');
-			video.playbackRate = 0.5;
-			
-			// Force play the video (some browsers need this)
-			video.play().then(() => {
-				console.log('📹 Background video started playing');
-			}).catch((error) => {
-				console.error('📹 Background video autoplay failed:', error);
-				// Fallback: try to play on user interaction
-				document.addEventListener('click', () => {
-					video.play().catch(e => console.error('📹 Manual play failed:', e));
-				}, { once: true });
-			});
-		} else {
-			console.error('📹 Video element not found');
-		}
-	});
 
 	function renderStars(rating: number) {
 		return Array(5).fill(0).map((_, i) => i < rating);
@@ -127,17 +105,12 @@
 
 	function handleBookDemo() {
 		console.log('📞 Booking demo');
-		goto('/contact?type=demo');
+		goto('/book-demo');
 	}
 
 	function handleHowItWorks() {
 		console.log('📋 Scrolling to how it works');
 		document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
-		const params = new URLSearchParams();
-		if (lovedOneName.trim()) {
-			params.set('q', lovedOneName.trim());
-		}
-		goto(`/search?${params.toString()}`);
 	}
 </script>
 
@@ -148,28 +121,11 @@
 
 <div class="bg-white text-gray-900" style="font-family: {theme.font.body}">
 	<!-- Hero Section with Dual-Path CTAs -->
-	<section class="relative min-h-[90vh] flex items-center overflow-hidden">
-		<!-- Video Background -->
-		<video 
-			bind:this={video}
-			class="absolute inset-0 w-full h-full object-cover z-0"
-			autoplay 
-			muted 
-			loop 
-			playsinline
-			preload="auto"
-			onloadstart={() => console.log('Video loading started')}
-			oncanplay={() => console.log('Video can play')}
-			onerror={(e) => console.error('Video error:', e)}
-		>
-			<source src="https://firebasestorage.googleapis.com/v0/b/fir-tweb.firebasestorage.app/o/tributestream_advertisment%20(720p)%20(1).mp4?alt=media&token=301d3835-f64a-4ba3-8619-343600cb1117" type="video/mp4">
-			Your browser does not support the video tag.
-		</video>
+	<section class="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+		<!-- Subtle pattern overlay -->
+		<div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 25% 25%, #D5BA7F 2px, transparent 2px); background-size: 60px 60px;"></div>
 		
-		<!-- Dark overlay for text readability -->
-		<div class="absolute inset-0 bg-black bg-opacity-50 z-5"></div>
-		
-		<div class="relative z-10 mx-auto max-w-7xl px-6">
+		<div class="relative mx-auto max-w-7xl px-6 z-10">
 			<div class="text-center mb-12">
 				<h1 class="text-4xl md:text-6xl font-bold text-white mb-6" style="font-family: {theme.font.heading}">
 					Beautiful, reliable memorial livestreams
@@ -216,7 +172,7 @@
 				<div class="text-center">
 					<h3 class="text-2xl font-semibold text-white mb-6">For Funeral Directors</h3>
 					<div class="space-y-4">
-						<Button theme="minimal" onclick={handleBookDemo} class="w-full bg-slate-900 text-white hover:bg-slate-800">
+						<Button theme="minimal" onclick={handleBookDemo} class="w-full bg-slate-900 text-white hover:bg-slate-800 flex items-center justify-center">
 							<Phone class="h-4 w-4 mr-2" />
 							Book a Demo
 						</Button>
@@ -230,8 +186,9 @@
 			<!-- Trust Mini-Strip -->
 			<div class="flex justify-center items-center gap-8 flex-wrap">
 				{#each trustBadges as badge}
+					{@const IconComponent = badge.icon}
 					<div class="flex items-center gap-2 text-sm text-white">
-						<svelte:component this={badge.icon} class="h-5 w-5 text-[#D5BA7F]" />
+						<IconComponent class="h-5 w-5 text-[#D5BA7F]" />
 						<span>{badge.text}</span>
 					</div>
 				{/each}
@@ -295,12 +252,12 @@
 			<div class="grid md:grid-cols-2 gap-12 items-start">
 				<div>
 					{#if activeTab === 'families'}
-						<Steps theme="minimal" steps={familySteps} />
+						<Steps theme="minimal" items={familySteps.map(s => s.title)} current={0} />
 						<p class="mt-6 text-slate-600">
 							Creating a memorial is simple and respectful. Set up your loved one's tribute page, schedule the service, and share the private link with family and friends. We handle all the technical details so you can focus on what matters most.
 						</p>
 					{:else}
-						<Steps theme="minimal" steps={directorSteps} />
+						<Steps theme="minimal" items={directorSteps.map(s => s.title)} current={0} />
 						<p class="mt-6 text-slate-600">
 							Partner with us for seamless memorial streaming. Our experienced technicians arrive early, handle all setup, and provide live support throughout the service. You focus on the family—we ensure the technology works flawlessly.
 						</p>
@@ -331,6 +288,7 @@
 							onerror={(e) => console.error('About Us video error:', e)}
 						>
 							<source src="https://firebasestorage.googleapis.com/v0/b/fir-tweb.firebasestorage.app/o/tributestream_-_about_us%20(1080p).mp4?alt=media&token=54cb483c-aa04-4b60-8f3d-15a3085a365a" type="video/mp4">
+							<track kind="captions" src="" srclang="en" label="English captions" default>
 							Your browser does not support the video tag.
 						</video>
 					</div>

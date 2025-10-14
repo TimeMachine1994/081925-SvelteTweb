@@ -154,10 +154,6 @@
 
 <style>
 	/* Hover effects */
-	.brand-link:hover {
-		color: #d1d5db !important;
-	}
-
 	.nav-link:hover {
 		color: #d1d5db !important;
 	}
@@ -167,7 +163,6 @@
 	}
 
 	/* Focus styles */
-	.brand-link:focus-visible,
 	.nav-link:focus-visible,
 	.mobile-nav-link:focus-visible {
 		outline: 2px solid #3b82f6;
