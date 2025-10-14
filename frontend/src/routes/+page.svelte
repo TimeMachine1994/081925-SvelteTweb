@@ -2,11 +2,18 @@
 	import { goto } from '$app/navigation';
 	import { getTheme } from '$lib/design-tokens/minimal-modern-theme';
 	import { Button, Input, Card, Stats, FAQ, Comparison, Steps, Timeline, VideoPlayer } from '$lib/components/minimal-modern';
-	import { Star, Shield, Users, Play, Search, Phone, Clock } from 'lucide-svelte';
+	import { Star, Shield, Users, Play, Search, Phone, Clock, Pause, Volume2, Maximize } from 'lucide-svelte';
 
 	let lovedOneName = $state('');
 	let searchQuery = $state('');
 	let activeTab = $state('families');
+	
+	// Video player state
+	let video: HTMLVideoElement;
+	let isPlaying = $state(false);
+	let currentTime = $state(0);
+	let duration = $state(0);
+	let volume = $state(1);
 
 	const theme = getTheme('minimal');
 
@@ -111,6 +118,50 @@
 	function handleHowItWorks() {
 		console.log('📋 Scrolling to how it works');
 		document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
+	}
+
+	// Video player functions
+	function togglePlay() {
+		if (video.paused) {
+			video.play();
+			isPlaying = true;
+		} else {
+			video.pause();
+			isPlaying = false;
+		}
+	}
+
+	function handleTimeUpdate() {
+		currentTime = video.currentTime;
+	}
+
+	function handleLoadedMetadata() {
+		duration = video.duration;
+	}
+
+	function handleSeek(event: Event) {
+		const target = event.target as HTMLInputElement;
+		const time = (parseFloat(target.value) / 100) * duration;
+		video.currentTime = time;
+		currentTime = time;
+	}
+
+	function handleVolumeChange(event: Event) {
+		const target = event.target as HTMLInputElement;
+		volume = parseFloat(target.value) / 100;
+		video.volume = volume;
+	}
+
+	function toggleFullscreen() {
+		if (video.requestFullscreen) {
+			video.requestFullscreen();
+		}
+	}
+
+	function formatTime(seconds: number): string {
+		const mins = Math.floor(seconds / 60);
+		const secs = Math.floor(seconds % 60);
+		return `${mins}:${secs.toString().padStart(2, '0')}`;
 	}
 </script>
 
