@@ -2,6 +2,7 @@ import { adminDb } from '$lib/server/firebase';
 import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import type { Memorial } from '$lib/types/memorial';
+import { verifyRecaptcha, RECAPTCHA_ACTIONS, getScoreThreshold } from '$lib/utils/recaptcha';
 
 // Helper function to convert Timestamps and Dates to strings
 function sanitizeData(data: any): any {
@@ -132,6 +133,32 @@ export const actions: Actions = {
 			return fail(401, { message: 'Only owners can create memorials' });
 		}
 
+		const data = await request.formData();
+		const recaptchaToken = data.get('recaptchaToken');
+
+		// Verify reCAPTCHA
+		if (recaptchaToken) {
+			const recaptchaResult = await verifyRecaptcha(
+				recaptchaToken.toString(),
+				RECAPTCHA_ACTIONS.CREATE_MEMORIAL,
+				getScoreThreshold(RECAPTCHA_ACTIONS.CREATE_MEMORIAL)
+			);
+
+			if (!recaptchaResult.success) {
+				console.error('[PROFILE_SERVER] reCAPTCHA verification failed:', recaptchaResult.error);
+				return fail(400, {
+					message: 'Security verification failed. Please try again.'
+				});
+			}
+
+			console.log(`[PROFILE_SERVER] reCAPTCHA verified successfully. Score: ${recaptchaResult.score}`);
+		} else {
+			console.warn('[PROFILE_SERVER] No reCAPTCHA token provided');
+			return fail(400, {
+				message: 'Security verification required. Please refresh and try again.'
+			});
+		}
+
 		// Check if user has already created a memorial and hasn't paid
 		const userDoc = await adminDb.collection('users').doc(locals.user.uid).get();
 		const userData = userDoc.data();
@@ -142,7 +169,6 @@ export const actions: Actions = {
 			});
 		}
 
-		const data = await request.formData();
 		const lovedOneName = data.get('lovedOneName')?.toString().trim();
 		
 		console.log('🎯 [PROFILE_SERVER] Form data received:', { lovedOneName });

@@ -2,13 +2,21 @@
 	import { goto } from '$app/navigation';
 	import { getTheme } from '$lib/design-tokens/minimal-modern-theme';
 	import { Button, Input, Card, Stats, FAQ, Comparison, Steps, Timeline, VideoPlayer } from '$lib/components/minimal-modern';
-	import { Star, Shield, Users, Play, Search, Phone, Clock, Pause, Volume2, Maximize, CheckCircle } from 'lucide-svelte';
+	import { Star, Shield, Users, Play, Search, Phone, Clock, Pause, Volume2, Maximize, CheckCircle, Globe } from 'lucide-svelte';
 
 	let lovedOneName = $state('');
 	let searchQuery = $state('');
 	let activeTab = $state('families');
+	let currentStep = $state(0);
 	
-	// Video player state
+	// Hero video player state
+	let heroVideo: HTMLVideoElement;
+	let heroIsPlaying = $state(false);
+	let heroCurrentTime = $state(0);
+	let heroDuration = $state(0);
+	let heroVolume = $state(1);
+
+	// About Us video player state (existing)
 	let video: HTMLVideoElement;
 	let isPlaying = $state(false);
 	let currentTime = $state(0);
@@ -19,23 +27,23 @@
 
 	// Trust badges
 	const trustBadges = [
-		{ icon: Shield, text: "1080p HLS" },
-		{ icon: Users, text: "Private Access" },
+		{ icon: Globe, text: "Worldwide Streaming" },
+		{ icon: Users, text: "Custom Link to Share" },
 		{ icon: Phone, text: "Expert On-Site Support" }
 	];
 
 	// Testimonials
 	const testimonials = [
-		{ text: "TributeStream made it possible for our family across the country to be part of Dad's service.", author: "Sarah M.", rating: 5 },
-		{ text: "Professional setup, flawless streaming. Highly recommend for any memorial service.", author: "Rev. Johnson", rating: 5 },
-		{ text: "The recording quality was beautiful. We'll treasure this forever.", author: "Michael R.", rating: 5 }
+		{ text: "I joined an online funeral held for my coworker that was streamed by Tributestream. The streaming quality was great and they really respected and honored our friend. I was not able to go to the physical funeral and I still felt as if I was there.", author: "Joshua Hernandez", rating: 5, date: "Dec 6, 2022" },
+		{ text: "These guys are great. My wife who passed was European, and we had well over 100 live viewers who could not make it to the states for the event. Everyone said the audio and video was top notch. Flawless. They are self sufficient and practically invisible. I highly recommend this service.", author: "Troy Kelly", rating: 5, date: "Sep 16, 2024" },
+		{ text: "What an awesome company. They captured the entire experience. From the service to the entombment. Highly recommended.", author: "Donna Hinckson-Torres", rating: 5, date: "Sep 24, 2024" }
 	];
 
 	// How it works steps
 	const familySteps = [
 		{ title: "Create Memorial", description: "Set up your loved one's memorial page in minutes" },
 		{ title: "Schedule Service", description: "Choose date, time, and streaming options" },
-		{ title: "Share & Stream", description: "Send private link to family and friends" }
+		{ title: "Share & Stream", description: "Send custom link to family and friends" }
 	];
 
 	const directorSteps = [
@@ -53,37 +61,38 @@
 
 	const faqItems = [
 		{ q: "How quickly can we set up streaming?", a: "Same-day streaming available in most areas. Call 407-221-5922 for immediate availability." },
-		{ q: "Is the memorial link private?", a: "Yes, you control who receives the private link. Optional password protection available." },
+		{ q: "Is the memorial link private?", a: "Yes, you control who receives the custom link. Optional password protection available." },
 		{ q: "Can we download the recording?", a: "Yes, you receive a high-quality downloadable archive after the service." },
 		{ q: "What if there are technical issues?", a: "Our expert technicians provide on-site support to ensure flawless streaming." },
 		{ q: "How many people can watch?", a: "Unlimited viewers. Our 1080p HLS streaming handles any audience size." },
 		{ q: "Do you work with funeral homes?", a: "Yes, we partner with funeral directors to provide seamless memorial streaming services." },
 		{ q: "What's included in the recording?", a: "Full HD recording, downloadable file, and optional edited highlights reel." },
-		{ q: "How do we share the link?", a: "We provide a private, secure link that you can share via email, text, or social media." }
+		{ q: "How do we share the link?", a: "We provide a custom, secure link that you can share via email, text, or social media." }
 	];
 
 	const packages = [
 		{ 
-			name: "DIY", 
+			name: "Solo", 
 			description: "Perfect for intimate services",
-			features: ["2 hour broadcast", "Private link", "HD recording", "Mobile ready"],
+			features: ["Single camera", "Custom link", "HD streaming", "Complimentary download"],
 			popular: false,
 			familyCta: "Select Package",
 			directorCta: "Get Quote"
 		},
 		{ 
-			name: "Standard", 
-			description: "Most popular choice",
-			popular: true,
+			name: "Live", 
+			description: "Complete professional service",
+			popular: false,
 			features: ["Multi-camera setup", "On-site technician", "Live support", "Custom graphics"],
 			familyCta: "Select Package",
 			directorCta: "Get Quote"
 		},
 		{ 
-			name: "Premium", 
+			name: "Legacy", 
 			description: "Complete professional service",
-			features: ["3+ locations", "Wireless audio", "Professional editing", "Extended archive"],
-			popular: false,
+			features: ["2+ locations", "On-site videographer", "Professional editing", "Custom USB"],
+			popular: true,
+			premium: true,
 			familyCta: "Select Package",
 			directorCta: "Get Quote"
 		}
@@ -120,7 +129,49 @@
 		document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
 	}
 
-	// Video player functions
+	// Hero video player functions
+	function heroTogglePlay() {
+		if (!heroVideo) return;
+		if (heroVideo.paused) {
+			heroVideo.play();
+			heroIsPlaying = true;
+		} else {
+			heroVideo.pause();
+			heroIsPlaying = false;
+		}
+	}
+
+	function heroHandleTimeUpdate() {
+		if (!heroVideo) return;
+		heroCurrentTime = heroVideo.currentTime;
+	}
+
+	function heroHandleLoadedMetadata() {
+		if (!heroVideo) return;
+		heroDuration = heroVideo.duration;
+	}
+
+	function heroHandleSeek(event: Event) {
+		if (!heroVideo) return;
+		const target = event.target as HTMLInputElement;
+		const time = (parseFloat(target.value) / 100) * heroDuration;
+		heroVideo.currentTime = time;
+		heroCurrentTime = time;
+	}
+
+	function heroHandleVolumeChange(event: Event) {
+		if (!heroVideo) return;
+		const target = event.target as HTMLInputElement;
+		heroVolume = parseFloat(target.value) / 100;
+		heroVideo.volume = heroVolume;
+	}
+
+	function heroToggleFullscreen() {
+		if (!heroVideo || !heroVideo.requestFullscreen) return;
+		heroVideo.requestFullscreen();
+	}
+
+	// About Us video player functions (existing)
 	function togglePlay() {
 		if (!video) return;
 		if (video.paused) {
@@ -181,21 +232,32 @@
 
 <svelte:head>
 	<title>Beautiful, reliable memorial livestreams - TributeStream</title>
-	<meta name="description" content="Private links. On-site technicians. Heirloom recordings. Professional memorial livestreaming for families and funeral directors." />
+	<meta name="description" content="Custom links. On-site technicians. Heirloom recordings. Professional memorial livestreaming for families and funeral directors." />
 </svelte:head>
 
 <div class="bg-white text-gray-900" style="font-family: {theme.font.body}">
-	<!-- Hero Section with Dual-Path CTAs -->
-	<section class="relative min-h-[90vh] flex items-center overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-		<!-- Subtle pattern overlay -->
-		<div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 25% 25%, #D5BA7F 2px, transparent 2px); background-size: 60px 60px;"></div>
+	<!-- Hero Section with Video Background (Forms Section) -->
+	<section class="relative min-h-[60vh] flex items-center overflow-hidden bg-black">
+		<!-- Video Background -->
+		<video
+			class="absolute inset-0 w-full h-full object-cover"
+			autoplay
+			muted
+			loop
+			playsinline
+		>
+			<source src="https://firebasestorage.googleapis.com/v0/b/fir-tweb.firebasestorage.app/o/tributestream_advertisment%20(720p)%20(1).mp4?alt=media&token=301d3835-f64a-4ba3-8619-343600cb1117" type="video/mp4">
+		</video>
+		
+		<!-- Dark overlay for text readability -->
+		<div class="absolute inset-0 bg-black/50"></div>
 		
 		<div class="relative mx-auto max-w-7xl px-6 z-10">
 			<div class="text-center mb-12">
 				<h1 class="text-4xl md:text-6xl font-bold text-white mb-6" style="font-family: {theme.font.heading}">
 					Beautiful, reliable memorial livestreams
 				</h1>
-				<p class="text-xl md:text-2xl text-white max-w-3xl mx-auto">
+				<p class="text-xl md:text-2xl text-white max-w-3xl mx-auto mb-12">
 					Bring everyone together—at church, graveside, or from home
 				</p>
 			</div>
@@ -221,19 +283,20 @@
 						<div class="flex gap-2">
 							<Input
 								type="text"
-								placeholder="Search existing tributes"
+								placeholder="Search memorials..."
 								bind:value={searchQuery}
 								theme="minimal"
 								class="flex-1"
 							/>
-							<Button theme="minimal" variant="secondary" onclick={handleSearchTributes}>
-								<Search class="h-4 w-4" />
+							<Button theme="minimal" class="bg-white text-gray-900 hover:bg-gray-100 flex items-center">
+								<Search class="h-4 w-4 mr-2" />
+								Search
 							</Button>
 						</div>
 					</div>
 				</div>
 
-				<!-- Directors CTA Cluster -->
+				<!-- Funeral Directors CTA Cluster -->
 				<div class="text-center">
 					<h3 class="text-2xl font-semibold text-white mb-6">For Funeral Directors</h3>
 					<div class="space-y-4">
@@ -247,16 +310,147 @@
 					</div>
 				</div>
 			</div>
+		</div>
+	</section>
 
-			<!-- Trust Mini-Strip -->
-			<div class="flex justify-center items-center gap-8 flex-wrap">
-				{#each trustBadges as badge}
-					{@const IconComponent = badge.icon}
-					<div class="flex items-center gap-2 text-sm text-white">
-						<IconComponent class="h-5 w-5 text-[#D5BA7F]" />
-						<span>{badge.text}</span>
+	<!-- Video Player Section with Light Flares -->
+	<section class="relative py-16 overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+		<!-- Gold sunrise/sunset radial gradient overlay -->
+		<div class="absolute inset-0" style="background: radial-gradient(circle at 50% 20%, rgba(213, 186, 127, 0.15) 0%, rgba(213, 186, 127, 0.08) 40%, transparent 70%);"></div>
+		
+		<!-- Floating Light Flares with Parallax -->
+		<div class="absolute inset-0 overflow-hidden">
+			<!-- Large floating flares -->
+			<div class="absolute w-32 h-32 rounded-full blur-2xl opacity-20 animate-float-slow" style="background: radial-gradient(circle, #D5BA7F 0%, transparent 70%); top: 10%; left: 15%;"></div>
+			<div class="absolute w-24 h-24 rounded-full blur-xl opacity-15 animate-float-medium" style="background: radial-gradient(circle, #D5BA7F 0%, transparent 70%); top: 60%; right: 20%;"></div>
+			<div class="absolute w-40 h-40 rounded-full blur-3xl opacity-10 animate-float-fast" style="background: radial-gradient(circle, #D5BA7F 0%, transparent 70%); bottom: 20%; left: 10%;"></div>
+			
+			<!-- Medium floating flares -->
+			<div class="absolute w-16 h-16 rounded-full blur-lg opacity-25 animate-float-reverse" style="background: radial-gradient(circle, #D5BA7F 0%, transparent 70%); top: 30%; right: 15%;"></div>
+			<div class="absolute w-20 h-20 rounded-full blur-xl opacity-20 animate-float-slow-reverse" style="background: radial-gradient(circle, #D5BA7F 0%, transparent 70%); bottom: 40%; right: 30%;"></div>
+			
+			<!-- Small floating flares -->
+			<div class="absolute w-8 h-8 rounded-full blur-sm opacity-30 animate-float-tiny" style="background: radial-gradient(circle, #D5BA7F 0%, transparent 70%); top: 20%; left: 60%;"></div>
+			<div class="absolute w-12 h-12 rounded-full blur-md opacity-25 animate-float-tiny-reverse" style="background: radial-gradient(circle, #D5BA7F 0%, transparent 70%); bottom: 60%; left: 70%;"></div>
+		</div>
+		
+		<!-- Gold warm glow effect -->
+		<div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-96 h-96 rounded-full blur-3xl" style="background: radial-gradient(circle, rgba(213, 186, 127, 0.12) 0%, rgba(213, 186, 127, 0.06) 50%, transparent 100%);"></div>
+		
+		<div class="relative mx-auto max-w-7xl px-6 z-10">
+			<!-- Video Player Section -->
+			<div class="max-w-4xl mx-auto">
+				<div class="relative rounded-2xl overflow-hidden shadow-2xl bg-black/20 backdrop-blur-sm border border-white/10">
+					<video
+						bind:this={heroVideo}
+						class="w-full aspect-video object-cover hero-video-zoom"
+						poster="https://firebasestorage.googleapis.com/v0/b/fir-tweb.firebasestorage.app/o/image_assets%2Fthumb%20for%20homevid%20001.png?alt=media&token=2da69fcb-1d2e-42c3-8716-ea0a6e78ad92"
+						ontimeupdate={heroHandleTimeUpdate}
+						onloadedmetadata={heroHandleLoadedMetadata}
+						onplay={() => heroIsPlaying = true}
+						onpause={() => heroIsPlaying = false}
+						preload="metadata"
+					>
+						<source src="https://firebasestorage.googleapis.com/v0/b/fir-tweb.firebasestorage.app/o/tributestream_advertisment%20(720p)%20(1).mp4?alt=media&token=301d3835-f64a-4ba3-8619-343600cb1117" type="video/mp4">
+						Your browser does not support the video tag.
+					</video>
+
+					<!-- Play Button Overlay for Thumbnail -->
+					{#if !heroIsPlaying && heroVideo && heroVideo.paused}
+						<div class="absolute inset-0 flex items-center justify-center bg-black/10">
+							<button
+								onclick={heroTogglePlay}
+								class="w-16 h-16 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-lg"
+								aria-label="Play video"
+							>
+								<Play class="w-6 h-6 text-black ml-1" />
+							</button>
+						</div>
+					{/if}
+
+					<!-- Custom Video Controls -->
+					<div class="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 bg-black/20">
+						<button
+							onclick={heroTogglePlay}
+							class="w-20 h-20 rounded-full bg-[#D5BA7F]/90 hover:bg-[#D5BA7F] flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-lg"
+							aria-label={heroIsPlaying ? 'Pause video' : 'Play video'}
+						>
+							{#if heroIsPlaying}
+								<Pause class="w-8 h-8 text-black ml-0" />
+							{:else}
+								<Play class="w-8 h-8 text-black ml-1" />
+							{/if}
+						</button>
 					</div>
-				{/each}
+
+					<!-- Progress Bar and Controls -->
+					<div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 hover:opacity-100 transition-opacity duration-300">
+						<div class="flex items-center gap-3 text-white">
+							<!-- Play/Pause Button -->
+							<button
+								onclick={heroTogglePlay}
+								class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+								aria-label={heroIsPlaying ? 'Pause' : 'Play'}
+							>
+								{#if heroIsPlaying}
+									<Pause class="w-4 h-4" />
+								{:else}
+									<Play class="w-4 h-4 ml-0.5" />
+								{/if}
+							</button>
+
+							<!-- Time Display -->
+							<span class="text-sm font-medium">
+								{formatTime(heroCurrentTime)} / {formatTime(heroDuration)}
+							</span>
+
+							<!-- Progress Bar -->
+							<div class="flex-1 mx-3">
+								<input
+									type="range"
+									min="0"
+									max="100"
+									value={heroDuration ? (heroCurrentTime / heroDuration) * 100 : 0}
+									onchange={heroHandleSeek}
+									class="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
+								/>
+							</div>
+
+							<!-- Volume Control -->
+							<div class="flex items-center gap-2">
+								<Volume2 class="w-4 h-4" />
+								<input
+									type="range"
+									min="0"
+									max="100"
+									value={heroVolume * 100}
+									onchange={heroHandleVolumeChange}
+									class="w-16 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
+								/>
+							</div>
+
+							<!-- Fullscreen Button -->
+							<button
+								onclick={heroToggleFullscreen}
+								class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+								aria-label="Fullscreen"
+							>
+								<Maximize class="w-4 h-4" />
+							</button>
+						</div>
+					</div>
+				</div>
+
+				<!-- Trust Mini-Strip Under Video -->
+				<div class="flex justify-center items-center gap-8 flex-wrap mt-8">
+					{#each trustBadges as badge}
+						{@const IconComponent = badge.icon}
+						<div class="flex items-center gap-2 text-sm text-white">
+							<IconComponent class="h-5 w-5 text-[#D5BA7F]" />
+							<span>{badge.text}</span>
+						</div>
+					{/each}
+				</div>
 			</div>
 		</div>
 	</section>
@@ -272,16 +466,34 @@
 								<Star class="h-4 w-4 {filled ? 'text-yellow-400 fill-current' : 'text-gray-300'}" />
 							{/each}
 						</div>
-						<p class="text-sm text-slate-600 mb-4">"{testimonial.text}"</p>
-						<p class="font-medium text-slate-900">— {testimonial.author}</p>
+						<p class="text-sm text-slate-600 mb-4 leading-relaxed">"{testimonial.text}"</p>
+						<div class="space-y-1">
+							<p class="font-medium text-slate-900">— {testimonial.author}</p>
+							<p class="text-xs text-slate-500">{testimonial.date}</p>
+						</div>
 					</Card>
 				{/each}
 			</div>
 			
 			<div class="text-center">
 				<p class="text-sm text-slate-600 mb-4">Trusted by funeral homes across Central Florida</p>
-				<div class="flex justify-center items-center gap-8 opacity-60">
-					<div class="text-xs font-medium">PARTNER FUNERAL HOMES</div>
+				<div class="space-y-2">
+					<div class="text-xs font-medium text-slate-500 uppercase tracking-wider">PARTNER FUNERAL HOMES</div>
+					<div class="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-xs text-slate-400">
+						<span>A Community Funeral Home</span>
+						<span class="hidden sm:inline">•</span>
+						<span>Osceola Memory Gardens (All Locations)</span>
+						<span class="hidden sm:inline">•</span>
+						<span>De Guispe Funeral Home</span>
+						<span class="hidden sm:inline">•</span>
+						<span>Woodward Funeral Home</span>
+						<span class="hidden sm:inline">•</span>
+						<span>Baldwin Bros. Funeral Home</span>
+						<span class="hidden sm:inline">•</span>
+						<span>Lohman Funeral Home</span>
+						<span class="hidden sm:inline">•</span>
+						<span>Cape Canaveral National Cemetery</span>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -301,13 +513,13 @@
 				<div class="bg-white rounded-lg p-1 shadow-sm">
 					<button 
 						class="px-6 py-2 rounded-md transition-colors {activeTab === 'families' ? 'bg-[#D5BA7F] text-white' : 'text-gray-600 hover:text-gray-900'}"
-						onclick={() => activeTab = 'families'}
+						onclick={() => { activeTab = 'families'; currentStep = 0; }}
 					>
 						Families
 					</button>
 					<button 
 						class="px-6 py-2 rounded-md transition-colors {activeTab === 'directors' ? 'bg-[#D5BA7F] text-white' : 'text-gray-600 hover:text-gray-900'}"
-						onclick={() => activeTab = 'directors'}
+						onclick={() => { activeTab = 'directors'; currentStep = 0; }}
 					>
 						Funeral Directors
 					</button>
@@ -316,17 +528,48 @@
 
 			<div class="grid md:grid-cols-2 gap-12 items-start">
 				<div>
-					{#if activeTab === 'families'}
-						<Steps theme="minimal" items={familySteps.map(s => s.title)} current={0} />
-						<p class="mt-6 text-slate-600">
-							Creating a memorial is simple and respectful. Set up your loved one's tribute page, schedule the service, and share the private link with family and friends. We handle all the technical details so you can focus on what matters most.
-						</p>
-					{:else}
-						<Steps theme="minimal" items={directorSteps.map(s => s.title)} current={0} />
-						<p class="mt-6 text-slate-600">
-							Partner with us for seamless memorial streaming. Our experienced technicians arrive early, handle all setup, and provide live support throughout the service. You focus on the family—we ensure the technology works flawlessly.
-						</p>
-					{/if}
+					<!-- Interactive Step Buttons -->
+					<div class="flex flex-col sm:flex-row gap-3 mb-8">
+						{#each (activeTab === 'families' ? familySteps : directorSteps) as step, index}
+							<button
+								class="flex-1 px-4 py-3 rounded-lg border-2 transition-all duration-200 text-left {currentStep === index ? 'border-[#D5BA7F] bg-[#D5BA7F]/10' : 'border-gray-200 bg-white hover:border-[#D5BA7F]/50'}"
+								onclick={() => currentStep = index}
+							>
+								<div class="text-xs font-semibold text-[#D5BA7F] mb-1">Step {index + 1}</div>
+								<div class="font-medium text-slate-900">{step.title}</div>
+							</button>
+						{/each}
+					</div>
+
+					<!-- Dynamic Step Description -->
+					<div class="mb-8">
+						{#if activeTab === 'families'}
+							<p class="text-slate-600 text-lg leading-relaxed">
+								{familySteps[currentStep].description}
+							</p>
+						{:else}
+							<p class="text-slate-600 text-lg leading-relaxed">
+								{directorSteps[currentStep].description}
+							</p>
+						{/if}
+					</div>
+
+					<!-- CTA Button -->
+					<div class="flex justify-center sm:justify-start">
+						{#if activeTab === 'families'}
+							<Button theme="minimal" class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F] px-8 py-3">
+								<a href="/register/loved-one" class="no-underline text-black font-semibold">
+									Create Memorial
+								</a>
+							</Button>
+						{:else}
+							<Button theme="minimal" class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F] px-8 py-3">
+								<a href="/contact" class="no-underline text-black font-semibold">
+									Book Demo
+								</a>
+							</Button>
+						{/if}
+					</div>
 				</div>
 				
 				<div>
@@ -435,13 +678,13 @@
 						<li class="flex items-start gap-3">
 							<Users class="h-5 w-5 text-[#D5BA7F] mt-0.5 flex-shrink-0" />
 							<div>
-								<strong>Private links:</strong> Secure, password-protected access for invited guests only
+								<strong>Custom links:</strong> Unique, custom links allow easy access for your invited guests
 							</div>
 						</li>
 						<li class="flex items-start gap-3">
 							<Play class="h-5 w-5 text-[#D5BA7F] mt-0.5 flex-shrink-0" />
 							<div>
-								<strong>Downloadable archive:</strong> High-quality recording delivered within 24 hours
+								<strong>Downloadable archive:</strong> High-quality recording available within 24 hours
 							</div>
 						</li>
 					</ul>
@@ -660,4 +903,116 @@
 		height: 8px;
 		border-radius: 4px;
 	}
+
+	/* Video Player Slider Styles */
+	:global(.slider) {
+		-webkit-appearance: none;
+		appearance: none;
+		background: transparent;
+		cursor: pointer;
+	}
+
+	:global(.slider::-webkit-slider-track) {
+		background: rgba(255, 255, 255, 0.2);
+		height: 4px;
+		border-radius: 2px;
+	}
+
+	:global(.slider::-webkit-slider-thumb) {
+		-webkit-appearance: none;
+		appearance: none;
+		height: 16px;
+		width: 16px;
+		border-radius: 50%;
+		background: #D5BA7F;
+		cursor: pointer;
+		border: 2px solid white;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+	}
+
+	:global(.slider::-moz-range-track) {
+		background: rgba(255, 255, 255, 0.2);
+		height: 4px;
+		border-radius: 2px;
+		border: none;
+	}
+
+	:global(.slider::-moz-range-thumb) {
+		height: 16px;
+		width: 16px;
+		border-radius: 50%;
+		background: #D5BA7F;
+		cursor: pointer;
+		border: 2px solid white;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+	}
+
+	/* Video container hover effects */
+	:global(.video-container:hover .video-controls) {
+		opacity: 1;
+	}
+
+	/* Hero video zoom effect */
+	:global(.hero-video-zoom) {
+		transform: scale(1.2);
+		transform-origin: center center;
+	}
+
+	/* Sunrise/Sunset radial gradients */
+	:global(.bg-gradient-radial) {
+		background-image: radial-gradient(circle, var(--tw-gradient-stops));
+	}
+
+	/* Floating Light Flare Animations */
+	@keyframes float-slow {
+		0%, 100% { transform: translateY(0px) translateX(0px) scale(1); }
+		25% { transform: translateY(-20px) translateX(10px) scale(1.1); }
+		50% { transform: translateY(-10px) translateX(-5px) scale(0.9); }
+		75% { transform: translateY(-30px) translateX(-10px) scale(1.05); }
+	}
+
+	@keyframes float-medium {
+		0%, 100% { transform: translateY(0px) translateX(0px) scale(1); }
+		33% { transform: translateY(-15px) translateX(-8px) scale(1.2); }
+		66% { transform: translateY(-25px) translateX(12px) scale(0.8); }
+	}
+
+	@keyframes float-fast {
+		0%, 100% { transform: translateY(0px) translateX(0px) scale(1); }
+		20% { transform: translateY(-10px) translateX(5px) scale(1.1); }
+		40% { transform: translateY(-20px) translateX(-3px) scale(0.9); }
+		60% { transform: translateY(-15px) translateX(-8px) scale(1.2); }
+		80% { transform: translateY(-25px) translateX(7px) scale(0.85); }
+	}
+
+	@keyframes float-reverse {
+		0%, 100% { transform: translateY(0px) translateX(0px) scale(1); }
+		25% { transform: translateY(20px) translateX(-10px) scale(0.9); }
+		50% { transform: translateY(10px) translateX(5px) scale(1.1); }
+		75% { transform: translateY(30px) translateX(10px) scale(0.95); }
+	}
+
+	@keyframes float-slow-reverse {
+		0%, 100% { transform: translateY(0px) translateX(0px) scale(1); }
+		33% { transform: translateY(15px) translateX(8px) scale(0.8); }
+		66% { transform: translateY(25px) translateX(-12px) scale(1.2); }
+	}
+
+	@keyframes float-tiny {
+		0%, 100% { transform: translateY(0px) translateX(0px) scale(1); }
+		50% { transform: translateY(-8px) translateX(4px) scale(1.3); }
+	}
+
+	@keyframes float-tiny-reverse {
+		0%, 100% { transform: translateY(0px) translateX(0px) scale(1); }
+		50% { transform: translateY(8px) translateX(-4px) scale(0.7); }
+	}
+
+	:global(.animate-float-slow) { animation: float-slow 25s ease-in-out infinite; }
+	:global(.animate-float-medium) { animation: float-medium 18s ease-in-out infinite; }
+	:global(.animate-float-fast) { animation: float-fast 12s ease-in-out infinite; }
+	:global(.animate-float-reverse) { animation: float-reverse 22s ease-in-out infinite; }
+	:global(.animate-float-slow-reverse) { animation: float-slow-reverse 28s ease-in-out infinite; }
+	:global(.animate-float-tiny) { animation: float-tiny 8s ease-in-out infinite; }
+	:global(.animate-float-tiny-reverse) { animation: float-tiny-reverse 10s ease-in-out infinite; }
 </style>

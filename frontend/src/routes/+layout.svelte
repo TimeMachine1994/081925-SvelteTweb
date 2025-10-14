@@ -4,6 +4,7 @@
 	import Navbar from '$lib/components/Navbar.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import DevRoleSwitcher from '$lib/components/DevRoleSwitcher.svelte';
+	import RecaptchaProvider from '$lib/components/RecaptchaProvider.svelte';
 	import { getTheme } from '$lib/design-tokens/minimal-modern-theme';
 
 	import { user } from '$lib/auth';
@@ -24,19 +25,21 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<div class="app-container {theme.root}" style="font-family: {theme.font.body}">
-	<DevRoleSwitcher />
-	<Navbar />
-	<main
-		class="main-content"
-		class:full-width={$page.route.id?.includes('/app/calculator')}
-		class:homepage={$page.route.id === '/'}
-		class:memorial-page={$page.route.id === '/[fullSlug]'}
-	>
-		{@render children?.()}
-	</main>
-	<Footer />
-</div>
+<RecaptchaProvider>
+	<div class="app-container {theme.root}" style="font-family: {theme.font.body}">
+		<DevRoleSwitcher />
+		<Navbar />
+		<main
+			class="main-content"
+			class:full-width={$page.route.id?.includes('/app/calculator')}
+			class:homepage={$page.route.id === '/'}
+			class:memorial-page={$page.route.id === '/[fullSlug]'}
+		>
+			{@render children?.()}
+		</main>
+		<Footer />
+	</div>
+</RecaptchaProvider>
 
 <style>
 	.app-container {

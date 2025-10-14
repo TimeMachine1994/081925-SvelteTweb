@@ -51,7 +51,7 @@
 				If you appreciated the service we provided you and your family please consider leaving us a
 				five-star review on Google!
 			</p>
-			<a href="https://google.com/search?q=tributestream" class="review-btn">Review Us</a>
+			<a href="https://g.page/r/CT2e1k0NJGeKEBM/review" class="review-btn" target="_blank" rel="noopener noreferrer">Review Us</a>
 		</div>
 	</div>
 	<div class="footer-bottom">

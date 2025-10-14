@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { getTheme } from '$lib/design-tokens/minimal-modern-theme';
 	import { Button, Input, Card, Toast, FAQ } from '$lib/components/minimal-modern';
+	// import { executeRecaptcha, RECAPTCHA_ACTIONS } from '$lib/utils/recaptcha';
 
 	let name = $state('');
 	let email = $state('');
@@ -50,7 +51,8 @@
 					name: name.trim(),
 					email: email.trim(),
 					subject: subject.trim(),
-					message: message.trim()
+					message: message.trim(),
+					recaptchaToken: null // Skip reCAPTCHA for now
 				})
 			});
 
@@ -63,11 +65,6 @@
 				email = '';
 				subject = '';
 				message = '';
-
-				// Redirect to confirmation page after 2 seconds
-				setTimeout(() => {
-					goto('/contact/confirmation');
-				}, 2000);
 			} else {
 				error = result.error || 'Failed to send message. Please try again.';
 			}
@@ -108,7 +105,7 @@
 				{#if success}
 					<Toast 
 						theme="minimal" 
-						message="Message sent successfully! We'll get back to you within 24 hours. Redirecting to confirmation page..." 
+						message="Message sent successfully! We'll get back to you within 24 hours." 
 						type="success" 
 						class="mb-6"
 					/>
@@ -164,7 +161,7 @@
 						/>
 					</div>
 
-					<div>
+					<div class="col-span-full">
 						<label for="message" class="block text-sm font-medium {theme.text} mb-2">
 							Message *
 						</label>
@@ -173,7 +170,7 @@
 							bind:value={message}
 							required
 							rows="6"
-							class="{theme.input} resize-vertical h-32"
+							class="{theme.input} resize-vertical h-32 w-full"
 							placeholder="Tell us more about how we can help you..."
 						></textarea>
 					</div>
@@ -181,7 +178,7 @@
 					<Button
 						type="submit"
 						theme="minimal"
-						class="w-full"
+						class="w-full flex items-center justify-center"
 						disabled={isSubmitting}
 					>
 						{#if isSubmitting}
@@ -254,7 +251,7 @@
 							For urgent technical support during a service, call our emergency line:
 						</p>
 						<Button theme="minimal" class="bg-amber-600 text-white hover:bg-amber-700">
-							<a href="tel:407-221-5922" class="no-underline text-white">Call Emergency Line</a>
+							<a href="/emergency" class="no-underline text-white">Emergency Support Info</a>
 						</Button>
 					</div>
 				</Card>

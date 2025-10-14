@@ -24,6 +24,7 @@
 	import { onMount } from 'svelte';
 	import { getTheme } from '$lib/design-tokens/minimal-modern-theme';
 	import { Button, Input, Card, Toast, Badge, Stats } from '$lib/components/minimal-modern';
+	import { executeRecaptcha, RECAPTCHA_ACTIONS } from '$lib/utils/recaptcha';
 
 	let { data, form } = $props();
 	let displayName = $state(data.profile?.displayName || '');
@@ -757,9 +758,26 @@
 					method="POST"
 					action="?/createMemorial"
 					class="space-y-6"
-					onsubmit={() => {
+					use:enhance={async ({ formData }) => {
 						console.log('🎯 [PROFILE] Form submitting...');
 						isCreatingMemorial = true;
+
+						// Execute reCAPTCHA
+						const recaptchaToken = await executeRecaptcha(RECAPTCHA_ACTIONS.CREATE_MEMORIAL);
+						
+						if (!recaptchaToken) {
+							console.error('🎯 [PROFILE] reCAPTCHA failed');
+							isCreatingMemorial = false;
+							return;
+						}
+
+						// Add reCAPTCHA token to form data
+						formData.append('recaptchaToken', recaptchaToken);
+
+						return async ({ result, update }) => {
+							isCreatingMemorial = false;
+							await update();
+						};
 					}}
 				>
 					<div

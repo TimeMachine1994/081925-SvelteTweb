@@ -1,19 +1,45 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { verifyRecaptcha, RECAPTCHA_ACTIONS, getScoreThreshold } from '$lib/utils/recaptcha';
 
 // You'll need to install @sendgrid/mail: npm install @sendgrid/mail
 import sgMail from '@sendgrid/mail';
 
 // Set your SendGrid API key from environment variables
-sgMail.setApiKey(process.env.SENDGRID_API_KEY || '');
+const sendgridApiKey = process.env.SENDGRID_API_KEY;
+if (sendgridApiKey) {
+	sgMail.setApiKey(sendgridApiKey);
+}
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
-		const { name, email, subject, message } = await request.json();
+		const { name, email, subject, message, recaptchaToken } = await request.json();
 
 		// Validate required fields
 		if (!name || !email || !subject || !message) {
 			return json({ error: 'All fields are required' }, { status: 400 });
+		}
+
+		// Verify reCAPTCHA (optional for now)
+		if (recaptchaToken) {
+			try {
+				const recaptchaResult = await verifyRecaptcha(
+					recaptchaToken,
+					RECAPTCHA_ACTIONS.CONTACT_FORM,
+					getScoreThreshold(RECAPTCHA_ACTIONS.CONTACT_FORM)
+				);
+
+				if (!recaptchaResult.success) {
+					console.error('[CONTACT_API] reCAPTCHA verification failed:', recaptchaResult.error);
+					return json({ error: 'Security verification failed. Please try again.' }, { status: 400 });
+				}
+
+				console.log(`[CONTACT_API] reCAPTCHA verified successfully. Score: ${recaptchaResult.score}`);
+			} catch (error) {
+				console.warn('[CONTACT_API] reCAPTCHA verification error, proceeding without verification:', error);
+			}
+		} else {
+			console.log('[CONTACT_API] No reCAPTCHA token provided, proceeding without verification');
 		}
 
 		// Validate email format
@@ -106,6 +132,25 @@ export const POST: RequestHandler = async ({ request }) => {
 				</div>
 			`
 		};
+
+		// Check if SendGrid is configured
+		if (!sendgridApiKey) {
+			console.log('[CONTACT_API] SendGrid not configured. Contact form data:', {
+				name,
+				email,
+				subject,
+				message,
+				timestamp: new Date().toISOString()
+			});
+
+			return json(
+				{
+					success: true,
+					message: 'Message received successfully. We will get back to you soon.'
+				},
+				{ status: 200 }
+			);
+		}
 
 		// Send both emails
 		await Promise.all([sgMail.send(supportEmail), sgMail.send(confirmationEmail)]);

@@ -1,14 +1,34 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { verifyRecaptcha, RECAPTCHA_ACTIONS, getScoreThreshold } from '$lib/utils/recaptcha';
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
 		const data = await request.json();
 		
 		// Validate required fields
-		const { funeralHomeName, contactName, email, phone } = data;
+		const { funeralHomeName, contactName, email, phone, recaptchaToken } = data;
 		if (!funeralHomeName || !contactName || !email || !phone) {
 			return json({ error: 'Missing required fields' }, { status: 400 });
+		}
+
+		// Verify reCAPTCHA
+		if (recaptchaToken) {
+			const recaptchaResult = await verifyRecaptcha(
+				recaptchaToken,
+				RECAPTCHA_ACTIONS.BOOK_DEMO,
+				getScoreThreshold(RECAPTCHA_ACTIONS.BOOK_DEMO)
+			);
+
+			if (!recaptchaResult.success) {
+				console.error('[BOOK_DEMO_API] reCAPTCHA verification failed:', recaptchaResult.error);
+				return json({ error: 'Security verification failed. Please try again.' }, { status: 400 });
+			}
+
+			console.log(`[BOOK_DEMO_API] reCAPTCHA verified successfully. Score: ${recaptchaResult.score}`);
+		} else {
+			console.warn('[BOOK_DEMO_API] No reCAPTCHA token provided');
+			return json({ error: 'Security verification required. Please refresh and try again.' }, { status: 400 });
 		}
 
 		// Here you would typically:

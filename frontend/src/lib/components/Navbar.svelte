@@ -52,7 +52,7 @@
 	];
 </script>
 
-<nav class="sticky top-0 z-50 w-full shadow-lg bg-slate-900">
+<nav class="sticky top-0 z-50 w-full shadow-lg bg-black">
 	<div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
 		<!-- Logo/Title -->
 		<a
@@ -115,7 +115,7 @@
 
 	<!-- Mobile Navigation Menu -->
 	{#if mobileMenuOpen}
-		<div class="mobile-menu md:hidden border-t shadow-lg bg-slate-900 border-slate-700">
+		<div class="mobile-menu md:hidden border-t shadow-lg bg-black border-slate-700">
 			<ul class="flex flex-col list-none m-0 p-4 gap-0"
 			>
 				{#each navigationItems as item}

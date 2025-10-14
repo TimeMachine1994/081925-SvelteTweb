@@ -1,6 +1,7 @@
 import { adminAuth, adminDb } from '$lib/server/firebase';
 import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
+import { verifyRecaptcha, RECAPTCHA_ACTIONS, getScoreThreshold } from '$lib/utils/recaptcha';
 
 export const actions: Actions = {
 	registerOwner: async ({ request }) => {
@@ -9,11 +10,35 @@ export const actions: Actions = {
 		const name = data.get('name');
 		const email = data.get('email');
 		const password = data.get('password');
+		const recaptchaToken = data.get('recaptchaToken');
 
 		if (!name || !email || !password) {
 			console.error('[+page.server.ts] Missing required fields.');
 			return fail(400, {
 				message: 'Name, email and password are required'
+			});
+		}
+
+		// Verify reCAPTCHA
+		if (recaptchaToken) {
+			const recaptchaResult = await verifyRecaptcha(
+				recaptchaToken.toString(),
+				RECAPTCHA_ACTIONS.REGISTER_OWNER,
+				getScoreThreshold(RECAPTCHA_ACTIONS.REGISTER_OWNER)
+			);
+
+			if (!recaptchaResult.success) {
+				console.error('[+page.server.ts] reCAPTCHA verification failed:', recaptchaResult.error);
+				return fail(400, {
+					message: 'Security verification failed. Please try again.'
+				});
+			}
+
+			console.log(`[+page.server.ts] reCAPTCHA verified successfully. Score: ${recaptchaResult.score}`);
+		} else {
+			console.warn('[+page.server.ts] No reCAPTCHA token provided');
+			return fail(400, {
+				message: 'Security verification required. Please refresh and try again.'
 			});
 		}
 
@@ -67,11 +92,35 @@ export const actions: Actions = {
 		const name = data.get('name');
 		const email = data.get('email');
 		const password = data.get('password');
+		const recaptchaToken = data.get('recaptchaToken');
 
 		if (!name || !email || !password) {
 			console.error('[+page.server.ts] Missing required fields.');
 			return fail(400, {
 				message: 'Name, email and password are required'
+			});
+		}
+
+		// Verify reCAPTCHA
+		if (recaptchaToken) {
+			const recaptchaResult = await verifyRecaptcha(
+				recaptchaToken.toString(),
+				RECAPTCHA_ACTIONS.REGISTER_VIEWER,
+				getScoreThreshold(RECAPTCHA_ACTIONS.REGISTER_VIEWER)
+			);
+
+			if (!recaptchaResult.success) {
+				console.error('[+page.server.ts] reCAPTCHA verification failed:', recaptchaResult.error);
+				return fail(400, {
+					message: 'Security verification failed. Please try again.'
+				});
+			}
+
+			console.log(`[+page.server.ts] reCAPTCHA verified successfully. Score: ${recaptchaResult.score}`);
+		} else {
+			console.warn('[+page.server.ts] No reCAPTCHA token provided');
+			return fail(400, {
+				message: 'Security verification required. Please refresh and try again.'
 			});
 		}
 

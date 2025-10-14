@@ -211,14 +211,14 @@
 							/>
 						</div>
 
-						<div>
+						<div class="col-span-full">
 							<label class="block text-sm font-medium {theme.text} mb-2">
 								Additional Notes
 							</label>
 							<textarea 
 								bind:value={notes} 
 								rows="4" 
-								class="{theme.input} resize-vertical" 
+								class="{theme.input} resize-vertical w-full" 
 								placeholder="Any specific questions or requirements for the demo?"
 							></textarea>
 						</div>

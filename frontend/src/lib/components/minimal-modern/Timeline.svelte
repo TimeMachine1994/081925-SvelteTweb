@@ -22,12 +22,12 @@
   const themeConfig = getTheme(theme);
 </script>
 
-<div class="relative pl-6 {className}">
-  <div class="absolute left-2 top-0 bottom-0 w-px bg-slate-200"></div>
+<div class="relative pl-8 {className}">
+  <div class="absolute left-3 top-0 bottom-0 w-px bg-slate-200"></div>
   <ul class="space-y-4">
     {#each events as event, idx}
       <li class="relative">
-        <div class="absolute -left-1 top-1.5 h-2.5 w-2.5 rounded-full bg-[#D5BA7F]"></div>
+        <div class="absolute -left-5 top-1.5 h-2.5 w-2.5 rounded-full bg-[#D5BA7F]"></div>
         <div class="text-xs opacity-60">{event.time}</div>
         <div class="font-medium">{event.title}</div>
         <div class="text-sm opacity-80">{event.detail}</div>

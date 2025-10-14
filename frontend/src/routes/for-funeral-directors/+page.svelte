@@ -34,7 +34,7 @@
 		{ 
 			name: "Basic Partnership", 
 			price: "No Cost", 
-			features: ["Commission-based model", "Basic training", "Phone support", "Standard branding"],
+			features: ["Free advertising materials", "Basic training", "Phone support", "Standard branding"],
 			popular: false,
 			familyCta: "Learn More",
 			directorCta: "Get Started"
@@ -43,9 +43,9 @@
 			name: "Premium Partnership", 
 			price: "Contact Us", 
 			popular: true,
-			features: ["Revenue sharing", "On-site training", "Priority support", "Custom branding", "Marketing materials"],
+			features: ["On-site technical support", "Funeral home technical support", "Custom branding", "Marketing materials", "SEO optimization", "Social media marketing"],
 			familyCta: "Learn More",
-			directorCta: "Schedule Demo"
+			directorCta: "Learn More"
 		}
 	];
 
@@ -173,7 +173,45 @@
 					Choose the partnership level that works best for your funeral home
 				</p>
 			</div>
-			<Comparison theme="minimal" tiers={packages} />
+			
+			<!-- Centered Two-Column Layout -->
+			<div class="flex justify-center">
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl">
+					{#each packages as pkg}
+						<div class="bg-white rounded-lg border-2 p-8 shadow-lg transition-all duration-200 hover:shadow-xl {pkg.popular ? 'border-[#D5BA7F] ring-2 ring-[#D5BA7F]/20' : 'border-gray-200 hover:border-[#D5BA7F]/50'}">
+							{#if pkg.popular}
+								<div class="text-center mb-4">
+									<span class="bg-[#D5BA7F] text-black px-3 py-1 rounded-full text-sm font-semibold">Most Popular</span>
+								</div>
+							{/if}
+							
+							<div class="text-center mb-6">
+								<h3 class="text-2xl font-bold text-slate-900 mb-2" style="font-family: {theme.font.heading}">
+									{pkg.name}
+								</h3>
+								<div class="text-3xl font-extrabold text-[#D5BA7F]">{pkg.price}</div>
+							</div>
+							
+							<ul class="space-y-4 mb-8">
+								{#each pkg.features as feature}
+									<li class="flex items-start gap-3">
+										<div class="mt-1.5 h-2 w-2 rounded-full bg-[#D5BA7F] flex-shrink-0"></div>
+										<span class="text-slate-700">{feature}</span>
+									</li>
+								{/each}
+							</ul>
+							
+							<div class="text-center">
+								<Button theme="minimal" class="w-full bg-[#D5BA7F] text-black hover:bg-[#C5AA6F] py-3">
+									<a href="/partnership/{pkg.name.toLowerCase().replace(' ', '-')}" class="no-underline text-black">
+										{pkg.directorCta}
+									</a>
+								</Button>
+							</div>
+						</div>
+					{/each}
+				</div>
+			</div>
 		</div>
 	</section>
 
