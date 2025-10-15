@@ -101,7 +101,8 @@
 				border: `1px solid ${roleColor.primary}`,
 				hover: {
 					background: roleColor.accent,
-					border: `1px solid ${roleColor.accent}`
+					border: `1px solid ${roleColor.accent}`,
+					color: colors.text.inverse
 				}
 			};
 		}
@@ -197,6 +198,9 @@
 		user-select: none;
 		white-space: nowrap;
 		width: ${fullWidth ? '100%' : 'auto'};
+		--hover-bg: ${variantStyles.hover.background};
+		--hover-border: ${variantStyles.hover.border};
+		--hover-color: ${variantStyles.hover.color || variantStyles.color};
 	`;
 
 	const hoverStyles = `
@@ -305,6 +309,7 @@
 	:global(.tribute-button:hover:not(:disabled)) {
 		background: var(--hover-bg) !important;
 		border: var(--hover-border) !important;
+		color: var(--hover-color, inherit) !important;
 		transform: translateY(-1px);
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 	}

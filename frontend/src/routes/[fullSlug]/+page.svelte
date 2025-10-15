@@ -76,55 +76,208 @@
 						{@html (memorial as any).custom_html}
 					</div>
 
-					<!-- Hide generic description text for legacy memorials with custom HTML -->
+					<!-- Body Section (2/3) -->
+					<div class="memorial-body">
+						<!-- Memorial Description -->
+						{#if memorial.content}
+							<div class="memorial-description">
+								{@html memorial.content}
+							</div>
+						{/if}
 
-					<!-- Streams Section for Legacy Memorials -->
-					{#if streams.length > 0}
-						<div class="streams-section">
-							<h2>Live Streams</h2>
-							<StreamPlayer streams={streams as any} memorialName={memorial.lovedOneName} memorialId={memorial.id} />
+						<!-- Memorial Video Section -->
+						<div class="memorial-video-section">
+							<h2 class="video-section-title">Memorial Video</h2>
+							<div class="placeholder-video">
+								<div class="placeholder-video-container">
+									<div class="placeholder-video-screen">
+										<div class="placeholder-video-content">
+											<div class="placeholder-video-icon">
+												<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+													<rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+													<line x1="8" y1="21" x2="16" y2="21"/>
+													<line x1="12" y1="17" x2="12" y2="21"/>
+													<polygon points="10,9 15,12 10,15"/>
+												</svg>
+											</div>
+											<h3>Memorial Video Coming Soon</h3>
+											<p>A special video tribute will be available here to honor {memorial.lovedOneName}'s memory</p>
+										</div>
+									</div>
+									<div class="placeholder-video-controls">
+										<div class="placeholder-control-bar">
+											<div class="placeholder-play-button">▶️</div>
+											<div class="placeholder-progress-bar">
+												<div class="placeholder-progress-fill"></div>
+											</div>
+											<div class="placeholder-time">0:00 / 0:00</div>
+											<div class="placeholder-volume">🔊</div>
+											<div class="placeholder-fullscreen">⛶</div>
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
-					{/if}
+
+						<!-- Livestream Section -->
+						<div class="livestream-section">
+							<h2 class="video-section-title">Live Stream</h2>
+							{#if streams && streams.length > 0}
+								<!-- Real Stream Player -->
+								<StreamPlayer streams={streams as any} memorialName={memorial.lovedOneName} memorialId={memorial.id} />
+							{:else}
+								<!-- Fake Player when no livestream scheduled -->
+								<div class="fake-player">
+									<div class="fake-player-container">
+										<div class="fake-player-screen">
+											<div class="fake-player-content">
+												<div class="fake-player-icon">
+													<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+														<circle cx="12" cy="12" r="10"/>
+														<polygon points="10,8 16,12 10,16"/>
+													</svg>
+												</div>
+												<h3>No Live Stream Scheduled</h3>
+												<p>Check back later for live streaming of the memorial service</p>
+											</div>
+										</div>
+										<div class="fake-player-controls">
+											<div class="fake-control-bar">
+												<div class="fake-play-button">⏸️</div>
+												<div class="fake-progress-bar">
+													<div class="fake-progress-fill"></div>
+												</div>
+												<div class="fake-time">0:00 / 0:00</div>
+												<div class="fake-volume">🔊</div>
+												<div class="fake-fullscreen">⛶</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							{/if}
+						</div>
+					</div>
 				</div>
-			</div>
-		{:else}
-			<!-- Standard Memorial Layout -->
-			<div class="memorial-header">
-				{#if memorial.imageUrl}
-					<div class="memorial-image">
-						<img src={memorial.imageUrl} alt={memorial.lovedOneName} />
+
+				<!-- Streams Section for Legacy Memorials -->
+				{#if streams.length > 0}
+					<div class="streams-section">
+						<h2>Live Streams</h2>
+						<StreamPlayer streams={streams as any} memorialName={memorial.lovedOneName} memorialId={memorial.id} />
 					</div>
 				{/if}
-				<div class="memorial-content">
-					<h1 class="memorial-title">
-						<span class="celebration-prefix">Celebration of Life for</span>
-						<span class="loved-one-name">{memorial.lovedOneName}</span>
-					</h1>
-					{#if memorial.birthDate || memorial.deathDate}
-						<div class="dates">
-							{#if memorial.birthDate}
-								<span>{formatDate(memorial.birthDate)}</span>
-							{/if}
-							{#if memorial.birthDate && memorial.deathDate}
-								<span> - </span>
-							{/if}
-							{#if memorial.deathDate}
-								<span>{formatDate(memorial.deathDate)}</span>
-							{/if}
+			</div>
+		{:else}
+			<!-- Standard Memorial Layout - 1/3 Header, 2/3 Body -->
+			<div class="memorial-layout">
+				<!-- Header Section (1/3) -->
+				<div class="memorial-header">
+					{#if memorial.imageUrl}
+						<div class="memorial-image">
+							<img src={memorial.imageUrl} alt={memorial.lovedOneName} />
 						</div>
 					{/if}
+					<div class="memorial-header-content">
+						<h1 class="memorial-title">
+							<span class="celebration-prefix">Celebration of Life for</span>
+							<span class="loved-one-name">{memorial.lovedOneName}</span>
+						</h1>
+						{#if memorial.birthDate || memorial.deathDate}
+							<div class="dates">
+								{#if memorial.birthDate}
+									<span>{formatDate(memorial.birthDate)}</span>
+								{/if}
+								{#if memorial.birthDate && memorial.deathDate}
+									<span> - </span>
+								{/if}
+								{#if memorial.deathDate}
+									<span>{formatDate(memorial.deathDate)}</span>
+								{/if}
+							</div>
+						{/if}
+					</div>
+				</div>
+
+				<!-- Body Section (2/3) -->
+				<div class="memorial-body">
+					<!-- Memorial Description -->
 					{#if memorial.content}
 						<div class="memorial-description">
 							{@html memorial.content}
 						</div>
 					{/if}
-				</div>
-			</div>
 
-			<!-- Streams Section -->
-			<div class="memorial-content-container">
-				<div class="streams-section">
-					<StreamPlayer streams={streams as any} memorialName={memorial.lovedOneName} memorialId={memorial.id} />
+					<!-- Memorial Video Section -->
+					<div class="memorial-video-section">
+						<h2 class="video-section-title">Memorial Video</h2>
+						<div class="placeholder-video">
+							<div class="placeholder-video-container">
+								<div class="placeholder-video-screen">
+									<div class="placeholder-video-content">
+										<div class="placeholder-video-icon">
+											<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+												<rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+												<line x1="8" y1="21" x2="16" y2="21"/>
+												<line x1="12" y1="17" x2="12" y2="21"/>
+												<polygon points="10,9 15,12 10,15"/>
+											</svg>
+										</div>
+										<h3>Memorial Video Coming Soon</h3>
+										<p>A special video tribute will be available here to honor {memorial.lovedOneName}'s memory</p>
+									</div>
+								</div>
+								<div class="placeholder-video-controls">
+									<div class="placeholder-control-bar">
+										<div class="placeholder-play-button">▶️</div>
+										<div class="placeholder-progress-bar">
+											<div class="placeholder-progress-fill"></div>
+										</div>
+										<div class="placeholder-time">0:00 / 0:00</div>
+										<div class="placeholder-volume">🔊</div>
+										<div class="placeholder-fullscreen">⛶</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- Livestream Section -->
+					<div class="livestream-section">
+						<h2 class="video-section-title">Live Stream</h2>
+						{#if streams && streams.length > 0}
+							<!-- Real Stream Player -->
+							<StreamPlayer streams={streams as any} memorialName={memorial.lovedOneName} memorialId={memorial.id} />
+						{:else}
+							<!-- Fake Player when no livestream scheduled -->
+							<div class="fake-player">
+								<div class="fake-player-container">
+									<div class="fake-player-screen">
+										<div class="fake-player-content">
+											<div class="fake-player-icon">
+												<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+													<circle cx="12" cy="12" r="10"/>
+													<polygon points="10,8 16,12 10,16"/>
+												</svg>
+											</div>
+											<h3>No Live Stream Scheduled</h3>
+											<p>Check back later for live streaming of the memorial service</p>
+										</div>
+									</div>
+									<div class="fake-player-controls">
+										<div class="fake-control-bar">
+											<div class="fake-play-button">⏸️</div>
+											<div class="fake-progress-bar">
+												<div class="fake-progress-fill"></div>
+											</div>
+											<div class="fake-time">0:00 / 0:00</div>
+											<div class="fake-volume">🔊</div>
+											<div class="fake-fullscreen">⛶</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						{/if}
+					</div>
 				</div>
 			</div>
 		{/if}
@@ -341,4 +494,331 @@
 
 	/* Import Fanwood font */
 	@import url('https://fonts.googleapis.com/css2?family=Fanwood+Text:ital,wght@0,400;1,400&display=swap');
+
+	/* New Memorial Layout - 1/3 Header, 2/3 Body */
+	.memorial-layout {
+		display: flex;
+		flex-direction: column;
+		min-height: 100vh;
+	}
+
+	.memorial-header {
+		height: 33.33vh;
+		min-height: 300px;
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background-image: url('https://firebasestorage.googleapis.com/v0/b/fir-tweb.firebasestorage.app/o/Background.jpg?alt=media&token=460aeba9-0879-4e88-b10f-f012dc79c0e6');
+		background-size: cover;
+		background-position: center;
+		background-repeat: no-repeat;
+		color: white;
+		overflow: hidden;
+	}
+
+	.memorial-image {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		z-index: 1;
+	}
+
+	.memorial-image img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		opacity: 0.7;
+	}
+
+	.memorial-header-content {
+		position: relative;
+		z-index: 2;
+		text-align: center;
+		padding: 2rem;
+		background: rgba(0, 0, 0, 0.3);
+		border-radius: 12px;
+		backdrop-filter: blur(10px);
+	}
+
+	.memorial-body {
+		flex: 1;
+		padding: 3rem 2rem;
+		background: #fafafa;
+		display: flex;
+		flex-direction: column;
+		gap: 2rem;
+	}
+
+	.memorial-description {
+		max-width: 800px;
+		margin: 0 auto;
+		font-size: 1.1rem;
+		line-height: 1.6;
+		color: #444;
+	}
+
+	.memorial-video-section,
+	.livestream-section {
+		max-width: 1000px;
+		margin: 0 auto;
+		width: 100%;
+	}
+
+	.video-section-title {
+		font-size: 1.8rem;
+		font-weight: 300;
+		color: #333;
+		text-align: center;
+		margin-bottom: 1.5rem;
+		font-family: 'Fanwood Text', serif;
+		font-style: italic;
+	}
+
+	/* Placeholder Video Styles */
+	.placeholder-video {
+		width: 100%;
+		max-width: 800px;
+		margin: 0 auto 3rem auto;
+		background: #000;
+		border-radius: 8px;
+		overflow: hidden;
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+	}
+
+	.placeholder-video-container {
+		position: relative;
+		width: 100%;
+	}
+
+	.placeholder-video-screen {
+		aspect-ratio: 16/9;
+		background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		position: relative;
+	}
+
+	.placeholder-video-content {
+		text-align: center;
+		color: #999;
+		padding: 2rem;
+	}
+
+	.placeholder-video-icon {
+		margin-bottom: 1rem;
+		opacity: 0.7;
+	}
+
+	.placeholder-video-content h3 {
+		margin: 0 0 0.5rem 0;
+		font-size: 1.6rem;
+		font-weight: 300;
+		color: #ddd;
+	}
+
+	.placeholder-video-content p {
+		margin: 0;
+		font-size: 1rem;
+		color: #999;
+		line-height: 1.5;
+	}
+
+	.placeholder-video-controls {
+		background: #1a1a1a;
+		padding: 0.75rem 1rem;
+		border-top: 1px solid #333;
+	}
+
+	.placeholder-control-bar {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		color: #888;
+		font-size: 0.9rem;
+	}
+
+	.placeholder-play-button {
+		width: 32px;
+		height: 32px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: #333;
+		border-radius: 4px;
+		cursor: not-allowed;
+		opacity: 0.5;
+	}
+
+	.placeholder-progress-bar {
+		flex: 1;
+		height: 4px;
+		background: #333;
+		border-radius: 2px;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.placeholder-progress-fill {
+		width: 0%;
+		height: 100%;
+		background: #666;
+		border-radius: 2px;
+	}
+
+	.placeholder-time {
+		font-family: monospace;
+		font-size: 0.85rem;
+		min-width: 80px;
+	}
+
+	.placeholder-volume,
+	.placeholder-fullscreen {
+		width: 24px;
+		height: 24px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: not-allowed;
+		opacity: 0.5;
+	}
+
+	/* Fake Player Styles */
+	.fake-player {
+		width: 100%;
+		max-width: 800px;
+		margin: 0 auto;
+		background: #000;
+		border-radius: 8px;
+		overflow: hidden;
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+	}
+
+	.fake-player-container {
+		position: relative;
+		width: 100%;
+	}
+
+	.fake-player-screen {
+		aspect-ratio: 16/9;
+		background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		position: relative;
+	}
+
+	.fake-player-content {
+		text-align: center;
+		color: #888;
+		padding: 2rem;
+	}
+
+	.fake-player-icon {
+		margin-bottom: 1rem;
+		opacity: 0.6;
+	}
+
+	.fake-player-content h3 {
+		margin: 0 0 0.5rem 0;
+		font-size: 1.5rem;
+		font-weight: 300;
+		color: #ccc;
+	}
+
+	.fake-player-content p {
+		margin: 0;
+		font-size: 1rem;
+		color: #888;
+	}
+
+	.fake-player-controls {
+		background: #1a1a1a;
+		padding: 0.75rem 1rem;
+		border-top: 1px solid #333;
+	}
+
+	.fake-control-bar {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		color: #888;
+		font-size: 0.9rem;
+	}
+
+	.fake-play-button {
+		width: 32px;
+		height: 32px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: #333;
+		border-radius: 4px;
+		cursor: not-allowed;
+		opacity: 0.5;
+	}
+
+	.fake-progress-bar {
+		flex: 1;
+		height: 4px;
+		background: #333;
+		border-radius: 2px;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.fake-progress-fill {
+		width: 0%;
+		height: 100%;
+		background: #666;
+		border-radius: 2px;
+	}
+
+	.fake-time {
+		font-family: monospace;
+		font-size: 0.85rem;
+		min-width: 80px;
+	}
+
+	.fake-volume,
+	.fake-fullscreen {
+		width: 24px;
+		height: 24px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: not-allowed;
+		opacity: 0.5;
+	}
+
+	/* Responsive Design */
+	@media (max-width: 768px) {
+		.memorial-header {
+			height: 40vh;
+			min-height: 250px;
+		}
+
+		.memorial-header-content {
+			padding: 1.5rem;
+		}
+
+		.memorial-body {
+			padding: 2rem 1rem;
+		}
+
+		.memorial-title {
+			font-size: 1.5rem;
+		}
+
+		.fake-player-content {
+			padding: 1.5rem;
+		}
+
+		.fake-player-content h3 {
+			font-size: 1.2rem;
+		}
+	}
 </style>
