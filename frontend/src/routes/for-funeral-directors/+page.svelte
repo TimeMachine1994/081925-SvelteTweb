@@ -10,7 +10,7 @@
 		{ 
 			icon: Video, 
 			title: "Professional Streaming", 
-			description: "1080p HLS streaming with automatic failover systems. 99.9% uptime guarantee for your most important services." 
+			description: "worldwide content delivery network with automatic failover systems. 99.9% uptime guarantee for your most important services." 
 		},
 		{ 
 			icon: Users, 

@@ -77,6 +77,7 @@
 						</a>
 					</li>
 				{/each}
+				
 				<li>
 					<Button
 						theme="minimal"
@@ -92,6 +93,27 @@
 							</a>
 						{/if}
 					</Button>
+				</li>
+				
+				<!-- Login/Logout Text Link -->
+				<li>
+					{#if $user}
+						<a
+							href="/api/logout"
+							class="nav-link transition-colors text-white hover:text-[#D5BA7F] font-medium py-2"
+							style="font-family: {theme.font.body}; text-decoration: none;"
+						>
+							Logout
+						</a>
+					{:else}
+						<a
+							href="/login"
+							class="nav-link transition-colors text-white hover:text-[#D5BA7F] font-medium py-2"
+							style="font-family: {theme.font.body}; text-decoration: none;"
+						>
+							Login
+						</a>
+					{/if}
 				</li>
 			</ul>
 		</div>
@@ -130,6 +152,7 @@
 						</a>
 					</li>
 				{/each}
+				
 				<li class="pt-4">
 					<Button
 						theme="minimal"
@@ -146,6 +169,29 @@
 							</a>
 						{/if}
 					</Button>
+				</li>
+				
+				<!-- Mobile Login/Logout Text Link -->
+				<li>
+					{#if $user}
+						<a
+							href="/api/logout"
+							class="mobile-nav-link block transition-colors border-b text-white hover:text-[#D5BA7F] font-medium py-4 border-slate-700"
+							style="font-family: {theme.font.body}; text-decoration: none;"
+							onclick={closeMobileMenu}
+						>
+							Logout
+						</a>
+					{:else}
+						<a
+							href="/login"
+							class="mobile-nav-link block transition-colors border-b text-white hover:text-[#D5BA7F] font-medium py-4 border-slate-700"
+							style="font-family: {theme.font.body}; text-decoration: none;"
+							onclick={closeMobileMenu}
+						>
+							Login
+						</a>
+					{/if}
 				</li>
 			</ul>
 		</div>

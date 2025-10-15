@@ -64,7 +64,7 @@
 		{ q: "Is the memorial link private?", a: "Yes, you control who receives the custom link. Optional password protection available." },
 		{ q: "Can we download the recording?", a: "Yes, you receive a high-quality downloadable archive after the service." },
 		{ q: "What if there are technical issues?", a: "Our expert technicians provide on-site support to ensure flawless streaming." },
-		{ q: "How many people can watch?", a: "Unlimited viewers. Our 1080p HLS streaming handles any audience size." },
+		{ q: "How many people can watch?", a: "Unlimited viewers. Our worldwide content delivery network handles any audience size." },
 		{ q: "Do you work with funeral homes?", a: "Yes, we partner with funeral directors to provide seamless memorial streaming services." },
 		{ q: "What's included in the recording?", a: "Full HD recording, downloadable file, and optional edited highlights reel." },
 		{ q: "How do we share the link?", a: "We provide a custom, secure link that you can share via email, text, or social media." }
