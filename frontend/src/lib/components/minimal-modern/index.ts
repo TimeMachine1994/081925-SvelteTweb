@@ -21,7 +21,7 @@ export { default as Breadcrumbs } from './Breadcrumbs.svelte';
 export { default as TagCloud } from './TagCloud.svelte';
 export { default as Toast } from './Toast.svelte';
 
-// TributeStream Specific Components
+// Tributestream Specific Components
 export { default as MemorialCard } from './MemorialCard.svelte';
 export { default as ServiceSchedule } from './ServiceSchedule.svelte';
 export { default as CondolenceForm } from './CondolenceForm.svelte';

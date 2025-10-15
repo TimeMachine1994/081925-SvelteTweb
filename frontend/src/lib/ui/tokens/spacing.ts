@@ -1,5 +1,5 @@
 /**
- * TributeStream Design System - Spacing Tokens
+ * Tributestream Design System - Spacing Tokens
  * 
  * Consistent spacing scale for margins, padding, and layout.
  * Based on Tailwind's spacing scale but customizable.

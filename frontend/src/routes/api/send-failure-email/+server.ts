@@ -34,9 +34,9 @@ export const POST: RequestHandler = async ({ request }) => {
 		// Send email with SendGrid
 		if (SENDGRID_API_KEY && SENDGRID_API_KEY !== 'mock_key') {
 			await sgMail.send({
-				from: FROM_EMAIL || 'TributeStream <noreply@tributestream.com>',
+				from: FROM_EMAIL || 'Tributestream <noreply@tributestream.com>',
 				to: customerEmail,
-				subject: `TributeStream Payment Issue - ${lovedOneName}`,
+				subject: `Tributestream Payment Issue - ${lovedOneName}`,
 				html: emailHtml
 			});
 
@@ -82,7 +82,7 @@ function generateFailureEmailHTML(data: FailureEmailData): string {
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TributeStream Payment Issue</title>
+  <title>Tributestream Payment Issue</title>
   <style>
     body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
     .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -97,7 +97,7 @@ function generateFailureEmailHTML(data: FailureEmailData): string {
 <body>
   <div class="container">
     <div class="header">
-      <h1>🎥 TributeStream</h1>
+      <h1>🎥 Tributestream</h1>
       <h2>Payment Issue</h2>
     </div>
     
@@ -134,11 +134,11 @@ function generateFailureEmailHTML(data: FailureEmailData): string {
       
       <p>Thank you for your patience.</p>
       
-      <p>Best regards,<br>The TributeStream Team</p>
+      <p>Best regards,<br>The Tributestream Team</p>
     </div>
     
     <div class="footer">
-      <p>TributeStream - Honoring Lives, Connecting Hearts</p>
+      <p>Tributestream - Honoring Lives, Connecting Hearts</p>
       <p>This is an automated email. Please do not reply directly to this message.</p>
     </div>
   </div>

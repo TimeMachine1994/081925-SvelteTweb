@@ -68,7 +68,7 @@
 		{
 			name: "Sarah M.",
 			rating: 5,
-			text: "TributeStream helped us create a beautiful memorial for my mother. Family from across the country could participate and share their memories. It brought us all together during a difficult time."
+			text: "Tributestream helped us create a beautiful memorial for my mother. Family from across the country could participate and share their memories. It brought us all together during a difficult time."
 		},
 		{
 			name: "Michael R.",
@@ -84,10 +84,10 @@
 </script>
 
 <svelte:head>
-	<title>For Families - TributeStream</title>
+	<title>For Families - Tributestream</title>
 	<meta
 		name="description"
-		content="Create a beautiful memorial for your loved one. Share memories, connect with family and friends, and honor their legacy with TributeStream."
+		content="Create a beautiful memorial for your loved one. Share memories, connect with family and friends, and honor their legacy with Tributestream."
 	/>
 </svelte:head>
 
@@ -169,7 +169,7 @@
 		<div class="max-w-6xl mx-auto px-6">
 			<div class="text-center mb-12">
 				<h2 class="text-3xl font-bold text-slate-900 mb-4" style="font-family: {theme.font.heading}">
-					Why Families Choose TributeStream
+					Why Families Choose Tributestream
 				</h2>
 				<p class="text-lg text-slate-600 max-w-2xl mx-auto">
 					Create a meaningful space to honor your loved one and bring family together during life's most important moments.
@@ -249,7 +249,7 @@
 					Trusted by Families Everywhere
 				</h2>
 				<p class="text-lg text-slate-600">
-					See how TributeStream has helped families honor their loved ones
+					See how Tributestream has helped families honor their loved ones
 				</p>
 			</div>
 			<div class="grid md:grid-cols-3 gap-8">
@@ -277,7 +277,7 @@
 				Ready to Create Something Beautiful?
 			</h2>
 			<p class="text-lg text-slate-300 mb-10 max-w-2xl mx-auto">
-				Join thousands of families who have created lasting tributes with TributeStream. Your loved one's story deserves to be celebrated and remembered forever.
+				Join thousands of families who have created lasting tributes with Tributestream. Your loved one's story deserves to be celebrated and remembered forever.
 			</p>
 			<div class="flex flex-col sm:flex-row gap-4 justify-center mb-6">
 				<Button

@@ -1,5 +1,5 @@
 /**
- * TributeStream Design Tokens
+ * Tributestream Design Tokens
  * Centralized design system values for consistent theming
  */
 

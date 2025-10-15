@@ -74,7 +74,7 @@
 </script>
 
 <svelte:head>
-  <title>Minimal Modern Theme Showroom - TributeStream</title>
+  <title>Minimal Modern Theme Showroom - Tributestream</title>
 </svelte:head>
 
 <div class="{themeConfig.root} min-h-screen w-full transition-colors duration-500" style="font-family: {themeConfig.font.body}">
@@ -84,7 +84,7 @@
     <div class="mx-auto max-w-6xl px-6 py-3 flex items-center gap-3 justify-between">
       <div class="text-sm opacity-80">Minimal Modern Theme Showroom</div>
       <div class="flex items-center gap-2">
-        <span class="text-xs uppercase tracking-wide opacity-70">TributeStream Design System</span>
+        <span class="text-xs uppercase tracking-wide opacity-70">Tributestream Design System</span>
       </div>
     </div>
   </div>
@@ -262,7 +262,7 @@
   <footer class="mt-10 border-t {themeConfig.footer.border} {themeConfig.footer.wrap}">
     <div class="mx-auto max-w-6xl px-6 py-8 md:py-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
       <div class={themeConfig.text}>
-        <div class="font-semibold">TributeStream®</div>
+        <div class="font-semibold">Tributestream®</div>
         <div class="text-sm opacity-80">Compassionate livestreams across Central Florida.</div>
       </div>
       <div class="text-sm opacity-80 flex gap-6">

@@ -1,10 +1,10 @@
 /**
- * reCAPTCHA v3 Utilities for TributeStream
+ * reCAPTCHA v3 Utilities for Tributestream
  * Provides client and server-side reCAPTCHA verification functions
  */
 
 import { PUBLIC_RECAPTCHA_SITE_KEY } from '$env/static/public';
-import { env } from '$env/dynamic/private';
+// import { env } from '$env/dynamic/private';
 
 // reCAPTCHA v3 score thresholds
 export const RECAPTCHA_THRESHOLDS = {
@@ -48,17 +48,27 @@ export async function executeRecaptcha(action: string): Promise<string | null> {
  * Server-side: Verify reCAPTCHA token
  */
 export async function verifyRecaptcha(
-	token: string, 
-	expectedAction: string,
-	minScore: number = RECAPTCHA_THRESHOLDS.MEDIUM_SECURITY
-): Promise<{ success: boolean; score?: number; error?: string }> {
-	if (!token) {
-		return { success: false, error: 'No reCAPTCHA token provided' };
-	}
+	token: string,
+	action: string,
+	threshold: number = 0.5
+): Promise<{
+	success: boolean;
+	score?: number;
+	action: string;
+	error?: string;
+}> {
+	// Note: This function should only be called server-side
+	// The secret key should be accessed via process.env in server context
+	const secretKey = process.env.RECAPTCHA_SECRET_KEY;
 
-	if (!env.RECAPTCHA_SECRET_KEY) {
-		console.error('RECAPTCHA_SECRET_KEY not configured');
-		return { success: false, error: 'reCAPTCHA not configured' };
+	if (!secretKey) {
+		console.error('[RECAPTCHA] Secret key not configured');
+		return {
+			success: false,
+			score: 0,
+			action: '',
+			error: 'reCAPTCHA not configured',
+		};
 	}
 
 	try {
@@ -68,7 +78,7 @@ export async function verifyRecaptcha(
 				'Content-Type': 'application/x-www-form-urlencoded',
 			},
 			body: new URLSearchParams({
-				secret: env.RECAPTCHA_SECRET_KEY,
+				secret: secretKey,
 				response: token,
 			}),
 		});
@@ -77,33 +87,36 @@ export async function verifyRecaptcha(
 
 		if (!result.success) {
 			return { 
-				success: false, 
+				success: false,
+				action,
 				error: `reCAPTCHA verification failed: ${result['error-codes']?.join(', ') || 'Unknown error'}` 
 			};
 		}
 
 		// Check action matches
-		if (result.action !== expectedAction) {
+		if (result.action !== action) {
 			return { 
-				success: false, 
-				error: `Action mismatch: expected ${expectedAction}, got ${result.action}` 
+				success: false,
+				action,
+				error: `Action mismatch: expected ${action}, got ${result.action}` 
 			};
 		}
 
 		// Check score threshold
 		const score = result.score || 0;
-		if (score < minScore) {
+		if (score < threshold) {
 			return { 
-				success: false, 
+				success: false,
+				action,
 				score,
-				error: `Score too low: ${score} < ${minScore}` 
+				error: `Score too low: ${score} < ${threshold}` 
 			};
 		}
 
-		return { success: true, score };
+		return { success: true, action, score };
 	} catch (error) {
 		console.error('reCAPTCHA verification error:', error);
-		return { success: false, error: 'Verification request failed' };
+		return { success: false, action, error: 'Verification request failed' };
 	}
 }
 

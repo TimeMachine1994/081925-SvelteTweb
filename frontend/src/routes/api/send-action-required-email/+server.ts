@@ -34,9 +34,9 @@ export const POST: RequestHandler = async ({ request }) => {
 		// Send email with SendGrid
 		if (SENDGRID_API_KEY && SENDGRID_API_KEY !== 'mock_key') {
 			await sgMail.send({
-				from: FROM_EMAIL || 'TributeStream <noreply@tributestream.com>',
+				from: FROM_EMAIL || 'Tributestream <noreply@tributestream.com>',
 				to: customerEmail,
-				subject: `TributeStream Payment Action Required - ${lovedOneName}`,
+				subject: `Tributestream Payment Action Required - ${lovedOneName}`,
 				html: emailHtml
 			});
 
@@ -82,7 +82,7 @@ function generateActionRequiredEmailHTML(data: ActionRequiredEmailData): string 
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TributeStream Payment Action Required</title>
+  <title>Tributestream Payment Action Required</title>
   <style>
     body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
     .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -97,7 +97,7 @@ function generateActionRequiredEmailHTML(data: ActionRequiredEmailData): string 
 <body>
   <div class="container">
     <div class="header">
-      <h1>🎥 TributeStream</h1>
+      <h1>🎥 Tributestream</h1>
       <h2>Payment Action Required</h2>
     </div>
     
@@ -144,13 +144,13 @@ function generateActionRequiredEmailHTML(data: ActionRequiredEmailData): string 
       
       <p>If you need assistance or have questions about this verification process, please contact our support team at support@tributestream.com or (555) 123-4567.</p>
       
-      <p>Thank you for choosing TributeStream.</p>
+      <p>Thank you for choosing Tributestream.</p>
       
-      <p>Best regards,<br>The TributeStream Team</p>
+      <p>Best regards,<br>The Tributestream Team</p>
     </div>
     
     <div class="footer">
-      <p>TributeStream - Honoring Lives, Connecting Hearts</p>
+      <p>Tributestream - Honoring Lives, Connecting Hearts</p>
       <p>This is an automated email. Please do not reply directly to this message.</p>
     </div>
   </div>

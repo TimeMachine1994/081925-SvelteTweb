@@ -231,7 +231,7 @@
 </script>
 
 <svelte:head>
-	<title>Beautiful, reliable memorial livestreams - TributeStream</title>
+	<title>Beautiful, reliable memorial livestreams - Tributestream</title>
 	<meta name="description" content="Custom links. On-site technicians. Heirloom recordings. Professional memorial livestreaming for families and funeral directors." />
 </svelte:head>
 
@@ -591,7 +591,7 @@
 							bind:this={video}
 							class="w-full aspect-video bg-black"
 							preload="metadata"
-							poster="https://via.placeholder.com/640x360/D5BA7F/FFFFFF?text=TributeStream+About+Us"
+							poster="https://via.placeholder.com/640x360/D5BA7F/FFFFFF?text=Tributestream+About+Us"
 							ontimeupdate={handleTimeUpdate}
 							onloadedmetadata={handleLoadedMetadata}
 							onplay={() => isPlaying = true}

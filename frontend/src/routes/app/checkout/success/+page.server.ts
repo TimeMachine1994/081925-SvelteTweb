@@ -37,7 +37,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 	if (locals.user.email && configData) {
 		await sendEnhancedRegistrationEmail({
 			email: locals.user.email,
-			ownerName: locals.user.name || 'TributeStream User',
+			ownerName: locals.user.name || 'Tributestream User',
 			lovedOneName: configData.formData.lovedOneName,
 			memorialUrl: `${PUBLIC_BASE_URL}/memorials/${configData.memorialId}`
 		});

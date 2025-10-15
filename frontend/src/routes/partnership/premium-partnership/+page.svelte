@@ -25,7 +25,7 @@
 </script>
 
 <svelte:head>
-	<title>Premium Partnership - TributeStream</title>
+	<title>Premium Partnership - Tributestream</title>
 	<meta name="description" content="Elevate your funeral home with our Premium Partnership. Get on-site support, custom branding, marketing materials, and comprehensive digital marketing." />
 </svelte:head>
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# TributeStream API Test Script
+# Tributestream API Test Script
 # Tests the live status polling and webhook endpoints
 
 set -e
@@ -17,7 +17,7 @@ BASE_URL="http://localhost:5173"
 WEBHOOK_ENDPOINT="$BASE_URL/api/webhooks/stream-status"
 LIVE_STATUS_ENDPOINT="$BASE_URL/api/streams/check-live-status"
 
-echo -e "${BLUE}🧪 TributeStream API Test Suite${NC}"
+echo -e "${BLUE}🧪 Tributestream API Test Suite${NC}"
 echo -e "${BLUE}=================================${NC}"
 echo ""
 

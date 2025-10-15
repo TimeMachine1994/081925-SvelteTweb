@@ -80,10 +80,10 @@
 </script>
 
 <svelte:head>
-	<title>Contact Us - TributeStream</title>
+	<title>Contact Us - Tributestream</title>
 	<meta
 		name="description"
-		content="Get in touch with TributeStream. We're here to help with your memorial services and answer any questions you may have."
+		content="Get in touch with Tributestream. We're here to help with your memorial services and answer any questions you may have."
 	/>
 </svelte:head>
 

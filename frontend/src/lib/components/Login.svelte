@@ -115,8 +115,8 @@
 </script>
 
 <svelte:head>
-	<title>Sign In - TributeStream</title>
-	<meta name="description" content="Sign in to your TributeStream account to manage memorial services and connect with families." />
+	<title>Sign In - Tributestream</title>
+	<meta name="description" content="Sign in to your Tributestream account to manage memorial services and connect with families." />
 </svelte:head>
 
 <div class="{theme.root} min-h-screen flex items-center justify-center py-12 px-4" style="font-family: {theme.font.body}">
@@ -126,7 +126,7 @@
 			<Card title="Welcome Back" theme="minimal" class="p-8">
 				<div class="text-center mb-6">
 					<h2 class="text-2xl font-bold {theme.text}" style="font-family: {theme.font.heading}">
-						Sign In to TributeStream
+						Sign In to Tributestream
 					</h2>
 					<p class="mt-2 text-sm {theme.hero.sub}">
 						Access your memorial services and connect with families

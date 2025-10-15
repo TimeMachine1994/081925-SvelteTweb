@@ -149,14 +149,14 @@ ${receiptData.bookingData.items
 
 TOTAL: ${formatCurrency(receiptData.bookingData.total)}
 
-Thank you for choosing TributeStream!
+Thank you for choosing Tributestream!
 `;
 
 		const blob = new Blob([receiptText], { type: 'text/plain' });
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement('a');
 		a.href = url;
-		a.download = `TributeStream-Receipt-${receiptData.paymentIntentId}.txt`;
+		a.download = `Tributestream-Receipt-${receiptData.paymentIntentId}.txt`;
 		document.body.appendChild(a);
 		a.click();
 		document.body.removeChild(a);
@@ -165,8 +165,8 @@ Thank you for choosing TributeStream!
 </script>
 
 <svelte:head>
-	<title>Payment Successful - TributeStream</title>
-	<meta name="description" content="Your TributeStream payment has been processed successfully" />
+	<title>Payment Successful - Tributestream</title>
+	<meta name="description" content="Your Tributestream payment has been processed successfully" />
 </svelte:head>
 
 <div class="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 py-8">
@@ -179,7 +179,7 @@ Thank you for choosing TributeStream!
 				</div>
 				<h1 class="mb-2 text-3xl font-bold text-gray-900">Payment Successful!</h1>
 				<p class="text-lg text-gray-600">
-					Your TributeStream service has been booked and confirmed
+					Your Tributestream service has been booked and confirmed
 				</p>
 
 				<!-- Email Status -->

@@ -1,5 +1,5 @@
 /**
- * TributeStream UI Component Library
+ * Tributestream UI Component Library
  * 
  * Centralized exports for all UI components and design tokens.
  */

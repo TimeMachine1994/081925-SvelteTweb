@@ -21,8 +21,8 @@ describe('Schedule Page Calculator', () => {
 	it('renders the calculator with default state', () => {
 		const { container } = render(SchedulePage);
 
-		expect(screen.getByText('TributeStream Pricing Calculator')).toBeInTheDocument();
-		expect(screen.getByText('Choose Your TributeStream Package')).toBeInTheDocument();
+		expect(screen.getByText('Tributestream Pricing Calculator')).toBeInTheDocument();
+		expect(screen.getByText('Choose Your Tributestream Package')).toBeInTheDocument();
 	});
 
 	it('initializes with solo tier selected', () => {

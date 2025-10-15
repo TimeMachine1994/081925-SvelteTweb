@@ -1,6 +1,6 @@
-# TributeStream API Testing Guide
+# Tributestream API Testing Guide
 
-This guide covers testing procedures for the TributeStream live status polling and webhook APIs.
+This guide covers testing procedures for the Tributestream live status polling and webhook APIs.
 
 ## Quick Test
 

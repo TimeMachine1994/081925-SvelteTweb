@@ -16,7 +16,7 @@
 </script>
 
 <svelte:head>
-	<title>Emergency Support Line - TributeStream</title>
+	<title>Emergency Support Line - Tributestream</title>
 	<meta name="description" content="Get immediate technical support during memorial services. Our emergency line provides urgent assistance when you need it most." />
 </svelte:head>
 

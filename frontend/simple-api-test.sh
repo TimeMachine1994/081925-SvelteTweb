@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Simple TributeStream API Test Script
-echo "🧪 TributeStream API Test Suite"
+# Simple Tributestream API Test Script
+echo "🧪 Tributestream API Test Suite"
 echo "================================="
 echo ""
 

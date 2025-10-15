@@ -1,5 +1,5 @@
 /**
- * TributeStream Design System - Color Tokens
+ * Tributestream Design System - Color Tokens
  * 
  * Centralized color definitions for consistent theming across components.
  * Based on current usage patterns in existing components.

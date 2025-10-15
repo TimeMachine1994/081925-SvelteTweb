@@ -1,5 +1,5 @@
 /**
- * Minimal Modern Theme System for TributeStream
+ * Minimal Modern Theme System for Tributestream
  * Ported from React design system - clean, airy design with ABeeZee font and gold accents
  */
 

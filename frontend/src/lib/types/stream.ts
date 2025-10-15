@@ -1,4 +1,4 @@
-// Stream Types for TributeStream Livestream System
+// Stream Types for Tributestream Livestream System
 
 export interface Stream {
 	id: string;

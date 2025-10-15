@@ -59,10 +59,10 @@
 </script>
 
 <svelte:head>
-	<title>For Funeral Directors - TributeStream</title>
+	<title>For Funeral Directors - Tributestream</title>
 	<meta
 		name="description"
-		content="Elevate your services with TributeStream. Offer beautiful, seamless memorial livestreams and digital guestbooks for the families you serve."
+		content="Elevate your services with Tributestream. Offer beautiful, seamless memorial livestreams and digital guestbooks for the families you serve."
 	/>
 </svelte:head>
 
@@ -72,7 +72,7 @@
 		<div class="{theme.hero.decoration}" aria-hidden="true"></div>
 		<div class="relative z-10 mx-auto max-w-4xl px-6 text-center">
 			<div class="mb-4 inline-block rounded-full bg-[#D5BA7F]/20 px-4 py-2 text-sm font-semibold text-[#D5BA7F]">
-				Partner with TributeStream
+				Partner with Tributestream
 			</div>
 			<h1 class="text-4xl md:text-6xl font-bold {theme.hero.heading} mb-6" style="font-family: {theme.font.heading}">
 				Modernize Your Memorial Services
@@ -98,7 +98,7 @@
 		<div class="max-w-6xl mx-auto px-6">
 			<div class="text-center mb-12">
 				<h2 class="text-3xl font-bold text-slate-900 mb-4" style="font-family: {theme.font.heading}">
-					Why Partner with TributeStream?
+					Why Partner with Tributestream?
 				</h2>
 				<p class="text-lg text-slate-600 max-w-2xl mx-auto">
 					Enhance your offerings, streamline your workflow, and provide unparalleled value to families.

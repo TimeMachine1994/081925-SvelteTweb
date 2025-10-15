@@ -1,10 +1,10 @@
 # Cloudflare Stream Setup Guide
 
-This guide explains how to set up Cloudflare Stream integration for TributeStream's livestreaming functionality.
+This guide explains how to set up Cloudflare Stream integration for Tributestream's livestreaming functionality.
 
 ## Overview
 
-TributeStream now uses **real Cloudflare Stream credentials** instead of fake RTMP URLs. This provides:
+Tributestream now uses **real Cloudflare Stream credentials** instead of fake RTMP URLs. This provides:
 
 - ✅ **Real RTMP URLs** from Cloudflare Stream
 - ✅ **Automatic recording** with webhook notifications

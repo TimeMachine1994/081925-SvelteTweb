@@ -524,7 +524,7 @@
 </script>
 
 <svelte:head>
-	<title>Price Calculator - TributeStream</title>
+	<title>Price Calculator - Tributestream</title>
 	<meta
 		name="description"
 		content="Configure your memorial service livestream package with our comprehensive pricing calculator."
@@ -539,7 +539,7 @@
 			<h1
 				class="bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-4xl font-bold text-transparent"
 			>
-				TributeStream Pricing Calculator
+				Tributestream Pricing Calculator
 			</h1>
 		</div>
 		<p class="mx-auto max-w-2xl text-xl text-gray-300">
@@ -581,7 +581,7 @@
 				>
 					<h2 class="mb-6 flex items-center text-2xl font-bold text-white">
 						<Star class="mr-2 h-6 w-6 text-amber-400" />
-						Choose Your TributeStream Package
+						Choose Your Tributestream Package
 					</h2>
 
 					<div class="grid gap-4 md:grid-cols-3">

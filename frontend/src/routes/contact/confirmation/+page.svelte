@@ -4,7 +4,7 @@
 </script>
 
 <svelte:head>
-	<title>Message Sent - TributeStream</title>
+	<title>Message Sent - Tributestream</title>
 	<meta
 		name="description"
 		content="Your message has been sent successfully. We'll get back to you soon."

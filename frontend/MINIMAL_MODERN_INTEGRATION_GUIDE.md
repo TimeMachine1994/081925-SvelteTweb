@@ -1,6 +1,6 @@
 # Minimal Modern Theme Integration Guide
 
-This guide shows how to integrate the new Minimal Modern design system into your existing TributeStream components.
+This guide shows how to integrate the new Minimal Modern design system into your existing Tributestream components.
 
 ## 🎨 Theme System Overview
 
@@ -33,7 +33,7 @@ The Minimal Modern theme provides:
 - `TagCloud` - Tag collections
 - `Toast` - Notification messages
 
-### TributeStream Specific Components
+### Tributestream Specific Components
 - `MemorialCard` - Memorial display cards with live status
 - `ServiceSchedule` - Timeline for memorial service events
 - `CondolenceForm` - Form for submitting condolences and memories
@@ -63,7 +63,7 @@ import { Button, Card, Input } from '$lib/components/minimal-modern';
 
 <div class="{theme.root}">
   <h1 class="{theme.hero.heading}" style="font-family: {theme.font.heading}">
-    Welcome to TributeStream
+    Welcome to Tributestream
   </h1>
 </div>
 ```

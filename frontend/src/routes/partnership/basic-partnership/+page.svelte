@@ -10,7 +10,7 @@
 		{ icon: BookOpen, title: "Free Advertising Materials", description: "Professional brochures, flyers, and digital assets to promote streaming services to families" },
 		{ icon: Users, title: "Basic Training", description: "Comprehensive online training modules and documentation to get your team up to speed" },
 		{ icon: Phone, title: "Phone Support", description: "Dedicated phone support during business hours for technical assistance and questions" },
-		{ icon: Award, title: "Standard Branding", description: "Professional TributeStream branding on all streaming materials and interfaces" }
+		{ icon: Award, title: "Standard Branding", description: "Professional Tributestream branding on all streaming materials and interfaces" }
 	];
 
 	function handleGetStarted() {
@@ -23,7 +23,7 @@
 </script>
 
 <svelte:head>
-	<title>Basic Partnership - TributeStream</title>
+	<title>Basic Partnership - Tributestream</title>
 	<meta name="description" content="Start offering memorial streaming services with our no-cost Basic Partnership. Get free marketing materials, training, and support." />
 </svelte:head>
 

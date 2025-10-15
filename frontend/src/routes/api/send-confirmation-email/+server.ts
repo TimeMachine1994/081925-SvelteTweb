@@ -32,9 +32,9 @@ export const POST: RequestHandler = async ({ request }) => {
 		// Send email with SendGrid
 		if (SENDGRID_API_KEY && SENDGRID_API_KEY !== 'mock_key') {
 			await sgMail.send({
-				from: FROM_EMAIL || 'TributeStream <noreply@tributestream.com>',
+				from: FROM_EMAIL || 'Tributestream <noreply@tributestream.com>',
 				to: customerEmail,
-				subject: `TributeStream Service Confirmation - ${lovedOneName}`,
+				subject: `Tributestream Service Confirmation - ${lovedOneName}`,
 				html: emailHtml
 			});
 
@@ -79,7 +79,7 @@ function generateConfirmationEmailHTML(data: EmailData): string {
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TributeStream Service Confirmation</title>
+  <title>Tributestream Service Confirmation</title>
   <style>
     body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
     .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -93,14 +93,14 @@ function generateConfirmationEmailHTML(data: EmailData): string {
 <body>
   <div class="container">
     <div class="header">
-      <h1>🎥 TributeStream</h1>
+      <h1>🎥 Tributestream</h1>
       <h2>Service Confirmation</h2>
     </div>
     
     <div class="content">
       <p>Dear Customer,</p>
       
-      <p>Thank you for choosing TributeStream! Your payment has been successfully processed and your memorial service for <strong>${lovedOneName}</strong> has been confirmed.</p>
+      <p>Thank you for choosing Tributestream! Your payment has been successfully processed and your memorial service for <strong>${lovedOneName}</strong> has been confirmed.</p>
       
       <div class="receipt-box">
         <h3>📋 Payment Details</h3>
@@ -116,7 +116,7 @@ function generateConfirmationEmailHTML(data: EmailData): string {
         <ul>
           <li>Your memorial service schedule has been confirmed</li>
           <li>Our team will contact you within 24 hours to coordinate service details</li>
-          <li>You can access your booking anytime in your TributeStream portal</li>
+          <li>You can access your booking anytime in your Tributestream portal</li>
           <li>We'll send additional information about your service setup closer to the date</li>
         </ul>
       </div>
@@ -125,11 +125,11 @@ function generateConfirmationEmailHTML(data: EmailData): string {
       
       <p>Thank you for trusting us with your memorial service.</p>
       
-      <p>Warm regards,<br>The TributeStream Team</p>
+      <p>Warm regards,<br>The Tributestream Team</p>
     </div>
     
     <div class="footer">
-      <p>TributeStream - Honoring Lives, Connecting Hearts</p>
+      <p>Tributestream - Honoring Lives, Connecting Hearts</p>
       <p>This is an automated email. Please do not reply directly to this message.</p>
     </div>
   </div>

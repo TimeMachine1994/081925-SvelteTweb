@@ -75,8 +75,8 @@
 </script>
 
 <svelte:head>
-	<title>Book a Demo - TributeStream for Funeral Directors</title>
-	<meta name="description" content="Schedule a personalized demo of TributeStream's memorial livestreaming technology. Free on-site demonstration and marketing materials included." />
+	<title>Book a Demo - Tributestream for Funeral Directors</title>
+	<meta name="description" content="Schedule a personalized demo of Tributestream's memorial livestreaming technology. Free on-site demonstration and marketing materials included." />
 </svelte:head>
 
 <div class="{theme.root} min-h-screen" style="font-family: {theme.font.body}">
@@ -88,7 +88,7 @@
 				Book Your Free Demo
 			</h1>
 			<p class="text-lg md:text-xl {theme.hero.sub} max-w-2xl mx-auto">
-				See TributeStream in action. We'll bring our equipment to your location for a personalized demonstration and leave you with free marketing materials.
+				See Tributestream in action. We'll bring our equipment to your location for a personalized demonstration and leave you with free marketing materials.
 			</p>
 		</div>
 	</section>

@@ -1,4 +1,4 @@
-// Site-wide audit logging system for TributeStream V1
+// Site-wide audit logging system for Tributestream V1
 import { adminDb } from './firebase';
 import type { RequestEvent } from '@sveltejs/kit';
 

@@ -118,7 +118,7 @@
 </script>
 
 <svelte:head>
-	<title>Maria Elena Cruz Memorial - TributeStream</title>
+	<title>Maria Elena Cruz Memorial - Tributestream</title>
 	<meta name="description" content="Memorial service for Maria Elena Cruz. Join family and friends in celebrating her life." />
 </svelte:head>
 
@@ -263,10 +263,10 @@
 	<footer class="mt-16 border-t {theme.footer.border} {theme.footer.wrap}">
 		<div class="max-w-6xl mx-auto px-6 py-8 text-center">
 			<p class="text-sm {theme.hero.sub}">
-				This memorial page was created with love by the Cruz family using TributeStream.
+				This memorial page was created with love by the Cruz family using Tributestream.
 			</p>
 			<p class="text-xs {theme.hero.sub} mt-2">
-				© 2025 TributeStream. Compassionate technology for meaningful moments.
+				© 2025 Tributestream. Compassionate technology for meaningful moments.
 			</p>
 		</div>
 	</footer>

@@ -95,7 +95,7 @@
 				Create your account
 			</h2>
 			<p class="mt-2 text-sm {theme.hero.sub}">
-				Join TributeStream to create meaningful memorial experiences
+				Join Tributestream to create meaningful memorial experiences
 			</p>
 		</div>
 

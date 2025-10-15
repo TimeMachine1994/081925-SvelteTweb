@@ -84,11 +84,11 @@ export const POST: RequestHandler = async ({ request }) => {
 		const confirmationEmail = {
 			to: email,
 			from: 'noreply@tributestream.com', // Replace with your verified sender email
-			subject: 'Thank you for contacting TributeStream',
+			subject: 'Thank you for contacting Tributestream',
 			html: `
 				<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
 					<div style="background: linear-gradient(135deg, #D5BA7F, #E5CA8F); padding: 20px; text-align: center;">
-						<h1 style="color: white; margin: 0;">TributeStream</h1>
+						<h1 style="color: white; margin: 0;">Tributestream</h1>
 						<p style="color: white; margin: 10px 0 0 0;">Thank you for reaching out</p>
 					</div>
 					<div style="padding: 20px;">
@@ -125,7 +125,7 @@ export const POST: RequestHandler = async ({ request }) => {
 					</div>
 					<div style="background: #f8f9fa; padding: 20px; text-align: center; color: #666; font-size: 14px;">
 						<p style="margin: 0;">
-							TributeStream - Honoring memories, connecting hearts<br>
+							Tributestream - Honoring memories, connecting hearts<br>
 							<a href="https://tributestream.com" style="color: #D5BA7F;">tributestream.com</a>
 						</p>
 					</div>

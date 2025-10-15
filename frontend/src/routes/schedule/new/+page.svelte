@@ -50,7 +50,7 @@
 </script>
 
 <svelte:head>
-	<title>Create New Memorial - TributeStream</title>
+	<title>Create New Memorial - Tributestream</title>
 	<meta
 		name="description"
 		content="Create a new memorial service and configure your livestream package."

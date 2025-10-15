@@ -137,10 +137,10 @@
 </script>
 
 <svelte:head>
-	<title>Register Your Funeral Home - TributeStream</title>
+	<title>Register Your Funeral Home - Tributestream</title>
 	<meta
 		name="description"
-		content="Join TributeStream's network of professional funeral directors and provide families with beautiful memorial experiences."
+		content="Join Tributestream's network of professional funeral directors and provide families with beautiful memorial experiences."
 	/>
 </svelte:head>
 
@@ -155,7 +155,7 @@
 			</div>
 			<h1 class="mb-4 text-4xl font-bold text-gray-900">Register Your Funeral Home</h1>
 			<p class="mx-auto max-w-2xl text-xl text-gray-600">
-				Join TributeStream's network of professional funeral directors and provide families with
+				Join Tributestream's network of professional funeral directors and provide families with
 				beautiful, lasting memorial experiences.
 			</p>
 		</div>

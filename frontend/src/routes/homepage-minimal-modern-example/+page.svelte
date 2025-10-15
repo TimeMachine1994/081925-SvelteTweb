@@ -68,7 +68,7 @@
 </script>
 
 <svelte:head>
-	<title>TributeStream - Compassionate Livestreams for Memorial Services</title>
+	<title>Tributestream - Compassionate Livestreams for Memorial Services</title>
 	<meta name="description" content="Professional livestreaming services for memorial services across Central Florida. Connect families anywhere with respectful, high-quality broadcasts." />
 </svelte:head>
 
@@ -93,7 +93,7 @@
 		
 		<div class="z-10 p-4 text-center text-white max-w-4xl mx-auto">
 			<h1 class="mb-6 text-5xl md:text-6xl font-bold" style="font-family: {theme.font.heading}">
-				TributeStream makes hearts full again
+				Tributestream makes hearts full again
 			</h1>
 			<p class="mb-8 text-xl md:text-2xl opacity-90">
 				Professional livestreaming for memorial services across Central Florida

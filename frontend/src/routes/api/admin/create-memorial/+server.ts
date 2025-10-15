@@ -135,8 +135,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					familyContactName: formData.creatorName || `${formData.lovedOneName} Family`,
 					familyContactPhone: '',
 					contactPreference: 'email',
-					directorName: 'TributeStream Admin',
-					funeralHomeName: 'TributeStream'
+					directorName: 'Tributestream Admin',
+					funeralHomeName: 'Tributestream'
 				});
 			} catch (emailError) {
 				console.error('⚠️ [ADMIN API] Failed to send welcome email:', emailError);

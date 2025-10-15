@@ -35,7 +35,7 @@ export const GET: RequestHandler = async ({ url }) => {
 					{
 						author_name: "Sarah M.",
 						rating: 5,
-						text: "TributeStream made it possible for our family across the country to be part of Dad's service.",
+						text: "Tributestream made it possible for our family across the country to be part of Dad's service.",
 						relative_time_description: "2 months ago",
 						profile_photo_url: "",
 						time: Date.now() - 5184000000 // 2 months ago
@@ -103,7 +103,7 @@ export const GET: RequestHandler = async ({ url }) => {
 				{
 					author_name: "Sarah M.",
 					rating: 5,
-					text: "TributeStream made it possible for our family across the country to be part of Dad's service.",
+					text: "Tributestream made it possible for our family across the country to be part of Dad's service.",
 					relative_time_description: "2 months ago",
 					profile_photo_url: "",
 					time: Date.now() - 5184000000

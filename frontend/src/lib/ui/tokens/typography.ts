@@ -1,5 +1,5 @@
 /**
- * TributeStream Design System - Typography Tokens
+ * Tributestream Design System - Typography Tokens
  * 
  * Consistent typography scale for headings, body text, and UI elements.
  * Based on a modular scale for visual hierarchy.
