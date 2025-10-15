@@ -63,7 +63,10 @@
 			<!-- Legacy Memorial Layout with Custom HTML -->
 			<div class="legacy-memorial">
 				<div class="memorial-header">
-					<h1>Celebration of Life for {memorial.lovedOneName}</h1>
+					<h1 class="memorial-title">
+						<span class="celebration-prefix">Celebration of Life for</span>
+						<span class="loved-one-name">{memorial.lovedOneName}</span>
+					</h1>
 					<!-- Hide dates for legacy memorials with custom HTML -->
 				</div>
 
@@ -93,7 +96,10 @@
 					</div>
 				{/if}
 				<div class="memorial-content">
-					<h1>{memorial.lovedOneName}</h1>
+					<h1 class="memorial-title">
+						<span class="celebration-prefix">Celebration of Life for</span>
+						<span class="loved-one-name">{memorial.lovedOneName}</span>
+					</h1>
 					{#if memorial.birthDate || memorial.deathDate}
 						<div class="dates">
 							{#if memorial.birthDate}
@@ -307,4 +313,32 @@
 			min-height: 250px;
 		}
 	}
+
+	/* Memorial Title Styles */
+	.memorial-title {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		line-height: 1.2;
+	}
+
+	.celebration-prefix {
+		font-family: 'Fanwood', 'Fanwood Text', serif;
+		font-style: italic;
+		font-size: 0.7em;
+		color: #888;
+		margin-bottom: 0.25rem;
+		font-weight: 300;
+	}
+
+	.loved-one-name {
+		font-family: inherit;
+		font-style: normal;
+		font-weight: inherit;
+		color: inherit;
+	}
+
+	/* Import Fanwood font */
+	@import url('https://fonts.googleapis.com/css2?family=Fanwood+Text:ital,wght@0,400;1,400&display=swap');
 </style>

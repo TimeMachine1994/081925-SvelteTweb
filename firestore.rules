@@ -56,5 +56,17 @@ service cloud.firestore {
 
     }
 
+    // Blog collection rules - for FireCMS admin access
+    match /blog/{blogId} {
+      // Allow admin emails to read/write blog posts
+      allow read, write: if request.auth != null && 
+        (request.auth.token.email == 'austinbryanfilm@gmail.com' ||
+         request.auth.token.email.matches('.*@tributestream.com') ||
+         isAdmin());
+      
+      // Allow public read access for published posts (for website display)
+      allow read: if resource.data.status == 'published';
+    }
+
   }
 }

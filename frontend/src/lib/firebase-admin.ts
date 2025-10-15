@@ -2,8 +2,8 @@ import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
 
-// Check if we're in development mode (emulators)
-const isDevelopment = process.env.NODE_ENV === 'development' || process.env.DEV === 'true';
+// EMULATORS DISABLED - Always use production Firebase
+const isDevelopment = false; // Disabled emulators - always use production
 
 // Initialize Firebase Admin SDK
 let adminApp;
@@ -18,25 +18,34 @@ if (getApps().length === 0) {
 		process.env.FIRESTORE_EMULATOR_HOST = '127.0.0.1:8080';
 
 		adminApp = initializeApp({
-			projectId: 'fir-tweb' // Use the emulator project ID
+			projectId: 'firebasetweb' // Use your main project ID
 		});
 	} else {
-		// Production mode - use service account credentials
+		// Production mode - use default credentials or service account
+		console.log('🔥 Firebase Admin connecting to production...');
+		
 		try {
+			// Try to use service account if available
 			const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_KEY
 				? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY)
 				: undefined;
 
-			adminApp = initializeApp({
-				credential: serviceAccount ? cert(serviceAccount) : undefined,
-				projectId: process.env.FIREBASE_PROJECT_ID || 'fir-tweb'
-			});
+			if (serviceAccount) {
+				console.log('🔑 Using service account credentials');
+				adminApp = initializeApp({
+					credential: cert(serviceAccount),
+					projectId: 'firebasetweb'
+				});
+			} else {
+				console.log('🔑 Using default application credentials');
+				// Use default application credentials (works in many environments)
+				adminApp = initializeApp({
+					projectId: 'firebasetweb'
+				});
+			}
 		} catch (error) {
-			console.warn('Firebase Admin initialization failed:', error);
-			// Fallback initialization
-			adminApp = initializeApp({
-				projectId: process.env.FIREBASE_PROJECT_ID || 'fir-tweb'
-			});
+			console.error('❌ Firebase Admin initialization failed:', error);
+			throw error;
 		}
 	}
 } else {
@@ -46,18 +55,7 @@ if (getApps().length === 0) {
 export const adminDb = getFirestore(adminApp);
 export const adminAuth = getAuth(adminApp);
 
-// Configure Firestore to use emulator in development
-if (isDevelopment && getApps().length === 1) {
-	try {
-		adminDb.settings({
-			host: '127.0.0.1:8080',
-			ssl: false
-		});
-		console.log('🔥 Firestore Admin configured for emulator');
-	} catch (error) {
-		// Settings already configured, ignore
-		console.log('🔥 Firestore Admin already configured');
-	}
-}
+// Emulators disabled - using production Firestore
+console.log('🔥 Firebase Admin initialized for production project: firebasetweb');
 
 export { adminApp, FieldValue };

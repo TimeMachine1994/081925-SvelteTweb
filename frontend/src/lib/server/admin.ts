@@ -1,6 +1,9 @@
 import { adminDb } from '$lib/firebase-admin';
 import type { UserManagementData, AdminDashboardStats } from '$lib/types/admin';
 
+// Export adminDb for use in other server files
+export { adminDb };
+
 export class AdminService {
 	/**
 	 * Get all users for admin management

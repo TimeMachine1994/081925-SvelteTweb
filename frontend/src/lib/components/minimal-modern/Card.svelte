@@ -22,11 +22,10 @@
 
 <div class={cardClasses}>
   {#if title}
-    <div class="flex items-center justify-between mb-3">
+    <div class="mb-3 text-center">
       <h3 class="text-lg font-semibold {themeConfig.text}" style="font-family: {themeConfig.font.heading}">
         {title}
       </h3>
-      <span class="text-xs opacity-60">{themeConfig.label}</span>
     </div>
   {/if}
   <div class={themeConfig.text}>

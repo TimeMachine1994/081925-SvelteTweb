@@ -65,21 +65,9 @@
 	];
 
 	const testimonials = [
-		{
-			name: "Sarah M.",
-			rating: 5,
-			text: "Tributestream helped us create a beautiful memorial for my mother. Family from across the country could participate and share their memories. It brought us all together during a difficult time."
-		},
-		{
-			name: "Michael R.",
-			rating: 5,
-			text: "The live streaming feature was perfect for our dad's service. Relatives who couldn't travel were able to be part of the ceremony. The memorial page is something we'll treasure forever."
-		},
-		{
-			name: "Jennifer L.",
-			rating: 5,
-			text: "Creating the memorial was so easy during such a difficult time. The support team was incredible, and the final result was more beautiful than we could have imagined."
-		}
+		{ text: "I joined an online funeral held for my coworker that was streamed by Tributestream. The streaming quality was great and they really respected and honored our friend. I was not able to go to the physical funeral and I still felt as if I was there.", author: "Joshua Hernandez", rating: 5, date: "Dec 6, 2022" },
+		{ text: "These guys are great. My wife who passed was European, and we had well over 100 live viewers who could not make it to the states for the event. Everyone said the audio and video was top notch. Flawless. They are self sufficient and practically invisible. I highly recommend this service.", author: "Troy Kelly", rating: 5, date: "Sep 16, 2024" },
+		{ text: "What an awesome company. They captured the entire experience. From the service to the entombment. Highly recommended.", author: "Donna Hinckson-Torres", rating: 5, date: "Sep 24, 2024" }
 	];
 </script>
 
@@ -126,14 +114,14 @@
 							theme="minimal"
 							type="submit"
 							disabled={isSubmitting || !lovedOneName.trim()}
-							class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F] flex items-center justify-center px-8 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+							class="bg-white text-black border border-gray-300 hover:bg-[#D5BA7F] hover:text-black flex items-center justify-center px-8 py-3 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 						>
 							{#if isSubmitting}
 								<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-black mr-2"></div>
 								Creating...
 							{:else}
-								<Heart class="h-5 w-5 mr-2" />
-								Create Memorial Now
+								<Sparkles class="h-5 w-5 mr-2" />
+								Get Started Free
 							{/if}
 						</Button>
 					</div>
@@ -146,10 +134,10 @@
 				<Button
 					theme="minimal"
 					onclick={handleGetStarted}
-					class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F] flex items-center justify-center"
+					class="bg-white text-black border border-gray-300 hover:bg-[#D5BA7F] hover:text-black flex items-center justify-center transition-colors"
 				>
 					<Sparkles class="h-5 w-5 mr-2" />
-					Get Started Now
+					Get Started Free
 				</Button>
 				<Button
 					theme="minimal"
@@ -228,11 +216,11 @@
 						<div class="flex justify-center">
 							<Button
 								theme="minimal"
-								onclick={handleCreateMemorial}
-								class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F] flex items-center justify-center px-6 py-3"
+								onclick={handleGetStarted}
+								class="bg-white text-black border border-gray-300 hover:bg-[#D5BA7F] hover:text-black flex items-center justify-center px-6 py-3 transition-colors"
 							>
-								<Heart class="h-5 w-5 mr-2" />
-								Create Memorial Now
+								<Sparkles class="h-5 w-5 mr-2" />
+								Get Started Free
 							</Button>
 						</div>
 					</div>
@@ -262,8 +250,11 @@
 								{/each}
 							</div>
 						</div>
-						<p class="mb-4 text-slate-600 italic">"{testimonial.text}"</p>
-						<p class="font-semibold text-slate-900">- {testimonial.name}</p>
+						<p class="mb-4 text-slate-600 italic leading-relaxed">"{testimonial.text}"</p>
+						<div class="space-y-1">
+							<p class="font-medium text-slate-900">— {testimonial.author}</p>
+							<p class="text-xs text-slate-500">{testimonial.date}</p>
+						</div>
 					</Card>
 				{/each}
 			</div>
@@ -282,17 +273,8 @@
 			<div class="flex flex-col sm:flex-row gap-4 justify-center mb-6">
 				<Button
 					theme="minimal"
-					onclick={handleCreateMemorial}
-					class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F] flex items-center justify-center text-lg px-8 py-4"
-				>
-					<Heart class="h-6 w-6 mr-2" />
-					Create Memorial Now
-				</Button>
-				<Button
-					theme="minimal"
-					variant="secondary"
 					onclick={handleGetStarted}
-					class="border-white text-white hover:bg-white hover:text-slate-900 flex items-center justify-center text-lg px-8 py-4"
+					class="bg-white text-black border border-gray-300 hover:bg-[#D5BA7F] hover:text-black flex items-center justify-center text-lg px-8 py-4 transition-colors"
 				>
 					<Sparkles class="h-6 w-6 mr-2" />
 					Get Started Free

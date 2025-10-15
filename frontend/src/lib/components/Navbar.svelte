@@ -81,14 +81,14 @@
 				<li>
 					<Button
 						theme="minimal"
-						class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F]"
+						class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F] hover:text-black"
 					>
 						{#if $user}
-							<a href={getUserPortalLink($user)} class="no-underline text-black">
+							<a href={getUserPortalLink($user)} class="no-underline text-black hover:text-black">
 								My Portal
 							</a>
 						{:else}
-							<a href="/register/loved-one" class="no-underline text-black">
+							<a href="/register/loved-one" class="no-underline text-black hover:text-black">
 								Create Memorial
 							</a>
 						{/if}
@@ -99,7 +99,7 @@
 				<li>
 					{#if $user}
 						<a
-							href="/api/logout"
+							href="/logout"
 							class="nav-link transition-colors text-white hover:text-[#D5BA7F] font-medium py-2"
 							style="font-family: {theme.font.body}; text-decoration: none;"
 						>
@@ -156,15 +156,15 @@
 				<li class="pt-4">
 					<Button
 						theme="minimal"
-						class="w-full bg-[#D5BA7F] text-black hover:bg-[#C5AA6F]"
+						class="w-full bg-[#D5BA7F] text-black hover:bg-[#C5AA6F] hover:text-black"
 						onclick={closeMobileMenu}
 					>
 						{#if $user}
-							<a href={getUserPortalLink($user)} class="no-underline text-black">
+							<a href={getUserPortalLink($user)} class="no-underline text-black hover:text-black">
 								My Portal
 							</a>
 						{:else}
-							<a href="/register/loved-one" class="no-underline text-black">
+							<a href="/register/loved-one" class="no-underline text-black hover:text-black">
 								Create Memorial
 							</a>
 						{/if}
@@ -175,7 +175,7 @@
 				<li>
 					{#if $user}
 						<a
-							href="/api/logout"
+							href="/logout"
 							class="mobile-nav-link block transition-colors border-b text-white hover:text-[#D5BA7F] font-medium py-4 border-slate-700"
 							style="font-family: {theme.font.body}; text-decoration: none;"
 							onclick={closeMobileMenu}

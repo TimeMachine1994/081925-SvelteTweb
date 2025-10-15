@@ -32,6 +32,7 @@ import { getStorage, connectStorageEmulator } from "firebase/storage";
 import { CenteredView } from "@firecms/ui";
 import { usersCollection } from "./collections/users";
 import { memorialsCollection } from "./collections/memorials";
+import { blogCollection } from "./collections/blog";
 
 import { firebaseConfig } from "./firebase_config";
 
@@ -43,23 +44,34 @@ function App() {
                                                                                        authController
                                                                                    }) => {
 
-        if (user?.email?.includes("flanders")) {
-            // You can throw an error to prevent access
-            throw Error("Stupid Flanders!");
+        // Define admin emails - add your email here
+        const adminEmails = [
+            "@tributestream.com",  // Any TributeStream email
+            "@firecms.co",         // FireCMS emails
+            "austinbryanfilm@gmail.com"  // Austin's admin email
+        ];
+
+        const userEmail = user?.email?.toLowerCase() || "";
+        const isAdmin = adminEmails.some(adminEmail => userEmail.includes(adminEmail));
+
+        console.log("🔐 Authentication check:", {
+            email: userEmail,
+            isAdmin,
+            user: user?.displayName || user?.email
+        });
+
+        if (!isAdmin) {
+            console.warn("❌ Access denied - not an admin email:", userEmail);
+            throw Error("Access denied. Admin access required for FireCMS.");
         }
 
-        const idTokenResult = await user?.firebaseUser?.getIdTokenResult();
-        const userIsAdmin = idTokenResult?.claims.admin || user?.email?.endsWith("@firecms.co");
-
-        console.log("Allowing access to", user);
-
-        // we allow access to every user in this case
+        console.log("✅ Admin access granted to:", userEmail);
         return true;
     }, []);
 
     const collections = useMemo(() => {
-        console.log("Loading collections into FireCMS:", ["usersCollection", "memorialsCollection"]);
-        return [usersCollection, memorialsCollection];
+        console.log("Loading collections into FireCMS:", ["usersCollection", "memorialsCollection", "blogCollection"]);
+        return [usersCollection, memorialsCollection, blogCollection];
     }, []);
 
     const {
@@ -71,6 +83,10 @@ function App() {
     });
 
     useEffect(() => {
+        // Emulators disabled - connecting to production Firebase
+        console.log('🔥 FireCMS connecting to production Firebase project:', firebaseConfig.projectId);
+        
+        /* EMULATORS DISABLED - Uncomment below if you want to use Firebase emulators
         if (import.meta.env.DEV && firebaseApp) {
             console.log("Connecting to Firebase emulators");
             try {
@@ -86,6 +102,7 @@ function App() {
                 console.error('Error connecting to Firebase emulators:', error);
             }
         }
+        */
     }, [firebaseApp]);
 
     // Controller used to manage the dark or light color mode

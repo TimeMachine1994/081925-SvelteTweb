@@ -1,4 +1,4 @@
-// TODO: Replace with your config
+// Using your actual Firebase project
 export const firebaseConfig = {
     apiKey: "AIzaSyAXmTxzYRc-LhMEW75nZjjjQCZov1gpiw0",
     authDomain: "fir-tweb.firebaseapp.com",

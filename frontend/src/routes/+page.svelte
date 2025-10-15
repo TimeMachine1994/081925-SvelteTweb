@@ -237,7 +237,7 @@
 
 <div class="bg-white text-gray-900" style="font-family: {theme.font.body}">
 	<!-- Hero Section with Video Background (Forms Section) -->
-	<section class="relative min-h-[60vh] flex items-center overflow-hidden bg-black">
+	<section class="relative min-h-[80vh] flex flex-col overflow-hidden bg-black">
 		<!-- Video Background -->
 		<video
 			class="absolute inset-0 w-full h-full object-cover"
@@ -252,98 +252,91 @@
 		<!-- Dark overlay for text readability -->
 		<div class="absolute inset-0 bg-black/50"></div>
 		
-		<div class="relative mx-auto max-w-7xl px-6 z-10">
-			<div class="text-center mb-12">
-				<h1 class="text-4xl md:text-6xl font-bold text-white mb-6" style="font-family: {theme.font.heading}">
-					Beautiful, reliable memorial livestreams
-				</h1>
-				<p class="text-xl md:text-2xl text-white max-w-3xl mx-auto mb-12">
-					Bring everyone together—at church, graveside, or from home
-				</p>
-			</div>
-
-			<!-- Dual CTA Clusters -->
-			<div class="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto mb-16">
-				<!-- Families CTA Cluster -->
-				<div class="text-center">
-					<h3 class="text-2xl font-semibold text-white mb-6">For Families</h3>
-					<div class="space-y-4">
-						<div class="flex gap-2">
-							<Input
-								type="text"
-								placeholder="Loved one's name"
-								bind:value={lovedOneName}
-								theme="minimal"
-								class="flex-1"
-							/>
-							<Button theme="minimal" onclick={handleCreateTribute} class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F]">
-								Create Memorial
-							</Button>
+		<!-- Trust Badges Overlay on Background Video -->
+		<div class="absolute bottom-8 left-0 right-0 z-10">
+			<div class="max-w-4xl mx-auto px-6">
+				<div class="flex justify-center items-center gap-8 flex-wrap bg-black/40 backdrop-blur-sm rounded-lg p-4">
+					{#each trustBadges as badge}
+						{@const IconComponent = badge.icon}
+						<div class="flex items-center gap-2 text-sm text-white">
+							<IconComponent class="h-5 w-5 text-[#D5BA7F]" />
+							<span>{badge.text}</span>
 						</div>
-						<div class="flex gap-2">
-							<Input
-								type="text"
-								placeholder="Search memorials..."
-								bind:value={searchQuery}
-								theme="minimal"
-								class="flex-1"
-							/>
-							<Button theme="minimal" class="bg-white text-gray-900 hover:bg-gray-100 flex items-center">
-								<Search class="h-4 w-4 mr-2" />
-								Search
+					{/each}
+				</div>
+			</div>
+		</div>
+		
+		<!-- Top Tier: Forms and Text -->
+		<div class="relative z-10 pt-8 pb-8">
+			<div class="mx-auto max-w-7xl px-6">
+				<div class="text-center mb-8">
+					<h1 class="text-4xl md:text-6xl font-bold text-white mb-4" style="font-family: {theme.font.heading}">
+						Beautiful, reliable memorial livestreams
+					</h1>
+					<p class="text-xl md:text-2xl text-white max-w-3xl mx-auto mb-8">
+						Bring everyone together—at church, graveside, or from home
+					</p>
+				</div>
+
+				<!-- Dual CTA Clusters -->
+				<div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+					<!-- Families CTA Cluster -->
+					<div class="text-center">
+						<h3 class="text-2xl font-semibold text-white mb-4">For Families</h3>
+						<div class="space-y-3">
+							<div class="flex gap-2">
+								<Input
+									type="text"
+									placeholder="Loved one's name"
+									bind:value={lovedOneName}
+									theme="minimal"
+									class="flex-1"
+								/>
+								<Button theme="minimal" onclick={handleCreateTribute} class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F]">
+									Create Memorial
+								</Button>
+							</div>
+							<div class="flex gap-2">
+								<Input
+									type="text"
+									placeholder="Search memorials..."
+									bind:value={searchQuery}
+									theme="minimal"
+									class="flex-1"
+								/>
+								<Button theme="minimal" class="bg-white text-gray-900 hover:bg-gray-100 flex items-center">
+									<Search class="h-4 w-4 mr-2" />
+									Search
+								</Button>
+							</div>
+						</div>
+					</div>
+
+					<!-- Funeral Directors CTA Cluster -->
+					<div class="text-center">
+						<h3 class="text-2xl font-semibold text-white mb-4">For Funeral Directors</h3>
+						<div class="space-y-3">
+							<Button theme="minimal" onclick={handleBookDemo} class="w-full bg-slate-900 text-white hover:bg-slate-800 flex items-center justify-center">
+								<Phone class="h-4 w-4 mr-2" />
+								Book a Demo
+							</Button>
+							<Button theme="minimal" variant="secondary" onclick={handleHowItWorks} class="w-full">
+								How it works
 							</Button>
 						</div>
 					</div>
 				</div>
-
-				<!-- Funeral Directors CTA Cluster -->
-				<div class="text-center">
-					<h3 class="text-2xl font-semibold text-white mb-6">For Funeral Directors</h3>
-					<div class="space-y-4">
-						<Button theme="minimal" onclick={handleBookDemo} class="w-full bg-slate-900 text-white hover:bg-slate-800 flex items-center justify-center">
-							<Phone class="h-4 w-4 mr-2" />
-							Book a Demo
-						</Button>
-						<Button theme="minimal" variant="secondary" onclick={handleHowItWorks} class="w-full">
-							How it works
-						</Button>
-					</div>
-				</div>
 			</div>
 		</div>
-	</section>
 
-	<!-- Video Player Section with Light Flares -->
-	<section class="relative py-16 overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-		<!-- Gold sunrise/sunset radial gradient overlay -->
-		<div class="absolute inset-0" style="background: radial-gradient(circle at 50% 20%, rgba(213, 186, 127, 0.15) 0%, rgba(213, 186, 127, 0.08) 40%, transparent 70%);"></div>
-		
-		<!-- Floating Light Flares with Parallax -->
-		<div class="absolute inset-0 overflow-hidden">
-			<!-- Large floating flares -->
-			<div class="absolute w-32 h-32 rounded-full blur-2xl opacity-20 animate-float-slow" style="background: radial-gradient(circle, #D5BA7F 0%, transparent 70%); top: 10%; left: 15%;"></div>
-			<div class="absolute w-24 h-24 rounded-full blur-xl opacity-15 animate-float-medium" style="background: radial-gradient(circle, #D5BA7F 0%, transparent 70%); top: 60%; right: 20%;"></div>
-			<div class="absolute w-40 h-40 rounded-full blur-3xl opacity-10 animate-float-fast" style="background: radial-gradient(circle, #D5BA7F 0%, transparent 70%); bottom: 20%; left: 10%;"></div>
-			
-			<!-- Medium floating flares -->
-			<div class="absolute w-16 h-16 rounded-full blur-lg opacity-25 animate-float-reverse" style="background: radial-gradient(circle, #D5BA7F 0%, transparent 70%); top: 30%; right: 15%;"></div>
-			<div class="absolute w-20 h-20 rounded-full blur-xl opacity-20 animate-float-slow-reverse" style="background: radial-gradient(circle, #D5BA7F 0%, transparent 70%); bottom: 40%; right: 30%;"></div>
-			
-			<!-- Small floating flares -->
-			<div class="absolute w-8 h-8 rounded-full blur-sm opacity-30 animate-float-tiny" style="background: radial-gradient(circle, #D5BA7F 0%, transparent 70%); top: 20%; left: 60%;"></div>
-			<div class="absolute w-12 h-12 rounded-full blur-md opacity-25 animate-float-tiny-reverse" style="background: radial-gradient(circle, #D5BA7F 0%, transparent 70%); bottom: 60%; left: 70%;"></div>
-		</div>
-		
-		<!-- Gold warm glow effect -->
-		<div class="absolute top-0 left-1/2 transform -translate-x-1/2 w-96 h-96 rounded-full blur-3xl" style="background: radial-gradient(circle, rgba(213, 186, 127, 0.12) 0%, rgba(213, 186, 127, 0.06) 50%, transparent 100%);"></div>
-		
-		<div class="relative mx-auto max-w-7xl px-6 z-10">
-			<!-- Video Player Section -->
-			<div class="max-w-4xl mx-auto">
-				<div class="relative rounded-2xl overflow-hidden shadow-2xl bg-black/20 backdrop-blur-sm border border-white/10">
+		<!-- Center Third: Demo Video -->
+		<div class="relative z-10 flex-1 flex items-start justify-center px-6 pt-8">
+			<div class="w-full max-w-md mx-auto">
+				<div class="relative rounded-lg overflow-hidden shadow-2xl bg-black/20 backdrop-blur-sm border border-white/10">
 					<video
 						bind:this={heroVideo}
-						class="w-full aspect-video object-cover hero-video-zoom"
+						class="w-full aspect-video object-cover scale-110"
 						poster="https://firebasestorage.googleapis.com/v0/b/fir-tweb.firebasestorage.app/o/image_assets%2Fthumb%20for%20homevid%20001.png?alt=media&token=2da69fcb-1d2e-42c3-8716-ea0a6e78ad92"
 						ontimeupdate={heroHandleTimeUpdate}
 						onloadedmetadata={heroHandleLoadedMetadata}
@@ -355,57 +348,55 @@
 						Your browser does not support the video tag.
 					</video>
 
-					<!-- Play Button Overlay for Thumbnail -->
-					{#if !heroIsPlaying && heroVideo && heroVideo.paused}
-						<div class="absolute inset-0 flex items-center justify-center bg-black/10">
+					<!-- Play Button Overlay - Only visible when paused -->
+					{#if !heroIsPlaying}
+						<div class="absolute inset-0 flex items-center justify-center">
 							<button
 								onclick={heroTogglePlay}
-								class="w-16 h-16 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-lg"
+								class="w-16 h-16 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-lg z-20"
 								aria-label="Play video"
 							>
-								<Play class="w-6 h-6 text-black ml-1" />
+								<Play class="w-6 h-6 text-black ml-0.5" />
 							</button>
 						</div>
 					{/if}
 
-					<!-- Custom Video Controls -->
-					<div class="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 bg-black/20">
-						<button
-							onclick={heroTogglePlay}
-							class="w-20 h-20 rounded-full bg-[#D5BA7F]/90 hover:bg-[#D5BA7F] flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-lg"
-							aria-label={heroIsPlaying ? 'Pause video' : 'Play video'}
-						>
-							{#if heroIsPlaying}
-								<Pause class="w-8 h-8 text-black ml-0" />
-							{:else}
-								<Play class="w-8 h-8 text-black ml-1" />
-							{/if}
-						</button>
+					<!-- Custom Video Controls - Show pause on hover when playing -->
+					<div class="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 bg-black/20 group">
+						{#if heroIsPlaying}
+							<button
+								onclick={heroTogglePlay}
+								class="w-16 h-16 rounded-full bg-[#D5BA7F]/90 hover:bg-[#D5BA7F] flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-lg"
+								aria-label="Pause video"
+							>
+								<Pause class="w-6 h-6 text-black ml-0" />
+							</button>
+						{/if}
 					</div>
 
 					<!-- Progress Bar and Controls -->
-					<div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 opacity-0 hover:opacity-100 transition-opacity duration-300">
-						<div class="flex items-center gap-3 text-white">
+					<div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 opacity-0 hover:opacity-100 transition-opacity duration-300">
+						<div class="flex items-center gap-2 text-white text-sm">
 							<!-- Play/Pause Button -->
 							<button
 								onclick={heroTogglePlay}
-								class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+								class="w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
 								aria-label={heroIsPlaying ? 'Pause' : 'Play'}
 							>
 								{#if heroIsPlaying}
-									<Pause class="w-4 h-4" />
+									<Pause class="w-3 h-3" />
 								{:else}
-									<Play class="w-4 h-4 ml-0.5" />
+									<Play class="w-3 h-3 ml-0.5" />
 								{/if}
 							</button>
 
 							<!-- Time Display -->
-							<span class="text-sm font-medium">
+							<span class="text-xs font-medium">
 								{formatTime(heroCurrentTime)} / {formatTime(heroDuration)}
 							</span>
 
 							<!-- Progress Bar -->
-							<div class="flex-1 mx-3">
+							<div class="flex-1 mx-2">
 								<input
 									type="range"
 									min="0"
@@ -417,43 +408,33 @@
 							</div>
 
 							<!-- Volume Control -->
-							<div class="flex items-center gap-2">
-								<Volume2 class="w-4 h-4" />
+							<div class="flex items-center gap-1">
+								<Volume2 class="w-3 h-3" />
 								<input
 									type="range"
 									min="0"
 									max="100"
 									value={heroVolume * 100}
 									onchange={heroHandleVolumeChange}
-									class="w-16 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
+									class="w-12 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
 								/>
 							</div>
 
 							<!-- Fullscreen Button -->
 							<button
 								onclick={heroToggleFullscreen}
-								class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+								class="w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
 								aria-label="Fullscreen"
 							>
-								<Maximize class="w-4 h-4" />
+								<Maximize class="w-3 h-3" />
 							</button>
 						</div>
 					</div>
 				</div>
-
-				<!-- Trust Mini-Strip Under Video -->
-				<div class="flex justify-center items-center gap-8 flex-wrap mt-8">
-					{#each trustBadges as badge}
-						{@const IconComponent = badge.icon}
-						<div class="flex items-center gap-2 text-sm text-white">
-							<IconComponent class="h-5 w-5 text-[#D5BA7F]" />
-							<span>{badge.text}</span>
-						</div>
-					{/each}
-				</div>
 			</div>
 		</div>
 	</section>
+
 
 	<!-- Social Proof Row -->
 	<section class="py-16 bg-white">
@@ -585,13 +566,13 @@
 		<div class="max-w-6xl mx-auto px-6">
 			<div class="grid md:grid-cols-2 gap-12 items-center">
 				<div>
-					<div class="video-player-custom rounded-lg overflow-hidden shadow-lg bg-black">
+					<div class="video-player-custom rounded-lg overflow-hidden shadow-lg bg-black relative">
 						<!-- Video Element -->
 						<video 
 							bind:this={video}
 							class="w-full aspect-video bg-black"
 							preload="metadata"
-							poster="https://via.placeholder.com/640x360/D5BA7F/FFFFFF?text=Tributestream+About+Us"
+							poster="https://firebasestorage.googleapis.com/v0/b/fir-tweb.firebasestorage.app/o/image_assets%2Fthumb%20for%20homevid%20002.png?alt=media&token=b5a29196-eceb-44cf-8e65-1b135d6b03ad"
 							ontimeupdate={handleTimeUpdate}
 							onloadedmetadata={handleLoadedMetadata}
 							onplay={() => isPlaying = true}
@@ -604,6 +585,19 @@
 							<track kind="captions" src="" srclang="en" label="English captions" default>
 							Your browser does not support the video tag.
 						</video>
+
+						<!-- Play Button Overlay for Thumbnail -->
+						{#if !isPlaying && video && video.paused}
+							<div class="absolute inset-0 flex items-center justify-center bg-black/10">
+								<button
+									onclick={togglePlay}
+									class="w-20 h-20 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-lg"
+									aria-label="Play video"
+								>
+									<Play class="w-8 h-8 text-black ml-1" />
+								</button>
+							</div>
+						{/if}
 						
 						<!-- Custom Control Bar -->
 						<div class="bg-gradient-to-r from-[#D5BA7F] to-[#C5AA6F] p-4 border-t border-[#B59A5F]">

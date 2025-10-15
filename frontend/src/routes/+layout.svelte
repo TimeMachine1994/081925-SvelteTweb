@@ -23,6 +23,7 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
+	<script type="text/javascript" src="//script.crazyegg.com/pages/scripts/0130/3684.js" async="async"></script>
 </svelte:head>
 
 <RecaptchaProvider>
