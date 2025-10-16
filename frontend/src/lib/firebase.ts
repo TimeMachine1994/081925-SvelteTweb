@@ -5,9 +5,12 @@ import { getStorage, connectStorageEmulator, type FirebaseStorage } from 'fireba
 import { dev, browser } from '$app/environment';
 import { env } from '$env/dynamic/public';
 
+// Check if we should use production Firebase instead of emulators
+const useProduction = env.PUBLIC_USE_PRODUCTION === 'true' || env.PUBLIC_NODE_ENV === 'production';
+
 // Firebase configuration with environment variables and fallbacks
 const firebaseConfig = {
-	apiKey: dev ? 'dummy' : env.PUBLIC_FIREBASE_API_KEY || 'AIzaSyAXmTxzYRc-LhMEW75nZjjjQCZov1gpiw0',
+	apiKey: (dev && !useProduction) ? 'dummy' : env.PUBLIC_FIREBASE_API_KEY || 'AIzaSyAXmTxzYRc-LhMEW75nZjjjQCZov1gpiw0',
 	authDomain: env.PUBLIC_FIREBASE_AUTH_DOMAIN || 'fir-tweb.firebaseapp.com',
 	projectId: env.PUBLIC_FIREBASE_PROJECT_ID || 'firebasetweb',
 	storageBucket: env.PUBLIC_FIREBASE_STORAGE_BUCKET || 'fir-tweb.firebasestorage.app',
@@ -20,7 +23,9 @@ console.log('🔥 Firebase Config:', {
 	authDomain: firebaseConfig.authDomain,
 	apiKey: firebaseConfig.apiKey,
 	isDev: dev,
-	isBrowser: browser
+	isBrowser: browser,
+	useProduction: useProduction,
+	mode: useProduction ? 'PRODUCTION' : 'EMULATORS'
 });
 
 // Initialize Firebase
@@ -35,7 +40,7 @@ if (browser) {
 	db = getFirestore(app);
 	storage = getStorage(app);
 
-	if (dev) {
+	if (dev && !useProduction) {
 		try {
 			console.log('🔥 Connecting to Firebase emulators...');
 
@@ -85,6 +90,8 @@ if (browser) {
 			console.error('❌ Error connecting to Firebase emulators:', error);
 			console.error('❌ Make sure Firebase emulators are running: firebase emulators:start');
 		}
+	} else if (useProduction) {
+		console.log('🚀 Using production Firebase - skipping emulator connections');
 	}
 }
 
