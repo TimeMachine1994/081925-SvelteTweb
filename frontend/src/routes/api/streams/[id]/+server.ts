@@ -58,6 +58,49 @@ export const PUT: RequestHandler = async ({ locals, params, request }) => {
 
 		console.log('✅ [STREAM API] Stream updated:', streamId, updates);
 
+		// If scheduledStartTime was updated and stream is linked to calculator, sync back to calculator
+		if (updates.scheduledStartTime && streamData.calculatorServiceType) {
+			try {
+				console.log('🔄 [STREAM API] Syncing stream time change back to calculator...');
+				
+				// Parse the new date/time
+				const newDateTime = new Date(updates.scheduledStartTime);
+				const newDate = newDateTime.toISOString().split('T')[0]; // YYYY-MM-DD
+				const newTime = newDateTime.toTimeString().split(' ')[0].substring(0, 5); // HH:MM
+
+				// Update the appropriate service in memorial.services directly
+				const memorialUpdateData: any = {
+					updatedAt: new Date().toISOString()
+				};
+
+				if (streamData.calculatorServiceType === 'main') {
+					// Update main service
+					memorialUpdateData['services.main.time.date'] = newDate;
+					memorialUpdateData['services.main.time.time'] = newTime;
+				} else if (streamData.calculatorServiceType === 'location' || streamData.calculatorServiceType === 'day') {
+					// Update additional service
+					const serviceIndex = streamData.calculatorServiceIndex;
+					if (serviceIndex !== null && serviceIndex !== undefined) {
+						memorialUpdateData[`services.additional.${serviceIndex}.time.date`] = newDate;
+						memorialUpdateData[`services.additional.${serviceIndex}.time.time`] = newTime;
+					}
+				}
+
+				// Update memorial with new calculator data
+				await adminDb.collection('memorials').doc(streamData.memorialId).update(memorialUpdateData);
+
+				console.log('✅ [STREAM API] Calculator sync successful:', {
+					serviceType: streamData.calculatorServiceType,
+					serviceIndex: streamData.calculatorServiceIndex,
+					newDate,
+					newTime
+				});
+			} catch (syncError) {
+				console.error('❌ [STREAM API] Calculator sync error:', syncError);
+				// Don't fail the stream update if sync fails
+			}
+		}
+
 		return json({
 			success: true,
 			message: 'Stream updated successfully'

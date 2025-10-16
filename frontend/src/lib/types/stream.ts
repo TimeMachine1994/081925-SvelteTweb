@@ -23,6 +23,10 @@ export interface Stream {
 	scheduledStartTime?: string;
 	scheduledEndTime?: string;
 
+	// Calculator Integration (for bidirectional sync)
+	calculatorServiceType?: 'main' | 'location' | 'day';
+	calculatorServiceIndex?: number | null;
+
 	// Recording
 	recordingUrl?: string;
 	recordingReady?: boolean;

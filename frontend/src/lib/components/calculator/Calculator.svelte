@@ -339,18 +339,43 @@
 	});
 
 	async function createStreamsFromSchedule() {
-		if (!memorialId) return;
+		console.log('🎬 [CALCULATOR] createStreamsFromSchedule called', { memorialId });
+		if (!memorialId) {
+			console.log('❌ [CALCULATOR] No memorialId, skipping stream creation');
+			return;
+		}
 
 		const streamsToCreate = [];
+
+		console.log('🔍 [CALCULATOR] Checking services data:', { services });
 
 		// Check main service for date/time
 		if (services.main.time.date && services.main.time.time && services.main.location.name) {
 			const scheduledStartTime = new Date(`${services.main.time.date}T${services.main.time.time}`).toISOString();
 			
+			console.log('✅ [CALCULATOR] Main service has all required data:', {
+				date: services.main.time.date,
+				time: services.main.time.time,
+				location: services.main.location.name,
+				scheduledStartTime
+			});
+			
 			streamsToCreate.push({
 				title: `${services.main.location.name} Service`,
 				description: `Memorial service at ${services.main.location.name}${services.main.location.address ? ` - ${services.main.location.address}` : ''}`,
-				scheduledStartTime
+				scheduledStartTime,
+				// Link to calculator data for bidirectional sync
+				calculatorServiceType: 'main',
+				calculatorServiceIndex: null
+			});
+		} else {
+			console.log('⚠️ [CALCULATOR] Main service missing required data:', {
+				hasDate: !!services.main.time.date,
+				hasTime: !!services.main.time.time,
+				hasLocation: !!services.main.location.name,
+				date: services.main.time.date,
+				time: services.main.time.time,
+				location: services.main.location.name
 			});
 		}
 
@@ -363,17 +388,21 @@
 				streamsToCreate.push({
 					title: `${serviceType} - ${service.location.name}`,
 					description: `${serviceType} service at ${service.location.name}${service.location.address ? ` - ${service.location.address}` : ''}`,
-					scheduledStartTime
+					scheduledStartTime,
+					// Link to calculator data for bidirectional sync
+					calculatorServiceType: service.type,
+					calculatorServiceIndex: index
 				});
 			}
 		});
 
 		// Create streams if any were scheduled
 		if (streamsToCreate.length > 0) {
-			console.log('🎬 Auto-creating', streamsToCreate.length, 'streams from schedule');
+			console.log('🎬 [CALCULATOR] Auto-creating', streamsToCreate.length, 'streams from schedule:', streamsToCreate);
 			
 			for (const streamData of streamsToCreate) {
 				try {
+					console.log('📡 [CALCULATOR] Creating stream:', streamData);
 					const response = await fetch(`/api/memorials/${memorialId}/streams`, {
 						method: 'POST',
 						headers: {
@@ -382,20 +411,27 @@
 						body: JSON.stringify(streamData)
 					});
 
+					console.log('📡 [CALCULATOR] Stream creation response:', response.status, response.statusText);
+
 					if (response.ok) {
 						const result = await response.json();
-						console.log('✅ Auto-created stream:', result.stream.title);
+						console.log('✅ [CALCULATOR] Auto-created stream:', result.stream.title, result.stream.id);
 					} else {
-						console.error('❌ Failed to auto-create stream:', streamData.title);
+						const errorText = await response.text();
+						console.error('❌ [CALCULATOR] Failed to auto-create stream:', streamData.title, response.status, errorText);
 					}
 				} catch (error) {
-					console.error('❌ Error auto-creating stream:', error);
+					console.error('❌ [CALCULATOR] Error auto-creating stream:', error);
 				}
 			}
+		} else {
+			console.log('⚠️ [CALCULATOR] No streams to create - no services with complete date/time/location data');
 		}
 	}
 
 	async function saveAndPayLater(isPayNowFlow = false) {
+		console.log('💾 [CALCULATOR] saveAndPayLater called', { isPayNowFlow, memorialId });
+		
 		// Validate required data
 		if (!selectedTier) {
 			alert('Please select a service tier before proceeding.');
@@ -432,6 +468,8 @@
 			const result = await response.json();
 
 			if (response.ok) {
+				console.log('✅ [CALCULATOR] Schedule saved successfully, now creating streams...');
+				
 				// Clear auto-save data since we've successfully saved
 				if (autoSave) {
 					autoSave.clearAutoSave?.();
@@ -444,6 +482,7 @@
 					alert('Schedule saved successfully!');
 				}
 			} else {
+				console.error('❌ [CALCULATOR] Failed to save schedule:', result.error);
 				alert(`Failed to save schedule: ${result.error}`);
 			}
 		} catch (error) {

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Radio, Circle, Calendar, Users } from 'lucide-svelte';
+	import { Radio, Circle, Calendar, Users, Calculator } from 'lucide-svelte';
 	import { colors } from '../tokens/colors.js';
 	import { getTextStyle } from '../tokens/typography.js';
 	import { getSemanticSpacing } from '../tokens/spacing.js';
@@ -125,18 +125,36 @@
 			</h3>
 		</div>
 
-		<!-- Status Badge -->
-		<span 
-			class="rounded-full px-2 py-1"
-			style="
-				font-size: {getTextStyle('ui', 'caption').fontSize};
-				font-weight: {getTextStyle('ui', 'button').sm.fontWeight};
-				color: {statusStyles.text};
-				background: {statusStyles.background};
-			"
-		>
-			{getStatusText(stream.status)}
-		</span>
+		<div class="flex items-center" style="gap: {getSemanticSpacing('component', 'sm')};">
+			<!-- Calculator Badge (for auto-generated streams) -->
+			{#if stream.calculatorServiceType}
+				<span 
+					class="rounded-full px-2 py-1 flex items-center"
+					style="
+						font-size: {getTextStyle('ui', 'caption').fontSize};
+						color: {colors.primary[600]};
+						background: {colors.primary[100]};
+						gap: 0.25rem;
+					"
+					title="Auto-generated from service calculator"
+				>
+					<Calculator style="width: 0.75rem; height: 0.75rem;" />
+					<span>Calculator</span>
+				</span>
+			{/if}
+
+			<!-- Status Badge -->
+			<span 
+				class="rounded-full px-2 py-1"
+				style="
+					font-size: {getTextStyle('ui', 'caption').fontSize};
+					color: {statusStyles.text};
+					background: {statusStyles.background};
+				"
+			>
+				{getStatusText(stream.status)}
+			</span>
+		</div>
 	</div>
 
 	<!-- Description -->

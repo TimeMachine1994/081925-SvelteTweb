@@ -99,7 +99,7 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 
 	try {
 		// Parse request body
-		const { title, description, scheduledStartTime } = await request.json();
+		const { title, description, scheduledStartTime, calculatorServiceType, calculatorServiceIndex } = await request.json();
 
 		if (!title || typeof title !== 'string' || title.trim().length === 0) {
 			throw SvelteKitError(400, 'Stream title is required');
@@ -190,6 +190,8 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			rtmpUrl,
 			cloudflareInputId: cloudflareInputId || undefined,
 			scheduledStartTime: scheduledStartTime || undefined,
+			calculatorServiceType: calculatorServiceType || undefined,
+			calculatorServiceIndex: calculatorServiceIndex || undefined,
 			createdBy: userId,
 			createdAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString()
