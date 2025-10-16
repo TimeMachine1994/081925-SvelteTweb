@@ -457,13 +457,32 @@
 
 <!-- No Streams Message -->
 {#if safeStreams.length === 0}
-	<div class="no-streams">
-		<div class="no-streams-icon">
-			<Play class="placeholder-icon" />
+	<!-- Memorial Video Section -->
+	<div class="memorial-video-section">
+ 		<div class="placeholder-video">
+			<div class="placeholder-video-container">
+				<div class="placeholder-video-screen">
+					<div class="placeholder-video-content">
+					 
+						<h3>Memorial Livestream Coming Soon</h3>
+						<p>A special livestream video will be avaialble here to honor our loved one.</p>
+					</div>
+				</div>
+				<div class="placeholder-video-controls">
+					<div class="placeholder-control-bar">
+						<div class="placeholder-play-button">▶️</div>
+						<div class="placeholder-progress-bar">
+							<div class="placeholder-progress-fill"></div>
+						</div>
+						<div class="placeholder-time">0:00 / 0:00</div>
+						<div class="placeholder-volume">🔊</div>
+						<div class="placeholder-fullscreen">⛶</div>
+					</div>
+				</div>
+			</div>
 		</div>
-		<h3>No Memorial Services</h3>
-		<p>Memorial services will appear here when scheduled.</p>
 	</div>
+ 
 {/if}
 
 <style>
@@ -493,12 +512,12 @@
 	}
 
 	.stream-card {
-		background: white;
+		background: #1a1a2e;
 		border-radius: 12px;
 		padding: 1.5rem;
 		margin-bottom: 1.5rem;
-		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-		border: 1px solid #e5e7eb;
+		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+		border: 1px solid #333;
 	}
 
 	.live-card {
@@ -606,10 +625,10 @@
 		align-items: center;
 		justify-content: center;
 		height: 300px;
-		background: #f9fafb;
-		border: 2px dashed #d1d5db;
+		background: #2a2a2a;
+		border: 2px dashed #555;
 		border-radius: 8px;
-		color: #6b7280;
+		color: #999;
 	}
 
 	.placeholder-icon {
@@ -654,6 +673,132 @@
 		color: #ef4444;
 		margin-top: 0.5rem;
 		font-family: monospace;
+	}
+
+	/* Memorial Video Section Styles */
+	.memorial-video-section {
+		max-width: 1000px;
+		margin: 0 auto 3rem auto;
+		width: 100%;
+	}
+
+	.video-section-title {
+		font-size: 1.8rem;
+		font-weight: 300;
+		color: #333;
+		text-align: center;
+		margin-bottom: 1.5rem;
+		font-family: 'Fanwood Text', serif;
+		font-style: italic;
+	}
+
+	/* Placeholder Video Styles */
+	.placeholder-video {
+		width: 100%;
+		max-width: 800px;
+		margin: 0 auto 3rem auto;
+		background: #000;
+		border-radius: 8px;
+		overflow: hidden;
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+	}
+
+	.placeholder-video-container {
+		position: relative;
+		width: 100%;
+	}
+
+	.placeholder-video-screen {
+		aspect-ratio: 16/9;
+		background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		position: relative;
+	}
+
+	.placeholder-video-content {
+		text-align: center;
+		color: #999;
+		padding: 2rem;
+	}
+
+	.placeholder-video-icon {
+		margin-bottom: 1rem;
+		opacity: 0.7;
+	}
+
+	.placeholder-video-content h3 {
+		margin: 0 0 0.5rem 0;
+		font-size: 1.6rem;
+		font-weight: 300;
+		color: #ddd;
+	}
+
+	.placeholder-video-content p {
+		margin: 0;
+		font-size: 1rem;
+		color: #999;
+		line-height: 1.5;
+	}
+
+	.placeholder-video-controls {
+		background: #1a1a1a;
+		padding: 0.75rem 1rem;
+		border-top: 1px solid #333;
+	}
+
+	.placeholder-control-bar {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		color: #888;
+		font-size: 0.9rem;
+	}
+
+	.placeholder-play-button {
+		width: 32px;
+		height: 32px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: #333;
+		border-radius: 4px;
+		cursor: not-allowed;
+		opacity: 0.5;
+	}
+
+	.placeholder-progress-bar {
+		flex: 1;
+		height: 4px;
+		background: #333;
+		border-radius: 2px;
+		position: relative;
+		overflow: hidden;
+	}
+
+	.placeholder-progress-fill {
+		width: 0%;
+		height: 100%;
+		background: #666;
+		border-radius: 2px;
+	}
+
+	.placeholder-time {
+		font-family: monospace;
+		font-size: 0.85rem;
+		min-width: 80px;
+	}
+
+	.placeholder-volume,
+	.placeholder-fullscreen {
+		width: 24px;
+		height: 24px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: not-allowed;
+		opacity: 0.5;
 	}
 
 	@media (max-width: 768px) {

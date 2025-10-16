@@ -85,39 +85,7 @@
 							</div>
 						{/if}
 
-						<!-- Memorial Video Section -->
-						<div class="memorial-video-section">
-							<h2 class="video-section-title">Memorial Video</h2>
-							<div class="placeholder-video">
-								<div class="placeholder-video-container">
-									<div class="placeholder-video-screen">
-										<div class="placeholder-video-content">
-											<div class="placeholder-video-icon">
-												<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-													<rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-													<line x1="8" y1="21" x2="16" y2="21"/>
-													<line x1="12" y1="17" x2="12" y2="21"/>
-													<polygon points="10,9 15,12 10,15"/>
-												</svg>
-											</div>
-											<h3>Memorial Video Coming Soon</h3>
-											<p>A special video tribute will be available here to honor {memorial.lovedOneName}'s memory</p>
-										</div>
-									</div>
-									<div class="placeholder-video-controls">
-										<div class="placeholder-control-bar">
-											<div class="placeholder-play-button">▶️</div>
-											<div class="placeholder-progress-bar">
-												<div class="placeholder-progress-fill"></div>
-											</div>
-											<div class="placeholder-time">0:00 / 0:00</div>
-											<div class="placeholder-volume">🔊</div>
-											<div class="placeholder-fullscreen">⛶</div>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
+						
 
 						<!-- Livestream Section -->
 						<div class="livestream-section">
@@ -174,39 +142,7 @@
 						</div>
 					{/if}
 
-					<!-- Memorial Video Section -->
-					<div class="memorial-video-section">
-						<h2 class="video-section-title">Memorial Video</h2>
-						<div class="placeholder-video">
-							<div class="placeholder-video-container">
-								<div class="placeholder-video-screen">
-									<div class="placeholder-video-content">
-										<div class="placeholder-video-icon">
-											<svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-												<rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-												<line x1="8" y1="21" x2="16" y2="21"/>
-												<line x1="12" y1="17" x2="12" y2="21"/>
-												<polygon points="10,9 15,12 10,15"/>
-											</svg>
-										</div>
-										<h3>Memorial Video Coming Soon</h3>
-										<p>A special video tribute will be available here to honor {memorial.lovedOneName}'s memory</p>
-									</div>
-								</div>
-								<div class="placeholder-video-controls">
-									<div class="placeholder-control-bar">
-										<div class="placeholder-play-button">▶️</div>
-										<div class="placeholder-progress-bar">
-											<div class="placeholder-progress-fill"></div>
-										</div>
-										<div class="placeholder-time">0:00 / 0:00</div>
-										<div class="placeholder-volume">🔊</div>
-										<div class="placeholder-fullscreen">⛶</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
+				
 
 					<!-- Livestream Section -->
 					<div class="livestream-section">
@@ -296,19 +232,6 @@
 		z-index: 2;
 	}
 
-	.memorial-image {
-		margin-bottom: 1.5rem;
-	}
-
-	.memorial-image img {
-		width: 200px;
-		height: 200px;
-		object-fit: cover;
-		object-position: bottom;
-		border-radius: 50%;
-		border: 4px solid white;
-		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-	}
 
 	.memorial-header h1 {
 		font-size: 2.5rem;
@@ -440,36 +363,20 @@
 	}
 
 	.memorial-header {
-		height: 33.33vh;
-		min-height: 300px;
+		height: 66.67vh;
+		min-height: 400px;
 		position: relative;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		background-image: url('https://firebasestorage.googleapis.com/v0/b/fir-tweb.firebasestorage.app/o/Background.jpg?alt=media&token=460aeba9-0879-4e88-b10f-f012dc79c0e6');
 		background-size: cover;
-		background-position: center;
+		background-position: bottom center;
 		background-repeat: no-repeat;
 		color: white;
 		overflow: hidden;
 	}
 
-	.memorial-image {
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		z-index: 1;
-	}
-
-	.memorial-image img {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		object-position: bottom;
-		opacity: 0.7;
-	}
 
 	.memorial-header-content {
 		position: relative;
@@ -484,7 +391,7 @@
 	.memorial-body {
 		flex: 1;
 		padding: 3rem 2rem;
-		background: #fafafa;
+		background: #0a0a1a;
 		display: flex;
 		flex-direction: column;
 		gap: 2rem;
@@ -495,7 +402,7 @@
 		margin: 0 auto;
 		font-size: 1.1rem;
 		line-height: 1.6;
-		color: #444;
+		color: #e0e0e0;
 	}
 
 	.memorial-video-section,
@@ -508,7 +415,7 @@
 	.video-section-title {
 		font-size: 1.8rem;
 		font-weight: 300;
-		color: #333;
+		color: #e0e0e0;
 		text-align: center;
 		margin-bottom: 1.5rem;
 		font-family: 'Fanwood Text', serif;
