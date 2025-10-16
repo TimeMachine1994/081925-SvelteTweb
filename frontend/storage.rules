@@ -32,15 +32,21 @@ service firebase.storage {
       allow write: if isAdmin() || isAdminEmail();
     }
 
+    // Blog featured images - allow admin access for FireCMS
+    match /blog-featured/{allPaths=**} {
+      allow read; // Public read for blog featured images
+      allow write: if isAdmin() || isAdminEmail();
+    }
+
     // Public videos (homepage background, about us, etc.)
     // - Publicly readable for marketing/promotional content
     // - Writable by admins for content management
-    match /tributestream_advertisment{allPaths=**} {
+    match /tributestream_advertisment/{allPaths=**} {
       allow read;
       allow write: if isAdmin() || isAdminEmail();
     }
     
-    match /tributestream_-_about_us{allPaths=**} {
+    match /tributestream_-_about_us/{allPaths=**} {
       allow read;
       allow write: if isAdmin() || isAdminEmail();
     }

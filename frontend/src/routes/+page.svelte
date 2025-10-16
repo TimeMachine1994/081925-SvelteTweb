@@ -54,9 +54,9 @@
 
 	// Timeline example
 	const sampleTimeline = [
-		{ time: "2:00 PM", title: "Service Begins", detail: "Welcome and opening remarks" },
-		{ time: "2:30 PM", title: "Live Stream", detail: "Memorial service broadcast" },
-		{ time: "3:30 PM", title: "Recording Available", detail: "Download link sent to family" }
+		{ time: "1:00 PM", title: "Tributestream Setup", detail: "Tributestream arrives early to setup gear" },
+		{ time: "2:00 PM", title: "Livestream", detail: "Memorial service broadcast" },
+		{ time: "3:00 PM", title: "Recording Available", detail: "Complimentary download available shortly after the service" }
 	];
 
 	const faqItems = [
@@ -658,6 +658,11 @@
 								</button>
 							</div>
 						</div>
+					</div>
+					
+					<!-- AI Generation Attribution -->
+					<div class="text-center mt-4">
+						<p class="text-sm text-slate-500 italic">This Ad was made with AI Generation.</p>
 					</div>
 				</div>
 				<div>

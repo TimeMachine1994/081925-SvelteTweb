@@ -122,50 +122,17 @@
 						<!-- Livestream Section -->
 						<div class="livestream-section">
 							<h2 class="video-section-title">Live Stream</h2>
-							{#if streams && streams.length > 0}
-								<!-- Real Stream Player -->
-								<StreamPlayer streams={streams as any} memorialName={memorial.lovedOneName} memorialId={memorial.id} />
-							{:else}
-								<!-- Fake Player when no livestream scheduled -->
-								<div class="fake-player">
-									<div class="fake-player-container">
-										<div class="fake-player-screen">
-											<div class="fake-player-content">
-												<div class="fake-player-icon">
-													<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-														<circle cx="12" cy="12" r="10"/>
-														<polygon points="10,8 16,12 10,16"/>
-													</svg>
-												</div>
-												<h3>No Live Stream Scheduled</h3>
-												<p>Check back later for live streaming of the memorial service</p>
-											</div>
-										</div>
-										<div class="fake-player-controls">
-											<div class="fake-control-bar">
-												<div class="fake-play-button">⏸️</div>
-												<div class="fake-progress-bar">
-													<div class="fake-progress-fill"></div>
-												</div>
-												<div class="fake-time">0:00 / 0:00</div>
-												<div class="fake-volume">🔊</div>
-												<div class="fake-fullscreen">⛶</div>
-											</div>
-										</div>
-									</div>
-								</div>
-							{/if}
+							<!-- Always use StreamPlayer - it handles all states internally -->
+							<StreamPlayer streams={streams as any} memorialName={memorial.lovedOneName} memorialId={memorial.id} />
 						</div>
 					</div>
 				</div>
 
 				<!-- Streams Section for Legacy Memorials -->
-				{#if streams.length > 0}
-					<div class="streams-section">
-						<h2>Live Streams</h2>
-						<StreamPlayer streams={streams as any} memorialName={memorial.lovedOneName} memorialId={memorial.id} />
-					</div>
-				{/if}
+				<div class="streams-section">
+					<h2>Live Streams</h2>
+					<StreamPlayer streams={streams as any} memorialName={memorial.lovedOneName} memorialId={memorial.id} />
+				</div>
 			</div>
 		{:else}
 			<!-- Standard Memorial Layout - 1/3 Header, 2/3 Body -->
@@ -244,39 +211,8 @@
 					<!-- Livestream Section -->
 					<div class="livestream-section">
 						<h2 class="video-section-title">Live Stream</h2>
-						{#if streams && streams.length > 0}
-							<!-- Real Stream Player -->
-							<StreamPlayer streams={streams as any} memorialName={memorial.lovedOneName} memorialId={memorial.id} />
-						{:else}
-							<!-- Fake Player when no livestream scheduled -->
-							<div class="fake-player">
-								<div class="fake-player-container">
-									<div class="fake-player-screen">
-										<div class="fake-player-content">
-											<div class="fake-player-icon">
-												<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-													<circle cx="12" cy="12" r="10"/>
-													<polygon points="10,8 16,12 10,16"/>
-												</svg>
-											</div>
-											<h3>No Live Stream Scheduled</h3>
-											<p>Check back later for live streaming of the memorial service</p>
-										</div>
-									</div>
-									<div class="fake-player-controls">
-										<div class="fake-control-bar">
-											<div class="fake-play-button">⏸️</div>
-											<div class="fake-progress-bar">
-												<div class="fake-progress-fill"></div>
-											</div>
-											<div class="fake-time">0:00 / 0:00</div>
-											<div class="fake-volume">🔊</div>
-											<div class="fake-fullscreen">⛶</div>
-										</div>
-									</div>
-								</div>
-							</div>
-						{/if}
+						<!-- Always use StreamPlayer - it handles all states internally -->
+						<StreamPlayer streams={streams as any} memorialName={memorial.lovedOneName} memorialId={memorial.id} />
 					</div>
 				</div>
 			</div>
@@ -368,9 +304,10 @@
 		width: 200px;
 		height: 200px;
 		object-fit: cover;
+		object-position: bottom;
 		border-radius: 50%;
-		border: 4px solid #f8f9fa;
-		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+		border: 4px solid white;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 	}
 
 	.memorial-header h1 {
@@ -530,6 +467,7 @@
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
+		object-position: bottom;
 		opacity: 0.7;
 	}
 
@@ -686,113 +624,6 @@
 		opacity: 0.5;
 	}
 
-	/* Fake Player Styles */
-	.fake-player {
-		width: 100%;
-		max-width: 800px;
-		margin: 0 auto;
-		background: #000;
-		border-radius: 8px;
-		overflow: hidden;
-		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-	}
-
-	.fake-player-container {
-		position: relative;
-		width: 100%;
-	}
-
-	.fake-player-screen {
-		aspect-ratio: 16/9;
-		background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		position: relative;
-	}
-
-	.fake-player-content {
-		text-align: center;
-		color: #888;
-		padding: 2rem;
-	}
-
-	.fake-player-icon {
-		margin-bottom: 1rem;
-		opacity: 0.6;
-	}
-
-	.fake-player-content h3 {
-		margin: 0 0 0.5rem 0;
-		font-size: 1.5rem;
-		font-weight: 300;
-		color: #ccc;
-	}
-
-	.fake-player-content p {
-		margin: 0;
-		font-size: 1rem;
-		color: #888;
-	}
-
-	.fake-player-controls {
-		background: #1a1a1a;
-		padding: 0.75rem 1rem;
-		border-top: 1px solid #333;
-	}
-
-	.fake-control-bar {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-		color: #888;
-		font-size: 0.9rem;
-	}
-
-	.fake-play-button {
-		width: 32px;
-		height: 32px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		background: #333;
-		border-radius: 4px;
-		cursor: not-allowed;
-		opacity: 0.5;
-	}
-
-	.fake-progress-bar {
-		flex: 1;
-		height: 4px;
-		background: #333;
-		border-radius: 2px;
-		position: relative;
-		overflow: hidden;
-	}
-
-	.fake-progress-fill {
-		width: 0%;
-		height: 100%;
-		background: #666;
-		border-radius: 2px;
-	}
-
-	.fake-time {
-		font-family: monospace;
-		font-size: 0.85rem;
-		min-width: 80px;
-	}
-
-	.fake-volume,
-	.fake-fullscreen {
-		width: 24px;
-		height: 24px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		cursor: not-allowed;
-		opacity: 0.5;
-	}
 
 	/* Responsive Design */
 	@media (max-width: 768px) {
@@ -813,12 +644,5 @@
 			font-size: 1.5rem;
 		}
 
-		.fake-player-content {
-			padding: 1.5rem;
-		}
-
-		.fake-player-content h3 {
-			font-size: 1.2rem;
-		}
 	}
 </style>

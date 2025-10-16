@@ -2,6 +2,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { Calendar, Clock, Play, Users } from 'lucide-svelte';
 	import type { Stream } from '$lib/types/stream';
+	import CountdownVideoPlayer from './CountdownVideoPlayer.svelte';
 
 	interface Props {
 		streams?: Stream[];
@@ -394,32 +395,13 @@
 					<p class="stream-description">{stream.description}</p>
 				{/if}
 
-				<div class="countdown-container">
-					<div class="countdown-display">
-						{#if countdown.days > 0}
-							<div class="countdown-unit">
-								<span class="countdown-number">{countdown.days}</span>
-								<span class="countdown-label">Days</span>
-							</div>
-						{/if}
-						<div class="countdown-unit">
-							<span class="countdown-number">{countdown.hours.toString().padStart(2, '0')}</span>
-							<span class="countdown-label">Hours</span>
-						</div>
-						<div class="countdown-unit">
-							<span class="countdown-number">{countdown.minutes.toString().padStart(2, '0')}</span>
-							<span class="countdown-label">Minutes</span>
-						</div>
-						<div class="countdown-unit">
-							<span class="countdown-number">{countdown.seconds.toString().padStart(2, '0')}</span>
-							<span class="countdown-label">Seconds</span>
-						</div>
-					</div>
-					<p class="scheduled-time">
-						<Clock class="time-icon" />
-						{formatDate(stream.scheduledStartTime!)}
-					</p>
-				</div>
+				<CountdownVideoPlayer 
+					scheduledStartTime={stream.scheduledStartTime!}
+					streamTitle={stream.title}
+					streamDescription={stream.description}
+					{currentTime}
+					theme="memorial"
+				/>
 			</div>
 		{/each}
 	</div>
@@ -636,54 +618,6 @@
 		margin-bottom: 1rem;
 	}
 
-	.countdown-container {
-		text-align: center;
-		padding: 2rem;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		border-radius: 12px;
-		color: white;
-		margin-bottom: 1rem;
-	}
-
-	.countdown-display {
-		display: flex;
-		justify-content: center;
-		gap: 2rem;
-		margin-bottom: 1rem;
-	}
-
-	.countdown-unit {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-	}
-
-	.countdown-number {
-		font-size: 2.5rem;
-		font-weight: 700;
-		line-height: 1;
-	}
-
-	.countdown-label {
-		font-size: 0.875rem;
-		opacity: 0.9;
-		margin-top: 0.25rem;
-	}
-
-	.scheduled-time {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.5rem;
-		font-size: 1.1rem;
-		margin: 0;
-		opacity: 0.95;
-	}
-
-	.time-icon {
-		width: 16px;
-		height: 16px;
-	}
 
 	.stream-info {
 		display: flex;
@@ -732,13 +666,6 @@
 			gap: 1rem;
 		}
 
-		.countdown-display {
-			gap: 1rem;
-		}
-
-		.countdown-number {
-			font-size: 2rem;
-		}
 
 		.stream-player {
 			height: 250px;

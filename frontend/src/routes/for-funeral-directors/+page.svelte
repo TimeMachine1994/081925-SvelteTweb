@@ -20,7 +20,7 @@
 		{ 
 			icon: Shield, 
 			title: "Your Brand Featured", 
-			description: "Your funeral home's name and branding prominently displayed on each memorial page, reinforcing your value." 
+			description: "Your funeral home's name and branding prominently displayed on each memorial page, reinforcing your value (coming soon). " 
 		}
 	];
 
@@ -87,7 +87,7 @@
 				</Button>
 				<Button theme="minimal" variant="secondary" onclick={handleRegister} class="flex items-center justify-center">
 					<ArrowRight class="h-5 w-5 mr-2" />
-					Register Your Home
+					Register Your Directors' Account
 				</Button>
 			</div>
 		</div>

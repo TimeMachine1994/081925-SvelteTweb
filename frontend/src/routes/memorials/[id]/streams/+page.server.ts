@@ -54,8 +54,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 
 		console.log(`✅ [STREAMS] User has permission to manage streams`);
 
-		// 4. For now, return basic memorial data
-		// TODO: Fetch actual streams data when stream collection is implemented
+		// 4. Return memorial data and user info for role-based UI
 		return {
 			memorial: {
 				id: memorial.id,
@@ -63,6 +62,11 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 				fullSlug: memorial.fullSlug,
 				ownerUid: memorial.ownerUid,
 				funeralDirectorUid: memorial.funeralDirectorUid
+			},
+			user: {
+				uid: locals.user.uid,
+				role: locals.user.role,
+				email: locals.user.email
 			},
 			streams: [] // Placeholder for streams data
 		};

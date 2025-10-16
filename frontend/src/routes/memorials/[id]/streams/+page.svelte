@@ -394,16 +394,19 @@
 						View Memorial
 					</a>
 
-					<Button
-						variant="role"
-						role="owner"
-						size="md"
-						rounded="lg"
-						onclick={openCreateModal}
-					>
-						<Plus class="mr-2 h-4 w-4" />
-						Create Stream
-					</Button>
+					<!-- Only show Create Stream button for funeral directors and admins -->
+					{#if data.user && (data.user.role === 'funeral_director' || data.user.role === 'admin')}
+						<Button
+							variant="role"
+							role="owner"
+							size="md"
+							rounded="lg"
+							onclick={openCreateModal}
+						>
+							<Plus class="mr-2 h-4 w-4" />
+							Create Stream
+						</Button>
+					{/if}
 				</div>
 			</div>
 		</div>
@@ -434,17 +437,28 @@
 						<Play class="h-12 w-12 text-gray-400" />
 					</div>
 					<h3 class="mb-2 text-xl font-semibold text-gray-900">No streams yet</h3>
-					<p class="mb-6 text-gray-600">Create your first livestream to get started</p>
-					<Button
-						variant="role"
-						role="owner"
-						size="md"
-						rounded="lg"
-						onclick={openCreateModal}
-					>
-						<Plus class="mr-2 h-4 w-4" />
-						Create First Stream
-					</Button>
+					{#if data.user && (data.user.role === 'funeral_director' || data.user.role === 'admin')}
+						<p class="mb-6 text-gray-600">Create your first livestream to get started</p>
+						<Button
+							variant="role"
+							role="owner"
+							size="md"
+							rounded="lg"
+							onclick={openCreateModal}
+						>
+							<Plus class="mr-2 h-4 w-4" />
+							Create First Stream
+						</Button>
+					{:else}
+						<p class="mb-6 text-gray-600">Streams will appear here when scheduled through the service calculator</p>
+						<a
+							href="/schedule?memorialId={memorialId}"
+							class="inline-flex items-center rounded-lg bg-amber-600 px-6 py-3 text-white transition-colors hover:bg-amber-700"
+						>
+							<Plus class="mr-2 h-4 w-4" />
+							Schedule Service
+						</a>
+					{/if}
 				</div>
 			{:else}
 				<!-- Streams Grid -->

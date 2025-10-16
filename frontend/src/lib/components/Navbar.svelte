@@ -2,6 +2,7 @@
 	import { user } from '$lib/auth';
 	import { getTheme } from '$lib/design-tokens/minimal-modern-theme';
 	import { Button } from '$lib/components/minimal-modern';
+	import { Heart, Users, BookOpen, Mail, User, LogIn, LogOut, Plus } from 'lucide-svelte';
 
 	// Mobile menu state
 	let mobileMenuOpen = $state(false);
@@ -45,10 +46,10 @@
 
 	// Navigation items - slim nav as specified
 	const navigationItems = [
-		{ label: 'For Families', href: '/for-families' },
-		{ label: 'For Funeral Directors', href: '/for-funeral-directors' },
-		{ label: 'FAQs', href: '/#faq' },
-		{ label: 'Contact', href: '/contact' }
+		{ label: 'For Families', href: '/for-families', icon: Heart },
+		{ label: 'For Funeral Directors', href: '/for-funeral-directors', icon: Users },
+		{ label: 'Blog', href: '/blog', icon: BookOpen },
+		{ label: 'Contact', href: '/contact', icon: Mail }
 	];
 </script>
 
@@ -67,12 +68,14 @@
 		<div class="desktop-nav hidden md:block">
 			<ul class="flex items-center list-none m-0 p-0 gap-8">
 				{#each navigationItems as item}
+					{@const IconComponent = item.icon}
 					<li>
 						<a
 							href={item.href}
-							class="nav-link transition-colors text-white hover:text-[#D5BA7F] font-medium py-2"
+							class="nav-link flex items-center gap-2 transition-colors text-white hover:text-[#D5BA7F] font-medium py-2"
 							style="font-family: {theme.font.body}; text-decoration: none;"
 						>
+							<IconComponent class="w-4 h-4" />
 							{item.label}
 						</a>
 					</li>
@@ -84,11 +87,13 @@
 						class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F] hover:text-black"
 					>
 						{#if $user}
-							<a href={getUserPortalLink($user)} class="no-underline text-black hover:text-black">
+							<a href={getUserPortalLink($user)} class="flex items-center gap-2 no-underline text-black hover:text-black">
+								<User class="w-4 h-4" />
 								My Portal
 							</a>
 						{:else}
-							<a href="/register/loved-one" class="no-underline text-black hover:text-black">
+							<a href="/register/loved-one" class="flex items-center gap-2 no-underline text-black hover:text-black">
+								<Plus class="w-4 h-4" />
 								Create Memorial
 							</a>
 						{/if}
@@ -100,17 +105,19 @@
 					{#if $user}
 						<a
 							href="/logout"
-							class="nav-link transition-colors text-white hover:text-[#D5BA7F] font-medium py-2"
+							class="nav-link flex items-center gap-2 transition-colors text-white hover:text-[#D5BA7F] font-medium py-2"
 							style="font-family: {theme.font.body}; text-decoration: none;"
 						>
+							<LogOut class="w-4 h-4" />
 							Logout
 						</a>
 					{:else}
 						<a
 							href="/login"
-							class="nav-link transition-colors text-white hover:text-[#D5BA7F] font-medium py-2"
+							class="nav-link flex items-center gap-2 transition-colors text-white hover:text-[#D5BA7F] font-medium py-2"
 							style="font-family: {theme.font.body}; text-decoration: none;"
 						>
+							<LogIn class="w-4 h-4" />
 							Login
 						</a>
 					{/if}
@@ -141,13 +148,15 @@
 			<ul class="flex flex-col list-none m-0 p-4 gap-0"
 			>
 				{#each navigationItems as item}
+					{@const IconComponent = item.icon}
 					<li>
 						<a
 							href={item.href}
-							class="mobile-nav-link block transition-colors border-b text-white hover:text-[#D5BA7F] font-medium py-4 border-slate-700"
+							class="mobile-nav-link flex items-center gap-3 transition-colors border-b text-white hover:text-[#D5BA7F] font-medium py-4 border-slate-700"
 							style="font-family: {theme.font.body}; text-decoration: none;"
 							onclick={closeMobileMenu}
 						>
+							<IconComponent class="w-5 h-5" />
 							{item.label}
 						</a>
 					</li>
@@ -160,11 +169,13 @@
 						onclick={closeMobileMenu}
 					>
 						{#if $user}
-							<a href={getUserPortalLink($user)} class="no-underline text-black hover:text-black">
+							<a href={getUserPortalLink($user)} class="flex items-center justify-center gap-2 no-underline text-black hover:text-black">
+								<User class="w-4 h-4" />
 								My Portal
 							</a>
 						{:else}
-							<a href="/register/loved-one" class="no-underline text-black hover:text-black">
+							<a href="/register/loved-one" class="flex items-center justify-center gap-2 no-underline text-black hover:text-black">
+								<Plus class="w-4 h-4" />
 								Create Memorial
 							</a>
 						{/if}
@@ -176,19 +187,21 @@
 					{#if $user}
 						<a
 							href="/logout"
-							class="mobile-nav-link block transition-colors border-b text-white hover:text-[#D5BA7F] font-medium py-4 border-slate-700"
+							class="mobile-nav-link flex items-center gap-3 transition-colors border-b text-white hover:text-[#D5BA7F] font-medium py-4 border-slate-700"
 							style="font-family: {theme.font.body}; text-decoration: none;"
 							onclick={closeMobileMenu}
 						>
+							<LogOut class="w-5 h-5" />
 							Logout
 						</a>
 					{:else}
 						<a
 							href="/login"
-							class="mobile-nav-link block transition-colors border-b text-white hover:text-[#D5BA7F] font-medium py-4 border-slate-700"
+							class="mobile-nav-link flex items-center gap-3 transition-colors border-b text-white hover:text-[#D5BA7F] font-medium py-4 border-slate-700"
 							style="font-family: {theme.font.body}; text-decoration: none;"
 							onclick={closeMobileMenu}
 						>
+							<LogIn class="w-5 h-5" />
 							Login
 						</a>
 					{/if}

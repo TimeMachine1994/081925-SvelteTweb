@@ -80,7 +80,7 @@
 </script>
 
 <svelte:head>
-	<title>TributeStream Blog - Memorial Planning & Live Streaming Insights</title>
+	<title>Tributestream Blog - Memorial Planning & Live Streaming Insights</title>
 	<meta name="description" content="Expert guidance on memorial planning, live streaming services, and supporting families during difficult times. Professional insights for funeral directors and families." />
 	<meta name="keywords" content="memorial planning, live streaming, funeral services, grief support, tribute stream" />
 </svelte:head>
@@ -89,7 +89,7 @@
 	<!-- Hero Section -->
 	<section class="hero-section">
 		<div class="hero-content">
-			<h1 class="hero-title">TributeStream Blog</h1>
+			<h1 class="hero-title">Tributestream Blog</h1>
 			<p class="hero-subtitle">Expert guidance on memorial planning, live streaming, and supporting families</p>
 			{#if usingMockData}
 				<div class="mock-data-notice">
@@ -113,7 +113,16 @@
 					{#each featuredPosts as post}
 						<Card theme="minimal" class="featured-card">
 							<div class="card-image">
-								<img src={post.featuredImage} alt={post.title} loading="lazy" />
+								{#if post.featuredImage}
+									<img src={post.featuredImage} alt={post.title} loading="lazy" />
+								{:else}
+									<div class="placeholder-image">
+										<div class="placeholder-content">
+											<span>📝</span>
+											<p>No Image</p>
+										</div>
+									</div>
+								{/if}
 								<div class="category-badge" style="background-color: {getCategoryColor(post.category)}">
 									{getCategoryLabel(post.category)}
 								</div>
@@ -129,7 +138,7 @@
 									{/if}
 								</div>
 								<div class="card-actions">
-									<Button theme="minimal" href="/blog/{post.slug}">Read More</Button>
+									<a href="/blog/{post.slug}" class="read-more-btn">Read More</a>
 								</div>
 							</div>
 						</Card>
@@ -146,7 +155,16 @@
 					{#each latestPosts as post}
 						<Card theme="minimal" class="latest-card">
 							<div class="card-image">
-								<img src={post.featuredImage} alt={post.title} loading="lazy" />
+								{#if post.featuredImage}
+									<img src={post.featuredImage} alt={post.title} loading="lazy" />
+								{:else}
+									<div class="placeholder-image">
+										<div class="placeholder-content">
+											<span>📝</span>
+											<p>No Image</p>
+										</div>
+									</div>
+								{/if}
 							</div>
 							<div class="card-content">
 								<div class="category-badge" style="background-color: {getCategoryColor(post.category)}">
@@ -159,7 +177,7 @@
 									<span class="date">{formatDate(post.publishedAt)}</span>
 								</div>
 								<div class="card-actions">
-									<Button theme="minimal" href="/blog/{post.slug}">Read More</Button>
+									<a href="/blog/{post.slug}" class="read-more-btn">Read More</a>
 								</div>
 							</div>
 						</Card>
@@ -326,6 +344,32 @@
 		transition: transform 0.3s ease;
 	}
 
+	.placeholder-image {
+		width: 100%;
+		height: 100%;
+		background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.placeholder-content {
+		text-align: center;
+		color: #9ca3af;
+	}
+
+	.placeholder-content span {
+		font-size: 2rem;
+		display: block;
+		margin-bottom: 0.5rem;
+	}
+
+	.placeholder-content p {
+		font-size: 0.875rem;
+		margin: 0;
+		font-weight: 500;
+	}
+
 	:global(.featured-card:hover) .card-image img,
 	:global(.latest-card:hover) .card-image img {
 		transform: scale(1.05);
@@ -372,6 +416,26 @@
 
 	.card-actions {
 		margin-top: 1rem;
+	}
+
+	.read-more-btn {
+		display: inline-block;
+		padding: 0.75rem 1.5rem;
+		background-color: #D5BA7F;
+		color: white;
+		text-decoration: none;
+		border-radius: 6px;
+		font-weight: 600;
+		font-size: 0.875rem;
+		transition: all 0.3s ease;
+		border: none;
+		cursor: pointer;
+	}
+
+	.read-more-btn:hover {
+		background-color: #C5AA6F;
+		transform: translateY(-1px);
+		box-shadow: 0 4px 12px rgba(213, 186, 127, 0.3);
 	}
 
 	/* Categories Section */

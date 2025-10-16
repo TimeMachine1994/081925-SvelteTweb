@@ -183,101 +183,57 @@
 
 			<!-- Main Content Grid -->
 			<div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
-				<!-- Profile Info Card -->
+				<!-- Account Settings Card (moved up) -->
 				<div
 					class="lg:col-span-1 {mounted ? 'animate-fade-in-up' : 'opacity-0'}"
 					style="animation-delay: 0.2s;"
 				>
-					<div
-						class="hover:shadow-3xl rounded-3xl border border-white/20 bg-white/70 p-8 shadow-2xl backdrop-blur-xl transition-all duration-500 hover:scale-105"
-					>
-						<div class="mb-6 flex items-center justify-between">
-							<h2 class="flex items-center text-2xl font-bold text-gray-900">
-								<User class="mr-3 h-6 w-6 text-{roleInfo.accentColor}-600" />
-								Profile
-							</h2>
+					<a href="/profile/settings" class="block">
+						<div
+							class="hover:shadow-3xl rounded-3xl border border-white/20 bg-white/70 p-8 shadow-2xl backdrop-blur-xl transition-all duration-500 hover:scale-105 cursor-pointer"
+						>
+							<div class="mb-6 flex items-center justify-between">
+								<h2 class="flex items-center text-2xl font-bold text-gray-900">
+									<Settings class="mr-3 h-6 w-6 text-{roleInfo.accentColor}-600" />
+									Account Settings
+								</h2>
+							</div>
+
+							<div class="space-y-4">
+								<p class="text-gray-600">Manage your account information and preferences</p>
+								
+								<div class="space-y-3">
+									<div class="flex items-center space-x-3 text-sm text-gray-500">
+										<User class="h-4 w-4" />
+										<span>Edit name and display preferences</span>
+									</div>
+									<div class="flex items-center space-x-3 text-sm text-gray-500">
+										<Mail class="h-4 w-4" />
+										<span>Update email address</span>
+									</div>
+									<div class="flex items-center space-x-3 text-sm text-gray-500">
+										<MapPin class="h-4 w-4" />
+										<span>Manage address information</span>
+									</div>
+									<div class="flex items-center space-x-3 text-sm text-gray-500">
+										<Shield class="h-4 w-4" />
+										<span>Change password</span>
+									</div>
+								</div>
+
+								<div class="mt-6 pt-4 border-t border-gray-200">
+									<div class="flex items-center justify-between">
+										<span class="text-sm font-medium text-gray-700">Click to manage</span>
+										<div class="w-6 h-6 rounded-full bg-{roleInfo.accentColor}-100 flex items-center justify-center">
+											<svg class="w-3 h-3 text-{roleInfo.accentColor}-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+											</svg>
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
-
-						<div class="space-y-6">
-							{#if userRole === 'funeral_director' && data.funeralDirector}
-								<!-- Funeral Director Business Info -->
-								<div
-									class="flex items-center space-x-4 rounded-2xl bg-gradient-to-r p-4 from-{roleInfo.accentColor}-50 border to-white border-{roleInfo.accentColor}-100"
-								>
-									<Building2 class="h-5 w-5 text-{roleInfo.accentColor}-600" />
-									<div>
-										<p class="text-sm text-{roleInfo.accentColor}-600 font-medium">Company</p>
-										<p class="font-semibold text-gray-900">{data.funeralDirector.companyName}</p>
-									</div>
-								</div>
-
-								<div
-									class="flex items-center space-x-4 rounded-2xl border border-gray-100 bg-gradient-to-r from-gray-50 to-white p-4"
-								>
-									<User class="h-5 w-5 text-gray-500" />
-									<div>
-										<p class="text-sm font-medium text-gray-500">Contact Person</p>
-										<p class="font-semibold text-gray-900">{data.funeralDirector.contactPerson}</p>
-									</div>
-								</div>
-
-								<div
-									class="flex items-center space-x-4 rounded-2xl border border-gray-100 bg-gradient-to-r from-gray-50 to-white p-4"
-								>
-									<Mail class="h-5 w-5 text-gray-500" />
-									<div>
-										<p class="text-sm font-medium text-gray-500">Email</p>
-										<p class="font-semibold text-gray-900">{data.funeralDirector.email}</p>
-									</div>
-								</div>
-
-								<div
-									class="flex items-center space-x-4 rounded-2xl border border-gray-100 bg-gradient-to-r from-gray-50 to-white p-4"
-								>
-									<User class="h-5 w-5 text-gray-500" />
-									<div>
-										<p class="text-sm font-medium text-gray-500">Phone</p>
-										<p class="font-semibold text-gray-900">{data.funeralDirector.phone}</p>
-									</div>
-								</div>
-
-								<div
-									class="flex items-center space-x-4 rounded-2xl border border-gray-100 bg-gradient-to-r from-gray-50 to-white p-4"
-								>
-									<Building2 class="h-5 w-5 text-gray-500" />
-									<div>
-										<p class="text-sm font-medium text-gray-500">Address</p>
-										<p class="font-semibold text-gray-900">
-											{data.funeralDirector.address.street}<br />
-											{data.funeralDirector.address.city}, {data.funeralDirector.address.state}
-											{data.funeralDirector.address.zipCode}
-										</p>
-									</div>
-								</div>
-							{:else}
-								<!-- Regular user profile -->
-								<div
-									class="flex items-center space-x-4 rounded-2xl border border-gray-100 bg-gradient-to-r from-gray-50 to-white p-4"
-								>
-									<Mail class="h-5 w-5 text-gray-500" />
-									<div>
-										<p class="text-sm font-medium text-gray-500">Email</p>
-										<p class="font-semibold text-gray-900">{data.profile.email}</p>
-									</div>
-								</div>
-
-								<div
-									class="flex items-center space-x-4 rounded-2xl bg-gradient-to-r p-4 from-{roleInfo.accentColor}-50 border to-white border-{roleInfo.accentColor}-100"
-								>
-									<User class="h-5 w-5 text-{roleInfo.accentColor}-600" />
-									<div>
-										<p class="text-sm text-{roleInfo.accentColor}-600 font-medium">Display Name</p>
-										<p class="font-semibold text-gray-900">{displayName || 'Not set'}</p>
-									</div>
-								</div>
-							{/if}
-						</div>
-					</div>
+					</a>
 				</div>
 
 				<!-- Memorials/Dashboard Card -->
@@ -447,19 +403,16 @@
 					</div>
 				</div>
 
-				<!-- Actions Section -->
-				<div
-					class="mt-12 {mounted ? 'animate-fade-in-up' : 'opacity-0'}"
-					style="animation-delay: 0.5s;"
-				>
+				{#if userRole === 'admin'}
+					<!-- Admin Dashboard Link -->
 					<div
-						class="space-y-6 rounded-3xl border border-white/20 bg-white/70 p-8 shadow-2xl backdrop-blur-xl"
+						class="mt-8 {mounted ? 'animate-fade-in-up' : 'opacity-0'}"
+						style="animation-delay: 0.5s;"
 					>
-						{#if userRole === 'admin'}
-							<!-- Site Admin Section -->
-							<div
-								class="flex flex-col items-center justify-between space-y-4 border-b border-gray-200 pb-6 sm:flex-row sm:space-y-0"
-							>
+						<div
+							class="rounded-3xl border border-white/20 bg-white/70 p-6 shadow-2xl backdrop-blur-xl"
+						>
+							<div class="flex items-center justify-between">
 								<div class="flex items-center space-x-4">
 									<Crown class="h-6 w-6 text-red-600" />
 									<div>
@@ -467,52 +420,44 @@
 										<p class="text-sm text-gray-500">Administrative dashboard and controls</p>
 									</div>
 								</div>
-								<div class="flex space-x-4">
-									<a
-										href="/admin"
-										class="rounded-xl bg-gradient-to-r from-red-500 to-pink-600 px-6 py-3 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
-									>
-										Admin Dashboard
-									</a>
-								</div>
-							</div>
-						{/if}
-
-						<!-- Account Settings Section -->
-						<div
-							class="flex flex-col items-center justify-between space-y-4 sm:flex-row sm:space-y-0"
-						>
-							<div class="flex items-center space-x-4">
-								<Settings class="h-6 w-6 text-gray-600" />
-								<div>
-									<h3 class="font-semibold text-gray-900">Account Settings</h3>
-									<p class="text-sm text-gray-500">Manage your account and preferences</p>
-								</div>
-							</div>
-							<div class="flex space-x-4">
-								{#if userRole === 'funeral_director'}
-									<a
-										href="/funeral-director/dashboard"
-										class="rounded-xl bg-gradient-to-r from-yellow-500 to-amber-600 px-6 py-3 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
-									>
-										Director Dashboard
-									</a>
-								{/if}
-								<form method="POST" action="/logout" class="inline">
-									<Button
-										type="submit"
-										variant="outline"
-										size="lg"
-										rounded="lg"
-									>
-										<LogOut class="mr-2 h-4 w-4" />
-										Sign Out
-									</Button>
-								</form>
+								<a
+									href="/admin"
+									class="rounded-xl bg-gradient-to-r from-red-500 to-pink-600 px-6 py-3 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
+								>
+									Admin Dashboard
+								</a>
 							</div>
 						</div>
 					</div>
-				</div>
+				{/if}
+
+				{#if userRole === 'funeral_director'}
+					<!-- Funeral Director Dashboard Link -->
+					<div
+						class="mt-8 {mounted ? 'animate-fade-in-up' : 'opacity-0'}"
+						style="animation-delay: 0.5s;"
+					>
+						<div
+							class="rounded-3xl border border-white/20 bg-white/70 p-6 shadow-2xl backdrop-blur-xl"
+						>
+							<div class="flex items-center justify-between">
+								<div class="flex items-center space-x-4">
+									<Building2 class="h-6 w-6 text-amber-600" />
+									<div>
+										<h3 class="font-semibold text-gray-900">Director Dashboard</h3>
+										<p class="text-sm text-gray-500">Professional tools and management</p>
+									</div>
+								</div>
+								<a
+									href="/funeral-director/dashboard"
+									class="rounded-xl bg-gradient-to-r from-yellow-500 to-amber-600 px-6 py-3 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
+								>
+									Director Dashboard
+								</a>
+							</div>
+						</div>
+					</div>
+				{/if}
 			</div>
 		{:else}
 			<div class="flex min-h-[60vh] items-center justify-center">

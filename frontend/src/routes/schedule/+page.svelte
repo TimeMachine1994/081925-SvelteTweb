@@ -297,6 +297,63 @@
 		return items;
 	}
 
+	async function createStreamsFromSchedule() {
+		if (!memorialId) return;
+
+		const streamsToCreate = [];
+
+		// Check main service for date/time
+		if (services.main.time.date && services.main.time.time && services.main.location.name) {
+			const scheduledStartTime = new Date(`${services.main.time.date}T${services.main.time.time}`).toISOString();
+			
+			streamsToCreate.push({
+				title: `${services.main.location.name} Service`,
+				description: `Memorial service at ${services.main.location.name}${services.main.location.address ? ` - ${services.main.location.address}` : ''}`,
+				scheduledStartTime
+			});
+		}
+
+		// Check additional services for date/time
+		services.additional.forEach((service, index) => {
+			if (service.time.date && service.time.time && service.location.name) {
+				const scheduledStartTime = new Date(`${service.time.date}T${service.time.time}`).toISOString();
+				const serviceType = service.type === 'location' ? 'Additional Location' : 'Additional Day';
+				
+				streamsToCreate.push({
+					title: `${serviceType} - ${service.location.name}`,
+					description: `${serviceType} service at ${service.location.name}${service.location.address ? ` - ${service.location.address}` : ''}`,
+					scheduledStartTime
+				});
+			}
+		});
+
+		// Create streams if any were scheduled
+		if (streamsToCreate.length > 0) {
+			console.log('🎬 Auto-creating', streamsToCreate.length, 'streams from schedule');
+			
+			for (const streamData of streamsToCreate) {
+				try {
+					const response = await fetch(`/api/memorials/${memorialId}/streams`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify(streamData)
+					});
+
+					if (response.ok) {
+						const result = await response.json();
+						console.log('✅ Auto-created stream:', result.stream.title);
+					} else {
+						console.error('❌ Failed to auto-create stream:', streamData.title);
+					}
+				} catch (error) {
+					console.error('❌ Error auto-creating stream:', error);
+				}
+			}
+		}
+	}
+
 	// Booking functions that integrate with our payment API
 	async function handleBookNow() {
 		if (!memorialId || !formData) {
@@ -325,6 +382,9 @@
 			const result = await response.json();
 
 			if (response.ok && result.clientSecret) {
+				// Auto-create livestreams if dates/times are provided
+				await createStreamsFromSchedule();
+				
 				// Redirect to payment page with encoded data
 				const paymentData = {
 					memorialId,
@@ -378,6 +438,9 @@
 			});
 
 			if (response.ok) {
+				// Auto-create livestreams if dates/times are provided
+				await createStreamsFromSchedule();
+				
 				// Redirect to profile page
 				goto('/profile');
 			} else {
