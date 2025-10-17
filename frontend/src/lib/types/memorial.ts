@@ -14,13 +14,17 @@ export interface ServiceDetails {
 	location: LocationInfo; // Service location
 	time: TimeInfo; // Service time
 	hours: number; // Duration in hours
+	streamId?: string; // Associated stream ID for bidirectional linking
+	streamHash?: string; // Hash of service data for change detection
 }
 
 export interface AdditionalServiceDetails {
-	enabled: boolean; // Whether service is enabled
+	type: 'location' | 'day'; // Service type
 	location: LocationInfo; // Service location
 	time: TimeInfo; // Service time
 	hours: number; // Duration in hours
+	streamId?: string; // Associated stream ID for bidirectional linking
+	streamHash?: string; // Hash of service data for change detection
 }
 
 export interface LocationInfo {

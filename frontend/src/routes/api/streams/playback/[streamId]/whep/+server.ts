@@ -9,23 +9,25 @@ import type { RequestHandler } from './$types';
  * This endpoint provides the WebRTC playback URL for a stream,
  * which can be used in OBS Browser Source to pull the live video
  * from Cloudflare Stream into OBS for further processing.
+ * 
+ * URL: /api/streams/playback/[streamId]/whep
  */
 export const GET: RequestHandler = async ({ params }) => {
 	const { streamId } = params;
 
-	console.log('🎬 [WHEP] Getting WHEP playback URL for stream:', streamId);
+	console.log('🎬 [STREAM PLAYBACK API] Getting WHEP playback URL for stream:', streamId);
 
 	try {
 		// Get the stream from database
 		const streamDoc = await adminDb.collection('streams').doc(streamId).get();
 
 		if (!streamDoc.exists) {
-			console.log('❌ [WHEP] Stream not found:', streamId);
+			console.log('❌ [STREAM PLAYBACK API] Stream not found:', streamId);
 			throw error(404, 'Stream not found');
 		}
 
 		const stream = streamDoc.data();
-		console.log('�� [WHEP] Stream data:', {
+		console.log('📋 [STREAM PLAYBACK API] Stream data:', {
 			id: streamId,
 			title: stream?.title,
 			status: stream?.status,
@@ -33,15 +35,15 @@ export const GET: RequestHandler = async ({ params }) => {
 		});
 
 		if (!stream?.cloudflareInputId) {
-			console.log('❌ [WHEP] No Cloudflare Input ID found for stream:', streamId);
+			console.log('❌ [STREAM PLAYBACK API] No Cloudflare Input ID found for stream:', streamId);
 			throw error(400, 'Stream not configured for live input');
 		}
 
 		// Get the live input details from Cloudflare
-		console.log('🔍 [WHEP] Fetching live input details from Cloudflare API');
+		console.log('🔍 [STREAM PLAYBACK API] Fetching live input details from Cloudflare API');
 
 		const liveInput = await getLiveInput(stream.cloudflareInputId);
-		console.log('📋 [WHEP] Live input data:', {
+		console.log('📋 [STREAM PLAYBACK API] Live input data:', {
 			uid: liveInput.uid,
 			hasWebRTC: !!liveInput.webRTC,
 			hasWebRTCPlayback: !!liveInput.webRTCPlayback
@@ -51,7 +53,7 @@ export const GET: RequestHandler = async ({ params }) => {
 		const whepUrl = getWHEPPlaybackURL(liveInput);
 
 		if (!whepUrl) {
-			console.error('❌ [WHEP] No webRTCPlayback URL found in live input response');
+			console.error('❌ [STREAM PLAYBACK API] No webRTCPlayback URL found in live input response');
 			console.error('Available URLs:', {
 				webRTC: liveInput.webRTC?.url,
 				rtmps: liveInput.rtmps?.url,
@@ -60,7 +62,7 @@ export const GET: RequestHandler = async ({ params }) => {
 			throw error(500, 'Live input does not have WebRTC playback enabled');
 		}
 
-		console.log('✅ [WHEP] Generated WHEP playback URL:', {
+		console.log('✅ [STREAM PLAYBACK API] Generated WHEP playback URL:', {
 			streamId,
 			cloudflareInputId: stream.cloudflareInputId,
 			whepUrl
@@ -87,7 +89,7 @@ export const GET: RequestHandler = async ({ params }) => {
 			}
 		});
 	} catch (err) {
-		console.error('❌ [WHEP] Error getting WHEP playback URL:', err);
+		console.error('❌ [STREAM PLAYBACK API] Error getting WHEP playback URL:', err);
 
 		if (err instanceof Error && 'status' in err) {
 			throw err;

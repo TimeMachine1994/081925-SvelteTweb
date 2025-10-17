@@ -14,7 +14,7 @@
 		scheduledStartTime, 
 		streamTitle, 
 		streamDescription, 
-		posterUrl = 'https://firebasestorage.googleapis.com/v0/b/fir-tweb.firebasestorage.app/o/image_assets%2Fthumb%20for%20homevid%20002.png?alt=media&token=b5a29196-eceb-44cf-8e65-1b135d6b03ad',
+		posterUrl,
 		theme = 'memorial',
 		currentTime
 	}: Props = $props();
@@ -63,16 +63,23 @@
 
 <div class="countdown-video-player" class:memorial-theme={theme === 'memorial'} class:homepage-theme={theme === 'homepage'}>
 	<div class="video-container">
-		<!-- Video Screen with Poster Background -->
-		<div class="video-screen" style="background-image: url({posterUrl})">
+		<!-- Video Screen with Lens Flare Effect -->
+		<div class="video-screen">
+			<!-- Lens Flare Background -->
+			<div class="lens-flare-bg">
+				<div class="flare-circle flare-1"></div>
+				<div class="flare-circle flare-2"></div>
+				<div class="flare-circle flare-3"></div>
+				<div class="flare-beam"></div>
+				<div class="flare-beam flare-beam-2"></div>
+			</div>
+			
 			<!-- Dark Overlay for Better Text Contrast -->
 			<div class="video-overlay"></div>
 			
 			<!-- Countdown Overlay -->
 			<div class="countdown-overlay">
 				<div class="countdown-content">
-					<h3 class="countdown-title">Service Starts In</h3>
-					
 					<div class="countdown-display">
 						{#if countdown.days > 0}
 							<div class="countdown-unit">
@@ -93,11 +100,6 @@
 							<span class="countdown-label">Seconds</span>
 						</div>
 					</div>
-					
-					<p class="scheduled-time">
-						<Clock class="time-icon" />
-						{formatDate(scheduledStartTime)}
-					</p>
 				</div>
 			</div>
 		</div>
@@ -159,14 +161,85 @@
 
 	.video-screen {
 		aspect-ratio: 16/9;
-		background-size: cover;
-		background-position: center;
-		background-repeat: no-repeat;
-		background-color: #1a1a1a;
+		background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
 		position: relative;
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		overflow: hidden;
+	}
+
+	/* Lens Flare Effects */
+	.lens-flare-bg {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		overflow: hidden;
+		z-index: 0;
+	}
+
+	.flare-circle {
+		position: absolute;
+		border-radius: 50%;
+		opacity: 0.3;
+		animation: float 6s ease-in-out infinite;
+	}
+
+	.flare-1 {
+		width: 200px;
+		height: 200px;
+		background: radial-gradient(circle, rgba(213, 186, 127, 0.4) 0%, rgba(213, 186, 127, 0.1) 50%, transparent 100%);
+		top: 10%;
+		right: 15%;
+		animation-delay: 0s;
+	}
+
+	.flare-2 {
+		width: 120px;
+		height: 120px;
+		background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+		bottom: 20%;
+		left: 20%;
+		animation-delay: 2s;
+	}
+
+	.flare-3 {
+		width: 80px;
+		height: 80px;
+		background: radial-gradient(circle, rgba(213, 186, 127, 0.5) 0%, rgba(213, 186, 127, 0.2) 50%, transparent 100%);
+		top: 60%;
+		right: 40%;
+		animation-delay: 4s;
+	}
+
+	.flare-beam {
+		position: absolute;
+		width: 2px;
+		height: 100%;
+		background: linear-gradient(to bottom, transparent 0%, rgba(255, 255, 255, 0.2) 50%, transparent 100%);
+		left: 30%;
+		top: 0;
+		animation: shimmer 4s ease-in-out infinite;
+		transform: rotate(15deg);
+	}
+
+	.flare-beam-2 {
+		left: 70%;
+		animation-delay: 2s;
+		transform: rotate(-15deg);
+		background: linear-gradient(to bottom, transparent 0%, rgba(213, 186, 127, 0.3) 50%, transparent 100%);
+	}
+
+	@keyframes float {
+		0%, 100% { transform: translateY(0px) scale(1); opacity: 0.3; }
+		50% { transform: translateY(-20px) scale(1.1); opacity: 0.5; }
+	}
+
+	@keyframes shimmer {
+		0%, 100% { opacity: 0.1; }
+		50% { opacity: 0.4; }
 	}
 
 	.video-overlay {
@@ -175,7 +248,7 @@
 		left: 0;
 		right: 0;
 		bottom: 0;
-		background: rgba(0, 0, 0, 0.6);
+		background: rgba(0, 0, 0, 0.4);
 		z-index: 1;
 	}
 
@@ -192,13 +265,6 @@
 		margin: 0 auto;
 	}
 
-	.countdown-title {
-		font-size: 1.5rem;
-		font-weight: 600;
-		margin-bottom: 1.5rem;
-		color: white;
-		text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-	}
 
 	.countdown-display {
 		display: flex;
@@ -232,22 +298,6 @@
 		font-weight: 500;
 	}
 
-	.scheduled-time {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.5rem;
-		font-size: 1.1rem;
-		margin: 0;
-		opacity: 0.95;
-		color: white;
-		text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-	}
-
-	.time-icon {
-		width: 16px;
-		height: 16px;
-	}
 
 	/* Video Controls */
 	.video-controls {

@@ -17,7 +17,7 @@
 	let heroVolume = $state(1);
 
 	// About Us video player state (existing)
-	let video: HTMLVideoElement;
+	let video: HTMLVideoElement = $state();
 	let isPlaying = $state(false);
 	let currentTime = $state(0);
 	let duration = $state(0);
@@ -345,6 +345,7 @@
 						preload="metadata"
 					>
 						<source src="https://firebasestorage.googleapis.com/v0/b/fir-tweb.firebasestorage.app/o/tributestream_advertisment%20(720p)%20(1).mp4?alt=media&token=301d3835-f64a-4ba3-8619-343600cb1117" type="video/mp4">
+						<track kind="captions" src="" srclang="en" label="English captions" default>
 						Your browser does not support the video tag.
 					</video>
 

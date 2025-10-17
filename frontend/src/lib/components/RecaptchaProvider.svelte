@@ -6,7 +6,7 @@
 	import { onMount } from 'svelte';
 	import { PUBLIC_RECAPTCHA_SITE_KEY } from '$env/static/public';
 
-	export let badge: 'bottomright' | 'bottomleft' | 'inline' = 'bottomright';
+	export const badge: 'bottomright' | 'bottomleft' | 'inline' = 'bottomright';
 
 	let scriptLoaded = false;
 	let scriptError = false;

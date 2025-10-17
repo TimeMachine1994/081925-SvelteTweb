@@ -14,6 +14,7 @@
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
 	import { useAutoSave } from '$lib/composables/useAutoSave';
+	import { syncStreamsWithSchedule } from '$lib/utils/streamMapper';
 	import type { CalculatorFormData, Tier } from '$lib/types/livestream';
 
 	let { data } = $props();
@@ -367,7 +368,7 @@
 				...(additionalLocation.enabled
 					? [
 							{
-								type: 'location',
+								type: 'location' as const,
 								location: additionalLocation.location,
 								time: additionalLocation.time,
 								hours: additionalLocation.hours
@@ -377,7 +378,7 @@
 				...(additionalDay.enabled
 					? [
 							{
-								type: 'day',
+								type: 'day' as const,
 								location: additionalDay.location,
 								time: additionalDay.time,
 								hours: additionalDay.hours
@@ -392,6 +393,35 @@
 			services: updatedServices,
 			calculatorData: calculatorData
 		});
+
+		// Create/sync streams from schedule data (ONLY on manual save)
+		if (memorialId) {
+			try {
+				console.log('🎬 [SCHEDULE] Syncing streams with schedule data...');
+				
+				const streamSyncData = {
+					services: updatedServices,
+					calculatorData: calculatorData,
+					memorialName: data?.memorial?.lovedOneName
+				};
+
+				const streamResults = await syncStreamsWithSchedule(memorialId, streamSyncData);
+				
+				if (streamResults.success) {
+					console.log(`✅ [SCHEDULE] Stream sync completed:`, {
+						created: streamResults.operations.created.length,
+						updated: streamResults.operations.updated.length,
+						deleted: streamResults.operations.deleted.length
+					});
+				} else {
+					console.warn(`⚠️ [SCHEDULE] Stream sync had issues:`, streamResults.errors);
+					// Could show user-friendly error message here
+				}
+			} catch (error) {
+				console.error('❌ [SCHEDULE] Error during stream sync:', error);
+				// Stream sync failure shouldn't block the save flow
+			}
+		}
 
 		// Redirect to profile page for both owner and funeral director
 		goto('/profile');

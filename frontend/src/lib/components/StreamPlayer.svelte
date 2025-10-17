@@ -64,19 +64,42 @@
 		if (pollingInterval) clearInterval(pollingInterval);
 	});
 
+	// Manual refresh function for testing
+	async function refreshStreams() {
+		console.log('🔄 [MEMORIAL] Manual refresh triggered');
+		await checkForUpdates();
+	}
+
 	// Check for stream updates
 	async function checkForUpdates() {
 		try {
-			console.log('🎬 [MEMORIAL] Checking for stream updates...');
+			console.log('🎬 [MEMORIAL] Checking for stream updates...', {
+				memorialId,
+				currentStreamCount: currentStreams.length,
+				currentStreamTitles: currentStreams.map(s => s.title)
+			});
 
 			// Fetch only stream data, not entire page
 			const response = await fetch(`/api/memorials/${memorialId}/streams`);
+			console.log('🎬 [MEMORIAL] API response status:', response.status);
+			
 			if (response.ok) {
 				const data = await response.json();
+				console.log('🎬 [MEMORIAL] API response data:', {
+					success: data.success,
+					streamCount: data.streams?.length || 0,
+					streamTitles: data.streams?.map((s: any) => s.title) || []
+				});
+				
 				if (data.success && data.streams) {
+					const oldCount = currentStreams.length;
 					// Update streams state without page reload
 					currentStreams = data.streams;
-					console.log('✅ [MEMORIAL] Streams updated via API:', data.streams.length);
+					console.log('✅ [MEMORIAL] Streams updated via API:', {
+						oldCount,
+						newCount: data.streams.length,
+						changed: oldCount !== data.streams.length
+					});
 				}
 			} else {
 				console.warn('⚠️ [MEMORIAL] Failed to fetch stream updates:', response.status);
@@ -328,6 +351,8 @@
 	}
 </script>
 
+<!-- Debug controls removed -->
+
 <!-- Live Streams Section -->
 {#if categorizedStreams.liveStreams.length > 0}
 	<div class="stream-section live-section">
@@ -378,33 +403,15 @@
 
 <!-- Scheduled Streams Section -->
 {#if categorizedStreams.scheduledStreams.length > 0}
-	<div class="stream-section scheduled-section">
-		<h2 class="section-title scheduled-title">📅 Upcoming Memorial Services</h2>
-		{#each categorizedStreams.scheduledStreams as stream (stream.id)}
-			{@const countdown = getCountdown(stream.scheduledStartTime!)}
-			<div class="stream-card scheduled-card">
-				<div class="stream-header">
-					<h3 class="stream-title">{stream.title}</h3>
-					<div class="scheduled-indicator">
-						<Calendar class="indicator-icon" />
-						SCHEDULED
-					</div>
-				</div>
-
-				{#if stream.description}
-					<p class="stream-description">{stream.description}</p>
-				{/if}
-
-				<CountdownVideoPlayer 
-					scheduledStartTime={stream.scheduledStartTime!}
-					streamTitle={stream.title}
-					streamDescription={stream.description}
-					{currentTime}
-					theme="memorial"
-				/>
-			</div>
-		{/each}
-	</div>
+	{#each categorizedStreams.scheduledStreams as stream (stream.id)}
+		<CountdownVideoPlayer 
+			scheduledStartTime={stream.scheduledStartTime!}
+			streamTitle={stream.title}
+			streamDescription={stream.description}
+			{currentTime}
+			theme="memorial"
+		/>
+	{/each}
 {/if}
 
 <!-- Recorded Streams Section -->
@@ -503,10 +510,6 @@
 		color: #dc2626;
 	}
 
-	.scheduled-title {
-		color: #2563eb;
-	}
-
 	.recorded-title {
 		color: #6b7280;
 	}
@@ -522,10 +525,6 @@
 
 	.live-card {
 		border-left: 4px solid #dc2626;
-	}
-
-	.scheduled-card {
-		border-left: 4px solid #2563eb;
 	}
 
 	.recorded-card {
@@ -576,17 +575,6 @@
 		}
 	}
 
-	.scheduled-indicator {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		background: #2563eb;
-		color: white;
-		padding: 0.25rem 0.75rem;
-		border-radius: 9999px;
-		font-size: 0.75rem;
-		font-weight: 600;
-	}
 
 	.recorded-indicator {
 		background: #6b7280;

@@ -8,17 +8,10 @@ import { createLiveInput, isCloudflareConfigured } from '$lib/server/cloudflare-
 export const GET: RequestHandler = async ({ locals, params }) => {
 	console.log('🎬 [STREAMS API] GET - Fetching streams for memorial:', params.memorialId);
 
-	// Check authentication
-	if (!locals.user) {
-		console.log('❌ [STREAMS API] User not authenticated');
-		throw SvelteKitError(401, 'Authentication required');
-	}
-
-	const userId = locals.user.uid;
 	const memorialId = params.memorialId;
 
 	try {
-		// Verify memorial exists and user has access
+		// Verify memorial exists
 		const memorialDoc = await adminDb.collection('memorials').doc(memorialId).get();
 
 		if (!memorialDoc.exists) {
@@ -28,15 +21,25 @@ export const GET: RequestHandler = async ({ locals, params }) => {
 
 		const memorial = memorialDoc.data()!;
 
-		// Check permissions
-		const hasPermission =
-			locals.user.role === 'admin' ||
-			memorial.ownerUid === userId ||
-			memorial.funeralDirectorUid === userId;
+		// For GET requests, allow public access to public memorials
+		// For authenticated users, check permissions for private memorials
+		if (locals.user) {
+			const userId = locals.user.uid;
+			const hasPermission =
+				locals.user.role === 'admin' ||
+				memorial.ownerUid === userId ||
+				memorial.funeralDirectorUid === userId;
 
-		if (!hasPermission) {
-			console.log('❌ [STREAMS API] User lacks permission:', userId);
-			throw SvelteKitError(403, 'Permission denied');
+			if (!hasPermission && !memorial.isPublic) {
+				console.log('❌ [STREAMS API] User lacks permission for private memorial:', userId);
+				throw SvelteKitError(403, 'Permission denied');
+			}
+		} else {
+			// Unauthenticated users can only access public memorials
+			if (!memorial.isPublic) {
+				console.log('❌ [STREAMS API] Unauthenticated access to private memorial');
+				throw SvelteKitError(403, 'Authentication required for private memorial');
+			}
 		}
 
 		// Fetch streams from the streams collection
@@ -99,7 +102,19 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 
 	try {
 		// Parse request body
-		const { title, description, scheduledStartTime, calculatorServiceType, calculatorServiceIndex } = await request.json();
+		const requestBody = await request.json();
+		console.log('📥 [STREAMS API] Request body received:', JSON.stringify(requestBody, null, 2));
+		
+		const { 
+			title, 
+			description, 
+			scheduledStartTime, 
+			calculatorServiceType, 
+			calculatorServiceIndex,
+			serviceHash,
+			lastSyncedAt,
+			syncStatus
+		} = requestBody;
 
 		if (!title || typeof title !== 'string' || title.trim().length === 0) {
 			throw SvelteKitError(400, 'Stream title is required');
@@ -179,8 +194,8 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			rtmpUrl = 'rtmp://live.tributestream.com/live';
 		}
 
-		// Create stream object with real Cloudflare data
-		const streamData: Omit<Stream, 'id'> = {
+		// Create stream object with real Cloudflare data (avoiding undefined values for Firestore)
+		const streamData: any = {
 			title: title.trim(),
 			description: description?.trim() || '',
 			memorialId,
@@ -188,14 +203,33 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			isVisible: true,
 			streamKey,
 			rtmpUrl,
-			cloudflareInputId: cloudflareInputId || undefined,
-			scheduledStartTime: scheduledStartTime || undefined,
-			calculatorServiceType: calculatorServiceType || undefined,
-			calculatorServiceIndex: calculatorServiceIndex || undefined,
 			createdBy: userId,
 			createdAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString()
+			updatedAt: new Date().toISOString(),
+			syncStatus: syncStatus || 'synced'
 		};
+
+		// Only add optional fields if they have values (avoid undefined)
+		if (cloudflareInputId) {
+			streamData.cloudflareInputId = cloudflareInputId;
+		}
+		if (scheduledStartTime) {
+			streamData.scheduledStartTime = scheduledStartTime;
+		}
+		if (calculatorServiceType) {
+			streamData.calculatorServiceType = calculatorServiceType;
+		}
+		if (calculatorServiceIndex !== undefined && calculatorServiceIndex !== null) {
+			streamData.calculatorServiceIndex = calculatorServiceIndex;
+		}
+		if (serviceHash) {
+			streamData.serviceHash = serviceHash;
+		}
+		if (lastSyncedAt) {
+			streamData.lastSyncedAt = lastSyncedAt;
+		}
+
+		console.log('💾 [STREAMS API] Stream data to save:', JSON.stringify(streamData, null, 2));
 
 		// Save to streams collection
 		console.log('💾 [STREAMS API] Saving stream to Firestore...');
@@ -215,11 +249,17 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 		});
 	} catch (error: any) {
 		console.error('❌ [STREAMS API] Error creating stream:', error);
+		console.error('❌ [STREAMS API] Error details:', {
+			message: error?.message,
+			stack: error?.stack,
+			name: error?.name,
+			code: error?.code
+		});
 
 		if (error && typeof error === 'object' && 'status' in error) {
 			throw error;
 		}
 
-		throw SvelteKitError(500, 'Failed to create stream');
+		throw SvelteKitError(500, `Failed to create stream: ${error?.message || 'Unknown error'}`);
 	}
 };

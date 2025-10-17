@@ -5,11 +5,11 @@ import type { Stream } from '$lib/types/stream';
 
 // POST - Start stream
 export const POST: RequestHandler = async ({ locals, params }) => {
-	console.log('🎬 [STREAM API] POST - Starting stream:', params.id);
+	console.log('🎬 [STREAM MANAGEMENT API] POST - Starting stream:', params.id);
 
 	// Check authentication
 	if (!locals.user) {
-		console.log('❌ [STREAM API] User not authenticated');
+		console.log('❌ [STREAM MANAGEMENT API] User not authenticated');
 		throw SvelteKitError(401, 'Authentication required');
 	}
 
@@ -21,7 +21,7 @@ export const POST: RequestHandler = async ({ locals, params }) => {
 		const streamDoc = await adminDb.collection('streams').doc(streamId).get();
 
 		if (!streamDoc.exists) {
-			console.log('❌ [STREAM API] Stream not found:', streamId);
+			console.log('❌ [STREAM MANAGEMENT API] Stream not found:', streamId);
 			throw SvelteKitError(404, 'Stream not found');
 		}
 
@@ -40,7 +40,7 @@ export const POST: RequestHandler = async ({ locals, params }) => {
 			memorial.funeralDirectorUid === userId;
 
 		if (!hasPermission) {
-			console.log('❌ [STREAM API] User lacks permission:', userId);
+			console.log('❌ [STREAM MANAGEMENT API] User lacks permission:', userId);
 			throw SvelteKitError(403, 'Permission denied');
 		}
 
@@ -51,7 +51,7 @@ export const POST: RequestHandler = async ({ locals, params }) => {
 			updatedAt: new Date().toISOString()
 		});
 
-		console.log('✅ [STREAM API] Stream started:', streamId);
+		console.log('✅ [STREAM MANAGEMENT API] Stream started:', streamId);
 
 		return json({
 			success: true,
@@ -59,7 +59,7 @@ export const POST: RequestHandler = async ({ locals, params }) => {
 			status: 'live'
 		});
 	} catch (error: any) {
-		console.error('❌ [STREAM API] Error starting stream:', error);
+		console.error('❌ [STREAM MANAGEMENT API] Error starting stream:', error);
 
 		if (error && typeof error === 'object' && 'status' in error) {
 			throw error;

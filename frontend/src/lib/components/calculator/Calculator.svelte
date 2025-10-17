@@ -13,6 +13,7 @@
 	import { onMount } from 'svelte';
 	import { auth } from '$lib/firebase';
 	import { useAutoSave } from '$lib/composables/useAutoSave';
+	import { createStreamsFromSchedule } from '$lib/utils/streamMapper';
 	import { Button } from '$lib/ui';
 
 	let {
@@ -338,115 +339,97 @@
 		}
 	});
 
-	async function createStreamsFromSchedule() {
+	async function createStreamsFromScheduleLocal() {
+		console.log('🎬 [CALCULATOR] ========== STREAM CREATION STARTED ==========');
 		console.log('🎬 [CALCULATOR] createStreamsFromSchedule called', { memorialId });
+		console.log('🎬 [CALCULATOR] Memorial data available:', !!data?.memorial);
+		console.log('🎬 [CALCULATOR] Memorial name:', data?.memorial?.lovedOneName);
+		
 		if (!memorialId) {
 			console.log('❌ [CALCULATOR] No memorialId, skipping stream creation');
 			return;
 		}
 
-		const streamsToCreate = [];
-
-		console.log('🔍 [CALCULATOR] Checking services data:', { services });
-
-		// Check main service for date/time
-		if (services.main.time.date && services.main.time.time && services.main.location.name) {
-			const scheduledStartTime = new Date(`${services.main.time.date}T${services.main.time.time}`).toISOString();
-			
-			console.log('✅ [CALCULATOR] Main service has all required data:', {
-				date: services.main.time.date,
-				time: services.main.time.time,
-				location: services.main.location.name,
-				scheduledStartTime
+		try {
+			console.log('🎬 [CALCULATOR] Creating streams from schedule data...');
+			console.log('🎬 [CALCULATOR] Services data structure:', {
+				hasMain: !!services.main,
+				mainLocationName: services.main?.location?.name,
+				mainLocationAddress: services.main?.location?.address,
+				mainDate: services.main?.time?.date,
+				mainTime: services.main?.time?.time,
+				mainHours: services.main?.hours,
+				additionalCount: services.additional?.length || 0
 			});
 			
-			streamsToCreate.push({
-				title: `${services.main.location.name} Service`,
-				description: `Memorial service at ${services.main.location.name}${services.main.location.address ? ` - ${services.main.location.address}` : ''}`,
-				scheduledStartTime,
-				// Link to calculator data for bidirectional sync
-				calculatorServiceType: 'main',
-				calculatorServiceIndex: null
-			});
-		} else {
-			console.log('⚠️ [CALCULATOR] Main service missing required data:', {
-				hasDate: !!services.main.time.date,
-				hasTime: !!services.main.time.time,
-				hasLocation: !!services.main.location.name,
-				date: services.main.time.date,
-				time: services.main.time.time,
-				location: services.main.location.name
-			});
-		}
+			const streamCreationData = {
+				services: services,
+				calculatorData: {
+					selectedTier,
+					addons: calculatorData.addons
+				},
+				memorialName: data?.memorial?.lovedOneName
+			};
 
-		// Check additional services for date/time
-		services.additional.forEach((service, index) => {
-			if (service.time.date && service.time.time && service.location.name) {
-				const scheduledStartTime = new Date(`${service.time.date}T${service.time.time}`).toISOString();
-				const serviceType = service.type === 'location' ? 'Additional Location' : 'Additional Day';
-				
-				streamsToCreate.push({
-					title: `${serviceType} - ${service.location.name}`,
-					description: `${serviceType} service at ${service.location.name}${service.location.address ? ` - ${service.location.address}` : ''}`,
-					scheduledStartTime,
-					// Link to calculator data for bidirectional sync
-					calculatorServiceType: service.type,
-					calculatorServiceIndex: index
-				});
-			}
-		});
-
-		// Create streams if any were scheduled
-		if (streamsToCreate.length > 0) {
-			console.log('🎬 [CALCULATOR] Auto-creating', streamsToCreate.length, 'streams from schedule:', streamsToCreate);
+			console.log('🔍 [CALCULATOR] Stream creation data being sent:', JSON.stringify(streamCreationData, null, 2));
 			
-			for (const streamData of streamsToCreate) {
-				try {
-					console.log('📡 [CALCULATOR] Creating stream:', streamData);
-					const response = await fetch(`/api/memorials/${memorialId}/streams`, {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json'
-						},
-						body: JSON.stringify(streamData)
-					});
-
-					console.log('📡 [CALCULATOR] Stream creation response:', response.status, response.statusText);
-
-					if (response.ok) {
-						const result = await response.json();
-						console.log('✅ [CALCULATOR] Auto-created stream:', result.stream.title, result.stream.id);
-					} else {
-						const errorText = await response.text();
-						console.error('❌ [CALCULATOR] Failed to auto-create stream:', streamData.title, response.status, errorText);
-					}
-				} catch (error) {
-					console.error('❌ [CALCULATOR] Error auto-creating stream:', error);
+			const streamResults = await createStreamsFromSchedule(memorialId, streamCreationData);
+			
+			console.log('📊 [CALCULATOR] Stream creation results:', {
+				success: streamResults.success,
+				createdCount: streamResults.createdStreams.length,
+				failedCount: streamResults.failedStreams.length,
+				errors: streamResults.errors
+			});
+			
+			if (streamResults.success) {
+				console.log(`✅ [CALCULATOR] Created ${streamResults.createdStreams.length} streams successfully`);
+				if (streamResults.createdStreams.length > 0) {
+					console.log('🎉 [CALCULATOR] Stream titles created:', 
+						streamResults.createdStreams.map(s => s.title).join(', ')
+					);
+					
+					// Show user feedback about created streams
+					alert(`✅ Successfully created ${streamResults.createdStreams.length} stream(s):\n${streamResults.createdStreams.map(s => `• ${s.title}`).join('\n')}`);
+				}
+			} else {
+				console.warn(`⚠️ [CALCULATOR] Stream creation had issues:`, streamResults.errors);
+				if (streamResults.errors.length > 0) {
+					alert(`⚠️ Stream creation issues:\n${streamResults.errors.join('\n')}`);
 				}
 			}
-		} else {
-			console.log('⚠️ [CALCULATOR] No streams to create - no services with complete date/time/location data');
+		} catch (error) {
+			console.error('❌ [CALCULATOR] Error during stream creation:', error);
 		}
 	}
 
 	async function saveAndPayLater(isPayNowFlow = false) {
+		console.log('💾 [CALCULATOR] ========== SAVE AND PAY LATER STARTED ==========');
 		console.log('💾 [CALCULATOR] saveAndPayLater called', { isPayNowFlow, memorialId });
+		console.log('💾 [CALCULATOR] Current selectedTier:', selectedTier);
+		console.log('💾 [CALCULATOR] Current services data:', JSON.stringify(services, null, 2));
+		console.log('💾 [CALCULATOR] Current calculatorData:', JSON.stringify(calculatorData, null, 2));
 		
 		// Validate required data
 		if (!selectedTier) {
+			console.log('❌ [CALCULATOR] Validation failed: No tier selected');
 			alert('Please select a service tier before proceeding.');
 			return;
 		}
 
 		if (!services.main.location.name) {
+			console.log('❌ [CALCULATOR] Validation failed: No main location name');
 			alert('Please specify the main service location.');
 			return;
 		}
 
 		if (bookingItems.length === 0) {
+			console.log('❌ [CALCULATOR] Validation failed: No booking items');
 			alert('Unable to calculate booking items. Please check your selections.');
 			return;
 		}
+
+		console.log('✅ [CALCULATOR] All validations passed');
 
 		// Prepare payload for API
 		const payload = {
@@ -456,7 +439,13 @@
 			totalPrice: bookingItems.reduce((sum, item) => sum + item.total, 0)
 		};
 
+		console.log('📦 [CALCULATOR] Payload being sent to schedule API:', JSON.stringify(payload, null, 2));
+
 		try {
+			console.log('📡 [CALCULATOR] Making API request to:', `/api/memorials/${memorialId}/schedule`);
+			console.log('📡 [CALCULATOR] Request method: PATCH');
+			console.log('📡 [CALCULATOR] Request headers:', { 'Content-Type': 'application/json' });
+			
 			const response = await fetch(`/api/memorials/${memorialId}/schedule`, {
 				method: 'PATCH',
 				headers: {
@@ -465,7 +454,11 @@
 				body: JSON.stringify(payload)
 			});
 
+			console.log('📡 [CALCULATOR] API response status:', response.status);
+			console.log('📡 [CALCULATOR] API response ok:', response.ok);
+
 			const result = await response.json();
+			console.log('📡 [CALCULATOR] API response data:', JSON.stringify(result, null, 2));
 
 			if (response.ok) {
 				console.log('✅ [CALCULATOR] Schedule saved successfully, now creating streams...');
@@ -476,16 +469,22 @@
 				}
 
 				// Auto-create livestreams if dates/times are provided
-				await createStreamsFromSchedule();
+				console.log('🎬 [CALCULATOR] About to call createStreamsFromScheduleLocal...');
+				await createStreamsFromScheduleLocal();
+				console.log('🎬 [CALCULATOR] createStreamsFromScheduleLocal completed');
 
 				if (!isPayNowFlow) {
 					alert('Schedule saved successfully!');
 				}
+				console.log('💾 [CALCULATOR] ========== SAVE AND PAY LATER COMPLETED SUCCESSFULLY ==========');
 			} else {
 				console.error('❌ [CALCULATOR] Failed to save schedule:', result.error);
+				console.log('💾 [CALCULATOR] ========== SAVE AND PAY LATER FAILED ==========');
 				alert(`Failed to save schedule: ${result.error}`);
 			}
 		} catch (error) {
+			console.error('❌ [CALCULATOR] Exception during save:', error);
+			console.log('💾 [CALCULATOR] ========== SAVE AND PAY LATER EXCEPTION ==========');
 			alert('An error occurred while saving the schedule.');
 		}
 	}

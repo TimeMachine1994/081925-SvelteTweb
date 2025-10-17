@@ -47,8 +47,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 		console.log('🛡️ Permission Check:');
 		console.log(`   - User ID: ${userId}, Role: ${userRole}`);
-		console.log(`   - Memorial Owner UID: ${memorial.ownerUid}`);
-		console.log(`   - Memorial FD UID: ${memorial.funeralDirectorUid}`);
+		console.log(`   - Memorial Owner UID: ${memorial.ownerUid || 'undefined'}`);
+		console.log(`   - Memorial FD UID: ${memorial.funeralDirectorUid || 'undefined'}`);
 
 		const hasPermission =
 			userRole === 'admin' ||

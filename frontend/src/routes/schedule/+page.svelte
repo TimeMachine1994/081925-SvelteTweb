@@ -23,6 +23,7 @@
 		Addons
 	} from '$lib/types/livestream';
 	import { useAutoSave } from '$lib/composables/useAutoSave';
+	import { createStreamsFromSchedule } from '$lib/utils/streamMapper';
 
 	let { data } = $props();
 
@@ -297,60 +298,35 @@
 		return items;
 	}
 
-	async function createStreamsFromSchedule() {
+	async function createStreamsFromScheduleLocal() {
 		if (!memorialId) return;
 
-		const streamsToCreate = [];
-
-		// Check main service for date/time
-		if (services.main.time.date && services.main.time.time && services.main.location.name) {
-			const scheduledStartTime = new Date(`${services.main.time.date}T${services.main.time.time}`).toISOString();
+		try {
+			console.log('🎬 [SCHEDULE] Creating streams from schedule data...');
 			
-			streamsToCreate.push({
-				title: `${services.main.location.name} Service`,
-				description: `Memorial service at ${services.main.location.name}${services.main.location.address ? ` - ${services.main.location.address}` : ''}`,
-				scheduledStartTime
-			});
-		}
+			const streamCreationData = {
+				services: services,
+				calculatorData: {
+					selectedTier,
+					addons
+				},
+				memorialName: lovedOneName
+			};
 
-		// Check additional services for date/time
-		services.additional.forEach((service, index) => {
-			if (service.time.date && service.time.time && service.location.name) {
-				const scheduledStartTime = new Date(`${service.time.date}T${service.time.time}`).toISOString();
-				const serviceType = service.type === 'location' ? 'Additional Location' : 'Additional Day';
-				
-				streamsToCreate.push({
-					title: `${serviceType} - ${service.location.name}`,
-					description: `${serviceType} service at ${service.location.name}${service.location.address ? ` - ${service.location.address}` : ''}`,
-					scheduledStartTime
-				});
-			}
-		});
-
-		// Create streams if any were scheduled
-		if (streamsToCreate.length > 0) {
-			console.log('🎬 Auto-creating', streamsToCreate.length, 'streams from schedule');
+			const streamResults = await createStreamsFromSchedule(memorialId, streamCreationData);
 			
-			for (const streamData of streamsToCreate) {
-				try {
-					const response = await fetch(`/api/memorials/${memorialId}/streams`, {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json'
-						},
-						body: JSON.stringify(streamData)
-					});
-
-					if (response.ok) {
-						const result = await response.json();
-						console.log('✅ Auto-created stream:', result.stream.title);
-					} else {
-						console.error('❌ Failed to auto-create stream:', streamData.title);
-					}
-				} catch (error) {
-					console.error('❌ Error auto-creating stream:', error);
+			if (streamResults.success) {
+				console.log(`✅ [SCHEDULE] Created ${streamResults.createdStreams.length} streams successfully`);
+				if (streamResults.createdStreams.length > 0) {
+					console.log('🎉 [SCHEDULE] Stream titles created:', 
+						streamResults.createdStreams.map(s => s.title).join(', ')
+					);
 				}
+			} else {
+				console.warn(`⚠️ [SCHEDULE] Stream creation had issues:`, streamResults.errors);
 			}
+		} catch (error) {
+			console.error('❌ [SCHEDULE] Error during stream creation:', error);
 		}
 	}
 
@@ -383,7 +359,7 @@
 
 			if (response.ok && result.clientSecret) {
 				// Auto-create livestreams if dates/times are provided
-				await createStreamsFromSchedule();
+				await createStreamsFromScheduleLocal();
 				
 				// Redirect to payment page with encoded data
 				const paymentData = {
@@ -439,7 +415,7 @@
 
 			if (response.ok) {
 				// Auto-create livestreams if dates/times are provided
-				await createStreamsFromSchedule();
+				await createStreamsFromScheduleLocal();
 				
 				// Redirect to profile page
 				goto('/profile');

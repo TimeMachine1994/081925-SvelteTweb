@@ -9,7 +9,7 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 	try {
 		const { status, startedAt, endedAt } = await request.json();
 
-		console.log(`🔧 [MANUAL_STATUS] Updating stream ${streamId} status to:`, status);
+		console.log(`🔧 [STREAM PLAYBACK API] Updating stream ${streamId} status to:`, status);
 
 		const updateData: any = {
 			status,
@@ -36,7 +36,7 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 
 		await adminDb.collection('streams').doc(streamId).update(updateData);
 
-		console.log(`✅ [MANUAL_STATUS] Stream ${streamId} updated successfully`);
+		console.log(`✅ [STREAM PLAYBACK API] Stream ${streamId} updated successfully`);
 
 		return json({
 			success: true,
@@ -46,7 +46,7 @@ export const PATCH: RequestHandler = async ({ params, request }) => {
 			updateData
 		});
 	} catch (err) {
-		console.error(`❌ [MANUAL_STATUS] Error updating stream ${streamId}:`, err);
+		console.error(`❌ [STREAM PLAYBACK API] Error updating stream ${streamId}:`, err);
 		throw error(500, 'Failed to update stream status');
 	}
 };
@@ -75,7 +75,7 @@ export const GET: RequestHandler = async ({ params }) => {
 			updatedAt: data?.updatedAt || null
 		});
 	} catch (err) {
-		console.error(`❌ [MANUAL_STATUS] Error getting stream ${streamId}:`, err);
+		console.error(`❌ [STREAM PLAYBACK API] Error getting stream ${streamId}:`, err);
 		throw error(500, 'Failed to get stream status');
 	}
 };

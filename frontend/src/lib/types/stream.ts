@@ -26,6 +26,9 @@ export interface Stream {
 	// Calculator Integration (for bidirectional sync)
 	calculatorServiceType?: 'main' | 'location' | 'day';
 	calculatorServiceIndex?: number | null;
+	serviceHash?: string; // Hash of service data for change detection
+	lastSyncedAt?: string; // When stream was last synced with service
+	syncStatus?: 'synced' | 'outdated' | 'orphaned';
 
 	// Recording
 	recordingUrl?: string;
@@ -84,6 +87,34 @@ export interface StreamResponse {
 	streams?: Stream[];
 	message?: string;
 	error?: string;
+}
+
+// Stream Synchronization Interfaces
+export interface StreamSyncRequest {
+	memorialId: string;
+	services: {
+		main: import('$lib/types/memorial').ServiceDetails;
+		additional: import('$lib/types/memorial').AdditionalServiceDetails[];
+	};
+	forceSync?: boolean;
+}
+
+export interface StreamSyncResult {
+	success: boolean;
+	operations: {
+		created: Stream[];
+		updated: Stream[];
+		deleted: string[];
+	};
+	errors: string[];
+}
+
+export interface ServiceStreamMapping {
+	serviceType: 'main' | 'location' | 'day';
+	serviceIndex: number | null;
+	serviceHash: string;
+	streamId: string;
+	lastSynced: string;
 }
 
 // Memorial Stream Integration

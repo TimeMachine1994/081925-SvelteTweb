@@ -1,14 +1,16 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import StreamPlayer from '$lib/components/StreamPlayer.svelte';
+	import MemorialSlideshow from '$lib/components/MemorialSlideshow.svelte';
 	import { getTheme } from '$lib/design-tokens/minimal-modern-theme.js';
 	import { Card, Button, Badge } from '$lib/components/minimal-modern';
 
 	let { data }: { data: PageData } = $props();
 
-	// Extract memorial and streams data from server load
+	// Extract memorial, streams, and slideshows data from server load
 	let memorial = $derived(data.memorial);
 	let streams = $derived((data.streams || []) as any);
+	let slideshows = $derived((data.slideshows || []) as any);
 	const theme = getTheme('minimal');
 
 	// Enhanced date formatting with better error handling
@@ -101,6 +103,16 @@
 					<h2>Live Streams</h2>
 					<StreamPlayer streams={streams as any} memorialName={memorial.lovedOneName} memorialId={memorial.id} />
 				</div>
+
+				<!-- Slideshows Section for Legacy Memorials -->
+				{#if slideshows && slideshows.length > 0}
+					<div class="slideshows-section">
+						<h2>Photo Slideshows</h2>
+						{#each slideshows as slideshow (slideshow.id)}
+							<MemorialSlideshow {slideshow} />
+						{/each}
+					</div>
+				{/if}
 			</div>
 		{:else}
 			<!-- Standard Memorial Layout - 1/3 Header, 2/3 Body -->
@@ -150,6 +162,16 @@
 						<!-- Always use StreamPlayer - it handles all states internally -->
 						<StreamPlayer streams={streams as any} memorialName={memorial.lovedOneName} memorialId={memorial.id} />
 					</div>
+
+					<!-- Slideshows Section -->
+					{#if slideshows && slideshows.length > 0}
+						<div class="slideshows-section">
+							<h2 class="video-section-title">Photo Slideshows</h2>
+							{#each slideshows as slideshow (slideshow.id)}
+								<MemorialSlideshow {slideshow} />
+							{/each}
+						</div>
+					{/if}
 				</div>
 			</div>
 		{/if}
@@ -260,6 +282,17 @@
 
 	.streams-section {
 		margin-bottom: 0;
+	}
+
+	.slideshows-section {
+		margin-bottom: 2rem;
+	}
+
+	.slideshows-section h2 {
+		margin-bottom: 1.5rem;
+		color: #1f2937;
+		font-size: 1.5rem;
+		font-weight: 600;
 	}
 
 	.loading {

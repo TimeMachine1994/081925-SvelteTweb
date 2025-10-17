@@ -2,7 +2,7 @@ import { error } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params, locals }) => {
 	const { fullSlug } = params;
 
 	console.log('🏠 [MEMORIAL_PAGE] Loading memorial page for slug:', fullSlug);
@@ -40,6 +40,19 @@ export const load: PageServerLoad = async ({ params }) => {
 		console.log('🏠 [MEMORIAL_PAGE] Has custom_html:', !!memorialData.custom_html);
 		console.log('🏠 [MEMORIAL_PAGE] Created by migration:', memorialData.createdByUserId === 'MIGRATION_SCRIPT');
 
+		// Helper function for defensive timestamp handling
+		const convertTimestamp = (timestamp: any) => {
+			if (!timestamp) return null;
+			if (typeof timestamp === 'string') return timestamp;
+			if (timestamp.toDate) return timestamp.toDate().toISOString();
+			if (timestamp instanceof Date) return timestamp.toISOString();
+			try {
+				return new Date(timestamp).toISOString();
+			} catch {
+				return null;
+			}
+		};
+
 		// Create memorial object with proper serialization (no Firestore objects)
 		const memorial = {
 			id: memorialDoc.id,
@@ -65,8 +78,8 @@ export const load: PageServerLoad = async ({ params }) => {
 			isLegacy: isLegacyMemorial,
 			createdByUserId: memorialData.createdByUserId || null,
 			// Convert Firestore timestamps to strings for serialization
-			createdAt: memorialData.createdAt?.toDate()?.toISOString() || null,
-			updatedAt: memorialData.updatedAt?.toDate()?.toISOString() || null
+			createdAt: convertTimestamp(memorialData.createdAt),
+			updatedAt: convertTimestamp(memorialData.updatedAt)
 		};
 
 		console.log('🏠 [MEMORIAL_PAGE] Memorial found:', {
@@ -92,19 +105,6 @@ export const load: PageServerLoad = async ({ params }) => {
 			})
 			.map((doc) => {
 				const data = doc.data();
-
-				// Helper function for defensive timestamp handling
-				const convertTimestamp = (timestamp: any) => {
-					if (!timestamp) return null;
-					if (typeof timestamp === 'string') return timestamp;
-					if (timestamp.toDate) return timestamp.toDate().toISOString();
-					if (timestamp instanceof Date) return timestamp.toISOString();
-					try {
-						return new Date(timestamp).toISOString();
-					} catch {
-						return null;
-					}
-				};
 
 				return {
 					id: doc.id,
@@ -161,9 +161,41 @@ export const load: PageServerLoad = async ({ params }) => {
 
 		console.log('🎬 [MEMORIAL_PAGE] Found', streams.length, 'visible streams');
 
-		// Security check: Only show content from public memorials to unauthenticated users
-		if (memorial.isPublic !== true) {
-			console.log('🔒 [MEMORIAL_PAGE] Memorial is private, returning basic info only');
+		// Load slideshows for this memorial
+		console.log('🎨 [MEMORIAL_PAGE] Loading slideshows for memorial:', memorialDoc.id);
+		const slideshowsRef = adminDb
+			.collection('memorials')
+			.doc(memorialDoc.id)
+			.collection('slideshows')
+			.orderBy('createdAt', 'desc');
+			
+		const slideshowsSnapshot = await slideshowsRef.get();
+		const slideshows = slideshowsSnapshot.docs.map(doc => ({
+			id: doc.id,
+			...doc.data()
+		}));
+		
+		console.log('🎨 [MEMORIAL_PAGE] Found', slideshows.length, 'slideshows');
+
+		// Check if user has permission to view private memorial content
+		const userId = locals.user?.uid;
+		const userRole = locals.user?.role;
+		const hasPermission = 
+			memorial.isPublic === true || 
+			userRole === 'admin' ||
+			memorialData.ownerUid === userId ||
+			memorialData.funeralDirectorUid === userId;
+
+		console.log('🔒 [MEMORIAL_PAGE] Permission check:', {
+			isPublic: memorial.isPublic,
+			userId: userId || 'anonymous',
+			userRole: userRole || 'none',
+			hasPermission
+		});
+
+		// Security check: Only show full content to authorized users
+		if (!hasPermission) {
+			console.log('🔒 [MEMORIAL_PAGE] Memorial is private and user lacks permission, returning basic info only');
 			return {
 				memorial: {
 					id: memorial.id,
@@ -178,14 +210,16 @@ export const load: PageServerLoad = async ({ params }) => {
 					createdAt: memorial.createdAt,
 					updatedAt: memorial.updatedAt
 				},
-				streams: [] // No streams for private memorials
+				streams: [], // No streams for unauthorized users
+				slideshows: [] // No slideshows for unauthorized users
 			};
 		}
 
-		// Return full memorial data for public memorials
+		// Return full memorial data, streams, and slideshows for authorized users
 		return {
 			memorial,
-			streams
+			streams,
+			slideshows
 		};
 	} catch (err: any) {
 		console.error('🏠 [MEMORIAL_PAGE] Error loading memorial:', err);

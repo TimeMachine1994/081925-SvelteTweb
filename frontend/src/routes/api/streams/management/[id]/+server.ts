@@ -6,11 +6,11 @@ import { deleteLiveInput, isCloudflareConfigured } from '$lib/server/cloudflare-
 
 // PUT - Update stream properties
 export const PUT: RequestHandler = async ({ locals, params, request }) => {
-	console.log('🎬 [STREAM API] PUT - Updating stream:', params.id);
+	console.log('🎬 [STREAM MANAGEMENT API] PUT - Updating stream:', params.id);
 
 	// Check authentication
 	if (!locals.user) {
-		console.log('❌ [STREAM API] User not authenticated');
+		console.log('❌ [STREAM MANAGEMENT API] User not authenticated');
 		throw SvelteKitError(401, 'Authentication required');
 	}
 
@@ -25,7 +25,7 @@ export const PUT: RequestHandler = async ({ locals, params, request }) => {
 		const streamDoc = await adminDb.collection('streams').doc(streamId).get();
 
 		if (!streamDoc.exists) {
-			console.log('❌ [STREAM API] Stream not found:', streamId);
+			console.log('❌ [STREAM MANAGEMENT API] Stream not found:', streamId);
 			throw SvelteKitError(404, 'Stream not found');
 		}
 
@@ -44,24 +44,29 @@ export const PUT: RequestHandler = async ({ locals, params, request }) => {
 			memorial.funeralDirectorUid === userId;
 
 		if (!hasPermission) {
-			console.log('❌ [STREAM API] User lacks permission:', userId);
+			console.log('❌ [STREAM MANAGEMENT API] User lacks permission:', userId);
 			throw SvelteKitError(403, 'Permission denied');
 		}
 
-		// Update stream
+		// Update stream (preserve sync fields)
 		const updateData = {
 			...updates,
 			updatedAt: new Date().toISOString()
 		};
 
+		// Ensure sync fields are handled properly
+		if (updates.serviceHash !== undefined) updateData.serviceHash = updates.serviceHash;
+		if (updates.lastSyncedAt !== undefined) updateData.lastSyncedAt = updates.lastSyncedAt;
+		if (updates.syncStatus !== undefined) updateData.syncStatus = updates.syncStatus;
+
 		await adminDb.collection('streams').doc(streamId).update(updateData);
 
-		console.log('✅ [STREAM API] Stream updated:', streamId, updates);
+		console.log('✅ [STREAM MANAGEMENT API] Stream updated:', streamId, updates);
 
 		// If scheduledStartTime was updated and stream is linked to calculator, sync back to calculator
 		if (updates.scheduledStartTime && streamData.calculatorServiceType) {
 			try {
-				console.log('🔄 [STREAM API] Syncing stream time change back to calculator...');
+				console.log('🔄 [STREAM MANAGEMENT API] Syncing stream time change back to calculator...');
 				
 				// Parse the new date/time
 				const newDateTime = new Date(updates.scheduledStartTime);
@@ -89,14 +94,14 @@ export const PUT: RequestHandler = async ({ locals, params, request }) => {
 				// Update memorial with new calculator data
 				await adminDb.collection('memorials').doc(streamData.memorialId).update(memorialUpdateData);
 
-				console.log('✅ [STREAM API] Calculator sync successful:', {
+				console.log('✅ [STREAM MANAGEMENT API] Calculator sync successful:', {
 					serviceType: streamData.calculatorServiceType,
 					serviceIndex: streamData.calculatorServiceIndex,
 					newDate,
 					newTime
 				});
 			} catch (syncError) {
-				console.error('❌ [STREAM API] Calculator sync error:', syncError);
+				console.error('❌ [STREAM MANAGEMENT API] Calculator sync error:', syncError);
 				// Don't fail the stream update if sync fails
 			}
 		}
@@ -106,7 +111,7 @@ export const PUT: RequestHandler = async ({ locals, params, request }) => {
 			message: 'Stream updated successfully'
 		});
 	} catch (error: any) {
-		console.error('❌ [STREAM API] Error updating stream:', error);
+		console.error('❌ [STREAM MANAGEMENT API] Error updating stream:', error);
 
 		if (error && typeof error === 'object' && 'status' in error) {
 			throw error;
@@ -118,11 +123,11 @@ export const PUT: RequestHandler = async ({ locals, params, request }) => {
 
 // DELETE - Delete stream
 export const DELETE: RequestHandler = async ({ locals, params }) => {
-	console.log('🎬 [STREAM API] DELETE - Deleting stream:', params.id);
+	console.log('🎬 [STREAM MANAGEMENT API] DELETE - Deleting stream:', params.id);
 
 	// Check authentication
 	if (!locals.user) {
-		console.log('❌ [STREAM API] User not authenticated');
+		console.log('❌ [STREAM MANAGEMENT API] User not authenticated');
 		throw SvelteKitError(401, 'Authentication required');
 	}
 
@@ -134,7 +139,7 @@ export const DELETE: RequestHandler = async ({ locals, params }) => {
 		const streamDoc = await adminDb.collection('streams').doc(streamId).get();
 
 		if (!streamDoc.exists) {
-			console.log('❌ [STREAM API] Stream not found:', streamId);
+			console.log('❌ [STREAM MANAGEMENT API] Stream not found:', streamId);
 			throw SvelteKitError(404, 'Stream not found');
 		}
 
@@ -153,7 +158,7 @@ export const DELETE: RequestHandler = async ({ locals, params }) => {
 			memorial.funeralDirectorUid === userId;
 
 		if (!hasPermission) {
-			console.log('❌ [STREAM API] User lacks permission:', userId);
+			console.log('❌ [STREAM MANAGEMENT API] User lacks permission:', userId);
 			throw SvelteKitError(403, 'Permission denied');
 		}
 
@@ -161,13 +166,13 @@ export const DELETE: RequestHandler = async ({ locals, params }) => {
 		if (streamData.cloudflareInputId && isCloudflareConfigured()) {
 			try {
 				console.log(
-					'🗑️ [STREAM API] Deleting Cloudflare Live Input:',
+					'🗑️ [STREAM MANAGEMENT API] Deleting Cloudflare Live Input:',
 					streamData.cloudflareInputId
 				);
 				await deleteLiveInput(streamData.cloudflareInputId);
-				console.log('✅ [STREAM API] Cloudflare Live Input deleted');
+				console.log('✅ [STREAM MANAGEMENT API] Cloudflare Live Input deleted');
 			} catch (error) {
-				console.error('⚠️ [STREAM API] Failed to delete Cloudflare Live Input:', error);
+				console.error('⚠️ [STREAM MANAGEMENT API] Failed to delete Cloudflare Live Input:', error);
 				// Continue with stream deletion even if Cloudflare cleanup fails
 			}
 		}
@@ -175,14 +180,14 @@ export const DELETE: RequestHandler = async ({ locals, params }) => {
 		// Delete stream from database
 		await adminDb.collection('streams').doc(streamId).delete();
 
-		console.log('✅ [STREAM API] Stream deleted:', streamId);
+		console.log('✅ [STREAM MANAGEMENT API] Stream deleted:', streamId);
 
 		return json({
 			success: true,
 			message: 'Stream deleted successfully'
 		});
 	} catch (error: any) {
-		console.error('❌ [STREAM API] Error deleting stream:', error);
+		console.error('❌ [STREAM MANAGEMENT API] Error deleting stream:', error);
 
 		if (error && typeof error === 'object' && 'status' in error) {
 			throw error;

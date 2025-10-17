@@ -12,7 +12,7 @@ const useProduction = env.PUBLIC_USE_PRODUCTION === 'true' || env.PUBLIC_NODE_EN
 const firebaseConfig = {
 	apiKey: (dev && !useProduction) ? 'dummy' : env.PUBLIC_FIREBASE_API_KEY || 'AIzaSyAXmTxzYRc-LhMEW75nZjjjQCZov1gpiw0',
 	authDomain: env.PUBLIC_FIREBASE_AUTH_DOMAIN || 'fir-tweb.firebaseapp.com',
-	projectId: env.PUBLIC_FIREBASE_PROJECT_ID || 'firebasetweb',
+	projectId: env.PUBLIC_FIREBASE_PROJECT_ID || 'fir-tweb',
 	storageBucket: env.PUBLIC_FIREBASE_STORAGE_BUCKET || 'fir-tweb.firebasestorage.app',
 	messagingSenderId: env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '509455146790',
 	appId: env.PUBLIC_FIREBASE_APP_ID || '1:509455146790:web:7ec99527214b05d7b9ebe7'

@@ -7,7 +7,7 @@ import type { RequestHandler } from './$types';
 export const GET: RequestHandler = async ({ params }) => {
 	const { streamId } = params;
 
-	console.log('🎥 [RECORDINGS] Fetching recordings for stream:', streamId);
+	console.log('🎥 [STREAM PLAYBACK API] Fetching recordings for stream:', streamId);
 
 	try {
 		// Get stream from database
@@ -36,14 +36,14 @@ export const GET: RequestHandler = async ({ params }) => {
 			);
 		}
 
-		console.log('🔍 [RECORDINGS] Checking recordings for Live Input:', cloudflareInputId);
+		console.log('🔍 [STREAM PLAYBACK API] Checking recordings for Live Input:', cloudflareInputId);
 
 		// Method 1: Try the direct videos endpoint for Live Input (per Cloudflare docs)
 		let recordings = [];
 		try {
 			const videosUrl = `https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCOUNT_ID}/stream/live_inputs/${cloudflareInputId}/videos`;
 
-			console.log('🔍 [RECORDINGS] Trying direct videos endpoint:', videosUrl);
+			console.log('🔍 [STREAM PLAYBACK API] Trying direct videos endpoint:', videosUrl);
 
 			const videosResponse = await fetch(videosUrl, {
 				headers: {
@@ -53,19 +53,19 @@ export const GET: RequestHandler = async ({ params }) => {
 			});
 
 			const videosData = await videosResponse.json();
-			console.log('📡 [RECORDINGS] Videos endpoint response:', JSON.stringify(videosData, null, 2));
+			console.log('📡 [STREAM PLAYBACK API] Videos endpoint response:', JSON.stringify(videosData, null, 2));
 
 			if (videosResponse.ok && videosData.success && videosData.result) {
 				recordings = Array.isArray(videosData.result) ? videosData.result : [];
-				console.log('✅ [RECORDINGS] Found', recordings.length, 'recordings via videos endpoint');
+				console.log('✅ [STREAM PLAYBACK API] Found', recordings.length, 'recordings via videos endpoint');
 			} else {
 				console.log(
-					'⚠️ [RECORDINGS] Videos endpoint failed:',
+					'⚠️ [STREAM PLAYBACK API] Videos endpoint failed:',
 					videosData.errors?.[0]?.message || 'Unknown error'
 				);
 			}
 		} catch (error) {
-			console.log('⚠️ [RECORDINGS] Videos endpoint error:', error);
+			console.log('⚠️ [STREAM PLAYBACK API] Videos endpoint error:', error);
 		}
 
 		// Method 2: If no direct videos endpoint, search all streams
@@ -94,7 +94,7 @@ export const GET: RequestHandler = async ({ params }) => {
 				);
 			});
 
-			console.log('🔍 [RECORDINGS] Found', recordings.length, 'recordings via streams search');
+			console.log('🔍 [STREAM PLAYBACK API] Found', recordings.length, 'recordings via streams search');
 		}
 
 		// Process recordings to extract useful information
@@ -123,7 +123,7 @@ export const GET: RequestHandler = async ({ params }) => {
 
 		// Update our database with recording information if found
 		if (processedRecordings.length > 0) {
-			console.log('💾 [RECORDINGS] Preparing database update for stream:', streamId);
+			console.log('💾 [STREAM PLAYBACK API] Preparing database update for stream:', streamId);
 			const latestRecording = processedRecordings[0]; // Most recent
 
 			const updateData: any = {
@@ -132,14 +132,14 @@ export const GET: RequestHandler = async ({ params }) => {
 				recordingCount: processedRecordings.length
 			};
 
-			console.log('💾 [RECORDINGS] Base update data:', {
+			console.log('💾 [STREAM PLAYBACK API] Base update data:', {
 				recordingCount: updateData.recordingCount,
 				hasCloudflareRecordings: !!updateData.cloudflareRecordings
 			});
 
 			// If we have a ready recording, update the main recording fields
 			const readyRecording = processedRecordings.find((r) => r.isReady);
-			console.log('💾 [RECORDINGS] Ready recording check:', {
+			console.log('💾 [STREAM PLAYBACK API] Ready recording check:', {
 				totalRecordings: processedRecordings.length,
 				readyRecordings: processedRecordings.filter((r) => r.isReady).length,
 				hasReadyRecording: !!readyRecording,
@@ -147,7 +147,7 @@ export const GET: RequestHandler = async ({ params }) => {
 			});
 
 			if (readyRecording) {
-				console.log('✅ [RECORDINGS] Found ready recording, updating main fields:', {
+				console.log('✅ [STREAM PLAYBACK API] Found ready recording, updating main fields:', {
 					uid: readyRecording.uid,
 					duration: readyRecording.duration,
 					hlsUrl: readyRecording.playbackUrls.hls,
@@ -167,14 +167,14 @@ export const GET: RequestHandler = async ({ params }) => {
 				if (stream.status === 'scheduled') {
 					updateData.status = 'completed';
 					updateData.endedAt = readyRecording.created; // Use recording creation time
-					console.log('📝 [RECORDINGS] Marking scheduled stream as completed due to recording');
+					console.log('📝 [STREAM PLAYBACK API] Marking scheduled stream as completed due to recording');
 				}
 			} else {
-				console.log('⚠️ [RECORDINGS] No ready recordings found, keeping recordingReady as false');
+				console.log('⚠️ [STREAM PLAYBACK API] No ready recordings found, keeping recordingReady as false');
 			}
 
 			await adminDb.collection('streams').doc(streamId).update(updateData);
-			console.log('✅ [RECORDINGS] Updated stream with recording data:', {
+			console.log('✅ [STREAM PLAYBACK API] Updated stream with recording data:', {
 				streamId,
 				recordingReady: updateData.recordingReady,
 				recordingPlaybackUrl: updateData.recordingPlaybackUrl,
@@ -193,7 +193,7 @@ export const GET: RequestHandler = async ({ params }) => {
 			latestRecording: processedRecordings[0] || null
 		});
 	} catch (error: any) {
-		console.error('❌ [RECORDINGS] Error fetching recordings:', error);
+		console.error('❌ [STREAM PLAYBACK API] Error fetching recordings:', error);
 
 		return json(
 			{

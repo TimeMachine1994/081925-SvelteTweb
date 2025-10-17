@@ -160,7 +160,10 @@
 						class="mx-auto h-32 w-32 rounded-full bg-gradient-to-r {roleInfo.gradient} p-1 shadow-2xl"
 					>
 						<div class="flex h-full w-full items-center justify-center rounded-full bg-white">
-							<svelte:component this={roleInfo.icon} class="h-16 w-16 text-gray-700" />
+							{#if roleInfo.icon}
+								{@const IconComponent = roleInfo.icon}
+								<IconComponent class="h-16 w-16 text-gray-700" />
+							{/if}
 						</div>
 					</div>
 					<div
@@ -176,7 +179,10 @@
 				<div
 					class="inline-flex items-center rounded-full bg-gradient-to-r px-4 py-2 {roleInfo.gradient} font-medium text-white shadow-lg"
 				>
-					<svelte:component this={roleInfo.icon} class="mr-2 h-4 w-4" />
+					{#if roleInfo.icon}
+						{@const IconComponent = roleInfo.icon}
+						<IconComponent class="mr-2 h-4 w-4" />
+					{/if}
 					{roleInfo.title}
 				</div>
 			</div>
@@ -308,13 +314,15 @@
 													<Clock class="mr-1 h-3 w-3" />
 													Schedule
 												</a>
-												<a
-													href={`/memorials/${memorial.id}/streams`}
-													class="flex items-center rounded-xl bg-purple-600 px-4 py-2 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
-												>
-													<Play class="mr-1 h-3 w-3" />
-													Manage Streams
-												</a>
+												{#if userRole === 'funeral_director' || userRole === 'admin'}
+													<a
+														href={`/memorials/${memorial.id}/streams`}
+														class="flex items-center rounded-xl bg-purple-600 px-4 py-2 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
+													>
+														<Play class="mr-1 h-3 w-3" />
+														Manage Streams
+													</a>
+												{/if}
 											</div>
 										</div>
 									</div>

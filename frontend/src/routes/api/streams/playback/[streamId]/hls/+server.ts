@@ -8,18 +8,20 @@ import type { RequestHandler } from './$types';
  *
  * This endpoint provides the direct HLS stream URL that OBS can consume
  * without needing JavaScript or WebRTC. This is much more reliable for OBS.
+ * 
+ * URL: /api/streams/playback/[streamId]/hls
  */
 export const GET: RequestHandler = async ({ params }) => {
 	const { streamId } = params;
 
-	console.log('📺 [HLS] Getting HLS stream URL for OBS:', streamId);
+	console.log('📺 [STREAM PLAYBACK API] Getting HLS stream URL for OBS:', streamId);
 
 	try {
 		// Get the stream from database
 		const streamDoc = await adminDb.collection('streams').doc(streamId).get();
 
 		if (!streamDoc.exists) {
-			console.log('❌ [HLS] Stream not found:', streamId);
+			console.log('❌ [STREAM PLAYBACK API] Stream not found:', streamId);
 			return json(
 				{
 					success: false,
@@ -30,7 +32,7 @@ export const GET: RequestHandler = async ({ params }) => {
 		}
 
 		const stream = streamDoc.data();
-		console.log('📋 [HLS] Stream data:', {
+		console.log('📋 [STREAM PLAYBACK API] Stream data:', {
 			id: streamId,
 			title: stream?.title,
 			status: stream?.status,
@@ -38,7 +40,7 @@ export const GET: RequestHandler = async ({ params }) => {
 		});
 
 		if (!stream?.cloudflareInputId) {
-			console.log('❌ [HLS] No Cloudflare Input ID found for stream:', streamId);
+			console.log('❌ [STREAM PLAYBACK API] No Cloudflare Input ID found for stream:', streamId);
 			return json(
 				{
 					success: false,
@@ -49,10 +51,10 @@ export const GET: RequestHandler = async ({ params }) => {
 		}
 
 		// Get the live input details from Cloudflare
-		console.log('🔍 [HLS] Fetching live input details from Cloudflare API');
+		console.log('🔍 [STREAM PLAYBACK API] Fetching live input details from Cloudflare API');
 
 		const liveInput = await getLiveInput(stream.cloudflareInputId);
-		console.log('📋 [HLS] Live input data:', {
+		console.log('📋 [STREAM PLAYBACK API] Live input data:', {
 			uid: liveInput.uid,
 			hasRtmpsPlayback: !!liveInput.rtmpsPlayback,
 			rtmpsPlaybackUrl: liveInput.rtmpsPlayback?.url
@@ -62,7 +64,7 @@ export const GET: RequestHandler = async ({ params }) => {
 		const hlsUrl = getHLSPlaybackURL(liveInput);
 
 		if (!hlsUrl) {
-			console.error('❌ [HLS] No HLS playback URL found in live input response');
+			console.error('❌ [STREAM PLAYBACK API] No HLS playback URL found in live input response');
 			console.error('Available URLs:', {
 				webRTC: liveInput.webRTC?.url,
 				rtmps: liveInput.rtmps?.url,
@@ -77,7 +79,7 @@ export const GET: RequestHandler = async ({ params }) => {
 			);
 		}
 
-		console.log('✅ [HLS] Generated HLS stream URL:', {
+		console.log('✅ [STREAM PLAYBACK API] Generated HLS stream URL:', {
 			streamId,
 			cloudflareInputId: stream.cloudflareInputId,
 			hlsUrl
@@ -104,7 +106,7 @@ export const GET: RequestHandler = async ({ params }) => {
 			}
 		});
 	} catch (err) {
-		console.error('❌ [HLS] Error getting HLS stream URL:', err);
+		console.error('❌ [STREAM PLAYBACK API] Error getting HLS stream URL:', err);
 
 		return json(
 			{
