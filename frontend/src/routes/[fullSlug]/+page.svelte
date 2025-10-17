@@ -91,7 +91,7 @@
 
 						<!-- Livestream Section -->
 						<div class="livestream-section">
-							<h2 class="video-section-title">Live Stream</h2>
+							<h2 class="video-section-title"></h2>
 							<!-- Always use StreamPlayer - it handles all states internally -->
 							<StreamPlayer streams={streams as any} memorialName={memorial.lovedOneName} memorialId={memorial.id} />
 						</div>
@@ -100,7 +100,7 @@
 
 				<!-- Streams Section for Legacy Memorials -->
 				<div class="streams-section">
-					<h2>Live Streams</h2>
+					<h2> </h2>
 					<StreamPlayer streams={streams as any} memorialName={memorial.lovedOneName} memorialId={memorial.id} />
 				</div>
 
@@ -158,7 +158,7 @@
 
 					<!-- Livestream Section -->
 					<div class="livestream-section">
-						<h2 class="video-section-title">Live Stream</h2>
+						<h2 class="video-section-title"></h2>
 						<!-- Always use StreamPlayer - it handles all states internally -->
 						<StreamPlayer streams={streams as any} memorialName={memorial.lovedOneName} memorialId={memorial.id} />
 					</div>

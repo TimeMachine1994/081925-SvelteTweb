@@ -19,28 +19,11 @@
 		currentTime
 	}: Props = $props();
 
-	// Get countdown for scheduled stream
-	function getCountdown(scheduledTime: string, currentTime: Date): {
-		days: number;
-		hours: number;
-		minutes: number;
-		seconds: number;
-		isStarted: boolean;
-	} {
+	// Check if stream has started
+	function hasStreamStarted(scheduledTime: string, currentTime: Date): boolean {
 		const now = currentTime.getTime();
 		const target = new Date(scheduledTime).getTime();
-		const diff = target - now;
-
-		if (diff <= 0) {
-			return { days: 0, hours: 0, minutes: 0, seconds: 0, isStarted: true };
-		}
-
-		const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-		const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-		const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-		const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-		return { days, hours, minutes, seconds, isStarted: false };
+		return target <= now;
 	}
 
 	// Format date for display
@@ -50,14 +33,22 @@
 			year: 'numeric',
 			month: 'long',
 			day: 'numeric',
-			hour: 'numeric',
-			minute: '2-digit'
+		
 		});
 	}
 
-	// Reactive countdown that updates with current time from parent
-	let countdown = $derived.by(() => {
-		return getCountdown(scheduledStartTime, currentTime);
+	// Format time separately for display
+	function formatTime(dateString: string): string {
+		return new Date(dateString).toLocaleTimeString('en-US', {
+			hour: 'numeric',
+			minute: '2-digit',
+			timeZoneName: 'short'
+		});
+	}
+
+	// Check if stream has started
+	let streamStarted = $derived.by(() => {
+		return hasStreamStarted(scheduledStartTime, currentTime);
 	});
 </script>
 
@@ -77,28 +68,28 @@
 			<!-- Dark Overlay for Better Text Contrast -->
 			<div class="video-overlay"></div>
 			
-			<!-- Countdown Overlay -->
+			<!-- Schedule Overlay -->
 			<div class="countdown-overlay">
 				<div class="countdown-content">
-					<div class="countdown-display">
-						{#if countdown.days > 0}
-							<div class="countdown-unit">
-								<span class="countdown-number">{countdown.days}</span>
-								<span class="countdown-label">Days</span>
+					<div class="schedule-display">
+						<div class="schedule-header">
+							<Clock class="schedule-icon" />
+							<h3 class="schedule-title">Scheduled Service</h3>
+						</div>
+						<div class="schedule-info">
+							<div class="schedule-date">
+ 								<span class="date-value">{formatDate(scheduledStartTime)}</span>
+							</div>
+							<div class="schedule-time">
+ 								<span class="time-value">{formatTime(scheduledStartTime)}</span>
+							</div>
+						</div>
+						{#if streamStarted}
+										
+							<div class="schedule-status started">
+								<span class="status-text">Service should be starting shortly.</span>
 							</div>
 						{/if}
-						<div class="countdown-unit">
-							<span class="countdown-number">{countdown.hours.toString().padStart(2, '0')}</span>
-							<span class="countdown-label">Hours</span>
-						</div>
-						<div class="countdown-unit">
-							<span class="countdown-number">{countdown.minutes.toString().padStart(2, '0')}</span>
-							<span class="countdown-label">Minutes</span>
-						</div>
-						<div class="countdown-unit">
-							<span class="countdown-number">{countdown.seconds.toString().padStart(2, '0')}</span>
-							<span class="countdown-label">Seconds</span>
-						</div>
 					</div>
 				</div>
 			</div>
@@ -266,36 +257,88 @@
 	}
 
 
-	.countdown-display {
+	.schedule-display {
+		text-align: center;
+		max-width: 400px;
+		margin: 0 auto;
+	}
+
+	.schedule-header {
 		display: flex;
+		align-items: center;
 		justify-content: center;
-		gap: 2rem;
+		gap: 0.75rem;
 		margin-bottom: 1.5rem;
 	}
 
-	.countdown-unit {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		min-width: 60px;
-	}
-
-	.countdown-number {
-		font-size: 2.5rem;
-		font-weight: 700;
-		line-height: 1;
+	.schedule-icon {
+		width: 2rem;
+		height: 2rem;
 		color: #D5BA7F;
-		text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-		font-family: 'Courier New', monospace;
+		filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.8));
 	}
 
-	.countdown-label {
-		font-size: 0.875rem;
-		opacity: 0.9;
-		margin-top: 0.25rem;
+	.schedule-title {
+		font-family: 'Fanwood Text', serif;
+		font-size: 2.25rem;
+		font-weight: 400;
+		font-style: italic;
+		color: white;
+		text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+		margin: 0;
+	}
+
+	.schedule-info {
+		margin-bottom: 1.5rem;
+	}
+
+	.schedule-date,
+	.schedule-time {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding: 0.75rem 1rem;
+		background: rgba(0, 0, 0, 0.3);
+		border-radius: 8px;
+		margin-bottom: 0.75rem;
+		border: 1px solid rgba(213, 186, 127, 0.2);
+		text-align: center;
+	}
+
+	.date-label,
+	.time-label {
+		font-size: 1rem;
+		font-weight: 500;
+		color: rgba(255, 255, 255, 0.8);
+		text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+	}
+
+	.date-value,
+	.time-value {
+		font-size: 1.1rem;
+		font-weight: 600;
+		color: #D5BA7F;
+		text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+	}
+
+	.schedule-status {
+		padding: 0.75rem 1rem;
+		background: rgba(59, 130, 246, 0.2);
+		border: 1px solid rgba(59, 130, 246, 0.3);
+		border-radius: 8px;
+		text-align: center;
+	}
+
+	.schedule-status.started {
+		background: rgba(34, 197, 94, 0.2);
+		border-color: rgba(34, 197, 94, 0.3);
+	}
+
+	.status-text {
+		font-size: 0.95rem;
+		font-weight: 500;
 		color: white;
 		text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
-		font-weight: 500;
 	}
 
 
@@ -388,24 +431,17 @@
 			padding: 1.5rem;
 		}
 
-		.countdown-title {
+		.schedule-title {
 			font-size: 1.25rem;
-			margin-bottom: 1rem;
 		}
 
-		.countdown-display {
-			gap: 1rem;
+		.schedule-date,
+		.schedule-time {
+			padding: 0.5rem 0.75rem;
 		}
 
-		.countdown-number {
-			font-size: 2rem;
-		}
-
-		.countdown-unit {
-			min-width: 50px;
-		}
-
-		.scheduled-time {
+		.date-value,
+		.time-value {
 			font-size: 1rem;
 		}
 
@@ -420,20 +456,27 @@
 	}
 
 	@media (max-width: 480px) {
-		.countdown-display {
-			gap: 0.75rem;
+		.schedule-header {
+			gap: 0.5rem;
 		}
 
-		.countdown-number {
-			font-size: 1.75rem;
+		.schedule-icon {
+			width: 1.5rem;
+			height: 1.5rem;
 		}
 
-		.countdown-label {
-			font-size: 0.75rem;
+		.schedule-title {
+			font-size: 1.1rem;
 		}
 
-		.countdown-unit {
-			min-width: 45px;
+		.date-label,
+		.time-label {
+			font-size: 0.9rem;
+		}
+
+		.date-value,
+		.time-value {
+			font-size: 0.95rem;
 		}
 	}
 </style>

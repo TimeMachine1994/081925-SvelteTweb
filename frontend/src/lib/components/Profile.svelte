@@ -397,13 +397,14 @@
 								{:else}
 									<Button
 										onclick={() => (showCreateMemorialModal = true)}
-										variant="role"
+										variant="outline"
 										role="owner"
 										size="lg"
 										rounded="lg"
+										class="flex items-center justify-center gap-2 whitespace-nowrap"
 									>
-										<Heart class="mr-2 h-4 w-4" />
-										Create Another Memorial
+										<Heart class="h-4 w-4 flex-shrink-0" />
+										<span>Create Another Memorial</span>
 									</Button>
 								{/if}
 							</div>
