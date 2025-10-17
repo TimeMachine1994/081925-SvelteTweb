@@ -1,7 +1,31 @@
 // frontend/src/routes/blog/+page.server.ts
 
-import { adminDb } from '$lib/server/admin';
+import { adminDb, adminStorage } from '$lib/server/admin';
 import type { PageServerLoad } from './$types';
+
+// Helper function to convert storage path to public URL
+async function getStorageUrl(storagePath: string): Promise<string> {
+    try {
+        if (!storagePath) return '';
+        
+        // If it's already a full URL, return as-is
+        if (storagePath.startsWith('http')) {
+            return storagePath;
+        }
+        
+        // Get download URL from Firebase Storage
+        const file = adminStorage.bucket().file(storagePath);
+        const [url] = await file.getSignedUrl({
+            action: 'read',
+            expires: '03-09-2491' // Far future date for public images
+        });
+        
+        return url;
+    } catch (err) {
+        console.error('Error getting storage URL for:', storagePath, err);
+        return storagePath; // Return original path as fallback
+    }
+}
 
 export interface BlogPost {
     id: string;
@@ -45,13 +69,28 @@ export const load: PageServerLoad = async () => {
         const allSnapshot = await allPostsQuery.get();
         console.log('📊 Published posts found:', allSnapshot.size);
         
-        const allPosts = allSnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            publishedAt: doc.data().publishedAt?.toDate() || null,
-            createdAt: doc.data().createdAt?.toDate() || new Date(),
-            updatedAt: doc.data().updatedAt?.toDate() || new Date()
-        })) as BlogPost[];
+        const allPosts = await Promise.all(
+            allSnapshot.docs.map(async (doc) => {
+                const postData = doc.data();
+                const post = {
+                    id: doc.id,
+                    ...postData,
+                    publishedAt: postData.publishedAt?.toDate() || null,
+                    createdAt: postData.createdAt?.toDate() || new Date(),
+                    updatedAt: postData.updatedAt?.toDate() || new Date()
+                } as BlogPost;
+
+                // Convert storage paths to proper URLs
+                if (post.featuredImage) {
+                    post.featuredImage = await getStorageUrl(post.featuredImage);
+                }
+                if (post.authorAvatar) {
+                    post.authorAvatar = await getStorageUrl(post.authorAvatar);
+                }
+
+                return post;
+            })
+        );
         
         // Sort and filter posts in JavaScript instead of Firestore
         const sortedPosts = allPosts.sort((a, b) => {

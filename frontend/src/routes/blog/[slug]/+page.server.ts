@@ -1,9 +1,33 @@
 // frontend/src/routes/blog/[slug]/+page.server.ts
 
-import { adminDb } from '$lib/server/admin';
+import { adminDb, adminStorage } from '$lib/server/admin';
 import type { PageServerLoad } from './$types';
 import type { BlogPost } from '../+page.server';
 import { error } from '@sveltejs/kit';
+
+// Helper function to convert storage path to public URL
+async function getStorageUrl(storagePath: string): Promise<string> {
+    try {
+        if (!storagePath) return '';
+        
+        // If it's already a full URL, return as-is
+        if (storagePath.startsWith('http')) {
+            return storagePath;
+        }
+        
+        // Get download URL from Firebase Storage
+        const file = adminStorage.bucket().file(storagePath);
+        const [url] = await file.getSignedUrl({
+            action: 'read',
+            expires: '03-09-2491' // Far future date for public images
+        });
+        
+        return url;
+    } catch (err) {
+        console.error('Error getting storage URL for:', storagePath, err);
+        return storagePath; // Return original path as fallback
+    }
+}
 
 export const load: PageServerLoad = async ({ params }) => {
     const { slug } = params;
@@ -33,6 +57,14 @@ export const load: PageServerLoad = async ({ params }) => {
             createdAt: postData.createdAt?.toDate() || new Date(),
             updatedAt: postData.updatedAt?.toDate() || new Date()
         } as BlogPost;
+
+        // Convert storage paths to proper URLs
+        if (post.featuredImage) {
+            post.featuredImage = await getStorageUrl(post.featuredImage);
+        }
+        if (post.authorAvatar) {
+            post.authorAvatar = await getStorageUrl(post.authorAvatar);
+        }
         
         // Get related posts (same category, excluding current post)
         const relatedQuery = await adminDb.collection('blog')
@@ -54,13 +86,14 @@ export const load: PageServerLoad = async ({ params }) => {
             .slice(0, 3) as BlogPost[];
         
         console.log('✅ Successfully loaded blog post:', post.title);
+        console.log('📸 Featured image URL:', post.featuredImage);
         
         return {
             post,
             relatedPosts
         };
         
-    } catch (err) {
+    } catch (err: any) {
         console.error('❌ Error fetching blog post:', err);
         
         if (err?.status === 404) {

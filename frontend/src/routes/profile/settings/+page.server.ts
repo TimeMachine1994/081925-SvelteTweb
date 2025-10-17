@@ -2,34 +2,69 @@ import { redirect, fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { adminDb } from '$lib/server/firebase';
 import { getAuth } from 'firebase-admin/auth';
+import { sendEmailChangeConfirmation } from '$lib/server/emailConfirmation';
+
+// Helper function to convert Timestamps and Dates to strings
+function sanitizeData(data: any): any {
+	if (!data) return data;
+	if (Array.isArray(data)) return data.map(sanitizeData);
+	if (typeof data === 'object' && data !== null) {
+		if (data.toDate && typeof data.toDate === 'function') return data.toDate().toISOString(); // Firestore Timestamp
+		if (data instanceof Date) return data.toISOString(); // JavaScript Date
+
+		const sanitized: { [key: string]: any } = {};
+		for (const key in data) {
+			sanitized[key] = sanitizeData(data[key]);
+		}
+		return sanitized;
+	}
+	return data;
+}
 
 export const load: PageServerLoad = async ({ locals }) => {
+	console.log('🔧 [SETTINGS] Loading profile settings page');
+	console.log('🔧 [SETTINGS] locals.user:', locals.user);
+
 	// Ensure user is authenticated
 	if (!locals.user) {
+		console.log('❌ [SETTINGS] No user in locals, redirecting to login');
 		throw redirect(302, '/login');
 	}
 
 	try {
+		console.log('🔧 [SETTINGS] Fetching user profile for UID:', locals.user.uid);
+		
 		// Get user profile data
 		const userDoc = await adminDb.collection('users').doc(locals.user.uid).get();
 		const userData = userDoc.data();
+		
+		console.log('🔧 [SETTINGS] User document exists:', userDoc.exists);
+		console.log('🔧 [SETTINGS] User data keys:', userData ? Object.keys(userData) : 'null');
 
 		// Get additional profile data based on role
 		let additionalData = {};
 		if (locals.user.role === 'funeral_director') {
+			console.log('🔧 [SETTINGS] User is funeral director, fetching FD profile');
 			const fdDoc = await adminDb.collection('funeral_directors').doc(locals.user.uid).get();
 			if (fdDoc.exists) {
-				additionalData = { funeralDirector: fdDoc.data() };
+				additionalData = { funeralDirector: sanitizeData(fdDoc.data()) };
+				console.log('🔧 [SETTINGS] FD profile loaded');
+			} else {
+				console.log('🔧 [SETTINGS] FD profile not found');
 			}
 		}
 
-		return {
+		const result = {
 			user: locals.user,
-			profile: userData,
+			profile: sanitizeData(userData),
 			...additionalData
 		};
+
+		console.log('✅ [SETTINGS] Profile settings loaded successfully');
+		return result;
 	} catch (error) {
-		console.error('Error loading profile settings:', error);
+		console.error('❌ [SETTINGS] Error loading profile settings:', error);
+		console.error('❌ [SETTINGS] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
 		throw redirect(302, '/profile');
 	}
 };
@@ -81,19 +116,35 @@ export const actions: Actions = {
 				updatedAt: new Date()
 			};
 
-			// Update user document in Firestore
-			await adminDb.collection('users').doc(locals.user.uid).update(updateData);
-
-			// If email changed, update Firebase Auth email
+			// If email changed, initiate email change verification process
 			if (email !== locals.user.email) {
+				console.log('📧 [SETTINGS] Email change requested from', locals.user.email, 'to', email);
+				
+				// Store pending email change in user document (don't update Firebase Auth yet)
+				updateData.pendingEmailChange = {
+					newEmail: email,
+					requestedAt: new Date(),
+					expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+					confirmed: false
+				};
+				
+				// Keep the old email in the profile for now
+				updateData.email = locals.user.email;
+				
+				console.log('⏳ [SETTINGS] Email change pending confirmation. User stays logged in with current email.');
+				
+				// Send confirmation email to new address
 				try {
-					const auth = getAuth();
-					await auth.updateUser(locals.user.uid, { email });
-				} catch (authError) {
-					console.error('Error updating auth email:', authError);
-					// Continue with profile update even if auth email update fails
+					await sendEmailChangeConfirmation(locals.user.uid, email, displayName || 'User');
+					console.log('✅ [SETTINGS] Confirmation email sent successfully');
+				} catch (emailError) {
+					console.error('⚠️ [SETTINGS] Failed to send confirmation email:', emailError);
+					// Don't fail the entire operation if email sending fails
 				}
 			}
+
+			// Update user document in Firestore
+			await adminDb.collection('users').doc(locals.user.uid).update(updateData);
 
 			return {
 				message: 'Profile updated successfully!',

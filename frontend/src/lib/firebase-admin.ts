@@ -1,6 +1,7 @@
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
+import { getStorage } from 'firebase-admin/storage';
 
 // EMULATORS DISABLED - Always use production Firebase
 const isDevelopment = false; // Disabled emulators - always use production
@@ -54,6 +55,7 @@ if (getApps().length === 0) {
 
 export const adminDb = getFirestore(adminApp);
 export const adminAuth = getAuth(adminApp);
+export const adminStorage = getStorage(adminApp);
 
 // Emulators disabled - using production Firestore
 console.log('🔥 Firebase Admin initialized for production project: firebasetweb');

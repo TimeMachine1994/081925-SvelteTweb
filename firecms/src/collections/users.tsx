@@ -14,12 +14,36 @@ export const usersCollection = buildCollection<User>({
     name: "Users",
     path: "users",
     description: "Registered users of the Tributestream platform",
-    permissions: ({ authController }) => ({
-        // Only allow admins to edit and delete users
-        edit: authController.extra?.admin ?? false,
-        create: authController.extra?.admin ?? false,
-        delete: authController.extra?.admin ?? false,
-    }),
+    permissions: ({ authController }) => {
+        // Check multiple ways to determine admin status
+        const isAdmin = authController.extra?.admin || 
+                       (authController as any).isAdmin || 
+                       authController.user?.email?.includes("austinbryanfilm@gmail.com") ||
+                       authController.user?.email?.includes("@tributestream.com") ||
+                       authController.user?.email?.includes("@firecms.co") ||
+                       false;
+        
+        // Only log occasionally to reduce spam
+        if (Math.random() < 0.01) { // Log ~1% of permission checks
+            console.log("👤 Users Collection Permissions Check:", {
+                authControllerExists: !!authController,
+                extraExists: !!authController.extra,
+                adminFlag: authController.extra?.admin,
+                directAdminFlag: (authController as any).isAdmin,
+                emailCheck: authController.user?.email,
+                finalIsAdmin: isAdmin,
+                timestamp: new Date().toISOString()
+            });
+        }
+        
+        return {
+            // Full CRUD access for admin users
+            read: isAdmin,
+            edit: isAdmin,
+            create: isAdmin,
+            delete: isAdmin,
+        };
+    },
     properties: {
         // Display Name of the user
         displayName: buildProperty({
@@ -49,14 +73,14 @@ export const usersCollection = buildCollection<User>({
             dataType: "string",
             name: "Role",
             description: "The user's role in the system",
-            enumValues: {
-                family_member: "Family Member",
-                viewer: "Viewer",
-                owner: "Owner",
-                funeral_director: "Funeral Director",
-                remote_producer: "Remote Producer",
-                onsite_videographer: "Onsite Videographer"
-            }
+            enumValues: [
+                { id: "family_member", label: "Family Member" },
+                { id: "viewer", label: "Viewer" },
+                { id: "owner", label: "Owner" },
+                { id: "funeral_director", label: "Funeral Director" },
+                { id: "remote_producer", label: "Remote Producer" },
+                { id: "onsite_videographer", label: "Onsite Videographer" }
+            ]
         })
     }
 });

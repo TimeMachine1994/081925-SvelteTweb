@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte';
 	import { getTheme } from '$lib/design-tokens/minimal-modern-theme';
 	import { Card, Button } from '$lib/components/minimal-modern';
@@ -9,7 +9,7 @@
 
 	$: ({ featuredPosts, latestPosts, categoryCounts, totalPosts, error, usingMockData } = data);
 
-	function formatDate(date) {
+	function formatDate(date: Date | string | null): string {
 		if (!date) return '';
 		return new Intl.DateTimeFormat('en-US', {
 			year: 'numeric',
@@ -18,8 +18,8 @@
 		}).format(new Date(date));
 	}
 
-	function getCategoryColor(category) {
-		const colors = {
+	function getCategoryColor(category: string): string {
+		const colors: Record<string, string> = {
 			'memorial-planning': '#D5BA7F',
 			'grief-support': '#8B9DC3',
 			'technology': '#7C9885',
@@ -31,8 +31,8 @@
 		return colors[category] || '#6B7280';
 	}
 
-	function getCategoryLabel(category) {
-		const labels = {
+	function getCategoryLabel(category: string): string {
+		const labels: Record<string, string> = {
 			'memorial-planning': 'Memorial Planning',
 			'grief-support': 'Grief Support',
 			'technology': 'Technology',
@@ -215,9 +215,9 @@
 					<div class="banner-content">
 						<h3 class="banner-title">{slide.title}</h3>
 						<p class="banner-subtitle">{slide.subtitle}</p>
-						<Button theme="minimal" href={slide.link} class="banner-cta">
+						<a href={slide.link} class="banner-cta-link">
 							{slide.cta}
-						</Button>
+						</a>
 					</div>
 				</div>
 			{/each}
@@ -535,12 +535,24 @@
 		opacity: 0.9;
 	}
 
-	:global(.banner-cta) {
-		background: white !important;
-		color: #1f2937 !important;
+	.banner-cta-link {
+		display: inline-block;
+		background: white;
+		color: #1f2937;
 		font-weight: 600;
 		padding: 1rem 2rem;
 		font-size: 1.1rem;
+		text-decoration: none;
+		border-radius: 6px;
+		transition: all 0.3s ease;
+		border: none;
+		cursor: pointer;
+	}
+
+	.banner-cta-link:hover {
+		background: #f9fafb;
+		transform: translateY(-1px);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 	}
 
 	.slider-indicators {

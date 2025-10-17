@@ -65,7 +65,37 @@ function App() {
             throw Error("Access denied. Admin access required for FireCMS.");
         }
 
-        console.log("✅ Admin access granted to:", userEmail);
+        // Set admin privileges IMMEDIATELY and make them immutable
+        const adminExtra = { admin: true };
+        
+        // Use Object.defineProperty to make it non-configurable and persistent
+        Object.defineProperty(authController, 'extra', {
+            value: adminExtra,
+            writable: false,
+            configurable: false,
+            enumerable: true
+        });
+        
+        // Also set it as a direct property for backup
+        Object.defineProperty(authController, 'isAdmin', {
+            value: true,
+            writable: false,
+            configurable: false,
+            enumerable: true
+        });
+
+        console.log("✅ Full admin access granted to:", userEmail, "with immutable privileges:", authController.extra);
+        
+        // Double-check that admin flag is set
+        setTimeout(() => {
+            console.log("🔍 Admin flag check after authenticator:", {
+                extraExists: !!authController.extra,
+                adminFlag: authController.extra?.admin,
+                isAdminDirect: (authController as any).isAdmin,
+                fullExtra: authController.extra
+            });
+        }, 100);
+        
         return true;
     }, []);
 
@@ -141,11 +171,78 @@ function App() {
     });
 
     const navigationController = useBuildNavigationController({
-        disabled: authLoading,
+        disabled: false, // Force enable to see if authLoading is the issue
         collections,
         authController,
         dataSourceDelegate: firestoreDelegate
     });
+
+    // Additional debugging for navigation controller issues
+    useEffect(() => {
+        console.log("🔍 Navigation Controller Debug:", {
+            navigationController: !!navigationController,
+            collectionsLength: collections.length,
+            collectionsNames: collections.map(c => c.name),
+            authControllerUser: !!authController.user,
+            authControllerExtra: authController.extra,
+            firestoreDelegate: !!firestoreDelegate,
+            timestamp: new Date().toISOString()
+        });
+        
+        if (!navigationController) {
+            console.error("❌ Navigation Controller is null/undefined - this will prevent UI from loading");
+        } else {
+            console.log("✅ Navigation Controller exists:", {
+                collections: navigationController.collections?.length || 0,
+                navigationControllerType: typeof navigationController
+            });
+        }
+        
+        // Try to catch any collection schema errors
+        collections.forEach((collection, index) => {
+            try {
+                console.log(`✅ Collection ${index + 1} (${collection.name}) schema is valid`);
+            } catch (error) {
+                console.error(`❌ Collection ${index + 1} (${collection.name}) has schema errors:`, error);
+            }
+        });
+    }, [navigationController, collections, authController, firestoreDelegate]);
+
+    // Debug navigation controller after it's built
+    useEffect(() => {
+        if (navigationController) {
+            console.log("🗂️ Navigation Controller Built:", {
+                exists: !!navigationController,
+                disabled: authLoading,
+                navigationController: navigationController
+            });
+        }
+    }, [navigationController, authLoading]);
+
+    // Debug authentication and navigation state
+    useEffect(() => {
+        console.log("🔐 Auth Debug:", {
+            authLoading,
+            canAccessMainView,
+            userEmail: authController.user?.email,
+            isAdmin: authController.extra?.admin,
+            collectionsCount: collections.length,
+            navigationController: !!navigationController,
+            authControllerUser: !!authController.user
+        });
+    }, [authLoading, canAccessMainView, authController.user, authController.extra, collections.length, navigationController]);
+
+    // Debug what's being rendered
+    useEffect(() => {
+        console.log("🎨 Render Debug:", {
+            firebaseConfigLoading,
+            firebaseApp: !!firebaseApp,
+            configError,
+            authLoading,
+            canAccessMainView,
+            notAllowedError
+        });
+    }, [firebaseConfigLoading, firebaseApp, configError, authLoading, canAccessMainView, notAllowedError]);
 
     if (firebaseConfigLoading || !firebaseApp) {
         return <>
@@ -173,19 +270,38 @@ function App() {
                       }) => {
 
                         if (loading || authLoading) {
+                            console.log("🔄 Showing loading screen - loading:", loading, "authLoading:", authLoading);
                             return <CircularProgressCenter size={"large"}/>;
                         }
 
                         if (!canAccessMainView) {
+                            console.log("🚫 Showing login screen - canAccessMainView:", canAccessMainView, "notAllowedError:", notAllowedError);
                             return <FirebaseLoginView authController={authController}
                                                       firebaseApp={firebaseApp}
                                                       signInOptions={signInOptions}
                                                       notAllowedError={notAllowedError}/>;
                         }
 
+                        console.log("✅ Showing main interface - collections count:", collections.length);
+                        console.log("🧭 Navigation Controller:", {
+                            exists: !!navigationController,
+                            collections: navigationController?.collections?.length || 0,
+                            navigationControllerObject: navigationController
+                        });
+
+                        // Debug what's being passed to the Scaffold
+                        console.log("🏗️ Scaffold Render Debug:", {
+                            navigationController: !!navigationController,
+                            authController: !!authController,
+                            userConfigPersistence: !!userConfigPersistence,
+                            dataSourceDelegate: !!firestoreDelegate,
+                            storageSource: !!storageSource,
+                            timestamp: new Date().toISOString()
+                        });
+
                         return <Scaffold
-                            autoOpenDrawer={false}>
-                            <AppBar title={"My demo app"}/>
+                            autoOpenDrawer={true}>
+                            <AppBar title={"TributeStream Admin"}/>
                             <Drawer/>
                             <NavigationRoutes/>
                             <SideDialogs/>

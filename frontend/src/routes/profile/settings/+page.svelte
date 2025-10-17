@@ -11,8 +11,8 @@
 	const theme = getTheme('minimal');
 	const userRole = data.user?.role || 'owner';
 	
-	// Form state
-	let displayName = $state(data.profile?.displayName || '');
+	// Form state - handle both displayName and name fields
+	let displayName = $state(data.profile?.displayName || data.profile?.name || '');
 	let email = $state(data.profile?.email || '');
 	let phone = $state(data.profile?.phone || '');
 	let address = $state({
@@ -149,6 +149,24 @@
 								class="w-full rounded-xl border border-gray-200 bg-white/70 px-4 py-3 backdrop-blur-sm transition-all focus:border-transparent focus:ring-2 focus:ring-{roleInfo.accentColor}-500"
 								placeholder="your@email.com"
 							/>
+							
+							<!-- Pending Email Change Notification -->
+							{#if data.profile?.pendingEmailChange}
+								<div class="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+									<div class="flex items-start space-x-2">
+										<Mail class="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
+										<div class="text-sm">
+											<p class="text-amber-800 font-medium">Email change pending</p>
+											<p class="text-amber-700">
+												Confirmation email sent to <strong>{data.profile.pendingEmailChange.newEmail}</strong>
+											</p>
+											<p class="text-amber-600 text-xs mt-1">
+												Please check your email and click the confirmation link within 24 hours.
+											</p>
+										</div>
+									</div>
+								</div>
+							{/if}
 						</div>
 
 						<div>

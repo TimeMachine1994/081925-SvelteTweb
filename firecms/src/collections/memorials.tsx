@@ -14,6 +14,36 @@ export const memorialsCollection = buildCollection<Memorial>({
     name: "Memorials",
     path: "memorials",
     description: "Enhanced memorials and tributes with comprehensive service coordination",
+    permissions: ({ authController }) => {
+        // Check multiple ways to determine admin status
+        const isAdmin = authController.extra?.admin || 
+                       (authController as any).isAdmin || 
+                       authController.user?.email?.includes("austinbryanfilm@gmail.com") ||
+                       authController.user?.email?.includes("@tributestream.com") ||
+                       authController.user?.email?.includes("@firecms.co") ||
+                       false;
+        
+        // Only log occasionally to reduce spam
+        if (Math.random() < 0.01) { // Log ~1% of permission checks
+            console.log("🏛️ Memorials Collection Permissions Check:", {
+                authControllerExists: !!authController,
+                extraExists: !!authController.extra,
+                adminFlag: authController.extra?.admin,
+                directAdminFlag: (authController as any).isAdmin,
+                emailCheck: authController.user?.email,
+                finalIsAdmin: isAdmin,
+                timestamp: new Date().toISOString()
+            });
+        }
+        
+        return {
+            // Full CRUD access for admin users
+            read: isAdmin,
+            edit: isAdmin,
+            create: isAdmin,
+            delete: isAdmin,
+        };
+    },
     properties: {
         // === CORE MEMORIAL INFORMATION ===
         id: buildProperty({

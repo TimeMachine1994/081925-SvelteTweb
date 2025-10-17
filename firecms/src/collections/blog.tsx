@@ -14,6 +14,36 @@ export const blogCollection = buildCollection<BlogPost>({
     name: "Blog Posts",
     path: "blog",
     description: "Blog posts and articles for TributeStream content marketing",
+    permissions: ({ authController }) => {
+        // Check multiple ways to determine admin status
+        const isAdmin = authController.extra?.admin || 
+                       (authController as any).isAdmin || 
+                       authController.user?.email?.includes("austinbryanfilm@gmail.com") ||
+                       authController.user?.email?.includes("@tributestream.com") ||
+                       authController.user?.email?.includes("@firecms.co") ||
+                       false;
+        
+        // Only log occasionally to reduce spam
+        if (Math.random() < 0.01) { // Log ~1% of permission checks
+            console.log("📝 Blog Collection Permissions Check:", {
+                authControllerExists: !!authController,
+                extraExists: !!authController.extra,
+                adminFlag: authController.extra?.admin,
+                directAdminFlag: (authController as any).isAdmin,
+                emailCheck: authController.user?.email,
+                finalIsAdmin: isAdmin,
+                timestamp: new Date().toISOString()
+            });
+        }
+        
+        return {
+            // Full CRUD access for admin users
+            read: isAdmin,
+            edit: isAdmin,
+            create: isAdmin,
+            delete: isAdmin,
+        };
+    },
     properties: {
         // === CORE BLOG INFORMATION ===
         id: buildProperty({
@@ -197,13 +227,7 @@ export const blogCollection = buildCollection<BlogPost>({
     },
     
     // Collection-level configuration
-    defaultSize: "m",
-    permissions: ({ authController }) => ({
-        read: true,
-        edit: true,
-        create: true,
-        delete: true
-    })
+    defaultSize: "m"
 });
 
 console.log("✅ Blog Collection Schema initialized successfully");

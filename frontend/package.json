@@ -69,7 +69,7 @@
 		"firebase-admin": "^13.4.0",
 		"g": "^2.0.1",
 		"hls.js": "^1.6.13",
-		"marked": "^16.4.0",
+		"marked": "^16.4.1",
 		"node-fetch": "^3.3.2",
 		"stripe": "^18.5.0",
 		"vercel": "^47.1.4"

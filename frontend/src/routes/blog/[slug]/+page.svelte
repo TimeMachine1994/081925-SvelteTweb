@@ -114,7 +114,28 @@
 		<!-- Featured Image -->
 		{#if post.featuredImage}
 			<div class="featured-image-container">
-				<img src={post.featuredImage} alt={post.title} class="featured-image" />
+				<img 
+					src={post.featuredImage} 
+					alt={post.featuredImageAlt || post.title} 
+					class="featured-image"
+					on:error={(e) => {
+						console.error('Failed to load featured image:', post.featuredImage);
+						e.target.style.display = 'none';
+					}}
+					on:load={() => {
+						console.log('Featured image loaded successfully:', post.featuredImage);
+					}}
+				/>
+			</div>
+		{:else}
+			<!-- Fallback placeholder if no featured image -->
+			<div class="featured-image-container">
+				<div class="featured-image-placeholder">
+					<div class="placeholder-content">
+						<span>📝</span>
+						<p>No Featured Image</p>
+					</div>
+				</div>
 			</div>
 		{/if}
 
@@ -328,6 +349,32 @@
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
+	}
+
+	.featured-image-placeholder {
+		width: 100%;
+		height: 100%;
+		background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.featured-image-placeholder .placeholder-content {
+		text-align: center;
+		color: #9ca3af;
+	}
+
+	.featured-image-placeholder .placeholder-content span {
+		font-size: 3rem;
+		display: block;
+		margin-bottom: 1rem;
+	}
+
+	.featured-image-placeholder .placeholder-content p {
+		font-size: 1.1rem;
+		margin: 0;
+		font-weight: 500;
 	}
 
 	/* Article Content */

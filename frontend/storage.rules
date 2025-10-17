@@ -38,6 +38,12 @@ service firebase.storage {
       allow write: if isAdmin() || isAdminEmail();
     }
 
+    // Blog author avatars - allow admin access for FireCMS
+    match /blog-authors/{allPaths=**} {
+      allow read; // Public read for blog author avatars
+      allow write: if isAdmin() || isAdminEmail();
+    }
+
     // Public videos (homepage background, about us, etc.)
     // - Publicly readable for marketing/promotional content
     // - Writable by admins for content management
