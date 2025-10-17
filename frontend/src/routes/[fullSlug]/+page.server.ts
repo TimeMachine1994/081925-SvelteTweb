@@ -161,22 +161,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 		console.log('🎬 [MEMORIAL_PAGE] Found', streams.length, 'visible streams');
 
-		// Load slideshows for this memorial
-		console.log('🎨 [MEMORIAL_PAGE] Loading slideshows for memorial:', memorialDoc.id);
-		const slideshowsRef = adminDb
-			.collection('memorials')
-			.doc(memorialDoc.id)
-			.collection('slideshows')
-			.orderBy('createdAt', 'desc');
-			
-		const slideshowsSnapshot = await slideshowsRef.get();
-		const slideshows = slideshowsSnapshot.docs.map(doc => ({
-			id: doc.id,
-			...doc.data()
-		}));
-		
-		console.log('🎨 [MEMORIAL_PAGE] Found', slideshows.length, 'slideshows');
-
 		// Check if user has permission to view private memorial content
 		const userId = locals.user?.uid;
 		const userRole = locals.user?.role;
@@ -210,16 +194,14 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 					createdAt: memorial.createdAt,
 					updatedAt: memorial.updatedAt
 				},
-				streams: [], // No streams for unauthorized users
-				slideshows: [] // No slideshows for unauthorized users
+				streams: [] // No streams for unauthorized users
 			};
 		}
 
-		// Return full memorial data, streams, and slideshows for authorized users
+		// Return full memorial data and streams for authorized users
 		return {
 			memorial,
-			streams,
-			slideshows
+			streams
 		};
 	} catch (err: any) {
 		console.error('🏠 [MEMORIAL_PAGE] Error loading memorial:', err);

@@ -14,6 +14,14 @@
 		const streamId = $page.params.streamId;
 		console.log('🎬 [WHEP] Starting WHEP client for stream:', streamId);
 
+		// Validate stream ID before proceeding
+		if (!streamId || streamId === 'undefined' || streamId === 'null') {
+			console.error('❌ [WHEP] Invalid stream ID:', streamId);
+			error = 'Invalid stream ID. Please check the stream URL.';
+			connectionStatus = 'error';
+			return;
+		}
+
 		await fetchWHEPUrl(streamId);
 		if (whepUrl && videoElement) {
 			await connectStream();
@@ -22,6 +30,11 @@
 
 	async function fetchWHEPUrl(streamId: string) {
 		try {
+			// Additional validation in fetch function
+			if (!streamId || streamId === 'undefined' || streamId === 'null') {
+				throw new Error('Invalid stream ID provided');
+			}
+
 			console.log('🔍 [WHEP] Fetching WHEP URL for stream:', streamId);
 			const response = await fetch(`/api/streams/${streamId}/whep`);
 			const data = await response.json();

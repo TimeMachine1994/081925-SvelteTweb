@@ -14,100 +14,53 @@
 
 	let currentTime = $state(new Date());
 	let timeInterval: NodeJS.Timeout;
-	let pollingInterval: NodeJS.Timeout;
 
-	// Use reactive state for streams that can be updated
-	let currentStreams = $state(streams || []);
+	// Validate and filter streams with proper error handling
+	let safeStreams = $derived((() => {
+		if (!streams || !Array.isArray(streams)) {
+			console.log('🎬 [STREAM_PLAYER] No streams provided or invalid streams array');
+			return [];
+		}
 
-	// Update currentStreams when props change
-	$effect(() => {
-		currentStreams = streams || [];
-	});
+		const validStreams = streams.filter(stream => {
+			// Comprehensive validation
+			if (!stream) {
+				console.warn('🚨 [STREAM_PLAYER] Null/undefined stream found');
+				return false;
+			}
+			
+			if (!stream.id || typeof stream.id !== 'string') {
+				console.warn('🚨 [STREAM_PLAYER] Invalid stream ID:', stream);
+				return false;
+			}
+			
+			if (stream.id === 'undefined' || stream.id === 'null' || stream.id.trim() === '') {
+				console.warn('🚨 [STREAM_PLAYER] Invalid stream ID value:', stream.id);
+				return false;
+			}
 
-	// Derive from currentStreams instead of props
-	let safeStreams = $derived(currentStreams || []);
+			return true;
+		});
+
+		console.log('🎬 [STREAM_PLAYER] Filtered streams:', {
+			total: streams.length,
+			valid: validStreams.length,
+			filtered: streams.length - validStreams.length
+		});
+
+		return validStreams;
+	})());
 
 	// Update current time every second for countdown
 	onMount(() => {
 		timeInterval = setInterval(() => {
 			currentTime = new Date();
 		}, 1000);
-
-		// Poll for stream updates with smart intervals
-		console.log('🎬 [MEMORIAL] Starting smart polling for stream updates...');
-		pollingInterval = setInterval(async () => {
-			// Only poll if tab is visible to save resources
-			if (!document.hidden) {
-				await checkForUpdates();
-			}
-		}, 10000); // Reduced frequency to 10 seconds
-
-		// Handle visibility changes to optimize polling
-		const handleVisibilityChange = () => {
-			if (!document.hidden) {
-				// Tab became visible, check for updates immediately
-				console.log('🎬 [MEMORIAL] Tab visible, checking for updates...');
-				checkForUpdates();
-			}
-		};
-
-		document.addEventListener('visibilitychange', handleVisibilityChange);
-
-		// Cleanup visibility listener
-		return () => {
-			document.removeEventListener('visibilitychange', handleVisibilityChange);
-		};
 	});
 
 	onDestroy(() => {
 		if (timeInterval) clearInterval(timeInterval);
-		if (pollingInterval) clearInterval(pollingInterval);
 	});
-
-	// Manual refresh function for testing
-	async function refreshStreams() {
-		console.log('🔄 [MEMORIAL] Manual refresh triggered');
-		await checkForUpdates();
-	}
-
-	// Check for stream updates
-	async function checkForUpdates() {
-		try {
-			console.log('🎬 [MEMORIAL] Checking for stream updates...', {
-				memorialId,
-				currentStreamCount: currentStreams.length,
-				currentStreamTitles: currentStreams.map(s => s.title)
-			});
-
-			// Fetch only stream data, not entire page
-			const response = await fetch(`/api/memorials/${memorialId}/streams`);
-			console.log('🎬 [MEMORIAL] API response status:', response.status);
-			
-			if (response.ok) {
-				const data = await response.json();
-				console.log('🎬 [MEMORIAL] API response data:', {
-					success: data.success,
-					streamCount: data.streams?.length || 0,
-					streamTitles: data.streams?.map((s: any) => s.title) || []
-				});
-				
-				if (data.success && data.streams) {
-					const oldCount = currentStreams.length;
-					// Update streams state without page reload
-					currentStreams = data.streams;
-					console.log('✅ [MEMORIAL] Streams updated via API:', {
-						oldCount,
-						newCount: data.streams.length,
-						changed: oldCount !== data.streams.length
-					});
-				}
-			} else {
-				console.warn('⚠️ [MEMORIAL] Failed to fetch stream updates:', response.status);
-			}
-		} catch (error) {
-			console.error('❌ [MEMORIAL] Error checking for updates:', error);
-		}
-	}
 
 	// Categorize streams by status and priority with flexible logic
 	let categorizedStreams = $derived.by(() => {
@@ -272,6 +225,12 @@
 
 	// Generate player URL with live stream support
 	function getStreamPlayerUrl(stream: Stream): string {
+		// Validate stream before processing
+		if (!stream || !stream.id || stream.id === 'undefined' || stream.id === 'null') {
+			console.error('❌ [MEMORIAL] Invalid stream provided to getStreamPlayerUrl:', stream);
+			return '';
+		}
+
 		console.log('🎬 [MEMORIAL] Getting player URL for stream:', {
 			id: stream.id,
 			title: stream.title,
@@ -470,9 +429,15 @@
 			<div class="placeholder-video-container">
 				<div class="placeholder-video-screen">
 					<div class="placeholder-video-content">
-					 
-						<h3>Memorial Livestream Coming Soon</h3>
-						<p>A special livestream video will be avaialble here to honor our loved one.</p>
+						<div class="placeholder-video-icon">
+							<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+								<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+								<circle cx="12" cy="13" r="3"/>
+							</svg>
+						</div>
+						<h3>Memorial Service Video</h3>
+						<p>Live streaming and recorded services will appear here when scheduled by the funeral director or family.</p>
+						<p class="placeholder-subtitle">Check back soon for updates.</p>
 					</div>
 				</div>
 				<div class="placeholder-video-controls">
@@ -714,6 +679,20 @@
 	.placeholder-video-icon {
 		margin-bottom: 1rem;
 		opacity: 0.7;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.placeholder-video-icon svg {
+		color: #999;
+	}
+
+	.placeholder-subtitle {
+		margin-top: 0.5rem;
+		font-size: 0.9rem;
+		color: #777;
+		font-style: italic;
 	}
 
 	.placeholder-video-content h3 {
