@@ -45,20 +45,37 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 			throw error(403, 'Insufficient permissions');
 		}
 		
-		// Add slideshow to memorial's slideshows subcollection
+		// Check if slideshow already exists (for updates)
 		const slideshowRef = adminDb
 			.collection('memorials')
 			.doc(memorialId)
 			.collection('slideshows')
 			.doc(slideshowData.id);
 			
-		const slideshowDoc = {
-			...slideshowData,
-			memorialId,
-			createdBy: userId,
-			createdAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString()
-		};
+		const existingSlideshow = await slideshowRef.get();
+		
+		let slideshowDoc;
+		if (existingSlideshow.exists) {
+			// Update existing slideshow
+			slideshowDoc = {
+				...slideshowData,
+				memorialId,
+				createdBy: existingSlideshow.data()?.createdBy || userId,
+				createdAt: existingSlideshow.data()?.createdAt || new Date().toISOString(),
+				updatedAt: new Date().toISOString()
+			};
+			console.log('🔄 [SLIDESHOW API] Updating existing slideshow:', slideshowData.id);
+		} else {
+			// Create new slideshow
+			slideshowDoc = {
+				...slideshowData,
+				memorialId,
+				createdBy: userId,
+				createdAt: new Date().toISOString(),
+				updatedAt: new Date().toISOString()
+			};
+			console.log('✨ [SLIDESHOW API] Creating new slideshow:', slideshowData.id);
+		}
 		
 		await slideshowRef.set(slideshowDoc);
 		
@@ -107,12 +124,100 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 			...doc.data()
 		}));
 		
-		console.log('✅ [SLIDESHOW API] Found', slideshows.length, 'slideshows');
+		console.log(' [SLIDESHOW API] Found', slideshows.length, 'slideshows');
 		
 		return json(slideshows);
 		
 	} catch (err: any) {
-		console.error('🔥 [SLIDESHOW API] Error fetching slideshows:', err);
+		console.error(' [SLIDESHOW API] Error fetching slideshows:', err);
 		throw error(500, 'Failed to fetch slideshows');
+	}
+};
+
+export const DELETE: RequestHandler = async ({ params, locals }) => {
+	const { memorialId } = params;
+	
+	console.log('🗑️ [SLIDESHOW API] DELETE - Unpublishing slideshow for memorial:', memorialId);
+	
+	// Check authentication
+	if (!locals.user) {
+		console.log('🔒 [SLIDESHOW API] Unauthorized delete request');
+		throw error(401, 'Unauthorized');
+	}
+	
+	try {
+		// Verify user has access to this memorial
+		const memorialRef = adminDb.collection('memorials').doc(memorialId);
+		const memorialDoc = await memorialRef.get();
+		
+		if (!memorialDoc.exists) {
+			console.log('🔒 [SLIDESHOW API] Memorial not found:', memorialId);
+			throw error(404, 'Memorial not found');
+		}
+		
+		const memorialData = memorialDoc.data();
+		const userRole = locals.user.role;
+		const userId = locals.user.uid;
+		
+		// Check permissions
+		const hasPermission = 
+			userRole === 'admin' ||
+			memorialData?.ownerUid === userId ||
+			memorialData?.funeralDirectorUid === userId;
+			
+		if (!hasPermission) {
+			console.log('🔒 [SLIDESHOW API] Insufficient permissions for delete:', userId);
+			throw error(403, 'Insufficient permissions');
+		}
+		
+		// Get all published slideshows for this memorial
+		const slideshowsRef = adminDb
+			.collection('memorials')
+			.doc(memorialId)
+			.collection('slideshows')
+			.where('status', 'in', ['ready', 'processing']);
+			
+		const slideshowsSnapshot = await slideshowsRef.get();
+		
+		if (slideshowsSnapshot.empty) {
+			console.log('⚠️ [SLIDESHOW API] No published slideshows found to unpublish');
+			return json({ success: true, message: 'No published slideshows to unpublish' });
+		}
+		
+		// Update slideshow status to 'unpublished' instead of deleting
+		const batch = adminDb.batch();
+		
+		slideshowsSnapshot.docs.forEach(doc => {
+			batch.update(doc.ref, {
+				status: 'unpublished',
+				unpublishedAt: new Date().toISOString(),
+				updatedAt: new Date().toISOString()
+			});
+		});
+		
+		await batch.commit();
+		
+		console.log('✅ [SLIDESHOW API] Unpublished', slideshowsSnapshot.docs.length, 'slideshows');
+		
+		// Update memorial document to reflect no published slideshow
+		await memorialRef.update({
+			hasSlideshow: false,
+			updatedAt: new Date().toISOString()
+		});
+		
+		return json({ 
+			success: true, 
+			message: 'Slideshow unpublished successfully',
+			unpublishedCount: slideshowsSnapshot.docs.length
+		});
+		
+	} catch (err: any) {
+		console.error('🔥 [SLIDESHOW API] Error unpublishing slideshow:', err);
+		
+		if (err.status) {
+			throw err; // Re-throw SvelteKit errors
+		}
+		
+		throw error(500, 'Failed to unpublish slideshow');
 	}
 };

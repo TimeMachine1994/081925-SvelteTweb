@@ -17,9 +17,14 @@
 
 	const theme = getTheme('minimal');
 
+	let currentStep = $state('');
+	let progress = $state(0);
+
 	const handleRegister: SubmitFunction = ({ formData }) => {
 		loading = true;
 		error = null;
+		currentStep = 'Verifying security...';
+		progress = 10;
 
 		return async ({ result, update }) => {
 			// Execute reCAPTCHA before processing result
@@ -29,6 +34,8 @@
 			if (!recaptchaToken) {
 				error = 'Security verification failed. Please try again.';
 				loading = false;
+				currentStep = '';
+				progress = 0;
 				await update({ reset: false });
 				return;
 			}
@@ -37,6 +44,8 @@
 			if (result.type === 'failure' && !formData.get('recaptchaToken')) {
 				// Resubmit with reCAPTCHA token
 				formData.append('recaptchaToken', recaptchaToken);
+				currentStep = 'Creating your account...';
+				progress = 30;
 				
 				const form = document.querySelector('form') as HTMLFormElement;
 				if (form) {
@@ -44,40 +53,43 @@
 				}
 				return;
 			}
+			
 			if (result.type === 'success' && result.data?.customToken) {
 				try {
-					// Step 2: Sign in with the custom token
-					const userCredential = await signInWithCustomToken(auth, result.data.customToken);
-					const user = userCredential.user;
-
-					// Step 3: Get the ID token
-					const idToken = await user.getIdToken();
-
-					// Step 4: Call the session API endpoint
-					const sessionResponse = await fetch('/api/session', {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json'
-						},
-						body: JSON.stringify({ idToken })
-					});
-
-					if (!sessionResponse.ok) {
-						throw new Error('Failed to create session');
-					}
-
-					// Step 5: Redirect to the home page
-					await goto('/');
+					// Navigate to session page with token for better UX
+					currentStep = 'Setting up your account...';
+					progress = 80;
+					
+					// Use SvelteKit navigation to session page
+					const redirectUrl = selectedRole === 'owner' 
+						? `/auth/session?token=${result.data.customToken}&redirect=profile`
+						: `/auth/session?token=${result.data.customToken}&redirect=profile`;
+					
+					currentStep = 'Redirecting...';
+					progress = 100;
+					
+					// Small delay for visual feedback
+					setTimeout(async () => {
+						await goto(redirectUrl, { replaceState: true });
+					}, 500);
+					
 				} catch (err: any) {
 					error = err.message;
+					loading = false;
+					currentStep = '';
+					progress = 0;
 				}
 			} else if (result.type === 'failure') {
 				error = result.data?.message ?? 'Registration failed.';
+				loading = false;
+				currentStep = '';
+				progress = 0;
 			} else if (result.type === 'error') {
 				error = result.error.message;
+				loading = false;
+				currentStep = '';
+				progress = 0;
 			}
-
-			loading = false;
 			// We call update to avoid a full-page reload and apply the action result.
 			// Since we handle navigation manually with `goto`, we don't need SvelteKit to do anything else.
 			await update({ reset: false });
@@ -206,13 +218,33 @@
 				{/if}
 
 				<div class="pt-4">
+					{#if loading && currentStep}
+						<!-- Progress indicator -->
+						<div class="mb-4">
+							<p class="text-sm text-slate-600 mb-2">{currentStep}</p>
+							<div class="w-full bg-slate-200 rounded-full h-2">
+								<div 
+									class="bg-gradient-to-r from-[#D5BA7F] to-[#C5AA6F] h-2 rounded-full transition-all duration-500 ease-out"
+									style="width: {progress}%"
+								></div>
+							</div>
+						</div>
+					{/if}
+					
 					<Button
 						type="submit"
 						disabled={loading}
 						theme="minimal"
-						class="w-full"
+						class="w-full {loading ? 'opacity-75' : ''}"
 					>
-						{loading ? 'Creating Account...' : 'Create Account'}
+						{#if loading}
+							<div class="flex items-center justify-center">
+								<div class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2"></div>
+								{currentStep || 'Creating Account...'}
+							</div>
+						{:else}
+							Create Account
+						{/if}
 					</Button>
 				</div>
 

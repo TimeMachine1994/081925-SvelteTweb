@@ -236,8 +236,8 @@
 </svelte:head>
 
 <div class="bg-white text-gray-900" style="font-family: {theme.font.body}">
-	<!-- Hero Section with Video Background (Forms Section) -->
-	<section class="relative min-h-[80vh] flex flex-col overflow-hidden bg-black">
+	<!-- Hero Section with Stacked Layout -->
+	<section class="relative min-h-[90vh] flex flex-col bg-black">
 		<!-- Video Background -->
 		<video
 			class="absolute inset-0 w-full h-full object-cover"
@@ -252,102 +252,89 @@
 		<!-- Dark overlay for text readability -->
 		<div class="absolute inset-0 bg-black/50"></div>
 		
-		<!-- Trust Badges Overlay on Background Video -->
-		<div class="absolute bottom-8 left-0 right-0 z-10">
-			<div class="max-w-4xl mx-auto px-6">
-				<div class="flex justify-center items-center gap-8 flex-wrap bg-black/40 backdrop-blur-sm rounded-lg p-4">
-					{#each trustBadges as badge}
-						{@const IconComponent = badge.icon}
-						<div class="flex items-center gap-2 text-sm text-white">
-							<IconComponent class="h-5 w-5 text-[#D5BA7F]" />
-							<span>{badge.text}</span>
-						</div>
-					{/each}
-				</div>
-			</div>
-		</div>
-		
-		<!-- Top Tier: Forms and Text -->
-		<div class="relative z-10 pt-8 pb-8">
-			<div class="mx-auto max-w-7xl px-6">
-				<div class="text-center mb-8">
-					<h1 class="text-4xl md:text-6xl font-bold text-white mb-4" style="font-family: {theme.font.heading}">
-						Beautiful, reliable memorial livestreams
-					</h1>
-					<p class="text-xl md:text-2xl text-white max-w-3xl mx-auto mb-8">
-						Bring everyone together—at church, graveside, or from home
-					</p>
-				</div>
+		<!-- Stacked Content Container -->
+		<div class="relative z-10 flex flex-col min-h-[80vh]">
+			<!-- Top: Forms and Text -->
+			<div class="pt-8 pb-8 flex-1">
+				<div class="mx-auto max-w-7xl px-6">
+					<div class="text-center mb-8">
+						<h1 class="text-4xl md:text-6xl font-bold text-white mb-4" style="font-family: {theme.font.heading}">
+							Beautiful, reliable memorial livestreams
+						</h1>
+						<p class="text-xl md:text-2xl text-white max-w-3xl mx-auto mb-8">
+							Bring everyone together—at church, graveside, or from home
+						</p>
+					</div>
 
-				<!-- Dual CTA Clusters -->
-				<div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-					<!-- Families CTA Cluster -->
-					<div class="text-center">
-						<h3 class="text-2xl font-semibold text-white mb-4">For Families</h3>
-						<div class="space-y-3">
-							<div class="flex gap-2">
-								<Input
-									type="text"
-									placeholder="Loved one's name"
-									bind:value={lovedOneName}
-									theme="minimal"
-									class="flex-1"
-								/>
-								<Button theme="minimal" onclick={handleCreateTribute} class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F]">
-									Create Memorial
-								</Button>
+					<!-- Dual CTA Clusters -->
+					<div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+						<!-- Families CTA Cluster -->
+						<div class="text-center">
+							<h3 class="text-2xl font-semibold text-white mb-4">For Families</h3>
+							<div class="space-y-3">
+								<div class="flex gap-2">
+									<Input
+										type="text"
+										placeholder="Loved one's name"
+										bind:value={lovedOneName}
+										theme="minimal"
+										class="flex-1"
+									/>
+									<Button theme="minimal" onclick={handleCreateTribute} class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F]">
+										Create Memorial
+									</Button>
+								</div>
+								<div class="flex gap-2">
+									<Input
+										type="text"
+										placeholder="Search memorials..."
+										bind:value={searchQuery}
+										theme="minimal"
+										class="flex-1"
+									/>
+									<Button theme="minimal" class="bg-white text-gray-900 hover:bg-gray-100 flex items-center">
+										<Search class="h-4 w-4 mr-2" />
+										Search
+									</Button>
+								</div>
 							</div>
-							<div class="flex gap-2">
-								<Input
-									type="text"
-									placeholder="Search memorials..."
-									bind:value={searchQuery}
-									theme="minimal"
-									class="flex-1"
-								/>
-								<Button theme="minimal" class="bg-white text-gray-900 hover:bg-gray-100 flex items-center">
-									<Search class="h-4 w-4 mr-2" />
-									Search
+						</div>
+
+						<!-- Funeral Directors CTA Cluster -->
+						<div class="text-center">
+							<h3 class="text-2xl font-semibold text-white mb-4">For Funeral Directors</h3>
+							<div class="space-y-3">
+								<Button theme="minimal" onclick={handleBookDemo} class="w-full bg-slate-900 text-white hover:bg-slate-800 flex items-center justify-center">
+									<Phone class="h-4 w-4 mr-2" />
+									Book a Demo
+								</Button>
+								<Button theme="minimal" variant="secondary" onclick={handleHowItWorks} class="w-full">
+									How it works
 								</Button>
 							</div>
 						</div>
 					</div>
-
-					<!-- Funeral Directors CTA Cluster -->
-					<div class="text-center">
-						<h3 class="text-2xl font-semibold text-white mb-4">For Funeral Directors</h3>
-						<div class="space-y-3">
-							<Button theme="minimal" onclick={handleBookDemo} class="w-full bg-slate-900 text-white hover:bg-slate-800 flex items-center justify-center">
-								<Phone class="h-4 w-4 mr-2" />
-								Book a Demo
-							</Button>
-							<Button theme="minimal" variant="secondary" onclick={handleHowItWorks} class="w-full">
-								How it works
-							</Button>
-						</div>
-					</div>
 				</div>
 			</div>
-		</div>
 
-		<!-- Center Third: Demo Video -->
-		<div class="relative z-10 flex-1 flex items-start justify-center px-6 pt-8">
-			<div class="w-full max-w-md mx-auto">
-				<div class="relative rounded-lg overflow-hidden shadow-2xl bg-black/20 backdrop-blur-sm border border-white/10">
-					<video
-						bind:this={heroVideo}
-						class="w-full aspect-video object-cover scale-110"
-						poster="https://firebasestorage.googleapis.com/v0/b/fir-tweb.firebasestorage.app/o/image_assets%2Fthumb%20for%20homevid%20001.png?alt=media&token=2da69fcb-1d2e-42c3-8716-ea0a6e78ad92"
-						ontimeupdate={heroHandleTimeUpdate}
-						onloadedmetadata={heroHandleLoadedMetadata}
-						onplay={() => heroIsPlaying = true}
-						onpause={() => heroIsPlaying = false}
-						preload="metadata"
-					>
-						<source src="https://firebasestorage.googleapis.com/v0/b/fir-tweb.firebasestorage.app/o/tributestream_advertisment%20(720p)%20(1).mp4?alt=media&token=301d3835-f64a-4ba3-8619-343600cb1117" type="video/mp4">
-						<track kind="captions" src="" srclang="en" label="English captions" default>
-						Your browser does not support the video tag.
-					</video>
+			<!-- Middle: Demo Video - Own row -->
+			<div class="flex justify-center px-6 py-8">
+				<div class="w-full max-w-md mx-auto">
+					<div class="relative rounded-lg overflow-hidden shadow-2xl bg-black/20 backdrop-blur-sm border border-white/10">
+						<video
+							bind:this={heroVideo}
+							class="w-full aspect-video object-cover scale-110"
+							poster="https://firebasestorage.googleapis.com/v0/b/fir-tweb.firebasestorage.app/o/image_assets%2Fthumb%20for%20homevid%20001.png?alt=media&token=2da69fcb-1d2e-42c3-8716-ea0a6e78ad92"
+							ontimeupdate={heroHandleTimeUpdate}
+							onloadedmetadata={heroHandleLoadedMetadata}
+							onplay={() => heroIsPlaying = true}
+							onpause={() => heroIsPlaying = false}
+							preload="metadata"
+						>
+							<source src="https://firebasestorage.googleapis.com/v0/b/fir-tweb.firebasestorage.app/o/tributestream_advertisment%20(720p)%20(1).mp4?alt=media&token=301d3835-f64a-4ba3-8619-343600cb1117" type="video/mp4">
+							<track kind="captions" src="" srclang="en" label="English captions" default>
+							Your browser does not support the video tag.
+						</video>
 
 					<!-- Play Button Overlay - Only visible when paused -->
 					{#if !heroIsPlaying}
@@ -410,14 +397,14 @@
 
 							<!-- Volume Control -->
 							<div class="flex items-center gap-1">
-								<Volume2 class="w-3 h-3" />
+								<Volume2 class="w-4 h-4" />
 								<input
 									type="range"
 									min="0"
 									max="100"
 									value={heroVolume * 100}
 									onchange={heroHandleVolumeChange}
-									class="w-12 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
+									class="w-16 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
 								/>
 							</div>
 
@@ -431,6 +418,19 @@
 							</button>
 						</div>
 					</div>
+				</div>
+			</div>
+			
+			<!-- Trust Badges - Below video, inside hero container -->
+			<div class="px-6 pb-8">
+				<div class="flex justify-center items-center gap-8 flex-wrap bg-black/40 backdrop-blur-sm rounded-lg p-4 max-w-4xl mx-auto">
+					{#each trustBadges as badge}
+						{@const IconComponent = badge.icon}
+						<div class="flex items-center gap-2 text-sm text-white">
+							<IconComponent class="h-5 w-5 text-[#D5BA7F]" />
+							<span>{badge.text}</span>
+						</div>
+					{/each}
 				</div>
 			</div>
 		</div>

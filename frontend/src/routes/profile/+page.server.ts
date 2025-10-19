@@ -3,6 +3,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import type { Memorial } from '$lib/types/memorial';
 import { verifyRecaptcha, RECAPTCHA_ACTIONS, getScoreThreshold } from '$lib/utils/recaptcha';
+import { dev } from '$app/environment';
 
 // Helper function to convert Timestamps and Dates to strings
 function sanitizeData(data: any): any {
@@ -136,8 +137,10 @@ export const actions: Actions = {
 		const data = await request.formData();
 		const recaptchaToken = data.get('recaptchaToken');
 
-		// Verify reCAPTCHA
-		if (recaptchaToken) {
+		// Verify reCAPTCHA (bypass in development mode)
+		if (dev) {
+			console.log('[PROFILE_SERVER] Development mode: bypassing reCAPTCHA verification');
+		} else if (recaptchaToken) {
 			const recaptchaResult = await verifyRecaptcha(
 				recaptchaToken.toString(),
 				RECAPTCHA_ACTIONS.CREATE_MEMORIAL,
@@ -263,13 +266,8 @@ export const actions: Actions = {
 
 			console.log(`[PROFILE] Memorial created successfully with ID: ${memorialRef.id}`);
 
-			return {
-				success: true,
-				memorialId: memorialRef.id,
-				memorialSlug: fullSlug,
-				memorialUrl: `/${fullSlug}`,
-				message: `Celebration of Life for ${lovedOneName} created successfully! You can view it at /${fullSlug}`
-			};
+			// Redirect to the newly created memorial page
+			throw redirect(303, `/${fullSlug}`);
 		} catch (error) {
 			console.error('Error creating memorial:', error);
 			return fail(500, { message: 'Failed to create memorial. Please try again.' });

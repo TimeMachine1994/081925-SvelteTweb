@@ -19,12 +19,15 @@
 		Settings,
 		Sparkles,
 		Eye,
-		Play
+		Play,
+		Camera
 	} from 'lucide-svelte';
 	import { onMount } from 'svelte';
 	import { getTheme } from '$lib/design-tokens/minimal-modern-theme';
 	import { Button, Input, Card, Toast, Badge, Stats } from '$lib/components/minimal-modern';
 	import { executeRecaptcha, RECAPTCHA_ACTIONS } from '$lib/utils/recaptcha';
+	import PhotoSlideshowCreator from '$lib/components/slideshow/PhotoSlideshowCreator.svelte';
+	import { dev } from '$app/environment';
 
 	let { data, form } = $props();
 	let displayName = $state(data.profile?.displayName || '');
@@ -33,7 +36,9 @@
 	let lovedOneName = $state('');
 	let isCreatingMemorial = $state(false);
 	let showScheduleModal = $state(false);
+	let showSlideshowModal = $state(false);
 	let selectedMemorial = $state(null);
+	let selectedMemorialForSlideshow = $state(null);
 	let scheduleForm = $state({
 		serviceDate: '',
 		serviceTime: '',
@@ -129,6 +134,20 @@
 			}
 		} catch (err) {
 			alert('Network error occurred');
+		}
+	}
+
+	function handleSlideshowGenerated(event) {
+		const { videoBlob, photos, settings, uploaded } = event.detail;
+		
+		if (uploaded) {
+			// Slideshow was uploaded to Firebase, show success message
+			alert(`Slideshow successfully created for ${selectedMemorialForSlideshow?.lovedOneName || 'memorial'}!`);
+			showSlideshowModal = false;
+			selectedMemorialForSlideshow = null;
+		} else {
+			// Just generated locally
+			alert('Slideshow generated! You can download it.');
 		}
 	}
 </script>
@@ -307,6 +326,18 @@
 													<Eye class="mr-1 h-3 w-3" />
 													View
 												</a>
+												{#if userRole === 'owner'}
+													<button
+														onclick={() => {
+															selectedMemorialForSlideshow = memorial;
+															showSlideshowModal = true;
+														}}
+														class="flex items-center rounded-xl bg-blue-600 px-4 py-2 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
+													>
+														<Camera class="mr-1 h-3 w-3" />
+														Slideshow
+													</button>
+												{/if}
 												<a
 													href={`/schedule/${memorial.id}`}
 													class="flex items-center rounded-xl bg-amber-600 px-4 py-2 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
@@ -716,17 +747,22 @@
 						console.log('🎯 [PROFILE] Form submitting...');
 						isCreatingMemorial = true;
 
-						// Execute reCAPTCHA
-						const recaptchaToken = await executeRecaptcha(RECAPTCHA_ACTIONS.CREATE_MEMORIAL);
-						
-						if (!recaptchaToken) {
-							console.error('🎯 [PROFILE] reCAPTCHA failed');
-							isCreatingMemorial = false;
-							return;
-						}
+						// Execute reCAPTCHA (skip in development mode)
+						if (dev) {
+							console.log('🎯 [PROFILE] Development mode: skipping reCAPTCHA');
+							formData.append('recaptchaToken', 'dev-bypass');
+						} else {
+							const recaptchaToken = await executeRecaptcha(RECAPTCHA_ACTIONS.CREATE_MEMORIAL);
+							
+							if (!recaptchaToken) {
+								console.error('🎯 [PROFILE] reCAPTCHA failed');
+								isCreatingMemorial = false;
+								return;
+							}
 
-						// Add reCAPTCHA token to form data
-						formData.append('recaptchaToken', recaptchaToken);
+							// Add reCAPTCHA token to form data
+							formData.append('recaptchaToken', recaptchaToken);
+						}
 
 						return async ({ result, update }) => {
 							isCreatingMemorial = false;
@@ -805,6 +841,42 @@
 						</Button>
 					</div>
 				</form>
+			</div>
+		</div>
+	</div>
+{/if}
+
+<!-- Create Slideshow Modal -->
+{#if showSlideshowModal && selectedMemorialForSlideshow}
+	<div class="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black p-4">
+		<div class="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-xl bg-white shadow-xl">
+			<div class="sticky top-0 bg-white border-b border-gray-200 p-6 z-10">
+				<div class="flex items-center justify-between">
+					<h2 class="text-2xl font-semibold text-gray-900">Create Memorial Slideshow</h2>
+					<button
+						onclick={() => {
+							showSlideshowModal = false;
+							selectedMemorialForSlideshow = null;
+						}}
+						class="text-gray-400 hover:text-gray-600 transition-colors"
+					>
+						<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+						</svg>
+					</button>
+				</div>
+				<p class="mt-2 text-gray-600">
+					Upload photos to create a beautiful slideshow for <span class="font-semibold">{selectedMemorialForSlideshow.lovedOneName}</span>'s memorial
+				</p>
+			</div>
+
+			<div class="p-6">
+				<PhotoSlideshowCreator 
+					memorialId={selectedMemorialForSlideshow.id}
+					maxPhotos={30}
+					maxFileSize={10}
+					on:slideshowGenerated={handleSlideshowGenerated}
+				/>
 			</div>
 		</div>
 	</div>

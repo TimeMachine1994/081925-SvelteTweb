@@ -1,12 +1,26 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import StreamPlayer from '$lib/components/StreamPlayer.svelte';
+	import SlideshowSection from '$lib/components/SlideshowSection.svelte';
 
 	let { data }: { data: PageData } = $props();
 
-	// Extract memorial and streams data from server load
+	// Extract memorial, streams, and slideshows data from server load
 	let memorial = $derived(data.memorial);
 	let streams = $derived((data.streams || []) as any);
+	let slideshows = $derived((data.slideshows || []) as any);
+	let user = $derived(data.user);
+	
+	// Determine if user can edit slideshows
+	let canEditSlideshows = $derived(() => {
+		if (!user || !memorial) return false;
+		
+		return (
+			user.role === 'admin' ||
+			memorial.ownerUid === user.uid ||
+			memorial.funeralDirectorUid === user.uid
+		);
+	});
 
 	// Enhanced date formatting with better error handling
 	function formatDate(dateString: string | null): string {
@@ -60,10 +74,24 @@
 			<!-- Legacy Memorial Layout with Custom HTML -->
 			<div class="legacy-memorial">
 				<div class="memorial-header">
-					<h1 class="memorial-title">
-						<span class="celebration-prefix">Celebration of Life for</span>
-						<span class="loved-one-name">{memorial.lovedOneName}</span>
-					</h1>
+					<!-- Glass box wrapper for title only -->
+					<div class="glass-box">
+						<h1 class="memorial-title">
+							<span class="celebration-prefix">Celebration of Life for</span>
+							<span class="loved-one-name">{memorial.lovedOneName}</span>
+						</h1>
+					</div>
+					
+					<!-- Hero Slideshow Section - Outside glass box -->
+					<div class="hero-slideshow">
+						<SlideshowSection 
+							{slideshows} 
+							memorialName={memorial.lovedOneName || 'Unknown'}
+							editable={canEditSlideshows()}
+							currentUserId={user?.uid}
+							heroMode={true}
+						/>
+					</div>
 				</div>
 
 				<!-- Legacy Custom HTML Content -->
@@ -72,16 +100,8 @@
 						{@html (memorial as any).custom_html}
 					</div>
 
-					<!-- Memorial Description -->
-					{#if memorial.content}
-						<div class="memorial-description">
-							{@html memorial.content}
-						</div>
-					{/if}
-
 					<!-- Streaming Section -->
 					<div class="streaming-section">
-						<h2>Memorial Services</h2>
 						<StreamPlayer {streams} memorialName={memorial.lovedOneName} memorialId={memorial.id} />
 					</div>
 				</div>
@@ -97,38 +117,45 @@
 						</div>
 					{/if}
 					<div class="memorial-header-content">
-						<h1 class="memorial-title">
-							<span class="celebration-prefix">Celebration of Life for</span>
-							<span class="loved-one-name">{memorial.lovedOneName}</span>
-						</h1>
-						{#if memorial.birthDate || memorial.deathDate}
-							<div class="dates">
-								{#if memorial.birthDate}
-									<span>{formatDate(memorial.birthDate)}</span>
-								{/if}
-								{#if memorial.birthDate && memorial.deathDate}
-									<span> - </span>
-								{/if}
-								{#if memorial.deathDate}
-									<span>{formatDate(memorial.deathDate)}</span>
-								{/if}
-							</div>
-						{/if}
+						<!-- Glass box wrapper for title and dates only -->
+						<div class="glass-box">
+							<h1 class="memorial-title">
+								<span class="celebration-prefix">Celebration of Life for</span>
+								<span class="loved-one-name">{memorial.lovedOneName}</span>
+							</h1>
+							
+							{#if memorial.birthDate || memorial.deathDate}
+								<div class="dates">
+									{#if memorial.birthDate}
+										<span>{formatDate(memorial.birthDate)}</span>
+									{/if}
+									{#if memorial.birthDate && memorial.deathDate}
+										<span> - </span>
+									{/if}
+									{#if memorial.deathDate}
+										<span>{formatDate(memorial.deathDate)}</span>
+									{/if}
+								</div>
+							{/if}
+						</div>
+						
+						<!-- Hero Slideshow Section - Outside glass box but inside header content -->
+						<div class="hero-slideshow">
+							<SlideshowSection 
+								{slideshows} 
+								memorialName={memorial.lovedOneName || 'Unknown'}
+								editable={canEditSlideshows()}
+								currentUserId={user?.uid}
+								heroMode={true}
+							/>
+						</div>
 					</div>
 				</div>
 
 				<!-- Body Section -->
 				<div class="memorial-body">
-					<!-- Memorial Description -->
-					{#if memorial.content}
-						<div class="memorial-description">
-							{@html memorial.content}
-						</div>
-					{/if}
-
 					<!-- Streaming Section -->
 					<div class="streaming-section">
-						<h2>Memorial Services</h2>
 						<StreamPlayer {streams} memorialName={memorial.lovedOneName} memorialId={memorial.id} />
 					</div>
 				</div>
@@ -199,6 +226,13 @@
 		position: relative;
 		z-index: 2;
 		text-align: center;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1.5rem;
+	}
+	
+	.glass-box {
 		padding: 2rem;
 		background: rgba(0, 0, 0, 0.3);
 		border-radius: 12px;
@@ -228,8 +262,8 @@
 	}
 
 	.loved-one-name {
-		font-family: inherit;
-		font-style: normal;
+		font-family: 'Fanwood Text', serif;
+		font-style: italic;
 		font-weight: inherit;
 		color: inherit;
 	}
@@ -339,6 +373,43 @@
 
 		.legacy-content :global(iframe) {
 			min-height: 250px;
+		}
+	}
+	
+	/* Hero Slideshow Styles */
+	.hero-slideshow {
+		display: flex;
+		justify-content: center;
+		padding: 0 2rem; /* Side padding for mobile */
+	}
+	
+	.hero-slideshow :global(.slideshow-section) {
+		margin: 0;
+	}
+	
+	.hero-slideshow :global(.slideshows-container) {
+		max-width: 300px; /* About 1/8 viewport */
+	}
+	
+	/* Float nicely outside the glass box */
+	.memorial-header .hero-slideshow {
+		position: relative;
+		z-index: 10; /* Above background elements */
+	}
+	
+	/* Spacing handled by flex gap in memorial-header-content */
+	.memorial-header-content .hero-slideshow {
+		margin: 0;
+	}
+	
+	@media (max-width: 768px) {
+		.hero-slideshow {
+			margin: 1.5rem 0 1rem 0;
+			padding: 0 1rem;
+		}
+		
+		.hero-slideshow :global(.slideshows-container) {
+			max-width: 200px; /* Smaller on mobile */
 		}
 	}
 </style>

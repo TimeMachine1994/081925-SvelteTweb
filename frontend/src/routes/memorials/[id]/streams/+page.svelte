@@ -2,12 +2,13 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { onMount, onDestroy } from 'svelte';
-	import { Plus, Play, Eye } from 'lucide-svelte';
+	import { Plus, Play, Eye, Camera } from 'lucide-svelte';
 	import type { PageData } from './$types';
 	import type { Stream } from '$lib/types/stream';
 	import { StreamCard } from '$lib/ui';
 	import CompletedStreamCard from '$lib/components/CompletedStreamCard.svelte';
 	import Button from '$lib/ui/primitives/Button.svelte';
+	import PhotoSlideshowCreator from '$lib/components/slideshow/PhotoSlideshowCreator.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -15,6 +16,7 @@
 	let loading = $state(false);
 	let error = $state('');
 	let showCreateModal = $state(false);
+	let showSlideshowModal = $state(false);
 	let newStreamTitle = $state('');
 	let newStreamDescription = $state('');
 	let newStreamDate = $state('');
@@ -366,6 +368,36 @@
 		newStreamDate = '';
 		newStreamTime = '';
 	}
+
+	function openSlideshowModal() {
+		showSlideshowModal = true;
+	}
+
+	function closeSlideshowModal() {
+		showSlideshowModal = false;
+	}
+
+	function handleSlideshowGenerated(event: CustomEvent) {
+		const { videoBlob, photos, settings, uploaded } = event.detail;
+		
+		console.log('🎬 Slideshow generated!', {
+			videoSize: videoBlob?.size || 'No video generated',
+			photoCount: photos.length,
+			settings,
+			uploaded
+		});
+
+		if (uploaded) {
+			// Slideshow was uploaded to Cloudflare, refresh the page to show it
+			alert('Slideshow successfully created and added to memorial!');
+			// Reload streams to include the new slideshow
+			loadStreams();
+			closeSlideshowModal();
+		} else {
+			// Just generated locally
+			alert('Slideshow generated! You can download it or it will be added to the memorial.');
+		}
+	}
 </script>
 
 <svelte:head>
@@ -396,6 +428,15 @@
 
 					<!-- Only show Create Stream button for funeral directors and admins -->
 					{#if data.user && (data.user.role === 'funeral_director' || data.user.role === 'admin')}
+						<Button
+							variant="secondary"
+							size="md"
+							rounded="lg"
+							onclick={openSlideshowModal}
+						>
+							<Camera class="mr-2 h-4 w-4" />
+							Create Slideshow
+						</Button>
 						<Button
 							variant="role"
 							role="owner"
@@ -592,6 +633,39 @@
 							</Button>
 						</div>
 					</form>
+				</div>
+			</div>
+		</div>
+	{/if}
+
+	<!-- Create Slideshow Modal -->
+	{#if showSlideshowModal}
+		<div class="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black p-4">
+			<div class="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-xl bg-white shadow-xl">
+				<div class="sticky top-0 bg-white border-b border-gray-200 p-6 z-10">
+					<div class="flex items-center justify-between">
+						<h2 class="text-2xl font-semibold text-gray-900">Create Memorial Slideshow</h2>
+						<button
+							onclick={closeSlideshowModal}
+							class="text-gray-400 hover:text-gray-600 transition-colors"
+						>
+							<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+							</svg>
+						</button>
+					</div>
+					<p class="mt-2 text-gray-600">
+						Upload photos to create a beautiful slideshow for <span class="font-semibold">{memorial.lovedOneName}</span>'s memorial
+					</p>
+				</div>
+
+				<div class="p-6">
+					<PhotoSlideshowCreator 
+						memorialId={memorialId}
+						maxPhotos={30}
+						maxFileSize={10}
+						on:slideshowGenerated={handleSlideshowGenerated}
+					/>
 				</div>
 			</div>
 		</div>

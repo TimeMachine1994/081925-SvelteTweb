@@ -32,6 +32,77 @@
 	let selectedMemorial = $state('');
 	let isEmbedding = $state(false);
 	let slideshowTitle = $state('Photo Slideshow');
+	
+	// Editing states
+	let isEditMode = $state(false);
+	let editingSlideshowId = $state('');
+	
+	// Check for edit mode on component mount
+	$effect(() => {
+		if (typeof window !== 'undefined') {
+			const urlParams = new URLSearchParams(window.location.search);
+			const editData = urlParams.get('edit');
+			
+			if (editData) {
+				try {
+					const slideshowData = JSON.parse(decodeURIComponent(editData));
+					loadSlideshowForEditing(slideshowData);
+				} catch (error) {
+					console.error('Error parsing edit data:', error);
+				}
+			}
+		}
+	});
+	
+	// Load existing slideshow data for editing
+	async function loadSlideshowForEditing(slideshowData: any) {
+		isEditMode = true;
+		editingSlideshowId = slideshowData.id;
+		slideshowTitle = slideshowData.title;
+		selectedMemorial = slideshowData.memorialId;
+		
+		// Convert base64 data back to File objects for proper editing
+		const loadedPhotos = await Promise.all(
+			slideshowData.photos.map(async (photo: any) => {
+				try {
+					// Convert base64 to File object for better editing experience
+					const file = await base64ToFile(photo.data, `photo-${photo.id}.jpg`);
+					return {
+						id: photo.id,
+						file: file,
+						url: URL.createObjectURL(file),
+						caption: photo.caption || ''
+					};
+				} catch (error) {
+					console.warn('Failed to convert photo to file:', error);
+					// Fallback to base64 URL if conversion fails
+					return {
+						id: photo.id,
+						file: null,
+						url: photo.data,
+						caption: photo.caption || ''
+					};
+				}
+			})
+		);
+		
+		photos = loadedPhotos;
+		
+		// Load settings
+		if (slideshowData.settings) {
+			slideDuration = slideshowData.settings.photoDuration * 1000 || 3000;
+			transition = slideshowData.settings.transitionType || 'fade';
+		}
+		
+		console.log('Loaded slideshow for editing with', photos.length, 'photos');
+	}
+	
+	// Convert base64 to File object
+	async function base64ToFile(base64Data: string, filename: string): Promise<File> {
+		const response = await fetch(base64Data);
+		const blob = await response.blob();
+		return new File([blob], filename, { type: blob.type });
+	}
 
 	function handleFileUpload(event: Event) {
 		const input = event.target as HTMLInputElement;
@@ -75,6 +146,48 @@
 		if (currentSlide >= photos.length && photos.length > 0) {
 			currentSlide = photos.length - 1;
 		}
+	}
+	
+	// Photo reordering functions
+	let draggedPhotoId: string | null = null;
+	
+	function handlePhotodragStart(event: DragEvent, photoId: string) {
+		draggedPhotoId = photoId;
+		if (event.dataTransfer) {
+			event.dataTransfer.effectAllowed = 'move';
+		}
+	}
+	
+	function handlePhotoDragOver(event: DragEvent) {
+		event.preventDefault();
+		if (event.dataTransfer) {
+			event.dataTransfer.dropEffect = 'move';
+		}
+	}
+	
+	function handlePhotoDrop(event: DragEvent, targetPhotoId: string) {
+		event.preventDefault();
+		
+		if (!draggedPhotoId || draggedPhotoId === targetPhotoId) return;
+		
+		const draggedIndex = photos.findIndex(p => p.id === draggedPhotoId);
+		const targetIndex = photos.findIndex(p => p.id === targetPhotoId);
+		
+		if (draggedIndex === -1 || targetIndex === -1) return;
+		
+		// Reorder photos array
+		const newPhotos = [...photos];
+		const [draggedPhoto] = newPhotos.splice(draggedIndex, 1);
+		newPhotos.splice(targetIndex, 0, draggedPhoto);
+		
+		photos = newPhotos;
+		draggedPhotoId = null;
+		
+		console.log('Photos reordered');
+	}
+	
+	function handlePhotoDragEnd() {
+		draggedPhotoId = null;
 	}
 
 	function nextSlide() {
@@ -268,6 +381,15 @@
 			// Convert photos to base64 for storage
 			const photosData = await Promise.all(
 				photos.map(async (photo) => {
+					// If photo already has base64 data (from editing), use it
+					if (photo.url.startsWith('data:')) {
+						return {
+							id: photo.id,
+							data: photo.url,
+							caption: photo.caption || ''
+						};
+					}
+					// Otherwise convert file to base64
 					const base64 = await fileToBase64(photo.file);
 					return {
 						id: photo.id,
@@ -278,14 +400,18 @@
 			);
 			
 			const slideshowData = {
-				id: crypto.randomUUID(),
+				id: isEditMode ? editingSlideshowId : crypto.randomUUID(),
 				title: slideshowTitle,
 				photos: photosData,
 				settings: {
-					duration: slideDuration,
-					transition: transition
+					photoDuration: slideDuration / 1000, // Convert back to seconds
+					transitionType: transition,
+					videoQuality: 'medium',
+					aspectRatio: '16:9'
 				},
-				createdAt: new Date().toISOString()
+				status: 'local_only', // Set status so it appears on memorial pages
+				createdAt: new Date().toISOString(),
+				updatedAt: new Date().toISOString()
 			};
 			
 			const response = await fetch(`/api/memorials/${selectedMemorial}/slideshow`, {
@@ -297,13 +423,27 @@
 			});
 			
 			if (response.ok) {
-				alert('Slideshow successfully embedded in memorial page!');
-				// Reset form
-				photos = [];
-				selectedMemorial = '';
-				slideshowTitle = 'Photo Slideshow';
+				const message = isEditMode 
+					? 'Slideshow successfully updated!' 
+					: 'Slideshow successfully embedded in memorial page!';
+				alert(message);
+				
+				// Navigate back to memorial page
+				if (selectedMemorial) {
+					window.location.href = `/memorial/${selectedMemorial}`;
+				} else {
+					// Reset form if not editing
+					if (!isEditMode) {
+						photos = [];
+						selectedMemorial = '';
+						slideshowTitle = 'Photo Slideshow';
+					}
+				}
 			} else {
-				alert('Failed to embed slideshow. Please try again.');
+				const message = isEditMode 
+					? 'Failed to update slideshow. Please try again.' 
+					: 'Failed to embed slideshow. Please try again.';
+				alert(message);
 			}
 		} catch (error) {
 			console.error('Error embedding slideshow:', error);
@@ -341,7 +481,14 @@
 
 <div class="slideshow-generator">
 	<div class="header">
-		<h2 class="title">Photo Slideshow Generator</h2>
+		<h2 class="title">
+			{isEditMode ? '✏️ Edit Slideshow' : 'Photo Slideshow Generator'}
+		</h2>
+		{#if isEditMode}
+			<div class="edit-indicator">
+				<span class="edit-badge">Editing: {slideshowTitle}</span>
+			</div>
+		{/if}
 		<p class="subtitle">Create beautiful slideshows from your photos</p>
 	</div>
 	
@@ -374,7 +521,14 @@
 					<div 
 						class="photo-item" 
 						class:active={index === currentSlide}
+						class:dragging={draggedPhotoId === photo.id}
+						draggable="true"
+						ondragstart={(e) => handlePhotodragStart(e, photo.id)}
+						ondragover={handlePhotoDragOver}
+						ondrop={(e) => handlePhotoDrop(e, photo.id)}
+						ondragend={handlePhotoDragEnd}
 						onclick={() => goToSlide(index)}
+						title="Drag to reorder photos"
 					>
 						<img src={photo.url} alt="Slide {index + 1}" />
 						<button 
@@ -458,9 +612,9 @@
 					>
 						<Heart class="w-5 h-5" />
 						{#if isEmbedding}
-							Embedding...
+							{isEditMode ? 'Updating...' : 'Embedding...'}
 						{:else}
-							Embed in Memorial
+							{isEditMode ? 'Update Slideshow' : 'Embed in Memorial'}
 						{/if}
 					</button>
 				</div>
@@ -620,6 +774,21 @@
 		color: #6b7280;
 		margin: 0;
 	}
+	
+	.edit-indicator {
+		margin: 1rem 0;
+	}
+	
+	.edit-badge {
+		display: inline-block;
+		background: linear-gradient(135deg, #D5BA7F 0%, #c4a96e 100%);
+		color: white;
+		padding: 0.5rem 1rem;
+		border-radius: 20px;
+		font-size: 0.875rem;
+		font-weight: 500;
+		box-shadow: 0 2px 4px rgba(213, 186, 127, 0.3);
+	}
 
 	/* Upload Section */
 	.upload-section {
@@ -705,6 +874,20 @@
 	.photo-item.active {
 		border-color: #3b82f6;
 		box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+	}
+	
+	.photo-item.dragging {
+		opacity: 0.5;
+		transform: rotate(5deg) scale(0.95);
+		z-index: 1000;
+	}
+	
+	.photo-item {
+		cursor: grab;
+	}
+	
+	.photo-item:active {
+		cursor: grabbing;
 	}
 
 	.photo-item img {

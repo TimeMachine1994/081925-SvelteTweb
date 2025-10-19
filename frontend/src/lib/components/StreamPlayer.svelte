@@ -331,15 +331,28 @@
 					<p class="stream-description">{stream.description}</p>
 				{/if}
 
-				<div class="video-container">
+				<div class="video-container themed-player">
 					{#if streamUrl}
-						<iframe
-							src={streamUrl}
-							class="stream-player"
-							allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
-							allowfullscreen
-							title="Live Stream: {stream.title}"
-						></iframe>
+						<div class="video-player-wrapper">
+							<iframe
+								src={streamUrl}
+								class="stream-player"
+								allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+								allowfullscreen
+								title="Live Stream: {stream.title}"
+							></iframe>
+							<!-- Golden themed control overlay -->
+							<div class="themed-controls-overlay">
+								<div class="themed-control-bar">
+									<div class="live-indicator-control">
+										<span class="live-dot-control"></span>
+										LIVE
+									</div>
+									<div class="control-spacer"></div>
+									<div class="themed-fullscreen-btn">⛶</div>
+								</div>
+							</div>
+						</div>
 					{:else}
 						<div class="stream-placeholder">
 							<Play class="placeholder-icon" />
@@ -391,17 +404,27 @@
 					<p class="stream-description">{stream.description}</p>
 				{/if}
 
-				<div class="video-container">
+				<div class="video-container themed-player">
 					{#if getStreamPlayerUrl(stream)}
 						{@const playerUrl = getStreamPlayerUrl(stream)}
 						{@const _ = console.log(`🎬 [RECORDED] Player URL for ${stream.id}:`, playerUrl)}
-						<iframe
-							src={playerUrl}
-							class="stream-player"
-							allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
-							allowfullscreen
-							title="Recorded Stream: {stream.title}"
-						></iframe>
+						<div class="video-player-wrapper">
+							<iframe
+								src={playerUrl}
+								class="stream-player"
+								allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+								allowfullscreen
+								title="Recorded Stream: {stream.title}"
+							></iframe>
+							<!-- Golden themed control overlay -->
+							<div class="themed-controls-overlay">
+								<div class="themed-control-bar">
+									<div class="recorded-indicator-control">RECORDED</div>
+									<div class="control-spacer"></div>
+									<div class="themed-fullscreen-btn">⛶</div>
+								</div>
+							</div>
+						</div>
 					{:else}
 						<div class="stream-placeholder">
 							<Play class="placeholder-icon" />
@@ -768,6 +791,88 @@
 		opacity: 0.5;
 	}
 
+	/* Golden Themed Video Player Styles */
+	.themed-player .video-player-wrapper {
+		position: relative;
+		border-radius: 8px;
+		overflow: hidden;
+		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+	}
+	
+	.themed-controls-overlay {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		background: linear-gradient(to right, #D5BA7F, #C5AA6F);
+		border-top: 1px solid #B59A5F;
+		z-index: 10;
+	}
+	
+	.themed-control-bar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0.75rem 1rem;
+		min-height: 48px;
+	}
+	
+	.live-indicator-control {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		background: #dc2626;
+		color: white;
+		padding: 0.25rem 0.75rem;
+		border-radius: 9999px;
+		font-size: 0.75rem;
+		font-weight: 600;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+	}
+	
+	.live-dot-control {
+		width: 6px;
+		height: 6px;
+		background: white;
+		border-radius: 50%;
+		animation: pulse 2s infinite;
+	}
+	
+	.recorded-indicator-control {
+		background: #374151;
+		color: white;
+		padding: 0.25rem 0.75rem;
+		border-radius: 9999px;
+		font-size: 0.75rem;
+		font-weight: 600;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+	}
+	
+	.control-spacer {
+		flex: 1;
+	}
+	
+	.themed-fullscreen-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 36px;
+		height: 36px;
+		background: rgba(0, 0, 0, 0.1);
+		border-radius: 6px;
+		color: #000;
+		font-size: 1rem;
+		font-weight: bold;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		border: 1px solid rgba(0, 0, 0, 0.1);
+	}
+	
+	.themed-fullscreen-btn:hover {
+		background: rgba(0, 0, 0, 0.2);
+		transform: scale(1.05);
+	}
+
 	@media (max-width: 768px) {
 		.stream-card {
 			padding: 1rem;
@@ -778,9 +883,19 @@
 			gap: 1rem;
 		}
 
-
 		.stream-player {
 			height: 250px;
+		}
+		
+		.themed-control-bar {
+			padding: 0.5rem 0.75rem;
+			min-height: 40px;
+		}
+		
+		.themed-fullscreen-btn {
+			width: 32px;
+			height: 32px;
+			font-size: 0.875rem;
 		}
 	}
 </style>

@@ -161,6 +161,57 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 		console.log('🎬 [MEMORIAL_PAGE] Found', streams.length, 'visible streams');
 
+		// Load slideshows for this memorial
+		console.log('📸 [MEMORIAL_PAGE] Loading slideshows for memorial:', memorial.id);
+		let slideshows = [];
+		try {
+			const slideshowsSnapshot = await adminDb
+				.collection('memorials')
+				.doc(memorial.id)
+				.collection('slideshows')
+				.orderBy('createdAt', 'desc')
+				.get();
+			
+			slideshows = slideshowsSnapshot.docs.map(doc => {
+				const data = doc.data();
+				console.log('📸 [MEMORIAL_PAGE] Processing slideshow:', {
+					id: doc.id,
+					title: data.title,
+					status: data.status,
+					hasPhotos: Array.isArray(data.photos) && data.photos.length > 0
+				});
+				return {
+					id: doc.id,
+					title: data.title || 'Memorial Slideshow',
+					memorialId: data.memorialId || memorial.id,
+					cloudflareStreamId: data.cloudflareStreamId || null,
+					firebaseStoragePath: data.firebaseStoragePath || null,
+					embedUrl: data.embedUrl || null,
+					playbackUrl: data.playbackUrl || null,
+					thumbnailUrl: data.thumbnailUrl || null,
+					status: data.status || 'processing',
+					isCloudflareHosted: data.isCloudflareHosted || false,
+					isFirebaseHosted: data.isFirebaseHosted || false,
+					photos: Array.isArray(data.photos) ? data.photos : [],
+					settings: data.settings || {
+						photoDuration: 3,
+						transitionType: 'fade',
+						videoQuality: 'medium',
+						aspectRatio: '16:9'
+					},
+					createdBy: data.createdBy || '',
+					createdAt: convertTimestamp(data.createdAt) || new Date().toISOString(),
+					updatedAt: convertTimestamp(data.updatedAt) || new Date().toISOString()
+				};
+			});
+			
+			console.log('📸 [MEMORIAL_PAGE] Loaded', slideshows.length, 'slideshows');
+		} catch (error) {
+			console.error('📸 [MEMORIAL_PAGE] Error loading slideshows:', error);
+			// Don't fail the entire page load if slideshows fail
+			slideshows = [];
+		}
+
 		// Check if user has permission to view private memorial content
 		const userId = locals.user?.uid;
 		const userRole = locals.user?.role;
@@ -194,14 +245,21 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 					createdAt: memorial.createdAt,
 					updatedAt: memorial.updatedAt
 				},
-				streams: [] // No streams for unauthorized users
+				streams: [], // No streams for unauthorized users
+				slideshows: [] // No slideshows for unauthorized users
 			};
 		}
 
-		// Return full memorial data and streams for authorized users
+		// Return full memorial data, streams, and slideshows for authorized users
 		return {
 			memorial,
-			streams
+			streams,
+			slideshows,
+			user: locals.user ? {
+				uid: locals.user.uid,
+				role: locals.user.role,
+				email: locals.user.email
+			} : null
 		};
 	} catch (err: any) {
 		console.error('🏠 [MEMORIAL_PAGE] Error loading memorial:', err);
