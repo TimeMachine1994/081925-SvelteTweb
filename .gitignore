@@ -5,3 +5,25 @@
 .env.local
 .env.*.local
 *.env local
+
+# Firebase credentials and service account keys
+*firebase-adminsdk*.json
+*service-account*.json
+firebase-adminsdk-*.json
+service-account-*.json
+
+# Scripts directory sensitive files
+scripts/*firebase*.json
+scripts/*adminsdk*.json
+scripts/*service-account*.json
+
+# Source directory sensitive files
+src/*firebase*.json
+src/*adminsdk*.json
+src/*service-account*.json
+
+# Node.js dependencies
+node_modules/
+package-lock.json
+scripts/node_modules/
+scripts/package-lock.json

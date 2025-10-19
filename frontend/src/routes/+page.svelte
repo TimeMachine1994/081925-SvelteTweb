@@ -255,7 +255,7 @@
 		<!-- Stacked Content Container -->
 		<div class="relative z-10 flex flex-col min-h-[80vh]">
 			<!-- Top: Forms and Text -->
-			<div class="pt-8 pb-8 flex-1">
+			<div class="pt-8 pb-8">
 				<div class="mx-auto max-w-7xl px-6">
 					<div class="text-center mb-8">
 						<h1 class="text-4xl md:text-6xl font-bold text-white mb-4" style="font-family: {theme.font.heading}">
@@ -318,7 +318,7 @@
 			</div>
 
 			<!-- Middle: Demo Video - Own row -->
-			<div class="flex justify-center px-6 py-8">
+			<div class="px-6 py-8">
 				<div class="w-full max-w-md mx-auto">
 					<div class="relative rounded-lg overflow-hidden shadow-2xl bg-black/20 backdrop-blur-sm border border-white/10">
 						<video
@@ -420,22 +420,23 @@
 					</div>
 				</div>
 			</div>
-			
-			<!-- Trust Badges - Below video, inside hero container -->
-			<div class="px-6 pb-8">
-				<div class="flex justify-center items-center gap-8 flex-wrap bg-black/40 backdrop-blur-sm rounded-lg p-4 max-w-4xl mx-auto">
-					{#each trustBadges as badge}
-						{@const IconComponent = badge.icon}
-						<div class="flex items-center gap-2 text-sm text-white">
-							<IconComponent class="h-5 w-5 text-[#D5BA7F]" />
-							<span>{badge.text}</span>
-						</div>
-					{/each}
-				</div>
-			</div>
 		</div>
 	</section>
 
+	<!-- Trust Badges Section -->
+	<section class="py-8 bg-slate-900">
+		<div class="max-w-6xl mx-auto px-6">
+			<div class="flex justify-center items-center gap-8 flex-wrap">
+				{#each trustBadges as badge}
+					{@const IconComponent = badge.icon}
+					<div class="flex items-center gap-2 text-sm text-white">
+						<IconComponent class="h-5 w-5 text-[#D5BA7F]" />
+						<span>{badge.text}</span>
+					</div>
+				{/each}
+			</div>
+		</div>
+	</section>
 
 	<!-- Social Proof Row -->
 	<section class="py-16 bg-white">

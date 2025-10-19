@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Upload, X, Plus, Play, Settings, Download, Camera, Video } from 'lucide-svelte';
+	import { Upload, X, Play, Settings, Plus, ExternalLink } from 'lucide-svelte';
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	import { SimpleSlideshowGenerator } from '$lib/utils/SimpleSlideshowGenerator';
 
@@ -45,11 +45,22 @@
 	let isLoadingDraft = $state(false);
 	let isSavingDraft = $state(false);
 	let lastSaveTime = $state<Date | null>(null);
-	let publishedSlideshow = $state<any>(null);
+	// Published slideshow state
 	let isPublished = $state(false);
+	let publishedSlideshow = $state<any>(null);
+	
+	// Draft state management
+	let hasDraftChanges = $state(false);
+	let originalPublishedPhotos = $state<SlideshowPhoto[]>([]);
+	let draftVideoBlob = $state<Blob | null>(null);
+	let draftVideoUrl = $state<string | null>(null);
+	let isUnpublishing = $state(false);
 	
 	// Drag and drop state for photo reordering
 	let draggedPhotoIndex = $state<number | null>(null);
+	
+	// Memorial data for navigation
+	let memorial = $state<any>(null);
 	
 	let settings = $state<SlideshowSettings>({
 		photoDuration: 3,
@@ -79,6 +90,36 @@
 	onDestroy(() => {
 		cleanup();
 	});
+
+	// Check if current photos differ from published version
+	function checkForDraftChanges() {
+		if (!isPublished || originalPublishedPhotos.length === 0) {
+			hasDraftChanges = false;
+			return;
+		}
+
+		// Compare current photos with original published photos
+		const currentPhotoIds = photos.map(p => p.id).sort();
+		const originalPhotoIds = originalPublishedPhotos.map(p => p.id).sort();
+		
+		// Check if photo count or IDs are different
+		const photosChanged = currentPhotoIds.length !== originalPhotoIds.length || 
+			!currentPhotoIds.every((id, index) => id === originalPhotoIds[index]);
+		
+		// Check if settings changed
+		const settingsChanged = publishedSlideshow && 
+			settings.photoDuration !== publishedSlideshow.settings?.photoDuration;
+
+		hasDraftChanges = photosChanged || settingsChanged;
+		
+		console.log('🔄 Draft changes detected:', {
+			photosChanged,
+			settingsChanged,
+			hasDraftChanges,
+			currentCount: photos.length,
+			originalCount: originalPublishedPhotos.length
+		});
+	}
 	
 	// File input reference
 	let fileInput: HTMLInputElement;
@@ -92,11 +133,33 @@
 		}
 	});
 	
+	// Load memorial data
+	async function loadMemorialData() {
+		if (!memorialId) return;
+		
+		try {
+			console.log('🔍 Loading memorial data for:', memorialId);
+			const response = await fetch(`/api/memorials/${memorialId}`);
+			
+			if (response.ok) {
+				memorial = await response.json();
+				console.log('✅ Memorial data loaded:', memorial?.fullSlug);
+			} else {
+				console.warn('⚠️ Could not load memorial data');
+			}
+		} catch (error) {
+			console.error('❌ Error loading memorial data:', error);
+		}
+	}
+
 	// Load both draft and published slideshow
 	async function loadDraftAndPublished() {
 		if (!memorialId) return;
 		
 		try {
+			// Load memorial data for navigation
+			await loadMemorialData();
+			
 			// First check for published slideshow
 			await loadPublishedSlideshow();
 			
@@ -275,7 +338,9 @@
 			
 			if (validPhotos.length > 0) {
 				photos = validPhotos;
-				console.log('✅ Photos set in component state');
+				// Store original published photos for draft comparison
+				originalPublishedPhotos = [...validPhotos];
+				console.log('✅ Photos set in component state and original photos stored');
 				
 				// Load slideshow settings if available
 				if (slideshow.settings) {
@@ -625,8 +690,9 @@
 
 		console.log(`Added ${validFiles.length} photos. Total: ${photos.length}`);
 		
-		// Auto-save immediately after adding photos
+		// Check for draft changes after adding photos
 		if (validFiles.length > 0) {
+			checkForDraftChanges();
 			setTimeout(() => saveDraft(), 100);
 		}
 	}
@@ -647,7 +713,8 @@
 			photos.splice(index, 1);
 			photos = [...photos]; // Trigger reactivity
 			
-			// Auto-save immediately after removing photo
+			// Check for draft changes and auto-save after removing photo
+			checkForDraftChanges();
 			setTimeout(() => saveDraft(), 100);
 		}
 	}
@@ -986,6 +1053,208 @@
 		}
 	}
 
+	// Unpublish slideshow from memorial
+	async function unpublishFromMemorial() {
+		if (!memorialId || !publishedSlideshow) return;
+
+		const confirmUnpublish = confirm('Are you sure you want to unpublish this slideshow from the memorial? Visitors will no longer be able to see it.');
+		if (!confirmUnpublish) return;
+
+		try {
+			isUnpublishing = true;
+
+			// Call API to delete the slideshow from memorial
+			const response = await fetch(`/api/memorials/${memorialId}/slideshow`, {
+				method: 'DELETE',
+				headers: {
+					'Content-Type': 'application/json'
+				}
+			});
+
+			if (response.ok) {
+				// Update status to unpublished
+				isPublished = false;
+				publishedSlideshow = null;
+				
+				// Show video preview again so user can re-publish if desired
+				showVideoPreview = true;
+				
+				alert('Slideshow unpublished from memorial successfully!');
+			} else {
+				const errorData = await response.json();
+				throw new Error(errorData.message || 'Failed to unpublish slideshow');
+			}
+		} catch (error) {
+			console.error('Error unpublishing slideshow:', error);
+			alert('Failed to unpublish slideshow. Please try again.');
+		} finally {
+			isUnpublishing = false;
+		}
+	}
+
+	// Discard draft changes and revert to published version
+	function discardDraftChanges() {
+		const confirmDiscard = confirm('Are you sure you want to discard all changes and revert to the published version?');
+		if (!confirmDiscard) return;
+
+		// Revert photos to original published state
+		photos = [...originalPublishedPhotos];
+		
+		// Revert settings if they were changed
+		if (publishedSlideshow?.settings) {
+			settings = { ...settings, ...publishedSlideshow.settings };
+		}
+
+		// Clear draft video
+		if (draftVideoUrl) {
+			URL.revokeObjectURL(draftVideoUrl);
+			draftVideoUrl = null;
+		}
+		draftVideoBlob = null;
+
+		// Reset to published video preview
+		if (publishedSlideshow?.playbackUrl || publishedSlideshow?.firebaseStorageUrl) {
+			previewVideoUrl = publishedSlideshow.playbackUrl || publishedSlideshow.firebaseStorageUrl;
+			showVideoPreview = true;
+		}
+
+		// Clear draft state
+		hasDraftChanges = false;
+		
+		console.log('🔄 Draft changes discarded, reverted to published version');
+	}
+
+	// Generate new video for draft
+	async function generateDraftVideo() {
+		if (photos.length === 0) return;
+
+		try {
+			isGenerating = true;
+			generationProgress = 0;
+			generationPhase = 'Generating draft video...';
+			currentPhoto = 0;
+
+			// Create canvas for video generation
+			const canvas = document.createElement('canvas');
+			const generator = new SimpleSlideshowGenerator(canvas);
+			
+			// Progress callback
+			const onProgress = (progress: GenerationProgress) => {
+				generationProgress = progress.progress;
+				currentPhoto = progress.currentPhoto || 0;
+				
+				switch (progress.phase) {
+					case 'loading':
+						generationPhase = `Loading images... (${progress.currentPhoto || 0}/${progress.totalPhotos})`;
+						break;
+					case 'rendering':
+						generationPhase = `Rendering draft... (${progress.currentPhoto || 0}/${progress.totalPhotos})`;
+						break;
+					case 'encoding':
+						generationPhase = 'Encoding draft video...';
+						break;
+					default:
+						generationPhase = 'Processing draft...';
+						break;
+				}
+			};
+
+			console.log('🎬 Starting draft video generation with:', { photos: photos.length, settings });
+			
+			// Generate the video
+			const videoBlob = await generator.generateVideo(photos, settings, onProgress);
+			
+			// Cleanup
+			generator.dispose();
+			
+			if (videoBlob) {
+				// Store as draft video
+				draftVideoBlob = videoBlob;
+				if (draftVideoUrl) {
+					URL.revokeObjectURL(draftVideoUrl);
+				}
+				draftVideoUrl = URL.createObjectURL(videoBlob);
+				
+				// Update preview to show draft video
+				if (previewVideoUrl && previewVideoUrl !== (publishedSlideshow?.playbackUrl || publishedSlideshow?.firebaseStorageUrl)) {
+					URL.revokeObjectURL(previewVideoUrl);
+				}
+				previewVideoUrl = draftVideoUrl;
+				showVideoPreview = true;
+				
+				console.log('✅ Draft video generated successfully:', videoBlob.size, 'bytes');
+			}
+		} catch (error) {
+			console.error('❌ Error generating draft video:', error);
+			alert('Failed to generate draft video. Please try again.');
+		} finally {
+			isGenerating = false;
+			generationProgress = 0;
+			generationPhase = '';
+		}
+	}
+
+	// Publish draft and replace published version
+	async function publishDraftAndReplace() {
+		if (!draftVideoBlob || !memorialId) return;
+
+		const confirmPublish = confirm('Are you sure you want to publish this draft and replace the current version on the memorial?');
+		if (!confirmPublish) return;
+
+		try {
+			isGenerating = true;
+			generationPhase = 'Publishing draft to memorial...';
+			generationProgress = 50;
+
+			// Upload new video to Firebase (this will replace the old one)
+			const result = await uploadToFirebase(draftVideoBlob, photos, settings);
+
+			if (result.slideshowId) {
+				// Update published slideshow data
+				publishedSlideshow = {
+					id: result.slideshowId,
+					title: result.title || `Memorial Slideshow - ${new Date().toLocaleDateString()}`,
+					playbackUrl: result.downloadURL,
+					photos: photos.map(photo => ({
+						id: photo.id,
+						caption: photo.caption || '',
+						duration: photo.duration || settings.photoDuration,
+						url: photo.storedUrl || photo.preview,
+						storagePath: photo.storagePath
+					})),
+					settings: settings
+				};
+
+				// Update original photos to current state
+				originalPublishedPhotos = [...photos];
+				
+				// Clear draft state
+				hasDraftChanges = false;
+				if (draftVideoUrl) {
+					URL.revokeObjectURL(draftVideoUrl);
+					draftVideoUrl = null;
+				}
+				draftVideoBlob = null;
+
+				// Update preview URL to published URL
+				if (previewVideoUrl && previewVideoUrl !== result.downloadURL) {
+					URL.revokeObjectURL(previewVideoUrl);
+				}
+				previewVideoUrl = result.downloadURL;
+
+				generationProgress = 100;
+				alert('Draft published successfully! The memorial now shows your updated slideshow.');
+			}
+		} catch (error) {
+			console.error('❌ Error publishing draft:', error);
+			alert('Failed to publish draft. Please try again.');
+		} finally {
+			isGenerating = false;
+			generationProgress = 0;
+			generationPhase = '';
+		}
+	}
+
 	// Download generated video
 	function downloadVideo() {
 		if (!generatedVideoBlob) return;
@@ -1098,80 +1367,33 @@
 </script>
 
 <div class="slideshow-creator">
-	<!-- Header -->
+	<!-- Simplified Header with Clear Hierarchy -->
 	<div class="creator-header">
 		{#if isLoadingDraft}
 			<h2 class="creator-title">Loading draft...</h2>
 			<p class="creator-subtitle">Restoring your saved photos</p>
 		{:else}
 			<div class="header-content">
-				<div class="title-section">
-					<h2 class="creator-title">
-						<Upload class="title-icon" />
-						Create Memorial Slideshow
-					</h2>
-					<p class="creator-subtitle">
-						Upload photos to create a beautiful memorial slideshow
-					</p>
-					
-					<!-- Add Photos Button - Always Visible -->
-					<div class="header-actions">
-						<button 
-							class="add-photos-btn"
-							onclick={() => {
-								console.log('🖱️ Header add photos clicked');
-								if (fileInput) {
-									fileInput.click();
-								}
-							}}
-							title="Add photos to slideshow"
-						>
-							<Upload class="btn-icon" />
-							{photos.length === 0 ? 'Add Photos' : `Add More Photos (${photos.length}/30)`}
-						</button>
-					</div>
-				</div>
+				<h2 class="creator-title">
+					<Upload class="title-icon" />
+					Create Memorial Slideshow
+				</h2>
+				<p class="creator-subtitle">
+					Upload photos to create a beautiful memorial slideshow
+				</p>
 				
+				<!-- Single Status Indicator (Miller's Rule - reduce cognitive load) -->
 				{#if photos.length > 0}
-					<div class="draft-status">
-						<div class="draft-controls">
-							<span class="draft-badge">
-								{#if isPublished}
-									🌟 Published to Memorial
-								{:else if isSavingDraft}
-									💾 Saving...
-								{:else if lastSaveTime}
-									✅ Saved {new Date().getTime() - lastSaveTime.getTime() < 5000 ? 'just now' : 'recently'}
-								{:else}
-									📝 Auto-saving enabled
-								{/if}
-							</span>
-							
-							{#if isPublished}
-								<button 
-									class="unpublish-btn"
-									onclick={unpublishSlideshow}
-									title="Unpublish and convert back to draft for editing"
-								>
-									📝 Unpublish & Edit
-								</button>
-							{:else}
-								<button 
-									class="continue-later-btn"
-									onclick={() => window.history.back()}
-									title="Save progress and return to profile"
-								>
-									💾 Save & Continue Later
-								</button>
-								<button 
-									class="clear-draft-btn"
-									onclick={clearDraft}
-									title="Clear draft and start fresh"
-								>
-									🗑️ Clear Draft
-								</button>
-							{/if}
-						</div>
+					<div class="status-indicator">
+						{#if isPublished}
+							<span class="status-badge published">🌟 Published to Memorial</span>
+						{:else if isSavingDraft}
+							<span class="status-badge saving">💾 Saving...</span>
+						{:else if lastSaveTime}
+							<span class="status-badge saved">✅ Saved recently</span>
+						{:else}
+							<span class="status-badge draft">📝 Draft</span>
+						{/if}
 					</div>
 				{/if}
 			</div>
@@ -1179,191 +1401,167 @@
 	</div>
 
 
-	<!-- Upload Area -->
-	{#if photos.length === 0}
-		<div 
-			class="upload-area"
-			class:drag-over={isDragOver}
-			ondragover={handleDragOver}
-			ondragleave={handleDragLeave}
-			ondrop={handleDrop}
-			role="button"
-			tabindex="0"
-			onclick={() => {
-				console.log('🖱️ Upload area clicked, fileInput:', fileInput);
-				if (fileInput) {
-					fileInput.click();
-				} else {
-					console.error('❌ fileInput is not available');
-				}
-			}}
-			onkeydown={(e) => e.key === 'Enter' && fileInput.click()}
-		>
-			<div class="upload-content">
-				<Upload class="upload-icon" />
-				<h3 class="upload-title">Add Photos to Slideshow</h3>
-				<p class="upload-text">
-					Drag and drop photos here, or click to browse
-				</p>
-				<p class="upload-limits">
-					Maximum 30 photos • 10MB per file
-				</p>
+	<!-- Step 1: Upload Photos - Always Visible -->
+	<div class="workflow-step active">
+		<div class="step-header">
+			<div class="step-number">1</div>
+			<h3 class="step-title">Upload Photos</h3>
+			{#if photos.length > 0}
+				<div class="step-status completed">✓ {photos.length} photos added</div>
+			{/if}
+		</div>
+		
+		{#if photos.length === 0}
+			<div 
+				class="primary-upload-area"
+				class:drag-over={isDragOver}
+				ondragover={handleDragOver}
+				ondragleave={handleDragLeave}
+				ondrop={handleDrop}
+				role="button"
+				tabindex="0"
+				onclick={() => {
+					console.log('🖱️ Upload area clicked, fileInput:', fileInput);
+					if (fileInput) {
+						fileInput.click();
+					} else {
+						console.error('❌ fileInput is not available');
+					}
+				}}
+				onkeydown={(e) => e.key === 'Enter' && fileInput.click()}
+			>
+				<div class="upload-content">
+					<Upload class="upload-icon" />
+					<h4 class="upload-title">Choose Photos</h4>
+					<p class="upload-text">
+						Drag and drop photos here, or click to browse
+					</p>
+					<div class="upload-button">
+						<button class="primary-btn large">
+							<Upload class="btn-icon" />
+							Select Photos
+						</button>
+					</div>
+					<p class="upload-limits">
+						Up to 30 photos • 10MB per file
+					</p>
+				</div>
+			</div>
+		{:else}
+			<div class="upload-summary">
+				<div class="summary-content">
+					<Upload class="summary-icon" />
+					<span class="summary-text">{photos.length} photos ready</span>
+					<button 
+						class="secondary-btn"
+						onclick={() => {
+							if (fileInput) {
+								fileInput.click();
+							}
+						}}
+					>
+						<Plus class="btn-icon" />
+						Add More
+					</button>
+				</div>
+			</div>
+		{/if}
+	</div>
+
+	<!-- Step 2: Organize Photos (Always show when photos exist) -->
+	{#if photos.length > 0}
+		<div class="workflow-step active">
+			<div class="step-header">
+				<div class="step-number">2</div>
+				<h3 class="step-title">Organize Your Photos ({photos.length})</h3>
+				{#if isPublished && !hasDraftChanges}
+					<div class="step-status completed">✓ Published to Memorial</div>
+				{:else if isPublished && hasDraftChanges}
+					<div class="step-status draft">📝 Draft Changes</div>
+				{:else if showVideoPreview}
+					<div class="step-status unpublished">📝 Ready to Publish</div>
+				{/if}
+			</div>
+			
+			<!-- Miller's Rule: Chunk Photos in Groups of 6 (Always show when photos exist) -->
+			<div class="photo-grid-container">
+				{#each Array(Math.ceil(photos.length / 6)) as _, chunkIndex}
+					<div class="photo-chunk">
+						<div class="chunk-header">
+							<span class="chunk-label">Photos {chunkIndex * 6 + 1}-{Math.min((chunkIndex + 1) * 6, photos.length)}</span>
+						</div>
+						<div class="photo-grid">
+							{#each photos.slice(chunkIndex * 6, (chunkIndex + 1) * 6) as photo, index (photo.id)}
+								<div 
+									class="photo-card"
+									class:dragging={draggedPhotoIndex === chunkIndex * 6 + index}
+									draggable="true"
+									ondragstart={(e) => handlePhotoDragStart(e, chunkIndex * 6 + index)}
+									ondragover={handlePhotoDragOver}
+									ondrop={(e) => handlePhotoDrop(e, chunkIndex * 6 + index)}
+									ondragend={handlePhotoDragEnd}
+									title="Drag to reorder photos"
+								>
+									<div class="photo-preview">
+										<img src={photo.preview} alt="Photo {chunkIndex * 6 + index + 1}" />
+										<!-- Larger Remove Button (Fitts's Law) -->
+										<button 
+											class="remove-btn large"
+											onclick={() => removePhoto(photo.id)}
+											aria-label="Remove photo"
+										>
+											<X class="remove-icon" />
+										</button>
+										<div class="photo-number">#{chunkIndex * 6 + index + 1}</div>
+									</div>
+								</div>
+							{/each}
+						</div>
+					</div>
+				{/each}
 			</div>
 		</div>
 	{/if}
 
-	<!-- Photo Grid -->
-	{#if photos.length > 0}
-		<div class="photo-section">
-			<!-- Settings Panel - Always Visible -->
-			<div class="settings-panel">
-				<h4 class="settings-title">Slideshow Settings</h4>
-				<div class="settings-grid">
-					<div class="setting-item">
-						<label for="photo-duration">Photo Duration (seconds)</label>
-						<input 
-							id="photo-duration"
-							type="range" 
-							min="1" 
-							max="10" 
-							step="0.5"
-							bind:value={settings.photoDuration}
-							class="range-input"
-						/>
-						<span class="range-value">{settings.photoDuration}s</span>
-					</div>
-
-
+	<!-- Step 3: Settings & Generate (Show for new slideshows or when there are draft changes) -->
+	{#if photos.length > 0 && (!isPublished || hasDraftChanges)}
+		<div class="workflow-step active">
+			<div class="step-header">
+				<div class="step-number">3</div>
+				<h3 class="step-title">
+					{hasDraftChanges ? 'Generate New Video' : 'Customize & Generate'}
+				</h3>
+				{#if showVideoPreview && !hasDraftChanges}
+					<div class="step-status completed">✓ Video Ready</div>
+				{:else if hasDraftChanges}
+					<div class="step-status draft">📝 Changes Need Preview</div>
+				{/if}
+			</div>
+			
+			<!-- Simplified Settings (Hick's Law - Fewer Choices) -->
+			<div class="settings-section">
+				<div class="setting-group">
+					<label for="photo-duration" class="setting-label">
+						Photo Duration: <strong>{settings.photoDuration}s</strong>
+					</label>
+					<input 
+						id="photo-duration"
+						type="range" 
+						min="1" 
+						max="10" 
+						step="0.5"
+						bind:value={settings.photoDuration}
+						class="range-slider"
+					/>
 				</div>
 			</div>
-
-			{#if !showVideoPreview}
-				<!-- Photo Grid View -->
-				<div class="section-header">
-					<h3 class="section-title">Photos ({photos.length})</h3>
-					<div class="section-actions">
-						<button 
-							class="action-btn danger"
-							onclick={clearPhotos}
-						>
-							<X class="btn-icon" />
-							Clear All
-						</button>
-					</div>
-				</div>
-
-				<!-- Photo Grid -->
-				<div class="photo-grid">
-					{#each photos as photo, index (photo.id)}
-						<div 
-							class="photo-card"
-							class:dragging={draggedPhotoIndex === index}
-							draggable="true"
-							ondragstart={(e) => handlePhotoDragStart(e, index)}
-							ondragover={handlePhotoDragOver}
-							ondrop={(e) => handlePhotoDrop(e, index)}
-							ondragend={handlePhotoDragEnd}
-							title="Drag to reorder photos"
-						>
-							<div class="photo-preview">
-								<img src={photo.preview} alt="Photo {index + 1}" />
-								<button 
-									class="remove-btn"
-									onclick={() => removePhoto(photo.id)}
-									aria-label="Remove photo"
-								>
-									<X class="remove-icon" />
-								</button>
-								<div class="photo-number">#{index + 1}</div>
-							</div>
-						</div>
-					{/each}
-					
-					<!-- Add More Photos Button -->
-					{#if photos.length < maxPhotos}
-						<div 
-							class="add-more-card"
-							onclick={() => {
-								console.log('🖱️ Add more photos clicked');
-								if (fileInput) {
-									fileInput.click();
-								}
-							}}
-							role="button"
-							tabindex="0"
-							title="Add more photos"
-						>
-							<div class="add-more-content">
-								<Upload class="add-more-icon" />
-								<span class="add-more-text">Add More Photos</span>
-								<span class="add-more-limit">{photos.length}/{maxPhotos}</span>
-							</div>
-						</div>
-					{/if}
-				</div>
-			{:else}
-				<!-- Video Preview View -->
-				<div class="section-header">
-					<h3 class="section-title">
-						{isPublished ? 'Published Slideshow' : 'Video Preview'}
-						{#if isPublished}
-							<span class="published-indicator">🌟 Live on Memorial</span>
-						{/if}
-					</h3>
-					<div class="section-actions">
-						<button 
-							class="action-btn secondary"
-							onclick={editVideo}
-						>
-							<Settings class="btn-icon" />
-							Edit Video
-						</button>
-						{#if memorialId && showVideoPreview}
-							<button 
-								class="action-btn primary"
-								onclick={saveToMemorial}
-								disabled={isGenerating}
-							>
-								{#if isGenerating}
-									<svg class="btn-icon animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-									</svg>
-									Saving...
-								{:else}
-									<svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-									</svg>
-									{isPublished ? 'Update Memorial' : 'Save to Memorial'}
-								{/if}
-							</button>
-						{/if}
-					</div>
-				</div>
-
-				<div class="video-preview-container">
-					<div class="video-preview">
-						<video 
-							src={previewVideoUrl} 
-							controls 
-							class="preview-video"
-							preload="metadata"
-						>
-							<track kind="captions" src="" srclang="en" label="English" />
-							Your browser does not support the video tag.
-						</video>
-					</div>
-					<p class="video-info">
-						Video size: {generatedVideoBlob ? (generatedVideoBlob.size / 1024 / 1024).toFixed(2) : '0'} MB • {photos.length} photos
-					</p>
-				</div>
-			{/if}
-
-			<!-- Action Buttons -->
-			<div class="generate-section">
+			
+			<!-- Primary Action (Fitts's Law - Large, Prominent) -->
+			<div class="action-section">
 				{#if isGenerating}
 					<div class="progress-container">
 						<div class="progress-header">
-							<h4 class="progress-title">Generating Slideshow</h4>
+							<h4 class="progress-title">Creating Your Slideshow</h4>
 							<span class="progress-percentage">{Math.round(generationProgress)}%</span>
 						</div>
 						<div class="progress-bar">
@@ -1379,22 +1577,224 @@
 							</p>
 						{/if}
 					</div>
-				{:else if showVideoPreview}
-					<!-- Video Preview Actions - Save to Memorial moved to section header -->
-					<div class="video-actions">
-						<!-- Save to Memorial button moved to section header next to Edit Video -->
-					</div>
 				{:else}
-					<!-- Generate Button -->
 					<button 
-						class="generate-btn"
-						onclick={generateSlideshow}
+						class="primary-btn extra-large"
+						onclick={hasDraftChanges ? generateDraftVideo : generateSlideshow}
 						disabled={photos.length === 0}
 					>
 						<Play class="btn-icon" />
-						Generate Slideshow
+						{hasDraftChanges ? 'Generate New Video' : 'Create Slideshow Video'}
+					</button>
+					<p class="action-help">
+						{hasDraftChanges 
+							? `Preview your changes with ${photos.length} photos` 
+							: `This will create a video from your ${photos.length} photos`}
+					</p>
+					
+					{#if hasDraftChanges}
+						<div class="draft-actions">
+							<button 
+								class="secondary-btn"
+								onclick={discardDraftChanges}
+							>
+								<X class="btn-icon" />
+								Discard Changes
+							</button>
+						</div>
+					{/if}
+				{/if}
+			</div>
+		</div>
+	{/if}
+		
+	<!-- Step 4: Save to Memorial (When video is ready and not published, or when there are draft changes) -->
+	{#if showVideoPreview && (!isPublished || (hasDraftChanges && draftVideoBlob))}
+		<div class="workflow-step active">
+			<div class="step-header">
+				<div class="step-number">4</div>
+				<h3 class="step-title">
+					{hasDraftChanges ? 'Publish Draft' : 'Save to Memorial'}
+				</h3>
+				{#if hasDraftChanges && draftVideoBlob}
+					<div class="step-status draft">📝 Draft Ready to Publish</div>
+				{/if}
+			</div>
+			
+			<div class="video-preview-container">
+				<div class="video-preview">
+					<video 
+						src={previewVideoUrl} 
+						controls 
+						class="preview-video"
+						preload="metadata"
+					>
+						<track kind="captions" src="" srclang="en" label="English" />
+						Your browser does not support the video tag.
+					</video>
+				</div>
+				<p class="video-info">
+					Video size: {generatedVideoBlob ? (generatedVideoBlob.size / 1024 / 1024).toFixed(2) : '0'} MB • {photos.length} photos
+				</p>
+			</div>
+			
+			<!-- Final Actions (Law of Proximity - Group Related Actions) -->
+			<div class="final-actions">
+				<button 
+					class="secondary-btn"
+					onclick={editVideo}
+				>
+					<Settings class="btn-icon" />
+					Edit Photos
+				</button>
+				
+				{#if hasDraftChanges && draftVideoBlob}
+					<!-- Draft Actions -->
+					<button 
+						class="secondary-btn"
+						onclick={discardDraftChanges}
+					>
+						<X class="btn-icon" />
+						Discard Draft
+					</button>
+					
+					{#if memorialId}
+						<button 
+							class="primary-btn extra-large"
+							onclick={publishDraftAndReplace}
+							disabled={isGenerating}
+						>
+							{#if isGenerating}
+								<svg class="btn-icon animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+								</svg>
+								Publishing Draft...
+							{:else}
+								<svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+								</svg>
+								Publish & Replace
+							{/if}
+						</button>
+					{/if}
+				{:else if memorialId}
+					<!-- Regular Publish Action -->
+					<button 
+						class="primary-btn extra-large"
+						onclick={saveToMemorial}
+						disabled={isGenerating}
+					>
+						{#if isGenerating}
+							<svg class="btn-icon animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+							</svg>
+							Publishing...
+						{:else}
+							<svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+							</svg>
+							Publish to Memorial
+						{/if}
 					</button>
 				{/if}
+			</div>
+		</div>
+	{/if}
+
+	<!-- Step 3: Settings (Read-only for published slideshows) -->
+	{#if photos.length > 0 && isPublished}
+		<div class="workflow-step active">
+			<div class="step-header">
+				<div class="step-number">3</div>
+				<h3 class="step-title">Slideshow Settings</h3>
+				<div class="step-status completed">✓ Published to Memorial</div>
+			</div>
+			
+			<!-- Read-only Settings Display -->
+			<div class="settings-section readonly">
+				<div class="setting-group">
+					<div class="setting-display">
+						<span class="setting-label">Photo Duration:</span>
+						<span class="setting-value">{settings.photoDuration}s per photo</span>
+					</div>
+					<div class="setting-display">
+						<span class="setting-label">Total Photos:</span>
+						<span class="setting-value">{photos.length} photos</span>
+					</div>
+					<div class="setting-display">
+						<span class="setting-label">Estimated Duration:</span>
+						<span class="setting-value">{Math.round(photos.length * settings.photoDuration)}s total</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	{/if}
+
+	<!-- Published Slideshow Display (Separate from workflow) -->
+	{#if isPublished && publishedSlideshow}
+		<div class="published-slideshow-section">
+			<div class="published-header">
+				<h3 class="published-title">
+					<span class="published-icon">🌟</span>
+					Published to Memorial
+				</h3>
+				<div class="published-actions">
+					<button 
+						class="secondary-btn"
+						onclick={editVideo}
+					>
+						<Settings class="btn-icon" />
+						Edit Photos
+					</button>
+					<button 
+						class="secondary-btn"
+						onclick={() => window.open(`/${memorial?.fullSlug || `memorial/${memorialId}`}`, '_blank')}
+					>
+						<ExternalLink class="btn-icon" />
+						View on Memorial
+					</button>
+					<button 
+						class="danger-btn"
+						onclick={unpublishFromMemorial}
+						disabled={isUnpublishing}
+					>
+						{#if isUnpublishing}
+							<svg class="btn-icon animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+							</svg>
+							Unpublishing...
+						{:else}
+							<X class="btn-icon" />
+							Unpublish from Memorial
+						{/if}
+					</button>
+				</div>
+			</div>
+			
+			<div class="published-video-container">
+				<div class="video-preview">
+					{#if publishedSlideshow.playbackUrl}
+						<video 
+							src={publishedSlideshow.playbackUrl} 
+							controls 
+							class="preview-video"
+							preload="metadata"
+						>
+							<track kind="captions" src="" srclang="en" label="English" />
+							Your browser does not support the video tag.
+						</video>
+					{:else if publishedSlideshow.firebaseStorageUrl}
+						<video 
+							src={publishedSlideshow.firebaseStorageUrl} 
+							controls 
+							class="preview-video"
+							preload="metadata"
+						>
+							<track kind="captions" src="" srclang="en" label="English" />
+							Your browser does not support the video tag.
+						</video>
+					{/if}
+				</div>
 			</div>
 		</div>
 	{/if}
@@ -1418,10 +1818,15 @@
 		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 	}
 
-	/* Header */
+	/* Header - Simplified */
 	.creator-header {
 		text-align: center;
-		margin-bottom: 2rem;
+		margin-bottom: 3rem;
+	}
+
+	.header-content {
+		max-width: 600px;
+		margin: 0 auto;
 	}
 
 	.creator-title {
@@ -1429,22 +1834,60 @@
 		align-items: center;
 		justify-content: center;
 		gap: 0.75rem;
-		font-size: 2rem;
-		font-weight: 600;
+		font-size: 2.5rem;
+		font-weight: 700;
 		color: #1f2937;
-		margin: 0 0 0.5rem 0;
+		margin: 0 0 1rem 0;
 	}
 
 	.title-icon {
-		width: 2rem;
-		height: 2rem;
+		width: 2.5rem;
+		height: 2.5rem;
 		color: #D5BA7F;
 	}
 
 	.creator-subtitle {
 		color: #6b7280;
-		font-size: 1.1rem;
-		margin: 0;
+		font-size: 1.2rem;
+		margin: 0 0 1.5rem 0;
+		line-height: 1.5;
+	}
+
+	/* Status Indicator - Single, Clear */
+	.status-indicator {
+		margin-top: 1rem;
+	}
+
+	.status-badge {
+		display: inline-block;
+		padding: 0.5rem 1rem;
+		border-radius: 20px;
+		font-size: 0.9rem;
+		font-weight: 500;
+	}
+
+	.status-badge.published {
+		background: rgba(5, 150, 105, 0.1);
+		color: #059669;
+		border: 1px solid rgba(5, 150, 105, 0.2);
+	}
+
+	.status-badge.saving {
+		background: rgba(59, 130, 246, 0.1);
+		color: #3b82f6;
+		border: 1px solid rgba(59, 130, 246, 0.2);
+	}
+
+	.status-badge.saved {
+		background: rgba(34, 197, 94, 0.1);
+		color: #22c55e;
+		border: 1px solid rgba(34, 197, 94, 0.2);
+	}
+
+	.status-badge.draft {
+		background: rgba(156, 163, 175, 0.1);
+		color: #6b7280;
+		border: 1px solid rgba(156, 163, 175, 0.2);
 	}
 
 	.skip-loading-btn {
@@ -1631,57 +2074,210 @@
 		background: #2563eb;
 	}
 
-	/* Upload Area */
-	.upload-area {
-		border: 2px dashed #d1d5db;
-		border-radius: 12px;
-		padding: 3rem 2rem;
-		text-align: center;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		background: #f9fafb;
-		pointer-events: auto;
-		position: relative;
-		z-index: 1;
-		user-select: none;
+	/* Workflow Steps - Progressive Disclosure */
+	.workflow-step {
+		background: white;
+		border: 2px solid #e5e7eb;
+		border-radius: 16px;
+		padding: 2rem;
+		margin-bottom: 2rem;
+		transition: all 0.3s ease;
 	}
 
-	.upload-area:hover,
-	.upload-area.drag-over {
+	.workflow-step.active {
 		border-color: #D5BA7F;
-		background: #fffbf5;
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(213, 186, 127, 0.2);
+		box-shadow: 0 4px 20px rgba(213, 186, 127, 0.1);
+	}
+
+	.step-header {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		margin-bottom: 1.5rem;
+		justify-content: space-between;
+		flex-wrap: wrap;
+	}
+
+	.step-number {
+		width: 3rem;
+		height: 3rem;
+		background: #D5BA7F;
+		color: white;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 1.25rem;
+		font-weight: 700;
+		flex-shrink: 0;
+	}
+
+	.step-title {
+		font-size: 1.5rem;
+		font-weight: 600;
+		color: #1f2937;
+		margin: 0;
+		flex: 1;
+	}
+
+	.step-actions {
+		display: flex;
+		gap: 0.75rem;
+	}
+
+	/* Primary Upload Area - Fitts's Law Applied */
+	.primary-upload-area {
+		border: 3px dashed #d1d5db;
+		border-radius: 20px;
+		padding: 4rem 2rem;
+		text-align: center;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+		position: relative;
+		min-height: 300px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.primary-upload-area:hover,
+	.primary-upload-area.drag-over {
+		border-color: #D5BA7F;
+		background: linear-gradient(135deg, #fffbf5 0%, #fef7e7 100%);
+		transform: translateY(-4px);
+		box-shadow: 0 8px 25px rgba(213, 186, 127, 0.25);
 	}
 
 	.upload-content {
-		max-width: 400px;
+		max-width: 500px;
 		margin: 0 auto;
 	}
 
 	.upload-icon {
-		width: 3rem;
-		height: 3rem;
-		color: #9ca3af;
-		margin-bottom: 1rem;
+		width: 4rem;
+		height: 4rem;
+		color: #D5BA7F;
+		margin-bottom: 1.5rem;
 	}
 
 	.upload-title {
-		font-size: 1.5rem;
+		font-size: 1.75rem;
 		font-weight: 600;
-		color: #374151;
-		margin: 0 0 0.5rem 0;
+		color: #1f2937;
+		margin: 0 0 1rem 0;
 	}
 
 	.upload-text {
 		color: #6b7280;
-		margin: 0 0 1rem 0;
+		font-size: 1.1rem;
+		margin: 0 0 2rem 0;
+		line-height: 1.5;
+	}
+
+	.upload-button {
+		margin: 2rem 0;
 	}
 
 	.upload-limits {
 		color: #9ca3af;
 		font-size: 0.9rem;
 		margin: 0;
+	}
+
+	/* Button Styles - Fitts's Law Applied */
+	.primary-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.75rem;
+		background: #D5BA7F;
+		color: white;
+		border: none;
+		border-radius: 12px;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		text-decoration: none;
+		font-family: inherit;
+		font-size: 1rem;
+		padding: 1rem 2rem;
+	}
+
+	.primary-btn.large {
+		padding: 1.25rem 2.5rem;
+		font-size: 1.1rem;
+	}
+
+	.primary-btn.extra-large {
+		padding: 1.5rem 3rem;
+		font-size: 1.25rem;
+		border-radius: 16px;
+	}
+
+	.primary-btn:hover:not(:disabled) {
+		background: #c4a96e;
+		transform: translateY(-2px);
+		box-shadow: 0 8px 20px rgba(213, 186, 127, 0.3);
+	}
+
+	.primary-btn:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+		transform: none;
+	}
+
+	.secondary-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		background: white;
+		color: #6b7280;
+		border: 2px solid #e5e7eb;
+		border-radius: 8px;
+		padding: 0.75rem 1.5rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		font-size: 0.9rem;
+	}
+
+	.secondary-btn:hover {
+		border-color: #D5BA7F;
+		color: #92400e;
+		background: #fffbf5;
+		transform: translateY(-1px);
+	}
+
+	.btn-icon {
+		width: 1.25rem;
+		height: 1.25rem;
+	}
+
+	.danger-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		background: #dc2626;
+		color: white;
+		border: 2px solid #dc2626;
+		border-radius: 8px;
+		padding: 0.75rem 1.5rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		font-size: 0.9rem;
+	}
+
+	.danger-btn:hover:not(:disabled) {
+		background: #b91c1c;
+		border-color: #b91c1c;
+		transform: translateY(-1px);
+	}
+
+	.danger-btn:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+		transform: none;
 	}
 
 	/* Add More Photos Section */
@@ -1898,13 +2494,37 @@
 		object-fit: cover;
 	}
 
+	/* Photo Management - Miller's Rule Applied */
+	.photo-grid-container {
+		margin: 1.5rem 0;
+	}
+
+	.photo-chunk {
+		margin-bottom: 2rem;
+	}
+
+	.chunk-header {
+		margin-bottom: 1rem;
+		padding: 0.5rem 1rem;
+		background: #f3f4f6;
+		border-radius: 8px;
+		border-left: 4px solid #D5BA7F;
+	}
+
+	.chunk-label {
+		font-size: 0.9rem;
+		font-weight: 600;
+		color: #374151;
+	}
+
+	/* Photo Cards with Larger Remove Buttons */
 	.remove-btn {
 		position: absolute;
 		top: 0.5rem;
 		right: 0.5rem;
-		width: 2rem;
-		height: 2rem;
-		background: rgba(0, 0, 0, 0.7);
+		width: 2.5rem;
+		height: 2.5rem;
+		background: rgba(0, 0, 0, 0.8);
 		border: none;
 		border-radius: 50%;
 		color: white;
@@ -1913,23 +2533,243 @@
 		align-items: center;
 		justify-content: center;
 		transition: all 0.2s ease;
+		z-index: 10;
+	}
+
+	.remove-btn.large {
+		width: 3rem;
+		height: 3rem;
+		top: 0.75rem;
+		right: 0.75rem;
 	}
 
 	.remove-btn:hover {
 		background: rgba(239, 68, 68, 0.9);
+		transform: scale(1.1);
 	}
 
 	.remove-icon {
-		width: 1rem;
+		width: 1.25rem;
+		height: 1.25rem;
+	}
 
-.remove-btn:hover {
-	background: rgba(239, 68, 68, 0.9);
-}
+	/* Settings Section - Simplified */
+	.settings-section {
+		background: #f8fafc;
+		border: 1px solid #e2e8f0;
+		border-radius: 12px;
+		padding: 2rem;
+		margin-bottom: 2rem;
+	}
 
-.remove-icon {
-	width: 1rem;
-	height: 1rem;
-}
+	.setting-group {
+		max-width: 400px;
+		margin: 0 auto;
+	}
+
+	.setting-label {
+		display: block;
+		font-size: 1.1rem;
+		font-weight: 500;
+		color: #374151;
+		margin-bottom: 1rem;
+		text-align: center;
+	}
+
+	.range-slider {
+		width: 100%;
+		height: 8px;
+		border-radius: 4px;
+		background: #e5e7eb;
+		outline: none;
+		-webkit-appearance: none;
+		margin: 1rem 0;
+	}
+
+	.range-slider::-webkit-slider-thumb {
+		-webkit-appearance: none;
+		appearance: none;
+		width: 24px;
+		height: 24px;
+		border-radius: 50%;
+		background: #D5BA7F;
+		cursor: pointer;
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+	}
+
+	.range-slider::-moz-range-thumb {
+		width: 24px;
+		height: 24px;
+		border-radius: 50%;
+		background: #D5BA7F;
+		cursor: pointer;
+		border: none;
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+	}
+
+	/* Action Sections */
+	.action-section {
+		text-align: center;
+		padding: 2rem;
+		background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+		border-radius: 16px;
+	}
+
+	.action-help {
+		color: #6b7280;
+		font-size: 1rem;
+		margin: 1rem 0 0 0;
+		font-style: italic;
+	}
+
+	.final-actions {
+		display: flex;
+		gap: 1.5rem;
+		justify-content: center;
+		align-items: center;
+		flex-wrap: wrap;
+		margin-top: 2rem;
+	}
+
+	.draft-actions {
+		display: flex;
+		gap: 1rem;
+		justify-content: center;
+		margin-top: 1rem;
+		padding-top: 1rem;
+		border-top: 1px solid #e5e7eb;
+	}
+
+	/* Step Status */
+	.step-status {
+		font-size: 0.9rem;
+		font-weight: 500;
+		padding: 0.25rem 0.75rem;
+		border-radius: 12px;
+	}
+
+	.step-status.completed {
+		color: #059669;
+		background: rgba(5, 150, 105, 0.1);
+		border: 1px solid rgba(5, 150, 105, 0.2);
+	}
+
+	.step-status.unpublished {
+		color: #d97706;
+		background: rgba(217, 119, 6, 0.1);
+		border: 1px solid rgba(217, 119, 6, 0.2);
+	}
+
+	.step-status.draft {
+		color: #7c3aed;
+		background: rgba(124, 58, 237, 0.1);
+		border: 1px solid rgba(124, 58, 237, 0.2);
+	}
+
+	/* Upload Summary */
+	.upload-summary {
+		background: #f0fdf4;
+		border: 2px solid #bbf7d0;
+		border-radius: 12px;
+		padding: 1.5rem;
+	}
+
+	.summary-content {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 1rem;
+		flex-wrap: wrap;
+	}
+
+	.summary-icon {
+		width: 1.5rem;
+		height: 1.5rem;
+		color: #059669;
+	}
+
+	.summary-text {
+		font-size: 1.1rem;
+		font-weight: 500;
+		color: #065f46;
+	}
+
+	/* Published Slideshow Section */
+	.published-slideshow-section {
+		background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+		border: 2px solid #f59e0b;
+		border-radius: 16px;
+		padding: 2rem;
+		margin-top: 2rem;
+	}
+
+	.published-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1.5rem;
+		flex-wrap: wrap;
+		gap: 1rem;
+	}
+
+	.published-title {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		font-size: 1.5rem;
+		font-weight: 600;
+		color: #92400e;
+		margin: 0;
+	}
+
+	.published-icon {
+		font-size: 1.5rem;
+	}
+
+	.published-actions {
+		display: flex;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+	}
+
+	.published-video-container {
+		background: white;
+		border-radius: 12px;
+		padding: 1rem;
+		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	}
+
+	/* Read-only Settings */
+	.settings-section.readonly {
+		background: #f8fafc;
+		border: 2px solid #e2e8f0;
+	}
+
+	.setting-display {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 0.75rem 0;
+		border-bottom: 1px solid #e5e7eb;
+	}
+
+	.setting-display:last-child {
+		border-bottom: none;
+	}
+
+	.setting-display .setting-label {
+		font-weight: 500;
+		color: #374151;
+		margin: 0;
+	}
+
+	.setting-value {
+		font-weight: 600;
+		color: #1f2937;
+		background: #f3f4f6;
+		padding: 0.25rem 0.75rem;
+		border-radius: 6px;
+		font-size: 0.9rem;
 	}
 
 	.video-preview {

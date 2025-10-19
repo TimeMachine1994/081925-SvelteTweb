@@ -1,0 +1,12 @@
+{
+  "name": "tributestream-migration-scripts",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Migration scripts for TributeStream Firebase data",
+  "scripts": {
+    "migrate-memorials": "node migrate-memorials.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.0.0"
+  }
+}
