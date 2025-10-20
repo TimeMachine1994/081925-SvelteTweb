@@ -141,63 +141,193 @@ export async function sendEmailChangeConfirmation(data: EmailChangeConfirmationD
 		return;
 	}
 
-	const htmlContent = `
-		<div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
-			<div style="background: linear-gradient(135deg, #D5BA7F 0%, #B8A082 100%); padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
-				<h1 style="color: white; margin: 0; font-size: 28px;">Confirm Your Email Change</h1>
-			</div>
-			<div style="background: white; padding: 30px; border-radius: 0 0 8px 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-				<p style="font-size: 16px; line-height: 1.6;">Hello ${data.userName},</p>
-				<p style="font-size: 16px; line-height: 1.6;">You requested to change your email address on your TributeStream account.</p>
-				<p style="font-size: 16px; line-height: 1.6;">Please click the button below to confirm this change:</p>
-				
-				<div style="text-align: center; margin: 30px 0;">
-					<a href="${data.confirmationUrl}" 
-						 style="background: linear-gradient(135deg, #D5BA7F 0%, #B8A082 100%); 
-								color: white; 
-								padding: 15px 30px; 
-								text-decoration: none; 
-								border-radius: 8px; 
-								font-weight: bold; 
-								font-size: 16px;
-								display: inline-block;
-								box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-						Confirm Email Change
-					</a>
-				</div>
-				
-				<div style="background: #f8f9fa; padding: 20px; border-radius: 6px; margin: 20px 0;">
-					<p style="margin: 0; font-size: 14px; color: #666;">
-						<strong>Important:</strong> This link will expire in 24 hours. If you didn't request this change, please ignore this email and your account will remain unchanged.
-					</p>
-				</div>
-				
-				<p style="font-size: 14px; color: #666; margin-top: 30px;">
-					If the button doesn't work, you can copy and paste this link into your browser:<br>
-					<a href="${data.confirmationUrl}" style="color: #D5BA7F; word-break: break-all;">${data.confirmationUrl}</a>
-				</p>
-				
-				<hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
-				<p style="font-size: 14px; color: #666;">
-					Sincerely,<br>
-					The TributeStream Team
-				</p>
-			</div>
-		</div>
-	`;
-
 	const msg = {
 		to: data.to,
 		from: FROM_EMAIL,
-		subject: 'Confirm Your Email Change - TributeStream',
-		html: htmlContent
+		templateId: SENDGRID_TEMPLATES.EMAIL_CHANGE_CONFIRMATION,
+		dynamicTemplateData: {
+			userName: data.userName,
+			confirmationUrl: data.confirmationUrl,
+			currentYear: new Date().getFullYear()
+		}
 	};
 
 	try {
 		await sgMail.send(msg);
-		console.log('✅ Email change confirmation sent to:', data.to);
+		console.log('✅ Email change confirmation sent via dynamic template to:', data.to);
 	} catch (error) {
 		console.error('💥 Exception sending email change confirmation:', error);
 		throw error;
 	}
+}
+
+/**
+ * Send payment confirmation email using dynamic template
+ */
+export async function sendPaymentConfirmationEmail(data: PaymentEmailData) {
+	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key') {
+		console.warn('⚠️ SendGrid client not initialized. Skipping payment confirmation.');
+		return;
+	}
+
+	const msg = {
+		to: data.customerEmail,
+		from: FROM_EMAIL,
+		templateId: SENDGRID_TEMPLATES.PAYMENT_CONFIRMATION,
+		dynamicTemplateData: {
+			lovedOneName: data.lovedOneName,
+			paymentIntentId: data.paymentIntentId,
+			amount: data.amount?.toFixed(2) || '0.00',
+			paymentDate: data.paymentDate?.toLocaleDateString() || new Date().toLocaleDateString(),
+			customerEmail: data.customerEmail,
+			memorialId: data.memorialId,
+			currentYear: new Date().getFullYear()
+		}
+	};
+
+	try {
+		await sgMail.send(msg);
+		console.log('✅ Payment confirmation email sent via dynamic template');
+	} catch (error) {
+		console.error('💥 Exception sending payment confirmation email:', error);
+		throw error;
+	}
+}
+
+/**
+ * Send payment action required email using dynamic template
+ */
+export async function sendPaymentActionRequiredEmail(data: PaymentEmailData) {
+	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key') {
+		console.warn('⚠️ SendGrid client not initialized. Skipping payment action required.');
+		return;
+	}
+
+	const baseUrl = process.env.PUBLIC_BASE_URL || 'https://tributestream.com';
+	const fallbackUrl = `${baseUrl}/schedule/${data.memorialId}`;
+
+	const msg = {
+		to: data.customerEmail,
+		from: FROM_EMAIL,
+		templateId: SENDGRID_TEMPLATES.PAYMENT_ACTION_REQUIRED,
+		dynamicTemplateData: {
+			lovedOneName: data.lovedOneName,
+			paymentIntentId: data.paymentIntentId,
+			actionDate: new Date().toLocaleDateString(),
+			nextActionUrl: data.nextActionUrl || fallbackUrl,
+			fallbackUrl: fallbackUrl,
+			currentYear: new Date().getFullYear()
+		}
+	};
+
+	try {
+		await sgMail.send(msg);
+		console.log('✅ Payment action required email sent via dynamic template');
+	} catch (error) {
+		console.error('💥 Exception sending payment action required email:', error);
+		throw error;
+	}
+}
+
+/**
+ * Send payment failure email using dynamic template
+ */
+export async function sendPaymentFailureEmail(data: PaymentEmailData) {
+	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key') {
+		console.warn('⚠️ SendGrid client not initialized. Skipping payment failure.');
+		return;
+	}
+
+	const baseUrl = process.env.PUBLIC_BASE_URL || 'https://tributestream.com';
+	const retryUrl = `${baseUrl}/schedule/${data.memorialId}`;
+
+	const msg = {
+		to: data.customerEmail,
+		from: FROM_EMAIL,
+		templateId: SENDGRID_TEMPLATES.PAYMENT_FAILURE,
+		dynamicTemplateData: {
+			lovedOneName: data.lovedOneName,
+			paymentIntentId: data.paymentIntentId,
+			failureReason: data.failureReason || 'Payment processing error',
+			failureDate: new Date().toLocaleDateString(),
+			retryUrl: retryUrl,
+			currentYear: new Date().getFullYear()
+		}
+	};
+
+	try {
+		await sgMail.send(msg);
+		console.log('✅ Payment failure email sent via dynamic template');
+	} catch (error) {
+		console.error('💥 Exception sending payment failure email:', error);
+		throw error;
+	}
+}
+
+/**
+ * Send contact form emails using dynamic templates
+ */
+export async function sendContactFormEmails(data: ContactFormData) {
+	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key') {
+		console.warn('⚠️ SendGrid client not initialized. Skipping contact form emails.');
+		return;
+	}
+
+	const timestamp = data.timestamp || new Date();
+
+	// Support team notification
+	const supportMsg = {
+		to: 'austinbryanfilm@gmail.com', // Replace with your support email
+		from: FROM_EMAIL,
+		templateId: SENDGRID_TEMPLATES.CONTACT_FORM_SUPPORT,
+		dynamicTemplateData: {
+			name: data.name,
+			email: data.email,
+			subject: data.subject,
+			message: data.message,
+			submittedAt: timestamp.toLocaleString(),
+			currentYear: new Date().getFullYear()
+		}
+	};
+
+	// Customer confirmation
+	const confirmationMsg = {
+		to: data.email,
+		from: FROM_EMAIL,
+		templateId: SENDGRID_TEMPLATES.CONTACT_FORM_CONFIRMATION,
+		dynamicTemplateData: {
+			name: data.name,
+			subject: data.subject,
+			message: data.message,
+			submittedAt: timestamp.toLocaleString(),
+			currentYear: new Date().getFullYear()
+		}
+	};
+
+	try {
+		await Promise.all([
+			sgMail.send(supportMsg),
+			sgMail.send(confirmationMsg)
+		]);
+		console.log('✅ Contact form emails sent via dynamic templates');
+	} catch (error) {
+		console.error('💥 Exception sending contact form emails:', error);
+		throw error;
+	}
+}
+
+/**
+ * Utility function to test if dynamic templates are configured
+ */
+export function isDynamicTemplatesConfigured(): boolean {
+	return Object.values(SENDGRID_TEMPLATES).every(templateId => 
+		templateId && !templateId.startsWith('d-placeholder')
+	);
+}
+
+/**
+ * Get all configured template IDs for debugging
+ */
+export function getTemplateIds() {
+	return SENDGRID_TEMPLATES;
 }
