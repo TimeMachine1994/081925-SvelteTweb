@@ -88,7 +88,7 @@
 	<!-- Hero Section -->
 	<section class="{theme.hero.wrap}">
 		<div class="{theme.hero.decoration}" aria-hidden="true"></div>
-		<div class="relative z-10 mx-auto max-w-4xl px-6 text-center">
+		<div class="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 text-center">
 			<h1 class="text-4xl md:text-5xl font-bold {theme.hero.heading} mb-6" style="font-family: {theme.font.heading}">
 				Get in Touch
 			</h1>
@@ -98,7 +98,7 @@
 		</div>
 	</section>
 
-	<div class="mx-auto max-w-6xl px-6 pb-16">
+	<div class="mx-auto max-w-6xl px-4 sm:px-6 pb-16">
 		<div class="grid gap-12 lg:grid-cols-2">
 			<!-- Contact Form -->
 			<Card title="Send us a Message" theme="minimal" class="p-8">
@@ -259,3 +259,18 @@
 		</div>
 	</div>
 </div>
+
+<style>
+	/* Override layout padding for contact page to prevent mobile layout issues */
+	:global(.main-content) {
+		padding: 0 !important;
+	}
+	
+	/* Ensure proper mobile spacing */
+	@media (max-width: 640px) {
+		:global(.main-content) {
+			padding: 0 !important;
+			margin: 0 !important;
+		}
+	}
+</style>
