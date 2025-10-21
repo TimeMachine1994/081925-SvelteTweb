@@ -34,12 +34,16 @@ export const load = async ({ locals }: any) => {
 		console.log('✅ [ADMIN LOAD] Admin authentication verified for:', locals.user.email);
 
 		// === DATA LOADING ===
-		// Load only essential data for admin operations
-		console.log('📊 [ADMIN LOAD] Loading admin dashboard data...');
+		// Load comprehensive data for admin operations
+		console.log('📊 [ADMIN LOAD] Loading comprehensive admin dashboard data...');
 
-		const [recentMemorialsSnap] = await Promise.all([
-			// Load recent memorials for oversight (last 30 days)
-			adminDb.collection('memorials').orderBy('createdAt', 'desc').limit(20).get()
+		const [recentMemorialsSnap, allUsersSnap, funeralDirectorsSnap] = await Promise.all([
+			// Load recent memorials for oversight
+			adminDb.collection('memorials').orderBy('createdAt', 'desc').limit(50).get(),
+			// Load all users for user management
+			adminDb.collection('users').orderBy('createdAt', 'desc').limit(100).get(),
+			// Load funeral directors
+			adminDb.collection('funeral_directors').get()
 		]);
 
 		// === PROCESS RECENT MEMORIALS ===
@@ -53,13 +57,48 @@ export const load = async ({ locals }: any) => {
 				lovedOneName: data.lovedOneName || 'Unknown',
 				fullSlug: data.fullSlug,
 				creatorEmail: data.creatorEmail || '',
+				creatorName: data.creatorName || '',
 				createdAt: data.createdAt?.toDate?.()?.toISOString() || null,
+				isPublic: data.isPublic !== false,
 				// Payment status from calculatorConfig (following established pattern)
 				paymentStatus: data.calculatorConfig?.status || 'draft',
 				// Check if has active livestream
 				hasLivestream: !!data.livestream?.isActive
 			};
 		});
+
+		// === PROCESS USERS ===
+		const allUsers = allUsersSnap.docs.map((doc) => {
+			const data = doc.data();
+			return {
+				uid: doc.id,
+				email: data.email || '',
+				displayName: data.displayName || data.name || '',
+				role: data.role || 'owner',
+				createdAt: data.createdAt?.toDate?.()?.toISOString() || null,
+				lastLoginAt: data.lastLoginAt?.toDate?.()?.toISOString() || null
+			};
+		});
+
+		// === PROCESS FUNERAL DIRECTORS ===
+		const allFuneralDirectors = funeralDirectorsSnap.docs.map((doc) => {
+			const data = doc.data();
+			return {
+				id: doc.id,
+				companyName: data.companyName || '',
+				contactPerson: data.contactPerson || '',
+				email: data.email || '',
+				phone: data.phone || '',
+				licenseNumber: data.licenseNumber || '',
+				businessType: data.businessType || '',
+				status: data.status || 'approved', // V1: All auto-approved
+				createdAt: data.createdAt?.toDate?.()?.toISOString() || null
+			};
+		});
+
+		// Separate pending and approved (though all are approved in V1)
+		const pendingFuneralDirectors = allFuneralDirectors.filter(fd => fd.status === 'pending');
+		const approvedFuneralDirectors = allFuneralDirectors.filter(fd => fd.status === 'approved');
 
 		// === CALCULATE STATS ===
 		// Get quick stats for dashboard overview
@@ -77,13 +116,18 @@ export const load = async ({ locals }: any) => {
 
 		console.log('✅ [ADMIN LOAD] Dashboard data loaded successfully:', {
 			recentMemorials: recentMemorials.length,
+			allUsers: allUsers.length,
+			pendingFuneralDirectors: pendingFuneralDirectors.length,
+			approvedFuneralDirectors: approvedFuneralDirectors.length,
 			stats
 		});
 
 		return {
 			// Core admin data
-			pendingFuneralDirectors: [], // Obsolete, return empty array
 			recentMemorials,
+			allUsers,
+			pendingFuneralDirectors,
+			approvedFuneralDirectors,
 			stats,
 			// User context
 			adminUser: {
@@ -100,8 +144,10 @@ export const load = async ({ locals }: any) => {
 
 		// Return safe fallback data to prevent 500 errors
 		return {
-			pendingFuneralDirectors: [],
 			recentMemorials: [],
+			allUsers: [],
+			pendingFuneralDirectors: [],
+			approvedFuneralDirectors: [],
 			stats: {
 				totalMemorials: 0,
 				totalFuneralDirectors: 0,

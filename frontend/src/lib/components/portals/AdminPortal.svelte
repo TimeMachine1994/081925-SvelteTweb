@@ -3,6 +3,7 @@
 	import type { Memorial } from '$lib/types/memorial';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { invalidateAll } from '$app/navigation';
 	import { Button } from '$lib/ui';
 
 	// Props from parent component
@@ -20,7 +21,7 @@
 
 	// Active tab state
 	let activeTab = $state<
-		'overview' | 'funeral-directors' | 'memorials' | 'create-memorial' | 'audit-logs'
+		'overview' | 'funeral-directors' | 'memorials' | 'memorial-owners' | 'create-memorial' | 'audit-logs'
 	>('overview');
 
 	// Memorial creation form state
@@ -272,6 +273,15 @@
 			💝 Memorials
 		</Button>
 		<Button
+			onclick={() => (activeTab = 'memorial-owners')}
+			variant={activeTab === 'memorial-owners' ? 'role' : 'ghost'}
+			role={activeTab === 'memorial-owners' ? 'admin' : undefined}
+			size="md"
+			rounded="lg"
+		>
+			👥 Memorial Owners
+		</Button>
+		<Button
 			onclick={() => (activeTab = 'create-memorial')}
 			variant={activeTab === 'create-memorial' ? 'role' : 'ghost'}
 			role={activeTab === 'create-memorial' ? 'admin' : undefined}
@@ -469,6 +479,121 @@
 							{/if}
 						</tbody>
 					</table>
+				</div>
+			</div>
+		</div>
+	{/if}
+
+	<!-- Memorial Owners Tab -->
+	{#if activeTab === 'memorial-owners'}
+		<div class="space-y-6">
+			<h2 class="mb-4 text-2xl font-bold text-white">Memorial Owners</h2>
+			<p class="text-white/70 mb-6">Manage families and individuals who own memorial pages</p>
+
+			<div class="overflow-hidden rounded-xl border border-white/10 bg-white/5">
+				<div class="overflow-x-auto">
+					<table class="w-full">
+						<thead class="bg-white/10">
+							<tr>
+								<th class="px-4 py-3 text-left font-semibold text-white">Owner Name</th>
+								<th class="px-4 py-3 text-left font-semibold text-white">Email</th>
+								<th class="px-4 py-3 text-left font-semibold text-white">Memorials</th>
+								<th class="px-4 py-3 text-left font-semibold text-white">Joined</th>
+								<th class="px-4 py-3 text-left font-semibold text-white">Actions</th>
+							</tr>
+						</thead>
+						<tbody>
+							{#if allUsers && allUsers.length > 0}
+								{#each allUsers.filter(user => user.role === 'owner' || !user.role) as owner}
+									{@const ownerMemorials = memorials.filter(m => m.creatorEmail === owner.email)}
+									<tr class="border-b border-white/10 hover:bg-white/5">
+										<td class="px-4 py-3 text-white">
+											{owner.displayName || 'Unknown'}
+										</td>
+										<td class="px-4 py-3 text-sm text-white/70">
+											{owner.email}
+										</td>
+										<td class="px-4 py-3">
+											<div class="flex flex-col gap-1">
+												<span class="text-white font-medium">{ownerMemorials.length} memorial{ownerMemorials.length !== 1 ? 's' : ''}</span>
+												{#if ownerMemorials.length > 0}
+													<div class="text-xs text-white/60">
+														{ownerMemorials.slice(0, 2).map(m => m.lovedOneName).join(', ')}
+														{#if ownerMemorials.length > 2}
+															<span class="text-white/40">+{ownerMemorials.length - 2} more</span>
+														{/if}
+													</div>
+												{/if}
+											</div>
+										</td>
+										<td class="px-4 py-3 text-sm text-white/70">
+											{owner.createdAt ? new Date(owner.createdAt).toLocaleDateString() : 'Unknown'}
+										</td>
+										<td class="px-4 py-3">
+											<div class="flex gap-2">
+												<button
+													class="text-sm text-blue-400 hover:text-blue-300"
+													onclick={() => {
+														// Navigate to user's first memorial if they have one
+														if (ownerMemorials.length > 0) {
+															window.open(`/${ownerMemorials[0].fullSlug}`, '_blank');
+														}
+													}}
+													disabled={ownerMemorials.length === 0}
+												>
+													View Memorial{ownerMemorials.length > 1 ? 's' : ''}
+												</button>
+												<button
+													class="text-sm text-green-400 hover:text-green-300"
+													onclick={() => {
+														// Copy email to clipboard
+														navigator.clipboard.writeText(owner.email);
+														alert('Email copied to clipboard!');
+													}}
+												>
+													Contact
+												</button>
+											</div>
+										</td>
+									</tr>
+								{/each}
+							{:else}
+								<tr>
+									<td colspan="5" class="px-4 py-8 text-center text-white/70">No memorial owners found</td>
+								</tr>
+							{/if}
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+			<!-- Memorial Owners Summary Stats -->
+			<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+				<div class="rounded-xl border border-white/10 bg-white/5 p-6">
+					<h3 class="text-lg font-semibold text-white mb-2">Total Owners</h3>
+					<p class="text-3xl font-bold text-blue-400">
+						{allUsers.filter(user => user.role === 'owner' || !user.role).length}
+					</p>
+					<p class="text-sm text-white/60 mt-1">Families & individuals</p>
+				</div>
+				
+				<div class="rounded-xl border border-white/10 bg-white/5 p-6">
+					<h3 class="text-lg font-semibold text-white mb-2">Active Owners</h3>
+					<p class="text-3xl font-bold text-green-400">
+						{allUsers.filter(user => (user.role === 'owner' || !user.role) && 
+							memorials.some(m => m.creatorEmail === user.email)).length}
+					</p>
+					<p class="text-sm text-white/60 mt-1">With memorials</p>
+				</div>
+				
+				<div class="rounded-xl border border-white/10 bg-white/5 p-6">
+					<h3 class="text-lg font-semibold text-white mb-2">Avg. Memorials</h3>
+					<p class="text-3xl font-bold text-purple-400">
+						{allUsers.filter(user => user.role === 'owner' || !user.role).length > 0 
+							? (memorials.length / allUsers.filter(user => user.role === 'owner' || !user.role).length).toFixed(1)
+							: '0.0'}
+					</p>
+					<p class="text-sm text-white/60 mt-1">Per owner</p>
 				</div>
 			</div>
 		</div>
