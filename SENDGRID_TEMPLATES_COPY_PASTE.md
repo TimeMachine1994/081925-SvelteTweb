@@ -1,5 +1,21 @@
 # Tributestream SendGrid Templates - Copy & Paste Ready
 
+## ⚠️ Important Setup Notes
+
+**Click Tracking**: These templates are designed to work with **click tracking disabled** in your SendGrid email sending code. This prevents the `url476.` prefix issue and maintains clean URLs.
+
+**Available Variables**: Each template uses specific variables passed from your application:
+- `{{memorialUrl}}` - Full clickable URL (e.g., `https://tributestream.com/memorial-slug`)
+- `{{memorialSlug}}` - Clean slug for display (e.g., `memorial-slug`)
+- `{{currentYear}}` - Current year for copyright
+- Template-specific variables listed with each template
+
+**Support Contact Info**: All templates now use the correct support contact information:
+- Email: support@tributestream.com
+- Phone: (800) 874-2883
+
+---
+
 ## Template 1:  
 
 **SendGrid Template Name**: Enhanced Registration - Tributestream  
@@ -26,7 +42,7 @@
                 <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #D5BA7F;">
                     <h3 style="color: #1a1a1a; margin-top: 0;">Your Memorial Details</h3>
                     <p style="margin: 5px 0;"><strong>Memorial URL:</strong></p>
-                    <p style="margin: 5px 0;"><a href="{{memorialUrl}}" style="color: #D5BA7F; text-decoration: none;">{{memorialUrl}}</a></p>
+                    <p style="margin: 5px 0; color: #333; font-family: monospace; background: #fff; padding: 8px; border-radius: 4px;">https://tributestream.com/{{memorialSlug}}</p>
                     <h4 style="color: #1a1a1a; margin: 20px 0 10px 0;">Login Credentials</h4>
                     <p style="margin: 5px 0;"><strong>Email:</strong> {{email}}</p>
                     <p style="margin: 5px 0;"><strong>Temporary Password:</strong> {{password}}</p>
@@ -34,7 +50,7 @@
                 <p style="color: #666; line-height: 1.6; font-size: 14px;"><strong>Important:</strong> We recommend changing your password after you log in for the first time.</p>
                 <p style="color: #333; line-height: 1.6;">From your portal, you can invite family and friends to contribute photos and memories.</p>
                 <div style="text-align: center; margin: 30px 0;">
-                    <a href="{{memorialUrl}}" style="background: linear-gradient(135deg, #D5BA7F 0%, #E5CA8F 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">View Memorial</a>
+                    <a href="{{memorialUrl}}" style="background: linear-gradient(135deg, #D5BA7F 0%, #E5CA8F 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">View Memorial</a>
                 </div>
             </div>
             <div style="background: #f8f9fa; padding: 20px; text-align: center; color: #666; font-size: 14px;">
@@ -211,7 +227,7 @@
                     <li>We'll send additional information about your service setup closer to the date</li>
                 </ul>
             </div>
-            <p style="color: #333; line-height: 1.6;">If you have any questions, please don't hesitate to contact our support team at support@tributestream.com or (555) 123-4567.</p>
+            <p style="color: #333; line-height: 1.6;">If you have any questions, please don't hesitate to contact our support team at <a href="mailto:support@tributestream.com" style="color: #D5BA7F; text-decoration: none;">support@tributestream.com</a> or <a href="tel:+18008742883" style="color: #D5BA7F; text-decoration: none;">(800) 874-2883</a>.</p>
             <p style="color: #333; line-height: 1.6;">Thank you for trusting us with your memorial service.</p>
         </div>
         <div style="background: #f8f9fa; padding: 20px; text-align: center; color: #666; font-size: 14px;">
@@ -266,7 +282,7 @@
                 </div>
             </div>
             <p style="color: #dc2626; line-height: 1.6; font-weight: bold;">Important: Your memorial service reservation is held for 24 hours while you complete this verification. Please complete the process as soon as possible to secure your booking.</p>
-            <p style="color: #333; line-height: 1.6;">If you need assistance or have questions about this verification process, please contact our support team at support@tributestream.com or (555) 123-4567.</p>
+            <p style="color: #333; line-height: 1.6;">If you need assistance or have questions about this verification process, please contact our support team at <a href="mailto:support@tributestream.com" style="color: #D5BA7F; text-decoration: none;">support@tributestream.com</a> or <a href="tel:+18008742883" style="color: #D5BA7F; text-decoration: none;">(800) 874-2883</a>.</p>
         </div>
         <div style="background: #f8f9fa; padding: 20px; text-align: center; color: #666; font-size: 14px;">
             <p style="margin: 0;">Best regards,<br>The Tributestream Team</p>
@@ -320,7 +336,7 @@
                     <a href="{{retryUrl}}" style="background: #f59e0b; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Retry Payment</a>
                 </div>
             </div>
-            <p style="color: #333; line-height: 1.6;">If you continue to experience issues, please contact our support team at support@tributestream.com or (555) 123-4567. We're here to help ensure your memorial service goes smoothly.</p>
+            <p style="color: #333; line-height: 1.6;">If you continue to experience issues, please contact our support team at <a href="mailto:support@tributestream.com" style="color: #D5BA7F; text-decoration: none;">support@tributestream.com</a> or <a href="tel:+18008742883" style="color: #D5BA7F; text-decoration: none;">(800) 874-2883</a>. We're here to help ensure your memorial service goes smoothly.</p>
             <p style="color: #333; line-height: 1.6;">Thank you for your patience.</p>
         </div>
         <div style="background: #f8f9fa; padding: 20px; text-align: center; color: #666; font-size: 14px;">
@@ -406,7 +422,7 @@
                 <div style="background: white; padding: 15px; border-left: 4px solid #D5BA7F; margin: 10px 0; color: #333; line-height: 1.6; white-space: pre-wrap;">{{message}}</div>
                 <p style="color: #666; font-size: 14px; margin: 15px 0 0 0;"><strong>Submitted:</strong> {{submittedAt}}</p>
             </div>
-            <p style="color: #333; line-height: 1.6;">If you need immediate assistance, please call us at <strong>1-800-TRIBUTE</strong> (Monday - Friday, 9 AM - 6 PM EST).</p>
+            <p style="color: #333; line-height: 1.6;">If you need immediate assistance, please call us at <a href="tel:+18008742883" style="color: #D5BA7F; text-decoration: none; font-weight: bold;">(800) 874-2883</a> (Monday - Friday, 9 AM - 6 PM EST).</p>
             <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; border-left: 4px solid #ffc107;">
                 <p style="margin: 0; color: #856404;"><strong>Need to create a memorial?</strong><br><a href="https://tributestream.com/register/loved-one" style="color: #D5BA7F; text-decoration: none; font-weight: bold;">Start creating a memorial →</a></p>
             </div>

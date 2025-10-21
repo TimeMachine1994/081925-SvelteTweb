@@ -1,0 +1,2 @@
+1. Make Complete Payment button takes you to to the calculator page. 
+2. Fix "If you have any questions, please don't hesitate to contact our support team at support@tributestream.com or (555) 123-4567." in our Service Confirmtion Details Message

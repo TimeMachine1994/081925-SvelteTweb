@@ -338,7 +338,7 @@ export const actions: Actions = {
 				await sendEnhancedRegistrationEmail({
 					email: familyContactEmail,
 					lovedOneName,
-					memorialUrl: `https://yoursite.com/${fullSlug}`,
+					memorialUrl: `https://tributestream.com/${fullSlug}`,
 					ownerName: familyContactName,
 					password // Pass the generated password
 				});
