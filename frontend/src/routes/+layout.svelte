@@ -29,12 +29,15 @@
 <RecaptchaProvider>
 	<div class="app-container {theme.root}" style="font-family: {theme.font.body}">
 		<DevRoleSwitcher />
-		<Navbar />
+		{#if !$page.route.id?.startsWith('/live') && !$page.route.id?.startsWith('/legacy')}
+			<Navbar />
+		{/if}
 		<main
 			class="main-content"
 			class:full-width={$page.route.id?.includes('/app/calculator')}
 			class:homepage={$page.route.id === '/'}
 			class:memorial-page={$page.route.id === '/[fullSlug]'}
+			class:brand-page={$page.route.id?.startsWith('/live') || $page.route.id?.startsWith('/legacy')}
 		>
 			{@render children?.()}
 		</main>
@@ -67,6 +70,11 @@
 	}
 
 	.main-content.memorial-page {
+		max-width: none;
+		padding: 0;
+	}
+
+	.main-content.brand-page {
 		max-width: none;
 		padding: 0;
 	}
