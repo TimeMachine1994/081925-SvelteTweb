@@ -5,7 +5,7 @@ import { logAuditEvent } from '$lib/server/auditLogger';
 
 export const GET: RequestHandler = async ({ request, locals, getClientAddress }) => {
 	// Verify admin access
-	if (!locals.user?.admin) {
+	if (!locals.user?.isAdmin) {
 		await logAuditEvent({
 			uid: locals.user?.uid || 'anonymous',
 			action: 'api_access_denied',

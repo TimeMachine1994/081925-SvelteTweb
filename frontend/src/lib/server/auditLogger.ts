@@ -48,9 +48,21 @@ export type AuditAction =
  */
 export async function logAuditEvent(event: Omit<AuditEvent, 'id' | 'timestamp'>): Promise<void> {
 	try {
+		// Clean undefined values to prevent Firestore errors
+		const cleanEvent = Object.fromEntries(
+			Object.entries(event).map(([key, value]) => [
+				key,
+				value === undefined ? null : value
+			])
+		);
+
 		const auditEvent: AuditEvent = {
-			...event,
-			timestamp: new Date()
+			...cleanEvent,
+			timestamp: new Date(),
+			// Ensure required fields are never undefined
+			errorMessage: cleanEvent.errorMessage || null,
+			ipAddress: cleanEvent.ipAddress || null,
+			userAgent: cleanEvent.userAgent || null
 		};
 
 		// Log to console for development

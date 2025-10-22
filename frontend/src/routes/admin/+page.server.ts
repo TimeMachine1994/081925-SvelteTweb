@@ -22,10 +22,10 @@ export const load = async ({ locals }: any) => {
 			throw redirect(302, '/login');
 		}
 
-		if (!locals.user.admin && locals.user.role !== 'admin') {
+		if (!locals.user.isAdmin && locals.user.role !== 'admin') {
 			console.log('🚫 [ADMIN LOAD] User lacks admin privileges:', {
 				uid: locals.user.uid,
-				admin: locals.user.admin,
+				isAdmin: locals.user.isAdmin,
 				role: locals.user.role
 			});
 			throw redirect(302, '/profile');

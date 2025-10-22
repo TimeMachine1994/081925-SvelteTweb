@@ -1,11 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import {
-		loadStripe,
-		type Stripe,
-		type StripeElements,
-		type StripeCardElement
-	} from '@stripe/stripe-js';
+	import type { Stripe, StripeElements, StripeCardElement } from '@stripe/stripe-js';
+	import { getStripe } from '$lib/utils/stripeLoader';
 
 	let { amount, memorialId, lovedOneName } = $props<{
 		amount: number;
@@ -18,15 +14,26 @@
 	let processing = $state(false);
 	let error: string | null = $state(null);
 	let clientSecret: string | null = $state(null);
+	let stripeLoading = $state(true);
+	let stripeError: string | null = $state(null);
 
 	onMount(async () => {
 		console.log('StripeCheckout component mounted 💳');
-		const stripeKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
-		if (!stripeKey) {
-			console.error('Stripe public key not found!');
+		try {
+			// Lazy load Stripe when component mounts
+			stripe = await getStripe();
+			if (!stripe) {
+				stripeError = 'Failed to initialize Stripe. Please refresh and try again.';
+				stripeLoading = false;
+				return;
+			}
+			stripeLoading = false;
+		} catch (error) {
+			console.error('Error loading Stripe:', error);
+			stripeError = error instanceof Error ? error.message : 'Failed to load payment system';
+			stripeLoading = false;
 			return;
 		}
-		stripe = await loadStripe(stripeKey);
 
 		const res = await fetch('/app/calculator', {
 			method: 'POST',
@@ -70,12 +77,27 @@
 
 <div class="stripe-checkout">
 	<h3>Complete Your Payment</h3>
-	<div id="card-element"></div>
-	<button onclick={handleSubmit} disabled={processing || !stripe}>
-		{processing ? 'Processing...' : `Pay $${amount}`}
-	</button>
-	{#if error}
-		<p class="error">{error}</p>
+	
+	{#if stripeLoading}
+		<div class="loading-state">
+			<div class="spinner"></div>
+			<p>Loading payment system...</p>
+		</div>
+	{:else if stripeError}
+		<div class="error-state">
+			<p class="error">{stripeError}</p>
+			<button onclick={() => window.location.reload()} class="retry-btn">
+				Retry
+			</button>
+		</div>
+	{:else}
+		<div id="card-element"></div>
+		<button onclick={handleSubmit} disabled={processing || !stripe}>
+			{processing ? 'Processing...' : `Pay $${amount}`}
+		</button>
+		{#if error}
+			<p class="error">{error}</p>
+		{/if}
 	{/if}
 </div>
 
@@ -89,7 +111,51 @@
 	#card-element {
 		margin-bottom: 1rem;
 	}
+	
+	.loading-state {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 2rem;
+		text-align: center;
+	}
+	
+	.spinner {
+		width: 32px;
+		height: 32px;
+		border: 3px solid #f3f3f3;
+		border-top: 3px solid #f59e0b;
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+		margin-bottom: 1rem;
+	}
+	
+	@keyframes spin {
+		0% { transform: rotate(0deg); }
+		100% { transform: rotate(360deg); }
+	}
+	
+	.error-state {
+		text-align: center;
+		padding: 1rem;
+	}
+	
 	.error {
-		color: red;
+		color: #ef4444;
+		margin-bottom: 1rem;
+	}
+	
+	.retry-btn {
+		background: #f59e0b;
+		color: white;
+		border: none;
+		padding: 0.5rem 1rem;
+		border-radius: 4px;
+		cursor: pointer;
+		transition: background-color 0.2s;
+	}
+	
+	.retry-btn:hover {
+		background: #d97706;
 	}
 </style>

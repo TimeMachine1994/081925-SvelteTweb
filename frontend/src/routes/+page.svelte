@@ -2,6 +2,8 @@
 	import { goto } from '$app/navigation';
 	import { getTheme } from '$lib/design-tokens/minimal-modern-theme';
 	import { Button, Input, Card, Stats, FAQ, Comparison, Steps, Timeline, VideoPlayer } from '$lib/components/minimal-modern';
+	import OptimizedImage from '$lib/components/OptimizedImage.svelte';
+	import { OPTIMIZED_VIDEO_POSTERS, getResponsivePoster } from '$lib/utils/optimizedPosters';
 	import { Star, Shield, Users, Play, Search, Phone, Clock, Pause, Volume2, Maximize, CheckCircle, Globe } from 'lucide-svelte';
 
 	let lovedOneName = $state('');
@@ -324,7 +326,7 @@
 						<video
 							bind:this={heroVideo}
 							class="w-full aspect-video object-cover scale-110"
-							poster="https://firebasestorage.googleapis.com/v0/b/fir-tweb.firebasestorage.app/o/image_assets%2Fthumb%20for%20homevid%20001.png?alt=media&token=2da69fcb-1d2e-42c3-8716-ea0a6e78ad92"
+							poster={OPTIMIZED_VIDEO_POSTERS.hero}
 							ontimeupdate={heroHandleTimeUpdate}
 							onloadedmetadata={heroHandleLoadedMetadata}
 							onplay={() => heroIsPlaying = true}
@@ -574,7 +576,7 @@
 							bind:this={video}
 							class="w-full aspect-video bg-black"
 							preload="metadata"
-							poster="https://firebasestorage.googleapis.com/v0/b/fir-tweb.firebasestorage.app/o/image_assets%2Fthumb%20for%20homevid%20002.png?alt=media&token=b5a29196-eceb-44cf-8e65-1b135d6b03ad"
+							poster={OPTIMIZED_VIDEO_POSTERS.demo}
 							ontimeupdate={handleTimeUpdate}
 							onloadedmetadata={handleLoadedMetadata}
 							onplay={() => isPlaying = true}

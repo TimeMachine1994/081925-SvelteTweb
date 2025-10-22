@@ -1,0 +1,5 @@
+# This is a placeholder for the optimized demo video poster image  
+# The actual image needs to be downloaded from Firebase Storage and optimized
+# Original: https://firebasestorage.googleapis.com/v0/b/fir-tweb.firebasestorage.app/o/image_assets%2Fthumb%20for%20homevid%20002.png
+# Size: 270 KiB -> Target: ~50 KiB (80% reduction)
+# Dimensions: 787x431 -> Responsive sizes: 400w, 800w

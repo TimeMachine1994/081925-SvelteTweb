@@ -239,69 +239,129 @@
 		};
 		return emojiMap[action] || '📝';
 	}
+
+	/**
+	 * Delete a memorial
+	 */
+	async function deleteMemorial(memorialId: string, memorialName: string) {
+		if (!confirm(`Are you sure you want to delete the memorial for "${memorialName}"? This action cannot be undone.`)) {
+			return;
+		}
+
+		console.log('🗑️ [ADMIN] Deleting memorial:', memorialId);
+
+		try {
+			const response = await fetch(`/api/admin/delete-memorial`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ memorialId })
+			});
+
+			const result = await response.json();
+
+			if (response.ok) {
+				console.log('✅ [ADMIN] Memorial deleted successfully');
+				await invalidateAll();
+				alert('Memorial deleted successfully');
+			} else {
+				console.error('❌ [ADMIN] Failed to delete memorial:', result.error);
+				alert(`Failed to delete memorial: ${result.error}`);
+			}
+		} catch (error) {
+			console.error('❌ [ADMIN] Error deleting memorial:', error);
+			alert('Network error occurred while deleting memorial');
+		}
+	}
+
+	/**
+	 * Delete a user
+	 */
+	async function deleteUser(userId: string, userEmail: string) {
+		if (!confirm(`Are you sure you want to delete the user "${userEmail}"? This action cannot be undone.`)) {
+			return;
+		}
+
+		console.log('🗑️ [ADMIN] Deleting user:', userId);
+
+		try {
+			const response = await fetch(`/api/admin/delete-user`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ userId })
+			});
+
+			const result = await response.json();
+
+			if (response.ok) {
+				console.log('✅ [ADMIN] User deleted successfully');
+				await invalidateAll();
+				alert('User deleted successfully');
+			} else {
+				console.error('❌ [ADMIN] Failed to delete user:', result.error);
+				alert(`Failed to delete user: ${result.error}`);
+			}
+		} catch (error) {
+			console.error('❌ [ADMIN] Error deleting user:', error);
+			alert('Network error occurred while deleting user');
+		}
+	}
 </script>
 
 <!-- Simplified Admin Dashboard with Tabs -->
 <div class="rounded-2xl border border-white/20 bg-white/10 p-6 shadow-2xl backdrop-blur-md">
 	<!-- Tab Navigation -->
-	<div class="mb-6 flex space-x-4 border-b border-white/20 pb-4">
-		<Button
+	<div class="mb-6 flex flex-wrap gap-2 border-b border-white/20 pb-4">
+		<button
 			onclick={() => (activeTab = 'overview')}
-			variant={activeTab === 'overview' ? 'role' : 'ghost'}
-			role={activeTab === 'overview' ? 'admin' : undefined}
-			size="md"
-			rounded="lg"
+			class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 {activeTab === 'overview' 
+				? 'bg-white text-gray-900 shadow-lg' 
+				: 'bg-white/10 text-white hover:bg-white/20'}"
 		>
 			📊 Overview
-		</Button>
-		<Button
+		</button>
+		<button
 			onclick={() => (activeTab = 'funeral-directors')}
-			variant={activeTab === 'funeral-directors' ? 'role' : 'ghost'}
-			role={activeTab === 'funeral-directors' ? 'admin' : undefined}
-			size="md"
-			rounded="lg"
+			class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 {activeTab === 'funeral-directors' 
+				? 'bg-white text-gray-900 shadow-lg' 
+				: 'bg-white/10 text-white hover:bg-white/20'}"
 		>
 			🏥 Funeral Directors
-		</Button>
-		<Button
+		</button>
+		<button
 			onclick={() => (activeTab = 'memorials')}
-			variant={activeTab === 'memorials' ? 'role' : 'ghost'}
-			role={activeTab === 'memorials' ? 'admin' : undefined}
-			size="md"
-			rounded="lg"
+			class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 {activeTab === 'memorials' 
+				? 'bg-white text-gray-900 shadow-lg' 
+				: 'bg-white/10 text-white hover:bg-white/20'}"
 		>
 			💝 Memorials
-		</Button>
-		<Button
+		</button>
+		<button
 			onclick={() => (activeTab = 'memorial-owners')}
-			variant={activeTab === 'memorial-owners' ? 'role' : 'ghost'}
-			role={activeTab === 'memorial-owners' ? 'admin' : undefined}
-			size="md"
-			rounded="lg"
+			class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 {activeTab === 'memorial-owners' 
+				? 'bg-white text-gray-900 shadow-lg' 
+				: 'bg-white/10 text-white hover:bg-white/20'}"
 		>
 			👥 Memorial Owners
-		</Button>
-		<Button
+		</button>
+		<button
 			onclick={() => (activeTab = 'create-memorial')}
-			variant={activeTab === 'create-memorial' ? 'role' : 'ghost'}
-			role={activeTab === 'create-memorial' ? 'admin' : undefined}
-			size="md"
-			rounded="lg"
+			class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 {activeTab === 'create-memorial' 
+				? 'bg-white text-gray-900 shadow-lg' 
+				: 'bg-white/10 text-white hover:bg-white/20'}"
 		>
 			➕ Create Memorial
-		</Button>
-		<Button
+		</button>
+		<button
 			onclick={() => {
 				activeTab = 'audit-logs';
 				loadAuditLogs();
 			}}
-			variant={activeTab === 'audit-logs' ? 'role' : 'ghost'}
-			role={activeTab === 'audit-logs' ? 'admin' : undefined}
-			size="md"
-			rounded="lg"
+			class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 {activeTab === 'audit-logs' 
+				? 'bg-white text-gray-900 shadow-lg' 
+				: 'bg-white/10 text-white hover:bg-white/20'}"
 		>
 			🔍 Audit Logs
-		</Button>
+		</button>
 	</div>
 
 	<!-- Overview Tab -->
@@ -467,6 +527,12 @@
 													href="/schedule?memorialId={memorial.id}"
 													class="text-sm text-purple-400 hover:text-purple-300">Schedule</a
 												>
+												<button
+													onclick={() => deleteMemorial(memorial.id, memorial.lovedOneName)}
+													class="text-sm text-red-400 hover:text-red-300"
+												>
+													Delete
+												</button>
 											</div>
 										</td>
 									</tr>
@@ -552,6 +618,12 @@
 													}}
 												>
 													Contact
+												</button>
+												<button
+													onclick={() => deleteUser(owner.uid, owner.email)}
+													class="text-sm text-red-400 hover:text-red-300"
+												>
+													Delete
 												</button>
 											</div>
 										</td>
