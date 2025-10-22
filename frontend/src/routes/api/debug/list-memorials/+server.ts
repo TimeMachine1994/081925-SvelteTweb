@@ -8,15 +8,39 @@ export const GET: RequestHandler = async () => {
 
 		const memorialsSnapshot = await adminDb.collection('memorials').limit(10).get();
 
-		const memorials = memorialsSnapshot.docs.map((doc) => ({
-			id: doc.id,
-			lovedOneName: doc.data().lovedOneName,
-			fullSlug: doc.data().fullSlug,
-			ownerUid: doc.data().ownerUid,
-			funeralDirectorUid: doc.data().funeralDirectorUid,
-			serviceDate: doc.data().serviceDate,
-			createdAt: doc.data().createdAt
-		}));
+		const memorials = memorialsSnapshot.docs.map((doc) => {
+			const data = doc.data();
+			
+			// Analyze custom_html field
+			const customHtmlAnalysis = {
+				exists: 'custom_html' in data,
+				type: typeof data.custom_html,
+				length: data.custom_html?.length || 0,
+				isTruthy: !!data.custom_html,
+				isValidString: typeof data.custom_html === 'string' && data.custom_html.trim().length > 0,
+				preview: data.custom_html ? data.custom_html.substring(0, 50) + '...' : null
+			};
+
+			// Legacy detection
+			const legacyFlags = {
+				strictLegacy: !!(data.custom_html && data.createdByUserId === 'MIGRATION_SCRIPT'),
+				hasCustomHtml: customHtmlAnalysis.isValidString,
+				createdByUserId: data.createdByUserId,
+				isMigrationScript: data.createdByUserId === 'MIGRATION_SCRIPT'
+			};
+
+			return {
+				id: doc.id,
+				lovedOneName: data.lovedOneName,
+				fullSlug: data.fullSlug,
+				ownerUid: data.ownerUid,
+				funeralDirectorUid: data.funeralDirectorUid,
+				serviceDate: data.serviceDate,
+				createdAt: data.createdAt,
+				customHtmlAnalysis,
+				legacyFlags
+			};
+		});
 
 		console.log('✅ [DEBUG] Found', memorials.length, 'memorials');
 

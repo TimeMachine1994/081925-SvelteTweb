@@ -12,7 +12,9 @@ export const POST: RequestHandler = async ({ request }) => {
 			return json({ error: 'Missing required fields' }, { status: 400 });
 		}
 
-		// Verify reCAPTCHA
+		// Verify reCAPTCHA (optional in development)
+		const isDev = process.env.NODE_ENV === 'development';
+		
 		if (recaptchaToken) {
 			const recaptchaResult = await verifyRecaptcha(
 				recaptchaToken,
@@ -26,9 +28,11 @@ export const POST: RequestHandler = async ({ request }) => {
 			}
 
 			console.log(`[BOOK_DEMO_API] reCAPTCHA verified successfully. Score: ${recaptchaResult.score}`);
-		} else {
+		} else if (!isDev) {
 			console.warn('[BOOK_DEMO_API] No reCAPTCHA token provided');
 			return json({ error: 'Security verification required. Please refresh and try again.' }, { status: 400 });
+		} else {
+			console.log('[BOOK_DEMO_API] reCAPTCHA skipped in development mode');
 		}
 
 		// Here you would typically:

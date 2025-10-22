@@ -14,8 +14,8 @@
 		},
 		{ 
 			icon: Users, 
-			title: "Enhanced Family Experience", 
-			description: "Dedicated memorial pages with digital guestbooks, photo galleries, and private access for invited guests only." 
+			title: "Memorial Creation & Management", 
+			description: "Create beautiful memorial pages for families with digital guestbooks, photo galleries, slideshow creation, and easy-to-use management interface." 
 		},
 		{ 
 			icon: Shield, 
@@ -54,7 +54,7 @@
 	}
 
 	function handleRegister() {
-		goto('/register/funeral-home');
+		goto('/register/funeral-director');
 	}
 </script>
 
@@ -75,10 +75,10 @@
 				Partner with Tributestream
 			</div>
 			<h1 class="text-4xl md:text-6xl font-bold {theme.hero.heading} mb-6" style="font-family: {theme.font.heading}">
-				Modernize Your Memorial Services
+				Create Beautiful Memorials for Your Families
 			</h1>
 			<p class="text-lg md:text-xl {theme.hero.sub} max-w-2xl mx-auto mb-10">
-				Empower the families you serve with beautiful, reliable memorial livestreams and interactive digital guestbooks. Simple for you, meaningful for them.
+				Register your individual director account to create memorial pages, manage livestreams, and help families build lasting digital tributes with photos, videos, and slideshows.
 			</p>
 			<div class="flex flex-col sm:flex-row gap-4 justify-center">
 				<Button theme="minimal" onclick={handleBookDemo} class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F] flex items-center justify-center">
@@ -87,7 +87,7 @@
 				</Button>
 				<Button theme="minimal" variant="secondary" onclick={handleRegister} class="flex items-center justify-center">
 					<ArrowRight class="h-5 w-5 mr-2" />
-					Register Your Directors' Account
+					Create Your Director Account
 				</Button>
 			</div>
 		</div>
@@ -98,10 +98,10 @@
 		<div class="max-w-6xl mx-auto px-6">
 			<div class="text-center mb-12">
 				<h2 class="text-3xl font-bold text-slate-900 mb-4" style="font-family: {theme.font.heading}">
-					Why Partner with Tributestream?
+					Why Create Your Director Account?
 				</h2>
 				<p class="text-lg text-slate-600 max-w-2xl mx-auto">
-					Enhance your offerings, streamline your workflow, and provide unparalleled value to families.
+					Get your own dashboard to create memorials for families, track their progress, and provide comprehensive digital memorial services.
 				</p>
 			</div>
 			<div class="grid md:grid-cols-3 gap-8">
@@ -134,27 +134,27 @@
 				<div>
 					<Steps theme="minimal" items={steps.map(s => s.title)} current={0} />
 					<p class="mt-6 text-slate-600">
-						Getting started is simple. Book a free demo to see our technology in action, complete our partner onboarding, and start offering streaming services to the families you serve.
+						Getting started is simple. Create your individual director account, get access to your dashboard, and start creating beautiful memorials for the families you serve.
 					</p>
 				</div>
 				<Card theme="minimal" class="p-8">
-					<h3 class="text-xl font-bold text-slate-900 mb-6">What You Get</h3>
+					<h3 class="text-xl font-bold text-slate-900 mb-6">Your Director Dashboard Includes</h3>
 					<div class="space-y-4">
 						<div class="flex items-center space-x-3">
-							<Gift class="h-5 w-5 text-[#D5BA7F]" />
-							<span class="text-slate-700">Free marketing materials</span>
+							<Users class="h-5 w-5 text-[#D5BA7F]" />
+							<span class="text-slate-700">Create memorials for families</span>
+						</div>
+						<div class="flex items-center space-x-3">
+							<Video class="h-5 w-5 text-[#D5BA7F]" />
+							<span class="text-slate-700">Manage livestreams & recordings</span>
+						</div>
+						<div class="flex items-center space-x-3">
+							<Sparkles class="h-5 w-5 text-[#D5BA7F]" />
+							<span class="text-slate-700">Help families create slideshows</span>
 						</div>
 						<div class="flex items-center space-x-3">
 							<Phone class="h-5 w-5 text-[#D5BA7F]" />
-							<span class="text-slate-700">Dedicated support line</span>
-						</div>
-						<div class="flex items-center space-x-3">
-							<Shield class="h-5 w-5 text-[#D5BA7F]" />
-							<span class="text-slate-700">Professional training</span>
-						</div>
-						<div class="flex items-center space-x-3">
-							<Users class="h-5 w-5 text-[#D5BA7F]" />
-							<span class="text-slate-700">Revenue sharing opportunities</span>
+							<span class="text-slate-700">Track memorial progress & analytics</span>
 						</div>
 					</div>
 				</Card>
@@ -219,10 +219,10 @@
 	<section class="py-16 bg-slate-50">
 		<div class="max-w-4xl mx-auto px-6 text-center">
 			<h2 class="text-3xl font-bold text-slate-900 mb-6" style="font-family: {theme.font.heading}">
-				Ready to Elevate Your Services?
+				Ready to Start Creating Memorials?
 			</h2>
 			<p class="text-lg text-slate-600 mb-8 max-w-2xl mx-auto">
-				Join our network of forward-thinking funeral directors. See our technology in action with a free on-site demonstration.
+				Create your director account today and start building beautiful, lasting memorials for the families you serve. Help them create slideshows, manage livestreams, and preserve precious memories.
 			</p>
 			<div class="flex flex-col sm:flex-row gap-4 justify-center">
 				<Button theme="minimal" onclick={handleBookDemo} class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F] flex items-center justify-center">

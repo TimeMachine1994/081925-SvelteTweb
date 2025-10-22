@@ -43,10 +43,8 @@
 		}
 	}
 
-	// Check if this is a legacy memorial
-	let isLegacyMemorial = $derived(
-		(memorial as any)?.custom_html && (memorial as any)?.createdByUserId === 'MIGRATION_SCRIPT'
-	);
+	// Simplified: Use hasCustomHtml flag from server
+	let hasCustomHtml = $derived((memorial as any)?.hasCustomHtml || false);
 
 	// Log memorial data for debugging
 	$effect(() => {
@@ -56,8 +54,11 @@
 				name: memorial.lovedOneName,
 				isPublic: memorial.isPublic,
 				streamCount: streams.length,
-				isLegacy: isLegacyMemorial,
-				hasCustomHtml: !!(memorial as any).custom_html
+				hasCustomHtml: hasCustomHtml,
+				layoutType: hasCustomHtml ? 'Legacy (custom HTML only)' : 'Standard (with streams)',
+				custom_html_length: (memorial as any)?.custom_html?.length || 0,
+				custom_html_preview: (memorial as any)?.custom_html ? 
+					(memorial as any).custom_html.substring(0, 100) + '...' : null
 			});
 		}
 	});
@@ -70,7 +71,7 @@
 
 <div class="memorial-page">
 	{#if memorial}
-		{#if isLegacyMemorial && (memorial as any).custom_html}
+		{#if hasCustomHtml && (memorial as any).custom_html}
 			<!-- Legacy Memorial Layout with Custom HTML -->
 			<div class="legacy-memorial">
 				<div class="memorial-header">
@@ -94,15 +95,10 @@
 					</div>
 				</div>
 
-				<!-- Legacy Custom HTML Content -->
+				<!-- Legacy Custom HTML Content Only -->
 				<div class="memorial-content-container">
 					<div class="legacy-content">
 						{@html (memorial as any).custom_html}
-					</div>
-
-					<!-- Streaming Section -->
-					<div class="streaming-section">
-						<StreamPlayer {streams} memorialName={memorial.lovedOneName} memorialId={memorial.id} />
 					</div>
 				</div>
 			</div>
@@ -327,8 +323,12 @@
 		margin-bottom: 0;
 	}
 
+	.legacy-memorial .memorial-content-container {
+		padding-bottom: 0;
+	}
+
 	.legacy-content {
-		margin: 2rem 0;
+		margin: 2rem 0 0 0; /* Remove bottom margin */
 		width: 100%;
 	}
 

@@ -305,6 +305,7 @@
 						<!-- Funeral Directors CTA Cluster -->
 						<div class="text-center">
 							<h3 class="text-2xl font-semibold text-white mb-4">For Funeral Directors</h3>
+							<p class="text-white/90 text-sm mb-4">Create memorials for families • Manage livestreams • Help build slideshows</p>
 							<div class="space-y-3">
 								<Button theme="minimal" onclick={handleBookDemo} class="w-full bg-slate-900 text-white hover:bg-slate-800 flex items-center justify-center">
 									<Phone class="h-4 w-4 mr-2" />
@@ -326,7 +327,6 @@
 						<video
 							bind:this={heroVideo}
 							class="w-full aspect-video object-cover scale-110"
-							poster={OPTIMIZED_VIDEO_POSTERS.hero}
 							ontimeupdate={heroHandleTimeUpdate}
 							onloadedmetadata={heroHandleLoadedMetadata}
 							onplay={() => heroIsPlaying = true}
@@ -574,9 +574,9 @@
 						<!-- Video Element -->
 						<video 
 							bind:this={video}
-							class="w-full aspect-video bg-black"
+							class="w-full aspect-video"
 							preload="metadata"
-							poster={OPTIMIZED_VIDEO_POSTERS.demo}
+							poster="https://firebasestorage.googleapis.com/v0/b/fir-tweb.firebasestorage.app/o/image_assets%2Fthumb%20for%20homevid%20002.png?alt=media&token=b5a29196-eceb-44cf-8e65-1b135d6b03ad"
 							ontimeupdate={handleTimeUpdate}
 							onloadedmetadata={handleLoadedMetadata}
 							onplay={() => isPlaying = true}
@@ -787,7 +787,7 @@
 <style>
 	/* Custom video player styling */
 	:global(.video-player-custom video) {
-		background-color: #000;
+		background-color: transparent;
 	}
 
 	:global(.video-player-custom video:focus) {

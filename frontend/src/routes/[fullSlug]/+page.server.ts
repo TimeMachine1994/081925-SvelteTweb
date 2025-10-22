@@ -30,15 +30,14 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		const memorialData = memorialDoc.data();
 		console.log('🏠 [MEMORIAL_PAGE] Memorial data keys:', Object.keys(memorialData));
 
-		// Check if this is a legacy memorial - has custom_html and minimal structured content
-		const isLegacyMemorial = !!(
-			memorialData.custom_html && 
-			memorialData.createdByUserId === 'MIGRATION_SCRIPT'
-		);
+		// Simplified legacy detection - just check for valid custom_html content
+		const hasCustomHtml = !!(memorialData.custom_html && 
+			typeof memorialData.custom_html === 'string' && 
+			memorialData.custom_html.trim().length > 0);
 		
-		console.log('🏠 [MEMORIAL_PAGE] Memorial type:', isLegacyMemorial ? 'Legacy (custom_html)' : 'Standard');
+		console.log('🏠 [MEMORIAL_PAGE] Memorial type:', hasCustomHtml ? 'Legacy (custom_html)' : 'Standard');
 		console.log('🏠 [MEMORIAL_PAGE] Has custom_html:', !!memorialData.custom_html);
-		console.log('🏠 [MEMORIAL_PAGE] Created by migration:', memorialData.createdByUserId === 'MIGRATION_SCRIPT');
+		console.log('🏠 [MEMORIAL_PAGE] Custom HTML length:', memorialData.custom_html?.length || 0);
 
 		// Helper function for defensive timestamp handling
 		const convertTimestamp = (timestamp: any) => {
@@ -75,8 +74,11 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			directorEmail: memorialData.directorEmail || null,
 			additionalNotes: memorialData.additionalNotes || null,
 			custom_html: memorialData.custom_html || null,
-			isLegacy: isLegacyMemorial,
+			hasCustomHtml: hasCustomHtml,
 			createdByUserId: memorialData.createdByUserId || null,
+			// Access control fields
+			ownerUid: memorialData.ownerUid || null,
+			funeralDirectorUid: memorialData.funeralDirectorUid || null,
 			// Convert Firestore timestamps to strings for serialization
 			createdAt: convertTimestamp(memorialData.createdAt),
 			updatedAt: convertTimestamp(memorialData.updatedAt)
@@ -243,7 +245,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 					birthDate: memorial.birthDate,
 					deathDate: memorial.deathDate,
 					createdAt: memorial.createdAt,
-					updatedAt: memorial.updatedAt
+					updatedAt: memorial.updatedAt,
+					ownerUid: null, // Don't expose for unauthorized users
+					funeralDirectorUid: null // Don't expose for unauthorized users
 				},
 				streams: [], // No streams for unauthorized users
 				slideshows: [] // No slideshows for unauthorized users
