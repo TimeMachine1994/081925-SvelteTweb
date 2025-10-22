@@ -30,15 +30,12 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		const memorialData = memorialDoc.data();
 		console.log('🏠 [MEMORIAL_PAGE] Memorial data keys:', Object.keys(memorialData));
 
-		// Check if this is a legacy memorial - has custom_html and minimal structured content
-		const isLegacyMemorial = !!(
-			memorialData.custom_html && 
-			memorialData.createdByUserId === 'MIGRATION_SCRIPT'
-		);
+		// Check if this memorial has custom HTML content - if so, render only that
+		const isLegacyMemorial = !!(memorialData.custom_html);
 		
-		console.log('🏠 [MEMORIAL_PAGE] Memorial type:', isLegacyMemorial ? 'Legacy (custom_html)' : 'Standard');
+		console.log('🏠 [MEMORIAL_PAGE] Memorial type:', isLegacyMemorial ? 'Custom HTML' : 'Standard');
 		console.log('🏠 [MEMORIAL_PAGE] Has custom_html:', !!memorialData.custom_html);
-		console.log('🏠 [MEMORIAL_PAGE] Created by migration:', memorialData.createdByUserId === 'MIGRATION_SCRIPT');
+		console.log('🏠 [MEMORIAL_PAGE] Custom HTML length:', memorialData.custom_html ? memorialData.custom_html.length : 0);
 
 		// Helper function for defensive timestamp handling
 		const convertTimestamp = (timestamp: any) => {

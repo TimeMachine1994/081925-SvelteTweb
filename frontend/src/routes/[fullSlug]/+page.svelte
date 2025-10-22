@@ -43,9 +43,9 @@
 		}
 	}
 
-	// Check if this is a legacy memorial
+	// Check if this memorial has custom HTML content
 	let isLegacyMemorial = $derived(
-		(memorial as any)?.custom_html && (memorial as any)?.createdByUserId === 'MIGRATION_SCRIPT'
+		!!(memorial as any)?.custom_html
 	);
 
 	// Log memorial data for debugging
@@ -71,40 +71,9 @@
 <div class="memorial-page">
 	{#if memorial}
 		{#if isLegacyMemorial && (memorial as any).custom_html}
-			<!-- Legacy Memorial Layout with Custom HTML -->
-			<div class="legacy-memorial">
-				<div class="memorial-header">
-					<!-- Glass box wrapper for title only -->
-					<div class="glass-box">
-						<h1 class="memorial-title">
-							<span class="celebration-prefix">Celebration of Life for</span>
-							<span class="loved-one-name">{memorial.lovedOneName}</span>
-						</h1>
-					</div>
-					
-					<!-- Hero Slideshow Section - Outside glass box -->
-					<div class="hero-slideshow">
-						<SlideshowSection 
-							{slideshows} 
-							memorialName={memorial.lovedOneName || 'Unknown'}
-							editable={canEditSlideshows()}
-							currentUserId={user?.uid}
-							heroMode={true}
-						/>
-					</div>
-				</div>
-
-				<!-- Legacy Custom HTML Content -->
-				<div class="memorial-content-container">
-					<div class="legacy-content">
-						{@html (memorial as any).custom_html}
-					</div>
-
-					<!-- Streaming Section -->
-					<div class="streaming-section">
-						<StreamPlayer {streams} memorialName={memorial.lovedOneName} memorialId={memorial.id} />
-					</div>
-				</div>
+			<!-- Custom HTML Only - No other content -->
+			<div class="custom-html-memorial">
+				{@html (memorial as any).custom_html}
 			</div>
 		{:else}
 			<!-- Standard Memorial Layout -->
@@ -179,12 +148,15 @@
 		width: calc(100% + 40px);
 	}
 
-	.memorial-content-container {
-		max-width: 1200px;
-		margin: 0 auto;
-		padding: 3rem 2rem 0 2rem;
-		color: #e0e0e0;
+	/* Custom HTML Memorial - Clean container with no styling interference */
+	.custom-html-memorial {
+		margin: 0;
+		padding: 0;
+		width: 100%;
+		min-height: 100vh;
+		background: transparent;
 	}
+
 
 	.memorial-header {
 		text-align: center;
@@ -322,36 +294,11 @@
 		font-style: italic;
 	}
 
-	/* Legacy Memorial Styles */
-	.legacy-memorial {
-		margin-bottom: 0;
-	}
 
-	.legacy-content {
-		margin: 2rem 0;
-		width: 100%;
-	}
-
-	.legacy-content :global(iframe) {
-		width: 100%;
-		height: auto;
-		min-height: 400px;
-	}
-
-	.legacy-content :global(div[style*="position:relative"]) {
-		width: 100% !important;
-		max-width: 800px;
-		margin: 0 auto;
-	}
-
-	/* Import Fanwood font */
-	@import url('https://fonts.googleapis.com/css2?family=Fanwood+Text:ital,wght@0,400;1,400&display=swap');
+	/* Fanwood font is loaded optimally via preload in app.html */
 
 	/* Responsive Design */
 	@media (max-width: 768px) {
-		.memorial-content-container {
-			padding: 2rem 1rem 0 1rem;
-		}
 
 		.memorial-header {
 			padding: 3rem 1rem;
@@ -371,9 +318,6 @@
 			padding: 2rem 1rem;
 		}
 
-		.legacy-content :global(iframe) {
-			min-height: 250px;
-		}
 	}
 	
 	/* Hero Slideshow Styles */
