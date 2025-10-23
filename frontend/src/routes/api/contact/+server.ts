@@ -13,7 +13,9 @@ export const POST: RequestHandler = async ({ request }) => {
 			return json({ error: 'All fields are required' }, { status: 400 });
 		}
 
-		// Verify reCAPTCHA (optional for now)
+		// Verify reCAPTCHA
+		const isDev = process.env.NODE_ENV === 'development';
+		
 		if (recaptchaToken) {
 			try {
 				const recaptchaResult = await verifyRecaptcha(
@@ -31,8 +33,12 @@ export const POST: RequestHandler = async ({ request }) => {
 			} catch (error) {
 				console.warn('[CONTACT_API] reCAPTCHA verification error, proceeding without verification:', error);
 			}
+		} else if (!isDev) {
+			// Require reCAPTCHA in production
+			console.warn('[CONTACT_API] No reCAPTCHA token provided in production');
+			return json({ error: 'Security verification required. Please refresh and try again.' }, { status: 400 });
 		} else {
-			console.log('[CONTACT_API] No reCAPTCHA token provided, proceeding without verification');
+			console.log('[CONTACT_API] reCAPTCHA skipped in development mode');
 		}
 
 		// Validate email format

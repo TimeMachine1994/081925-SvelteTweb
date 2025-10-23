@@ -1,6 +1,15 @@
 import { 
 	SENDGRID_API_KEY, 
-	FROM_EMAIL
+	FROM_EMAIL,
+	SENDGRID_TEMPLATE_ENHANCED_REGISTRATION,
+	SENDGRID_TEMPLATE_BASIC_REGISTRATION,
+	SENDGRID_TEMPLATE_INVITATION,
+	SENDGRID_TEMPLATE_EMAIL_CHANGE,
+	SENDGRID_TEMPLATE_PAYMENT_CONFIRMATION,
+	SENDGRID_TEMPLATE_PAYMENT_ACTION,
+	SENDGRID_TEMPLATE_PAYMENT_FAILURE,
+	SENDGRID_TEMPLATE_CONTACT_SUPPORT,
+	SENDGRID_TEMPLATE_CONTACT_CONFIRMATION
 } from '$env/static/private';
 import sgMail from '@sendgrid/mail';
 
@@ -8,17 +17,17 @@ if (SENDGRID_API_KEY && SENDGRID_API_KEY !== 'mock_key') {
 	sgMail.setApiKey(SENDGRID_API_KEY);
 }
 
-// SendGrid Dynamic Template IDs - temporarily disabled for build
+// SendGrid Dynamic Template IDs from environment variables
 export const SENDGRID_TEMPLATES = {
-	ENHANCED_REGISTRATION: 'placeholder',
-	BASIC_REGISTRATION: 'placeholder',
-	INVITATION: 'placeholder',
-	EMAIL_CHANGE_CONFIRMATION: 'placeholder',
-	PAYMENT_CONFIRMATION: 'placeholder',
-	PAYMENT_ACTION_REQUIRED: 'placeholder',
-	PAYMENT_FAILURE: 'placeholder',
-	CONTACT_FORM_SUPPORT: 'placeholder',
-	CONTACT_FORM_CONFIRMATION: 'placeholder'
+	ENHANCED_REGISTRATION: SENDGRID_TEMPLATE_ENHANCED_REGISTRATION || 'placeholder',
+	BASIC_REGISTRATION: SENDGRID_TEMPLATE_BASIC_REGISTRATION || 'placeholder',
+	INVITATION: SENDGRID_TEMPLATE_INVITATION || 'placeholder',
+	EMAIL_CHANGE_CONFIRMATION: SENDGRID_TEMPLATE_EMAIL_CHANGE || 'placeholder',
+	PAYMENT_CONFIRMATION: SENDGRID_TEMPLATE_PAYMENT_CONFIRMATION || 'placeholder',
+	PAYMENT_ACTION_REQUIRED: SENDGRID_TEMPLATE_PAYMENT_ACTION || 'placeholder',
+	PAYMENT_FAILURE: SENDGRID_TEMPLATE_PAYMENT_FAILURE || 'placeholder',
+	CONTACT_FORM_SUPPORT: SENDGRID_TEMPLATE_CONTACT_SUPPORT || 'placeholder',
+	CONTACT_FORM_CONFIRMATION: SENDGRID_TEMPLATE_CONTACT_CONFIRMATION || 'placeholder'
 };
 
 export interface EnhancedRegistrationEmailData {
@@ -65,6 +74,12 @@ export async function sendEnhancedRegistrationEmail(data: EnhancedRegistrationEm
 	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key') {
 		console.warn('⚠️ SendGrid client not initialized. Skipping enhanced email.');
 		return;
+	}
+
+	// Check if template is configured
+	if (!SENDGRID_TEMPLATES.ENHANCED_REGISTRATION || SENDGRID_TEMPLATES.ENHANCED_REGISTRATION === 'placeholder') {
+		console.error('💥 Enhanced registration template not configured. Template ID:', SENDGRID_TEMPLATES.ENHANCED_REGISTRATION);
+		throw new Error('Email template not configured. Please check SENDGRID_TEMPLATE_ENHANCED_REGISTRATION environment variable.');
 	}
 
 	const msg = {
@@ -303,6 +318,17 @@ export async function sendContactFormEmails(data: ContactFormData) {
 		return;
 	}
 
+	// Check if contact form templates are configured
+	if (!SENDGRID_TEMPLATES.CONTACT_FORM_SUPPORT || SENDGRID_TEMPLATES.CONTACT_FORM_SUPPORT === 'placeholder') {
+		console.error('💥 Contact form support template not configured. Template ID:', SENDGRID_TEMPLATES.CONTACT_FORM_SUPPORT);
+		throw new Error('Contact form templates not configured. Please check SENDGRID_TEMPLATE_CONTACT_SUPPORT environment variable.');
+	}
+
+	if (!SENDGRID_TEMPLATES.CONTACT_FORM_CONFIRMATION || SENDGRID_TEMPLATES.CONTACT_FORM_CONFIRMATION === 'placeholder') {
+		console.error('💥 Contact form confirmation template not configured. Template ID:', SENDGRID_TEMPLATES.CONTACT_FORM_CONFIRMATION);
+		throw new Error('Contact form templates not configured. Please check SENDGRID_TEMPLATE_CONTACT_CONFIRMATION environment variable.');
+	}
+
 	const timestamp = data.timestamp || new Date();
 
 	// Support team notification
@@ -351,7 +377,7 @@ export async function sendContactFormEmails(data: ContactFormData) {
  */
 export function isDynamicTemplatesConfigured(): boolean {
 	return Object.values(SENDGRID_TEMPLATES).every(templateId => 
-		templateId && !templateId.startsWith('d-placeholder')
+		templateId && templateId !== 'placeholder' && !templateId.startsWith('d-xxxxxxxxxx')
 	);
 }
 
@@ -369,7 +395,7 @@ export function validateTemplateConfiguration(): { valid: boolean; missing: stri
 	const missing: string[] = [];
 	
 	Object.entries(SENDGRID_TEMPLATES).forEach(([key, templateId]) => {
-		if (!templateId || templateId.startsWith('d-xxxxxxxxxx') || templateId === 'undefined') {
+		if (!templateId || templateId === 'placeholder' || templateId.startsWith('d-xxxxxxxxxx') || templateId === 'undefined') {
 			missing.push(key);
 		}
 	});

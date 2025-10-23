@@ -22,11 +22,22 @@ export async function executeRecaptcha(action: string): Promise<string | null> {
 		return null;
 	}
 
+	// Skip reCAPTCHA if site key is not configured
+	if (!PUBLIC_RECAPTCHA_SITE_KEY || PUBLIC_RECAPTCHA_SITE_KEY === 'your_site_key_here') {
+		console.warn('reCAPTCHA site key not configured, skipping verification');
+		return null;
+	}
+
 	try {
-		// Wait for reCAPTCHA to be ready
-		await new Promise<void>((resolve) => {
+		// Wait for reCAPTCHA to be ready with timeout
+		await new Promise<void>((resolve, reject) => {
+			const timeout = setTimeout(() => {
+				reject(new Error('reCAPTCHA loading timeout'));
+			}, 10000); // 10 second timeout
+
 			const checkReady = () => {
 				if (window.grecaptcha && window.grecaptcha.ready) {
+					clearTimeout(timeout);
 					window.grecaptcha.ready(() => resolve());
 				} else {
 					setTimeout(checkReady, 100);
@@ -35,8 +46,14 @@ export async function executeRecaptcha(action: string): Promise<string | null> {
 			checkReady();
 		});
 
-		// Execute reCAPTCHA
-		const token = await window.grecaptcha.execute(PUBLIC_RECAPTCHA_SITE_KEY, { action });
+		// Execute reCAPTCHA with timeout
+		const token = await Promise.race([
+			window.grecaptcha.execute(PUBLIC_RECAPTCHA_SITE_KEY, { action }),
+			new Promise<never>((_, reject) => 
+				setTimeout(() => reject(new Error('reCAPTCHA execution timeout')), 5000)
+			)
+		]);
+		
 		return token;
 	} catch (error) {
 		console.error('reCAPTCHA execution failed:', error);

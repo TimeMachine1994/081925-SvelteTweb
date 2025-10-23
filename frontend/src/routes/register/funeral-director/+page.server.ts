@@ -3,6 +3,7 @@ import type { Actions } from './$types';
 import { adminDb } from '$lib/server/firebase';
 import { Timestamp } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
+import { sendRegistrationEmail } from '$lib/server/email';
 
 /**
  * FUNERAL DIRECTOR REGISTRATION SERVER
@@ -133,6 +134,19 @@ export const actions: Actions = {
 				});
 			} catch (auditError) {
 				console.error('⚠️ [FUNERAL HOME REG] Failed to create audit log:', auditError);
+			}
+
+			// Send registration email
+			try {
+				await sendRegistrationEmail(
+					applicationData.email,
+					applicationData.password,
+					applicationData.companyName
+				);
+				console.log('✅ [FUNERAL HOME REG] Registration email sent to:', applicationData.email);
+			} catch (emailError) {
+				console.warn('⚠️ [FUNERAL HOME REG] Failed to send registration email:', emailError);
+				// Don't fail the registration if email fails
 			}
 
 			// Create a custom token to allow for auto-login on the client

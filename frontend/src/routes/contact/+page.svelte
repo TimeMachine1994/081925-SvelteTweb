@@ -3,7 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { getTheme } from '$lib/design-tokens/minimal-modern-theme';
 	import { Button, Input, Card, Toast, FAQ } from '$lib/components/minimal-modern';
-	// import { executeRecaptcha, RECAPTCHA_ACTIONS } from '$lib/utils/recaptcha';
+	import { executeRecaptcha, RECAPTCHA_ACTIONS } from '$lib/utils/recaptcha';
 
 	let name = $state('');
 	let email = $state('');
@@ -42,6 +42,14 @@
 		error = '';
 
 		try {
+			// Execute reCAPTCHA
+			let recaptchaToken = null;
+			try {
+				recaptchaToken = await executeRecaptcha(RECAPTCHA_ACTIONS.CONTACT_FORM);
+			} catch (recaptchaError) {
+				console.warn('reCAPTCHA failed, proceeding without token:', recaptchaError);
+			}
+
 			const response = await fetch('/api/contact', {
 				method: 'POST',
 				headers: {
@@ -52,7 +60,7 @@
 					email: email.trim(),
 					subject: subject.trim(),
 					message: message.trim(),
-					recaptchaToken: null // Skip reCAPTCHA for now
+					recaptchaToken
 				})
 			});
 
