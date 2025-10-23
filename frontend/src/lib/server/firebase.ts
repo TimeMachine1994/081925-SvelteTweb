@@ -37,7 +37,7 @@ if (admin.apps.length) {
 			socket.on('error', () => {
 				resolve(false);
 			});
-			socket.connect(9099, '127.0.0.1');
+			socket.connect(9098, '127.0.0.1');
 		});
 
 		if (isEmulatorRunning) {
@@ -46,7 +46,7 @@ if (admin.apps.length) {
 			delete process.env['GOOGLE_APPLICATION_CREDENTIALS'];
 
 			// Set Auth emulator host via environment variable
-			process.env['FIREBASE_AUTH_EMULATOR_HOST'] = '127.0.0.1:9099';
+			process.env['FIREBASE_AUTH_EMULATOR_HOST'] = '127.0.0.1:9098';
 
 			admin.initializeApp({
 				projectId: 'fir-tweb',
@@ -56,7 +56,7 @@ if (admin.apps.length) {
 			// Configure Firestore emulator
 			const firestore = admin.firestore();
 			firestore.settings({
-				host: '127.0.0.1:8080',
+				host: '127.0.0.1:8081',
 				ssl: false
 			});
 			console.log('✅ [FIREBASE] Connected to Firebase emulators successfully');

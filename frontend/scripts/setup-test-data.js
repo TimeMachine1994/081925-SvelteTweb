@@ -6,8 +6,8 @@
  */
 
 import { initializeApp } from 'firebase/app';
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
-import { getFirestore, doc, setDoc, collection, addDoc } from 'firebase/firestore';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, connectAuthEmulator } from 'firebase/auth';
+import { getFirestore, doc, setDoc, collection, addDoc, connectFirestoreEmulator } from 'firebase/firestore';
 
 // Firebase config for emulator
 const firebaseConfig = {
@@ -25,8 +25,12 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 // Connect to emulators
-auth.useEmulator('http://localhost:9099');
-db.useEmulator('localhost', 8080);
+try {
+  connectAuthEmulator(auth, 'http://127.0.0.1:9098');
+  connectFirestoreEmulator(db, '127.0.0.1', 8081);
+} catch (error) {
+  console.log('Emulators already connected or not available');
+}
 
 const testUsers = [
   {

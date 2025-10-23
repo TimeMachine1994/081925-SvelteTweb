@@ -48,8 +48,8 @@ if (browser) {
 			try {
 				console.log('🔄 Connecting to Auth emulator...');
 				// Use 127.0.0.1 to match emulator host
-				connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
-				console.log('✅ Connected to Auth emulator on port 9099');
+				connectAuthEmulator(auth, 'http://127.0.0.1:9098', { disableWarnings: true });
+				console.log('✅ Connected to Auth emulator on port 9098');
 			} catch (authError) {
 				const errorMessage = (authError as Error).message;
 				if (errorMessage?.includes('already') || errorMessage?.includes('emulator')) {
@@ -61,8 +61,8 @@ if (browser) {
 
 			// Connect to Firestore emulator
 			try {
-				connectFirestoreEmulator(db, '127.0.0.1', 8080);
-				console.log('✅ Connected to Firestore emulator on port 8080');
+				connectFirestoreEmulator(db, '127.0.0.1', 8081);
+				console.log('✅ Connected to Firestore emulator on port 8081');
 			} catch (firestoreError) {
 				const errorMessage = (firestoreError as Error).message;
 				if (errorMessage?.includes('already') || errorMessage?.includes('emulator')) {
@@ -74,8 +74,8 @@ if (browser) {
 
 			// Connect to Storage emulator
 			try {
-				connectStorageEmulator(storage, '127.0.0.1', 9199);
-				console.log('✅ Connected to Storage emulator on port 9199');
+				connectStorageEmulator(storage, '127.0.0.1', 9198);
+				console.log('✅ Connected to Storage emulator on port 9198');
 			} catch (storageError) {
 				const errorMessage = (storageError as Error).message;
 				if (errorMessage?.includes('already') || errorMessage?.includes('emulator')) {
