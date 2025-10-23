@@ -1,35 +1,34 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { GET } from './+server';
 
-// Mock Firebase Admin
-const mockAdd = vi.fn().mockResolvedValue({ id: 'mock-doc-id' });
-const mockWhere = vi.fn().mockReturnThis();
-const mockOrderBy = vi.fn().mockReturnThis();
-const mockLimit = vi.fn().mockReturnThis();
-const mockGet = vi.fn().mockResolvedValue({
-	docs: [
-		{
-			id: 'log1',
-			data: () => ({
-				action: 'memorial_created',
-				userEmail: 'test@example.com',
-				userRole: 'owner',
-				timestamp: new Date(),
-				resourceType: 'memorial',
-				resourceId: 'memorial-123'
-			})
-		}
-	]
-});
+// Mock Firebase Admin with simplified approach
+const mockGet = vi.fn();
+const mockLimit = vi.fn();
+const mockWhere = vi.fn();
+const mockOrderBy = vi.fn();
 
 vi.mock('$lib/server/firebase', () => ({
 	adminDb: {
 		collection: vi.fn(() => ({
-			add: mockAdd,
-			where: mockWhere,
-			orderBy: mockOrderBy,
-			limit: mockLimit,
-			get: mockGet
+			orderBy: mockOrderBy.mockReturnThis(),
+			where: mockWhere.mockReturnThis(),
+			limit: mockLimit.mockReturnValue({
+				get: mockGet.mockResolvedValue({
+					docs: [
+						{
+							id: 'log1',
+							data: () => ({
+								action: 'memorial_created',
+								userEmail: 'test@example.com',
+								userRole: 'owner',
+								timestamp: new Date(),
+								resourceType: 'memorial',
+								resourceId: 'memorial-123'
+							})
+						}
+					]
+				})
+			})
 		}))
 	}
 }));
@@ -59,7 +58,8 @@ describe('Audit Logs API', () => {
 			},
 			locals: {
 				user: {
-					admin: true,
+					uid: 'admin-uid',
+					isAdmin: true,
 					email: 'admin@test.com',
 					role: 'admin'
 				}
@@ -82,7 +82,7 @@ describe('Audit Logs API', () => {
 
 	it('should deny access for non-admin users', async () => {
 		const mockEvent = createMockRequest();
-		mockEvent.locals.user.admin = false;
+		mockEvent.locals.user.isAdmin = false;
 
 		const response = await GET(mockEvent as any);
 		const result = await response.json();
