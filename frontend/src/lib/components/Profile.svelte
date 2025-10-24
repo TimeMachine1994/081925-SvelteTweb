@@ -292,7 +292,7 @@
 											: 'opacity-0'}"
 										style="animation-delay: {0.4 + index * 0.1}s;"
 									>
-										<div class="flex items-center justify-between">
+										<div class="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
 											<div class="flex items-center space-x-4">
 												<div
 													class="h-12 w-12 rounded-full bg-gradient-to-r {roleInfo.gradient} flex items-center justify-center shadow-lg"
@@ -316,12 +316,12 @@
 												</div>
 											</div>
 											<div
-												class="flex space-x-2 opacity-0 transition-opacity group-hover:opacity-100"
+												class="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 opacity-100 sm:opacity-0 transition-opacity sm:group-hover:opacity-100"
 											>
 												<a
 													href={`/${memorial.fullSlug}`}
 													target="_blank"
-													class="flex items-center rounded-xl bg-green-600 px-4 py-2 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
+													class="flex items-center justify-center rounded-xl bg-green-600 px-4 py-3 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg min-h-[44px]"
 												>
 													<Eye class="mr-1 h-3 w-3" />
 													View
@@ -332,7 +332,7 @@
 															selectedMemorialForSlideshow = memorial;
 															showSlideshowModal = true;
 														}}
-														class="flex items-center rounded-xl bg-blue-600 px-4 py-2 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
+														class="flex items-center justify-center rounded-xl bg-blue-600 px-4 py-3 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg min-h-[44px]"
 													>
 														<Camera class="mr-1 h-3 w-3" />
 														Slideshow
@@ -340,7 +340,7 @@
 												{/if}
 												<a
 													href={`/schedule/${memorial.id}`}
-													class="flex items-center rounded-xl bg-amber-600 px-4 py-2 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
+													class="flex items-center justify-center rounded-xl bg-amber-600 px-4 py-3 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg min-h-[44px]"
 												>
 													<Clock class="mr-1 h-3 w-3" />
 													Schedule
@@ -348,7 +348,7 @@
 												{#if userRole === 'funeral_director' || userRole === 'admin'}
 													<a
 														href={`/memorials/${memorial.id}/streams`}
-														class="flex items-center rounded-xl bg-purple-600 px-4 py-2 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
+														class="flex items-center justify-center rounded-xl bg-purple-600 px-4 py-3 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg min-h-[44px]"
 													>
 														<Play class="mr-1 h-3 w-3" />
 														Manage Streams

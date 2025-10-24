@@ -14,6 +14,34 @@ export const RECAPTCHA_THRESHOLDS = {
 } as const;
 
 /**
+ * Dynamically load reCAPTCHA script
+ */
+async function loadRecaptchaScript(): Promise<void> {
+	if (typeof window === 'undefined') return;
+	
+	// Skip if already loaded
+	if (window.grecaptcha) return;
+	
+	// Skip if site key is not configured
+	if (!PUBLIC_RECAPTCHA_SITE_KEY || PUBLIC_RECAPTCHA_SITE_KEY === 'your_site_key_here') {
+		console.warn('reCAPTCHA site key not configured, skipping script loading');
+		return;
+	}
+
+	return new Promise((resolve, reject) => {
+		const script = document.createElement('script');
+		script.src = `https://www.google.com/recaptcha/api.js?render=${PUBLIC_RECAPTCHA_SITE_KEY}`;
+		script.async = true;
+		script.defer = true;
+		
+		script.onload = () => resolve();
+		script.onerror = () => reject(new Error('Failed to load reCAPTCHA script'));
+		
+		document.head.appendChild(script);
+	});
+}
+
+/**
  * Client-side: Execute reCAPTCHA and get token
  */
 export async function executeRecaptcha(action: string): Promise<string | null> {
@@ -29,6 +57,9 @@ export async function executeRecaptcha(action: string): Promise<string | null> {
 	}
 
 	try {
+		// Load reCAPTCHA script if not already loaded
+		await loadRecaptchaScript();
+
 		// Wait for reCAPTCHA to be ready with timeout
 		await new Promise<void>((resolve, reject) => {
 			const timeout = setTimeout(() => {

@@ -15,8 +15,9 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		// Verify reCAPTCHA
 		const isDev = process.env.NODE_ENV === 'development';
+		const isRecaptchaConfigured = process.env.RECAPTCHA_SECRET_KEY && process.env.RECAPTCHA_SECRET_KEY !== 'your_recaptcha_secret_key_here';
 		
-		if (recaptchaToken) {
+		if (recaptchaToken && isRecaptchaConfigured) {
 			try {
 				const recaptchaResult = await verifyRecaptcha(
 					recaptchaToken,
@@ -26,15 +27,24 @@ export const POST: RequestHandler = async ({ request }) => {
 
 				if (!recaptchaResult.success) {
 					console.error('[CONTACT_API] reCAPTCHA verification failed:', recaptchaResult.error);
-					return json({ error: 'Security verification failed. Please try again.' }, { status: 400 });
+					if (!isDev) {
+						return json({ error: 'Security verification failed. Please try again.' }, { status: 400 });
+					} else {
+						console.warn('[CONTACT_API] reCAPTCHA failed in dev mode, proceeding anyway');
+					}
+				} else {
+					console.log(`[CONTACT_API] reCAPTCHA verified successfully. Score: ${recaptchaResult.score}`);
 				}
-
-				console.log(`[CONTACT_API] reCAPTCHA verified successfully. Score: ${recaptchaResult.score}`);
 			} catch (error) {
-				console.warn('[CONTACT_API] reCAPTCHA verification error, proceeding without verification:', error);
+				console.warn('[CONTACT_API] reCAPTCHA verification error:', error);
+				if (!isDev) {
+					return json({ error: 'Security verification error. Please try again.' }, { status: 400 });
+				}
 			}
-		} else if (!isDev) {
-			// Require reCAPTCHA in production
+		} else if (!isRecaptchaConfigured) {
+			console.warn('[CONTACT_API] reCAPTCHA not configured, skipping verification');
+		} else if (!recaptchaToken && !isDev) {
+			// Only require reCAPTCHA in production when it's configured
 			console.warn('[CONTACT_API] No reCAPTCHA token provided in production');
 			return json({ error: 'Security verification required. Please refresh and try again.' }, { status: 400 });
 		} else {
@@ -48,13 +58,21 @@ export const POST: RequestHandler = async ({ request }) => {
 		}
 
 		// Send contact form emails using dynamic templates
-		await sendContactFormEmails({
-			name,
-			email,
-			subject,
-			message,
-			timestamp: new Date()
-		});
+		console.log('[CONTACT_API] Attempting to send emails...');
+		try {
+			await sendContactFormEmails({
+				name,
+				email,
+				subject,
+				message,
+				timestamp: new Date()
+			});
+			console.log('[CONTACT_API] Emails sent successfully');
+		} catch (emailError) {
+			console.error('[CONTACT_API] Email sending failed:', emailError);
+			// Don't fail the entire request if email fails
+			console.warn('[CONTACT_API] Continuing despite email failure');
+		}
 
 		return json(
 			{

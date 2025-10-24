@@ -46,6 +46,9 @@
 			let recaptchaToken = null;
 			try {
 				recaptchaToken = await executeRecaptcha(RECAPTCHA_ACTIONS.CONTACT_FORM);
+				if (!recaptchaToken) {
+					console.warn('reCAPTCHA returned null token');
+				}
 			} catch (recaptchaError) {
 				console.warn('reCAPTCHA failed, proceeding without token:', recaptchaError);
 			}
@@ -137,7 +140,6 @@
 							<Input
 								type="text"
 								bind:value={name}
-								required
 								placeholder="Your full name"
 								theme="minimal"
 							/>
@@ -149,7 +151,6 @@
 							<Input
 								type="email"
 								bind:value={email}
-								required
 								placeholder="your@email.com"
 								theme="minimal"
 							/>
@@ -163,7 +164,6 @@
 						<Input
 							type="text"
 							bind:value={subject}
-							required
 							placeholder="What can we help you with?"
 							theme="minimal"
 						/>
