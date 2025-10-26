@@ -1,15 +1,49 @@
-import { fail, redirect } from '@sveltejs/kit';
+import { adminAuth, adminDb } from '$lib/server/firebase';
+import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { adminDb, adminAuth } from '$lib/server/firebase';
-import { Timestamp } from 'firebase-admin/firestore';
 import { sendEnhancedRegistrationEmail } from '$lib/server/email';
+import type { EnhancedRegistrationEmailData } from '$lib/server/email';
+import { indexMemorial } from '$lib/server/algolia-indexing';
+import type { Memorial } from '$lib/types/memorial';
 
 /**
- * QUICK FAMILY REGISTRATION PAGE
+ * ENHANCED FUNERAL DIRECTOR REGISTRATION PAGE
  *
- * Allows funeral directors to quickly register families
- * and create memorial pages on their behalf
+ * Allows funeral directors to register families with comprehensive
+ * memorial and service information
  */
+
+// Helper function to generate a random password
+function generateRandomPassword(length = 12) {
+	const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()';
+	let password = '';
+	for (let i = 0; i < length; i++) {
+		const randomIndex = Math.floor(Math.random() * charset.length);
+		password += charset[randomIndex];
+	}
+	return password;
+}
+
+// Helper function to generate slug from loved one's name
+function generateSlug(lovedOneName: string): string {
+	console.log('🔗 Generating slug for:', lovedOneName);
+	const slug = `celebration-of-life-for-${lovedOneName
+		.trim()
+		.toLowerCase()
+		.replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+		.replace(/\s+/g, '-') // Replace spaces with hyphens
+		.replace(/-+/g, '-') // Replace multiple hyphens with single
+		.replace(/^-|-$/g, '')}` // Remove leading/trailing hyphens
+		.substring(0, 100); // Limit length
+	console.log('🔗 Generated slug:', slug);
+	return slug;
+}
+
+// Helper function to validate email format
+function isValidEmail(email: string): boolean {
+	const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+	return emailRegex.test(email);
+}
 
 export const load: PageServerLoad = async ({ locals }) => {
 	// Check if user is logged in
@@ -22,8 +56,14 @@ export const load: PageServerLoad = async ({ locals }) => {
 		throw redirect(302, '/profile?error=access-denied');
 	}
 
-	// Get funeral director profile for display
+	// Get funeral director profile for prepopulation
 	let funeralDirectorProfile = null;
+	let prepopulatedData = {
+		directorName: '',
+		directorEmail: '',
+		funeralHomeName: ''
+	};
+
 	if (locals.user.role === 'funeral_director') {
 		try {
 			const fdDoc = await adminDb
@@ -32,15 +72,30 @@ export const load: PageServerLoad = async ({ locals }) => {
 				.get();
 			if (fdDoc.exists) {
 				funeralDirectorProfile = fdDoc.data();
+				
+				// Prepopulate form data from funeral director profile
+				prepopulatedData = {
+					directorName: funeralDirectorProfile?.contactPerson || locals.user.displayName || '',
+					directorEmail: funeralDirectorProfile?.email || locals.user.email || '',
+					funeralHomeName: funeralDirectorProfile?.companyName || ''
+				};
 			}
 		} catch (error) {
 			console.error('Failed to fetch funeral director profile:', error);
 		}
+	} else if (locals.user.role === 'admin') {
+		// For admin users, just use their basic info
+		prepopulatedData = {
+			directorName: locals.user.displayName || '',
+			directorEmail: locals.user.email || '',
+			funeralHomeName: ''
+		};
 	}
 
 	return {
 		user: locals.user,
-		funeralDirectorProfile
+		funeralDirectorProfile,
+		prepopulatedData
 	};
 };
 
