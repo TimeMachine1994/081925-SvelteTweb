@@ -260,8 +260,18 @@ export const actions: Actions = {
 
 			// 5. Send registration email
 			console.log('📧 Sending registration email...');
-			await sendRegistrationEmail(familyContactEmail, password, lovedOneName);
-			console.log('✅ Registration email sent successfully');
+			try {
+				// Import debug function
+				const { debugTemplateConfiguration } = await import('$lib/server/email');
+				debugTemplateConfiguration();
+				
+				await sendRegistrationEmail(familyContactEmail, password, lovedOneName);
+				console.log('✅ Registration email sent successfully');
+			} catch (emailError) {
+				console.error('💥 Email sending failed:', emailError);
+				console.warn('⚠️ Continuing with registration despite email failure...');
+				// Don't throw - allow registration to complete even if email fails
+			}
 
 			// 6. Create a custom token for auto-login
 			console.log('🎟️ Creating custom token for auto-login...');

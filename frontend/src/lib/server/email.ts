@@ -107,6 +107,19 @@ export async function sendRegistrationEmail(email: string, password: string, lov
 		return;
 	}
 
+	// Check if template is configured
+	if (!SENDGRID_TEMPLATES.BASIC_REGISTRATION || SENDGRID_TEMPLATES.BASIC_REGISTRATION === 'placeholder') {
+		console.error('💥 Basic registration template not configured. Template ID:', SENDGRID_TEMPLATES.BASIC_REGISTRATION);
+		throw new Error('Email template not configured. Please check SENDGRID_TEMPLATE_BASIC_REGISTRATION environment variable.');
+	}
+
+	// Debug logging
+	console.log('🔍 SendGrid Debug Info:');
+	console.log('  - Template ID:', SENDGRID_TEMPLATES.BASIC_REGISTRATION);
+	console.log('  - To Email:', email);
+	console.log('  - From Email:', FROM_EMAIL);
+	console.log('  - Loved One Name:', lovedOneName);
+
 	const msg = {
 		to: email,
 		from: FROM_EMAIL,
@@ -395,6 +408,23 @@ export function isDynamicTemplatesConfigured(): boolean {
  */
 export function getTemplateIds() {
 	return SENDGRID_TEMPLATES;
+}
+
+/**
+ * Debug function to log all template configurations
+ */
+export function debugTemplateConfiguration() {
+	console.log('🔍 SendGrid Template Configuration Debug:');
+	console.log('  - API Key configured:', !!SENDGRID_API_KEY && SENDGRID_API_KEY !== 'mock_key');
+	console.log('  - From Email:', FROM_EMAIL);
+	console.log('  - Templates:');
+	Object.entries(SENDGRID_TEMPLATES).forEach(([key, templateId]) => {
+		const isConfigured = templateId && templateId !== 'placeholder';
+		console.log(`    ${key}: ${templateId} ${isConfigured ? '✅' : '❌'}`);
+	});
+	
+	const validation = validateTemplateConfiguration();
+	console.log('  - Validation:', validation.valid ? '✅ All valid' : `❌ Missing: ${validation.missing.join(', ')}`);
 }
 
 /**
