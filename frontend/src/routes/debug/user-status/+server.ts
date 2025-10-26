@@ -20,8 +20,7 @@ export const GET: RequestHandler = async ({ locals }) => {
 				uid: locals.user.uid,
 				email: locals.user.email,
 				displayName: locals.user.displayName,
-				role: locals.user.role,
-				isAdmin: locals.user.isAdmin
+				role: locals.user.role
 			},
 			firebaseCustomClaims: userRecord.customClaims || {},
 			sessionData: {
@@ -38,8 +37,7 @@ export const GET: RequestHandler = async ({ locals }) => {
 				uid: locals.user.uid,
 				email: locals.user.email,
 				displayName: locals.user.displayName,
-				role: locals.user.role,
-				isAdmin: locals.user.isAdmin
+				role: locals.user.role
 			}
 		});
 	}

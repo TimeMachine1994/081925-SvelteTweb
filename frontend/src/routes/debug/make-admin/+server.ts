@@ -20,10 +20,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		const existingClaims = user.customClaims || {};
 		console.log('📋 [DEBUG] Existing claims:', existingClaims);
 
-		// Set admin claims
+		// Set admin claims (only role needed now)
 		await adminAuth.setCustomUserClaims(user.uid, {
 			...existingClaims,
-			admin: true,
 			role: 'admin'
 		});
 
