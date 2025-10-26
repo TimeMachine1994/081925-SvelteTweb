@@ -1,146 +1,69 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import { goto } from '$app/navigation';
-	import { auth } from '$lib/firebase';
-	import { signInWithCustomToken, getIdToken } from 'firebase/auth';
 	import {
-		Building2,
+		Heart,
 		User,
 		Mail,
-		Phone,
-		MapPin,
-		FileText,
-		Shield,
-		Award,
+		Calendar,
+		Clock,
 		CheckCircle,
-		Save,
-		ArrowRight,
-		Sparkles
+		Building2,
+		Users,
+		AlertCircle
 	} from 'lucide-svelte';
-	import { useFormAutoSave } from '$lib/composables/useFormAutoSave';
 	import { Button } from '$lib/ui';
+	import type { PageData } from './$types';
 
 	let {
+		data,
 		form
-	}: { form?: { error?: any; success?: boolean; message?: string; applicationId?: string } } =
-		$props();
+	}: { 
+		data: PageData;
+		form?: { error?: any; success?: boolean; message?: string; memorialSlug?: string; familyEmail?: string } 
+	} = $props();
 
 	// Form state using Svelte 5 runes
-	let companyName = $state('');
-	let contactPerson = $state('');
-	let email = $state('');
-	let password = $state('');
-	let phone = $state('');
-	let address = $state({
-		street: '',
-		city: '',
-		state: '',
-		zipCode: '',
-		country: 'United States'
-	});
-	let website = $state('');
+	let lovedOneName = $state('');
+	let familyEmail = $state('');
+	let serviceDate = $state('');
+	let serviceTime = $state('');
 
 	// UI states
 	let isSubmitting = $state(false);
 
-	// Initialize auto-save functionality
-	const autoSave = useFormAutoSave({
-		storageKey: 'funeral-director-registration',
-		debounceMs: 3000,
-		useLocalStorage: false, // Use cookies for better persistence
-		cookieExpireDays: 30,
-		onSave: (data) => console.log('🏥 [AUTO-SAVE] Funeral home form data saved'),
-		onLoad: (data) => {
-			if (data) {
-				console.log('🏥 [AUTO-SAVE] Loading saved funeral home data');
-				// Restore form fields from saved data
-				companyName = data.companyName || '';
-				contactPerson = data.contactPerson || '';
-				email = data.email || '';
-				password = data.password || '';
-				phone = data.phone || '';
-				address = data.address || {
-					street: '',
-					city: '',
-					state: '',
-					zipCode: '',
-					country: 'United States'
-				};
-				website = data.website || '';
-			}
+	// Get today's date for minimum date input
+	const today = new Date().toISOString().split('T')[0];
+
+	// Form validation
+	function validateForm() {
+		if (!lovedOneName.trim()) return 'Loved one\'s name is required';
+		if (!familyEmail.trim()) return 'Family email is required';
+		if (!serviceDate) return 'Service date is required';
+		if (!serviceTime) return 'Service time is required';
+		
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (!emailRegex.test(familyEmail)) return 'Please enter a valid email address';
+		
+		return null;
+	}
+
+	// Handle form submission
+	function handleSubmit(event: SubmitEvent) {
+		const error = validateForm();
+		if (error) {
+			event.preventDefault();
+			alert(error);
+			return;
 		}
-	});
-
-	// Auto-save form data when fields change
-	$effect(() => {
-		const formData = {
-			companyName,
-			contactPerson,
-			email,
-			password,
-			phone,
-			address,
-			website
-		};
-
-		// Only auto-save if we have some meaningful data
-		if (companyName || contactPerson || email) {
-			autoSave.triggerAutoSave(formData);
-		}
-	});
-
-	// Load saved data on component mount
-	$effect(() => {
-		autoSave.loadFromStorage();
-	});
-
-	// Check if form was successfully submitted and handle auto-login
-	$effect(() => {
-		if (form?.success && form?.customToken) {
-			const performAutoLogin = async () => {
-				isSubmitting = true;
-				try {
-					console.log('Custom token received, attempting auto-login...');
-					const userCredential = await signInWithCustomToken(auth, form.customToken);
-					const idToken = await getIdToken(userCredential.user);
-
-					// Post the ID token to the login action to create a session
-					const loginFormData = new FormData();
-					loginFormData.append('idToken', idToken);
-
-					const loginResponse = await fetch('/login?/login', {
-						method: 'POST',
-						body: loginFormData
-					});
-
-					if (!loginResponse.ok) {
-						throw new Error('Session creation failed.');
-					}
-
-					console.log('Auto-login successful, redirecting to profile...');
-					autoSave.clearStorage(); // Clear data before navigating
-					window.location.href = '/profile'; // Use full page reload
-				} catch (error) {
-					console.error('Auto-login process failed:', error);
-					// If auto-login fails, send user to the manual login page as a fallback
-					alert(
-						'Your account was created, but we could not log you in automatically. Please log in manually.'
-					);
-					await goto('/login');
-				} finally {
-					isSubmitting = false;
-				}
-			};
-			performAutoLogin();
-		}
-	});
+	}
 </script>
 
 <svelte:head>
-	<title>Create Your Director Account - Tributestream</title>
+	<title>Quick Family Registration - Tributestream</title>
 	<meta
 		name="description"
-		content="Create your individual funeral director account to manage memorials, help families create slideshows, and provide beautiful digital memorial experiences."
+		content="Quickly register families and create memorial pages for funeral services. Professional tools for funeral directors."
 	/>
 </svelte:head>
 
@@ -151,40 +74,61 @@
 			<div
 				class="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-yellow-600 to-amber-600"
 			>
-				<Building2 class="h-8 w-8 text-white" />
+				<Heart class="h-8 w-8 text-white" />
 			</div>
-			<h1 class="mb-4 text-4xl font-bold text-gray-900">Create Your Director Account</h1>
+			<h1 class="mb-4 text-4xl font-bold text-gray-900">Quick Family Registration</h1>
 			<p class="mx-auto max-w-2xl text-xl text-gray-600">
-				Register your individual funeral director account to create memorials for families, manage livestreams, and help them build beautiful digital tributes with slideshows and photo galleries.
+				Quickly register families and create memorial pages for their loved ones. This will create their account, memorial page, and send them login credentials via email.
 			</p>
+			
+			<!-- User Info Display -->
+			{#if data.user}
+				<div class="mt-6 inline-flex items-center gap-3 rounded-lg bg-blue-50 px-4 py-2 text-sm text-blue-800">
+					{#if data.user.role === 'funeral_director'}
+						<Building2 class="h-4 w-4" />
+						<span>Logged in as: {data.funeralDirectorProfile?.companyName || 'Funeral Director'}</span>
+					{:else if data.user.role === 'admin'}
+						<Users class="h-4 w-4" />
+						<span>Logged in as: Administrator</span>
+					{/if}
+				</div>
+			{/if}
 		</div>
 
 		<!-- Form -->
 		<div class="mx-auto max-w-4xl">
 			<div class="rounded-2xl bg-white p-8 shadow-xl">
-				<!-- Auto-save Status Indicator -->
-				{#if autoSave.hasSavedData()}
-					<div
-						class="mb-6 flex items-center gap-3 rounded-xl border border-green-200 bg-green-50 p-3"
-					>
-						<Save class="h-4 w-4 text-green-600" />
-						<div class="flex-1">
-							<p class="text-sm font-medium text-green-800">Form data auto-saved</p>
-							<p class="text-xs text-green-600">
-								Last saved: {autoSave.getLastSaveTime()?.toLocaleString() || 'Recently'}
-							</p>
+				<!-- Success Message -->
+				{#if form?.success}
+					<div class="mb-6 rounded-xl border border-green-200 bg-green-50 p-4">
+						<div class="flex items-center gap-3">
+							<CheckCircle class="h-6 w-6 text-green-600" />
+							<div class="flex-1">
+								<h3 class="text-lg font-semibold text-green-800">Memorial Created Successfully!</h3>
+								<p class="text-sm text-green-700 mt-1">{form.message}</p>
+								{#if form.memorialSlug}
+									<div class="mt-3 space-y-2">
+										<p class="text-sm text-green-700">
+											<strong>Memorial URL:</strong> 
+											<a href="/{form.memorialSlug}" target="_blank" class="underline hover:text-green-800">
+												tributestream.com/{form.memorialSlug}
+											</a>
+										</p>
+										{#if form.familyEmail}
+											<p class="text-sm text-green-700">
+												<strong>Family Email:</strong> {form.familyEmail}
+											</p>
+										{/if}
+									</div>
+								{/if}
+							</div>
 						</div>
-						<button
-							type="button"
-							onclick={() => autoSave.clearStorage()}
-							class="text-xs text-green-600 underline hover:text-green-800"
-						>
-							Clear saved data
-						</button>
 					</div>
 				{/if}
+
 				<form
 					method="POST"
+					onsubmit={handleSubmit}
 					use:enhance={() => {
 						isSubmitting = true;
 						return async ({ update }) => {
@@ -195,57 +139,21 @@
 				>
 					<div class="space-y-6">
 						<div class="mb-8 text-center">
-							<h2 class="mb-2 text-2xl font-bold text-gray-900">Account & Business Information</h2>
-							<p class="text-gray-600">Create your account and tell us about your funeral home.</p>
+							<h2 class="mb-2 text-2xl font-bold text-gray-900">Family & Service Information</h2>
+							<p class="text-gray-600">Enter the family and service details to create their memorial page.</p>
 						</div>
 
 						<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 							<div>
-								<label for="companyName" class="mb-2 block text-sm font-medium text-gray-700">
-									<Building2 class="mr-1 inline h-4 w-4" />
-									Funeral Home Name *
+								<label for="lovedOneName" class="mb-2 block text-sm font-medium text-gray-700">
+									<Heart class="mr-1 inline h-4 w-4" />
+									Loved One's Name *
 								</label>
 								<input
 									type="text"
-									id="companyName"
-									name="companyName"
-									bind:value={companyName}
-									onchange={(e) => (companyName = e.currentTarget.value)}
-									required
-									class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
-									placeholder="Smith & Sons Funeral Home"
-								/>
-							</div>
-
-							<div>
-								<label for="password" class="mb-2 block text-sm font-medium text-gray-700">
-									<Shield class="mr-1 inline h-4 w-4" />
-									Password *
-								</label>
-								<input
-									type="password"
-									id="password"
-									name="password"
-									bind:value={password}
-									onchange={(e) => (password = e.currentTarget.value)}
-									required
-									minlength="6"
-									class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
-									placeholder="Choose a secure password"
-								/>
-							</div>
-
-							<div>
-								<label for="contactPerson" class="mb-2 block text-sm font-medium text-gray-700">
-									<User class="mr-1 inline h-4 w-4" />
-									Primary Contact Name *
-								</label>
-								<input
-									type="text"
-									id="contactPerson"
-									name="contactPerson"
-									bind:value={contactPerson}
-									onchange={(e) => (contactPerson = e.currentTarget.value)}
+									id="lovedOneName"
+									name="lovedOneName"
+									bind:value={lovedOneName}
 									required
 									class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
 									placeholder="John Smith"
@@ -253,100 +161,67 @@
 							</div>
 
 							<div>
-								<label for="email" class="mb-2 block text-sm font-medium text-gray-700">
+								<label for="familyEmail" class="mb-2 block text-sm font-medium text-gray-700">
 									<Mail class="mr-1 inline h-4 w-4" />
-									Email Address *
+									Family Email Address *
 								</label>
 								<input
 									type="email"
-									id="email"
-									name="email"
-									bind:value={email}
-									onchange={(e) => (email = e.currentTarget.value)}
+									id="familyEmail"
+									name="familyEmail"
+									bind:value={familyEmail}
 									required
 									class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
-									placeholder="john@smithfuneralhome.com"
+									placeholder="family@email.com"
 								/>
 							</div>
 
 							<div>
-								<label for="phone" class="mb-2 block text-sm font-medium text-gray-700">
-									<Phone class="mr-1 inline h-4 w-4" />
-									Phone Number *
+								<label for="serviceDate" class="mb-2 block text-sm font-medium text-gray-700">
+									<Calendar class="mr-1 inline h-4 w-4" />
+									Service Date *
 								</label>
 								<input
-									type="tel"
-									id="phone"
-									name="phone"
-									bind:value={phone}
-									onchange={(e) => (phone = e.currentTarget.value)}
+									type="date"
+									id="serviceDate"
+									name="serviceDate"
+									bind:value={serviceDate}
+									min={today}
 									required
 									class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
-									placeholder="(555) 123-4567"
+								/>
+							</div>
+
+							<div>
+								<label for="serviceTime" class="mb-2 block text-sm font-medium text-gray-700">
+									<Clock class="mr-1 inline h-4 w-4" />
+									Service Time *
+								</label>
+								<input
+									type="time"
+									id="serviceTime"
+									name="serviceTime"
+									bind:value={serviceTime}
+									required
+									class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
 								/>
 							</div>
 						</div>
 
-						<!-- Address Section -->
+						<!-- Information Box -->
 						<div class="border-t pt-6">
-							<h3 class="mb-4 flex items-center text-lg font-semibold text-gray-900">
-								<MapPin class="mr-2 h-5 w-5" />
-								Business Address
-							</h3>
-							<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-								<div class="md:col-span-2">
-									<input
-										type="text"
-										name="address.street"
-										bind:value={address.street}
-										onchange={(e) => (address.street = e.currentTarget.value)}
-										required
-										class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
-										placeholder="Street Address"
-									/>
-								</div>
-								<div>
-									<input
-										type="text"
-										name="address.city"
-										bind:value={address.city}
-										onchange={(e) => (address.city = e.currentTarget.value)}
-										required
-										class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
-										placeholder="City"
-									/>
-								</div>
-								<div>
-									<input
-										type="text"
-										name="address.state"
-										bind:value={address.state}
-										onchange={(e) => (address.state = e.currentTarget.value)}
-										required
-										class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
-										placeholder="State"
-									/>
-								</div>
-								<div>
-									<input
-										type="text"
-										name="address.zipCode"
-										bind:value={address.zipCode}
-										onchange={(e) => (address.zipCode = e.currentTarget.value)}
-										required
-										class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
-										placeholder="ZIP Code"
-									/>
-								</div>
-								<div>
-									<input
-										type="text"
-										name="address.country"
-										bind:value={address.country}
-										onchange={(e) => (address.country = e.currentTarget.value)}
-										class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
-										placeholder="Country"
-									/>
+							<div class="rounded-lg bg-blue-50 p-4">
+								<div class="flex items-start gap-3">
+									<AlertCircle class="h-5 w-5 text-blue-600 mt-0.5" />
+									<div class="flex-1">
+										<h3 class="text-sm font-semibold text-blue-800">What happens next?</h3>
+										<ul class="mt-2 text-sm text-blue-700 space-y-1">
+											<li>• Family account will be created with temporary password</li>
+											<li>• Memorial page will be set up with the loved one's information</li>
+											<li>• Welcome email with login credentials will be sent to the family</li>
+											<li>• Family will have full control to customize their memorial</li>
+										</ul>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -354,12 +229,15 @@
 
 					{#if form?.error}
 						<div class="mt-6 rounded-xl border border-red-200 bg-red-50 p-4">
-							<p class="text-red-800">❌ {form.error}</p>
+							<div class="flex items-center gap-3">
+								<AlertCircle class="h-5 w-5 text-red-600" />
+								<p class="text-red-800">{form.error}</p>
+							</div>
 						</div>
 					{/if}
 
-					<!-- Navigation Buttons -->
-					<div class="mt-8 flex justify-end border-t pt-6">
+					<!-- Submit Button -->
+					<div class="mt-8 flex justify-center border-t pt-6">
 						<Button
 							type="submit"
 							variant="role"
@@ -369,7 +247,7 @@
 							disabled={isSubmitting}
 							loading={isSubmitting}
 						>
-							{isSubmitting ? 'Creating Account...' : 'Create Account & Get Started'}
+							{isSubmitting ? 'Creating Memorial...' : 'Create Family Memorial'}
 						</Button>
 					</div>
 				</form>

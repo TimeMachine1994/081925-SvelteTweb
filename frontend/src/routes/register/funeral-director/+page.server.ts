@@ -1,173 +1,212 @@
 import { fail, redirect } from '@sveltejs/kit';
-import type { Actions } from './$types';
-import { adminDb } from '$lib/server/firebase';
+import type { Actions, PageServerLoad } from './$types';
+import { adminDb, adminAuth } from '$lib/server/firebase';
 import { Timestamp } from 'firebase-admin/firestore';
-import { getAuth } from 'firebase-admin/auth';
-import { sendRegistrationEmail } from '$lib/server/email';
+import { sendEnhancedRegistrationEmail } from '$lib/server/email';
 
 /**
- * FUNERAL DIRECTOR REGISTRATION SERVER
+ * QUICK FAMILY REGISTRATION PAGE
  *
- * Handles new funeral director applications
- * Creates pending applications for admin approval
+ * Allows funeral directors to quickly register families
+ * and create memorial pages on their behalf
  */
 
+export const load: PageServerLoad = async ({ locals }) => {
+	// Check if user is logged in
+	if (!locals.user) {
+		throw redirect(302, '/login?redirect=/register/funeral-director');
+	}
+
+	// Check if user has proper role (funeral director or admin)
+	if (locals.user.role !== 'funeral_director' && locals.user.role !== 'admin') {
+		throw redirect(302, '/profile?error=access-denied');
+	}
+
+	// Get funeral director profile for display
+	let funeralDirectorProfile = null;
+	if (locals.user.role === 'funeral_director') {
+		try {
+			const fdDoc = await adminDb
+				.collection('funeral_directors')
+				.doc(locals.user.uid)
+				.get();
+			if (fdDoc.exists) {
+				funeralDirectorProfile = fdDoc.data();
+			}
+		} catch (error) {
+			console.error('Failed to fetch funeral director profile:', error);
+		}
+	}
+
+	return {
+		user: locals.user,
+		funeralDirectorProfile
+	};
+};
+
 export const actions: Actions = {
-	default: async ({ request }) => {
-		console.log('🏥 [FUNERAL HOME REG] Processing funeral director registration (no documents)');
+	default: async ({ request, locals }) => {
+		console.log('👨‍⚕️ [QUICK FAMILY REG] Processing quick family registration');
 
 		try {
-			const auth = getAuth();
+			// Verify authentication
+			if (!locals.user) {
+				return fail(401, { error: 'Authentication required' });
+			}
+
+			// Verify user is a funeral director or admin
+			if (locals.user.role !== 'funeral_director' && locals.user.role !== 'admin') {
+				return fail(403, { error: 'Funeral director or admin access required' });
+			}
+
 			const formData = await request.formData();
+			const lovedOneName = formData.get('lovedOneName')?.toString();
+			const familyEmail = formData.get('familyEmail')?.toString();
+			const serviceDate = formData.get('serviceDate')?.toString();
+			const serviceTime = formData.get('serviceTime')?.toString();
 
-			// Extract form fields (account + business info)
-			const applicationData = {
-				companyName: formData.get('companyName')?.toString() || '',
-				contactPerson: formData.get('contactPerson')?.toString() || '',
-				email: formData.get('email')?.toString() || '',
-				password: formData.get('password')?.toString() || '',
-				phone: formData.get('phone')?.toString() || '',
-				website: formData.get('website')?.toString() || '',
-				address: {
-					street: formData.get('address.street')?.toString() || '',
-					city: formData.get('address.city')?.toString() || '',
-					state: formData.get('address.state')?.toString() || '',
-					zipCode: formData.get('address.zipCode')?.toString() || '',
-					country: formData.get('address.country')?.toString() || 'United States'
-				}
-			};
-
-			console.log('📋 [FUNERAL HOME REG] Application data (simplified):', {
-				companyName: applicationData.companyName,
-				email: applicationData.email
-			});
-
-			// Validate required fields (first page)
-			const requiredFields = [
-				'companyName',
-				'contactPerson',
-				'email',
-				'password',
-				'phone'
-			] as const;
-			const missing = requiredFields.filter((f) => {
-				const v = applicationData[f];
-				return !v || (typeof v === 'string' && v.trim() === '');
-			});
-			if (missing.length) {
-				console.log('❌ [FUNERAL HOME REG] Missing required fields:', missing);
-				return fail(400, { error: `Missing required fields: ${missing.join(', ')}` });
+			if (!lovedOneName || !familyEmail || !serviceDate || !serviceTime) {
+				return fail(400, { error: 'All fields are required' });
 			}
 
 			// Validate email format
 			const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-			if (!emailRegex.test(applicationData.email)) {
+			if (!emailRegex.test(familyEmail)) {
 				return fail(400, { error: 'Please enter a valid email address' });
 			}
 
-			// Create Firebase Auth user (admin SDK)
-			let uid: string;
-			try {
-				const userRecord = await getAuth().createUser({
-					email: applicationData.email,
-					password: applicationData.password,
-					displayName: applicationData.contactPerson
-				});
-				uid = userRecord.uid;
-				console.log('✅ [FUNERAL HOME REG] Created Firebase Auth user:', uid);
-			} catch (createErr: any) {
-				console.error('❌ [FUNERAL HOME REG] Failed to create auth user:', createErr);
-				// Common case: email already exists
-				const message =
-					createErr?.errorInfo?.message || createErr?.message || 'Failed to create user';
-				return fail(400, { error: message });
+			// Get funeral director profile
+			let funeralDirector = null;
+			if (locals.user.role === 'funeral_director') {
+				const funeralDirectorDoc = await adminDb
+					.collection('funeral_directors')
+					.doc(locals.user.uid)
+					.get();
+
+				if (!funeralDirectorDoc.exists) {
+					return fail(404, { error: 'Funeral director profile not found' });
+				}
+				funeralDirector = funeralDirectorDoc.data();
 			}
 
-			// Prepare FD document (auto-approved)
-			const fdDoc = {
-				status: 'approved' as const,
-				verificationStatus: 'auto-approved' as const,
-				companyName: applicationData.companyName,
-				contactPerson: applicationData.contactPerson,
-				email: applicationData.email,
-				phone: applicationData.phone,
-				website: applicationData.website || null,
-				address: applicationData.address,
-				permissions: {
-					canCreateMemorials: true,
-					canManageMemorials: true,
-					canLivestream: true,
-					maxMemorials: 999 // Effectively unlimited
+			// Generate temporary password for family
+			const tempPassword = Math.random().toString(36).slice(-8);
+
+			// Create user account for family
+			const userRecord = await adminAuth.createUser({
+				email: familyEmail,
+				password: tempPassword,
+				displayName: `Family of ${lovedOneName}`
+			});
+
+			// Set custom claims for the new user
+			await adminAuth.setCustomUserClaims(userRecord.uid, {
+				role: 'owner'
+			});
+
+			// Create user profile in Firestore
+			await adminDb
+				.collection('users')
+				.doc(userRecord.uid)
+				.set({
+					email: familyEmail,
+					displayName: `Family of ${lovedOneName}`,
+					role: 'owner',
+					createdAt: Timestamp.now(),
+					createdBy: locals.user.uid,
+					createdByFuneralDirector: true
+				});
+
+			// Parse loved one's name
+			const nameParts = lovedOneName.trim().split(' ');
+			const firstName = nameParts[0] || '';
+			const lastName = nameParts.slice(1).join(' ') || '';
+
+			// Create memorial slug
+			const baseSlug = `${firstName}-${lastName}`
+				.toLowerCase()
+				.replace(/[^a-z0-9\s-]/g, '')
+				.replace(/\s+/g, '-')
+				.replace(/-+/g, '-')
+				.trim();
+
+			const timestamp = Date.now().toString().slice(-4);
+			const memorialSlug = `${baseSlug}-${timestamp}`;
+
+			// Combine service date and time
+			const serviceDateTime = new Date(`${serviceDate}T${serviceTime}`);
+
+			// Create memorial
+			const memorialRef = adminDb.collection('memorials').doc();
+			await memorialRef.set({
+				title: `In Memory of ${lovedOneName}`,
+				slug: memorialSlug,
+				fullSlug: memorialSlug,
+				lovedOneName: lovedOneName,
+				deceased: {
+					firstName: firstName,
+					lastName: lastName,
+					fullName: lovedOneName
 				},
-				streamingConfig: {
-					provider: 'custom',
-					maxConcurrentStreams: 1,
-					streamingEnabled: true
-				},
+				ownerId: userRecord.uid,
+				ownerEmail: familyEmail,
+				creatorUid: userRecord.uid,
+
+				// Funeral director info
+				funeralDirectorId: locals.user.role === 'funeral_director' ? locals.user.uid : null,
+				funeralDirectorName: funeralDirector?.companyName || 'Funeral Director',
+				managedByFuneralDirector: locals.user.role === 'funeral_director',
+
+				// Service info
+				serviceDate: Timestamp.fromDate(serviceDateTime),
+				serviceTime: serviceTime,
+
+				// Settings
+				isPublic: true,
+				allowComments: true,
+				allowPhotos: true,
+				allowTributes: true,
+
+				// Timestamps
 				createdAt: Timestamp.now(),
 				updatedAt: Timestamp.now(),
-				approvedAt: Timestamp.now(),
-				approvedBy: 'system_auto_approve',
-				userId: uid,
-				isActive: true
-			};
 
-			await adminDb.collection('funeral_directors').doc(uid).set(fdDoc);
-			console.log('💾 [FUNERAL HOME REG] Saved funeral_directors doc with uid:', uid);
-
-			// Set custom claim for funeral director role
-			await auth.setCustomUserClaims(uid, { role: 'funeral_director' });
-			console.log('✅ [FUNERAL HOME REG] Set custom claim: funeral_director');
-
-			// Log audit
-			try {
-				await adminDb.collection('admin_actions').add({
-					action: 'funeral_director_auto_approved',
-					targetId: uid,
-					targetType: 'funeral_director',
-					timestamp: Timestamp.now(),
-					details: {
-						companyName: applicationData.companyName,
-						email: applicationData.email,
-						contactPerson: applicationData.contactPerson
-					}
-				});
-			} catch (auditError) {
-				console.error('⚠️ [FUNERAL HOME REG] Failed to create audit log:', auditError);
-			}
-
-			// Send registration email
-			try {
-				await sendRegistrationEmail(
-					applicationData.email,
-					applicationData.password,
-					applicationData.companyName
-				);
-				console.log('✅ [FUNERAL HOME REG] Registration email sent to:', applicationData.email);
-			} catch (emailError) {
-				console.warn('⚠️ [FUNERAL HOME REG] Failed to send registration email:', emailError);
-				// Don't fail the registration if email fails
-			}
-
-			// Create a custom token to allow for auto-login on the client
-			const customToken = await auth.createCustomToken(uid, {
-				role: 'funeral_director',
-				email: applicationData.email
+				// Status
+				status: 'active'
 			});
+
+			// Send welcome email to the family
+			try {
+				await sendEnhancedRegistrationEmail({
+					email: familyEmail,
+					password: tempPassword,
+					lovedOneName: lovedOneName,
+					memorialUrl: `https://tributestream.com/${memorialSlug}`,
+					ownerName: `Family of ${lovedOneName}`
+				});
+				console.log('📧 Welcome email sent to family successfully.');
+			} catch (emailError) {
+				console.error('⚠️ Failed to send welcome email:', emailError);
+				// Do not fail the entire request if email sending fails
+			}
 
 			return {
 				success: true,
-				message: 'Account created and approved! You can now create memorials.',
-				directorId: uid,
-				customToken
+				message: 'Family memorial created successfully! Welcome email sent to family.',
+				memorialId: memorialRef.id,
+				memorialSlug: memorialSlug,
+				memorialUrl: `/${memorialSlug}`,
+				familyEmail: familyEmail
 			};
-		} catch (error) {
-			console.error('💥 [FUNERAL HOME REG] Registration failed:', {
-				error: error instanceof Error ? error.message : String(error)
-			});
-			return fail(500, {
-				error: 'An error occurred while processing your registration. Please try again.'
-			});
+		} catch (error: any) {
+			console.error('Quick family registration error:', error);
+			
+			// Handle specific Firebase Auth errors
+			if (error?.code === 'auth/email-already-exists') {
+				return fail(400, { error: 'An account with this email already exists. Please use a different email address.' });
+			}
+			
+			return fail(500, { error: 'Failed to create family memorial. Please try again.' });
 		}
 	}
 };
