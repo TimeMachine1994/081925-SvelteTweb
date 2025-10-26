@@ -9,15 +9,15 @@
 		if ($user) {
 			// User is logged in - check their role
 			if ($user.role === 'funeral_director' || $user.role === 'admin') {
-				// Funeral director or admin - go to enhanced form (dashboard)
-				goto('/funeral-director/dashboard');
-			} else {
-				// Other logged-in users - go to funeral director registration
+				// Funeral director or admin - go to quick family registration tool
 				goto('/register/funeral-director');
+			} else {
+				// Other logged-in users - go to funeral director information page
+				goto('/for-funeral-directors');
 			}
 		} else {
-			// User not logged in - go to login page first
-			goto('/login');
+			// User not logged in - go to funeral director information page
+			goto('/for-funeral-directors');
 		}
 	}
 </script>
