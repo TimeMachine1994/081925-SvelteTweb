@@ -7,11 +7,17 @@
 
 	function handleFuneralDirectorClick() {
 		if ($user) {
-			// User is logged in, go to funeral director registration
-			goto('/register/funeral-director');
+			// User is logged in - check their role
+			if ($user.role === 'funeral_director' || $user.role === 'admin') {
+				// Funeral director or admin - go to enhanced form (dashboard)
+				goto('/funeral-director/dashboard');
+			} else {
+				// Other logged-in users - go to funeral director registration
+				goto('/register/funeral-director');
+			}
 		} else {
-			// User not logged in, go to funeral home registration
-			goto('/register/funeral-home');
+			// User not logged in - go to login page first
+			goto('/login');
 		}
 	}
 </script>
