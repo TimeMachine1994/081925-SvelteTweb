@@ -9,11 +9,37 @@
 	import { executeRecaptcha, RECAPTCHA_ACTIONS } from '$lib/utils/recaptcha';
 
 	let error: string | null = null;
+	let fieldErrors: Record<string, string> = {};
 	let loading = false;
 	let name = '';
 	let email = '';
 	let password = '';
 	let selectedRole: 'owner' | 'viewer' = 'owner';
+
+	// Props to receive form data from server
+	interface Props {
+		form?: {
+			message?: string;
+			field?: string;
+		};
+	}
+	
+	let { form }: Props = $props();
+
+	// Handle server-side validation errors
+	$effect(() => {
+		if (form?.message) {
+			if (form.field) {
+				// Field-specific error
+				fieldErrors = { [form.field]: form.message };
+				error = null;
+			} else {
+				// General error
+				error = form.message;
+				fieldErrors = {};
+			}
+		}
+	});
 
 	const theme = getTheme('minimal');
 
@@ -23,6 +49,7 @@
 	const handleRegister: SubmitFunction = ({ formData }) => {
 		loading = true;
 		error = null;
+		fieldErrors = {}; // Clear field errors on new submission
 		currentStep = 'Verifying security...';
 		progress = 10;
 
@@ -80,7 +107,14 @@
 					progress = 0;
 				}
 			} else if (result.type === 'failure') {
-				error = result.data?.message ?? 'Registration failed.';
+				// Handle field-specific errors
+				if (result.data?.field && result.data?.message) {
+					fieldErrors = { [result.data.field]: result.data.message };
+					error = null;
+				} else {
+					error = result.data?.message ?? 'Registration failed.';
+					fieldErrors = {};
+				}
 				loading = false;
 				currentStep = '';
 				progress = 0;
@@ -127,7 +161,11 @@
 							placeholder="Enter your full name"
 							theme="minimal"
 							bind:value={name}
+							class={fieldErrors.name ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}
 						/>
+						{#if fieldErrors.name}
+							<p class="mt-1 text-sm text-red-600">{fieldErrors.name}</p>
+						{/if}
 					</div>
 
 					<div>
@@ -143,7 +181,11 @@
 							placeholder="Enter your email"
 							theme="minimal"
 							bind:value={email}
+							class={fieldErrors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}
 						/>
+						{#if fieldErrors.email}
+							<p class="mt-1 text-sm text-red-600">{fieldErrors.email}</p>
+						{/if}
 					</div>
 					
 					<div>
@@ -159,7 +201,11 @@
 							placeholder="Create a secure password"
 							theme="minimal"
 							bind:value={password}
+							class={fieldErrors.password ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}
 						/>
+						{#if fieldErrors.password}
+							<p class="mt-1 text-sm text-red-600">{fieldErrors.password}</p>
+						{/if}
 					</div>
 
 					<!-- Role Selection -->

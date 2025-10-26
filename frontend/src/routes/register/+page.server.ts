@@ -2,6 +2,8 @@ import { adminAuth, adminDb } from '$lib/server/firebase';
 import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import { verifyRecaptcha, RECAPTCHA_ACTIONS, getScoreThreshold } from '$lib/utils/recaptcha';
+import { validateEmail } from '$lib/utils/email-validation';
+import { createStandardUserProfile, validateUserProfileData } from '$lib/utils/user-profile';
 
 export const actions: Actions = {
 	registerOwner: async ({ request }) => {
@@ -18,6 +20,18 @@ export const actions: Actions = {
 				message: 'Name, email and password are required'
 			});
 		}
+
+		// Pre-validate email before expensive operations
+		console.log('[+page.server.ts] Pre-validating email...');
+		const emailValidation = await validateEmail(email.toString(), 'email');
+		if (!emailValidation.isValid) {
+			console.error('[+page.server.ts] Email validation failed:', emailValidation.error);
+			return fail(400, {
+				message: emailValidation.error,
+				field: emailValidation.field
+			});
+		}
+		console.log('[+page.server.ts] Email validation passed.');
 
 		// Verify reCAPTCHA
 		if (recaptchaToken) {
@@ -56,17 +70,15 @@ export const actions: Actions = {
 				isOwner: true
 			});
 
-			const userDocRef = adminDb.collection('users').doc(userRecord.uid);
-			await userDocRef.set({
-				email: userRecord.email,
+			// Create standardized user profile
+			const userProfile = createStandardUserProfile({
+				email: userRecord.email!,
 				displayName: name.toString(),
-				role: 'owner',
-				isOwner: true,
-				hasPaidForMemorial: false,
-				memorialCount: 0,
-				createdAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString()
+				role: 'owner'
 			});
+
+			const userDocRef = adminDb.collection('users').doc(userRecord.uid);
+			await userDocRef.set(userProfile);
 
 			console.log(`[+page.server.ts] Owner created and profile stored successfully: ${email}`);
 
@@ -81,8 +93,18 @@ export const actions: Actions = {
 				throw error;
 			}
 			console.error(`[+page.server.ts] Error creating owner ${email}:`, error);
-			return fail(400, {
-				message: error.message
+			
+			// Since we pre-validated email, this should rarely happen
+			// But keep for safety in case of network issues or other errors
+			if (error.code === 'auth/email-already-exists') {
+				return fail(400, {
+					message: `An account with email ${email} already exists. Please use a different email or sign in to your existing account.`,
+					field: 'email'
+				});
+			}
+			
+			return fail(500, {
+				message: 'Registration failed. Please try again.'
 			});
 		}
 	},
@@ -100,6 +122,18 @@ export const actions: Actions = {
 				message: 'Name, email and password are required'
 			});
 		}
+
+		// Pre-validate email before expensive operations
+		console.log('[+page.server.ts] Pre-validating email...');
+		const emailValidation = await validateEmail(email.toString(), 'email');
+		if (!emailValidation.isValid) {
+			console.error('[+page.server.ts] Email validation failed:', emailValidation.error);
+			return fail(400, {
+				message: emailValidation.error,
+				field: emailValidation.field
+			});
+		}
+		console.log('[+page.server.ts] Email validation passed.');
 
 		// Verify reCAPTCHA
 		if (recaptchaToken) {
@@ -138,15 +172,15 @@ export const actions: Actions = {
 				isViewer: true
 			});
 
-			const userDocRef = adminDb.collection('users').doc(userRecord.uid);
-			await userDocRef.set({
-				email: userRecord.email,
+			// Create standardized user profile
+			const userProfile = createStandardUserProfile({
+				email: userRecord.email!,
 				displayName: name.toString(),
-				role: 'viewer',
-				isViewer: true,
-				createdAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString()
+				role: 'viewer'
 			});
+
+			const userDocRef = adminDb.collection('users').doc(userRecord.uid);
+			await userDocRef.set(userProfile);
 
 			console.log(`[+page.server.ts] Viewer created and profile stored successfully: ${email}`);
 
@@ -161,8 +195,17 @@ export const actions: Actions = {
 				throw error;
 			}
 			console.error(`[+page.server.ts] Error creating viewer ${email}:`, error);
-			return fail(400, {
-				message: error.message
+			
+			// Since we pre-validated email, this should rarely happen
+			if (error.code === 'auth/email-already-exists') {
+				return fail(400, {
+					message: `An account with email ${email} already exists. Please use a different email or sign in to your existing account.`,
+					field: 'email'
+				});
+			}
+			
+			return fail(500, {
+				message: 'Registration failed. Please try again.'
 			});
 		}
 	},
@@ -179,6 +222,18 @@ export const actions: Actions = {
 			});
 		}
 
+		// Pre-validate email before expensive operations
+		console.log('[+page.server.ts] Pre-validating email...');
+		const emailValidation = await validateEmail(email.toString(), 'email');
+		if (!emailValidation.isValid) {
+			console.error('[+page.server.ts] Email validation failed:', emailValidation.error);
+			return fail(400, {
+				message: emailValidation.error,
+				field: emailValidation.field
+			});
+		}
+		console.log('[+page.server.ts] Email validation passed.');
+
 		try {
 			console.log(`[+page.server.ts] Attempting to create admin user: ${email}`);
 			const userRecord = await adminAuth.createUser({
@@ -191,14 +246,15 @@ export const actions: Actions = {
 				isAdmin: true
 			});
 
-			const userDocRef = adminDb.collection('users').doc(userRecord.uid);
-			await userDocRef.set({
-				email: userRecord.email,
-				role: 'admin',
-				isAdmin: true,
-				createdAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString()
+			// Create standardized user profile
+			const userProfile = createStandardUserProfile({
+				email: userRecord.email!,
+				displayName: userRecord.email!, // Admin uses email as display name by default
+				role: 'admin'
 			});
+
+			const userDocRef = adminDb.collection('users').doc(userRecord.uid);
+			await userDocRef.set(userProfile);
 
 			console.log(`[+page.server.ts] Admin user created and profile stored successfully: ${email}`);
 
@@ -211,8 +267,17 @@ export const actions: Actions = {
 				throw error;
 			}
 			console.error(`[+page.server.ts] Error creating admin user ${email}:`, error);
-			return fail(400, {
-				message: error.message
+			
+			// Since we pre-validated email, this should rarely happen
+			if (error.code === 'auth/email-already-exists') {
+				return fail(400, {
+					message: `An account with email ${email} already exists. Please use a different email or sign in to your existing account.`,
+					field: 'email'
+				});
+			}
+			
+			return fail(500, {
+				message: 'Registration failed. Please try again.'
 			});
 		}
 	}

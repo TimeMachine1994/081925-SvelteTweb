@@ -4,6 +4,9 @@ import type { Actions } from './$types';
 import { sendEnhancedRegistrationEmail } from '$lib/server/email';
 import { indexMemorial } from '$lib/server/algolia-indexing';
 import type { Memorial } from '$lib/types/memorial';
+import { validateEmail } from '$lib/utils/email-validation';
+import { generateUniqueMemorialSlug } from '$lib/utils/memorial-slug';
+import { createStandardUserProfile } from '$lib/utils/user-profile';
 
 // Helper function to generate a random password
 function generateRandomPassword(length = 12) {
@@ -16,20 +19,6 @@ function generateRandomPassword(length = 12) {
 	return password;
 }
 
-// Helper function to generate fullSlug from loved one's name
-function generateFullSlug(lovedOneName: string): string {
-	console.log('🔗 Generating fullSlug for:', lovedOneName);
-	const fullSlug = `celebration-of-life-for-${lovedOneName
-		.trim()
-		.toLowerCase()
-		.replace(/[^a-z0-9\s-]/g, '') // Remove special characters
-		.replace(/\s+/g, '-') // Replace spaces with hyphens
-		.replace(/-+/g, '-') // Replace multiple hyphens with single
-		.replace(/^-|-$/g, '')}` // Remove leading/trailing hyphens
-		.substring(0, 100); // Limit length
-	console.log('🔗 Generated fullSlug:', fullSlug);
-	return fullSlug;
-}
 
 export const actions: Actions = {
 	default: async ({ request, cookies }) => {
@@ -44,8 +33,20 @@ export const actions: Actions = {
 			return fail(400, { error: 'Please fill out all required fields.' });
 		}
 
+		// Pre-validate email before expensive operations
+		console.log('Pre-validating email...');
+		const emailValidation = await validateEmail(email, 'email');
+		if (!emailValidation.isValid) {
+			console.error('Email validation failed:', emailValidation.error);
+			return fail(400, {
+				error: emailValidation.error,
+				field: emailValidation.field
+			});
+		}
+		console.log('Email validation passed.');
+
 		const password = generateRandomPassword();
-		const fullSlug = generateFullSlug(lovedOneName);
+		const fullSlug = await generateUniqueMemorialSlug(lovedOneName);
 
 		try {
 			// 1. Create user in Firebase Auth
@@ -66,13 +67,14 @@ export const actions: Actions = {
 			await new Promise((resolve) => setTimeout(resolve, 2000));
 
 			// 3. Create user profile in Firestore
-			await adminDb.collection('users').doc(userRecord.uid).set({
+			const userProfile = createStandardUserProfile({
 				email,
 				displayName: name,
 				phone,
-				role: 'owner',
-				createdAt: new Date()
+				role: 'owner'
 			});
+
+			await adminDb.collection('users').doc(userRecord.uid).set(userProfile);
 			console.log(`User profile created for ${email} with owner role 📝`);
 
 			// 4. Create memorial
@@ -149,10 +151,18 @@ export const actions: Actions = {
 				throw error;
 			}
 			console.error('Error during registration process:', error);
+			
+			// Since we pre-validated email, this should rarely happen
 			if (error.code === 'auth/email-already-exists') {
-				return fail(400, { error: `An account with email ${email} already exists.` });
+				return fail(400, { 
+					error: `An account with email ${email} already exists. Please use a different email or sign in to your existing account.`,
+					field: 'email'
+				});
 			}
-			return fail(500, { error: error.message });
+			
+			return fail(500, { 
+				error: 'Registration failed. Please try again.'
+			});
 		}
 
 		return { success: true };

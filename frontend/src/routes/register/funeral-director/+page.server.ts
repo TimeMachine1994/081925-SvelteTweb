@@ -4,6 +4,9 @@ import type { Actions, PageServerLoad } from './$types';
 import { sendRegistrationEmail } from '$lib/server/email';
 import { indexMemorial } from '$lib/server/algolia-indexing';
 import type { Memorial } from '$lib/types/memorial';
+import { validateMultipleEmails } from '$lib/utils/email-validation';
+import { generateUniqueMemorialSlug } from '$lib/utils/memorial-slug';
+import { createStandardUserProfile } from '$lib/utils/user-profile';
 
 /**
  * ENHANCED FUNERAL DIRECTOR REGISTRATION PAGE
@@ -23,26 +26,6 @@ function generateRandomPassword(length = 12) {
 	return password;
 }
 
-// Helper function to generate slug from loved one's name
-function generateSlug(lovedOneName: string): string {
-	console.log('🔗 Generating slug for:', lovedOneName);
-	const slug = `celebration-of-life-for-${lovedOneName
-		.trim()
-		.toLowerCase()
-		.replace(/[^a-z0-9\s-]/g, '') // Remove special characters
-		.replace(/\s+/g, '-') // Replace spaces with hyphens
-		.replace(/-+/g, '-') // Replace multiple hyphens with single
-		.replace(/^-|-$/g, '')}` // Remove leading/trailing hyphens
-		.substring(0, 100); // Limit length
-	console.log('🔗 Generated slug:', slug);
-	return slug;
-}
-
-// Helper function to validate email format
-function isValidEmail(email: string): boolean {
-	const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-	return emailRegex.test(email);
-}
 
 export const load: PageServerLoad = async ({ locals }) => {
 	// Check if user is logged in
@@ -140,24 +123,36 @@ export const actions: Actions = {
 		if (!familyContactPhone) validationErrors.push('Family contact phone is required');
 		if (!funeralHomeName) validationErrors.push('Funeral home name is required');
 
-		// Email format validation
-		if (familyContactEmail && !isValidEmail(familyContactEmail)) {
-			validationErrors.push('Family contact email must be a valid email address');
-		}
-		if (directorEmail && !isValidEmail(directorEmail)) {
-			validationErrors.push('Director email must be a valid email address');
-		}
-
 		if (validationErrors.length > 0) {
 			console.log('❌ Validation failed:', validationErrors);
 			return fail(400, { error: `Validation failed: ${validationErrors.join(', ')}` });
 		}
 
-		console.log('✅ All required fields validated successfully');
+		// Pre-validate emails before expensive operations
+		console.log('🔍 Pre-validating emails...');
+		const emailsToValidate = [
+			{ email: familyContactEmail, fieldName: 'familyContactEmail' }
+		];
+		
+		// Add director email if provided
+		if (directorEmail && directorEmail.trim()) {
+			emailsToValidate.push({ email: directorEmail, fieldName: 'directorEmail' });
+		}
+
+		const emailValidation = await validateMultipleEmails(emailsToValidate);
+		if (!emailValidation.isValid) {
+			console.log('❌ Email validation failed:', emailValidation.errors);
+			const firstError = emailValidation.errors[0];
+			return fail(400, { 
+				error: firstError.error,
+				field: firstError.field
+			});
+		}
+
+		console.log('✅ All validation passed successfully');
 
 		const password = generateRandomPassword();
-		const slug = generateSlug(lovedOneName);
-		const fullSlug = `tributes/${slug}`;
+		const fullSlug = await generateUniqueMemorialSlug(lovedOneName);
 
 		try {
 			// 1. Create user in Firebase Auth using family contact email as primary
@@ -176,20 +171,18 @@ export const actions: Actions = {
 
 			// 3. Create enhanced user profile in Firestore
 			console.log('📝 Creating enhanced user profile...');
-			const userProfile = {
+			const userProfile = createStandardUserProfile({
 				email: familyContactEmail,
 				displayName: familyContactName || directorName,
 				phone: familyContactPhone,
 				funeralHomeName,
 				role: 'owner',
-				createdAt: new Date(),
-				// Enhanced director information
-				directorEmail: directorEmail || null,
-				directorName: directorName,
+				directorEmail: directorEmail || undefined,
 				familyContactName: familyContactName,
 				familyContactPhone: familyContactPhone,
-				contactPreference: contactPreference as 'phone' | 'email'
-			};
+				contactPreference: contactPreference as 'phone' | 'email',
+				createdByFuneralDirector: true
+			});
 
 			await adminDb.collection('users').doc(userRecord.uid).set(userProfile);
 			console.log(`✅ Enhanced user profile created for ${familyContactEmail}`);
@@ -199,13 +192,32 @@ export const actions: Actions = {
 			const memorialData = {
 				// Core memorial fields
 				lovedOneName: lovedOneName,
-				slug: slug,
+				slug: fullSlug, // Use fullSlug as slug for consistency
 				fullSlug: fullSlug,
+				ownerUid: userRecord.uid, // Required field
 				createdByUserId: userRecord.uid,
 				creatorEmail: familyContactEmail,
 				creatorName: familyContactName || directorName,
 				
-				// Service information fields
+				// Service information structure (required)
+				services: {
+					main: {
+						location: {
+							name: locationName || '',
+							address: locationAddress || '',
+							isUnknown: !locationName
+						},
+						time: {
+							date: memorialDate || null,
+							time: memorialTime || null,
+							isUnknown: !memorialDate || !memorialTime
+						},
+						hours: 2 // Default duration
+					},
+					additional: [] // Empty initially
+				},
+				
+				// Service information fields (legacy)
 				directorFullName: directorName,
 				funeralHomeName: funeralHomeName,
 				memorialDate: memorialDate || null,
@@ -225,8 +237,9 @@ export const actions: Actions = {
 				// Additional information
 				additionalNotes: additionalNotes || null,
 				
-				// Default values
+				// Required fields
 				isPublic: true,
+				isComplete: false, // Required field
 				content: '',
 				custom_html: null,
 				
@@ -240,10 +253,10 @@ export const actions: Actions = {
 
 			const memorialRef = await adminDb.collection('memorials').add(memorialData);
 			console.log(`✅ Comprehensive memorial created for ${lovedOneName} with ID: ${memorialRef.id}`);
-			console.log(`🔗 Memorial slug: ${slug}, Full slug: ${fullSlug}`);
+			console.log(`🔗 Memorial fullSlug: ${fullSlug}`);
 
 			// Index the new memorial in Algolia
-			await indexMemorial({ ...memorialData, id: memorialRef.id } as Memorial);
+			await indexMemorial({ ...memorialData, id: memorialRef.id } as unknown as Memorial);
 
 			// 5. Send registration email
 			console.log('📧 Sending registration email...');
@@ -256,7 +269,7 @@ export const actions: Actions = {
 			console.log(`✅ Custom token created for ${familyContactEmail}`);
 
 			// 7. Redirect to the memorial page directly
-			const memorialUrl = `/tributes/${slug}`;
+			const memorialUrl = `/${fullSlug}`;
 			console.log(`🚀 Redirecting to memorial page: ${memorialUrl}`);
 			
 			console.log('🎉 Enhanced funeral director registration completed successfully!');
@@ -270,20 +283,22 @@ export const actions: Actions = {
 			console.error('💥 Error during enhanced registration process:', error);
 			
 			// Enhanced error handling with specific messages
-			let errorMessage = 'An unexpected error occurred during registration.';
+			let errorMessage = 'Registration failed. Please try again.';
+			let fieldName = undefined;
 			
+			// Since we pre-validated email, this should rarely happen
 			if (error.code === 'auth/email-already-exists') {
-				errorMessage = `An account with email ${familyContactEmail} already exists. Please use a different email or contact support.`;
+				errorMessage = `An account with email ${familyContactEmail} already exists. Please use a different email or sign in to your existing account.`;
+				fieldName = 'familyContactEmail';
 			} else if (error.code === 'auth/invalid-email') {
 				errorMessage = 'The provided email address is invalid. Please check and try again.';
+				fieldName = 'familyContactEmail';
 			} else if (error.code === 'auth/weak-password') {
 				errorMessage = 'The generated password is too weak. Please try again.';
 			} else if (error.message?.includes('PERMISSION_DENIED')) {
 				errorMessage = 'Database permission denied. Please contact support.';
 			} else if (error.message?.includes('QUOTA_EXCEEDED')) {
 				errorMessage = 'Service quota exceeded. Please try again later.';
-			} else if (error.message) {
-				errorMessage = `Registration failed: ${error.message}`;
 			}
 			
 			console.error('❌ Specific error details:', {
@@ -292,7 +307,10 @@ export const actions: Actions = {
 				stack: error.stack
 			});
 			
-			return fail(500, { error: errorMessage });
+			return fail(500, { 
+				error: errorMessage,
+				...(fieldName && { field: fieldName })
+			});
 		}
 	}
 };

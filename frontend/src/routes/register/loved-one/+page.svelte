@@ -7,7 +7,7 @@
 
 	console.log('🎯 Loved-One Registration form initializing');
 
-	let { form }: { form?: { error?: any; success?: boolean } } = $props();
+	let { form }: { form?: { error?: any; field?: string; success?: boolean } } = $props();
 
 	// Pre-fill lovedOneName from URL parameter
 	let lovedOneName = $state($page.url.searchParams.get('name') || '');
@@ -20,6 +20,21 @@
 
 	// Form validation
 	let validationErrors = $state<string[]>([]);
+	let fieldErrors = $state<Record<string, string>>({});
+
+	// Handle server-side validation errors
+	$effect(() => {
+		if (form?.error) {
+			if (form.field) {
+				// Field-specific error
+				fieldErrors = { [form.field]: form.error };
+				validationErrors = [];
+			} else {
+				// General error - clear field errors
+				fieldErrors = {};
+			}
+		}
+	});
 
 	function validateForm() {
 		console.log('🔍 Validating form...');
@@ -100,8 +115,11 @@
 							type="text"
 							required
 							bind:value={lovedOneName}
-							class="form-input"
+							class="form-input {fieldErrors.lovedOneName ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}"
 						/>
+						{#if fieldErrors.lovedOneName}
+							<p class="mt-1 text-sm text-red-600">{fieldErrors.lovedOneName}</p>
+						{/if}
 					</div>
 					<div class="form-group">
 						<label for="name" class="form-label">Your Name *</label>
@@ -111,8 +129,11 @@
 							type="text"
 							required
 							bind:value={name}
-							class="form-input"
+							class="form-input {fieldErrors.name ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}"
 						/>
+						{#if fieldErrors.name}
+							<p class="mt-1 text-sm text-red-600">{fieldErrors.name}</p>
+						{/if}
 					</div>
 					<div class="form-group">
 						<label for="email" class="form-label">Your Email *</label>
@@ -122,8 +143,11 @@
 							type="email"
 							required
 							bind:value={email}
-							class="form-input"
+							class="form-input {fieldErrors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}"
 						/>
+						{#if fieldErrors.email}
+							<p class="mt-1 text-sm text-red-600">{fieldErrors.email}</p>
+						{/if}
 					</div>
 					<div class="form-group">
 						<label for="phone" class="form-label">Your Phone Number</label>

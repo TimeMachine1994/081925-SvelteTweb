@@ -4,6 +4,7 @@ import type { PageServerLoad, Actions } from './$types';
 import type { Memorial } from '$lib/types/memorial';
 import { verifyRecaptcha, RECAPTCHA_ACTIONS, getScoreThreshold } from '$lib/utils/recaptcha';
 import { dev } from '$app/environment';
+import { generateUniqueMemorialSlug } from '$lib/utils/memorial-slug';
 
 // Helper function to convert Timestamps and Dates to strings
 function sanitizeData(data: any): any {
@@ -177,39 +178,13 @@ export const actions: Actions = {
 		console.log('🎯 [PROFILE_SERVER] Form data received:', { lovedOneName });
 
 		if (!lovedOneName) {
-			console.error('❌ [PROFILE_SERVER] Missing loved one name');
+			console.error(' [PROFILE_SERVER] Missing loved one name');
 			return fail(400, { message: "Loved one's name is required" });
 		}
 
 		try {
-			// Generate base fullSlug from loved one's name
-			const baseSlug = `celebration-of-life-for-${lovedOneName
-				.toLowerCase()
-				.replace(/[^a-z0-9\s-]/g, '')
-				.replace(/\s+/g, '-')
-				.replace(/-+/g, '-')
-				.replace(/^-|-$/g, '')}`.substring(0, 80);
-
-			// Check for existing fullSlugs and make unique
-			let fullSlug = baseSlug;
-			let counter = 1;
-			let isUnique = false;
-
-			while (!isUnique) {
-				const existingMemorial = await adminDb
-					.collection('memorials')
-					.where('fullSlug', '==', fullSlug)
-					.limit(1)
-					.get();
-
-				if (existingMemorial.empty) {
-					isUnique = true;
-				} else {
-					fullSlug = `${baseSlug}-${counter}`;
-					counter++;
-				}
-			}
-
+			// Generate unique memorial slug
+			const fullSlug = await generateUniqueMemorialSlug(lovedOneName);
 			console.log(`[PROFILE] Creating memorial with unique fullSlug: ${fullSlug}`);
 
 			// Create the memorial
