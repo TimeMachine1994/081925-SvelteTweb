@@ -5,9 +5,9 @@
 
 	const theme = getTheme('minimal');
 
-	export let data;
+	let { data } = $props();
 
-	$: ({ featuredPosts, latestPosts, categoryCounts, totalPosts, error, usingMockData } = data);
+	const { featuredPosts, latestPosts, categoryCounts, totalPosts, error, usingMockData } = $derived(data);
 
 	function formatDate(date: Date | string | null): string {
 		if (!date) return '';

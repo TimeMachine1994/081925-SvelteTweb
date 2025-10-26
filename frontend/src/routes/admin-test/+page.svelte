@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 </script>
 
 <div class="container mx-auto p-6">
@@ -13,7 +13,7 @@
 			<p><strong>Email:</strong> {data.user.email}</p>
 			<p><strong>UID:</strong> {data.user.uid}</p>
 			<p><strong>Role:</strong> {data.user.role}</p>
-			<p><strong>Admin Flag:</strong> {data.user.admin}</p>
+			<p><strong>Admin Flag:</strong> {data.user.isAdmin}</p>
 		</div>
 	</div>
 

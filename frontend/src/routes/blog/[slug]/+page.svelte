@@ -5,8 +5,8 @@
 
 	const theme = getTheme('minimal');
 
-	export let data;
-	$: ({ post, relatedPosts } = data);
+	let { data } = $props();
+	const { post, relatedPosts } = $derived(data);
 
 	function formatDate(date) {
 		if (!date) return '';

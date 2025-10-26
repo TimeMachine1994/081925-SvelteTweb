@@ -168,8 +168,8 @@
 	}
 
 	// Computed values
-	$: scheduledMemorials = memorials.filter(m => !m.isComplete);
-	$: completedMemorials = memorials.filter(m => m.isComplete);
+	const scheduledMemorials = $derived(memorials.filter(m => !m.isComplete));
+	const completedMemorials = $derived(memorials.filter(m => m.isComplete));
 
 	/**
 	 * Reject a funeral director application

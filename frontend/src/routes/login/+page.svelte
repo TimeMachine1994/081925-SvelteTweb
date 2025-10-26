@@ -2,7 +2,7 @@
 	import Login from '$lib/components/Login.svelte';
 	import type { ActionData } from './$types';
 
-	export let form: ActionData;
+	let { form }: { form?: ActionData } = $props();
 </script>
 
 <Login {form} />
