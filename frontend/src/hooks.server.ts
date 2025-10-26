@@ -10,7 +10,19 @@ const authHandle: Handle = async ({ event, resolve }) => {
 		event.url.pathname.includes('mockServiceWorker.js') ||
 		event.url.pathname.endsWith('.js') ||
 		event.url.pathname.endsWith('.css') ||
-		event.url.pathname.endsWith('.map')) {
+		event.url.pathname.endsWith('.map') ||
+		event.url.pathname.endsWith('.webmanifest') ||
+		event.url.pathname.endsWith('.ico') ||
+		event.url.pathname.endsWith('.png') ||
+		event.url.pathname.endsWith('.jpg') ||
+		event.url.pathname.endsWith('.jpeg') ||
+		event.url.pathname.endsWith('.svg') ||
+		event.url.pathname.endsWith('.woff') ||
+		event.url.pathname.endsWith('.woff2') ||
+		event.url.pathname.endsWith('.ttf') ||
+		event.url.pathname.endsWith('.eot') ||
+		event.url.pathname.startsWith('/favicon') ||
+		event.url.pathname.startsWith('/apple-touch-icon')) {
 		return resolve(event);
 	}
 
@@ -38,7 +50,8 @@ const authHandle: Handle = async ({ event, resolve }) => {
 				uid: userRecord.uid,
 				email: userRecord.email || null,
 				displayName: userRecord.displayName,
-				role: userRecord.customClaims?.role || 'owner'
+				role: userRecord.customClaims?.role || 'owner',
+				isAdmin: userRecord.customClaims?.role === 'admin'
 			};
 
 		} catch (error) {
