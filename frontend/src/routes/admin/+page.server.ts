@@ -59,6 +59,7 @@ export const load = async ({ locals }: any) => {
 				creatorName: data.creatorName || '',
 				createdAt: data.createdAt?.toDate?.()?.toISOString() || null,
 				isPublic: data.isPublic !== false,
+				isComplete: data.isComplete || false, // Include completion status
 				// Payment status from calculatorConfig (following established pattern)
 				paymentStatus: data.calculatorConfig?.status || 'draft',
 				// Check if has active livestream
