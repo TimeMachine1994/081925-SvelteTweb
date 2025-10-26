@@ -134,6 +134,7 @@ export async function sendRegistrationEmail(email: string, password: string, lov
 	}
 }
 
+
 export async function sendInvitationEmail(data: InvitationEmailData) {
 	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key') {
 		console.warn('⚠️ SendGrid client not initialized. Skipping invitation email.');

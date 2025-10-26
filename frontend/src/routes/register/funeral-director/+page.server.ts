@@ -1,7 +1,7 @@
 import { adminAuth, adminDb } from '$lib/server/firebase';
 import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { sendRegistrationEmail } from '$lib/server/email';
+import { sendRegistrationEmail, sendEnhancedRegistrationEmail } from '$lib/server/email';
 import { indexMemorial } from '$lib/server/algolia-indexing';
 import type { Memorial } from '$lib/types/memorial';
 import { validateMultipleEmails } from '$lib/utils/email-validation';
@@ -128,63 +128,80 @@ export const actions: Actions = {
 			return fail(400, { error: `Validation failed: ${validationErrors.join(', ')}` });
 		}
 
-		// Pre-validate emails before expensive operations
-		// Only validate family contact email since that's the only one creating a new account
-		console.log('🔍 Pre-validating family contact email...');
-		const emailsToValidate = [
-			{ email: familyContactEmail, fieldName: 'familyContactEmail' }
-		];
-		
-		// Note: Director email is NOT validated for uniqueness since it's just metadata
-		// and not used to create a new Firebase Auth account
-
-		const emailValidation = await validateMultipleEmails(emailsToValidate);
-		if (!emailValidation.isValid) {
-			console.log('❌ Email validation failed:', emailValidation.errors);
-			const firstError = emailValidation.errors[0];
-			return fail(400, { 
-				error: firstError.error,
-				field: firstError.field
-			});
-		}
-
 		console.log('✅ All validation passed successfully');
 
-		const password = generateRandomPassword();
 		const fullSlug = await generateUniqueMemorialSlug(lovedOneName);
+		let userRecord;
+		let isExistingUser = false;
+		let password = '';
 
 		try {
-			// 1. Create user in Firebase Auth using family contact email as primary
-			console.log(`👤 Creating user account with family contact email: ${familyContactEmail}`);
-			const userRecord = await adminAuth.createUser({
-				email: familyContactEmail, // Use family contact email as primary
-				password,
-				displayName: familyContactName || directorName // Prefer family contact name
-			});
-			console.log(`✅ User created successfully: ${userRecord.uid}`);
+			// Check if user already exists
+			console.log(`🔍 Checking if user exists with email: ${familyContactEmail}`);
+			try {
+				userRecord = await adminAuth.getUserByEmail(familyContactEmail);
+				isExistingUser = true;
+				console.log(`✅ Found existing user: ${userRecord.uid}`);
+			} catch (error: any) {
+				if (error.code === 'auth/user-not-found') {
+					// User doesn't exist, create new one
+					console.log(`👤 Creating new user account with family contact email: ${familyContactEmail}`);
+					password = generateRandomPassword();
+					userRecord = await adminAuth.createUser({
+						email: familyContactEmail,
+						password,
+						displayName: familyContactName || directorName
+					});
+					console.log(`✅ New user created successfully: ${userRecord.uid}`);
 
-			// 2. Set custom claim for owner role
-			console.log('👑 Setting owner role claim...');
-			await adminAuth.setCustomUserClaims(userRecord.uid, { role: 'owner' });
-			console.log(`✅ Custom claim 'owner' set for ${familyContactEmail}`);
+					// Set custom claim for owner role (only for new users)
+					console.log('👑 Setting owner role claim...');
+					await adminAuth.setCustomUserClaims(userRecord.uid, { role: 'owner' });
+					console.log(`✅ Custom claim 'owner' set for ${familyContactEmail}`);
+				} else {
+					throw error; // Re-throw other errors
+				}
+			}
 
-			// 3. Create enhanced user profile in Firestore
-			console.log('📝 Creating enhanced user profile...');
-			const userProfile = createStandardUserProfile({
-				email: familyContactEmail,
-				displayName: familyContactName || directorName,
-				phone: familyContactPhone,
-				funeralHomeName,
-				role: 'owner',
-				directorEmail: directorEmail || undefined,
-				familyContactName: familyContactName,
-				familyContactPhone: familyContactPhone,
-				contactPreference: contactPreference as 'phone' | 'email',
-				createdByFuneralDirector: true
-			});
+			// Update or create user profile in Firestore
+			if (isExistingUser) {
+				console.log('📝 Updating existing user profile with new memorial info...');
+				// Get existing profile
+				const existingProfileDoc = await adminDb.collection('users').doc(userRecord.uid).get();
+				const existingProfile = existingProfileDoc.data() || {};
+				
+				// Update with new information (merge with existing)
+				const updatedProfile = {
+					...existingProfile,
+					phone: familyContactPhone || existingProfile.phone,
+					familyContactName: familyContactName || existingProfile.familyContactName,
+					familyContactPhone: familyContactPhone || existingProfile.familyContactPhone,
+					contactPreference: contactPreference || existingProfile.contactPreference,
+					updatedAt: new Date(),
+					// Increment memorial count if it exists
+					memorialCount: (existingProfile.memorialCount || 0) + 1
+				};
 
-			await adminDb.collection('users').doc(userRecord.uid).set(userProfile);
-			console.log(`✅ Enhanced user profile created for ${familyContactEmail}`);
+				await adminDb.collection('users').doc(userRecord.uid).update(updatedProfile);
+				console.log(`✅ Existing user profile updated for ${familyContactEmail}`);
+			} else {
+				console.log('📝 Creating new user profile...');
+				const userProfile = createStandardUserProfile({
+					email: familyContactEmail,
+					displayName: familyContactName || directorName,
+					phone: familyContactPhone,
+					funeralHomeName,
+					role: 'owner',
+					directorEmail: directorEmail || undefined,
+					familyContactName: familyContactName,
+					familyContactPhone: familyContactPhone,
+					contactPreference: contactPreference as 'phone' | 'email',
+					createdByFuneralDirector: true
+				});
+
+				await adminDb.collection('users').doc(userRecord.uid).set(userProfile);
+				console.log(`✅ New user profile created for ${familyContactEmail}`);
+			}
 
 			// 4. Create comprehensive memorial with all service details
 			console.log('🕊️ Creating comprehensive memorial...');
@@ -257,10 +274,23 @@ export const actions: Actions = {
 			// Index the new memorial in Algolia
 			await indexMemorial({ ...memorialData, id: memorialRef.id } as unknown as Memorial);
 
-			// 5. Send registration email
-			console.log('📧 Sending registration email...');
-			await sendRegistrationEmail(familyContactEmail, password, lovedOneName);
-			console.log('✅ Registration email sent successfully');
+			// 5. Send appropriate email based on user status
+			if (isExistingUser) {
+				console.log('📧 Sending enhanced registration email for existing user...');
+				// For existing users, send enhanced email about the new memorial (no password needed)
+				await sendEnhancedRegistrationEmail({
+					email: familyContactEmail,
+					lovedOneName: lovedOneName,
+					memorialUrl: `https://tributestream.com/${fullSlug}`,
+					ownerName: familyContactName || directorName,
+					password: '' // No password needed for existing users
+				});
+				console.log('✅ Enhanced registration email sent successfully');
+			} else {
+				console.log('📧 Sending registration email for new user...');
+				await sendRegistrationEmail(familyContactEmail, password, lovedOneName);
+				console.log('✅ Registration email sent successfully');
+			}
 
 			// 6. Create a custom token for auto-login
 			console.log('🎟️ Creating custom token for auto-login...');
@@ -271,7 +301,11 @@ export const actions: Actions = {
 			const memorialUrl = `/${fullSlug}`;
 			console.log(`🚀 Redirecting to memorial page: ${memorialUrl}`);
 			
-			console.log('🎉 Enhanced funeral director registration completed successfully!');
+			if (isExistingUser) {
+				console.log('🎉 Additional memorial created for existing user successfully!');
+			} else {
+				console.log('🎉 Enhanced funeral director registration completed successfully!');
+			}
 			throw redirect(303, memorialUrl);
 			
 		} catch (error: any) {
