@@ -42,15 +42,17 @@
 		error = '';
 
 		try {
-			// Execute reCAPTCHA
+			// Execute reCAPTCHA (only in browser)
 			let recaptchaToken = null;
-			try {
-				recaptchaToken = await executeRecaptcha(RECAPTCHA_ACTIONS.CONTACT_FORM);
-				if (!recaptchaToken) {
-					console.warn('reCAPTCHA returned null token');
+			if (typeof window !== 'undefined') {
+				try {
+					recaptchaToken = await executeRecaptcha(RECAPTCHA_ACTIONS.CONTACT_FORM);
+					if (!recaptchaToken) {
+						console.warn('reCAPTCHA returned null token');
+					}
+				} catch (recaptchaError) {
+					console.warn('reCAPTCHA failed, proceeding without token:', recaptchaError);
 				}
-			} catch (recaptchaError) {
-				console.warn('reCAPTCHA failed, proceeding without token:', recaptchaError);
 			}
 
 			const response = await fetch('/api/contact', {

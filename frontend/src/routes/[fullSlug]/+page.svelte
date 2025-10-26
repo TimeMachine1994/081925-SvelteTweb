@@ -2,6 +2,9 @@
 	import type { PageData } from './$types';
 	import StreamPlayer from '$lib/components/StreamPlayer.svelte';
 	import SlideshowSection from '$lib/components/SlideshowSection.svelte';
+	import BookingReminderBanner from '$lib/components/BookingReminderBanner.svelte';
+	import { shouldShowBookingBanner, markBannerAsSeen, debugBannerState } from '$lib/utils/bookingBanner';
+	import { onMount } from 'svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -21,6 +24,25 @@
 			memorial.funeralDirectorUid === user.uid
 		);
 	});
+
+	// Booking banner state
+	let showBookingBanner = $state(false);
+	let bannerVisible = $state(false);
+
+	// Check if booking banner should be shown
+	let bannerState = $derived(() => {
+		if (!memorial || !memorial.id) return { shouldShow: false };
+		return shouldShowBookingBanner(memorial.id, user, memorial);
+	});
+
+	// Handle banner dismissal
+	function handleBannerDismiss() {
+		if (memorial?.id) {
+			markBannerAsSeen(memorial.id);
+		}
+		bannerVisible = false;
+		showBookingBanner = false;
+	}
 
 	// Enhanced date formatting with better error handling
 	function formatDate(dateString: string | null): string {
@@ -46,6 +68,25 @@
 	// Simplified: Use hasCustomHtml flag from server
 	let hasCustomHtml = $derived((memorial as any)?.hasCustomHtml || false);
 
+	// Show booking banner after delay if conditions are met
+	$effect(() => {
+		const currentBannerState = bannerState();
+		if (currentBannerState.shouldShow && !showBookingBanner) {
+			console.log('🎯 [BOOKING_BANNER] Scheduling banner display in 3 seconds...');
+			if (memorial?.id) {
+				debugBannerState(memorial.id);
+			}
+			
+			const timer = setTimeout(() => {
+				console.log('🎯 [BOOKING_BANNER] Showing booking banner');
+				showBookingBanner = true;
+				bannerVisible = true;
+			}, 3000); // 3 second delay
+
+			return () => clearTimeout(timer);
+		}
+	});
+
 	// Log memorial data for debugging
 	$effect(() => {
 		if (memorial) {
@@ -58,7 +99,8 @@
 				layoutType: hasCustomHtml ? 'Legacy (custom HTML only)' : 'Standard (with streams)',
 				custom_html_length: (memorial as any)?.custom_html?.length || 0,
 				custom_html_preview: (memorial as any)?.custom_html ? 
-					(memorial as any).custom_html.substring(0, 100) + '...' : null
+					(memorial as any).custom_html.substring(0, 100) + '...' : null,
+				bannerState: bannerState()
 			});
 		}
 	});
@@ -69,7 +111,17 @@
 	<meta name="description" content={memorial?.content || 'Memorial service information'} />
 </svelte:head>
 
-<div class="memorial-page">
+<!-- Booking Reminder Banner -->
+{#if showBookingBanner && memorial}
+	<BookingReminderBanner 
+		memorialId={memorial.id}
+		memorialName={memorial.lovedOneName}
+		onDismiss={handleBannerDismiss}
+		visible={bannerVisible}
+	/>
+{/if}
+
+<div class="memorial-page {showBookingBanner ? 'banner-active' : ''}">
 	{#if memorial}
 		{#if hasCustomHtml && (memorial as any).custom_html}
 			<!-- Legacy Memorial Layout with Custom HTML -->
@@ -346,6 +398,12 @@
 
 	/* Import Fanwood font */
 	@import url('https://fonts.googleapis.com/css2?family=Fanwood+Text:ital,wght@0,400;1,400&display=swap');
+
+	/* Banner integration styles */
+	.memorial-page.banner-active {
+		padding-top: 80px; /* Space for banner */
+		transition: padding-top 0.3s ease-out;
+	}
 
 	/* Responsive Design */
 	@media (max-width: 768px) {

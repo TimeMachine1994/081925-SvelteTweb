@@ -33,6 +33,10 @@
 		});
 
 		if (response.ok) {
+			// Set login timestamp for booking banner tracking
+			const { setLoginTimestamp } = await import('$lib/utils/bookingBanner');
+			setLoginTimestamp();
+			
 			const result = await response.json();
 			if (result.redirectTo) {
 				// Use window.location.href to avoid race condition with session cookie

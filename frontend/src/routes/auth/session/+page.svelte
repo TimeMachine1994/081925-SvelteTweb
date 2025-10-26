@@ -65,6 +65,11 @@
 
 				if (response.ok) {
 					console.log('✅ Session created successfully!');
+					
+					// Set login timestamp for booking banner tracking
+					const { setLoginTimestamp } = await import('$lib/utils/bookingBanner');
+					setLoginTimestamp();
+					
 					// Step 5: Redirect
 					currentStep = 'Redirecting...';
 					progress = 100;

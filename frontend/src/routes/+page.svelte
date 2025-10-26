@@ -305,7 +305,6 @@
 						<!-- Funeral Directors CTA Cluster -->
 						<div class="text-center">
 							<h3 class="text-2xl font-semibold text-white mb-4">For Funeral Directors</h3>
-							<p class="text-white/90 text-sm mb-4">Create memorials for families • Manage livestreams • Help build slideshows</p>
 							<div class="space-y-3">
 								<Button theme="minimal" onclick={handleBookDemo} class="w-full bg-slate-900 text-white hover:bg-slate-800 flex items-center justify-center">
 									<Phone class="h-4 w-4 mr-2" />

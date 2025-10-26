@@ -825,6 +825,19 @@
 			generationPhase = 'Preview ready!';
 			generationProgress = 100;
 
+			// Auto-scroll to step 4 on mobile after video generation
+			setTimeout(() => {
+				if (window.innerWidth <= 768) { // Mobile breakpoint
+					const step4Element = document.querySelector('.workflow-step:nth-of-type(4)');
+					if (step4Element) {
+						step4Element.scrollIntoView({ 
+							behavior: 'smooth', 
+							block: 'start' 
+						});
+					}
+				}
+			}, 500); // Small delay to ensure DOM is updated
+
 		} catch (error) {
 			console.error('Error generating slideshow:', error);
 			alert(`Failed to generate slideshow: ${error.message}`);
@@ -1010,7 +1023,8 @@
 			// Upload new video to Firebase
 			const result = await uploadToFirebase(generatedVideoBlob, photos, settings);
 
-			if (result.slideshowId) {
+			// Fix: Check for both result.slideshowId and result.success
+			if (result.success && result.slideshowId) {
 				// Update published status
 				isPublished = true;
 				publishedSlideshow = {
@@ -1040,12 +1054,17 @@
 				});
 
 				alert('Slideshow published to memorial successfully!');
+			} else {
+				// Handle case where API succeeded but didn't return expected data
+				throw new Error('API response missing required data');
 			}
 
 			generationProgress = 100;
 		} catch (error) {
 			console.error('Error saving slideshow to memorial:', error);
-			alert('Failed to save slideshow to memorial. Please try again.');
+			// More detailed error message
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+			alert(`Failed to save slideshow to memorial: ${errorMessage}. Please try again.`);
 		} finally {
 			isGenerating = false;
 			generationProgress = 0;
@@ -3107,6 +3126,29 @@
 
 		.settings-grid {
 			grid-template-columns: 1fr;
+		}
+
+		/* Fix button overflow on mobile */
+		.primary-btn.extra-large {
+			padding: 1rem 1.5rem;
+			font-size: 1.1rem;
+			max-width: 100%;
+			word-wrap: break-word;
+		}
+
+		.action-section {
+			padding: 1.5rem 1rem;
+		}
+
+		.final-actions {
+			flex-direction: column;
+			gap: 1rem;
+			align-items: stretch;
+		}
+
+		.final-actions .primary-btn {
+			width: 100%;
+			justify-content: center;
 		}
 	}
 
