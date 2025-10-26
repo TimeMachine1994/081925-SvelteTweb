@@ -39,6 +39,11 @@
 	// Loading states
 	let isApproving = $state(false);
 	let isCreatingMemorial = $state(false);
+	let isTogglingStatus = $state(false);
+
+	// Memorial selection state
+	let selectedMemorials = $state<Set<string>>(new Set());
+	let selectAll = $state(false);
 
 	// Audit logs state
 	let auditLogs = $state<any[]>([]);
@@ -85,6 +90,86 @@
 			isApproving = false;
 		}
 	}
+
+	/**
+	 * Toggle memorial completion status for selected memorials
+	 */
+	async function toggleMemorialStatus(isComplete: boolean) {
+		if (selectedMemorials.size === 0) {
+			alert('Please select memorials to update');
+			return;
+		}
+
+		const memorialIds = Array.from(selectedMemorials);
+		const statusText = isComplete ? 'completed' : 'scheduled';
+		
+		if (!confirm(`Mark ${memorialIds.length} memorial(s) as ${statusText}?`)) {
+			return;
+		}
+
+		isTogglingStatus = true;
+
+		try {
+			const response = await fetch('/api/admin/toggle-memorial-status', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ memorialIds, isComplete })
+			});
+
+			const result = await response.json();
+
+			if (response.ok) {
+				console.log(`✅ [ADMIN] Successfully marked ${result.updatedCount} memorials as ${statusText}`);
+				await invalidateAll(); // Refresh data
+				selectedMemorials.clear();
+				selectAll = false;
+				alert(`Successfully marked ${result.updatedCount} memorial(s) as ${statusText}!`);
+			} else {
+				console.error(`❌ [ADMIN] Failed to toggle memorial status:`, result.error);
+				alert(`Failed to update memorials: ${result.error}`);
+			}
+		} catch (error) {
+			console.error('❌ [ADMIN] Error toggling memorial status:', error);
+			alert('Network error occurred while updating memorials');
+		} finally {
+			isTogglingStatus = false;
+		}
+	}
+
+	/**
+	 * Handle select all checkbox
+	 */
+	function handleSelectAll() {
+		if (selectAll) {
+			// Select all visible memorials
+			const visibleMemorials = activeTab === 'overview' 
+				? memorials.filter(m => !m.isComplete) 
+				: memorials;
+			selectedMemorials = new Set(visibleMemorials.map(m => m.id).filter(id => id !== undefined) as string[]);
+		} else {
+			selectedMemorials.clear();
+		}
+	}
+
+	/**
+	 * Handle individual memorial selection
+	 */
+	function handleMemorialSelect(memorialId: string, event: Event) {
+		const target = event.target as HTMLInputElement;
+		const checked = target.checked;
+		
+		if (checked) {
+			selectedMemorials.add(memorialId);
+		} else {
+			selectedMemorials.delete(memorialId);
+			selectAll = false;
+		}
+		selectedMemorials = selectedMemorials; // Trigger reactivity
+	}
+
+	// Computed values
+	$: scheduledMemorials = memorials.filter(m => !m.isComplete);
+	$: completedMemorials = memorials.filter(m => m.isComplete);
 
 	/**
 	 * Reject a funeral director application
@@ -371,21 +456,113 @@
 
 			<div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
 				<div class="rounded-xl border border-white/10 bg-white/5 p-4">
-					<div class="text-sm text-white/70">Total Memorials</div>
-					<div class="text-2xl font-bold text-white">{memorials.length}</div>
+					<div class="text-sm text-white/70">Scheduled Memorials</div>
+					<div class="text-2xl font-bold text-amber-400">{scheduledMemorials.length}</div>
 				</div>
 				<div class="rounded-xl border border-white/10 bg-white/5 p-4">
-					<div class="text-sm text-white/70">Total Users</div>
-					<div class="text-2xl font-bold text-white">{allUsers.length}</div>
+					<div class="text-sm text-white/70">Completed Memorials</div>
+					<div class="text-2xl font-bold text-green-400">{completedMemorials.length}</div>
 				</div>
 				<div class="rounded-xl border border-white/10 bg-white/5 p-4">
 					<div class="text-sm text-white/70">Pending Approvals</div>
 					<div class="text-2xl font-bold text-amber-400">{pendingFuneralDirectors.length}</div>
 				</div>
 				<div class="rounded-xl border border-white/10 bg-white/5 p-4">
-					<div class="text-sm text-white/70">Approved Directors</div>
-					<div class="text-2xl font-bold text-green-400">{approvedFuneralDirectors.length}</div>
+					<div class="text-sm text-white/70">Total Users</div>
+					<div class="text-2xl font-bold text-white">{allUsers.length}</div>
 				</div>
+			</div>
+
+			<!-- Scheduled Memorials Section -->
+			<div class="rounded-xl border border-white/10 bg-white/5 p-4">
+				<div class="flex items-center justify-between mb-4">
+					<h3 class="text-lg font-semibold text-white">📅 Scheduled Memorials ({scheduledMemorials.length})</h3>
+					{#if scheduledMemorials.length > 0}
+						<div class="flex items-center gap-3">
+							<label class="flex items-center gap-2 text-sm text-white/70">
+								<input
+									type="checkbox"
+									bind:checked={selectAll}
+									onchange={handleSelectAll}
+									class="rounded border-white/20 bg-white/10 text-blue-500"
+								/>
+								Select All
+							</label>
+							{#if selectedMemorials.size > 0}
+								<div class="flex gap-2">
+									<Button
+										onclick={() => toggleMemorialStatus(true)}
+										disabled={isTogglingStatus}
+										variant="primary"
+										rounded="lg"
+									>
+										{isTogglingStatus ? 'Updating...' : `✅ Mark Complete (${selectedMemorials.size})`}
+									</Button>
+								</div>
+							{/if}
+						</div>
+					{/if}
+				</div>
+
+				{#if scheduledMemorials.length > 0}
+					<div class="overflow-hidden rounded-lg border border-white/10">
+						<div class="overflow-x-auto">
+							<table class="w-full">
+								<thead class="bg-white/10">
+									<tr>
+										<th class="px-3 py-2 text-left font-semibold text-white w-12">Select</th>
+										<th class="px-3 py-2 text-left font-semibold text-white">Loved One</th>
+										<th class="px-3 py-2 text-left font-semibold text-white">Creator</th>
+										<th class="px-3 py-2 text-left font-semibold text-white">Created</th>
+										<th class="px-3 py-2 text-left font-semibold text-white">Actions</th>
+									</tr>
+								</thead>
+								<tbody>
+									{#each scheduledMemorials as memorial}
+										<tr class="border-b border-white/10 hover:bg-white/5">
+											<td class="px-3 py-2">
+												<input
+													type="checkbox"
+													checked={selectedMemorials.has(memorial.id || '')}
+													onchange={(e) => handleMemorialSelect(memorial.id || '', e)}
+													class="rounded border-white/20 bg-white/10 text-blue-500"
+												/>
+											</td>
+											<td class="px-3 py-2 text-white font-medium">{memorial.lovedOneName}</td>
+											<td class="px-3 py-2 text-sm text-white/70">{memorial.creatorEmail}</td>
+											<td class="px-3 py-2 text-sm text-white/70">
+												{memorial.createdAt ? new Date(memorial.createdAt.toDate()).toLocaleDateString() : 'Unknown'}
+											</td>
+											<td class="px-3 py-2">
+												<div class="flex gap-2">
+													<a
+														href="/{memorial.fullSlug}"
+														class="text-sm text-blue-400 hover:text-blue-300">View</a
+													>
+													<a
+														href="/memorials/{memorial.id}/streams"
+														class="text-sm text-green-400 hover:text-green-300">Streams</a
+													>
+													<button
+														onclick={() => toggleMemorialStatus(true)}
+														class="text-sm text-amber-400 hover:text-amber-300"
+													>
+														Complete
+													</button>
+												</div>
+											</td>
+										</tr>
+									{/each}
+								</tbody>
+							</table>
+						</div>
+					</div>
+				{:else}
+					<div class="text-center py-8 text-white/70">
+						<p>No scheduled memorials found</p>
+						<p class="text-sm mt-2">All memorials have been completed</p>
+					</div>
+				{/if}
 			</div>
 
 			<div class="rounded-xl border border-white/10 bg-white/5 p-4">
@@ -489,13 +666,49 @@
 	<!-- Memorials Tab -->
 	{#if activeTab === 'memorials'}
 		<div class="space-y-6">
-			<h2 class="mb-4 text-2xl font-bold text-white">Memorial Management</h2>
+			<div class="flex items-center justify-between">
+				<h2 class="text-2xl font-bold text-white">Memorial Management</h2>
+				{#if memorials.length > 0}
+					<div class="flex items-center gap-3">
+						<label class="flex items-center gap-2 text-sm text-white/70">
+							<input
+								type="checkbox"
+								bind:checked={selectAll}
+								onchange={handleSelectAll}
+								class="rounded border-white/20 bg-white/10 text-blue-500"
+							/>
+							Select All
+						</label>
+						{#if selectedMemorials.size > 0}
+							<div class="flex gap-2">
+								<Button
+									onclick={() => toggleMemorialStatus(true)}
+									disabled={isTogglingStatus}
+									variant="primary"
+									rounded="lg"
+								>
+									{isTogglingStatus ? 'Updating...' : `✅ Mark Complete (${selectedMemorials.size})`}
+								</Button>
+								<Button
+									onclick={() => toggleMemorialStatus(false)}
+									disabled={isTogglingStatus}
+									variant="secondary"
+									rounded="lg"
+								>
+									{isTogglingStatus ? 'Updating...' : `📅 Mark Scheduled (${selectedMemorials.size})`}
+								</Button>
+							</div>
+						{/if}
+					</div>
+				{/if}
+			</div>
 
 			<div class="overflow-hidden rounded-xl border border-white/10 bg-white/5">
 				<div class="overflow-x-auto">
 					<table class="w-full">
 						<thead class="bg-white/10">
 							<tr>
+								<th class="px-4 py-3 text-left font-semibold text-white w-12">Select</th>
 								<th class="px-4 py-3 text-left font-semibold text-white">Loved One</th>
 								<th class="px-4 py-3 text-left font-semibold text-white">Creator</th>
 								<th class="px-4 py-3 text-left font-semibold text-white">Status</th>
@@ -506,16 +719,29 @@
 							{#if memorials && memorials.length > 0}
 								{#each memorials as memorial}
 									<tr class="border-b border-white/10 hover:bg-white/5">
+										<td class="px-4 py-3">
+											<input
+												type="checkbox"
+												checked={selectedMemorials.has(memorial.id || '')}
+												onchange={(e) => handleMemorialSelect(memorial.id || '', e)}
+												class="rounded border-white/20 bg-white/10 text-blue-500"
+											/>
+										</td>
 										<td class="px-4 py-3 text-white">{memorial.lovedOneName}</td>
 										<td class="px-4 py-3 text-sm text-white/70">{memorial.creatorEmail}</td>
 										<td class="px-4 py-3">
-											{#if memorial.isPublic}
-												<span class="rounded bg-green-500 px-2 py-1 text-xs text-white">Public</span
-												>
-											{:else}
-												<span class="rounded bg-gray-500 px-2 py-1 text-xs text-white">Private</span
-												>
-											{/if}
+											<div class="flex flex-col gap-1">
+												{#if memorial.isComplete}
+													<span class="rounded bg-green-500 px-2 py-1 text-xs text-white w-fit">✅ Completed</span>
+												{:else}
+													<span class="rounded bg-amber-500 px-2 py-1 text-xs text-white w-fit">📅 Scheduled</span>
+												{/if}
+												{#if memorial.isPublic}
+													<span class="rounded bg-blue-500 px-2 py-1 text-xs text-white w-fit">Public</span>
+												{:else}
+													<span class="rounded bg-gray-500 px-2 py-1 text-xs text-white w-fit">Private</span>
+												{/if}
+											</div>
 										</td>
 										<td class="px-4 py-3">
 											<div class="flex gap-2">
@@ -532,7 +758,13 @@
 													class="text-sm text-purple-400 hover:text-purple-300">Schedule</a
 												>
 												<button
-													onclick={() => deleteMemorial(memorial.id, memorial.lovedOneName)}
+													onclick={() => toggleMemorialStatus(!memorial.isComplete)}
+													class="text-sm {memorial.isComplete ? 'text-amber-400 hover:text-amber-300' : 'text-green-400 hover:text-green-300'}"
+												>
+													{memorial.isComplete ? 'Mark Scheduled' : 'Mark Complete'}
+												</button>
+												<button
+													onclick={() => deleteMemorial(memorial.id || '', memorial.lovedOneName)}
 													class="text-sm text-red-400 hover:text-red-300"
 												>
 													Delete

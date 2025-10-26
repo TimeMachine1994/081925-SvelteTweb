@@ -40,6 +40,7 @@ export interface TimeInfo {
 }
 
 export interface Memorial {
+	id?: string; // Document ID from Firestore
 	lovedOneName: string;
 	slug: string;
 	fullSlug: string;
@@ -61,6 +62,7 @@ export interface Memorial {
 	memorialLocationName?: string;
 	memorialLocationAddress?: string;
 	isPublic: boolean;
+	isComplete: boolean;
 	content: string;
 	custom_html: string | null;
 	isLegacy?: boolean; // Indicates if this memorial uses custom_html instead of structured data

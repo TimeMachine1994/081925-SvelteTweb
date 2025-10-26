@@ -76,7 +76,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			creatorEmail: formData.creatorEmail,
 			creatorName: formData.creatorName || formData.lovedOneName + ' Family',
 			content: formData.content || '',
-			isPublic: formData.isPublic !== false,
+			isPublic: true, // Always set to true for new memorials
+			isComplete: false, // New memorials start as incomplete/scheduled
 			serviceDate: formData.serviceDate || null,
 			serviceTime: formData.serviceTime || null,
 			location: formData.location || '',
@@ -130,7 +131,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					email: formData.creatorEmail,
 					password: password,
 					lovedOneName: formData.lovedOneName,
-					tributeUrl: `https://tributestream.com/${fullSlug}`,
 					familyContactEmail: formData.creatorEmail,
 					familyContactName: formData.creatorName || `${formData.lovedOneName} Family`,
 					familyContactPhone: '',

@@ -102,7 +102,8 @@ export const actions: Actions = {
 				},
 
 				// Basic memorial settings
-				isPublic: false,
+				isPublic: true, // Set to true by default
+				isComplete: false, // New memorials start as scheduled/incomplete
 				content: '',
 				custom_html: null,
 
