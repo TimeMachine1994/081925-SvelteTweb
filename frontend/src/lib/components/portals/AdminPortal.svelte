@@ -531,7 +531,7 @@
 											<td class="px-3 py-2 text-white font-medium">{memorial.lovedOneName}</td>
 											<td class="px-3 py-2 text-sm text-white/70">{memorial.creatorEmail}</td>
 											<td class="px-3 py-2 text-sm text-white/70">
-												{memorial.createdAt ? new Date(memorial.createdAt.toDate()).toLocaleDateString() : 'Unknown'}
+												{memorial.createdAt ? new Date(memorial.createdAt).toLocaleDateString() : 'Unknown'}
 											</td>
 											<td class="px-3 py-2">
 												<div class="flex gap-2">
