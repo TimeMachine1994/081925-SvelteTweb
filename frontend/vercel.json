@@ -82,7 +82,7 @@
       ]
     },
     {
-      "source": "/(.*)\.webmanifest$",
+      "source": "/(.*)\\.webmanifest$",
       "headers": [
         {
           "key": "Cache-Control",
