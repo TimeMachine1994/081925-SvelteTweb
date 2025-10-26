@@ -46,6 +46,9 @@ const authHandle: Handle = async ({ event, resolve }) => {
 
 			const userRecord = await Promise.race([userRecordPromise, userTimeoutPromise]);
 
+			console.log('🔍 [AUTH] User custom claims:', userRecord.customClaims);
+			console.log('🔍 [AUTH] User email:', userRecord.email);
+
 			event.locals.user = {
 				uid: userRecord.uid,
 				email: userRecord.email || null,
@@ -53,6 +56,8 @@ const authHandle: Handle = async ({ event, resolve }) => {
 				role: userRecord.customClaims?.role || 'owner',
 				isAdmin: userRecord.customClaims?.role === 'admin'
 			};
+
+			console.log('🔍 [AUTH] Final user object:', event.locals.user);
 
 		} catch (error) {
 			console.error('❌ Session verification failed:', error);
