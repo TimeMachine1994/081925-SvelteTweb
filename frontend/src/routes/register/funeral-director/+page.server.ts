@@ -1,8 +1,7 @@
 import { adminAuth, adminDb } from '$lib/server/firebase';
 import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { sendEnhancedRegistrationEmail } from '$lib/server/email';
-import type { EnhancedRegistrationEmailData } from '$lib/server/email';
+import { sendRegistrationEmail } from '$lib/server/email';
 import { indexMemorial } from '$lib/server/algolia-indexing';
 import type { Memorial } from '$lib/types/memorial';
 
@@ -246,27 +245,10 @@ export const actions: Actions = {
 			// Index the new memorial in Algolia
 			await indexMemorial({ ...memorialData, id: memorialRef.id } as Memorial);
 
-			// 5. Send enhanced registration email
-			console.log('📧 Sending enhanced registration email...');
-			await sendEnhancedRegistrationEmail({
-				email: familyContactEmail,
-				password,
-				lovedOneName,
-				tributeUrl: `https://tributestream.com/tributes/${slug}`,
-				familyContactName,
-				familyContactEmail,
-				familyContactPhone,
-				contactPreference: contactPreference as 'phone' | 'email',
-				directorName,
-				directorEmail,
-				funeralHomeName,
-				memorialDate,
-				memorialTime,
-				locationName,
-				locationAddress,
-				additionalNotes
-			});
-			console.log('✅ Enhanced registration email sent successfully');
+			// 5. Send registration email
+			console.log('📧 Sending registration email...');
+			await sendRegistrationEmail(familyContactEmail, password, lovedOneName);
+			console.log('✅ Registration email sent successfully');
 
 			// 6. Create a custom token for auto-login
 			console.log('🎟️ Creating custom token for auto-login...');
