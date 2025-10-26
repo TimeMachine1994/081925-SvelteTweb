@@ -524,6 +524,10 @@
 													class="text-sm text-blue-400 hover:text-blue-300">View</a
 												>
 												<a
+													href="/memorials/{memorial.id}/streams"
+													class="text-sm text-green-400 hover:text-green-300">Streams</a
+												>
+												<a
 													href="/schedule?memorialId={memorial.id}"
 													class="text-sm text-purple-400 hover:text-purple-300">Schedule</a
 												>
