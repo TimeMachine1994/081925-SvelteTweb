@@ -45,7 +45,7 @@ export async function verifyMemorialAccess(
 		// If memorial data is provided, use it directly for testing
 		if (memorial) {
 			// Check if user is admin first (highest priority)
-			if (userContext.role === 'admin' || userContext.isAdmin) {
+			if (userContext.role === 'admin') {
 				return {
 					hasAccess: true,
 					accessLevel: 'admin',
@@ -126,7 +126,7 @@ export class MemorialAccessVerifier {
 		try {
 			await initializeAdminDb(); // Ensure DB is initialized
 			// Admin always has access
-			if (user.role === 'admin' || user.isAdmin) {
+			if (user.role === 'admin') {
 				return {
 					hasAccess: true,
 					accessLevel: 'admin',
@@ -254,7 +254,7 @@ export class MemorialAccessVerifier {
 			const accessibleMemorials: Array<{ memorial: Memorial; accessLevel: string }> = [];
 
 			// Admin gets all memorials with full access
-			if (user.role === 'admin' || user.isAdmin) {
+			if (user.role === 'admin') {
 				const allMemorialsSnap = await adminDb.collection('memorials').get();
 				return allMemorialsSnap.docs.map((doc: any) => ({
 					memorial: { id: doc.id, ...doc.data() } as Memorial,

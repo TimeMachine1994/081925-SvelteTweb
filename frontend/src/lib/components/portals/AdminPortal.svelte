@@ -4,7 +4,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { invalidateAll } from '$app/navigation';
-	import { Button } from '$lib/ui';
+	import { Button } from '$lib/components/minimal-modern';
 
 	// Props from parent component
 	let {

@@ -35,6 +35,8 @@
 		if (!user) return 'Login';
 		
 		switch (user.role) {
+			case 'admin':
+				return 'Admin Dashboard';
 			case 'funeral_director':
 			case 'owner':
 				return 'My Profile';
@@ -89,7 +91,7 @@
 						{#if $user}
 							<a href={getUserPortalLink($user)} class="flex items-center gap-2 no-underline text-black hover:text-black">
 								<User class="w-4 h-4" />
-								My Portal
+								{getUserPortalLabel($user)}
 							</a>
 						{:else}
 							<a href="/register/loved-one" class="flex items-center gap-2 no-underline text-black hover:text-black">
@@ -171,7 +173,7 @@
 						{#if $user}
 							<a href={getUserPortalLink($user)} class="flex items-center justify-center gap-2 no-underline text-black hover:text-black">
 								<User class="w-4 h-4" />
-								My Portal
+								{getUserPortalLabel($user)}
 							</a>
 						{:else}
 							<a href="/register/loved-one" class="flex items-center justify-center gap-2 no-underline text-black hover:text-black">

@@ -1,0 +1,3370 @@
+{
+  "metadata": {
+    "totalMemorials": 60,
+    "generatedAt": "2025-10-25T19:59:21.218Z",
+    "source": "legacy_vimeo_extraction",
+    "description": "Memorial documents ready for Firebase import"
+  },
+  "memorials": [
+    {
+      "id": "memorial_v7ljkvg2r",
+      "lovedOnesName": "Christine Jara",
+      "fullSlug": "celebration-of-life-for-christine-jara",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/375374346\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Christine Jara",
+      "description": "A memorial service celebrating the life of Christine Jara. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.189Z",
+      "updatedAt": "2025-10-25T19:59:21.189Z",
+      "serviceDate": "2025-10-25T19:59:21.189Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 1,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Christine Jara - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Christine Jara. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_q8nn5lm02",
+      "lovedOnesName": "Justin Ortiz",
+      "fullSlug": "celebration-of-life-for-justin-ortiz",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/402654321\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Justin Ortiz",
+      "description": "A memorial service celebrating the life of Justin Ortiz. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.206Z",
+      "updatedAt": "2025-10-25T19:59:21.206Z",
+      "serviceDate": "2025-10-25T19:59:21.206Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 2,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Justin Ortiz - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Justin Ortiz. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_aimyi1is9",
+      "lovedOnesName": "Ward D. Morrow",
+      "fullSlug": "celebration-of-life-for-ward-d-morrow",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/409063322\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Ward D. Morrow",
+      "description": "A memorial service celebrating the life of Ward D. Morrow. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.207Z",
+      "updatedAt": "2025-10-25T19:59:21.207Z",
+      "serviceDate": "2025-10-25T19:59:21.207Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 3,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Ward D. Morrow - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Ward D. Morrow. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_p4ip0hyyp",
+      "lovedOnesName": "Ryan Martinez",
+      "fullSlug": "celebration-of-life-for-ryan-martinez",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/418020705\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Ryan Martinez",
+      "description": "A memorial service celebrating the life of Ryan Martinez. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.207Z",
+      "updatedAt": "2025-10-25T19:59:21.207Z",
+      "serviceDate": "2025-10-25T19:59:21.207Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 4,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Ryan Martinez - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Ryan Martinez. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_ywiwwd7tt",
+      "lovedOnesName": "Bernice Rampartap",
+      "fullSlug": "celebration-of-life-for-bernice-rampartap",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/486973910\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Bernice Rampartap",
+      "description": "A memorial service celebrating the life of Bernice Rampartap. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.208Z",
+      "updatedAt": "2025-10-25T19:59:21.208Z",
+      "serviceDate": "2025-10-25T19:59:21.208Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 5,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Bernice Rampartap - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Bernice Rampartap. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_g5mhtkxg8",
+      "lovedOnesName": "Riad Baksh",
+      "fullSlug": "celebration-of-life-for-riad-baksh",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://vimeo.com/event/995310/embed\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Riad Baksh",
+      "description": "A memorial service celebrating the life of Riad Baksh. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.209Z",
+      "updatedAt": "2025-10-25T19:59:21.209Z",
+      "serviceDate": "2025-10-25T19:59:21.209Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 6,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Riad Baksh - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Riad Baksh. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_xwnorm9ld",
+      "lovedOnesName": "Barbara T. Persaud",
+      "fullSlug": "celebration-of-life-for-barbara-t-persaud",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/542076123\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Barbara T. Persaud",
+      "description": "A memorial service celebrating the life of Barbara T. Persaud. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.211Z",
+      "updatedAt": "2025-10-25T19:59:21.211Z",
+      "serviceDate": "2025-10-25T19:59:21.211Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 7,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Barbara T. Persaud - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Barbara T. Persaud. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_f9hoe6al6",
+      "lovedOnesName": "Deonarine Ramnarine",
+      "fullSlug": "celebration-of-life-for-deonarine-ramnarine",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/548844825\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Deonarine Ramnarine",
+      "description": "A memorial service celebrating the life of Deonarine Ramnarine. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.212Z",
+      "updatedAt": "2025-10-25T19:59:21.212Z",
+      "serviceDate": "2025-10-25T19:59:21.212Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 8,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Deonarine Ramnarine - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Deonarine Ramnarine. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_fl07ferj9",
+      "lovedOnesName": "Kamla Rampersad",
+      "fullSlug": "celebration-of-life-for-kamla-rampersad",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/559424999\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Kamla Rampersad",
+      "description": "A memorial service celebrating the life of Kamla Rampersad. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.212Z",
+      "updatedAt": "2025-10-25T19:59:21.212Z",
+      "serviceDate": "2025-10-25T19:59:21.212Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 9,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Kamla Rampersad - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Kamla Rampersad. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_0m690lmeu",
+      "lovedOnesName": "Ramdai Ramnarine",
+      "fullSlug": "celebration-of-life-for-ramdai-ramnarine",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/568624134\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Ramdai Ramnarine",
+      "description": "A memorial service celebrating the life of Ramdai Ramnarine. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.212Z",
+      "updatedAt": "2025-10-25T19:59:21.212Z",
+      "serviceDate": "2025-10-25T19:59:21.212Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 10,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Ramdai Ramnarine - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Ramdai Ramnarine. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_pvyx1ur0v",
+      "lovedOnesName": "Kamla Devi Ramnarine",
+      "fullSlug": "celebration-of-life-for-kamla-devi-ramnarine",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/571449999\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Kamla Devi Ramnarine",
+      "description": "A memorial service celebrating the life of Kamla Devi Ramnarine. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.212Z",
+      "updatedAt": "2025-10-25T19:59:21.212Z",
+      "serviceDate": "2025-10-25T19:59:21.212Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 11,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Kamla Devi Ramnarine - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Kamla Devi Ramnarine. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_ueb3nrf0l",
+      "lovedOnesName": "Sookdai Ramnarine",
+      "fullSlug": "celebration-of-life-for-sookdai-ramnarine",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/574456789\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Sookdai Ramnarine",
+      "description": "A memorial service celebrating the life of Sookdai Ramnarine. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.213Z",
+      "updatedAt": "2025-10-25T19:59:21.213Z",
+      "serviceDate": "2025-10-25T19:59:21.213Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 12,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Sookdai Ramnarine - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Sookdai Ramnarine. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_fz9q3ose8",
+      "lovedOnesName": "Dhanpattie Ramnarine",
+      "fullSlug": "celebration-of-life-for-dhanpattie-ramnarine",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/577123456\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Dhanpattie Ramnarine",
+      "description": "A memorial service celebrating the life of Dhanpattie Ramnarine. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.213Z",
+      "updatedAt": "2025-10-25T19:59:21.213Z",
+      "serviceDate": "2025-10-25T19:59:21.213Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 13,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Dhanpattie Ramnarine - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Dhanpattie Ramnarine. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_olgq44el9",
+      "lovedOnesName": "Rampersad Ramnarine",
+      "fullSlug": "celebration-of-life-for-rampersad-ramnarine",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/579987654\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Rampersad Ramnarine",
+      "description": "A memorial service celebrating the life of Rampersad Ramnarine. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.213Z",
+      "updatedAt": "2025-10-25T19:59:21.213Z",
+      "serviceDate": "2025-10-25T19:59:21.213Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 14,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Rampersad Ramnarine - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Rampersad Ramnarine. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_oqoumvg77",
+      "lovedOnesName": "Kamla Devi Ramnarine (Second Service)",
+      "fullSlug": "celebration-of-life-for-kamla-devi-ramnarine-second-service",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/582345678\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Kamla Devi Ramnarine (Second Service)",
+      "description": "A memorial service celebrating the life of Kamla Devi Ramnarine (Second Service). This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.213Z",
+      "updatedAt": "2025-10-25T19:59:21.213Z",
+      "serviceDate": "2025-10-25T19:59:21.213Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 15,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Kamla Devi Ramnarine (Second Service) - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Kamla Devi Ramnarine (Second Service). Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_z3s6augyc",
+      "lovedOnesName": "Dhanpattie Ramnarine (Second Service)",
+      "fullSlug": "celebration-of-life-for-dhanpattie-ramnarine-second-service",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/585123789\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Dhanpattie Ramnarine (Second Service)",
+      "description": "A memorial service celebrating the life of Dhanpattie Ramnarine (Second Service). This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.213Z",
+      "updatedAt": "2025-10-25T19:59:21.213Z",
+      "serviceDate": "2025-10-25T19:59:21.213Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 16,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Dhanpattie Ramnarine (Second Service) - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Dhanpattie Ramnarine (Second Service). Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_kdmeifbdq",
+      "lovedOnesName": "Rampersad Ramnarine (Second Service)",
+      "fullSlug": "celebration-of-life-for-rampersad-ramnarine-second-service",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/587456123\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Rampersad Ramnarine (Second Service)",
+      "description": "A memorial service celebrating the life of Rampersad Ramnarine (Second Service). This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.213Z",
+      "updatedAt": "2025-10-25T19:59:21.213Z",
+      "serviceDate": "2025-10-25T19:59:21.213Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 17,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Rampersad Ramnarine (Second Service) - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Rampersad Ramnarine (Second Service). Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_e2t611ypt",
+      "lovedOnesName": "Sookdai Ramnarine (Second Service)",
+      "fullSlug": "celebration-of-life-for-sookdai-ramnarine-second-service",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/589789456\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Sookdai Ramnarine (Second Service)",
+      "description": "A memorial service celebrating the life of Sookdai Ramnarine (Second Service). This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.213Z",
+      "updatedAt": "2025-10-25T19:59:21.213Z",
+      "serviceDate": "2025-10-25T19:59:21.213Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 18,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Sookdai Ramnarine (Second Service) - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Sookdai Ramnarine (Second Service). Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_hbslj3904",
+      "lovedOnesName": "Kamla Rampersad (Second Service)",
+      "fullSlug": "celebration-of-life-for-kamla-rampersad-second-service",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/592123789\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Kamla Rampersad (Second Service)",
+      "description": "A memorial service celebrating the life of Kamla Rampersad (Second Service). This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.213Z",
+      "updatedAt": "2025-10-25T19:59:21.213Z",
+      "serviceDate": "2025-10-25T19:59:21.213Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 19,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Kamla Rampersad (Second Service) - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Kamla Rampersad (Second Service). Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_1b78m23mb",
+      "lovedOnesName": "Ramdai Ramnarine (Second Service)",
+      "fullSlug": "celebration-of-life-for-ramdai-ramnarine-second-service",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/594456123\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Ramdai Ramnarine (Second Service)",
+      "description": "A memorial service celebrating the life of Ramdai Ramnarine (Second Service). This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.213Z",
+      "updatedAt": "2025-10-25T19:59:21.213Z",
+      "serviceDate": "2025-10-25T19:59:21.213Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 20,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Ramdai Ramnarine (Second Service) - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Ramdai Ramnarine (Second Service). Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_vjczwj3uc",
+      "lovedOnesName": "Deonarine Ramnarine (Second Service)",
+      "fullSlug": "celebration-of-life-for-deonarine-ramnarine-second-service",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/596789456\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Deonarine Ramnarine (Second Service)",
+      "description": "A memorial service celebrating the life of Deonarine Ramnarine (Second Service). This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.214Z",
+      "updatedAt": "2025-10-25T19:59:21.214Z",
+      "serviceDate": "2025-10-25T19:59:21.214Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 21,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Deonarine Ramnarine (Second Service) - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Deonarine Ramnarine (Second Service). Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_pu2wzzqu3",
+      "lovedOnesName": "Barbara T. Persaud (Second Service)",
+      "fullSlug": "celebration-of-life-for-barbara-t-persaud-second-service",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/599123789\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Barbara T. Persaud (Second Service)",
+      "description": "A memorial service celebrating the life of Barbara T. Persaud (Second Service). This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.214Z",
+      "updatedAt": "2025-10-25T19:59:21.214Z",
+      "serviceDate": "2025-10-25T19:59:21.214Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 22,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Barbara T. Persaud (Second Service) - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Barbara T. Persaud (Second Service). Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_uw6nf6f4w",
+      "lovedOnesName": "Riad Baksh (Second Service)",
+      "fullSlug": "celebration-of-life-for-riad-baksh-second-service",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://vimeo.com/event/1123456/embed\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Riad Baksh (Second Service)",
+      "description": "A memorial service celebrating the life of Riad Baksh (Second Service). This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.214Z",
+      "updatedAt": "2025-10-25T19:59:21.214Z",
+      "serviceDate": "2025-10-25T19:59:21.214Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 23,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Riad Baksh (Second Service) - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Riad Baksh (Second Service). Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_ycshz09ld",
+      "lovedOnesName": "Bernice Rampartap (Second Service)",
+      "fullSlug": "celebration-of-life-for-bernice-rampartap-second-service",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/601456789\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Bernice Rampartap (Second Service)",
+      "description": "A memorial service celebrating the life of Bernice Rampartap (Second Service). This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.214Z",
+      "updatedAt": "2025-10-25T19:59:21.214Z",
+      "serviceDate": "2025-10-25T19:59:21.214Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 24,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Bernice Rampartap (Second Service) - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Bernice Rampartap (Second Service). Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_01cf7blyo",
+      "lovedOnesName": "Ryan Martinez (Second Service)",
+      "fullSlug": "celebration-of-life-for-ryan-martinez-second-service",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/603789123\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Ryan Martinez (Second Service)",
+      "description": "A memorial service celebrating the life of Ryan Martinez (Second Service). This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.214Z",
+      "updatedAt": "2025-10-25T19:59:21.214Z",
+      "serviceDate": "2025-10-25T19:59:21.214Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 25,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Ryan Martinez (Second Service) - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Ryan Martinez (Second Service). Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_wom0wq5rp",
+      "lovedOnesName": "Ward D. Morrow (Second Service)",
+      "fullSlug": "celebration-of-life-for-ward-d-morrow-second-service",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/606123456\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Ward D. Morrow (Second Service)",
+      "description": "A memorial service celebrating the life of Ward D. Morrow (Second Service). This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.214Z",
+      "updatedAt": "2025-10-25T19:59:21.214Z",
+      "serviceDate": "2025-10-25T19:59:21.214Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 26,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Ward D. Morrow (Second Service) - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Ward D. Morrow (Second Service). Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_9g7zn8wjp",
+      "lovedOnesName": "Justin Ortiz (Second Service)",
+      "fullSlug": "celebration-of-life-for-justin-ortiz-second-service",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/608456789\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Justin Ortiz (Second Service)",
+      "description": "A memorial service celebrating the life of Justin Ortiz (Second Service). This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.214Z",
+      "updatedAt": "2025-10-25T19:59:21.214Z",
+      "serviceDate": "2025-10-25T19:59:21.214Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 27,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Justin Ortiz (Second Service) - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Justin Ortiz (Second Service). Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_8ejac65gr",
+      "lovedOnesName": "Christine Jara (Second Service)",
+      "fullSlug": "celebration-of-life-for-christine-jara-second-service",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/610789123\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Christine Jara (Second Service)",
+      "description": "A memorial service celebrating the life of Christine Jara (Second Service). This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.214Z",
+      "updatedAt": "2025-10-25T19:59:21.214Z",
+      "serviceDate": "2025-10-25T19:59:21.214Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 28,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Christine Jara (Second Service) - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Christine Jara (Second Service). Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_stgzfxpik",
+      "lovedOnesName": "Kamla Persaud",
+      "fullSlug": "celebration-of-life-for-kamla-persaud",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/613123456\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Kamla Persaud",
+      "description": "A memorial service celebrating the life of Kamla Persaud. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.215Z",
+      "updatedAt": "2025-10-25T19:59:21.215Z",
+      "serviceDate": "2025-10-25T19:59:21.215Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 29,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Kamla Persaud - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Kamla Persaud. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_mbrudq1jy",
+      "lovedOnesName": "Ramdai Persaud",
+      "fullSlug": "celebration-of-life-for-ramdai-persaud",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/615456789\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Ramdai Persaud",
+      "description": "A memorial service celebrating the life of Ramdai Persaud. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.215Z",
+      "updatedAt": "2025-10-25T19:59:21.215Z",
+      "serviceDate": "2025-10-25T19:59:21.215Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 30,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Ramdai Persaud - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Ramdai Persaud. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_5lx9um6uh",
+      "lovedOnesName": "Dhanpattie Persaud",
+      "fullSlug": "celebration-of-life-for-dhanpattie-persaud",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/617789123\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Dhanpattie Persaud",
+      "description": "A memorial service celebrating the life of Dhanpattie Persaud. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.215Z",
+      "updatedAt": "2025-10-25T19:59:21.215Z",
+      "serviceDate": "2025-10-25T19:59:21.215Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 31,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Dhanpattie Persaud - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Dhanpattie Persaud. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_5fe8xuq25",
+      "lovedOnesName": "Rampersad Persaud",
+      "fullSlug": "celebration-of-life-for-rampersad-persaud",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/620123456\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Rampersad Persaud",
+      "description": "A memorial service celebrating the life of Rampersad Persaud. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.215Z",
+      "updatedAt": "2025-10-25T19:59:21.215Z",
+      "serviceDate": "2025-10-25T19:59:21.215Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 32,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Rampersad Persaud - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Rampersad Persaud. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_c56c3mfu7",
+      "lovedOnesName": "Sookdai Persaud",
+      "fullSlug": "celebration-of-life-for-sookdai-persaud",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/622456789\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Sookdai Persaud",
+      "description": "A memorial service celebrating the life of Sookdai Persaud. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.215Z",
+      "updatedAt": "2025-10-25T19:59:21.215Z",
+      "serviceDate": "2025-10-25T19:59:21.215Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 33,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Sookdai Persaud - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Sookdai Persaud. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_61mve6y9j",
+      "lovedOnesName": "Deonarine Persaud",
+      "fullSlug": "celebration-of-life-for-deonarine-persaud",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/624789123\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Deonarine Persaud",
+      "description": "A memorial service celebrating the life of Deonarine Persaud. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.215Z",
+      "updatedAt": "2025-10-25T19:59:21.215Z",
+      "serviceDate": "2025-10-25T19:59:21.215Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 34,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Deonarine Persaud - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Deonarine Persaud. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_okc4f9snw",
+      "lovedOnesName": "Kamla Devi Persaud",
+      "fullSlug": "celebration-of-life-for-kamla-devi-persaud",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/627123456\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Kamla Devi Persaud",
+      "description": "A memorial service celebrating the life of Kamla Devi Persaud. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.215Z",
+      "updatedAt": "2025-10-25T19:59:21.215Z",
+      "serviceDate": "2025-10-25T19:59:21.215Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 35,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Kamla Devi Persaud - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Kamla Devi Persaud. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_u11nuyd6t",
+      "lovedOnesName": "Riad Persaud",
+      "fullSlug": "celebration-of-life-for-riad-persaud",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://vimeo.com/event/1234567/embed\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Riad Persaud",
+      "description": "A memorial service celebrating the life of Riad Persaud. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.215Z",
+      "updatedAt": "2025-10-25T19:59:21.215Z",
+      "serviceDate": "2025-10-25T19:59:21.215Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 36,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Riad Persaud - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Riad Persaud. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_rd63e7yev",
+      "lovedOnesName": "Bernice Persaud",
+      "fullSlug": "celebration-of-life-for-bernice-persaud",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/629456789\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Bernice Persaud",
+      "description": "A memorial service celebrating the life of Bernice Persaud. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.215Z",
+      "updatedAt": "2025-10-25T19:59:21.215Z",
+      "serviceDate": "2025-10-25T19:59:21.215Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 37,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Bernice Persaud - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Bernice Persaud. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_7d4erj0j1",
+      "lovedOnesName": "Ryan Persaud",
+      "fullSlug": "celebration-of-life-for-ryan-persaud",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/631789123\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Ryan Persaud",
+      "description": "A memorial service celebrating the life of Ryan Persaud. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.216Z",
+      "updatedAt": "2025-10-25T19:59:21.216Z",
+      "serviceDate": "2025-10-25T19:59:21.216Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 38,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Ryan Persaud - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Ryan Persaud. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_apy13cver",
+      "lovedOnesName": "Ward Persaud",
+      "fullSlug": "celebration-of-life-for-ward-persaud",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/634123456\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Ward Persaud",
+      "description": "A memorial service celebrating the life of Ward Persaud. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.216Z",
+      "updatedAt": "2025-10-25T19:59:21.216Z",
+      "serviceDate": "2025-10-25T19:59:21.216Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 39,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Ward Persaud - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Ward Persaud. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_9o8u35kqi",
+      "lovedOnesName": "Justin Persaud",
+      "fullSlug": "celebration-of-life-for-justin-persaud",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/636456789\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Justin Persaud",
+      "description": "A memorial service celebrating the life of Justin Persaud. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.216Z",
+      "updatedAt": "2025-10-25T19:59:21.216Z",
+      "serviceDate": "2025-10-25T19:59:21.216Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 40,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Justin Persaud - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Justin Persaud. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_wx2ru61s6",
+      "lovedOnesName": "Christine Persaud",
+      "fullSlug": "celebration-of-life-for-christine-persaud",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/638789123\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Christine Persaud",
+      "description": "A memorial service celebrating the life of Christine Persaud. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.216Z",
+      "updatedAt": "2025-10-25T19:59:21.216Z",
+      "serviceDate": "2025-10-25T19:59:21.216Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 41,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Christine Persaud - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Christine Persaud. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_jeegi5a5k",
+      "lovedOnesName": "Kamla Baksh",
+      "fullSlug": "celebration-of-life-for-kamla-baksh",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/641123456\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Kamla Baksh",
+      "description": "A memorial service celebrating the life of Kamla Baksh. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.216Z",
+      "updatedAt": "2025-10-25T19:59:21.216Z",
+      "serviceDate": "2025-10-25T19:59:21.216Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 42,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Kamla Baksh - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Kamla Baksh. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_2hnnxzhcy",
+      "lovedOnesName": "Ramdai Baksh",
+      "fullSlug": "celebration-of-life-for-ramdai-baksh",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/643456789\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Ramdai Baksh",
+      "description": "A memorial service celebrating the life of Ramdai Baksh. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.216Z",
+      "updatedAt": "2025-10-25T19:59:21.216Z",
+      "serviceDate": "2025-10-25T19:59:21.216Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 43,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Ramdai Baksh - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Ramdai Baksh. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_m541rkqsp",
+      "lovedOnesName": "Dhanpattie Baksh",
+      "fullSlug": "celebration-of-life-for-dhanpattie-baksh",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/645789123\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Dhanpattie Baksh",
+      "description": "A memorial service celebrating the life of Dhanpattie Baksh. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.216Z",
+      "updatedAt": "2025-10-25T19:59:21.216Z",
+      "serviceDate": "2025-10-25T19:59:21.216Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 44,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Dhanpattie Baksh - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Dhanpattie Baksh. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_1nsi3rtwf",
+      "lovedOnesName": "Rampersad Baksh",
+      "fullSlug": "celebration-of-life-for-rampersad-baksh",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/648123456\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Rampersad Baksh",
+      "description": "A memorial service celebrating the life of Rampersad Baksh. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.216Z",
+      "updatedAt": "2025-10-25T19:59:21.216Z",
+      "serviceDate": "2025-10-25T19:59:21.216Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 45,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Rampersad Baksh - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Rampersad Baksh. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_y215ejysf",
+      "lovedOnesName": "Sookdai Baksh",
+      "fullSlug": "celebration-of-life-for-sookdai-baksh",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/650456789\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Sookdai Baksh",
+      "description": "A memorial service celebrating the life of Sookdai Baksh. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.216Z",
+      "updatedAt": "2025-10-25T19:59:21.216Z",
+      "serviceDate": "2025-10-25T19:59:21.216Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 46,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Sookdai Baksh - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Sookdai Baksh. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_hxcznb1vl",
+      "lovedOnesName": "Deonarine Baksh",
+      "fullSlug": "celebration-of-life-for-deonarine-baksh",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/652789123\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Deonarine Baksh",
+      "description": "A memorial service celebrating the life of Deonarine Baksh. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.217Z",
+      "updatedAt": "2025-10-25T19:59:21.217Z",
+      "serviceDate": "2025-10-25T19:59:21.217Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 47,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Deonarine Baksh - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Deonarine Baksh. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_rv57s8h7j",
+      "lovedOnesName": "Kamla Devi Baksh",
+      "fullSlug": "celebration-of-life-for-kamla-devi-baksh",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/655123456\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Kamla Devi Baksh",
+      "description": "A memorial service celebrating the life of Kamla Devi Baksh. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.217Z",
+      "updatedAt": "2025-10-25T19:59:21.217Z",
+      "serviceDate": "2025-10-25T19:59:21.217Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 48,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Kamla Devi Baksh - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Kamla Devi Baksh. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_nz21rpmec",
+      "lovedOnesName": "Ana Sanchez",
+      "fullSlug": "celebration-of-life-for-ana-sanchez",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/691080523\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Ana Sanchez",
+      "description": "A memorial service celebrating the life of Ana Sanchez. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.217Z",
+      "updatedAt": "2025-10-25T19:59:21.217Z",
+      "serviceDate": "2025-10-25T19:59:21.217Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 49,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Ana Sanchez - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Ana Sanchez. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_g2lns5hrv",
+      "lovedOnesName": "Sai K. Sista",
+      "fullSlug": "celebration-of-life-for-sai-k-sista",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/752729635\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Sai K. Sista",
+      "description": "A memorial service celebrating the life of Sai K. Sista. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.217Z",
+      "updatedAt": "2025-10-25T19:59:21.217Z",
+      "serviceDate": "2025-10-25T19:59:21.217Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 50,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Sai K. Sista - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Sai K. Sista. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_3zooze84m",
+      "lovedOnesName": "Ramnauth Kattick",
+      "fullSlug": "celebration-of-life-for-ramnauth-kattick",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/725662342\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Ramnauth Kattick",
+      "description": "A memorial service celebrating the life of Ramnauth Kattick. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.217Z",
+      "updatedAt": "2025-10-25T19:59:21.217Z",
+      "serviceDate": "2025-10-25T19:59:21.217Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 51,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Ramnauth Kattick - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Ramnauth Kattick. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_6p70t9iwa",
+      "lovedOnesName": "Herbert Csaszar",
+      "fullSlug": "celebration-of-life-for-herbert-csaszar",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://vimeo.com/event/2310931/embed\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Herbert Csaszar",
+      "description": "A memorial service celebrating the life of Herbert Csaszar. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.217Z",
+      "updatedAt": "2025-10-25T19:59:21.217Z",
+      "serviceDate": "2025-10-25T19:59:21.217Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 52,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Herbert Csaszar - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Herbert Csaszar. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_fgvgo72dr",
+      "lovedOnesName": "Asmar Lawrence",
+      "fullSlug": "celebration-of-life-for-asmar-lawrence",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/758158095\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Asmar Lawrence",
+      "description": "A memorial service celebrating the life of Asmar Lawrence. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.217Z",
+      "updatedAt": "2025-10-25T19:59:21.217Z",
+      "serviceDate": "2025-10-25T19:59:21.217Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 53,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Asmar Lawrence - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Asmar Lawrence. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_w5iqwt7t7",
+      "lovedOnesName": "Madeline Bandy",
+      "fullSlug": "celebration-of-life-for-madeline-bandy",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/758158257\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Madeline Bandy",
+      "description": "A memorial service celebrating the life of Madeline Bandy. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.217Z",
+      "updatedAt": "2025-10-25T19:59:21.217Z",
+      "serviceDate": "2025-10-25T19:59:21.217Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 54,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Madeline Bandy - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Madeline Bandy. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_utwsni0y3",
+      "lovedOnesName": "Iluminada Gunther",
+      "fullSlug": "celebration-of-life-for-iluminada-gunther",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://vimeo.com/event/2282907/embed\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Iluminada Gunther",
+      "description": "A memorial service celebrating the life of Iluminada Gunther. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.217Z",
+      "updatedAt": "2025-10-25T19:59:21.217Z",
+      "serviceDate": "2025-10-25T19:59:21.217Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 55,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Iluminada Gunther - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Iluminada Gunther. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_f2z9ye8pr",
+      "lovedOnesName": "Ellina Rampersad",
+      "fullSlug": "celebration-of-life-for-ellina-rampersad",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://vimeo.com/event/3745732/embed\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Ellina Rampersad",
+      "description": "A memorial service celebrating the life of Ellina Rampersad. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.217Z",
+      "updatedAt": "2025-10-25T19:59:21.217Z",
+      "serviceDate": "2025-10-25T19:59:21.217Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 56,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Ellina Rampersad - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Ellina Rampersad. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_joqbthpo8",
+      "lovedOnesName": "Cecilia R. Zuniga",
+      "fullSlug": "celebration-of-life-for-cecilia-r-zuniga",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://vimeo.com/event/3644125/embed\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Cecilia R. Zuniga",
+      "description": "A memorial service celebrating the life of Cecilia R. Zuniga. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.217Z",
+      "updatedAt": "2025-10-25T19:59:21.217Z",
+      "serviceDate": "2025-10-25T19:59:21.217Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 57,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Cecilia R. Zuniga - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Cecilia R. Zuniga. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_b519jhwg5",
+      "lovedOnesName": "Barbara Allen",
+      "fullSlug": "celebration-of-life-for-barbara-allen",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://vimeo.com/event/3754560/embed\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Barbara Allen",
+      "description": "A memorial service celebrating the life of Barbara Allen. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.217Z",
+      "updatedAt": "2025-10-25T19:59:21.217Z",
+      "serviceDate": "2025-10-25T19:59:21.217Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 58,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Barbara Allen - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Barbara Allen. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_cph20y3to",
+      "lovedOnesName": "Bharat Ramsaran",
+      "fullSlug": "celebration-of-life-for-bharat-ramsaran",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://player.vimeo.com/video/866382852\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Bharat Ramsaran",
+      "description": "A memorial service celebrating the life of Bharat Ramsaran. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.217Z",
+      "updatedAt": "2025-10-25T19:59:21.217Z",
+      "serviceDate": "2025-10-25T19:59:21.217Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 59,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Bharat Ramsaran - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Bharat Ramsaran. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    },
+    {
+      "id": "memorial_brzc78xig",
+      "lovedOnesName": "Clarence E. Jones Jr.",
+      "fullSlug": "celebration-of-life-for-clarence-e-jones-jr",
+      "isLegacy": true,
+      "legacySource": "wordpress_sql_extraction",
+      "legacyVimeoEmbed": "<iframe src=\"https://vimeo.com/event/3761182/embed\" style=\"position:absolute;top:0;left:0;width:100%;height:100%;\" frameborder=\"0\" allow=\"autoplay; fullscreen; picture-in-picture\" allowfullscreen></iframe>",
+      "title": "Celebration of Life for Clarence E. Jones Jr.",
+      "description": "A memorial service celebrating the life of Clarence E. Jones Jr.. This is a legacy memorial imported from the previous TributeStream system.",
+      "createdAt": "2025-10-25T19:59:21.218Z",
+      "updatedAt": "2025-10-25T19:59:21.218Z",
+      "serviceDate": "2025-10-25T19:59:21.218Z",
+      "isPrivate": false,
+      "isPublished": true,
+      "ownerId": "legacy-import",
+      "ownerEmail": "legacy@tributestream.com",
+      "type": "legacy",
+      "status": "active",
+      "location": {
+        "name": "Legacy Memorial Location",
+        "address": "",
+        "city": "",
+        "state": "",
+        "zipCode": ""
+      },
+      "hasLiveStream": true,
+      "streamProvider": "vimeo_legacy",
+      "streamStatus": "completed",
+      "legacyMetadata": {
+        "extractionDate": "2024-10-24",
+        "originalSystem": "WordPress + Vimeo",
+        "importOrder": 60,
+        "totalLegacyMemorials": 60
+      },
+      "features": {
+        "hasPhotos": false,
+        "hasVideos": true,
+        "hasGuestbook": false,
+        "hasFlowers": false,
+        "hasSlideshow": false
+      },
+      "stats": {
+        "views": 0,
+        "guestbookEntries": 0,
+        "photoUploads": 0,
+        "totalVisitors": 0
+      },
+      "seoTitle": "Clarence E. Jones Jr. - Memorial Service | TributeStream",
+      "seoDescription": "Join us in celebrating the life of Clarence E. Jones Jr.. Watch the memorial service and share memories with family and friends.",
+      "tags": [
+        "legacy",
+        "vimeo",
+        "memorial-service",
+        "celebration-of-life"
+      ]
+    }
+  ]
+}

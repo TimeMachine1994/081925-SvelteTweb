@@ -1245,23 +1245,879 @@ This document contains all the custom memorial data found in the legacy WordPres
 
 ---
 
-### Summary
+### 39. Pascual Santos Charrez Memorial
 
-**Total Memorials Found So Far:** 38+ (continuing to extract more)  
-**Vimeo Integration Types:**
-- Direct video embeds (player.vimeo.com/video/ID)
-- Live chat integration (vimeo.com/live-chat/ID)
-- Event streaming (vimeo.com/event/ID/embed)
-- Multiple videos per memorial
-- Backup streams for technical difficulties
+**Loved One's Name:** Pascual Santos Charrez  
+**Memorial Title:** Celebración de la vida de Pascual Santos Charrez (Part I & Part II)  
+**Post ID:** 1760, 2142, 2143, 2144, 2145, 2146, 2147, 2149, 2150, 2151, 3349  
+**Date:** December 22, 2021  
+**Vimeo URLs:** 
+- https://player.vimeo.com/video/638021258 (Part I - Mass)
+- https://player.vimeo.com/video/638186167 (Part II - Burial)
 
-**Next Steps:**
-1. Continue extracting memorial data from remaining database sections
-2. Validate Vimeo URLs are still accessible
-3. Create migration script for Firestore
-4. Test legacy memorial rendering in new system
-5. Set up proper fullSlug routing for legacy content
+**Custom HTML:**
+```html
+<!-- Part I - Mass -->
+<div style="padding:56.25% 0 0 0;position:relative;">
+  <iframe src="https://player.vimeo.com/video/638021258" 
+          style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+          frameborder="0" 
+          allow="autoplay; fullscreen; picture-in-picture" 
+          allowfullscreen>
+  </iframe>
+</div>
+
+<!-- Part II - Burial -->
+<div style="padding:56.25% 0 0 0;position:relative;">
+  <iframe src="https://player.vimeo.com/video/638186167" 
+          style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+          frameborder="0" 
+          allow="autoplay; fullscreen; picture-in-picture" 
+          allowfullscreen>
+  </iframe>
+</div>
+```
+
+**Full Slug Suggestion:** `celebration-of-life-for-pascual-santos-charrez`
 
 ---
 
-*This document is being updated as more memorial data is extracted from the database...*
+### 40. Nathaniel McAnuff Memorial
+
+**Loved One's Name:** Nathaniel McAnuff  
+**Memorial Title:** Celebration of Life for Nathaniel McAnuff  
+**Post ID:** 6464, 6465, 6471, 6473, 6474, 6475  
+**Date:** June 12, 2023  
+**Vimeo URLs:** 
+- https://vimeo.com/event/3493343/embed
+- https://vimeo.com/event/3493343/chat/
+
+**Custom HTML:**
+```html
+<!-- Event Stream -->
+<div style="padding:56.25% 0 0 0;position:relative;">
+  <iframe src="https://vimeo.com/event/3493343/embed" 
+          style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+          frameborder="0" 
+          allow="autoplay; fullscreen; picture-in-picture" 
+          allowfullscreen>
+  </iframe>
+</div>
+
+<!-- Live Chat -->
+<div style="width:400px;height:600px;">
+  <iframe src="https://vimeo.com/event/3493343/chat/" 
+          width="400" 
+          height="600" 
+          frameborder="0">
+  </iframe>
+</div>
+```
+
+**Full Slug Suggestion:** `celebration-of-life-for-nathaniel-mcanuff`
+
+---
+
+### 41. Wilfred Lee Whittingham Memorial
+
+**Loved One's Name:** Wilfred Lee Whittingham  
+**Memorial Title:** Celebration of Life for Wilfred Lee Whittingham  
+**Post ID:** 6476, 6477, 6478, 6479, 6480  
+**Date:** June 13, 2023  
+**Vimeo URLs:** 
+- https://vimeo.com/event/3475258/embed
+- https://vimeo.com/event/3495068/embed
+- https://vimeo.com/event/3475258/chat/
+
+**Custom HTML:**
+```html
+<!-- Main Event Stream -->
+<div style="padding:56.25% 0 0 0;position:relative;">
+  <iframe src="https://vimeo.com/event/3495068/embed" 
+          style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+          frameborder="0" 
+          allow="autoplay; fullscreen; picture-in-picture" 
+          allowfullscreen>
+  </iframe>
+</div>
+
+<!-- Backup Stream -->
+<div style="padding:56.25% 0 0 0;position:relative;">
+  <iframe src="https://vimeo.com/event/3475258/embed" 
+          style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+          frameborder="0" 
+          allow="autoplay; fullscreen; picture-in-picture" 
+          allowfullscreen>
+  </iframe>
+</div>
+
+<!-- Live Chat -->
+<div style="width:400px;height:600px;">
+  <iframe src="https://vimeo.com/event/3475258/chat/" 
+          width="400" 
+          height="600" 
+          frameborder="0">
+  </iframe>
+</div>
+```
+
+**Full Slug Suggestion:** `celebration-of-life-for-wilfred-lee-whittingham`
+
+---
+
+### 42. Warfield S. Samuels Memorial
+
+**Loved One's Name:** Warfield S. Samuels (Sir)  
+**Memorial Title:** Celebration of Life for Sir Warfield S. Samuels  
+**Post ID:** 6450, 6485, 6491  
+**Date:** June 15, 2023  
+**Vimeo URLs:** 
+- https://vimeo.com/event/3487894/embed
+- https://vimeo.com/event/3487894/chat/
+
+**Custom HTML:**
+```html
+<!-- Event Stream -->
+<div style="padding:56.25% 0 0 0;position:relative;">
+  <iframe src="https://vimeo.com/event/3487894/embed" 
+          style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+          frameborder="0" 
+          allow="autoplay; fullscreen; picture-in-picture" 
+          allowfullscreen>
+  </iframe>
+</div>
+
+<!-- Live Chat -->
+<div style="width:400px;height:600px;">
+  <iframe src="https://vimeo.com/event/3487894/chat/" 
+          width="400" 
+          height="600" 
+          frameborder="0">
+  </iframe>
+</div>
+```
+
+**Full Slug Suggestion:** `celebration-of-life-for-sir-warfield-s-samuels`
+
+---
+
+### 43. Barbara T. Persaud Memorial
+
+**Loved One's Name:** Barbara T. Persaud  
+**Memorial Title:** Celebration of Life for Barbara T. Persaud  
+**Post ID:** 3098, 3099, 3100, 3101  
+**Date:** January 10, 2022  
+**Vimeo URL:** https://player.vimeo.com/video/582329861
+
+**Custom HTML:**
+```html
+<div style="padding:56.25% 0 0 0;position:relative;">
+  <iframe src="https://player.vimeo.com/video/582329861" 
+          style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+          frameborder="0" 
+          allow="autoplay; fullscreen; picture-in-picture" 
+          allowfullscreen>
+  </iframe>
+</div>
+```
+
+**Full Slug Suggestion:** `celebration-of-life-for-barbara-t-persaud`
+
+---
+
+### 44. Jennifer "Happie" Nicholson Memorial
+
+**Loved One's Name:** Jennifer Renee "Happie" Nicholson  
+**Memorial Title:** Celebration of Life for Jennifer "Happie" Nicholson  
+**Post ID:** 3098, 3106, 3107, 3108, 3109, 3110, 3111, 3112, 3114, 3115, 3116  
+**Date:** January 12, 2022  
+**Vimeo URL:** https://player.vimeo.com/video/664485950
+
+**Custom HTML:**
+```html
+<div style="padding:56.25% 0 0 0;position:relative;">
+  <iframe src="https://player.vimeo.com/video/664485950" 
+          style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+          frameborder="0" 
+          allow="autoplay; fullscreen; picture-in-picture" 
+          allowfullscreen>
+  </iframe>
+</div>
+```
+
+**Full Slug Suggestion:** `celebration-of-life-for-jennifer-happie-nicholson`
+
+---
+
+### 45. Ermite Sanon Memorial
+
+**Loved One's Name:** Ermite Sanon  
+**Memorial Title:** Celebration of Life for Ermite Sanon  
+**Post ID:** 3757, 3758  
+**Date:** January 25, 2022  
+**Vimeo URL:** https://vimeo.com/event/1758337/embed
+
+**Custom HTML:**
+```html
+<div style="padding:56.25% 0 0 0;position:relative;">
+  <iframe src="https://vimeo.com/event/1758337/embed" 
+          style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+          frameborder="0" 
+          allow="autoplay; fullscreen; picture-in-picture" 
+          allowfullscreen>
+  </iframe>
+</div>
+```
+
+**Full Slug Suggestion:** `celebration-of-life-for-ermite-sanon`
+
+---
+
+### 46. John Halo Memorial
+
+**Loved One's Name:** John Halo  
+**Memorial Title:** Celebration of Life for John Halo  
+**Post ID:** 3172, 3173, 3175, 3176, 3177, 3179, 3180, 3181, 3183, 3184, 3185, 3390  
+**Date:** January 17, 2022  
+**Vimeo URL:** https://player.vimeo.com/video/657526448
+
+**Custom HTML:**
+```html
+<div style="padding:56.25% 0 0 0;position:relative;">
+  <iframe src="https://player.vimeo.com/video/657526448" 
+          style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+          frameborder="0" 
+          allow="autoplay; fullscreen; picture-in-picture" 
+          allowfullscreen>
+  </iframe>
+</div>
+```
+
+**Full Slug Suggestion:** `celebration-of-life-for-john-halo`
+
+---
+
+### 47. John Rutledge Memorial
+
+**Loved One's Name:** John Rutledge  
+**Memorial Title:** Celebration of Life for John Rutledge  
+**Post ID:** 3955, 3966, 3967, 3969  
+**Date:** February 18, 2022  
+**Vimeo URL:** https://player.vimeo.com/video/676916391
+
+**Custom HTML:**
+```html
+<div style="padding:56.25% 0 0 0;position:relative;">
+  <iframe src="https://player.vimeo.com/video/676916391" 
+          style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+          frameborder="0" 
+          allow="autoplay; fullscreen; picture-in-picture" 
+          allowfullscreen>
+  </iframe>
+</div>
+```
+
+**Full Slug Suggestion:** `celebration-of-life-for-john-rutledge`
+
+---
+
+### 48. Ana/Anna Sanchez Memorial
+
+**Loved One's Name:** Ana Sanchez (also referred to as Anna Sanchez)  
+**Memorial Title:** Celebration of Life for Ana Sanchez  
+**Post ID:** 4404, 4405, 4406, 4408, 4409, 4410, 4411, 4412, 4413, 4416, 4417, 4418, 4430, 4431, 4432, 4433, 4434, 4435, 4438  
+**Date:** March 24, 2022  
+**Vimeo URLs:** 
+- https://player.vimeo.com/video/691080523 (Main Service)
+- https://vimeo.com/event/1930010/chat/ (Event Chat)
+- https://vimeo.com/live-chat/691080523/ (Live Chat)
+- https://vimeo.com/live-chat/691080523/interaction/ (Interactive Chat)
+
+**Custom HTML:**
+```html
+<!-- Main Service -->
+<div style="padding:56.25% 0 0 0;position:relative;">
+  <iframe src="https://player.vimeo.com/video/691080523" 
+          style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+          frameborder="0" 
+          allow="autoplay; fullscreen; picture-in-picture" 
+          allowfullscreen>
+  </iframe>
+</div>
+
+<!-- Live Chat -->
+<div style="width:400px;height:600px;">
+  <iframe src="https://vimeo.com/live-chat/691080523/" 
+          width="400" 
+          height="600" 
+          frameborder="0">
+  </iframe>
+</div>
+
+<!-- Interactive Chat -->
+<div style="width:400px;height:600px;">
+  <iframe src="https://vimeo.com/live-chat/691080523/interaction/" 
+          width="400" 
+          height="600" 
+          frameborder="0">
+  </iframe>
+</div>
+
+<!-- Event Chat -->
+<div style="width:400px;height:600px;">
+  <iframe src="https://vimeo.com/event/1930010/chat/" 
+          width="400" 
+          height="600" 
+          frameborder="0">
+  </iframe>
+</div>
+```
+
+**Special Features:**
+- **Memorial Chat Wall Archive**: Includes preserved condolence messages from family and friends
+- **Bilingual Support**: Spanish and English condolences
+- **Multiple Chat Integration**: Various Vimeo chat implementations tested
+- **Interactive Elements**: Different chat interaction methods
+
+**Full Slug Suggestion:** `celebration-of-life-for-ana-sanchez`
+
+---
+
+### 49. Sai K. Sista Memorial
+
+**Loved One's Name:** Sai K. Sista  
+**Memorial Title:** Celebration of Life for Sai K. Sista  
+**Post ID:** 5507  
+**Date:** September 24, 2022  
+**Vimeo URLs:** 
+- https://player.vimeo.com/video/752729635 (Part 1)
+- https://player.vimeo.com/video/753343102 (Part 2)
+- https://vimeo.com/event/2450358/chat/ (Event Chat)
+
+**Custom HTML:**
+```html
+<!-- Part 1 -->
+<div style="padding:56.25% 0 0 0;position:relative;">
+  <iframe src="https://player.vimeo.com/video/752729635" 
+          style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+          frameborder="0" 
+          allow="autoplay; fullscreen; picture-in-picture" 
+          allowfullscreen>
+  </iframe>
+</div>
+
+<!-- Part 2 -->
+<div style="padding:56.25% 0 0 0;position:relative;">
+  <iframe src="https://player.vimeo.com/video/753343102" 
+          style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+          frameborder="0" 
+          allow="autoplay; fullscreen; picture-in-picture" 
+          allowfullscreen>
+  </iframe>
+</div>
+
+<!-- Event Chat -->
+<div style="width:400px;height:600px;">
+  <iframe src="https://vimeo.com/event/2450358/chat/" 
+          width="400" 
+          height="600" 
+          frameborder="0">
+  </iframe>
+</div>
+```
+
+**Full Slug Suggestion:** `celebration-of-life-for-sai-k-sista`
+
+---
+
+### 50. Ramnauth Kattick Memorial
+
+**Loved One's Name:** Ramnauth Kattick  
+**Memorial Title:** Celebration of Life for Ramnauth Kattick - Complete Service  
+**Post ID:** 5522, 5523  
+**Date:** September 30, 2022  
+**Vimeo URLs:** 
+- https://player.vimeo.com/video/725662342
+- https://vimeo.com/event/2218471/chat/
+
+**Custom HTML:**
+```html
+<!-- Complete Service -->
+<div style="padding:56.25% 0 0 0;position:relative;">
+  <iframe src="https://player.vimeo.com/video/725662342" 
+          style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+          frameborder="0" 
+          allow="autoplay; fullscreen; picture-in-picture" 
+          allowfullscreen>
+  </iframe>
+</div>
+
+<!-- Event Chat -->
+<div style="width:400px;height:600px;">
+  <iframe src="https://vimeo.com/event/2218471/chat/" 
+          width="400" 
+          height="600" 
+          frameborder="0">
+  </iframe>
+</div>
+```
+
+**Full Slug Suggestion:** `celebration-of-life-for-ramnauth-kattick`
+
+---
+
+### 51. Herbert Csaszar Memorial
+
+**Loved One's Name:** Herbert Csaszar  
+**Memorial Title:** Celebration of Life for Herbert Csaszar  
+**Post ID:** 5527, 5528  
+**Date:** October 2, 2022  
+**Vimeo URLs:** 
+- https://vimeo.com/event/2310931/embed
+- https://vimeo.com/event/2310931/chat/
+
+**Special Notes:** Due to power outage, stream began between 11am and 12pm
+
+**Custom HTML:**
+```html
+<!-- Event Stream -->
+<div style="padding:56.25% 0 0 0;position:relative;">
+  <iframe src="https://vimeo.com/event/2310931/embed" 
+          style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+          frameborder="0" 
+          allow="autoplay; fullscreen; picture-in-picture" 
+          allowfullscreen>
+  </iframe>
+</div>
+
+<!-- Event Chat -->
+<div style="width:400px;height:600px;">
+  <iframe src="https://vimeo.com/event/2310931/chat/" 
+          width="400" 
+          height="600" 
+          frameborder="0">
+  </iframe>
+</div>
+```
+
+**Full Slug Suggestion:** `celebration-of-life-for-herbert-csaszar`
+
+---
+
+### 52. Asmar Lawrence Memorial
+
+**Loved One's Name:** Asmar Lawrence  
+**Memorial Title:** Celebration of Life for Asmar Lawrence  
+**Post ID:** 5530, 5531, 5532, 5541  
+**Date:** October 8, 2022  
+**Vimeo URLs:** 
+- https://player.vimeo.com/video/744762121 (Live Stream)
+- https://player.vimeo.com/video/758158095 (Complete Service)
+- https://vimeo.com/event/2389940/chat/
+
+**Custom HTML:**
+```html
+<!-- Complete Service -->
+<div style="padding:56.25% 0 0 0;position:relative;">
+  <iframe src="https://player.vimeo.com/video/758158095" 
+          style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+          frameborder="0" 
+          allow="autoplay; fullscreen; picture-in-picture" 
+          allowfullscreen>
+  </iframe>
+</div>
+
+<!-- Live Stream -->
+<div style="padding:56.25% 0 0 0;position:relative;">
+  <iframe src="https://player.vimeo.com/video/744762121" 
+          style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+          frameborder="0" 
+          allow="autoplay; fullscreen; picture-in-picture" 
+          allowfullscreen>
+  </iframe>
+</div>
+
+<!-- Event Chat -->
+<div style="width:400px;height:600px;">
+  <iframe src="https://vimeo.com/event/2389940/chat/" 
+          width="400" 
+          height="600" 
+          frameborder="0">
+  </iframe>
+</div>
+```
+
+**Full Slug Suggestion:** `celebration-of-life-for-asmar-lawrence`
+
+---
+
+### 53. Madeline Bandy Memorial
+
+**Loved One's Name:** Madeline Bandy  
+**Memorial Title:** Celebration of Life for Madeline Bandy  
+**Post ID:** 5533, 5534, 5535, 5536, 5537, 5538  
+**Date:** October 8, 2022  
+**Vimeo URLs:** 
+- https://vimeo.com/event/2313810/embed (Live Event)
+- https://player.vimeo.com/video/758158257 (Complete Service)
+- https://vimeo.com/event/2313810/chat/
+
+**Custom HTML:**
+```html
+<!-- Complete Service -->
+<div style="padding:56.25% 0 0 0;position:relative;">
+  <iframe src="https://player.vimeo.com/video/758158257" 
+          style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+          frameborder="0" 
+          allow="autoplay; fullscreen; picture-in-picture" 
+          allowfullscreen>
+  </iframe>
+</div>
+
+<!-- Live Event -->
+<div style="padding:56.25% 0 0 0;position:relative;">
+  <iframe src="https://vimeo.com/event/2313810/embed" 
+          style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+          frameborder="0" 
+          allow="autoplay; fullscreen; picture-in-picture" 
+          allowfullscreen>
+  </iframe>
+</div>
+
+<!-- Event Chat -->
+<div style="width:400px;height:600px;">
+  <iframe src="https://vimeo.com/event/2313810/chat/" 
+          width="400" 
+          height="600" 
+          frameborder="0">
+  </iframe>
+</div>
+```
+
+**Full Slug Suggestion:** `celebration-of-life-for-madeline-bandy`
+
+---
+
+### 54. Iluminada Gunther Memorial
+
+**Loved One's Name:** Iluminada Gunther  
+**Memorial Title:** Celebration of Life for Iluminada Gunther  
+**Post ID:** 5966  
+**Date:** January 25, 2023  
+**Vimeo URLs:** 
+- https://vimeo.com/event/2282907/embed
+- https://vimeo.com/event/2282907/chat/
+
+**Custom HTML:**
+```html
+<!-- Event Stream -->
+<div style="padding:56.25% 0 0 0;position:relative;">
+  <iframe src="https://vimeo.com/event/2282907/embed" 
+          style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+          frameborder="0" 
+          allow="autoplay; fullscreen; picture-in-picture" 
+          allowfullscreen>
+  </iframe>
+</div>
+
+<!-- Event Chat -->
+<div style="width:400px;height:600px;">
+  <iframe src="https://vimeo.com/event/2282907/chat/" 
+          width="400" 
+          height="600" 
+          frameborder="0">
+  </iframe>
+</div>
+```
+
+**Full Slug Suggestion:** `celebration-of-life-for-iluminada-gunther`
+
+---
+
+### 55. Ellina Rampersad Memorial
+
+**Loved One's Name:** Ellina Rampersad  
+**Memorial Title:** Tributestream® for Ellina Rampersad  
+**Post ID:** 6758, 6785, 6786, 6787, 6788, 6789, 6790  
+**Date:** September 27, 2023  
+**Vimeo URLs:** 
+- https://vimeo.com/event/3745732/embed
+- https://vimeo.com/live/interaction_tools/live_event/3745732
+
+**Special Features:**
+- **Interactive Memorial Board**: Link to whiteboard with community rules
+- **Advanced Vimeo Integration**: Live interaction tools
+
+**Custom HTML:**
+```html
+<!-- Event Stream -->
+<div style="padding:56.25% 0 0 0;position:relative;">
+  <iframe src="https://vimeo.com/event/3745732/embed" 
+          style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+          frameborder="0" 
+          allow="autoplay; fullscreen; picture-in-picture" 
+          allowfullscreen>
+  </iframe>
+</div>
+
+<!-- Interactive Tools -->
+<div style="width:400px;height:600px;">
+  <iframe src="https://vimeo.com/live/interaction_tools/live_event/3745732" 
+          width="400" 
+          height="600" 
+          frameborder="0">
+  </iframe>
+</div>
+```
+
+**Full Slug Suggestion:** `tributestream-for-ellina-rampersad`
+
+---
+
+### 56. Cecilia R. Zuniga Memorial
+
+**Loved One's Name:** Cecilia R. Zuniga  
+**Memorial Title:** Celebration of Life for Cecilia R. Zuniga  
+**Post ID:** 6556, 6791, 6792  
+**Date:** September 29, 2023  
+**Vimeo URLs:** 
+- https://vimeo.com/event/3644125/embed
+- https://vimeo.com/event/1930010/chat/
+
+**Custom HTML:**
+```html
+<!-- Event Stream -->
+<div style="padding:56.25% 0 0 0;position:relative;">
+  <iframe src="https://vimeo.com/event/3644125/embed" 
+          style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+          frameborder="0" 
+          allow="autoplay; fullscreen; picture-in-picture" 
+          allowfullscreen>
+  </iframe>
+</div>
+
+<!-- Event Chat -->
+<div style="width:400px;height:600px;">
+  <iframe src="https://vimeo.com/event/1930010/chat/" 
+          width="400" 
+          height="600" 
+          frameborder="0">
+  </iframe>
+</div>
+```
+
+**Full Slug Suggestion:** `celebration-of-life-for-cecilia-r-zuniga`
+
+---
+
+### 57. Barbara Allen Memorial
+
+**Loved One's Name:** Barbara Allen  
+**Memorial Title:** Celebration of Life for Barbara Allen  
+**Post ID:** 6794, 6795, 6797, 6798, 6799, 6800, 6801, 6802, 6803, 6804, 6805  
+**Date:** September 29, 2023  
+**Vimeo URLs:** 
+- https://vimeo.com/event/3754560/embed
+- https://vimeo.com/live/interaction_tools/live_event/3754560
+- https://vimeo.com/event/1930010/chat/
+
+**Custom HTML:**
+```html
+<!-- Event Stream -->
+<div style="padding:56.25% 0 0 0;position:relative;">
+  <iframe src="https://vimeo.com/event/3754560/embed" 
+          style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+          frameborder="0" 
+          allow="autoplay; fullscreen; picture-in-picture" 
+          allowfullscreen>
+  </iframe>
+</div>
+
+<!-- Interactive Tools -->
+<div style="width:400px;height:600px;">
+  <iframe src="https://vimeo.com/live/interaction_tools/live_event/3754560" 
+          width="400" 
+          height="600" 
+          frameborder="0">
+  </iframe>
+</div>
+
+<!-- Event Chat -->
+<div style="width:400px;height:600px;">
+  <iframe src="https://vimeo.com/event/1930010/chat/" 
+          width="400" 
+          height="600" 
+          frameborder="0">
+  </iframe>
+</div>
+```
+
+**Full Slug Suggestion:** `celebration-of-life-for-barbara-allen`
+
+---
+
+### 58. Bharat Ramsaran Memorial
+
+**Loved One's Name:** Bharat Ramsaran  
+**Memorial Title:** Celebration of Life for Bharat Ramsaran  
+**Post ID:** 6696, 6806, 6807, 6808  
+**Date:** September 29, 2023  
+**Vimeo URLs:** 
+- https://vimeo.com/event/3726896/embed (Day 1)
+- https://vimeo.com/event/3726963/embed (Day 2)
+- https://vimeo.com/event/3727062/embed (Day 3)
+- https://player.vimeo.com/video/866382852 (Complete Day 1)
+- https://vimeo.com/live/interaction_tools/live_event/3726896
+- https://vimeo.com/live/interaction_tools/live_event/3727062
+
+**Special Features:**
+- **Multi-day Memorial**: 3-day celebration with separate streams
+- **Complete Service Recording**: Post-event video available
+- **Multiple Interactive Tools**: Different interaction tools for each day
+
+**Custom HTML:**
+```html
+<!-- Day 1 Complete Service -->
+<div style="padding:56.25% 0 0 0;position:relative;">
+  <iframe src="https://player.vimeo.com/video/866382852" 
+          style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+          frameborder="0" 
+          allow="autoplay; fullscreen; picture-in-picture" 
+          allowfullscreen>
+  </iframe>
+</div>
+
+<!-- Day 1 Live Event -->
+<div style="padding:56.25% 0 0 0;position:relative;">
+  <iframe src="https://vimeo.com/event/3726896/embed" 
+          style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+          frameborder="0" 
+          allow="autoplay; fullscreen; picture-in-picture" 
+          allowfullscreen>
+  </iframe>
+</div>
+
+<!-- Day 2 Event -->
+<div style="padding:56.25% 0 0 0;position:relative;">
+  <iframe src="https://vimeo.com/event/3726963/embed" 
+          style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+          frameborder="0" 
+          allow="autoplay; fullscreen; picture-in-picture" 
+          allowfullscreen>
+  </iframe>
+</div>
+
+<!-- Day 3 Event -->
+<div style="padding:56.25% 0 0 0;position:relative;">
+  <iframe src="https://vimeo.com/event/3727062/embed" 
+          style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+          frameborder="0" 
+          allow="autoplay; fullscreen; picture-in-picture" 
+          allowfullscreen>
+  </iframe>
+</div>
+
+<!-- Interactive Tools Day 1 -->
+<div style="width:800px;height:450px;">
+  <iframe src="https://vimeo.com/live/interaction_tools/live_event/3726896" 
+          width="800" 
+          height="450" 
+          frameborder="0">
+  </iframe>
+</div>
+
+<!-- Interactive Tools Day 3 -->
+<div style="width:400px;height:600px;">
+  <iframe src="https://vimeo.com/live/interaction_tools/live_event/3727062" 
+          width="400" 
+          height="600" 
+          frameborder="0">
+  </iframe>
+</div>
+```
+
+**Full Slug Suggestion:** `celebration-of-life-for-bharat-ramsaran`
+
+---
+
+### 59. Clarence E. Jones Jr. Memorial
+
+**Loved One's Name:** Clarence E. Jones Jr.  
+**Memorial Title:** Celebration of Life for Clarence E. Jones Jr.  
+**Post ID:** 6809, 6810, 6814, 6817  
+**Date:** October 2, 2023  
+**Vimeo URLs:** 
+- https://vimeo.com/event/3761182/embed
+- https://vimeo.com/live/interaction_tools/live_event/3761182
+
+**Custom HTML:**
+```html
+<!-- Event Stream -->
+<div style="padding:56.25% 0 0 0;position:relative;">
+  <iframe src="https://vimeo.com/event/3761182/embed" 
+          style="position:absolute;top:0;left:0;width:100%;height:100%;" 
+          frameborder="0" 
+          allow="autoplay; fullscreen; picture-in-picture" 
+          allowfullscreen>
+  </iframe>
+</div>
+
+<!-- Interactive Tools -->
+<div style="width:400px;height:600px;">
+  <iframe src="https://vimeo.com/live/interaction_tools/live_event/3761182" 
+          width="400" 
+          height="600" 
+          frameborder="0">
+  </iframe>
+</div>
+```
+
+**Full Slug Suggestion:** `celebration-of-life-for-clarence-e-jones-jr`
+
+---
+
+### Summary
+
+**Total Memorials Found:** 59 (complete extraction)  
+**Vimeo Integration Types:**
+- Direct video embeds (player.vimeo.com/video/ID)
+- Live chat integration (vimeo.com/live-chat/ID)
+- Interactive chat (vimeo.com/live-chat/ID/interaction/)
+- Event streaming (vimeo.com/event/ID/embed)
+- Event chat (vimeo.com/event/ID/chat/)
+- Live interaction tools (vimeo.com/live/interaction_tools/live_event/ID)
+- Multiple videos per memorial
+- Backup streams for technical difficulties
+- Multi-day memorial services
+- Complete service recordings (post-event)
+
+**Advanced Features Discovered:**
+- **Interactive Memorial Boards**: Community whiteboards with moderation rules
+- **Multi-day Celebrations**: 3-day memorial services with separate streams
+- **Live Interaction Tools**: Advanced Vimeo engagement features
+- **Memorial Chat Wall Archives**: Preserved condolence messages
+- **Bilingual Support**: Spanish/English memorial services
+- **Technical Support Integration**: Real-time troubleshooting during events
+- **Hurricane/Power Outage Contingencies**: Documented service delays and solutions
+
+**Date Range Coverage:** November 2019 - October 2023 (4 years)
+**Peak Usage Period:** 2021-2022 (COVID-19 pandemic era)
+**Latest Technology:** 2023 memorials show advanced Vimeo interaction tools
+
+**Migration Ready:**
+✅ All 59 memorials documented with complete technical specifications
+✅ Ready-to-use custom HTML for each memorial
+✅ SEO-friendly slug suggestions provided
+✅ Special features and requirements noted
+✅ Compatible with existing legacy memorial support system
+
+**Next Steps for Migration:**
+1. Create Firestore migration script using this data
+2. Test legacy memorial rendering in new system
+3. Set up proper fullSlug routing for legacy content
+4. Validate Vimeo URLs are still accessible
+5. Import memorial data into Firebase collection
+
+---
+
+*✅ **EXTRACTION COMPLETE** - All 59 legacy memorials with Vimeo content have been successfully documented and are ready for migration to the new TributeStream system.*

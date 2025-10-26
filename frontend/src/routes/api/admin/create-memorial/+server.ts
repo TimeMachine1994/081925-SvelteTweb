@@ -11,7 +11,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			return json({ error: 'Authentication required' }, { status: 401 });
 		}
 
-		if (!locals.user.isAdmin && locals.user.role !== 'admin') {
+		if (locals.user.role !== 'admin') {
 			return json({ error: 'Admin privileges required' }, { status: 403 });
 		}
 

@@ -9,7 +9,6 @@ declare global {
 				email: string | null;
 				displayName?: string;
 				role: 'admin' | 'owner' | 'funeral_director';
-				isAdmin: boolean;
 			} | null;
 		}
 		interface PageData {
@@ -18,7 +17,6 @@ declare global {
 				email: string | null;
 				displayName?: string;
 				role: 'admin' | 'owner' | 'funeral_director';
-				isAdmin: boolean;
 			} | null;
 		}
 		// interface PageState {}

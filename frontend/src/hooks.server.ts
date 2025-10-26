@@ -38,8 +38,7 @@ const authHandle: Handle = async ({ event, resolve }) => {
 				uid: userRecord.uid,
 				email: userRecord.email || null,
 				displayName: userRecord.displayName,
-				role: userRecord.customClaims?.role || 'owner',
-				isAdmin: userRecord.customClaims?.admin || false
+				role: userRecord.customClaims?.role || 'owner'
 			};
 
 		} catch (error) {
