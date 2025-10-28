@@ -11,6 +11,13 @@
 	let monitoringInterval: NodeJS.Timeout | null = null;
 	let healthInterval: NodeJS.Timeout | null = null;
 
+	// WHIP streaming state
+	let whipStatus = $state<'idle' | 'requesting_media' | 'connecting' | 'streaming' | 'error'>('idle');
+	let localStream: MediaStream | null = null;
+	let peerConnection: RTCPeerConnection | null = null;
+	let whipUrl = $state<string>('');
+	let localVideoElement: HTMLVideoElement;
+
 	// Test results
 	let testResults = $state({
 		cloudflareConnection: false,
@@ -24,6 +31,7 @@
 	onDestroy(() => {
 		if (monitoringInterval) clearInterval(monitoringInterval);
 		if (healthInterval) clearInterval(healthInterval);
+		stopWhipStream();
 	});
 
 	// Logging function
@@ -42,6 +50,179 @@
 		// Keep only last 100 log entries
 		if (logs.length > 100) {
 			logs = logs.slice(-100);
+		}
+	}
+
+	// WHIP Streaming Functions
+	async function createCloudflareStream() {
+		addLog('🎬 [WHIP-CREATE] Creating Cloudflare stream for WHIP...');
+		
+		try {
+			const response = await fetch('/api/streams/create-whip-stream', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					title: 'MUX Bridge Test Stream',
+					description: 'Test stream for MUX bridge validation'
+				})
+			});
+
+			addLog(`📡 [WHIP-CREATE] Cloudflare API Response Status: ${response.status}`);
+
+			if (!response.ok) {
+				const errorData = await response.text();
+				addLog(`❌ [WHIP-CREATE] Cloudflare API Error: ${errorData}`);
+				throw new Error(`Cloudflare API error: ${response.statusText}`);
+			}
+
+			const streamData = await response.json();
+			addLog(`📊 [WHIP-CREATE] Cloudflare Stream Data:`, streamData);
+
+			cloudflareStreamId = streamData.stream.id;
+			whipUrl = streamData.stream.whipUrl;
+
+			addLog(`🆔 [WHIP-CREATE] Stream ID: ${cloudflareStreamId}`);
+			addLog(`🔗 [WHIP-CREATE] WHIP URL: ${whipUrl}`);
+
+			return { success: true, streamData };
+		} catch (error) {
+			addLog(`❌ [WHIP-CREATE] Stream creation failed: ${error.message}`);
+			return { success: false, error: error.message };
+		}
+	}
+
+	async function startWhipStream() {
+		addLog('📹 [WHIP-START] Starting WHIP stream...');
+		whipStatus = 'requesting_media';
+
+		try {
+			// First create Cloudflare stream
+			const streamCreation = await createCloudflareStream();
+			if (!streamCreation.success) {
+				throw new Error(`Stream creation failed: ${streamCreation.error}`);
+			}
+
+			// Request user media
+			addLog('🎥 [WHIP-START] Requesting user media (camera/microphone)...');
+			localStream = await navigator.mediaDevices.getUserMedia({
+				video: { width: 1280, height: 720 },
+				audio: true
+			});
+
+			addLog('✅ [WHIP-START] Media access granted');
+
+			// Display local video
+			if (localVideoElement) {
+				localVideoElement.srcObject = localStream;
+				addLog('📺 [WHIP-START] Local video preview started');
+			}
+
+			// Create WebRTC peer connection
+			whipStatus = 'connecting';
+			addLog('🔗 [WHIP-START] Creating WebRTC peer connection...');
+
+			peerConnection = new RTCPeerConnection({
+				iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+			});
+
+			// Add local stream to peer connection
+			localStream.getTracks().forEach(track => {
+				peerConnection?.addTrack(track, localStream!);
+				addLog(`➕ [WHIP-START] Added ${track.kind} track to peer connection`);
+			});
+
+			// Create offer
+			addLog('📤 [WHIP-START] Creating WebRTC offer...');
+			const offer = await peerConnection.createOffer();
+			await peerConnection.setLocalDescription(offer);
+
+			addLog('📡 [WHIP-START] Sending WHIP offer to Cloudflare...');
+
+			// Send offer to WHIP endpoint
+			const whipResponse = await fetch(whipUrl, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/sdp'
+				},
+				body: offer.sdp
+			});
+
+			addLog(`📡 [WHIP-START] WHIP Response Status: ${whipResponse.status}`);
+
+			if (!whipResponse.ok) {
+				const errorText = await whipResponse.text();
+				addLog(`❌ [WHIP-START] WHIP Error Response: ${errorText}`);
+				throw new Error(`WHIP connection failed: ${whipResponse.statusText}`);
+			}
+
+			// Get answer from Cloudflare
+			const answerSdp = await whipResponse.text();
+			addLog('📥 [WHIP-START] Received SDP answer from Cloudflare');
+
+			await peerConnection.setRemoteDescription({
+				type: 'answer',
+				sdp: answerSdp
+			});
+
+			// Monitor connection state
+			peerConnection.onconnectionstatechange = () => {
+				const state = peerConnection?.connectionState;
+				addLog(`🔗 [WHIP-CONNECTION] Connection state: ${state}`);
+				
+				if (state === 'connected') {
+					whipStatus = 'streaming';
+					addLog('✅ [WHIP-CONNECTION] WHIP stream connected successfully!');
+				} else if (state === 'failed' || state === 'disconnected') {
+					whipStatus = 'error';
+					addLog('❌ [WHIP-CONNECTION] WHIP connection failed or disconnected');
+				}
+			};
+
+			peerConnection.oniceconnectionstatechange = () => {
+				const state = peerConnection?.iceConnectionState;
+				addLog(`🧊 [WHIP-ICE] ICE connection state: ${state}`);
+			};
+
+			addLog('✅ [WHIP-START] WHIP stream setup completed');
+			return { success: true };
+
+		} catch (error) {
+			whipStatus = 'error';
+			addLog(`❌ [WHIP-START] WHIP stream failed: ${error.message}`);
+			return { success: false, error: error.message };
+		}
+	}
+
+	async function stopWhipStream() {
+		addLog('🛑 [WHIP-STOP] Stopping WHIP stream...');
+
+		try {
+			// Close peer connection
+			if (peerConnection) {
+				peerConnection.close();
+				peerConnection = null;
+				addLog('🔗 [WHIP-STOP] Peer connection closed');
+			}
+
+			// Stop local media tracks
+			if (localStream) {
+				localStream.getTracks().forEach(track => {
+					track.stop();
+					addLog(`⏹️ [WHIP-STOP] Stopped ${track.kind} track`);
+				});
+				localStream = null;
+			}
+
+			// Clear local video
+			if (localVideoElement) {
+				localVideoElement.srcObject = null;
+			}
+
+			whipStatus = 'idle';
+			addLog('✅ [WHIP-STOP] WHIP stream stopped successfully');
+
+		} catch (error) {
+			addLog(`❌ [WHIP-STOP] Error stopping WHIP stream: ${error.message}`);
 		}
 	}
 
@@ -425,20 +606,97 @@
 		<p class="text-gray-600">Test Phone → Cloudflare → Bridge → MUX recording pipeline</p>
 	</div>
 
-	<!-- Test Controls -->
+	<!-- WHIP Streaming Controls -->
+	<div class="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
+		<h3 class="text-lg font-semibold text-blue-900 mb-3">📹 WHIP Stream Controls</h3>
+		<div class="flex gap-4 mb-4">
+			<button
+				onclick={startWhipStream}
+				disabled={whipStatus !== 'idle'}
+				class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+			>
+				{whipStatus === 'idle' ? 'Start Camera Stream' : 
+				 whipStatus === 'requesting_media' ? 'Requesting Camera...' :
+				 whipStatus === 'connecting' ? 'Connecting...' : 'Streaming...'}
+			</button>
+			<button
+				onclick={stopWhipStream}
+				disabled={whipStatus === 'idle'}
+				class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+			>
+				Stop Stream
+			</button>
+			{#if cloudflareStreamId}
+				<div class="flex items-center gap-2 px-3 py-2 bg-white rounded-lg border">
+					<span class="text-sm font-medium text-gray-700">Stream ID:</span>
+					<code class="text-sm bg-gray-100 px-2 py-1 rounded">{cloudflareStreamId}</code>
+					<button
+						onclick={() => navigator.clipboard.writeText(cloudflareStreamId)}
+						class="text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded transition-colors"
+					>
+						Copy
+					</button>
+				</div>
+			{/if}
+		</div>
+		
+		<!-- WHIP Status Indicator -->
+		<div class="flex items-center gap-2 mb-3">
+			<span class="text-sm font-medium text-gray-700">WHIP Status:</span>
+			<span
+				class="px-3 py-1 rounded-full text-sm font-medium"
+				class:bg-gray-100={whipStatus === 'idle'}
+				class:text-gray-700={whipStatus === 'idle'}
+				class:bg-yellow-100={whipStatus === 'requesting_media' || whipStatus === 'connecting'}
+				class:text-yellow-800={whipStatus === 'requesting_media' || whipStatus === 'connecting'}
+				class:bg-green-100={whipStatus === 'streaming'}
+				class:text-green-800={whipStatus === 'streaming'}
+				class:bg-red-100={whipStatus === 'error'}
+				class:text-red-800={whipStatus === 'error'}
+			>
+				{whipStatus.toUpperCase().replace('_', ' ')}
+			</span>
+		</div>
+
+		<!-- Local Video Preview -->
+		<div class="relative bg-black rounded-lg overflow-hidden" style="aspect-ratio: 16/9;">
+			<video
+				bind:this={localVideoElement}
+				autoplay
+				muted
+				playsinline
+				class="w-full h-full object-cover"
+			>
+				<track kind="captions" />
+			</video>
+			{#if whipStatus === 'idle'}
+				<div class="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-75 text-white">
+					<div class="text-center">
+						<div class="text-4xl mb-2">📹</div>
+						<div class="text-sm">Click "Start Camera Stream" to begin</div>
+					</div>
+				</div>
+			{/if}
+		</div>
+	</div>
+
+	<!-- Bridge Test Controls -->
 	<div class="mb-6">
+		<h3 class="text-lg font-semibold text-gray-900 mb-3">🌉 Bridge Test Controls</h3>
 		<div class="flex gap-4 mb-4">
 			<input
 				bind:value={cloudflareStreamId}
-				placeholder="Enter Cloudflare Stream ID"
+				placeholder="Stream ID (auto-filled from WHIP stream)"
+				readonly={!!cloudflareStreamId}
 				class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+				class:bg-gray-50={!!cloudflareStreamId}
 			/>
 			<button
 				onclick={runFullBridgeTest}
 				disabled={!cloudflareStreamId || testPhase !== 'idle'}
 				class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 			>
-				{testPhase === 'idle' ? 'Start Test' : 'Testing...'}
+				{testPhase === 'idle' ? 'Start Bridge Test' : 'Testing...'}
 			</button>
 			<button
 				onclick={stopBridgeTest}
@@ -475,7 +733,27 @@
 	</div>
 
 	<!-- Status Dashboard -->
-	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+		<!-- WHIP Stream Status -->
+		<div class="bg-gray-50 p-4 rounded-lg">
+			<h3 class="font-semibold mb-2 flex items-center gap-2">
+				📹 <span>WHIP Stream</span>
+			</h3>
+			<div class="text-sm space-y-1">
+				<div class="flex items-center gap-2">
+					<span class={whipStatus === 'streaming' ? 'text-green-600' : whipStatus === 'connecting' || whipStatus === 'requesting_media' ? 'text-yellow-600' : whipStatus === 'error' ? 'text-red-600' : 'text-gray-400'}>
+						{whipStatus === 'streaming' ? '✅' : whipStatus === 'connecting' || whipStatus === 'requesting_media' ? '🟡' : whipStatus === 'error' ? '❌' : '⭕'}
+					</span>
+					<span class="capitalize">{whipStatus.replace('_', ' ')}</span>
+				</div>
+				{#if cloudflareStreamId}
+					<div class="text-xs text-gray-500 mt-2">
+						ID: {cloudflareStreamId.slice(0, 8)}...
+					</div>
+				{/if}
+			</div>
+		</div>
+
 		<!-- Cloudflare Status -->
 		<div class="bg-gray-50 p-4 rounded-lg">
 			<h3 class="font-semibold mb-2 flex items-center gap-2">
@@ -488,11 +766,6 @@
 					</span>
 					<span>Connection</span>
 				</div>
-				{#if cloudflareStreamId}
-					<div class="text-xs text-gray-500 mt-2">
-						ID: {cloudflareStreamId.slice(0, 8)}...
-					</div>
-				{/if}
 			</div>
 		</div>
 
