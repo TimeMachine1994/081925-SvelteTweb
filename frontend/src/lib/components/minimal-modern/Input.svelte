@@ -8,6 +8,8 @@
     value?: string;
     disabled?: boolean;
     class?: string;
+    id?: string;
+    required?: boolean;
     oninput?: (event: Event) => void;
   }
   
@@ -18,6 +20,8 @@
     value = $bindable(''),
     disabled = false,
     class: className = '',
+    id,
+    required = false,
     oninput,
     ...restProps
   }: Props = $props();

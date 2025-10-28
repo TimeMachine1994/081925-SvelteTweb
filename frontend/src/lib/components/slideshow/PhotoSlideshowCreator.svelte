@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Upload, X, Play, Settings, Plus, ExternalLink } from 'lucide-svelte';
+	import { Upload, X, Play, Settings, Plus, ExternalLink, ChevronUp, ChevronDown } from 'lucide-svelte';
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	import { SimpleSlideshowGenerator } from '$lib/utils/SimpleSlideshowGenerator';
 
@@ -764,6 +764,26 @@
 		const [movedPhoto] = newPhotos.splice(fromIndex, 1);
 		newPhotos.splice(toIndex, 0, movedPhoto);
 		photos = newPhotos;
+		
+		console.log(`Photo moved from position ${fromIndex + 1} to ${toIndex + 1}`);
+		
+		// Auto-save draft after reordering
+		if (memorialId) {
+			saveDraft();
+		}
+	}
+
+	// Mobile-friendly photo reordering functions
+	function movePhotoUp(index: number) {
+		if (index > 0) {
+			movePhoto(index, index - 1);
+		}
+	}
+
+	function movePhotoDown(index: number) {
+		if (index < photos.length - 1) {
+			movePhoto(index, index + 1);
+		}
 	}
 
 	// Generate slideshow video
@@ -1532,6 +1552,28 @@
 											<X class="remove-icon" />
 										</button>
 										<div class="photo-number">#{chunkIndex * 6 + index + 1}</div>
+										
+										<!-- Mobile Reordering Arrows -->
+										<div class="mobile-reorder-controls">
+											<button 
+												class="reorder-btn up"
+												onclick={() => movePhotoUp(chunkIndex * 6 + index)}
+												disabled={chunkIndex * 6 + index === 0}
+												aria-label="Move photo up"
+												title="Move photo up"
+											>
+												<ChevronUp size={16} />
+											</button>
+											<button 
+												class="reorder-btn down"
+												onclick={() => movePhotoDown(chunkIndex * 6 + index)}
+												disabled={chunkIndex * 6 + index === photos.length - 1}
+												aria-label="Move photo down"
+												title="Move photo down"
+											>
+												<ChevronDown size={16} />
+											</button>
+										</div>
 									</div>
 								</div>
 							{/each}
@@ -2532,32 +2574,21 @@
 
 	.chunk-label {
 		font-size: 0.9rem;
-		font-weight: 600;
-		color: #374151;
-	}
 
-	/* Photo Cards with Larger Remove Buttons */
-	.remove-btn {
-		position: absolute;
-		top: 0.5rem;
-		right: 0.5rem;
-		width: 2.5rem;
-		height: 2.5rem;
-		background: rgba(0, 0, 0, 0.8);
-		border: none;
-		border-radius: 50%;
-		color: white;
-		cursor: pointer;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		transition: all 0.2s ease;
-		z-index: 10;
-	}
+/* Action Sections */
+.action-section {
+	text-align: center;
+	padding: 2rem;
+	background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+	border-radius: 16px;
+}
 
-	.remove-btn.large {
-		width: 3rem;
-		height: 3rem;
+.action-help {
+	color: #6b7280;
+	font-size: 1rem;
+	margin: 1rem 0 0 0;
+	font-style: italic;
+}
 		top: 0.75rem;
 		right: 0.75rem;
 	}
@@ -2570,6 +2601,70 @@
 	.remove-icon {
 		width: 1.25rem;
 		height: 1.25rem;
+	}
+
+	/* Mobile Reordering Controls */
+	.mobile-reorder-controls {
+		position: absolute;
+		bottom: 0.5rem;
+		right: 0.5rem;
+		display: none; /* Hidden by default, shown on mobile */
+		flex-direction: column;
+		gap: 0.25rem;
+		z-index: 10;
+	}
+
+	.reorder-btn {
+		width: 2rem;
+		height: 2rem;
+		background: rgba(213, 186, 127, 0.9);
+		border: none;
+		border-radius: 4px;
+		color: white;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.2s ease;
+		font-size: 0.75rem;
+	}
+
+	.reorder-btn:hover:not(:disabled) {
+		background: rgba(213, 186, 127, 1);
+		transform: scale(1.1);
+	}
+
+	.reorder-btn:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.reorder-btn.up {
+		border-radius: 4px 4px 2px 2px;
+	}
+
+	.reorder-btn.down {
+		border-radius: 2px 2px 4px 4px;
+	}
+
+	/* Show mobile controls on touch devices and small screens */
+	@media (max-width: 768px), (hover: none) {
+		.mobile-reorder-controls {
+			display: flex;
+		}
+		
+		/* Hide drag cursor on mobile since drag-and-drop doesn't work well */
+		.photo-card {
+			cursor: default;
+		}
+		
+		.photo-card[draggable="true"] {
+			-webkit-user-drag: none;
+			-khtml-user-drag: none;
+			-moz-user-drag: none;
+			-o-user-drag: none;
+			user-select: none;
+		}
 	}
 
 	/* Settings Section - Simplified */

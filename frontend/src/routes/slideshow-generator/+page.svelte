@@ -24,15 +24,43 @@
 				isEditMode = false;
 			}
 		}
-		
+
 		// Check for memorialId parameter (when coming from memorial page)
 		const memorialParam = $page.url.searchParams.get('memorialId');
 		if (memorialParam && !isEditMode) {
 			memorialId = memorialParam;
 			console.log('🎬 Memorial ID found, will check for existing slideshow:', memorialId);
 		}
+
 	});
 	
+	// Memorial data for proper navigation
+	let memorial = $state<any>(null);
+	
+	// Fetch memorial data if memorialId is provided
+	async function fetchMemorialData() {
+		if (!memorialId) return;
+		
+		try {
+			const response = await fetch(`/api/memorials/${memorialId}`);
+			if (response.ok) {
+				memorial = await response.json();
+				console.log('📍 Memorial data loaded:', memorial);
+			} else {
+				console.warn('⚠️ Could not load memorial data for navigation');
+			}
+		} catch (error) {
+			console.error('❌ Error fetching memorial data:', error);
+		}
+	}
+	
+	onMount(() => {
+		// Load memorial data on mount
+		if (memorialId) {
+			fetchMemorialData();
+		}
+	});
+
 	// Handle when PhotoSlideshowCreator finds existing slideshow
 	function handleExistingSlideshowFound(event: CustomEvent) {
 		const { slideshow } = event.detail;
@@ -55,13 +83,30 @@
 			isEditMode
 		});
 
+		// Auto-scroll to next step on mobile after video generation
+		if (window.innerWidth <= 768) {
+			setTimeout(() => {
+				const nextStepElement = document.querySelector('.final-actions, .upload-section, .step-4');
+				if (nextStepElement) {
+					nextStepElement.scrollIntoView({ 
+						behavior: 'smooth', 
+						block: 'start',
+						inline: 'nearest'
+					});
+				}
+			}, 500); // Small delay to ensure UI has updated
+		}
+
 		if (uploaded) {
 			const action = isEditMode ? 'updated' : 'created';
 			alert(`Slideshow successfully ${action}!`);
 			
 			// Navigate back to memorial or profile
-			if (memorialId) {
-				// Try to navigate to memorial page
+			if (memorial?.fullSlug) {
+				// Navigate to memorial page using fullSlug
+				window.location.href = `/${memorial.fullSlug}`;
+			} else if (memorialId) {
+				// Fallback to memorial ID if fullSlug not available
 				window.location.href = `/memorials/${memorialId}`;
 			} else {
 				// Navigate to profile
@@ -74,9 +119,14 @@
 
 	// Handle navigation back
 	function handleBack() {
-		if (memorialId) {
+		if (memorial?.fullSlug) {
+			// Navigate to memorial page using fullSlug
+			window.location.href = `/${memorial.fullSlug}`;
+		} else if (memorialId) {
+			// Fallback to memorial ID if fullSlug not available
 			window.location.href = `/memorials/${memorialId}`;
 		} else {
+			// Navigate to profile
 			window.location.href = '/profile';
 		}
 	}
@@ -113,8 +163,7 @@
 	<!-- Slideshow Creator -->
 	<div class="creator-container">
 		<PhotoSlideshowCreator 
-			{memorialId}
-			existingSlideshow={editData}
+			memorialId={memorialId || undefined}
 			maxPhotos={30}
 			maxFileSize={10}
 			on:slideshowGenerated={handleSlideshowGenerated}
@@ -185,11 +234,13 @@
 
 	@media (max-width: 768px) {
 		.slideshow-generator-page {
-			padding: 1rem 0;
+			padding: 0.5rem 0;
+			min-height: 100vh;
 		}
 
 		.page-header {
-			margin-bottom: 2rem;
+			margin-bottom: 1.5rem;
+			padding: 0 0.5rem;
 		}
 
 		.header-content {
@@ -199,16 +250,54 @@
 		}
 
 		.header-text h1 {
-			font-size: 2rem;
+			font-size: 1.75rem;
+			line-height: 1.2;
 		}
 
 		.header-text p {
-			font-size: 1rem;
+			font-size: 0.9rem;
+			line-height: 1.4;
 		}
 
 		.back-button {
 			padding: 0.5rem 1rem;
 			font-size: 0.875rem;
+			width: auto;
+			min-width: fit-content;
+		}
+
+		.creator-container {
+			padding: 0 0.5rem;
+			max-width: 100%;
+		}
+	}
+
+	/* Extra small mobile devices */
+	@media (max-width: 480px) {
+		.slideshow-generator-page {
+			padding: 0.25rem 0;
+		}
+
+		.page-header {
+			padding: 0 0.25rem;
+			margin-bottom: 1rem;
+		}
+
+		.header-text h1 {
+			font-size: 1.5rem;
+		}
+
+		.header-text p {
+			font-size: 0.85rem;
+		}
+
+		.creator-container {
+			padding: 0 0.25rem;
+		}
+
+		.back-button {
+			padding: 0.4rem 0.8rem;
+			font-size: 0.8rem;
 		}
 	}
 </style>

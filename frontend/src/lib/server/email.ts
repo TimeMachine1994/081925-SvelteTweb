@@ -16,7 +16,8 @@ export const SENDGRID_TEMPLATES = {
 	PAYMENT_ACTION_REQUIRED: env.SENDGRID_TEMPLATE_PAYMENT_ACTION || 'placeholder',
 	PAYMENT_FAILURE: env.SENDGRID_TEMPLATE_PAYMENT_FAILURE || 'placeholder',
 	CONTACT_FORM_SUPPORT: env.SENDGRID_TEMPLATE_CONTACT_SUPPORT || 'placeholder',
-	CONTACT_FORM_CONFIRMATION: env.SENDGRID_TEMPLATE_CONTACT_CONFIRMATION || 'placeholder'
+	CONTACT_FORM_CONFIRMATION: env.SENDGRID_TEMPLATE_CONTACT_CONFIRMATION || 'placeholder',
+	PASSWORD_RESET: env.SENDGRID_TEMPLATE_PASSWORD_RESET || 'placeholder'
 };
 
 export interface EnhancedRegistrationEmailData {
@@ -57,6 +58,12 @@ export interface ContactFormData {
 	subject: string;
 	message: string;
 	timestamp?: Date;
+}
+
+export interface PasswordResetEmailData {
+	email: string;
+	displayName: string;
+	resetLink: string;
 }
 
 export async function sendEnhancedRegistrationEmail(data: EnhancedRegistrationEmailData) {
@@ -295,6 +302,48 @@ export async function sendPaymentFailureEmail(data: PaymentEmailData) {
 		console.log('✅ Payment failure email sent via dynamic template');
 	} catch (error) {
 		console.error('💥 Exception sending payment failure email:', error);
+		throw error;
+	}
+}
+
+/**
+ * Send password reset email using dynamic template
+ */
+export async function sendPasswordResetEmail(data: PasswordResetEmailData) {
+	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key') {
+		console.warn('⚠️ SendGrid client not initialized. Skipping password reset email.');
+		return;
+	}
+
+	// Check if template is configured
+	if (!SENDGRID_TEMPLATES.PASSWORD_RESET || SENDGRID_TEMPLATES.PASSWORD_RESET === 'placeholder') {
+		console.error('💥 Password reset template not configured. Template ID:', SENDGRID_TEMPLATES.PASSWORD_RESET);
+		throw new Error('Password reset email template not configured. Please check SENDGRID_TEMPLATE_PASSWORD_RESET environment variable.');
+	}
+
+	const msg = {
+		to: data.email,
+		from: FROM_EMAIL,
+		templateId: SENDGRID_TEMPLATES.PASSWORD_RESET,
+		dynamicTemplateData: {
+			displayName: data.displayName || 'User',
+			email: data.email,
+			resetLink: data.resetLink,
+			currentYear: new Date().getFullYear()
+		},
+		// Disable click tracking to prevent URL mangling
+		trackingSettings: {
+			clickTracking: {
+				enable: false
+			}
+		}
+	};
+
+	try {
+		await sgMail.send(msg);
+		console.log('✅ Password reset email sent via dynamic template to:', data.email);
+	} catch (error) {
+		console.error('💥 Exception sending password reset email:', error);
 		throw error;
 	}
 }

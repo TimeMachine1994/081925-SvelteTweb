@@ -106,7 +106,7 @@
 		try {
 			// 1. Get WHIP URL from our API
 			console.log('📡 [BROWSER_STREAM] Getting WHIP URL...');
-			const response = await fetch(`/api/streams/${streamId}/whip`, {
+			const response = await fetch(`/api/streams/playback/${streamId}/whip`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' }
 			});

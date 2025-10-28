@@ -2,8 +2,7 @@
 	import {
 		signInWithEmailAndPassword,
 		signInWithPopup,
-		GoogleAuthProvider,
-		sendPasswordResetEmail
+		GoogleAuthProvider
 	} from 'firebase/auth';
 	import { auth } from '$lib/firebase';
 	import { goto } from '$app/navigation';
@@ -89,11 +88,28 @@
 		error = null;
 
 		try {
-			await sendPasswordResetEmail(auth, resetEmail);
-			resetSuccess = true;
+			console.log('[Login.svelte] Attempting password reset for:', resetEmail);
+			
+			// Use custom SendGrid-based password reset API
+			const response = await fetch('/api/password-reset', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({ email: resetEmail })
+			});
+
+			const result = await response.json();
+
+			if (response.ok) {
+				console.log('[Login.svelte] Password reset email sent successfully');
+				resetSuccess = true;
+			} else {
+				error = result.error || 'Failed to send password reset email.';
+			}
 		} catch (e: any) {
-			error = e.message;
-			console.error('[Login.svelte] An error occurred during password reset:', e);
+			console.error('[Login.svelte] Password reset error:', e);
+			error = 'An error occurred while sending the password reset email. Please try again.';
 		} finally {
 			resetLoading = false;
 		}

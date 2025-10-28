@@ -259,7 +259,7 @@ describe('BrowserStreamer Component', () => {
       const startButton = screen.getByText('Start Streaming');
       await fireEvent.click(startButton);
 
-      expect(mockFetch).toHaveBeenCalledWith('/api/streams/test-stream-123/whip', {
+      expect(mockFetch).toHaveBeenCalledWith('/api/streams/playback/test-stream-123/whip', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
