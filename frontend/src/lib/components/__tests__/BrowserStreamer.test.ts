@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/svelte';
 import BrowserStreamer from '../BrowserStreamer.svelte';
 import { setupTestEnvironment } from '../../../../test-utils/test-helpers';
+import type { MuxConnectionState } from '$lib/services/muxWebRTC';
 
 // Mock Button component
 vi.mock('$lib/ui', () => ({
@@ -31,13 +32,25 @@ vi.mock('lucide-svelte', () => ({
   AlertCircle: vi.fn(() => ({ $$: { fragment: null } }))
 }));
 
-describe('BrowserStreamer Component', () => {
+// Mock MuxWebRTC service
+const mockMuxService = {
+  startBridge: vi.fn(),
+  connectToMux: vi.fn(),
+  stopBridge: vi.fn(),
+  cleanup: vi.fn(),
+  getConnectionState: vi.fn(() => ({ status: 'disconnected' }))
+};
+
+vi.mock('$lib/services/muxWebRTC', () => ({
+  createMuxWebRTCService: vi.fn(() => mockMuxService),
+  MuxWebRTCService: vi.fn(() => mockMuxService)
+}));
+
+describe('BrowserStreamer Component (Mux Integration)', () => {
   let mockMediaStream: MediaStream;
   let mockVideoTrack: MediaStreamTrack;
   let mockAudioTrack: MediaStreamTrack;
-  let mockPeerConnection: RTCPeerConnection;
   let mockGetUserMedia: ReturnType<typeof vi.fn>;
-  let mockFetch: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     setupTestEnvironment();
@@ -526,6 +539,95 @@ describe('BrowserStreamer Component', () => {
       await new Promise(resolve => setTimeout(resolve, 150));
 
       expect(screen.getByText('No video tracks found')).toBeInTheDocument();
+    });
+  });
+
+  // New Mux Integration Tests
+  describe('Mux Integration', () => {
+    beforeEach(() => {
+      vi.clearAllMocks();
+    });
+
+    it('should use Mux service for streaming instead of WHIP', async () => {
+      mockMuxService.startBridge.mockResolvedValue({
+        success: true,
+        bridgeId: 'mux-bridge-123',
+        webrtcUrl: 'https://global-live.mux.com/webrtc/test-key',
+        rtmpUrl: 'rtmps://global-live.mux.com:443/live',
+        streamKey: 'test-stream-key',
+        status: 'ready'
+      });
+
+      mockMuxService.connectToMux.mockResolvedValue({});
+
+      render(BrowserStreamer, {
+        props: {
+          streamId: 'test-stream-123',
+          streamTitle: 'Test Memorial Stream'
+        }
+      });
+
+      // Grant permissions first
+      mockGetUserMedia.mockResolvedValue(mockMediaStream);
+      const permissionButton = screen.getByText('Allow Camera & Microphone');
+      await fireEvent.click(permissionButton);
+
+      // Start streaming
+      const startButton = screen.getByText('Start Streaming');
+      await fireEvent.click(startButton);
+
+      expect(mockMuxService.startBridge).toHaveBeenCalledWith('test-stream-123');
+      expect(mockMuxService.connectToMux).toHaveBeenCalledWith(
+        'https://global-live.mux.com/webrtc/test-key',
+        mockMediaStream
+      );
+    });
+
+    it('should show guaranteed recording messaging', () => {
+      render(BrowserStreamer, {
+        props: {
+          streamId: 'test-stream-123',
+          streamTitle: 'Test Memorial Stream'
+        }
+      });
+
+      expect(screen.getByText('Guaranteed Recording Stream')).toBeInTheDocument();
+      expect(screen.getByText('Enterprise-grade recording via Mux bridge')).toBeInTheDocument();
+    });
+
+    it('should handle Mux connection failures gracefully', async () => {
+      mockMuxService.startBridge.mockRejectedValue(new Error('Mux API error'));
+
+      render(BrowserStreamer, {
+        props: {
+          streamId: 'test-stream-123',
+          streamTitle: 'Test Memorial Stream'
+        }
+      });
+
+      // Grant permissions first
+      mockGetUserMedia.mockResolvedValue(mockMediaStream);
+      const permissionButton = screen.getByText('Allow Camera & Microphone');
+      await fireEvent.click(permissionButton);
+
+      // Start streaming (should fail)
+      const startButton = screen.getByText('Start Streaming');
+      await fireEvent.click(startButton);
+
+      expect(screen.getByText(/Failed to start streaming with guaranteed recording/)).toBeInTheDocument();
+    });
+
+    it('should clean up Mux service on component unmount', () => {
+      const { unmount } = render(BrowserStreamer, {
+        props: {
+          streamId: 'test-stream-123',
+          streamTitle: 'Test Memorial Stream'
+        }
+      });
+
+      unmount();
+
+      expect(mockMuxService.cleanup).toHaveBeenCalled();
     });
   });
 });

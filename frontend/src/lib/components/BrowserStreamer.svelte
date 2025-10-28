@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
-	import { Camera, CameraOff, Mic, MicOff, Play, Square } from 'lucide-svelte';
+	import { Camera, CameraOff, Mic, MicOff, Play, Square, AlertCircle } from 'lucide-svelte';
 	import { Button } from '$lib/ui';
+	import { createMuxWebRTCService, type MuxConnectionState } from '$lib/services/muxWebRTC';
 
 	interface Props {
 		streamId: string;
@@ -18,10 +19,15 @@
 	let hasPermission = $state(false);
 	let error = $state('');
 	let mediaStream = $state<MediaStream | null>(null);
-	let peerConnection = $state<RTCPeerConnection | null>(null);
 	let videoElement = $state<HTMLVideoElement>();
 	let cameraEnabled = $state(true);
 	let micEnabled = $state(true);
+
+	// Mux WebRTC service
+	let muxService = createMuxWebRTCService((state: MuxConnectionState) => {
+		handleMuxStateChange(state);
+	});
+	let connectionState = $state<MuxConnectionState>({ status: 'disconnected' });
 
 	// Cleanup on component destroy
 	onDestroy(() => {
@@ -99,101 +105,36 @@
 			if (!mediaStream) return;
 		}
 
-		console.log('🚀 [BROWSER_STREAM] Starting WHIP stream for:', streamId);
+		console.log('🎬 [BROWSER_STREAM] Starting Mux bridge stream for:', streamId);
 		isConnecting = true;
 		error = '';
 
 		try {
-			// 1. Get WHIP URL from our API
-			console.log('📡 [BROWSER_STREAM] Getting WHIP URL...');
-			const response = await fetch(`/api/streams/playback/${streamId}/whip`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' }
-			});
-
-			if (!response.ok) {
-				throw new Error(`Failed to get WHIP URL: ${response.statusText}`);
+			// Check Mux configuration first
+			console.log('🔧 [BROWSER_STREAM] Checking Mux configuration...');
+			const configResponse = await fetch('/api/config/mux');
+			if (configResponse.ok) {
+				const config = await configResponse.json();
+				if (!config.configured) {
+					throw new Error(`Mux integration not configured. ${config.message}`);
+				}
 			}
 
-			const { whipUrl, cloudflareInputId } = await response.json();
-			console.log('✅ [BROWSER_STREAM] Got WHIP URL:', whipUrl);
+			// 1. Start Mux bridge and get WebRTC URL
+			console.log('🌉 [BROWSER_STREAM] Starting Mux bridge...');
+			const bridgeResponse = await muxService.startBridge(streamId);
+			console.log('✅ [BROWSER_STREAM] Mux bridge started:', bridgeResponse.bridgeId);
 
-			// 2. Create RTCPeerConnection
-			peerConnection = new RTCPeerConnection({
-				iceServers: [{ urls: 'stun:stun.cloudflare.com:3478' }]
-			});
-
-			// 3. Add media tracks
-			mediaStream.getTracks().forEach((track) => {
-				if (peerConnection && mediaStream) {
-					peerConnection.addTrack(track, mediaStream);
-				}
-			});
-
-			// 4. Create offer
-			const offer = await peerConnection.createOffer();
-			await peerConnection.setLocalDescription(offer);
-
-			console.log('📤 [BROWSER_STREAM] Sending WHIP offer to Cloudflare...');
-			console.log('📝 [BROWSER_STREAM] SDP Offer:', offer.sdp);
-
-			// 5. Send WHIP request (pre-authenticated URL)
-			const whipResponse = await fetch(whipUrl, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/sdp'
-				},
-				body: offer.sdp
-			});
-
-			console.log(
-				'📥 [BROWSER_STREAM] WHIP response status:',
-				whipResponse.status,
-				whipResponse.statusText
-			);
-
-			if (!whipResponse.ok) {
-				const errorText = await whipResponse.text();
-				console.error('❌ [BROWSER_STREAM] WHIP error response:', errorText);
-				throw new Error(
-					`WHIP request failed: ${whipResponse.status} ${whipResponse.statusText} - ${errorText}`
-				);
-			}
-
-			const answerSdp = await whipResponse.text();
-			console.log('📥 [BROWSER_STREAM] Received WHIP answer from Cloudflare');
-
-			// 6. Set remote description
-			await peerConnection.setRemoteDescription({
-				type: 'answer',
-				sdp: answerSdp
-			});
-
-			// 7. Monitor connection state
-			peerConnection.onconnectionstatechange = () => {
-				console.log('🔗 [BROWSER_STREAM] Connection state:', peerConnection?.connectionState);
-
-				if (peerConnection?.connectionState === 'connected') {
-					console.log('✅ [BROWSER_STREAM] Successfully connected to Cloudflare Stream');
-					isStreaming = true;
-					isConnecting = false;
-					onStreamStart?.();
-				} else if (peerConnection?.connectionState === 'failed') {
-					console.error('❌ [BROWSER_STREAM] Connection failed');
-					error = 'Failed to connect to streaming server. Please try again.';
-					cleanup();
-				}
-			};
-
-			peerConnection.oniceconnectionstatechange = () => {
-				console.log(
-					'🧊 [BROWSER_STREAM] ICE connection state:',
-					peerConnection?.iceConnectionState
-				);
-			};
+			// 2. Connect to Mux WebRTC endpoint
+			console.log('🔗 [BROWSER_STREAM] Connecting to Mux WebRTC...');
+			await muxService.connectToMux(bridgeResponse.webrtcUrl, mediaStream);
+			
+			console.log('✅ [BROWSER_STREAM] Successfully connected to Mux WebRTC');
+			console.log('📡 [BROWSER_STREAM] Stream will be automatically bridged to Cloudflare RTMP');
+			
 		} catch (err) {
-			console.error('❌ [BROWSER_STREAM] Error starting stream:', err);
-			error = err instanceof Error ? err.message : 'Failed to start streaming';
+			console.error('❌ [BROWSER_STREAM] Error starting Mux stream:', err);
+			error = err instanceof Error ? err.message : 'Failed to start streaming with guaranteed recording';
 			isConnecting = false;
 			cleanup();
 		}
@@ -205,11 +146,11 @@
 		onStreamEnd?.();
 	}
 
-	function cleanup() {
-		if (peerConnection) {
-			peerConnection.close();
-			peerConnection = null;
-		}
+	async function cleanup() {
+		console.log('🧹 [BROWSER_STREAM] Cleaning up resources...');
+		
+		// Stop Mux service
+		await muxService.cleanup();
 
 		if (mediaStream) {
 			mediaStream.getTracks().forEach((track) => track.stop());
@@ -223,6 +164,38 @@
 		isStreaming = false;
 		isConnecting = false;
 		hasPermission = false;
+	}
+
+	/**
+	 * Handle Mux connection state changes
+	 */
+	function handleMuxStateChange(state: MuxConnectionState) {
+		console.log('📊 [BROWSER_STREAM] Mux state changed:', state);
+		connectionState = state;
+
+		switch (state.status) {
+			case 'connected':
+				console.log('✅ [BROWSER_STREAM] Mux connection established - guaranteed recording active');
+				isStreaming = true;
+				isConnecting = false;
+				onStreamStart?.();
+				break;
+			case 'failed':
+				console.error('❌ [BROWSER_STREAM] Mux connection failed:', state.error);
+				error = state.error || 'Connection to recording service failed. Please try again.';
+				isConnecting = false;
+				isStreaming = false;
+				break;
+			case 'connecting':
+				console.log('🔄 [BROWSER_STREAM] Connecting to Mux...');
+				isConnecting = true;
+				break;
+			case 'disconnected':
+				console.log('🔌 [BROWSER_STREAM] Mux connection disconnected');
+				isStreaming = false;
+				isConnecting = false;
+				break;
+		}
 	}
 
 	function toggleCamera() {
@@ -248,8 +221,9 @@
 
 <div class="browser-streamer">
 	<div class="stream-header">
-		<h3>📹 Browser Streaming</h3>
+		<h3>Guaranteed Recording Stream</h3>
 		<p class="stream-title">{streamTitle}</p>
+		<p class="stream-subtitle">Enterprise-grade recording via Mux bridge</p>
 	</div>
 
 	{#if error}
@@ -365,9 +339,16 @@
 	}
 
 	.stream-title {
-		margin: 0;
+		margin: 0 0 0.25rem 0;
 		color: #6b7280;
 		font-size: 0.875rem;
+	}
+
+	.stream-subtitle {
+		margin: 0;
+		color: #059669;
+		font-size: 0.75rem;
+		font-weight: 500;
 	}
 
 	.error-message {
