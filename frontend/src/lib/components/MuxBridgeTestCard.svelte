@@ -232,35 +232,98 @@
 		addLog(`📋 [CF-VALIDATE] Stream ID: ${streamId}`);
 
 		try {
-			// Check if stream exists and is live
-			const response = await fetch(`/api/streams/${streamId}/status`);
-			addLog(`📡 [CF-VALIDATE] API Response Status: ${response.status}`);
+			// For WHIP-created streams, we need to validate differently
+			if (whipStatus === 'streaming' && whipUrl) {
+				addLog('🎯 [CF-VALIDATE] Validating WHIP-created stream...');
+				
+				// Extract customer code from WHIP URL
+				const whipUrlMatch = whipUrl.match(/customer-([^.]+)\.cloudflarestream\.com/);
+				if (!whipUrlMatch) {
+					throw new Error('Could not extract customer code from WHIP URL');
+				}
+				
+				const customerCode = whipUrlMatch[1];
+				addLog(`🏢 [CF-VALIDATE] Customer Code: ${customerCode}`);
 
-			if (!response.ok) {
-				throw new Error(`Cloudflare API error: ${response.statusText}`);
-			}
+				// Generate HLS URL for WHIP stream
+				const hlsUrl = `https://customer-${customerCode}.cloudflarestream.com/${streamId}/manifest/video.m3u8`;
+				addLog(`🎥 [CF-VALIDATE] HLS URL Generated: ${hlsUrl}`);
 
-			const streamData = await response.json();
-			addLog(`📊 [CF-VALIDATE] Stream Data:`, streamData);
+				// Test HLS accessibility
+				addLog('🔍 [CF-VALIDATE] Testing HLS stream accessibility...');
+				const hlsResponse = await fetch(hlsUrl, { method: 'HEAD' });
+				addLog(`🎥 [CF-VALIDATE] HLS Accessibility Test: ${hlsResponse.status}`);
 
-			if (streamData.status !== 'live') {
-				throw new Error(`Stream not live. Current status: ${streamData.status}`);
-			}
-
-			// Get HLS URL for bridge connection
-			const hlsUrl = `https://customer-${streamData.customerCode}.cloudflarestream.com/${streamId}/manifest/video.m3u8`;
-			addLog(`🎥 [CF-VALIDATE] HLS URL Generated: ${hlsUrl}`);
-
-			// Test HLS accessibility
-			const hlsResponse = await fetch(hlsUrl, { method: 'HEAD' });
-			addLog(`🎥 [CF-VALIDATE] HLS Accessibility Test: ${hlsResponse.status}`);
-
-			if (hlsResponse.ok) {
-				addLog('✅ [CF-VALIDATE] Cloudflare stream validation successful');
-				testResults.cloudflareConnection = true;
-				return { success: true, hlsUrl, streamData };
+				if (hlsResponse.ok) {
+					addLog('✅ [CF-VALIDATE] WHIP stream HLS is accessible');
+					testResults.cloudflareConnection = true;
+					return { 
+						success: true, 
+						hlsUrl, 
+						streamData: { 
+							id: streamId, 
+							status: 'live', 
+							customerCode,
+							isWhipStream: true 
+						} 
+					};
+				} else {
+					// HLS might not be ready immediately, let's wait a bit
+					addLog('⏳ [CF-VALIDATE] HLS not ready yet, waiting 3 seconds...');
+					await new Promise(resolve => setTimeout(resolve, 3000));
+					
+					const retryResponse = await fetch(hlsUrl, { method: 'HEAD' });
+					addLog(`🔄 [CF-VALIDATE] HLS Retry Test: ${retryResponse.status}`);
+					
+					if (retryResponse.ok) {
+						addLog('✅ [CF-VALIDATE] WHIP stream HLS is now accessible');
+						testResults.cloudflareConnection = true;
+						return { 
+							success: true, 
+							hlsUrl, 
+							streamData: { 
+								id: streamId, 
+								status: 'live', 
+								customerCode,
+								isWhipStream: true 
+							} 
+						};
+					} else {
+						throw new Error(`HLS not accessible after retry: ${retryResponse.status}`);
+					}
+				}
 			} else {
-				throw new Error(`HLS not accessible: ${hlsResponse.status}`);
+				// Fallback to database stream validation
+				addLog('🗄️ [CF-VALIDATE] Validating database stream...');
+				const response = await fetch(`/api/streams/${streamId}/status`);
+				addLog(`📡 [CF-VALIDATE] API Response Status: ${response.status}`);
+
+				if (!response.ok) {
+					throw new Error(`Cloudflare API error: ${response.statusText}`);
+				}
+
+				const streamData = await response.json();
+				addLog(`📊 [CF-VALIDATE] Stream Data:`, streamData);
+
+				if (streamData.status !== 'live') {
+					throw new Error(`Stream not live. Current status: ${streamData.status}`);
+				}
+
+				// Get HLS URL for bridge connection
+				const hlsUrl = `https://customer-${streamData.customerCode}.cloudflarestream.com/${streamId}/manifest/video.m3u8`;
+				addLog(`🎥 [CF-VALIDATE] HLS URL Generated: ${hlsUrl}`);
+
+				// Test HLS accessibility
+				const hlsResponse = await fetch(hlsUrl, { method: 'HEAD' });
+				addLog(`🎥 [CF-VALIDATE] HLS Accessibility Test: ${hlsResponse.status}`);
+
+				if (hlsResponse.ok) {
+					addLog('✅ [CF-VALIDATE] Cloudflare stream validation successful');
+					testResults.cloudflareConnection = true;
+					return { success: true, hlsUrl, streamData };
+				} else {
+					throw new Error(`HLS not accessible: ${hlsResponse.status}`);
+				}
 			}
 		} catch (error) {
 			addLog(`❌ [CF-VALIDATE] Cloudflare validation failed: ${error.message}`);
