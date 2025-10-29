@@ -129,11 +129,15 @@ export class BridgeSession {
 	private muxStreamKey: string = '';
 	private muxTokenId: string = '';
 	private muxTokenSecret: string = '';
+	private muxUploadUrl: string = '';
+	private muxUploadId: string = '';
 	private isActive: boolean = false;
 	private segmentCount: number = 0;
 	private bytesTransferred: number = 0;
+	private nextByteStart: number = 0;
 	private startTime: number = 0;
 	private alarmInterval: number = 2000; // Check for new segments every 2 seconds
+	private processedSegments: Set<string> = new Set(); // Track which segments we've uploaded
 
 	constructor(state: DurableObjectState) {
 		this.state = state;
@@ -141,10 +145,15 @@ export class BridgeSession {
 			// Restore state from storage
 			this.cloudflareHlsUrl = await this.state.storage.get('cloudflareHlsUrl') || '';
 			this.muxStreamKey = await this.state.storage.get('muxStreamKey') || '';
+			this.muxUploadUrl = await this.state.storage.get('muxUploadUrl') || '';
+			this.muxUploadId = await this.state.storage.get('muxUploadId') || '';
 			this.isActive = await this.state.storage.get('isActive') || false;
 			this.segmentCount = await this.state.storage.get('segmentCount') || 0;
 			this.bytesTransferred = await this.state.storage.get('bytesTransferred') || 0;
+			this.nextByteStart = await this.state.storage.get('nextByteStart') || 0;
 			this.startTime = await this.state.storage.get('startTime') || 0;
+			const storedSegments = await this.state.storage.get<string[]>('processedSegments') || [];
+			this.processedSegments = new Set(storedSegments);
 		});
 	}
 
@@ -161,17 +170,53 @@ export class BridgeSession {
 			this.muxTokenId = request.headers.get('MUX-Token-ID') || '';
 			this.muxTokenSecret = request.headers.get('MUX-Token-Secret') || '';
 
+			// Create MUX Direct Upload
+			console.log('[BRIDGE-START] Creating MUX Direct Upload...');
+			const uploadResponse = await fetch('https://api.mux.com/video/v1/uploads', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization': `Basic ${btoa(`${this.muxTokenId}:${this.muxTokenSecret}`)}`
+				},
+				body: JSON.stringify({
+					cors_origin: '*',
+					new_asset_settings: {
+						playback_policy: ['public'],
+						passthrough: muxStreamKey
+					}
+				})
+			});
+
+			if (!uploadResponse.ok) {
+				const errorText = await uploadResponse.text();
+				console.error('[BRIDGE-START] MUX Upload creation failed:', errorText);
+				return new Response(JSON.stringify({
+					success: false,
+					error: 'Failed to create MUX upload'
+				}), { status: 500, headers: { 'Content-Type': 'application/json' } });
+			}
+
+			const uploadData = await uploadResponse.json() as { data: { id: string; url: string } };
+			this.muxUploadUrl = uploadData.data.url;
+			this.muxUploadId = uploadData.data.id;
+			console.log('[BRIDGE-START] MUX Upload created:', this.muxUploadId);
+
 			// Store configuration
 			this.cloudflareHlsUrl = cloudflareHlsUrl;
 			this.muxStreamKey = muxStreamKey;
 			this.isActive = true;
 			this.startTime = Date.now();
+			this.nextByteStart = 0;
 
 			await this.state.storage.put({
 				cloudflareHlsUrl,
 				muxStreamKey,
+				muxUploadUrl: this.muxUploadUrl,
+				muxUploadId: this.muxUploadId,
 				isActive: true,
-				startTime: this.startTime
+				startTime: this.startTime,
+				nextByteStart: 0,
+				processedSegments: []
 			});
 
 			// Schedule first alarm to start pulling HLS segments
@@ -179,8 +224,9 @@ export class BridgeSession {
 
 			return new Response(JSON.stringify({
 				success: true,
-				message: 'Bridge session started',
-				startTime: this.startTime
+				message: 'Bridge session started with MUX Direct Upload',
+				startTime: this.startTime,
+				uploadId: this.muxUploadId
 			}), {
 				headers: { 'Content-Type': 'application/json' }
 			});
@@ -196,6 +242,7 @@ export class BridgeSession {
 				segmentCount: this.segmentCount,
 				bytesTransferred: this.bytesTransferred,
 				cloudflareHlsUrl: this.cloudflareHlsUrl,
+				muxUploadId: this.muxUploadId,
 				muxStreamKey: this.muxStreamKey ? '****' + this.muxStreamKey.slice(-4) : 'not set'
 			}), {
 				headers: { 'Content-Type': 'application/json' }
@@ -206,7 +253,26 @@ export class BridgeSession {
 		if (url.pathname === '/stop' && request.method === 'DELETE') {
 			this.isActive = false;
 			await this.state.storage.put('isActive', false);
+			// Cancel the alarm
 			await this.state.storage.deleteAlarm();
+
+			// Finalize MUX upload by sending final chunk indicator
+			if (this.muxUploadUrl && this.nextByteStart > 0) {
+				console.log('[BRIDGE-STOP] Finalizing MUX upload...');
+				try {
+					// Send empty PUT with final Content-Range to signal completion
+					const finalResponse = await fetch(this.muxUploadUrl, {
+						method: 'PUT',
+						headers: {
+							'Content-Length': '0',
+							'Content-Range': `bytes */${this.nextByteStart}`
+						}
+					});
+					console.log('[BRIDGE-STOP] MUX upload finalized:', finalResponse.status);
+				} catch (error) {
+					console.error('[BRIDGE-STOP] Failed to finalize upload:', error);
+				}
+			}
 
 			return new Response(JSON.stringify({
 				success: true,
@@ -228,64 +294,104 @@ export class BridgeSession {
 	 * Alarm handler - called periodically to pull HLS segments and push to MUX
 	 */
 	async alarm(): Promise<void> {
-		if (!this.isActive) {
+		if (!this.isActive || !this.muxUploadUrl) {
 			return;
 		}
 
-		try {
-			console.log(`[BRIDGE-ALARM] Pulling HLS segment from: ${this.cloudflareHlsUrl}`);
+		console.log('[BRIDGE-ALARM] Pulling HLS segments from:', this.cloudflareHlsUrl);
 
-			// Fetch the HLS manifest to get latest segments
+		try {
+			// Fetch HLS manifest
 			const manifestResponse = await fetch(this.cloudflareHlsUrl);
 			if (!manifestResponse.ok) {
 				console.error('[BRIDGE-ALARM] Failed to fetch HLS manifest:', manifestResponse.status);
-				// Schedule next alarm anyway
-				await this.state.storage.setAlarm(Date.now() + this.alarmInterval);
 				return;
 			}
 
-			const manifest = await manifestResponse.text();
+			const manifestText = await manifestResponse.text();
 			
-			// Parse manifest for segment URLs (simplified parsing)
-			const segmentLines = manifest.split('\n').filter(line => line.endsWith('.ts') || line.endsWith('.m4s'));
+			// Parse HLS manifest to extract segment URLs
+			const lines = manifestText.split('\n');
+			const segmentUrls: string[] = [];
 			
-			if (segmentLines.length > 0) {
-				// Get the latest segment
-				const segmentUrl = segmentLines[segmentLines.length - 1];
-				const fullSegmentUrl = new URL(segmentUrl, this.cloudflareHlsUrl).href;
-
-				console.log(`[BRIDGE-ALARM] Fetching segment: ${fullSegmentUrl}`);
-
-				// Fetch the segment
-				const segmentResponse = await fetch(fullSegmentUrl);
-				if (segmentResponse.ok) {
-					const segmentData = await segmentResponse.arrayBuffer();
-					const segmentSize = segmentData.byteLength;
-
-					console.log(`[BRIDGE-ALARM] Fetched segment: ${segmentSize} bytes`);
-
-					// TODO: Push segment to MUX via RTMP (this is the challenging part)
-					// For now, we'll use MUX's direct upload API as an alternative
-					// Note: This requires converting HLS segments to a format MUX can ingest
-
-					this.segmentCount++;
-					this.bytesTransferred += segmentSize;
-
-					await this.state.storage.put({
-						segmentCount: this.segmentCount,
-						bytesTransferred: this.bytesTransferred
-					});
-
-					console.log(`[BRIDGE-ALARM] Progress: ${this.segmentCount} segments, ${this.bytesTransferred} bytes`);
+			for (const line of lines) {
+				if (line && !line.startsWith('#') && line.trim()) {
+					// Build absolute URL for segment
+					const segmentUrl = line.startsWith('http') 
+						? line 
+						: new URL(line, this.cloudflareHlsUrl).toString();
+					
+					// Only process if we haven't seen this segment before
+					if (!this.processedSegments.has(segmentUrl)) {
+						segmentUrls.push(segmentUrl);
+					}
 				}
 			}
 
-			// Schedule next alarm
-			await this.state.storage.setAlarm(Date.now() + this.alarmInterval);
+			if (segmentUrls.length === 0) {
+				console.log('[BRIDGE-ALARM] No new segments to process');
+				return;
+			}
+
+			console.log(`[BRIDGE-ALARM] Found ${segmentUrls.length} new segments`);
+
+			// Download and upload each segment to MUX
+			for (const segmentUrl of segmentUrls) {
+				try {
+					// Download segment
+					const segmentResponse = await fetch(segmentUrl);
+					if (!segmentResponse.ok) {
+						console.error('[BRIDGE-ALARM] Failed to download segment:', segmentUrl);
+						continue;
+					}
+
+					const segmentData = await segmentResponse.arrayBuffer();
+					const segmentSize = segmentData.byteLength;
+
+					// Calculate byte range for this chunk
+					const byteStart = this.nextByteStart;
+					const byteEnd = byteStart + segmentSize - 1;
+
+					// Upload segment to MUX using Direct Upload
+					const uploadResponse = await fetch(this.muxUploadUrl, {
+						method: 'PUT',
+						headers: {
+							'Content-Length': segmentSize.toString(),
+							'Content-Range': `bytes ${byteStart}-${byteEnd}/*`
+						},
+						body: segmentData
+					});
+
+					if (uploadResponse.ok || uploadResponse.status === 308) {
+						console.log(`[BRIDGE-ALARM] Uploaded segment: ${segmentSize} bytes`);
+						
+						// Mark segment as processed
+						this.processedSegments.add(segmentUrl);
+						this.nextByteStart += segmentSize;
+						this.segmentCount++;
+						this.bytesTransferred += segmentSize;
+					} else {
+						console.error('[BRIDGE-ALARM] Upload failed:', uploadResponse.status);
+					}
+				} catch (error) {
+					console.error('[BRIDGE-ALARM] Error processing segment:', segmentUrl, error);
+				}
+			}
+
+			// Save updated state
+			await this.state.storage.put({
+				segmentCount: this.segmentCount,
+				bytesTransferred: this.bytesTransferred,
+				nextByteStart: this.nextByteStart,
+				processedSegments: Array.from(this.processedSegments)
+			});
 
 		} catch (error) {
-			console.error('[BRIDGE-ALARM] Error in alarm handler:', error);
-			// Continue anyway, schedule next alarm
+			console.error('[BRIDGE-ALARM] Error processing HLS:', error);
+		}
+
+		// Schedule next alarm
+		if (this.isActive) {
 			await this.state.storage.setAlarm(Date.now() + this.alarmInterval);
 		}
 	}
