@@ -27,6 +27,49 @@ export default {
 		}
 
 		try {
+			// Route: POST /test-upload - Test MUX Direct Upload creation
+			if (url.pathname === '/test-upload' && request.method === 'POST') {
+				console.log('[TEST] Creating test MUX Direct Upload...');
+				
+				const uploadResponse = await fetch('https://api.mux.com/video/v1/uploads', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'Authorization': `Basic ${btoa(`${env.MUX_TOKEN_ID}:${env.MUX_TOKEN_SECRET}`)}`
+					},
+					body: JSON.stringify({
+						cors_origin: '*',
+						new_asset_settings: {
+							playback_policy: ['public']
+						}
+					})
+				});
+
+				if (!uploadResponse.ok) {
+					const errorText = await uploadResponse.text();
+					console.error('[TEST] Upload creation failed:', errorText);
+					return new Response(JSON.stringify({
+						success: false,
+						error: errorText,
+						status: uploadResponse.status
+					}), {
+						status: uploadResponse.status,
+						headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+					});
+				}
+
+				const uploadData = await uploadResponse.json() as { data: { id: string; url: string } };
+				console.log('[TEST] Upload created:', uploadData.data.id);
+
+				return new Response(JSON.stringify({
+					success: true,
+					uploadId: uploadData.data.id,
+					uploadUrl: uploadData.data.url
+				}), {
+					headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+				});
+			}
+
 			// Route: POST /bridge/start
 			if (url.pathname === '/bridge/start' && request.method === 'POST') {
 				const { streamId, cloudflareHlsUrl, muxStreamKey } = await request.json() as {
