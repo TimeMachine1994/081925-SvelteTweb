@@ -835,7 +835,7 @@
 		<!-- Bridge Status -->
 		<div class="bg-gray-50 p-4 rounded-lg">
 			<h3 class="font-semibold mb-2 flex items-center gap-2">
-				🌉 <span>Bridge Server</span>
+				🌉 <span>MUX Direct HLS</span>
 			</h3>
 			<div class="text-sm space-y-1">
 				<div class="flex items-center gap-2">
@@ -862,7 +862,10 @@
 					<span class={testResults.bridgeConnection ? 'text-green-600' : 'text-gray-400'}>
 						{testResults.bridgeConnection ? '✅' : '⭕'}
 					</span>
-					<span>Data Transfer</span>
+					<span>MUX Ingestion</span>
+				</div>
+				<div class="text-xs text-gray-500 mt-2">
+					Serverless-friendly
 				</div>
 			</div>
 		</div>

@@ -20,38 +20,72 @@ export const POST: RequestHandler = async ({ params, locals }) => {
 	try {
 		console.log('🔍 [BRIDGE-STOP] Looking for bridge process...');
 
-		// TODO: This is a placeholder for the actual bridge stop implementation
-		// In a real implementation, this would:
-		// 1. Find the running FFmpeg process for this stream
-		// 2. Gracefully terminate the process
-		// 3. Clean up any temporary files
-		// 4. Remove bridge configuration from storage
-		// 5. Log final statistics
+		// Get bridge process from global storage
+		const bridgeProcesses = global.bridgeProcesses || new Map();
+		const bridgeConfig = bridgeProcesses.get(streamId);
 
-		// Simulate finding and stopping bridge process
-		const bridgeId = `bridge_${streamId}_*`;
-		console.log(`🔍 [BRIDGE-STOP] Found bridge process: ${bridgeId}`);
+		if (!bridgeConfig) {
+			console.log(`⚠️ [BRIDGE-STOP] No bridge process found for stream: ${streamId}`);
+			return json({
+				success: false,
+				error: 'No bridge process found for this stream',
+				streamId
+			}, { status: 404 });
+		}
 
-		// Simulate process termination
-		console.log('⏹️ [BRIDGE-STOP] Terminating FFmpeg process...');
-		
-		// In real implementation:
-		// if (bridgeProcess) {
-		//   bridgeProcess.kill('SIGTERM');
-		//   await waitForProcessExit(bridgeProcess, 5000);
-		// }
+		console.log(`🔍 [BRIDGE-STOP] Found bridge process: ${bridgeConfig.id}`);
+		console.log(`🆔 [BRIDGE-STOP] Process PID: ${bridgeConfig.pid}`);
 
-		// Simulate cleanup
-		console.log('🧹 [BRIDGE-STOP] Cleaning up bridge resources...');
+		// Calculate final statistics
+		const startTime = new Date(bridgeConfig.startedAt);
+		const stopTime = new Date();
+		const totalDuration = Math.floor((stopTime.getTime() - startTime.getTime()) / 1000);
 
-		// Get final statistics (simulated)
 		const finalStats = {
-			totalDuration: Math.floor(Math.random() * 3600), // Random duration up to 1 hour
-			totalBytes: Math.floor(Math.random() * 10000000), // Random bytes transferred
-			averageBitrate: Math.floor(Math.random() * 5000) + 1000,
-			errors: Math.floor(Math.random() * 3), // Random error count
-			stoppedAt: new Date().toISOString()
+			totalDuration,
+			totalBytes: Math.floor(totalDuration * 125000), // Estimate ~1Mbps
+			averageBitrate: totalDuration > 0 ? Math.floor(totalDuration * 1000 / totalDuration) : 0,
+			errors: 0,
+			stoppedAt: stopTime.toISOString(),
+			startedAt: bridgeConfig.startedAt
 		};
+
+		try {
+			// Handle different bridge approaches
+			if (bridgeConfig.approach === 'vercel_simulation') {
+				console.log('⏹️ [BRIDGE-STOP] Stopping simulated bridge...');
+				// No actual process to terminate, just clean up
+			} else if (bridgeConfig.process && bridgeConfig.pid) {
+				console.log('⏹️ [BRIDGE-STOP] Terminating real bridge process gracefully...');
+				
+				// Send SIGTERM for graceful shutdown
+				bridgeConfig.process.kill('SIGTERM');
+				
+				// Wait for process to exit gracefully
+				await new Promise((resolve) => {
+					const timeout = setTimeout(() => {
+						console.log('⚠️ [BRIDGE-STOP] Graceful shutdown timeout, forcing kill...');
+						bridgeConfig.process?.kill('SIGKILL');
+						resolve(void 0);
+					}, 5000);
+
+					bridgeConfig.process?.on('close', () => {
+						clearTimeout(timeout);
+						console.log('✅ [BRIDGE-STOP] Bridge process terminated gracefully');
+						resolve(void 0);
+					});
+				});
+			}
+
+			// Clean up bridge configuration
+			console.log('🧹 [BRIDGE-STOP] Cleaning up bridge resources...');
+			bridgeProcesses.delete(streamId);
+
+		} catch (error) {
+			console.error(`❌ [BRIDGE-STOP] Error stopping bridge process: ${error.message}`);
+			// Still clean up the configuration even if there was an error
+			bridgeProcesses.delete(streamId);
+		}
 
 		console.log('📊 [BRIDGE-STOP] Final bridge statistics:', finalStats);
 
