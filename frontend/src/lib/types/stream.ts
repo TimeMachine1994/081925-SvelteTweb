@@ -19,6 +19,41 @@ export interface Stream {
 	rtmpUrl?: string;
 	clientId?: string;
 
+	// Streaming Method Selection
+	streamingMethod?: 'obs' | 'phone-to-obs' | 'phone-to-mux'; // Optional for backward compatibility
+	methodConfigured?: boolean;
+
+	// Phone to OBS Method (dual stream setup)
+	phoneSourceStreamId?: string; // ID of the phone camera Cloudflare stream
+	phoneSourcePlaybackUrl?: string; // For OBS browser source
+	phoneSourceWhipUrl?: string; // WHIP URL for phone camera
+
+	// Phone to MUX Method (restreaming setup)
+	muxStreamId?: string;
+	muxStreamKey?: string;
+	muxPlaybackId?: string;
+	muxWhepUrl?: string;
+	restreamingEnabled?: boolean;
+
+	// Recording Sources (multiple sources for reliability)
+	recordingSources?: {
+		cloudflare?: {
+			available: boolean;
+			playbackUrl?: string;
+			duration?: number;
+		};
+		mux?: {
+			available: boolean;
+			whepUrl?: string;
+			playbackUrl?: string;
+			duration?: number;
+		};
+	};
+	preferredRecordingSource?: 'cloudflare' | 'mux';
+
+	// UI State Tracking
+	phoneStreamActive?: boolean;
+
 	// Scheduling
 	scheduledStartTime?: string;
 	scheduledEndTime?: string;
@@ -71,6 +106,7 @@ export interface StreamCreateRequest {
 	title: string;
 	description?: string;
 	scheduledStartTime?: string;
+	streamingMethod?: 'obs' | 'phone-to-obs' | 'phone-to-mux';
 }
 
 export interface StreamUpdateRequest {

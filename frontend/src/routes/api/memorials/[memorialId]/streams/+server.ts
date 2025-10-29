@@ -3,6 +3,8 @@ import { error as SvelteKitError, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import type { Stream } from '$lib/types/stream';
 import { createLiveInput, isCloudflareConfigured } from '$lib/server/cloudflare-stream';
+import { setupOBSMethod, setupPhoneToOBSMethod, setupPhoneToMUXMethod } from '$lib/server/streaming-methods';
+import { isValidStreamingMethod } from '$lib/types/streaming-methods';
 
 // GET - Fetch all streams for a memorial
 export const GET: RequestHandler = async ({ locals, params }) => {
@@ -109,6 +111,7 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			title, 
 			description, 
 			scheduledStartTime, 
+			streamingMethod = 'obs', // Default to OBS method
 			calculatorServiceType, 
 			calculatorServiceIndex,
 			serviceHash,
@@ -119,6 +122,13 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 		if (!title || typeof title !== 'string' || title.trim().length === 0) {
 			throw SvelteKitError(400, 'Stream title is required');
 		}
+
+		// Validate streaming method
+		if (!isValidStreamingMethod(streamingMethod)) {
+			throw SvelteKitError(400, `Invalid streaming method: ${streamingMethod}`);
+		}
+
+		console.log('🎬 [STREAMS API] Selected streaming method:', streamingMethod);
 
 		// Verify memorial exists and user has access
 		const memorialDoc = await adminDb.collection('memorials').doc(memorialId).get();
@@ -141,60 +151,51 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			throw SvelteKitError(403, 'Permission denied');
 		}
 
-		// Create Cloudflare Live Input for real RTMP streaming
-		console.log('🎬 [STREAMS API] Creating Cloudflare Live Input...');
-		let cloudflareInput: any = null;
+		// Setup streaming method
+		console.log('🎬 [STREAMS API] Setting up streaming method:', streamingMethod);
+		let methodConfig: any = {};
 		let streamKey = '';
 		let rtmpUrl = '';
 		let cloudflareInputId = '';
 
-		if (isCloudflareConfigured()) {
-			try {
-				cloudflareInput = await createLiveInput({
-					name: `${memorial.lovedOneName} - ${title.trim()}`,
-					recording: true,
-					recordingTimeout: 30
-				});
-
-				// Extract real Cloudflare credentials
-				streamKey = cloudflareInput.rtmps.streamKey;
-				cloudflareInputId = cloudflareInput.uid;
-
-				// DEBUG: Log all available URLs from Cloudflare
-				console.log(
-					'🔍 [STREAMS API DEBUG] Full Cloudflare input data:',
-					JSON.stringify(cloudflareInput, null, 2)
-				);
-				console.log('🔍 [STREAMS API DEBUG] Available URLs:', {
-					rtmps: cloudflareInput.rtmps?.url,
-					rtmp: cloudflareInput.rtmp?.url,
-					srt: cloudflareInput.srt?.url,
-					webRTC: cloudflareInput.webRTC?.url
-				});
-
-				// Use RTMP (non-secure) if available, fallback to RTMPS
-				rtmpUrl = cloudflareInput.rtmp?.url || cloudflareInput.rtmps?.url;
-
-				console.log('✅ [STREAMS API] Cloudflare Live Input created:', cloudflareInputId);
-				console.log('🔑 [STREAMS API] RTMP URL:', rtmpUrl);
-				console.log('🔑 [STREAMS API] Stream Key:', streamKey.substring(0, 8) + '...');
-				console.log(
-					'🔍 [STREAMS API] URL Type:',
-					rtmpUrl?.startsWith('rtmps://') ? 'RTMPS (Secure)' : 'RTMP (Standard)'
-				);
-			} catch (error) {
-				console.error('❌ [STREAMS API] Failed to create Cloudflare Live Input:', error);
-				// Fall back to placeholder values for development
-				streamKey = `dev_${Math.random().toString(36).substring(2, 15)}`;
-				rtmpUrl = 'rtmp://live.tributestream.com/live';
+		try {
+			if (streamingMethod === 'obs') {
+				// OBS Method: Single RTMP stream
+				const config = await setupOBSMethod();
+				streamKey = config.streamKey;
+				rtmpUrl = config.rtmpUrl;
+				cloudflareInputId = config.cloudflareInputId;
+				methodConfig = { type: 'obs', cloudflareInputId };
+			} else if (streamingMethod === 'phone-to-obs') {
+				// Phone to OBS Method: Two streams (phone + OBS)
+				const config = await setupPhoneToOBSMethod();
+				streamKey = config.obsDestination.streamKey;
+				rtmpUrl = config.obsDestination.rtmpUrl;
+				cloudflareInputId = config.obsDestination.cloudflareInputId;
+				methodConfig = {
+					type: 'phone-to-obs',
+					obsDestination: config.obsDestination,
+					phoneSource: config.phoneSource
+				};
+			} else if (streamingMethod === 'phone-to-mux') {
+				// Phone to MUX Method: Phone + restreaming
+				const config = await setupPhoneToMUXMethod();
+				// This will throw an error until Phase 5
+				cloudflareInputId = config.cloudflare.inputId;
+				methodConfig = {
+					type: 'phone-to-mux',
+					cloudflare: config.cloudflare,
+					mux: config.mux
+				};
 			}
-		} else {
-			console.warn('⚠️ [STREAMS API] Cloudflare not configured, using development placeholders');
-			streamKey = `dev_${Math.random().toString(36).substring(2, 15)}`;
-			rtmpUrl = 'rtmp://live.tributestream.com/live';
+
+			console.log('✅ [STREAMS API] Streaming method configured successfully');
+		} catch (error) {
+			console.error('❌ [STREAMS API] Failed to setup streaming method:', error);
+			throw SvelteKitError(500, `Failed to configure ${streamingMethod} streaming: ${error instanceof Error ? error.message : 'Unknown error'}`);
 		}
 
-		// Create stream object with real Cloudflare data (avoiding undefined values for Firestore)
+		// Create stream object with method configuration (avoiding undefined values for Firestore)
 		const streamData: any = {
 			title: title.trim(),
 			description: description?.trim() || '',
@@ -203,6 +204,8 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			isVisible: true,
 			streamKey,
 			rtmpUrl,
+			streamingMethod, // NEW: Store selected method
+			methodConfigured: true, // NEW: Mark as configured
 			createdBy: userId,
 			createdAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
@@ -227,6 +230,18 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 		}
 		if (lastSyncedAt) {
 			streamData.lastSyncedAt = lastSyncedAt;
+		}
+
+		// Add method-specific fields
+		if (streamingMethod === 'phone-to-obs') {
+			streamData.phoneSourceStreamId = methodConfig.phoneSource.cloudflareInputId;
+			streamData.phoneSourcePlaybackUrl = methodConfig.phoneSource.playbackUrl;
+			streamData.phoneSourceWhipUrl = methodConfig.phoneSource.whipUrl;
+		} else if (streamingMethod === 'phone-to-mux') {
+			streamData.muxStreamId = methodConfig.mux.streamId;
+			streamData.muxStreamKey = methodConfig.mux.streamKey;
+			streamData.muxPlaybackId = methodConfig.mux.playbackId;
+			streamData.restreamingEnabled = methodConfig.restreamingConfigured;
 		}
 
 		console.log('💾 [STREAMS API] Stream data to save:', JSON.stringify(streamData, null, 2));

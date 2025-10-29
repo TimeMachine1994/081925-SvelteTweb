@@ -2,10 +2,15 @@
 	import { Card, Button } from '../index.js';
 	import StreamHeader from './StreamHeader.svelte';
 	import StreamCredentials from './StreamCredentials.svelte';
+	import OBSMethodUI from './methods/OBSMethodUI.svelte';
+	import PhoneToOBSMethodUI from './methods/PhoneToOBSMethodUI.svelte';
+	import PhoneToMUXMethodUI from './methods/PhoneToMUXMethodUI.svelte';
 	import { colors } from '../tokens/colors.js';
 	import { getSemanticSpacing } from '../tokens/spacing.js';
 	import { getTextStyle } from '../tokens/typography.js';
 	import type { Stream } from '$lib/types/stream';
+	import { STREAMING_METHOD_INFO } from '$lib/types/streaming-methods';
+	import type { StreamingMethod } from '$lib/types/streaming-methods';
 
 	interface Props {
 		stream: Stream;
@@ -15,6 +20,46 @@
 	}
 
 	let { stream, onCopy, copiedStreamKey, copiedRtmpUrl }: Props = $props();
+
+	// Backward compatibility: If stream has RTMP credentials but no method configured,
+	// assume it's OBS method (existing streams before method selection was added)
+	const isLegacyStream = !stream.methodConfigured && stream.rtmpUrl && stream.streamKey;
+	const effectiveStreamingMethod = stream.streamingMethod || (isLegacyStream ? 'obs' : undefined);
+	
+	// Method selection state
+	let showMethodSelection = $state(!stream.methodConfigured && !isLegacyStream);
+	let isConfiguringMethod = $state(false);
+	let configError = $state('');
+
+	async function selectMethod(method: StreamingMethod) {
+		if (isConfiguringMethod) return;
+
+		isConfiguringMethod = true;
+		configError = '';
+
+		try {
+			// Update stream with selected method
+			const response = await fetch(`/api/streams/management/${stream.id}`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ 
+					streamingMethod: method,
+					methodConfigured: true 
+				})
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to configure streaming method');
+			}
+
+			// Reload page to show new configuration
+			window.location.reload();
+		} catch (error) {
+			console.error('Error configuring method:', error);
+			configError = 'Failed to configure streaming method. Please try again.';
+			isConfiguringMethod = false;
+		}
+	}
 
 	// Edit schedule modal state
 	let showEditModal = $state(false);
@@ -84,19 +129,135 @@
 	<!-- Stream Header Section -->
 	<StreamHeader {stream} onEditSchedule={openEditModal} />
 
-	<!-- Stream Credentials Section -->
-	<StreamCredentials 
-		{stream} 
-		{onCopy} 
-		{copiedStreamKey} 
-		{copiedRtmpUrl} 
-	/>
+	<!-- Method Selection or Method-Specific UI -->
+	{#if showMethodSelection}
+		<!-- Method Selection UI -->
+		<div 
+			class="method-selection"
+			style="
+				padding: {getSemanticSpacing('card', 'padding')['lg']};
+				border-top: 1px solid {colors.border.primary};
+			"
+		>
+			<h4 
+				style="
+					font-family: {getTextStyle('heading', 'h5').fontFamily};
+					font-size: {getTextStyle('heading', 'h5').fontSize};
+					font-weight: {getTextStyle('heading', 'h5').fontWeight};
+					color: {colors.text.primary};
+					margin: 0 0 {getSemanticSpacing('component', 'xs')} 0;
+				"
+			>
+				Choose Streaming Method
+			</h4>
+			<p 
+				style="
+					font-size: {getTextStyle('body', 'sm').fontSize};
+					color: {colors.text.secondary};
+					margin: 0 0 {getSemanticSpacing('component', 'lg')} 0;
+				"
+			>
+				Select how you want to stream to this memorial
+			</p>
+
+			<div 
+				class="method-grid"
+				style="
+					display: grid;
+					grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+					gap: {getSemanticSpacing('component', 'md')};
+				"
+			>
+				{#each Object.values(STREAMING_METHOD_INFO) as methodInfo}
+					<button
+						class="method-option"
+						onclick={() => selectMethod(methodInfo.method)}
+						disabled={isConfiguringMethod}
+						style="
+							display: flex;
+							flex-direction: column;
+							align-items: center;
+							gap: {getSemanticSpacing('component', 'sm')};
+							padding: {getSemanticSpacing('card', 'padding')['md']};
+							border: 2px solid {colors.border.primary};
+							border-radius: 0.75rem;
+							background: {colors.background.primary};
+							cursor: pointer;
+							transition: all 0.2s ease;
+							text-align: center;
+						"
+					>
+						<div style="font-size: 2.5rem;">{methodInfo.icon}</div>
+						<h5 
+							style="
+								font-family: {getTextStyle('heading', 'h6').fontFamily};
+								font-size: {getTextStyle('heading', 'h6').fontSize};
+								font-weight: {getTextStyle('heading', 'h6').fontWeight};
+								color: {colors.text.primary};
+								margin: 0;
+							"
+						>
+							{methodInfo.title}
+						</h5>
+						<p 
+							style="
+								font-size: {getTextStyle('body', 'sm').fontSize};
+								color: {colors.text.secondary};
+								margin: 0;
+							"
+						>
+							{methodInfo.description}
+						</p>
+					</button>
+				{/each}
+			</div>
+
+			{#if configError}
+				<p 
+					style="
+						color: {colors.error[600]};
+						font-size: {getTextStyle('body', 'sm').fontSize};
+						margin-top: {getSemanticSpacing('component', 'md')};
+					"
+				>
+					{configError}
+				</p>
+			{/if}
+		</div>
+	{:else}
+		<!-- Method-Specific UI -->
+		{#if effectiveStreamingMethod === 'obs'}
+			<OBSMethodUI 
+				{stream} 
+				{onCopy} 
+				{copiedStreamKey} 
+				{copiedRtmpUrl} 
+			/>
+		{:else if effectiveStreamingMethod === 'phone-to-obs'}
+			<PhoneToOBSMethodUI 
+				{stream} 
+				{onCopy} 
+				{copiedStreamKey} 
+				{copiedRtmpUrl} 
+			/>
+		{:else if effectiveStreamingMethod === 'phone-to-mux'}
+			<PhoneToMUXMethodUI {stream} />
+		{:else}
+			<!-- Fallback to old credentials UI for backward compatibility -->
+			<StreamCredentials 
+				{stream} 
+				{onCopy} 
+				{copiedStreamKey} 
+				{copiedRtmpUrl} 
+			/>
+		{/if}
+	{/if}
 </Card>
 
 <!-- Edit Schedule Modal -->
 {#if showEditModal}
-	<div class="modal-overlay" onclick={() => showEditModal = false}>
-		<div class="modal-content" onclick={(e) => e.stopPropagation()}>
+	<div class="modal-overlay" onclick={() => showEditModal = false} role="presentation">
+		<div class="modal-content" onclick={(e) => e.stopPropagation()} role="dialog" aria-labelledby="modal-title">
 			<h3 
 				style="
 					font-family: {getTextStyle('heading', 'h4').fontFamily};
@@ -212,5 +373,16 @@
 		outline: none;
 		border-color: #3b82f6;
 		box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+	}
+
+	.method-option:hover:not(:disabled) {
+		border-color: var(--color-primary-500, #6366f1);
+		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+		transform: translateY(-2px);
+	}
+
+	.method-option:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
 	}
 </style>
