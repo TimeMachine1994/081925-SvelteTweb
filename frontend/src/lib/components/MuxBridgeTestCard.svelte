@@ -401,6 +401,11 @@
 			if (!response.ok) {
 				const errorData = await response.text();
 				addLog(`❌ [BRIDGE] Bridge API Error: ${errorData}`);
+				
+				if (response.status === 500 && errorData.includes('Worker')) {
+					throw new Error('Cloudflare Worker not accessible. Please ensure MUX_BRIDGE_WORKER_URL is set and Worker is deployed.');
+				}
+				
 				throw new Error(`Bridge API error: ${response.statusText}`);
 			}
 
@@ -411,6 +416,7 @@
 				bridgeStatus = 'connected';
 				testResults.bridgeConnection = true;
 				addLog('✅ [BRIDGE] Bridge connection established successfully');
+				addLog('🌐 [BRIDGE] Cloudflare Worker is now pulling HLS and pushing to MUX');
 
 				// Start monitoring bridge health
 				startBridgeMonitoring();
@@ -666,7 +672,10 @@
 	<!-- Header -->
 	<div class="mb-6">
 		<h2 class="text-2xl font-bold text-gray-900 mb-2">🌉 MUX Bridge Test Component</h2>
-		<p class="text-gray-600">Test Phone → Cloudflare → Bridge → MUX recording pipeline</p>
+		<p class="text-gray-600">Test Phone → Cloudflare → Cloudflare Worker → MUX recording pipeline</p>
+		<div class="mt-2 text-sm text-blue-600 bg-blue-50 px-3 py-2 rounded-md">
+			💡 <strong>Serverless Architecture:</strong> Uses Cloudflare Worker for HLS → RTMP bridging (Vercel-compatible)
+		</div>
 	</div>
 
 	<!-- WHIP Streaming Controls -->
@@ -835,7 +844,7 @@
 		<!-- Bridge Status -->
 		<div class="bg-gray-50 p-4 rounded-lg">
 			<h3 class="font-semibold mb-2 flex items-center gap-2">
-				🌉 <span>MUX Direct HLS</span>
+				🌉 <span>CF Worker Bridge</span>
 			</h3>
 			<div class="text-sm space-y-1">
 				<div class="flex items-center gap-2">
@@ -862,10 +871,10 @@
 					<span class={testResults.bridgeConnection ? 'text-green-600' : 'text-gray-400'}>
 						{testResults.bridgeConnection ? '✅' : '⭕'}
 					</span>
-					<span>MUX Ingestion</span>
+					<span>Data Transfer</span>
 				</div>
 				<div class="text-xs text-gray-500 mt-2">
-					Serverless-friendly
+					⚡ Serverless Edge
 				</div>
 			</div>
 		</div>
