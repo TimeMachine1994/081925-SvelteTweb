@@ -4,7 +4,6 @@ import type { Actions, PageServerLoad } from './$types';
 import { sendRegistrationEmail, sendEnhancedRegistrationEmail } from '$lib/server/email';
 import { indexMemorial } from '$lib/server/algolia-indexing';
 import type { Memorial } from '$lib/types/memorial';
-import { validateMultipleEmails } from '$lib/utils/email-validation';
 import { generateUniqueMemorialSlug } from '$lib/utils/memorial-slug';
 import { createStandardUserProfile } from '$lib/utils/user-profile';
 
@@ -48,12 +47,20 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	if (locals.user.role === 'funeral_director') {
 		try {
+			console.log('🔍 Attempting to fetch funeral director profile...');
+			console.log('🔍 adminDb defined?', !!adminDb);
+			console.log('🔍 User UID:', locals.user.uid);
+			
 			const fdDoc = await adminDb
 				.collection('funeral_directors')
 				.doc(locals.user.uid)
 				.get();
+			
+			console.log('🔍 FD doc exists?', fdDoc.exists);
+			
 			if (fdDoc.exists) {
 				funeralDirectorProfile = fdDoc.data();
+				console.log('✅ FD profile loaded:', Object.keys(funeralDirectorProfile || {}));
 				
 				// Prepopulate form data from funeral director profile
 				prepopulatedData = {
@@ -61,9 +68,12 @@ export const load: PageServerLoad = async ({ locals }) => {
 					directorEmail: funeralDirectorProfile?.email || locals.user.email || '',
 					funeralHomeName: funeralDirectorProfile?.companyName || ''
 				};
+			} else {
+				console.log('⚠️ FD profile not found, using user data only');
 			}
 		} catch (error) {
-			console.error('Failed to fetch funeral director profile:', error);
+			console.error('❌ Failed to fetch funeral director profile:', error);
+			console.error('❌ Error details:', error.message, error.stack);
 		}
 	} else if (locals.user.role === 'admin') {
 		// For admin users, just use their basic info
