@@ -496,8 +496,6 @@
 							})}
 							<StreamCard
 								{stream}
-								onToggleVisibility={toggleVisibility}
-								onDelete={deleteStream}
 								onCopy={copyToClipboard}
 								{copiedStreamKey}
 								{copiedRtmpUrl}
