@@ -27,6 +27,18 @@ export default {
 		}
 
 		try {
+			// Route: GET / - Health check
+			if (url.pathname === '/' && request.method === 'GET') {
+				return new Response(JSON.stringify({
+					status: 'ok',
+					service: 'MUX Bridge Worker',
+					version: '2.0',
+					timestamp: new Date().toISOString()
+				}), {
+					headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+				});
+			}
+
 			// Route: POST /test-upload - Test MUX Direct Upload creation
 			if (url.pathname === '/test-upload' && request.method === 'POST') {
 				console.log('[TEST] Creating test MUX Direct Upload...');
