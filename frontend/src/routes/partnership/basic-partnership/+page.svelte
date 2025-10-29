@@ -14,7 +14,7 @@
 	];
 
 	function handleGetStarted() {
-		goto('/register/funeral-director');
+		goto('/register/funeral-home');
 	}
 
 	function handleContactUs() {

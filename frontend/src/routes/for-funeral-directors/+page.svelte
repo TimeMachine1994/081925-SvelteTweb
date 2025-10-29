@@ -54,7 +54,7 @@
 	}
 
 	function handleRegister() {
-		goto('/register/funeral-director');
+		goto('/register/funeral-home');
 	}
 </script>
 
