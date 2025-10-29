@@ -59,14 +59,23 @@ export const load: PageServerLoad = async ({ locals }) => {
 			console.log('🔍 FD doc exists?', fdDoc.exists);
 			
 			if (fdDoc.exists) {
-				funeralDirectorProfile = fdDoc.data();
+				const rawData: any = fdDoc.data();
+				
+				// Convert Firestore Timestamps to ISO strings for serialization
+				funeralDirectorProfile = {
+					...rawData,
+					createdAt: rawData?.createdAt?.toDate?.()?.toISOString() || null,
+					updatedAt: rawData?.updatedAt?.toDate?.()?.toISOString() || null,
+					approvedAt: rawData?.approvedAt?.toDate?.()?.toISOString() || null
+				} as any;
+				
 				console.log('✅ FD profile loaded:', Object.keys(funeralDirectorProfile || {}));
 				
 				// Prepopulate form data from funeral director profile
 				prepopulatedData = {
-					directorName: funeralDirectorProfile?.contactPerson || locals.user.displayName || '',
-					directorEmail: funeralDirectorProfile?.email || locals.user.email || '',
-					funeralHomeName: funeralDirectorProfile?.companyName || ''
+					directorName: rawData?.contactPerson || locals.user.displayName || '',
+					directorEmail: rawData?.email || locals.user.email || '',
+					funeralHomeName: rawData?.companyName || ''
 				};
 			} else {
 				console.log('⚠️ FD profile not found, using user data only');
