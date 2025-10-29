@@ -41,7 +41,7 @@ export const POST: RequestHandler = async ({ params, locals }) => {
 		const stopTime = new Date();
 		const totalDuration = Math.floor((stopTime.getTime() - startTime.getTime()) / 1000);
 
-		const finalStats = {
+		let finalStats = {
 			totalDuration,
 			totalBytes: Math.floor(totalDuration * 125000), // Estimate ~1Mbps
 			averageBitrate: totalDuration > 0 ? Math.floor(totalDuration * 1000 / totalDuration) : 0,

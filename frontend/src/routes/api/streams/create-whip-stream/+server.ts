@@ -45,7 +45,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				},
 				body: JSON.stringify({
 					meta: {
-						name: title || 'MUX Bridge Test Stream'
+						name: title || 'WHIP Test Stream'
 					},
 					recording: {
 						mode: 'automatic',

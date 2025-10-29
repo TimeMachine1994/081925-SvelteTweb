@@ -118,11 +118,11 @@
 					src={post.featuredImage} 
 					alt={post.featuredImageAlt || post.title} 
 					class="featured-image"
-					on:error={(e) => {
+					onerror={(e) => {
 						console.error('Failed to load featured image:', post.featuredImage);
 						e.target.style.display = 'none';
 					}}
-					on:load={() => {
+					onload={() => {
 						console.log('Featured image loaded successfully:', post.featuredImage);
 					}}
 				/>
@@ -164,7 +164,7 @@
 							<Button theme="minimal" href="/blog">← Back to Blog</Button>
 							<div class="social-share">
 								<span>Share:</span>
-								<button class="share-btn" on:click={() => navigator.share?.({ title: post.title, url: window.location.href })}>
+								<button class="share-btn" onclick={() => navigator.share?.({ title: post.title, url: window.location.href })}>
 									📤 Share
 								</button>
 							</div>

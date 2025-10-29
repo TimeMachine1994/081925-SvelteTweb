@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { Settings, Trash2, Eye, EyeOff, Camera, Radio } from 'lucide-svelte';
+	import { Settings, Trash2, Eye, EyeOff, Radio } from 'lucide-svelte';
 	import { Button } from '../index.js';
 	import { colors } from '../tokens/colors.js';
 	import { getSemanticSpacing } from '../tokens/spacing.js';
-	import { FEATURES } from '$lib/config/features.js';
 	import type { Stream } from '$lib/types/stream';
 
 	interface Props {
@@ -24,26 +23,8 @@
 		showBrowserStreamer = false
 	}: Props = $props();
 
-	// Debug logging for browser streaming button
-	console.log('🔧 [STREAM_ACTIONS] Debug info:', {
-		streamStatus: stream.status,
-		featureEnabled: FEATURES.USE_MUX_FOR_BROWSER_STREAMING,
-		hasToggleFunction: !!onToggleBrowserStreamer,
-		streamId: stream.id
-	});
-
 	// Action button configurations
 	const actions = [
-		// Mux Browser Streaming (only for ready/scheduled streams and when feature enabled)
-		...((stream.status === 'ready' || stream.status === 'scheduled') && FEATURES.USE_MUX_FOR_BROWSER_STREAMING && onToggleBrowserStreamer ? [{
-			id: 'browser-stream',
-			icon: Camera,
-			title: 'Stream from Browser',
-			variant: 'ghost' as const,
-			onClick: onToggleBrowserStreamer,
-			color: colors.primary[600]
-		}] : []),
-
 		// DEBUG: Manual Embed URL Test
 		...(onFetchEmbedUrl ? [{
 			id: 'debug-embed',

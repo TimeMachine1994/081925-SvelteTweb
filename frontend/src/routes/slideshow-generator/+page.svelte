@@ -5,9 +5,9 @@
 	import type { MemorialSlideshow } from '$lib/types/slideshow';
 
 	// Get edit data from URL parameters
-	let editData: MemorialSlideshow | null = null;
-	let isEditMode = false;
-	let memorialId: string | null = null;
+	let editData = $state<MemorialSlideshow | null>(null);
+	let isEditMode = $state(false);
+	let memorialId = $state<string | null>(null);
 
 	onMount(() => {
 		// Check for edit parameter first

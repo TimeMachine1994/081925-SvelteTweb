@@ -7,7 +7,6 @@
 	import type { Stream } from '$lib/types/stream';
 	import { StreamCard } from '$lib/ui';
 	import CompletedStreamCard from '$lib/components/CompletedStreamCard.svelte';
-	import MuxBridgeTestCard from '$lib/components/MuxBridgeTestCard.svelte';
 	import Button from '$lib/ui/primitives/Button.svelte';
 
 	let { data }: { data: PageData } = $props();
@@ -419,11 +418,6 @@
 				</div>
 			</div>
 		</div>
-
-		<!-- MUX Bridge Test Component (Admin/Funeral Director Only) -->
-		{#if data.user && (data.user.role === 'admin' || data.user.role === 'funeral_director')}
-			<MuxBridgeTestCard />
-		{/if}
 
 		<!-- Error Message -->
 		{#if error}

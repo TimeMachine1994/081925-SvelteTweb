@@ -11,7 +11,7 @@
 
 	let { memorialId, memorialName, onDismiss, visible = false }: Props = $props();
 	
-	let bannerElement: HTMLElement;
+	let bannerElement = $state<HTMLElement>();
 	let isVisible = $state(visible);
 	let isAnimating = $state(false);
 
