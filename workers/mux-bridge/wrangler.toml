@@ -1,0 +1,16 @@
+name = "mux-bridge-worker"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# Environment variables (set via wrangler secret put)
+# MUX_TOKEN_ID
+# MUX_TOKEN_SECRET
+
+[durable_objects]
+bindings = [
+  { name = "BRIDGE_SESSIONS", class_name = "BridgeSession" }
+]
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["BridgeSession"]

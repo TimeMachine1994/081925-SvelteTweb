@@ -44,9 +44,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 
 		try {
-			console.log('🎬 [BRIDGE-START] Creating MUX live stream with HLS input...');
+			console.log('🎬 [BRIDGE-START] Creating MUX live stream...');
 
-			// Create MUX live stream that ingests from Cloudflare HLS
+			// Create MUX live stream
 			const muxResponse = await fetch('https://api.mux.com/video/v1/live-streams', {
 				method: 'POST',
 				headers: {
@@ -58,7 +58,6 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					new_asset_settings: {
 						playback_policy: ['public']
 					},
-					// Configure for HLS input from Cloudflare
 					reduced_latency: false,
 					test: false
 				})
@@ -73,62 +72,56 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			}
 
 			const muxData = await muxResponse.json();
+			const muxStreamKey = muxData.data.stream_key;
+			
 			console.log('📊 [BRIDGE-START] MUX Live Stream created:', {
 				id: muxData.data.id,
-				stream_key: muxData.data.stream_key,
+				stream_key: muxStreamKey,
 				status: muxData.data.status,
 				playback_ids: muxData.data.playback_ids?.length || 0
 			});
 
-			// Now create a MUX asset that pulls from Cloudflare HLS
-			console.log('🔗 [BRIDGE-START] Creating MUX asset with Cloudflare HLS input...');
+			// Call Cloudflare Worker to start the bridge
+			console.log('🌉 [BRIDGE-START] Calling Cloudflare Worker to start bridge...');
 			
-			const assetResponse = await fetch('https://api.mux.com/video/v1/assets', {
+			// TODO: Replace with your deployed worker URL
+			const WORKER_URL = process.env.MUX_BRIDGE_WORKER_URL || 'http://localhost:8787';
+			
+			const workerResponse = await fetch(`${WORKER_URL}/bridge/start`, {
 				method: 'POST',
 				headers: {
-					'Content-Type': 'application/json',
-					'Authorization': `Basic ${Buffer.from(`${MUX_TOKEN_ID}:${MUX_TOKEN_SECRET}`).toString('base64')}`
+					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify({
-					input: [{
-						url: inputUrl,
-						type: 'video'
-					}],
-					playback_policy: ['public'],
-					recording_ready: true
+					streamId,
+					cloudflareHlsUrl: inputUrl,
+					muxStreamKey: muxStreamKey
 				})
 			});
 
-			console.log(`📡 [BRIDGE-START] MUX Asset API Response: ${assetResponse.status}`);
-
-			let assetData = null;
-			if (assetResponse.ok) {
-				assetData = await assetResponse.json();
-				console.log('📊 [BRIDGE-START] MUX Asset created:', {
-					id: assetData.data.id,
-					status: assetData.data.status,
-					playback_ids: assetData.data.playback_ids?.length || 0
-				});
-			} else {
-				const errorText = await assetResponse.text();
-				console.log(`⚠️ [BRIDGE-START] MUX Asset creation failed: ${errorText}`);
-				console.log('🔄 [BRIDGE-START] Continuing with live stream only...');
+			if (!workerResponse.ok) {
+				const errorText = await workerResponse.text();
+				console.log(`❌ [BRIDGE-START] Worker error: ${errorText}`);
+				throw new Error(`Worker bridge failed: ${workerResponse.statusText}`);
 			}
 
+			const workerData = await workerResponse.json();
+			console.log('✅ [BRIDGE-START] Cloudflare Worker bridge started:', workerData);
+
 			// Store bridge configuration
-			global.bridgeProcesses = global.bridgeProcesses || new Map();
+			(global as any).bridgeProcesses = (global as any).bridgeProcesses || new Map();
 			const bridgeConfig = {
 				id: bridgeId,
 				streamId,
 				inputUrl,
-				outputUrl,
+				outputUrl: muxStreamKey,
 				status: 'connected',
 				startedAt: new Date().toISOString(),
-				approach: 'mux_direct_hls',
+				approach: 'cloudflare_worker',
 				muxLiveStreamId: muxData.data.id,
-				muxAssetId: assetData?.data.id || null,
 				muxData,
-				assetData,
+				workerData,
+				workerUrl: WORKER_URL,
 				stats: {
 					bytesTransferred: 0,
 					duration: 0,
@@ -137,11 +130,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				}
 			};
 
-			global.bridgeProcesses.set(streamId, bridgeConfig);
-			console.log('✅ [BRIDGE-START] MUX direct HLS ingestion configured successfully');
+			(global as any).bridgeProcesses.set(streamId, bridgeConfig);
+			console.log('✅ [BRIDGE-START] Bridge configured successfully with Cloudflare Worker');
 
 		} catch (error) {
-			console.error(`❌ [BRIDGE-START] Failed to configure MUX direct ingestion: ${error.message}`);
+			console.error(`❌ [BRIDGE-START] Failed to start bridge: ${(error as Error).message}`);
 			throw error;
 		}
 

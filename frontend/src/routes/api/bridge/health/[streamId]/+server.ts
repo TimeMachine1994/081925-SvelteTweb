@@ -50,14 +50,23 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		let processMemory = Math.floor(Math.random() * 50) + 20; // 20-70 MB (lighter for serverless)
 		let processCpu = Math.floor(Math.random() * 15) + 2; // 2-17% CPU (lighter for serverless)
 
-		// For MUX direct ingestion, check MUX API status
-		if (bridgeConfig.approach === 'mux_direct_hls') {
-			console.log(`📊 [BRIDGE-HEALTH] Checking MUX direct ingestion health`);
-			processRunning = true; // No local process, but MUX is handling it
+		// For Cloudflare Worker approach, check worker status
+		if (bridgeConfig.approach === 'cloudflare_worker' && bridgeConfig.workerUrl) {
+			console.log(`📊 [BRIDGE-HEALTH] Checking Cloudflare Worker health`);
+			processRunning = true;
 			
-			// Check MUX live stream status
-			if (bridgeConfig.muxLiveStreamId) {
-				try {
+			try {
+				// Check worker bridge status
+				const workerStatusResponse = await fetch(`${bridgeConfig.workerUrl}/bridge/status/${streamId}`);
+				
+				if (workerStatusResponse.ok) {
+					const workerStatus = await workerStatusResponse.json();
+					console.log(`📊 [BRIDGE-HEALTH] Worker Status:`, workerStatus);
+					
+					bridgeConfig.stats.bytesTransferred = workerStatus.bytesTransferred || 0;
+					bridgeConfig.stats.inputConnected = workerStatus.isActive || false;
+					
+					// Also check MUX status
 					const MUX_TOKEN_ID = process.env.MUX_TOKEN_ID;
 					const MUX_TOKEN_SECRET = process.env.MUX_TOKEN_SECRET;
 					
@@ -72,9 +81,9 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 						console.log(`📊 [BRIDGE-HEALTH] MUX Stream Status: ${muxStatus.data.status}`);
 						bridgeConfig.stats.outputConnected = muxStatus.data.status === 'active';
 					}
-				} catch (muxError) {
-					console.log(`⚠️ [BRIDGE-HEALTH] MUX status check failed: ${muxError}`);
 				}
+			} catch (error) {
+				console.log(`⚠️ [BRIDGE-HEALTH] Worker status check failed: ${(error as Error).message}`);
 			}
 		} else if (bridgeConfig.process && bridgeConfig.pid) {
 			// Real process checking (for non-Vercel deployments)

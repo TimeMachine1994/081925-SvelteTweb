@@ -52,9 +52,24 @@ export const POST: RequestHandler = async ({ params, locals }) => {
 
 		try {
 			// Handle different bridge approaches
-			if (bridgeConfig.approach === 'vercel_simulation') {
-				console.log('⏹️ [BRIDGE-STOP] Stopping simulated bridge...');
-				// No actual process to terminate, just clean up
+			if (bridgeConfig.approach === 'cloudflare_worker' && bridgeConfig.workerUrl) {
+				console.log('⏹️ [BRIDGE-STOP] Stopping Cloudflare Worker bridge...');
+				
+				try {
+					const workerResponse = await fetch(`${bridgeConfig.workerUrl}/bridge/stop/${streamId}`, {
+						method: 'DELETE'
+					});
+					
+					if (workerResponse.ok) {
+						const workerData = await workerResponse.json();
+						console.log('✅ [BRIDGE-STOP] Worker bridge stopped:', workerData);
+						finalStats = workerData.finalStats || finalStats;
+					} else {
+						console.log(`⚠️ [BRIDGE-STOP] Worker stop failed: ${workerResponse.status}`);
+					}
+				} catch (workerError) {
+					console.log(`⚠️ [BRIDGE-STOP] Worker error: ${(workerError as Error).message}`);
+				}
 			} else if (bridgeConfig.process && bridgeConfig.pid) {
 				console.log('⏹️ [BRIDGE-STOP] Terminating real bridge process gracefully...');
 				
