@@ -48,11 +48,14 @@ export const POST: RequestHandler = async ({ request }) => {
 				break;
 
 			case 'basic_registration':
-				result = await sendRegistrationEmail(
-					testEmail,
-					customData?.password || 'TempPass123!',
-					customData?.lovedOneName || 'John Doe'
-				);
+				result = await sendRegistrationEmail({
+					email: testEmail,
+					familyName: customData?.familyName || 'The Smith Family',
+					lovedOneName: customData?.lovedOneName || 'John Doe',
+					memorialUrl: customData?.memorialUrl || 'https://tributestream.com/john-doe-memorial',
+					password: customData?.password || 'TempPass123!',
+					additionalNotes: customData?.additionalNotes
+				});
 				break;
 
 			case 'invitation':

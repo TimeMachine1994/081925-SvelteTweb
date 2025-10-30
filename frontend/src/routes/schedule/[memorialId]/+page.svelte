@@ -511,15 +511,15 @@
 
 	const tiers = [
 		{
-			name: 'Tributestream Solo',
+			name: 'Tributestream Record',
 			alias: 'solo',
 			price: 599,
 			features: [
-				'2 Hours of Broadcast Time',
+				'2 Hours of Record Time',
 				'Custom Link',
 				'Complimentary Download',
 				'One Year Hosting',
-				'DIY Livestream Kit'
+				'Posted Online within 24 Hours'
 			]
 		},
 		{

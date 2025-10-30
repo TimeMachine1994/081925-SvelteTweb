@@ -66,6 +66,15 @@ export interface PasswordResetEmailData {
 	resetLink: string;
 }
 
+export interface BasicRegistrationEmailData {
+	email: string;
+	lovedOneName: string;
+	memorialUrl: string;
+	familyName: string;
+	password?: string; // Optional - only for new users
+	additionalNotes?: string;
+}
+
 export interface FuneralDirectorRegistrationEmailData {
 	email: string;
 	familyName: string;
@@ -117,20 +126,30 @@ export async function sendEnhancedRegistrationEmail(data: EnhancedRegistrationEm
 	}
 }
 
-export async function sendRegistrationEmail(email: string, password: string, lovedOneName: string) {
+export async function sendRegistrationEmail(data: BasicRegistrationEmailData) {
 	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key') {
 		console.warn('⚠️ SendGrid client not initialized. Skipping registration email.');
 		return;
 	}
 
+	// Check if template is configured
+	if (!SENDGRID_TEMPLATES.BASIC_REGISTRATION || SENDGRID_TEMPLATES.BASIC_REGISTRATION === 'placeholder') {
+		console.error('💥 Basic registration template not configured. Template ID:', SENDGRID_TEMPLATES.BASIC_REGISTRATION);
+		throw new Error('Email template not configured. Please check SENDGRID_TEMPLATE_BASIC_REGISTRATION environment variable.');
+	}
+
 	const msg = {
-		to: email,
+		to: data.email,
 		from: FROM_EMAIL,
 		templateId: SENDGRID_TEMPLATES.BASIC_REGISTRATION,
 		dynamicTemplateData: {
-			lovedOneName: lovedOneName,
-			email: email,
-			password: password,
+			familyName: data.familyName,
+			lovedOneName: data.lovedOneName,
+			memorialUrl: data.memorialUrl,
+			email: data.email,
+			password: data.password || '', // Empty string if not provided
+			additionalNotes: data.additionalNotes || '',
+			hasAdditionalNotes: !!data.additionalNotes,
 			currentYear: new Date().getFullYear()
 		},
 		// Disable click tracking to prevent URL mangling
@@ -143,7 +162,7 @@ export async function sendRegistrationEmail(email: string, password: string, lov
 
 	try {
 		await sgMail.send(msg);
-		console.log('✅ Basic registration email sent via dynamic template to:', email);
+		console.log('✅ Basic registration email sent via dynamic template to:', data.email);
 	} catch (error) {
 		console.error('💥 Exception sending registration email:', error);
 		throw error;
