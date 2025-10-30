@@ -62,6 +62,17 @@
                 </a>
             </div>
             
+            <!-- Pricing Information Box -->
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #D5BA7F; text-align: center;">
+                <h3 style="color: #1a1a1a; margin-top: 0; font-size: 16px;">📋 Complete Service Pricing</h3>
+                <p style="color: #666; margin: 10px 0; font-size: 14px;">
+                    View our complete pricing breakdown including all packages, add-ons, and payment options.
+                </p>
+                <a href="https://tributestream.com/pricing-breakdown" style="display: inline-block; margin-top: 10px; color: #D5BA7F; text-decoration: underline; font-weight: 500;">
+                    View Complete Pricing Details →
+                </a>
+            </div>
+            
             <!-- Account Information Box -->
             <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin: 30px 0; border-left: 4px solid #ffc107;">
                 <h3 style="color: #856404; margin-top: 0;">📋 Account Information</h3>
