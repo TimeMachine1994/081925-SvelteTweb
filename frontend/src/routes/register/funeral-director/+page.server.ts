@@ -1,7 +1,7 @@
 import { adminAuth, adminDb } from '$lib/server/firebase';
 import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { sendRegistrationEmail, sendEnhancedRegistrationEmail } from '$lib/server/email';
+import { sendFuneralDirectorRegistrationEmail } from '$lib/server/email';
 import { indexMemorial } from '$lib/server/algolia-indexing';
 import type { Memorial } from '$lib/types/memorial';
 import { generateUniqueMemorialSlug } from '$lib/utils/memorial-slug';
@@ -293,23 +293,17 @@ export const actions: Actions = {
 			// Index the new memorial in Algolia
 			await indexMemorial({ ...memorialData, id: memorialRef.id } as unknown as Memorial);
 
-			// 5. Send appropriate email based on user status
-			if (isExistingUser) {
-				console.log('📧 Sending enhanced registration email for existing user...');
-				// For existing users, send enhanced email about the new memorial (no password needed)
-				await sendEnhancedRegistrationEmail({
-					email: familyContactEmail,
-					lovedOneName: lovedOneName,
-					memorialUrl: `https://tributestream.com/${fullSlug}`,
-					ownerName: familyContactName || directorName,
-					password: '' // No password needed for existing users
-				});
-				console.log('✅ Enhanced registration email sent successfully');
-			} else {
-				console.log('📧 Sending registration email for new user...');
-				await sendRegistrationEmail(familyContactEmail, password, lovedOneName);
-				console.log('✅ Registration email sent successfully');
-			}
+			// 5. Send funeral director registration email
+			console.log(`📧 Sending funeral director registration email to ${isExistingUser ? 'existing' : 'new'} user...`);
+			await sendFuneralDirectorRegistrationEmail({
+				email: familyContactEmail,
+				familyName: familyContactName || 'Family',
+				lovedOneName: lovedOneName,
+				memorialUrl: `https://tributestream.com/${fullSlug}`,
+				password: isExistingUser ? '' : password, // Include password for new users only
+				additionalNotes: additionalNotes
+			});
+			console.log('✅ Funeral director registration email sent successfully');
 
 			// 6. Create a custom token for auto-login
 			console.log('🎟️ Creating custom token for auto-login...');
