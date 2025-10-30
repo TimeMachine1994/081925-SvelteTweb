@@ -6,7 +6,14 @@ import { sendContactFormEmails } from '$lib/server/email';
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
-		const { name, email, subject, message, recaptchaToken } = await request.json();
+		const { name, email, subject, message, recaptchaToken, honeypot } = await request.json();
+
+		// Honeypot check - if filled, it's a bot
+		if (honeypot) {
+			console.warn('[CONTACT_API] Honeypot field filled, rejecting bot submission');
+			// Return fake success to fool bots
+			return json({ success: true, message: 'Message sent successfully.' }, { status: 200 });
+		}
 
 		// Validate required fields
 		if (!name || !email || !subject || !message) {
@@ -59,6 +66,9 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		// Send contact form emails using dynamic templates
 		console.log('[CONTACT_API] Attempting to send emails...');
+		let emailsSent = false;
+		let emailError: any = null;
+		
 		try {
 			await sendContactFormEmails({
 				name,
@@ -67,20 +77,44 @@ export const POST: RequestHandler = async ({ request }) => {
 				message,
 				timestamp: new Date()
 			});
-			console.log('[CONTACT_API] Emails sent successfully');
-		} catch (emailError) {
-			console.error('[CONTACT_API] Email sending failed:', emailError);
-			// Don't fail the entire request if email fails
-			console.warn('[CONTACT_API] Continuing despite email failure');
+			console.log('[CONTACT_API] ✅ Both emails sent successfully (support + confirmation)');
+			emailsSent = true;
+		} catch (err) {
+			emailError = err;
+			console.error('[CONTACT_API] ❌ Email sending failed:', err);
+			
+			// Log detailed error information
+			if (err && typeof err === 'object' && 'response' in err) {
+				const sgError = err as any;
+				console.error('[CONTACT_API] SendGrid error details:', {
+					body: sgError.response?.body,
+					status: sgError.response?.statusCode,
+					headers: sgError.response?.headers
+				});
+			}
+			
+			console.warn('[CONTACT_API] ⚠️ Email delivery failed but form submission recorded');
 		}
 
-		return json(
-			{
-				success: true,
-				message: 'Message sent successfully. Confirmation email sent to your inbox.'
-			},
-			{ status: 200 }
-		);
+		// Return appropriate message based on email success
+		if (emailsSent) {
+			return json(
+				{
+					success: true,
+					message: 'Message sent successfully. Confirmation email sent to your inbox.'
+				},
+				{ status: 200 }
+			);
+		} else {
+			// Email failed but we still received the submission
+			return json(
+				{
+					success: true,
+					message: 'Message received. We\'ll respond within 24 hours. (Note: Email confirmation may be delayed)'
+				},
+				{ status: 200 }
+			);
+		}
 	} catch (error) {
 		console.error('Contact form error:', error);
 

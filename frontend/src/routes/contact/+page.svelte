@@ -9,6 +9,7 @@
 	let email = $state('');
 	let subject = $state('');
 	let message = $state('');
+	let honeypot = $state(''); // Bot trap field
 	let isSubmitting = $state(false);
 	let error = $state('');
 	let success = $state(false);
@@ -32,6 +33,14 @@
 
 	async function handleSubmit(event: SubmitEvent) {
 		event.preventDefault();
+
+		// Honeypot check - if filled, it's a bot
+		if (honeypot) {
+			console.warn('[CONTACT] Honeypot triggered, likely bot submission');
+			// Fake success to fool bots
+			success = true;
+			return;
+		}
 
 		if (!name.trim() || !email.trim() || !subject.trim() || !message.trim()) {
 			error = 'Please fill in all fields';
@@ -65,7 +74,8 @@
 					email: email.trim(),
 					subject: subject.trim(),
 					message: message.trim(),
-					recaptchaToken
+					recaptchaToken,
+					honeypot // Send to server for additional validation
 				})
 			});
 
@@ -183,6 +193,19 @@
 							class="{theme.input} resize-vertical h-32 w-full"
 							placeholder="Tell us more about how we can help you..."
 						></textarea>
+					</div>
+
+					<!-- Honeypot field - hidden from users, catches bots -->
+					<div style="position: absolute; left: -5000px;" aria-hidden="true">
+						<label for="website">Website (leave blank)</label>
+						<input 
+							type="text" 
+							id="website" 
+							name="website" 
+							tabindex="-1" 
+							autocomplete="off"
+							bind:value={honeypot}
+						/>
 					</div>
 
 					<Button
