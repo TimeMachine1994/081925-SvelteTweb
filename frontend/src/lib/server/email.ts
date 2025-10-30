@@ -405,36 +405,47 @@ export async function sendPasswordResetEmail(data: PasswordResetEmailData) {
  * Send contact form emails using dynamic templates
  */
 export async function sendContactFormEmails(data: ContactFormData) {
-	console.log('[EMAIL] Starting sendContactFormEmails with data:', { 
+	console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+	console.log('[EMAIL] 🚀 Starting sendContactFormEmails');
+	console.log('[EMAIL] 📋 Form Data:', { 
 		name: data.name, 
 		email: data.email, 
-		subject: data.subject 
+		subject: data.subject,
+		messageLength: data.message?.length || 0
 	});
 
+	// Step 1: Check SendGrid API Key
+	console.log('[EMAIL] 🔑 Step 1: Checking SendGrid API Key...');
 	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key') {
-		console.warn('⚠️ SendGrid client not initialized. Skipping contact form emails.');
+		console.warn('[EMAIL] ⚠️ SendGrid client not initialized. Skipping contact form emails.');
 		console.log('[EMAIL] SENDGRID_API_KEY status:', SENDGRID_API_KEY ? 'Set' : 'Not set');
 		return;
 	}
+	console.log('[EMAIL] ✅ SendGrid API key is configured');
+	console.log('[EMAIL] FROM_EMAIL:', FROM_EMAIL);
 
-	console.log('[EMAIL] SendGrid API key is configured');
-	console.log('[EMAIL] Template IDs:', {
+	// Step 2: Log Template IDs
+	console.log('[EMAIL] 📝 Step 2: Checking Template IDs...');
+	console.log('[EMAIL] Template Configuration:', {
 		support: SENDGRID_TEMPLATES.CONTACT_FORM_SUPPORT,
 		confirmation: SENDGRID_TEMPLATES.CONTACT_FORM_CONFIRMATION
 	});
 
-	// Check if contact form templates are configured
+	// Step 3: Validate Templates
+	console.log('[EMAIL] ✔️ Step 3: Validating templates...');
 	const templateValidation = validateContactFormTemplates();
 	if (!templateValidation.valid) {
-		console.error('💥 Contact form templates not configured properly:', templateValidation.missing);
+		console.error('[EMAIL] 💥 Contact form templates not configured properly:', templateValidation.missing);
 		throw new Error(`Contact form templates not configured: ${templateValidation.missing.join(', ')}`);
 	}
+	console.log('[EMAIL] ✅ Both templates validated successfully');
 
 	const timestamp = data.timestamp || new Date();
 
-	// Support team notification
+	// Step 4: Build Support Email Message
+	console.log('[EMAIL] 📧 Step 4: Building support email message...');
 	const supportMsg = {
-		to: 'austinbryanfilm@gmail.com', // Replace with your support email
+		to: 'austinbryanfilm@gmail.com',
 		from: FROM_EMAIL,
 		templateId: SENDGRID_TEMPLATES.CONTACT_FORM_SUPPORT,
 		dynamicTemplateData: {
@@ -446,8 +457,15 @@ export async function sendContactFormEmails(data: ContactFormData) {
 			currentYear: new Date().getFullYear()
 		}
 	};
+	console.log('[EMAIL] 📧 Support message built:', {
+		to: supportMsg.to,
+		from: supportMsg.from,
+		templateId: supportMsg.templateId,
+		dataKeys: Object.keys(supportMsg.dynamicTemplateData)
+	});
 
-	// Customer confirmation
+	// Step 5: Build Confirmation Email Message
+	console.log('[EMAIL] 📧 Step 5: Building confirmation email message...');
 	const confirmationMsg = {
 		to: data.email,
 		from: FROM_EMAIL,
@@ -460,26 +478,89 @@ export async function sendContactFormEmails(data: ContactFormData) {
 			currentYear: new Date().getFullYear()
 		}
 	};
+	console.log('[EMAIL] 📧 Confirmation message built:', {
+		to: confirmationMsg.to,
+		from: confirmationMsg.from,
+		templateId: confirmationMsg.templateId,
+		dataKeys: Object.keys(confirmationMsg.dynamicTemplateData)
+	});
 
 	try {
-		console.log('[EMAIL] Sending support notification to:', supportMsg.to);
-		console.log('[EMAIL] Sending confirmation to:', confirmationMsg.to);
-		console.log('[EMAIL] Using templates:', {
-			support: supportMsg.templateId,
-			confirmation: confirmationMsg.templateId
-		});
+		// Step 6: Send Both Emails
+		console.log('[EMAIL] 📤 Step 6: Sending emails...');
+		console.log('[EMAIL] 📤 Attempting to send SUPPORT email to:', supportMsg.to);
+		console.log('[EMAIL] 📤 Attempting to send CONFIRMATION email to:', confirmationMsg.to);
+		console.log('[EMAIL] Using Promise.allSettled for independent sending...');
 
-		await Promise.all([
-			sgMail.send(supportMsg),
-			sgMail.send(confirmationMsg)
+		// Send emails individually with separate tracking
+		const results = await Promise.allSettled([
+			sgMail.send(supportMsg).then(result => {
+				console.log('[EMAIL] ✅ SUPPORT email sent successfully!');
+				console.log('[EMAIL] Support email SendGrid response:', JSON.stringify(result, null, 2));
+				return { type: 'support', success: true, result };
+			}).catch(error => {
+				console.error('[EMAIL] ❌ SUPPORT email FAILED:', error);
+				if (error && typeof error === 'object' && 'response' in error) {
+					const sgError = error as any;
+					console.error('[EMAIL] Support email SendGrid error body:', sgError.response?.body);
+				}
+				throw error;
+			}),
+			sgMail.send(confirmationMsg).then(result => {
+				console.log('[EMAIL] ✅ CONFIRMATION email sent successfully!');
+				console.log('[EMAIL] Confirmation email SendGrid response:', JSON.stringify(result, null, 2));
+				return { type: 'confirmation', success: true, result };
+			}).catch(error => {
+				console.error('[EMAIL] ❌ CONFIRMATION email FAILED:', error);
+				if (error && typeof error === 'object' && 'response' in error) {
+					const sgError = error as any;
+					console.error('[EMAIL] Confirmation email SendGrid error body:', sgError.response?.body);
+					console.error('[EMAIL] Confirmation email SendGrid status:', sgError.response?.statusCode);
+					console.error('[EMAIL] Confirmation email SendGrid headers:', sgError.response?.headers);
+				}
+				throw error;
+			})
 		]);
-		console.log('✅ Contact form emails sent via dynamic templates');
+
+		console.log('[EMAIL] 📊 Email sending results:', results);
+
+		// Check individual results
+		const supportResult = results[0];
+		const confirmationResult = results[1];
+
+		if (supportResult.status === 'fulfilled') {
+			console.log('[EMAIL] ✅ Support email: SUCCESS');
+		} else {
+			console.error('[EMAIL] ❌ Support email: FAILED -', supportResult.reason);
+		}
+
+		if (confirmationResult.status === 'fulfilled') {
+			console.log('[EMAIL] ✅ Confirmation email: SUCCESS');
+		} else {
+			console.error('[EMAIL] ❌ Confirmation email: FAILED -', confirmationResult.reason);
+		}
+
+		// If either failed, throw error
+		if (supportResult.status === 'rejected' || confirmationResult.status === 'rejected') {
+			const errors = [];
+			if (supportResult.status === 'rejected') errors.push(`Support: ${supportResult.reason}`);
+			if (confirmationResult.status === 'rejected') errors.push(`Confirmation: ${confirmationResult.reason}`);
+			throw new Error(`Email sending failed: ${errors.join(', ')}`);
+		}
+
+		console.log('[EMAIL] ✅✅ Both contact form emails sent successfully via dynamic templates');
+		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 	} catch (error) {
-		console.error('💥 Exception sending contact form emails:', error);
+		console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+		console.error('[EMAIL] 💥💥 EXCEPTION in sendContactFormEmails');
+		console.error('[EMAIL] Error type:', typeof error);
+		console.error('[EMAIL] Error:', error);
 		if (error && typeof error === 'object' && 'response' in error) {
 			const sgError = error as any;
-			console.error('💥 SendGrid error details:', sgError.response?.body);
+			console.error('[EMAIL] 💥 SendGrid error details:', sgError.response?.body);
+			console.error('[EMAIL] 💥 SendGrid status code:', sgError.response?.statusCode);
 		}
+		console.error('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 		throw error;
 	}
 }
