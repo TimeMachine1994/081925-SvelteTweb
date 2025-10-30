@@ -53,7 +53,28 @@ This caused a disconnect where memorials were created but not linked to the fune
 
 ---
 
+---
+
+## ✅ FIXED: Complete Payment Button Link (Oct 29, 2025)
+
+### Problem
+The "Complete Payment" button on the profile page had no link - it didn't take users anywhere when clicked.
+
+### Solution
+Added link to the schedule/calculator page for the user's memorial:
+```svelte
+<a href="/schedule/{data.memorials?.[0]?.id}" class="inline-block">
+  <Button>Complete Payment</Button>
+</a>
+```
+
+Since owners should only have one memorial, we use `data.memorials?.[0]?.id` to get their first memorial's ID and link to `/schedule/[id]`.
+
+**File Modified:** `lib/components/Profile.svelte` (line 399)
+
+---
+
 ## 🔧 TO DO
 
-1. Make Complete Payment button takes you to to the calculator page. 
+1. ~~Make Complete Payment button takes you to to the calculator page.~~ ✅ DONE
 2. Fix "If you have any questions, please don't hesitate to contact our support team at support@tributestream.com or (555) 123-4567." in our Service Confirmtion Details Message

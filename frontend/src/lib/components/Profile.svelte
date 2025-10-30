@@ -396,14 +396,16 @@
 											<strong>Payment Required:</strong> Please complete payment for your existing memorial
 											before creating a new one.
 										</p>
-										<Button
-											variant="role"
-											role="owner"
-											size="md"
-											rounded="lg"
-										>
-											Complete Payment
-										</Button>
+										<a href="/schedule/{data.memorials?.[0]?.id}" class="inline-block">
+											<Button
+												variant="role"
+												role="owner"
+												size="md"
+												rounded="lg"
+											>
+												Complete Payment
+											</Button>
+										</a>
 									</div>
 								{:else}
 									<Button
