@@ -1,9 +1,10 @@
 # Funeral Director Registration Email Template
 
-**Template ID Variable**: `SENDGRID_TEMPLATE_FUNERAL_DIRECTOR_REGISTRATION`  
+**IMPORTANT:** This updates your **existing** `SENDGRID_TEMPLATE_ENHANCED_REGISTRATION` template  
+**Template ID Variable**: `SENDGRID_TEMPLATE_ENHANCED_REGISTRATION` (d-10efa11389054692a7dc7d24372f5a49)  
 **Subject**: `Memorial Service for {{lovedOneName}} - Tributestream`
 
-## Copy this HTML into SendGrid Dynamic Template:
+## Update your existing Enhanced Registration template with this HTML:
 
 ```html
 <!DOCTYPE html>

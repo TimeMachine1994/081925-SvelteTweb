@@ -10,7 +10,6 @@ if (SENDGRID_API_KEY && SENDGRID_API_KEY !== 'mock_key') {
 export const SENDGRID_TEMPLATES = {
 	ENHANCED_REGISTRATION: env.SENDGRID_TEMPLATE_ENHANCED_REGISTRATION || 'placeholder',
 	BASIC_REGISTRATION: env.SENDGRID_TEMPLATE_BASIC_REGISTRATION || 'placeholder',
-	FUNERAL_DIRECTOR_REGISTRATION: env.SENDGRID_TEMPLATE_FUNERAL_DIRECTOR_REGISTRATION || 'placeholder',
 	INVITATION: env.SENDGRID_TEMPLATE_INVITATION || 'placeholder',
 	EMAIL_CHANGE_CONFIRMATION: env.SENDGRID_TEMPLATE_EMAIL_CHANGE || 'placeholder',
 	PAYMENT_CONFIRMATION: env.SENDGRID_TEMPLATE_PAYMENT_CONFIRMATION || 'placeholder',
@@ -158,15 +157,15 @@ export async function sendFuneralDirectorRegistrationEmail(data: FuneralDirector
 	}
 
 	// Check if template is configured
-	if (!SENDGRID_TEMPLATES.FUNERAL_DIRECTOR_REGISTRATION || SENDGRID_TEMPLATES.FUNERAL_DIRECTOR_REGISTRATION === 'placeholder') {
-		console.error('💥 Funeral director registration template not configured. Template ID:', SENDGRID_TEMPLATES.FUNERAL_DIRECTOR_REGISTRATION);
-		throw new Error('Email template not configured. Please check SENDGRID_TEMPLATE_FUNERAL_DIRECTOR_REGISTRATION environment variable.');
+	if (!SENDGRID_TEMPLATES.ENHANCED_REGISTRATION || SENDGRID_TEMPLATES.ENHANCED_REGISTRATION === 'placeholder') {
+		console.error('💥 Enhanced registration template not configured. Template ID:', SENDGRID_TEMPLATES.ENHANCED_REGISTRATION);
+		throw new Error('Email template not configured. Please check SENDGRID_TEMPLATE_ENHANCED_REGISTRATION environment variable.');
 	}
 
 	const msg = {
 		to: data.email,
 		from: FROM_EMAIL,
-		templateId: SENDGRID_TEMPLATES.FUNERAL_DIRECTOR_REGISTRATION,
+		templateId: SENDGRID_TEMPLATES.ENHANCED_REGISTRATION,
 		dynamicTemplateData: {
 			familyName: data.familyName,
 			lovedOneName: data.lovedOneName,
