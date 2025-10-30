@@ -57,7 +57,7 @@
 
 <div class="min-h-screen bg-white text-zinc-900">
 	<!-- Header -->
-	<header class="sticky top-0 z-50 border-b bg-white/90 backdrop-blur">
+	<header class="sticky top-16 z-40 border-b bg-white/90 backdrop-blur">
 		<div class="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
 			<div class="flex items-center gap-3">
 				<div class="h-9 w-9 rounded-full bg-[#D5BA7F]"></div>
@@ -483,11 +483,13 @@
 					<h3 class="font-medium">Booking Process</h3>
 					<ol class="mt-3 list-decimal pl-5 text-zinc-800 space-y-2">
 						<li>
-							Call <a class="underline" href="tel:14072215922">(407) 221‑5922</a> or text the details above.
+							<a class="underline hover:text-[#D5BA7F]" href="/profile">Create custom link</a>
 						</li>
-						<li>We'll reply with a free custom preview link.</li>
-						<li>We'll email your order for confirmation.</li>
-						<li>Pay through the secure invoice portal in the email.</li>
+						<li>
+							<a class="underline hover:text-[#D5BA7F]" href="/login">Login to account</a>
+						</li>
+						<li>Enter booking details</li>
+						<li>Checkout to lock in the reservation</li>
 					</ol>
 					<div class="mt-5">
 						<a
