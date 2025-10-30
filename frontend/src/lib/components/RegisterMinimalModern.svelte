@@ -47,6 +47,11 @@
 	let progress = $state(0);
 
 	const handleRegister: SubmitFunction = ({ formData }) => {
+		// Prevent double submission
+		if (loading) {
+			return async () => {};
+		}
+		
 		loading = true;
 		error = null;
 		fieldErrors = {}; // Clear field errors on new submission

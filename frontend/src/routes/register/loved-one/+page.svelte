@@ -15,6 +15,9 @@
 	let name = $state('');
 	let email = $state('');
 	let phone = $state('');
+	
+	// Submission state for double-click prevention
+	let isSubmitting = $state(false);
 
 	console.log('📝 Form state initialized with runes');
 
@@ -97,7 +100,17 @@
 			</div>
 		{/if}
 
-		<form method="POST" use:enhance onsubmit={handleSubmit}>
+		<form 
+			method="POST" 
+			onsubmit={handleSubmit}
+			use:enhance={() => {
+				isSubmitting = true;
+				return async ({ update }) => {
+					await update();
+					isSubmitting = false;
+				};
+			}}
+		>
 			<section class="form-section">
 				<LiveUrlPreview bind:lovedOneName />
 			</section>
@@ -191,8 +204,10 @@
 					size="xl"
 					fullWidth
 					rounded="lg"
+					disabled={isSubmitting}
+					loading={isSubmitting}
 				>
-					🚀 Create Memorial
+					{isSubmitting ? '🔄 Creating Memorial...' : '🚀 Create Memorial'}
 				</Button>
 				<p class="submit-note">
 					By submitting this form, you'll create your account and set up the memorial page. Login

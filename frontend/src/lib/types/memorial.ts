@@ -95,4 +95,12 @@ export interface Memorial {
 
 	// Access control - required fields
 	funeralDirectorUid?: string;
+	funeralDirector?: {
+		id: string;
+		companyName: string;
+		contactPerson: string;
+		phone: string;
+		email: string;
+		licenseNumber?: string;
+	};
 }

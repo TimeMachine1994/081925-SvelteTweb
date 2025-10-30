@@ -61,6 +61,12 @@
 
 	// Handle form submission
 	function handleSubmit(event: SubmitEvent) {
+		// Prevent double submission
+		if (isSubmitting) {
+			event.preventDefault();
+			return;
+		}
+		
 		const error = validateForm();
 		if (error) {
 			event.preventDefault();

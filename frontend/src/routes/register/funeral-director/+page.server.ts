@@ -101,7 +101,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions: Actions = {
-	default: async ({ request }) => {
+	default: async ({ request, locals }) => {
 		console.log('🎯 Enhanced funeral director registration started');
 		const data = await request.formData();
 		
@@ -222,6 +222,13 @@ export const actions: Actions = {
 				console.log(`✅ New user profile created for ${familyContactEmail}`);
 			}
 
+			// Get funeral director profile for tracking
+			let funeralDirectorProfile = null;
+			if (locals.user) {
+				const funeralDirectorDoc = await adminDb.collection('funeral_directors').doc(locals.user.uid).get();
+				funeralDirectorProfile = funeralDirectorDoc.exists ? funeralDirectorDoc.data() : null;
+			}
+
 			// 4. Create comprehensive memorial with all service details
 			console.log('🕊️ Creating comprehensive memorial...');
 			const memorialData = {
@@ -268,6 +275,16 @@ export const actions: Actions = {
 				
 				// Director information
 				directorEmail: directorEmail || null,
+				
+				// Funeral director tracking (CRITICAL FIX)
+				funeralDirectorUid: locals.user?.uid || null, // For profile page queries
+				funeralDirector: locals.user ? {
+					id: locals.user.uid,
+					companyName: funeralDirectorProfile?.companyName || funeralHomeName,
+					contactPerson: funeralDirectorProfile?.contactPerson || directorName,
+					phone: funeralDirectorProfile?.phone || '',
+					email: funeralDirectorProfile?.email || directorEmail || ''
+				} : null, // For API endpoint queries
 				
 				// Additional information
 				additionalNotes: additionalNotes || null,

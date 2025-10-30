@@ -47,17 +47,32 @@ export const load: PageServerLoad = async ({ locals }) => {
 		// Fetch memorials based on role
 		let memorials: Memorial[] = [];
 		if (role === 'funeral_director') {
+			// Query using funeralDirectorUid (compatible with both old and new memorials)
 			const memorialsSnap = await adminDb
 				.collection('memorials')
 				.where('funeralDirectorUid', '==', uid)
 				.get();
-			memorials = memorialsSnap.docs.map((doc) => {
-				const data = doc.data();
-				if (!data.fullSlug && data.slug) {
-					data.fullSlug = data.slug;
+		
+			// Also query using funeralDirector.id for newer format
+			const memorialsSnap2 = await adminDb
+				.collection('memorials')
+				.where('funeralDirector.id', '==', uid)
+				.get();
+		
+			// Combine results and deduplicate by memorial ID
+			const memorialMap = new Map();
+		
+			[...memorialsSnap.docs, ...memorialsSnap2.docs].forEach((doc) => {
+				if (!memorialMap.has(doc.id)) {
+					const data = doc.data();
+					if (!data.fullSlug && data.slug) {
+						data.fullSlug = data.slug;
+					}
+					memorialMap.set(doc.id, { id: doc.id, ...data } as Memorial);
 				}
-				return { id: doc.id, ...data } as Memorial;
 			});
+		
+			memorials = Array.from(memorialMap.values());
 		} else if (role === 'owner') {
 			const memorialsSnap = await adminDb
 				.collection('memorials')
