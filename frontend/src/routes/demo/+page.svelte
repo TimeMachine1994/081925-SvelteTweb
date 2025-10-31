@@ -120,14 +120,16 @@
 			}
 
 			// Redirect based on scenario
+			// Note: Phase 1 only creates users. Phase 2 will add demo data.
+			// For now, redirect to existing pages that work without demo content
 			const redirects: Record<string, string> = {
-				first_memorial_service: '/funeral-director',
-				managing_multiple: '/funeral-director',
-				legacy_celebration: '/profile',
-				viewer_experience: '/'
+				first_memorial_service: '/my-portal', // Funeral director portal
+				managing_multiple: '/my-portal', // Funeral director portal
+				legacy_celebration: '/my-portal', // Family owner portal
+				viewer_experience: '/' // Public homepage
 			};
 
-			const redirectPath = redirects[selectedScenario] || '/';
+			const redirectPath = redirects[selectedScenario] || '/my-portal';
 			console.log('[DEMO_LANDING] Redirecting to:', redirectPath);
 
 			goto(redirectPath);
