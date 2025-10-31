@@ -360,6 +360,28 @@
 		goto(`/payment?data=${encodedData}`);
 	}
 
+	function handleTestPayment() {
+		// Create test booking data with $1 total for testing
+		const testBookingData = {
+			items: [
+				{
+					name: 'Test Payment',
+					price: 1,
+					quantity: 1,
+					total: 1
+				}
+			],
+			total: 1, // $1 test payment
+			calculatorData,
+			memorialId,
+			timestamp: new Date().toISOString(),
+			isTest: true // Flag to indicate test payment
+		};
+
+		const encodedData = btoa(JSON.stringify(testBookingData));
+		goto(`/payment?data=${encodedData}`);
+	}
+
 	async function handleSaveAndPayLater() {
 		// Update services.additional array based on UI toggles
 		const updatedServices = {
@@ -564,8 +586,7 @@
 <!-- Header -->
 <section class="bg-gradient-to-br from-black via-gray-900 to-amber-900 py-16 text-white">
 	<div class="mx-auto max-w-4xl px-4 text-center">
-		<div class="mb-6 flex items-center justify-center">
-			<Calculator class="mr-4 h-12 w-12 text-amber-400" />
+		<div class="mb-6">
 			<h1
 				class="bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-4xl font-bold text-transparent"
 			>
@@ -1027,6 +1048,12 @@
 							class="w-full rounded-lg bg-gradient-to-r from-amber-500 to-yellow-600 px-6 py-3 font-medium text-black transition-all duration-300 hover:from-amber-600 hover:to-yellow-700 hover:shadow-lg hover:shadow-amber-500/25"
 						>
 							Book Now
+						</button>
+						<button
+							onclick={handleTestPayment}
+							class="w-full rounded-lg border-2 border-green-500 bg-green-500/10 px-6 py-3 font-medium text-green-400 transition-colors hover:bg-green-500/20 hover:text-green-300"
+						>
+							$1 Test Payment
 						</button>
 						<button
 							onclick={handleSaveAndPayLater}
