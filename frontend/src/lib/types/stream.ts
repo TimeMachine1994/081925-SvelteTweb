@@ -98,6 +98,11 @@ export interface Stream {
 	// Error tracking
 	errorCode?: string;
 	errorMessage?: string;
+
+	// Demo mode fields - for sandboxed demo data
+	isDemo?: boolean;
+	demoSessionId?: string;
+	demoExpiresAt?: string;
 }
 
 export type StreamStatus =

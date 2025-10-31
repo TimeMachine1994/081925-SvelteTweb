@@ -161,7 +161,7 @@
 						{/if}
 
 						<div class="article-actions">
-							<Button theme="minimal" href="/blog">← Back to Blog</Button>
+							<a href="/blog" class="back-to-blog-btn">← Back to Blog</a>
 							<div class="social-share">
 								<span>Share:</span>
 								<button class="share-btn" on:click={() => navigator.share?.({ title: post.title, url: window.location.href })}>
@@ -216,8 +216,8 @@
 					<h2>Need Help with Your Memorial Service?</h2>
 					<p>Our expert team is here to guide you through planning and live streaming your memorial service.</p>
 					<div class="cta-buttons">
-						<Button theme="minimal" href="/register/loved-one">Get Started Free</Button>
-						<Button theme="minimal" href="/contact">Contact Us</Button>
+						<a href="/register/loved-one" class="cta-btn primary">Get Started Free</a>
+						<a href="/contact" class="cta-btn secondary">Contact Us</a>
 					</div>
 				</div>
 			</div>
@@ -229,7 +229,7 @@
 				<div class="error-content">
 					<h1>Blog Post Not Found</h1>
 					<p>Sorry, we couldn't find the blog post you're looking for.</p>
-					<Button theme="minimal" href="/blog">← Back to Blog</Button>
+					<a href="/blog" class="back-to-blog-btn">← Back to Blog</a>
 				</div>
 			</div>
 		</div>
@@ -604,9 +604,58 @@
 		flex-wrap: wrap;
 	}
 
-	.cta-buttons :global(.btn) {
-		background: white !important;
-		color: #1f2937 !important;
+	.cta-btn {
+		display: inline-block;
+		padding: 0.75rem 2rem;
+		font-size: 1rem;
+		font-weight: 500;
+		text-decoration: none;
+		border-radius: 0.375rem;
+		transition: all 0.2s ease;
+		border: 2px solid transparent;
+		cursor: pointer;
+	}
+
+	.cta-btn.primary {
+		background: #D5BA7F;
+		color: white;
+	}
+
+	.cta-btn.primary:hover {
+		background: #c4a96f;
+		transform: translateY(-2px);
+		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	}
+
+	.cta-btn.secondary {
+		background: white;
+		color: #1f2937;
+		border-color: #D5BA7F;
+	}
+
+	.cta-btn.secondary:hover {
+		background: #f9fafb;
+		transform: translateY(-2px);
+		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	}
+
+	.back-to-blog-btn {
+		display: inline-block;
+		padding: 0.5rem 1.5rem;
+		font-size: 0.95rem;
+		font-weight: 500;
+		text-decoration: none;
+		color: #D5BA7F;
+		background: white;
+		border: 2px solid #D5BA7F;
+		border-radius: 0.375rem;
+		transition: all 0.2s ease;
+	}
+
+	.back-to-blog-btn:hover {
+		background: #D5BA7F;
+		color: white;
+		transform: translateX(-4px);
 	}
 
 	/* Error Page */

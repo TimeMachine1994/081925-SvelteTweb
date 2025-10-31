@@ -10,6 +10,10 @@ declare global {
 				displayName?: string;
 				role: 'admin' | 'owner' | 'funeral_director';
 				isAdmin: boolean;
+				// Demo mode fields
+				isDemo?: boolean;
+				demoSessionId?: string;
+				demoExpiresAt?: string;
 			} | null;
 		}
 		interface PageData {
@@ -19,6 +23,10 @@ declare global {
 				displayName?: string;
 				role: 'admin' | 'owner' | 'funeral_director';
 				isAdmin: boolean;
+				// Demo mode fields
+				isDemo?: boolean;
+				demoSessionId?: string;
+				demoExpiresAt?: string;
 			} | null;
 		}
 		// interface PageState {}

@@ -103,4 +103,9 @@ export interface Memorial {
 		email: string;
 		licenseNumber?: string;
 	};
+
+	// Demo mode fields - for sandboxed demo data
+	isDemo?: boolean;
+	demoSessionId?: string;
+	demoExpiresAt?: string;
 }

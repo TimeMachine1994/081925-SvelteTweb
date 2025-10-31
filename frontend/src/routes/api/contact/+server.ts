@@ -62,6 +62,11 @@ export const POST: RequestHandler = async ({ request }) => {
 
 				if (!recaptchaResult.success) {
 					console.error('[CONTACT_API] reCAPTCHA verification failed:', recaptchaResult.error);
+					console.error('[CONTACT_API] Full reCAPTCHA result:', JSON.stringify(recaptchaResult, null, 2));
+					console.error('[CONTACT_API] Score:', recaptchaResult.score);
+					console.error('[CONTACT_API] Action:', recaptchaResult.action);
+					console.error('[CONTACT_API] Expected action:', RECAPTCHA_ACTIONS.CONTACT_FORM);
+					console.error('[CONTACT_API] Score threshold:', getScoreThreshold(RECAPTCHA_ACTIONS.CONTACT_FORM));
 					if (!isDev) {
 						console.error('[CONTACT_API] ❌ reCAPTCHA verification FAILED in production');
 						return json({ error: 'Security verification failed. Please try again.' }, { status: 400 });
