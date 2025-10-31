@@ -54,6 +54,11 @@ export interface Stream {
 	// UI State Tracking
 	phoneStreamActive?: boolean;
 
+	// Emergency Override - takes priority over normal streaming
+	overrideEmbedCode?: string; // Full HTML embed code (iframe, etc.)
+	overrideActive?: boolean;    // Toggle without deleting code
+	overrideNote?: string;       // Internal note for why override was used
+
 	// Scheduling
 	scheduledStartTime?: string;
 	scheduledEndTime?: string;

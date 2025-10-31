@@ -66,6 +66,22 @@
 	let categorizedStreams = $derived.by(() => {
 		const now = currentTime.getTime();
 
+		// CHECK FOR OVERRIDE FIRST - this takes priority over everything
+		const overrideStreams = safeStreams.filter(s => 
+			s.overrideEmbedCode && 
+			s.overrideActive === true
+		);
+		
+		// If we have override streams, return ONLY those as "live"
+		if (overrideStreams.length > 0) {
+			console.log('🚨 [OVERRIDE] Using override embed codes:', overrideStreams.length, overrideStreams.map(s => s.id));
+			return {
+				liveStreams: overrideStreams, // Treat as "live" for display priority
+				scheduledStreams: [],
+				recordedStreams: []
+			};
+		}
+
 		// More flexible live stream detection with enhanced debugging
 		const liveStreams = safeStreams.filter((s) => {
 			console.log(`🔍 [STREAM_DEBUG] Checking stream ${s.id}:`, {
@@ -332,7 +348,10 @@
 				{/if}
 
 				<div class="video-container themed-player">
-					{#if streamUrl}
+					{#if stream.overrideEmbedCode && stream.overrideActive}
+						<!-- Emergency override - seamless to viewers, no indicators -->
+						{@html stream.overrideEmbedCode}
+					{:else if streamUrl}
 						<div class="video-player-wrapper">
 							<iframe
 								src={streamUrl}

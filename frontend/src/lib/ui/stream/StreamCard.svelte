@@ -68,6 +68,13 @@
 	let isSaving = $state(false);
 	let saveError = $state('');
 
+	// Emergency override state
+	let overrideEmbedCode = $state(stream.overrideEmbedCode || '');
+	let overrideActive = $state(stream.overrideActive || false);
+	let overrideNote = $state(stream.overrideNote || '');
+	let isSavingOverride = $state(false);
+	let overrideError = $state('');
+
 	function openEditModal() {
 		if (!stream.scheduledStartTime) return;
 		
@@ -116,6 +123,35 @@
 			isSaving = false;
 		}
 	}
+
+	async function saveOverride() {
+		isSavingOverride = true;
+		overrideError = '';
+
+		try {
+			const response = await fetch(`/api/streams/management/${stream.id}`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					overrideEmbedCode: overrideEmbedCode.trim() || null,
+					overrideActive,
+					overrideNote: overrideNote.trim() || null
+				})
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to save override');
+			}
+
+			// Success - reload page to show updated data
+			window.location.reload();
+		} catch (error) {
+			console.error('Error saving override:', error);
+			overrideError = 'Failed to save override. Please try again.';
+		} finally {
+			isSavingOverride = false;
+		}
+	}
 </script>
 
 
@@ -128,6 +164,178 @@
 >
 	<!-- Stream Header Section -->
 	<StreamHeader {stream} onEditSchedule={openEditModal} />
+
+	<!-- Emergency Override Active Indicator (Admin Only) -->
+	{#if stream.overrideActive}
+		<div 
+			class="override-active-indicator"
+			style="
+				padding: {getSemanticSpacing('card', 'padding')['md']};
+				background: #fef3c7;
+				border-top: 1px solid {colors.border.primary};
+				border-bottom: 2px solid #f59e0b;
+			"
+		>
+			<div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+				<span style="font-size: 1.25rem;">🚨</span>
+				<strong style="color: #92400e; font-size: {getTextStyle('body', 'md').fontSize};">
+					Override Active
+				</strong>
+			</div>
+			<p style="margin: 0; font-size: {getTextStyle('body', 'sm').fontSize}; color: #78350f;">
+				Memorial page is showing custom embed instead of Cloudflare stream
+			</p>
+			{#if stream.overrideNote}
+				<p style="margin: 0.5rem 0 0 0; font-size: {getTextStyle('body', 'sm').fontSize}; color: #92400e; font-style: italic;">
+					Note: {stream.overrideNote}
+				</p>
+			{/if}
+		</div>
+	{/if}
+
+	<!-- Emergency Override Section -->
+	<details 
+		class="override-section"
+		style="
+			border-top: 1px solid {colors.border.primary};
+		"
+	>
+		<summary 
+			style="
+				padding: {getSemanticSpacing('card', 'padding')['md']};
+				cursor: pointer;
+				font-weight: 600;
+				color: #d97706;
+				background: #fffbeb;
+				user-select: none;
+			"
+		>
+			🚨 Emergency Embed Override
+		</summary>
+		
+		<div 
+			style="
+				padding: {getSemanticSpacing('card', 'padding')['lg']};
+				background: #fffbeb;
+				border-top: 1px solid #fde68a;
+			"
+		>
+			<p 
+				style="
+					font-size: {getTextStyle('body', 'sm').fontSize};
+					color: #78350f;
+					margin: 0 0 {getSemanticSpacing('component', 'md')} 0;
+					line-height: 1.5;
+				"
+			>
+				Paste a complete embed code (Vimeo, YouTube, etc.) to replace the streaming system.
+				<strong style="color: #059669;">Viewers won't see any indication this is an override.</strong>
+			</p>
+			
+			<div style="display: flex; flex-direction: column; gap: {getSemanticSpacing('component', 'md')};">
+				<!-- Embed Code Textarea -->
+				<div>
+					<label 
+						for="override-embed-{stream.id}"
+						style="
+							display: block;
+							font-size: {getTextStyle('body', 'sm').fontSize};
+							font-weight: 600;
+							color: #92400e;
+							margin-bottom: {getSemanticSpacing('component', 'xs')};
+						"
+					>
+						Embed Code
+					</label>
+					<textarea
+						id="override-embed-{stream.id}"
+						bind:value={overrideEmbedCode}
+						placeholder='<iframe src="https://player.vimeo.com/video/123456789" width="640" height="360" frameborder="0" allowfullscreen></iframe>'
+						rows="6"
+						style="
+							width: 100%;
+							font-family: monospace;
+							font-size: 0.875rem;
+							padding: 0.5rem;
+							border: 1px solid #d1d5db;
+							border-radius: 0.375rem;
+							resize: vertical;
+						"
+					></textarea>
+				</div>
+				
+				<!-- Activate Toggle -->
+				<label 
+					style="
+						display: flex;
+						align-items: center;
+						gap: 0.5rem;
+						cursor: pointer;
+						font-size: {getTextStyle('body', 'sm').fontSize};
+						color: #78350f;
+					"
+				>
+					<input 
+						type="checkbox" 
+						bind:checked={overrideActive}
+						style="
+							width: 1.25rem;
+							height: 1.25rem;
+							cursor: pointer;
+						"
+					/>
+					<strong>Activate Override</strong> (replaces normal player on memorial page)
+				</label>
+				
+				<!-- Note Input -->
+				<div>
+					<label 
+						for="override-note-{stream.id}"
+						style="
+							display: block;
+							font-size: {getTextStyle('body', 'sm').fontSize};
+							font-weight: 600;
+							color: #92400e;
+							margin-bottom: {getSemanticSpacing('component', 'xs')};
+						"
+					>
+						Internal Note
+					</label>
+					<input
+						id="override-note-{stream.id}"
+						type="text"
+						bind:value={overrideNote}
+						placeholder="Why override is being used (viewers won't see this)"
+						style="
+							width: 100%;
+							padding: 0.5rem 0.75rem;
+							border: 1px solid #d1d5db;
+							border-radius: 0.375rem;
+							font-size: 0.875rem;
+						"
+					/>
+				</div>
+				
+				{#if overrideError}
+					<p style="color: {colors.error[600]}; font-size: {getTextStyle('body', 'sm').fontSize}; margin: 0;">
+						{overrideError}
+					</p>
+				{/if}
+				
+				<!-- Save Button -->
+				<div>
+					<Button 
+						variant="primary"
+						onclick={saveOverride}
+						disabled={isSavingOverride}
+						style="background: #f59e0b; color: white;"
+					>
+						{isSavingOverride ? 'Saving Override...' : 'Save Override'}
+					</Button>
+				</div>
+			</div>
+		</div>
+	</details>
 
 	<!-- Method Selection or Method-Specific UI -->
 	{#if showMethodSelection}
