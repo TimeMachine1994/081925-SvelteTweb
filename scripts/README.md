@@ -155,3 +155,106 @@ If you encounter issues:
 2. Verify Firebase project configurations
 3. Ensure proper permissions on both projects
 4. Review this README for troubleshooting steps
+
+---
+
+# Firebase Authentication Clearing Script
+
+This script allows you to bulk delete all users from Firebase Authentication instead of manually deleting them one by one.
+
+## ⚠️ WARNING
+
+**This script will DELETE ALL users from your Firebase Authentication database!**
+
+Only use this for:
+- Development/testing environments
+- Cleaning up test data
+- Resetting authentication for a fresh start
+
+**DO NOT run this on production unless you absolutely know what you're doing!**
+
+## Running the Script
+
+1. Make sure you're in the scripts directory:
+```bash
+cd scripts
+```
+
+2. Ensure dependencies are installed:
+```bash
+npm install
+```
+
+3. Make sure you have the service account file:
+   - The script uses `fir-tweb-service-account.json` from the parent directory
+   - See the Prerequisites section above for how to obtain this
+
+4. Run the script:
+```bash
+npm run clear-auth
+```
+
+## What the Script Does
+
+1. **Lists all users** in Firebase Authentication
+2. **Shows preview** of first 10 users and total count
+3. **Requires confirmation** - you must type "DELETE ALL" to proceed
+4. **Deletes users in batches** of 100 (Firebase limit)
+5. **Provides progress updates** for each batch
+6. **Reports summary** of successful/failed deletions
+
+## Example Output
+
+```
+🔥 Firebase Authentication User Deletion Script
+
+⚠️  WARNING: This will DELETE ALL users from Firebase Authentication!
+
+📋 Fetching all users...
+
+Found 45 users:
+
+  1. user1@example.com (John Doe) - UID: abc12345...
+  2. user2@example.com (Jane Smith) - UID: def67890...
+  3. test@example.com (Test User) - UID: ghi11223...
+  ... and 42 more users
+
+❓ Are you sure you want to delete ALL these users? Type "DELETE ALL" to confirm: DELETE ALL
+
+🗑️  Starting user deletion...
+
+Deleting batch 1/1 (45 users)...
+  ✅ Batch deleted successfully
+
+📊 DELETION SUMMARY
+==================
+Total users processed: 45
+Successfully deleted: 45
+Failed to delete: 0
+
+✅ All users deleted successfully!
+```
+
+## Safety Features
+
+- **Preview before deletion** - see what will be deleted
+- **Explicit confirmation** - must type exact phrase
+- **Batch processing** - handles large numbers of users
+- **Error tracking** - reports failed deletions
+- **Cancellation** - can cancel at confirmation prompt
+
+## Troubleshooting
+
+### Permission Errors
+- Ensure your service account has authentication admin privileges
+- Check Firebase IAM roles for the service account
+
+### Script Won't Run
+- Verify Node.js version (16 or higher)
+- Make sure firebase-admin is installed: `npm install`
+- Check that service account file path is correct
+
+### Partial Deletions
+- Some users may fail due to active sessions or locks
+- Re-run the script to attempt remaining deletions
+- Check Firebase Console for any users with special restrictions

@@ -4,7 +4,8 @@
   "type": "module",
   "description": "Migration scripts for TributeStream Firebase data",
   "scripts": {
-    "migrate-memorials": "node migrate-memorials.js"
+    "migrate-memorials": "node migrate-memorials.js",
+    "clear-auth": "node clear-firebase-auth.js"
   },
   "dependencies": {
     "firebase-admin": "^12.0.0"
