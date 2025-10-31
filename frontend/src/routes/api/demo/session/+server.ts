@@ -61,7 +61,7 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 				userAgent: request.headers.get('user-agent') || 'unknown',
 				entryPoint: metadata?.entryPoint || 'landing_page',
 				scenario: scenario,
-				referrer: metadata?.referrer
+				referrer: metadata?.referrer || null
 			}
 		};
 
