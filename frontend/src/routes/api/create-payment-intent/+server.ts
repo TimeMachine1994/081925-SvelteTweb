@@ -7,7 +7,7 @@ import { STRIPE_SECRET_KEY } from '$env/static/private';
 
 // Initialize Stripe with your secret key
 const stripe = new Stripe(STRIPE_SECRET_KEY, {
-	apiVersion: '2025-08-27.basil'
+	apiVersion: '2024-10-28.acacia'
 });
 
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -62,7 +62,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				quantity: item.quantity
 			})),
 			mode: 'payment',
-			success_url: `${request.headers.get('origin')}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+			success_url: `${request.headers.get('origin')}/payment/receipt?session_id={CHECKOUT_SESSION_ID}`,
 			cancel_url: `${request.headers.get('origin')}/schedule/${memorialId}`,
 			metadata: {
 				memorialId,

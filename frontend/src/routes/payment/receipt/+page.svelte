@@ -1,8 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
-	import { browser } from '$app/environment';
 	import {
 		CheckCircle,
 		Download,
@@ -14,90 +11,13 @@
 		CreditCard
 	} from 'lucide-svelte';
 
-	let receiptData: any = null;
-	let emailSent = false;
-	let sendingEmail = false;
-
-	// Load receipt data from URL params
-	onMount(async () => {
-		if (browser) {
-			const urlParams = new URLSearchParams(window.location.search);
-			const encodedData = urlParams.get('data');
-
-			if (encodedData) {
-				try {
-					receiptData = JSON.parse(decodeURIComponent(encodedData));
-					console.log('🧾 Receipt data loaded:', receiptData);
-
-					// Send confirmation email
-					await sendConfirmationEmail();
-
-					// Lock the schedule
-					await lockSchedule();
-				} catch (e) {
-					console.error('Failed to parse receipt data:', e);
-					goto('/my-portal');
-				}
-			} else {
-				goto('/my-portal');
-			}
-		}
-	});
-
-	async function sendConfirmationEmail() {
-		if (!receiptData) return;
-
-		sendingEmail = true;
-		try {
-			const response = await fetch('/api/send-confirmation-email', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					receiptData,
-					customerEmail: receiptData.customerInfo.email
-				})
-			});
-
-			if (response.ok) {
-				emailSent = true;
-				console.log('✅ Confirmation email sent successfully');
-			} else {
-				console.error('Failed to send confirmation email');
-			}
-		} catch (error) {
-			console.error('Error sending confirmation email:', error);
-		} finally {
-			sendingEmail = false;
-		}
-	}
-
-	async function lockSchedule() {
-		if (!receiptData) return;
-
-		try {
-			const response = await fetch('/api/lock-schedule', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					paymentIntentId: receiptData.paymentIntentId,
-					bookingData: receiptData.bookingData,
-					customerInfo: receiptData.customerInfo
-				})
-			});
-
-			if (response.ok) {
-				console.log('🔒 Schedule locked successfully');
-			} else {
-				console.error('Failed to lock schedule');
-			}
-		} catch (error) {
-			console.error('Error locking schedule:', error);
-		}
-	}
+	// Get data from page server load
+	let { data } = $props<{ data: any }>();
+	let receiptData = $state(data.receiptData);
+	
+	// Note: Email confirmation and payment processing handled by webhook
+	// This provides better reliability than client-side calls
+	console.log('📄 Receipt page loaded with data:', receiptData);
 
 	function formatCurrency(amount: number): string {
 		return new Intl.NumberFormat('en-US', {
@@ -182,22 +102,12 @@ Thank you for choosing Tributestream!
 					Your Tributestream service has been booked and confirmed
 				</p>
 
-				<!-- Email Status -->
+				<!-- Email Confirmation -->
 				<div class="mt-4 flex items-center justify-center space-x-2">
-					{#if sendingEmail}
-						<div
-							class="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent"
-						></div>
-						<span class="text-sm text-blue-600">Sending confirmation email...</span>
-					{:else if emailSent}
-						<Mail class="h-4 w-4 text-green-500" />
-						<span class="text-sm text-green-600"
-							>Confirmation email sent to {receiptData.customerInfo.email}</span
-						>
-					{:else}
-						<Mail class="h-4 w-4 text-gray-400" />
-						<span class="text-sm text-gray-500">Email confirmation pending</span>
-					{/if}
+					<Mail class="h-4 w-4 text-green-500" />
+					<span class="text-sm text-green-600"
+						>A confirmation email has been sent to {receiptData.customerInfo.email}</span
+					>
 				</div>
 			</div>
 

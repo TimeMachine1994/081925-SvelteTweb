@@ -204,6 +204,9 @@ export interface CreateDemoSessionResponse {
   /** Initial role assigned */
   initialRole: string;
   
+  /** Memorial slug if demo data was seeded */
+  memorialSlug?: string;
+  
   /** Error message if failed */
   error?: string;
 }

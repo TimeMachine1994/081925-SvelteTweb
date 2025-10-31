@@ -2,13 +2,17 @@ import { json } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
 import type { RequestHandler } from './$types';
 
-export const GET: RequestHandler = async () => {
+export const GET: RequestHandler = async ({ url }) => {
 	try {
-		// Load all memorials for client-side search
-		const memorialsRef = adminDb.collection('memorials');
+		const query = url.searchParams.get('q')?.toLowerCase().trim() || '';
+		
+		// CRITICAL: Only return public memorials for privacy/security
+		const memorialsRef = adminDb.collection('memorials')
+			.where('isPublic', '==', true);
+		
 		const snapshot = await memorialsRef.get();
 		
-		const memorials = snapshot.docs.map(doc => {
+		let memorials = snapshot.docs.map(doc => {
 			const data = doc.data();
 			return {
 				id: doc.id,
@@ -20,6 +24,20 @@ export const GET: RequestHandler = async () => {
 				createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt
 			};
 		});
+
+		// Optional server-side filtering if query provided
+		if (query.length >= 2) {
+			memorials = memorials.filter(memorial => {
+				const searchableText = [
+					memorial.lovedOneName,
+					memorial.creatorName,
+					memorial.birthDate,
+					memorial.deathDate
+				].filter(Boolean).join(' ').toLowerCase();
+				
+				return searchableText.includes(query);
+			});
+		}
 
 		return json({
 			memorials,

@@ -294,7 +294,7 @@
 										theme="minimal"
 										class="flex-1"
 									/>
-									<Button theme="minimal" class="bg-white text-gray-900 hover:bg-gray-100 flex items-center">
+									<Button theme="minimal" onclick={handleSearchTributes} class="bg-white text-gray-900 hover:bg-gray-100 flex items-center">
 										<Search class="h-4 w-4 mr-2" />
 										Search
 									</Button>

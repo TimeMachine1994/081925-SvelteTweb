@@ -3,13 +3,14 @@ import type { RequestHandler } from './$types';
 import Stripe from 'stripe';
 import { adminDb } from '$lib/firebase-admin';
 import { Timestamp, FieldValue } from 'firebase-admin/firestore';
-import { STRIPE_SECRET_KEY } from '$env/static/private';
+import { STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET } from '$env/static/private';
 
-// Use fallback for STRIPE_WEBHOOK_SECRET if not set
-const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
+if (!STRIPE_WEBHOOK_SECRET) {
+	console.error('⚠️ STRIPE_WEBHOOK_SECRET is not configured - webhook signature verification will fail');
+}
 
 const stripe = new Stripe(STRIPE_SECRET_KEY, {
-	apiVersion: '2023-10-16'
+	apiVersion: '2024-10-28.acacia'
 });
 
 export const POST: RequestHandler = async ({ request }) => {
@@ -31,7 +32,31 @@ export const POST: RequestHandler = async ({ request }) => {
 			return json({ error: 'Invalid signature' }, { status: 400 });
 		}
 
+		console.log(`🎯 [WEBHOOK] Received event: ${event.type}`);
+
 		switch (event.type) {
+			// Checkout Session events (primary payment flow)
+			case 'checkout.session.completed':
+				const session = event.data.object as Stripe.Checkout.Session;
+				await handleCheckoutSuccess(session);
+				break;
+
+			case 'checkout.session.async_payment_succeeded':
+				const asyncSession = event.data.object as Stripe.Checkout.Session;
+				await handleCheckoutSuccess(asyncSession);
+				break;
+
+			case 'checkout.session.async_payment_failed':
+				const failedSession = event.data.object as Stripe.Checkout.Session;
+				await handleCheckoutFailure(failedSession);
+				break;
+
+			case 'checkout.session.expired':
+				const expiredSession = event.data.object as Stripe.Checkout.Session;
+				console.log(`⏱️ [WEBHOOK] Checkout session expired: ${expiredSession.id}`);
+				break;
+
+			// Payment Intent events (for direct payment flows)
 			case 'payment_intent.succeeded':
 				const paymentIntent = event.data.object as Stripe.PaymentIntent;
 				await handlePaymentSuccess(paymentIntent);
@@ -48,7 +73,7 @@ export const POST: RequestHandler = async ({ request }) => {
 				break;
 
 			default:
-			// Unhandled event type
+				console.log(`ℹ️ [WEBHOOK] Unhandled event type: ${event.type}`);
 		}
 
 		return json({ received: true });
@@ -58,8 +83,122 @@ export const POST: RequestHandler = async ({ request }) => {
 	}
 };
 
+// NEW: Handle Checkout Session completion (primary payment flow)
+async function handleCheckoutSuccess(session: Stripe.Checkout.Session) {
+	try {
+		console.log('💳 [WEBHOOK] Processing checkout session:', session.id);
+
+		const memorialId = session.metadata?.memorialId;
+		const uid = session.metadata?.uid;
+
+		if (!memorialId || !uid) {
+			console.error('❌ [WEBHOOK] Missing metadata in checkout session:', { memorialId, uid });
+			return;
+		}
+
+		// Extract payment intent ID from session
+		const paymentIntentId =
+			typeof session.payment_intent === 'string'
+				? session.payment_intent
+				: session.payment_intent?.id;
+
+		// 1. Update Memorial - SET isPaid flag for payment restrictions
+		const memorialRef = adminDb.collection('memorials').doc(memorialId);
+		await memorialRef.update({
+			isPaid: true, // ✅ CRITICAL: Enable payment restrictions
+			paidAt: Timestamp.now(),
+			'calculatorConfig.status': 'paid',
+			'calculatorConfig.paidAt': Timestamp.now(),
+			'calculatorConfig.checkoutSessionId': session.id,
+			'calculatorConfig.paymentIntentId': paymentIntentId,
+			'calculatorConfig.lastModified': Timestamp.now(),
+			paymentHistory: FieldValue.arrayUnion({
+				checkoutSessionId: session.id,
+				paymentIntentId: paymentIntentId,
+				status: 'succeeded',
+				amount: session.amount_total ? session.amount_total / 100 : 0,
+				paidAt: Timestamp.now(),
+				createdBy: uid
+			})
+		});
+
+		console.log('✅ [WEBHOOK] Memorial updated:', memorialId);
+
+		// 2. Update User - SET hasPaidForMemorial flag ✅
+		const userRef = adminDb.collection('users').doc(uid);
+		await userRef.update({
+			hasPaidForMemorial: true, // ✅ CRITICAL: Allow creating additional memorials
+			lastPaymentDate: Timestamp.now()
+		});
+
+		console.log('✅ [WEBHOOK] User payment status updated:', uid);
+
+		// 3. Send confirmation email
+		await sendConfirmationEmail({
+			memorialId,
+			checkoutSessionId: session.id,
+			paymentIntentId: paymentIntentId,
+			customerEmail: session.customer_details?.email || session.metadata?.customerEmail,
+			lovedOneName: session.metadata?.lovedOneName,
+			amount: session.amount_total ? session.amount_total / 100 : 0
+		});
+
+		console.log('✅ [WEBHOOK] Confirmation email sent');
+	} catch (error) {
+		console.error('❌ [WEBHOOK] Failed to handle checkout success:', error);
+		throw error; // Re-throw to trigger Stripe retry
+	}
+}
+
+// NEW: Handle Checkout Session failure
+async function handleCheckoutFailure(session: Stripe.Checkout.Session) {
+	try {
+		console.log('❌ [WEBHOOK] Processing failed checkout session:', session.id);
+
+		const memorialId = session.metadata?.memorialId;
+		const uid = session.metadata?.uid;
+
+		if (!memorialId) {
+			console.error('❌ [WEBHOOK] Missing memorialId in failed checkout session');
+			return;
+		}
+
+		const memorialRef = adminDb.collection('memorials').doc(memorialId);
+		await memorialRef.update({
+			'calculatorConfig.status': 'payment_failed',
+			'calculatorConfig.paymentFailedAt': Timestamp.now(),
+			'calculatorConfig.checkoutSessionId': session.id,
+			'calculatorConfig.lastModified': Timestamp.now(),
+			paymentHistory: FieldValue.arrayUnion({
+				checkoutSessionId: session.id,
+				status: 'failed',
+				amount: session.amount_total ? session.amount_total / 100 : 0,
+				failedAt: Timestamp.now(),
+				failureReason: 'Checkout session payment failed',
+				createdBy: uid
+			})
+		});
+
+		// Send failure notification email
+		await sendPaymentFailureEmail({
+			memorialId,
+			checkoutSessionId: session.id,
+			customerEmail: session.customer_details?.email || session.metadata?.customerEmail,
+			lovedOneName: session.metadata?.lovedOneName,
+			failureReason: 'Payment was not completed successfully'
+		});
+
+		console.log('✅ [WEBHOOK] Failure handling complete');
+	} catch (error) {
+		console.error('❌ [WEBHOOK] Failed to handle checkout failure:', error);
+	}
+}
+
+// EXISTING: Handle Payment Intent success (for direct payment flows)
 async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
 	try {
+		console.log('💳 [WEBHOOK] Processing payment intent:', paymentIntent.id);
+
 		const memorialId = paymentIntent.metadata.memorialId;
 		const uid = paymentIntent.metadata.uid;
 
@@ -71,6 +210,8 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
 		const memorialRef = adminDb.collection('memorials').doc(memorialId);
 
 		await memorialRef.update({
+			isPaid: true, // ✅ Also set isPaid for payment intent flows
+			paidAt: Timestamp.now(),
 			'calculatorConfig.status': 'paid',
 			'calculatorConfig.paidAt': Timestamp.now(),
 			'calculatorConfig.paymentIntentId': paymentIntent.id,
@@ -83,6 +224,15 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
 				createdBy: uid
 			})
 		});
+
+		// Update user payment status
+		if (uid) {
+			const userRef = adminDb.collection('users').doc(uid);
+			await userRef.update({
+				hasPaidForMemorial: true,
+				lastPaymentDate: Timestamp.now()
+			});
+		}
 
 		await sendConfirmationEmail({
 			memorialId,

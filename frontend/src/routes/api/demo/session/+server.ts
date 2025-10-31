@@ -7,6 +7,7 @@ import type {
 	CreateDemoSessionResponse,
 	DemoUser
 } from '$lib/types/demo';
+import { seedDemoScenario } from '$lib/server/demo/seedData';
 
 /**
  * POST /api/demo/session
@@ -68,7 +69,29 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 		await adminDb.collection('demoSessions').doc(sessionId).set(sessionData);
 		console.log('[DEMO_SESSION] Session document created in Firestore');
 
-		// 6. Generate custom token for initial role (funeral director)
+		// 6. Seed demo data based on scenario
+		console.log('[DEMO_SESSION] Seeding demo data for scenario:', scenario);
+		let memorialSlug: string | null = null;
+		try {
+			const seedResult = await seedDemoScenario(
+				scenario,
+				sessionId,
+				demoUsers.owner.uid // Memorial owned by the demo owner user
+			);
+			memorialSlug = seedResult.slug;
+			console.log('[DEMO_SESSION] Demo data seeded successfully. Memorial slug:', memorialSlug);
+			
+			// Update session with memorial info
+			await adminDb.collection('demoSessions').doc(sessionId).update({
+				memorialId: seedResult.memorialId,
+				memorialSlug: memorialSlug
+			});
+		} catch (seedError: any) {
+			console.error('[DEMO_SESSION] ⚠️ Warning: Failed to seed demo data:', seedError.message);
+			// Continue even if seeding fails - users can still explore the platform
+		}
+
+		// 7. Generate custom token for initial role (funeral director)
 		const initialUser = demoUsers.funeral_director;
 		const customToken = await adminAuth.createCustomToken(initialUser.uid, {
 			role: 'funeral_director',
@@ -77,13 +100,14 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 		});
 		console.log('[DEMO_SESSION] Custom token generated for initial login');
 
-		// 7. Return success response
+		// 8. Return success response
 		const response: CreateDemoSessionResponse = {
 			success: true,
 			sessionId,
 			customToken,
 			expiresAt: expiresAt.toISOString(),
-			initialRole: 'funeral_director'
+			initialRole: 'funeral_director',
+			memorialSlug: memorialSlug || undefined // Include memorial slug for redirect
 		};
 
 		console.log('[DEMO_SESSION] ✅ Session created successfully');

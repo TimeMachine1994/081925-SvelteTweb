@@ -10,6 +10,7 @@
 	// State using SvelteKit 5 runes
 	let searchQuery = $state(query);
 	let searchResults = $state<Memorial[]>([]);
+	let isSearching = $state(false);
 	const theme = getTheme('minimal');
 
 	// Debug: Check if data is loading
@@ -17,9 +18,11 @@
 
 	function performSearch(searchTerm: string) {
 		console.log('🔎 performSearch called with:', searchTerm);
+		isSearching = true;
 		
 		if (searchTerm.length < 2) {
 			searchResults = [];
+			isSearching = false;
 			console.log('❌ Search term too short');
 			return;
 		}
@@ -27,20 +30,28 @@
 		if (!memorials || memorials.length === 0) {
 			console.error('❌ No memorials available:', memorials?.length);
 			searchResults = [];
+			isSearching = false;
 			return;
 		}
 
-		// Simple client-side search by loved one's name
+		// Enhanced client-side search across multiple fields
 		const query = searchTerm.toLowerCase().trim();
 		const filtered = memorials.filter((memorial: Memorial) => {
-			const name = memorial.lovedOneName?.toLowerCase();
-			const matches = name?.includes(query);
+			// Search across name, creator, and dates
+			const searchableText = [
+				memorial.lovedOneName,
+				memorial.creatorName,
+				memorial.birthDate,
+				memorial.deathDate
+			].filter(Boolean).join(' ').toLowerCase();
+			
+			const matches = searchableText.includes(query);
 			if (matches) console.log('✅ Match:', memorial.lovedOneName);
 			return matches;
 		});
 
 		searchResults = filtered.sort((a: Memorial, b: Memorial) => {
-			// Sort by relevance: exact matches first, then partial matches
+			// Sort by relevance: exact name matches first, then partial matches
 			const aName = a.lovedOneName?.toLowerCase() || '';
 			const bName = b.lovedOneName?.toLowerCase() || '';
 			
@@ -51,7 +62,14 @@
 			return aName.localeCompare(bName);
 		});
 		
+		isSearching = false;
 		console.log('🎯 Search results:', searchResults.length);
+	}
+
+	function handleKeyPress(event: KeyboardEvent) {
+		if (event.key === 'Enter' && searchQuery.length >= 2) {
+			performSearch(searchQuery);
+		}
 	}
 
 	// SvelteKit 5 reactive effect with proper dependency tracking
@@ -72,13 +90,20 @@
 	<div class="mx-auto max-w-2xl">
 		<input
 			type="text"
-			placeholder="Search for a loved one..."
-			class="w-full rounded-md border border-gray-300 px-4 py-3 text-lg"
+			placeholder="Search by name, date, or creator..."
+			class="w-full rounded-md border border-gray-300 px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-[#D5BA7F] focus:border-transparent"
 			bind:value={searchQuery}
+			onkeypress={handleKeyPress}
+			aria-label="Search memorials"
 		/>
 
 		<div class="mt-8">
-			{#if searchResults.length > 0}
+			{#if isSearching}
+				<div class="text-center py-8">
+					<div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#D5BA7F]"></div>
+					<p class="text-gray-600 mt-4">Searching...</p>
+				</div>
+			{:else if searchResults.length > 0}
 				<div class="mb-4 text-sm text-gray-600">
 					Found {searchResults.length} memorial{searchResults.length === 1 ? '' : 's'}
 				</div>
@@ -105,12 +130,24 @@
 					{/each}
 				</ul>
 			{:else if searchQuery.length >= 2}
-				<div class="text-center py-8">
-					<p class="text-gray-600 mb-2">No memorials found for "{searchQuery}"</p>
-					<p class="text-sm text-gray-500">Try searching with a different name or check the spelling</p>
+				<div class="text-center py-12">
+					<div class="text-5xl mb-4">🔍</div>
+					<p class="text-xl text-gray-700 mb-2">No memorials found</p>
+					<p class="text-gray-600 mb-4">No public memorials match "{searchQuery}"</p>
+					<p class="text-sm text-gray-500">Try searching with:
+						<br>• A different name or spelling
+						<br>• The creator's name
+						<br>• Birth or death dates
+					</p>
 				</div>
 			{:else if searchQuery.length === 1}
-				<p class="text-center text-gray-500 py-4">Type at least 2 characters to search</p>
+				<div class="text-center py-8">
+					<p class="text-gray-500">Type at least 2 characters to search</p>
+				</div>
+			{:else if memorials.length === 0}
+				<div class="text-center py-12">
+					<p class="text-gray-600">No public memorials available at this time.</p>
+				</div>
 			{/if}
 		</div>
 	</div>
