@@ -15,8 +15,8 @@ export const SENDGRID_TEMPLATES = {
 	PAYMENT_CONFIRMATION: env.SENDGRID_TEMPLATE_PAYMENT_CONFIRMATION || 'placeholder',
 	PAYMENT_ACTION_REQUIRED: env.SENDGRID_TEMPLATE_PAYMENT_ACTION || 'placeholder',
 	PAYMENT_FAILURE: env.SENDGRID_TEMPLATE_PAYMENT_FAILURE || 'placeholder',
-	SENDGRID_TEMPLATE_CONTACT_SUPPORT: env.SENDGRID_TEMPLATE_CONTACT_SUPPORT || 'placeholder',
-	SENDGRID_TEMPLATE_CONTACT_CONFIRMATION: env.SENDGRID_TEMPLATE_CONTACT_CONFIRMATION || 'placeholder',
+	CONTACT_SUPPORT: env.SENDGRID_TEMPLATE_CONTACT_SUPPORT || 'placeholder',
+	CONTACT_CONFIRMATION: env.SENDGRID_TEMPLATE_CONTACT_CONFIRMATION || 'placeholder',
 	PASSWORD_RESET: env.SENDGRID_TEMPLATE_PASSWORD_RESET || 'placeholder'
 };
 
@@ -446,8 +446,8 @@ export async function sendContactFormEmails(data: ContactFormData) {
 	// Step 2: Log Template IDs
 	console.log('[EMAIL] 📝 Step 2: Checking Template IDs...');
 	console.log('[EMAIL] Template Configuration:', {
-		support: SENDGRID_TEMPLATES.SENDGRID_TEMPLATE_CONTACT_SUPPORT,
-		confirmation: SENDGRID_TEMPLATES.SENDGRID_TEMPLATE_CONTACT_CONFIRMATION
+		support: SENDGRID_TEMPLATES.CONTACT_SUPPORT,
+		confirmation: SENDGRID_TEMPLATES.CONTACT_CONFIRMATION
 	});
 
 	// Step 3: Validate Templates
@@ -466,7 +466,7 @@ export async function sendContactFormEmails(data: ContactFormData) {
 	const supportMsg = {
 		to: 'austinbryanfilm@gmail.com',
 		from: FROM_EMAIL,
-		templateId: SENDGRID_TEMPLATES.SENDGRID_TEMPLATE_CONTACT_SUPPORT,
+		templateId: SENDGRID_TEMPLATES.CONTACT_SUPPORT,
 		dynamicTemplateData: {
 			name: data.name,
 			email: data.email,
@@ -488,7 +488,7 @@ export async function sendContactFormEmails(data: ContactFormData) {
 	const confirmationMsg = {
 		to: data.email,
 		from: FROM_EMAIL,
-		templateId: SENDGRID_TEMPLATES.SENDGRID_TEMPLATE_CONTACT_CONFIRMATION,
+		templateId: SENDGRID_TEMPLATES.CONTACT_CONFIRMATION,
 		dynamicTemplateData: {
 			name: data.name,
 			subject: data.subject,
@@ -623,7 +623,7 @@ export function validateTemplateConfiguration(): { valid: boolean; missing: stri
  */
 export function validateContactFormTemplates(): { valid: boolean; missing: string[] } {
 	const missing: string[] = [];
-	const requiredTemplates = ['SENDGRID_TEMPLATE_CONTACT_SUPPORT', 'SENDGRID_TEMPLATE_CONTACT_CONFIRMATION'];
+	const requiredTemplates = ['CONTACT_SUPPORT', 'CONTACT_CONFIRMATION'];
 	
 	requiredTemplates.forEach(key => {
 		const templateId = SENDGRID_TEMPLATES[key as keyof typeof SENDGRID_TEMPLATES];
