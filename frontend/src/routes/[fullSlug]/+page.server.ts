@@ -154,6 +154,11 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 					peakViewerCount: typeof data.peakViewerCount === 'number' ? data.peakViewerCount : null,
 					totalViews: typeof data.totalViews === 'number' ? data.totalViews : null,
 
+					// Emergency Override fields
+					overrideEmbedCode: data.overrideEmbedCode || null,
+					overrideActive: data.overrideActive || false,
+					overrideNote: data.overrideNote || null,
+
 					// Metadata with defensive handling
 					createdBy: data.createdBy || '',
 					createdAt: convertTimestamp(data.createdAt) || new Date().toISOString(),
