@@ -518,7 +518,7 @@
 
 	.override-video {
 		width: 100%;
-		max-width: 33.333%; /* 1/3 of screen width */
+		max-width: 66.666%; /* 2/3 of screen width */
 		margin: 0 auto;
 	}
 
