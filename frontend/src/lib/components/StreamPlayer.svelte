@@ -330,28 +330,34 @@
 
 <!-- Live Streams Section -->
 {#if categorizedStreams.liveStreams.length > 0}
-	<div class="stream-section live-section">
-		<h2 class="section-title live-title">🔴 Live Memorial Services</h2>
-		{#each categorizedStreams.liveStreams as stream (stream.id)}
-			{@const streamUrl = getStreamPlayerUrl(stream)}
-			<div class="stream-card live-card">
-				<div class="stream-header">
-					<h3 class="stream-title">{stream.title}</h3>
-					<div class="live-indicator">
-						<span class="live-dot"></span>
-						LIVE
-					</div>
+	{#each categorizedStreams.liveStreams as stream (stream.id)}
+		{#if stream.overrideEmbedCode && stream.overrideActive}
+			<!-- Emergency Override: Minimal, centered layout -->
+			<div class="override-container">
+				<div class="override-video">
+					{@html stream.overrideEmbedCode}
 				</div>
+			</div>
+		{:else}
+			<!-- Normal stream layout -->
+			{@const streamUrl = getStreamPlayerUrl(stream)}
+			<div class="stream-section live-section">
+				<h2 class="section-title live-title">🔴 Live Memorial Services</h2>
+				<div class="stream-card live-card">
+					<div class="stream-header">
+						<h3 class="stream-title">{stream.title}</h3>
+						<div class="live-indicator">
+							<span class="live-dot"></span>
+							LIVE
+						</div>
+					</div>
 
-				{#if stream.description}
-					<p class="stream-description">{stream.description}</p>
-				{/if}
+					{#if stream.description}
+						<p class="stream-description">{stream.description}</p>
+					{/if}
 
-				<div class="video-container themed-player">
-					{#if stream.overrideEmbedCode && stream.overrideActive}
-						<!-- Emergency override - seamless to viewers, no indicators -->
-						{@html stream.overrideEmbedCode}
-					{:else if streamUrl}
+					<div class="video-container themed-player">
+						{#if streamUrl}
 						<div class="video-player-wrapper">
 							<iframe
 								src={streamUrl}
@@ -372,24 +378,25 @@
 								</div>
 							</div>
 						</div>
-					{:else}
-						<div class="stream-placeholder">
-							<Play class="placeholder-icon" />
-							<p>Stream starting soon...</p>
-							<p class="debug-info">Debug: No playback URL found</p>
+						{:else}
+							<div class="stream-placeholder">
+								<Play class="placeholder-icon" />
+								<p>Stream starting soon...</p>
+								<p class="debug-info">Debug: No playback URL found</p>
+							</div>
+						{/if}
+					</div>
+
+					{#if stream.viewerCount !== undefined}
+						<div class="stream-info">
+							<Users class="info-icon" />
+							<span>{stream.viewerCount} viewers</span>
 						</div>
 					{/if}
 				</div>
-
-				{#if stream.viewerCount !== undefined}
-					<div class="stream-info">
-						<Users class="info-icon" />
-						<span>{stream.viewerCount} viewers</span>
-					</div>
-				{/if}
 			</div>
-		{/each}
-	</div>
+		{/if}
+	{/each}
 {/if}
 
 <!-- Scheduled Streams Section -->
@@ -500,6 +507,30 @@
 {/if}
 
 <style>
+	/* Emergency Override: Minimal centered layout */
+	.override-container {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding: 2rem 0;
+		min-height: 400px;
+	}
+
+	.override-video {
+		width: 100%;
+		max-width: 33.333%; /* 1/3 of screen width */
+		margin: 0 auto;
+	}
+
+	.override-video :global(iframe),
+	.override-video :global(video) {
+		width: 100%;
+		height: auto;
+		aspect-ratio: 16/9;
+		border-radius: 8px;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	}
+
 	.stream-section {
 		margin-bottom: 3rem;
 	}
@@ -893,6 +924,11 @@
 	}
 
 	@media (max-width: 768px) {
+		/* Override video takes more space on mobile */
+		.override-video {
+			max-width: 90%;
+		}
+
 		.stream-card {
 			padding: 1rem;
 		}
