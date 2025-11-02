@@ -36,6 +36,8 @@
 	let isCreatingMemorial = $state(false);
 	let showScheduleModal = $state(false);
 	let selectedMemorial = $state(null);
+	let showPaymentNotification = $state(false);
+	let paymentMemorialId = $state('');
 	let scheduleForm = $state({
 		serviceDate: '',
 		serviceTime: '',
@@ -748,7 +750,15 @@
 
 						return async ({ result, update }) => {
 							isCreatingMemorial = false;
-							await update();
+							
+							// Check if payment is needed
+							if (result.type === 'failure' && result.data?.needsPayment) {
+								showCreateMemorialModal = false;
+								paymentMemorialId = result.data.memorialId || '';
+								showPaymentNotification = true;
+							} else {
+								await update();
+							}
 						};
 					}}
 				>
@@ -828,6 +838,84 @@
 	</div>
 {/if}
 
+<!-- Payment Notification Modal -->
+{#if showPaymentNotification}
+	<div class="bg-opacity-50 fixed inset-0 z-50 h-full w-full overflow-y-auto bg-gray-600">
+		<div
+			class="relative top-20 mx-auto w-96 rounded-3xl border bg-white/90 p-5 shadow-lg backdrop-blur-xl"
+		>
+			<div class="mt-3">
+				<div class="mb-6 flex items-center justify-between">
+					<h3 class="flex items-center text-xl font-bold text-gray-900">
+						<Heart class="mr-3 h-6 w-6 text-amber-600" />
+						Complete Payment Required
+					</h3>
+					<button
+						onclick={() => (showPaymentNotification = false)}
+						class="text-gray-400 transition-colors hover:text-gray-600"
+						aria-label="Close modal"
+					>
+						<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M6 18L18 6M6 6l12 12"
+							></path>
+						</svg>
+					</button>
+				</div>
+
+				<div class="space-y-6">
+					<div class="rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-6">
+						<div class="mb-4 flex items-center justify-center">
+							<div class="h-16 w-16 rounded-full bg-amber-100 flex items-center justify-center">
+								<Clock class="h-8 w-8 text-amber-600" />
+							</div>
+						</div>
+						<h4 class="mb-3 text-center text-lg font-semibold text-gray-900">
+							Finish Setting Up Your First Memorial
+						</h4>
+						<p class="text-center text-gray-700">
+							Before you can create another memorial, please complete the checkout process for your first memorial.
+						</p>
+					</div>
+
+					<div class="rounded-xl border border-blue-200 bg-blue-50 p-4">
+						<h4 class="mb-2 font-semibold text-blue-900">What you'll do next:</h4>
+						<ul class="space-y-1 text-sm text-blue-800">
+							<li>• Review your service details and schedule</li>
+							<li>• Choose your memorial package</li>
+							<li>• Complete the checkout process</li>
+							<li>• Then you can create additional memorials</li>
+						</ul>
+					</div>
+
+					<div class="flex justify-end space-x-3 pt-4">
+						<Button
+							variant="secondary"
+							size="md"
+							onclick={() => (showPaymentNotification = false)}
+							rounded="lg"
+						>
+							Cancel
+						</Button>
+						<a href={`/schedule/${paymentMemorialId}`}>
+							<Button
+								variant="role"
+								role="owner"
+								size="md"
+								rounded="lg"
+							>
+								Go to Schedule & Payment
+							</Button>
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+{/if}
 
 <style>
 	@keyframes fade-in-up {

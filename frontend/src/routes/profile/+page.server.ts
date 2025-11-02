@@ -183,8 +183,19 @@ export const actions: Actions = {
 		const userData = userDoc.data();
 
 		if (userData?.memorialCount > 0 && !userData?.hasPaidForMemorial) {
+			// Get the first memorial to redirect user to payment
+			const memorialsSnap = await adminDb
+				.collection('memorials')
+				.where('ownerUid', '==', locals.user.uid)
+				.limit(1)
+				.get();
+			
+			const firstMemorialId = memorialsSnap.docs[0]?.id;
+			
 			return fail(400, {
-				message: 'You must complete payment for your existing memorial before creating a new one.'
+				message: 'You must complete payment for your existing memorial before creating a new one.',
+				needsPayment: true,
+				memorialId: firstMemorialId
 			});
 		}
 
