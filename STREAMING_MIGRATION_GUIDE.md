@@ -1,46 +1,38 @@
 # Streaming Methods Migration Guide
 
-**Version:** 2.0  
-**Date:** October 29, 2025  
-**Breaking Changes:** None (fully backward compatible)
+**Version:** 3.0  
+**Date:** November 1, 2025  
+**Breaking Changes:** Method selection now required for all streams
 
 ---
 
 ## 🎯 Overview
 
-This guide helps migrate from the old single-method streaming system to the new multi-method streaming architecture.
+This guide explains the new multi-method streaming architecture and how existing streams are affected.
 
-**Good News:** Migration is **100% optional** - existing streams continue working without any changes!
+**Important:** All streams (new and existing) must select a streaming method to be used.
 
 ---
 
 ## 🔄 What Changed?
 
-### **Before (Single Method)**
+### **Stream Data Model**
 ```typescript
 Stream {
-  rtmpUrl: string
-  streamKey: string
-  // Only RTMP streaming supported
-}
-```
-
-### **After (Three Methods)**
-```typescript
-Stream {
-  streamingMethod?: 'obs' | 'phone-to-obs' | 'phone-to-mux'
-  methodConfigured?: boolean
+  streamingMethod: 'obs' | 'phone-to-obs' | 'phone-to-mux'  // REQUIRED
+  methodConfigured: boolean  // REQUIRED (must be true)
   
-  // OBS Method (same as before)
+  // OBS Method fields
   rtmpUrl?: string
   streamKey?: string
+  cloudflareInputId?: string
   
-  // Phone to OBS Method
+  // Phone to OBS Method fields
   phoneSourceStreamId?: string
   phoneSourcePlaybackUrl?: string
   phoneSourceWhipUrl?: string
   
-  // Phone to MUX Method
+  // Phone to MUX Method fields
   muxStreamId?: string
   muxStreamKey?: string
   muxPlaybackId?: string
@@ -50,54 +42,56 @@ Stream {
 
 ---
 
-## ✅ Backward Compatibility
+## 🚨 Breaking Changes
 
-### **Existing Streams Automatically Work**
+### **No Automatic Method Detection**
 
-The system detects legacy streams using this logic:
-
+**Before (Removed):**
 ```typescript
-// Legacy stream detection
-const isLegacyStream = 
-  !stream.methodConfigured && 
-  stream.rtmpUrl && 
-  stream.streamKey;
-
-// Legacy streams automatically treated as OBS method
-const effectiveStreamingMethod = 
-  stream.streamingMethod || (isLegacyStream ? 'obs' : undefined);
+// ❌ Legacy detection removed
+const isLegacyStream = !stream.methodConfigured && stream.rtmpUrl;
+const effectiveMethod = stream.streamingMethod || (isLegacyStream ? 'obs' : undefined);
 ```
 
-**Result:** Old streams display OBS credentials UI without requiring any updates.
+**After (Current):**
+```typescript
+// ✅ Method selection required
+const showMethodSelection = !stream.methodConfigured;
+
+// Only render UI after method is selected
+if (stream.streamingMethod === 'obs') {
+  // Show OBS UI
+}
+```
 
 ---
 
-## 📊 Migration Scenarios
+## 📊 Migration Path
 
-### **Scenario 1: Do Nothing (Recommended)**
-
-**Best for:** Existing deployments with active streams
-
-**Action Required:** None
+### **For Existing Streams Without Method**
 
 **What Happens:**
-- Existing streams continue working
-- Users see OBS credentials as before
-- New streams get method selection
-- Old and new streams coexist peacefully
+- Stream card shows method selection UI
+- User must click one of the three method buttons:
+  - 💻 **OBS** - Professional streaming
+  - 📱➡️💻 **Phone to OBS** - Phone as camera
+  - 📱 **Phone to MUX** - Direct phone streaming
+- After selection, stream is configured and ready to use
 
-**Pros:**
-- ✅ Zero risk
-- ✅ No downtime
-- ✅ No user impact
-
-**Cons:**
-- ⚠️ Existing streams don't get new features
-- ⚠️ Database inconsistency (some streams have method, some don't)
+**Database Update:**
+```typescript
+// When user selects a method
+await updateStream(streamId, {
+  streamingMethod: 'obs',  // or 'phone-to-obs' or 'phone-to-mux'
+  methodConfigured: true
+});
+```
 
 ---
 
-### **Scenario 2: Explicit Migration Script**
+## ✅ Migration Script (Optional)
+
+### **Auto-Migrate Existing Streams to OBS**
 
 **Best for:** Clean data model, want consistent database
 
@@ -171,33 +165,7 @@ node migrate-streaming-methods.js
 
 ---
 
-### **Scenario 3: Gradual Migration**
-
-**Best for:** Risk-averse deployments, prefer organic transition
-
-**Action Required:** Let users migrate naturally
-
-**What Happens:**
-1. Deploy new code
-2. Existing streams work as-is (legacy mode)
-3. Users create new streams → get method selection
-4. Users can manually recreate old streams with new methods if desired
-5. Over time, more streams use new system
-
-**Timeline:** Months to years for complete migration
-
-**Pros:**
-- ✅ Zero risk
-- ✅ Users choose when to adopt
-- ✅ Natural transition
-
-**Cons:**
-- ⚠️ Long migration period
-- ⚠️ Mixed system for extended time
-
----
-
-## 🔧 Migration Steps (Scenario 2)
+## 🔧 Migration Steps
 
 ### **Step 1: Backup Database**
 

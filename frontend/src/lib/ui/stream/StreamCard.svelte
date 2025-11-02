@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Card, Button } from '../index.js';
 	import StreamHeader from './StreamHeader.svelte';
-	import StreamCredentials from './StreamCredentials.svelte';
 	import OBSMethodUI from './methods/OBSMethodUI.svelte';
 	import PhoneToOBSMethodUI from './methods/PhoneToOBSMethodUI.svelte';
 	import PhoneToMUXMethodUI from './methods/PhoneToMUXMethodUI.svelte';
@@ -21,13 +20,8 @@
 
 	let { stream, onCopy, copiedStreamKey, copiedRtmpUrl }: Props = $props();
 
-	// Backward compatibility: If stream has RTMP credentials but no method configured,
-	// assume it's OBS method (existing streams before method selection was added)
-	const isLegacyStream = !stream.methodConfigured && stream.rtmpUrl && stream.streamKey;
-	const effectiveStreamingMethod = stream.streamingMethod || (isLegacyStream ? 'obs' : undefined);
-	
 	// Method selection state
-	let showMethodSelection = $state(!stream.methodConfigured && !isLegacyStream);
+	let showMethodSelection = $state(!stream.methodConfigured);
 	let isConfiguringMethod = $state(false);
 	let configError = $state('');
 
@@ -434,32 +428,64 @@
 		</div>
 	{:else}
 		<!-- Method-Specific UI -->
-		{#if effectiveStreamingMethod === 'obs'}
+		{#if stream.streamingMethod === 'obs'}
 			<OBSMethodUI 
 				{stream} 
 				{onCopy} 
 				{copiedStreamKey} 
 				{copiedRtmpUrl} 
 			/>
-		{:else if effectiveStreamingMethod === 'phone-to-obs'}
+		{:else if stream.streamingMethod === 'phone-to-obs'}
 			<PhoneToOBSMethodUI 
 				{stream} 
 				{onCopy} 
 				{copiedStreamKey} 
 				{copiedRtmpUrl} 
 			/>
-		{:else if effectiveStreamingMethod === 'phone-to-mux'}
+		{:else if stream.streamingMethod === 'phone-to-mux'}
 			<PhoneToMUXMethodUI {stream} />
-		{:else}
-			<!-- Fallback to old credentials UI for backward compatibility -->
-			<StreamCredentials 
-				{stream} 
-				{onCopy} 
-				{copiedStreamKey} 
-				{copiedRtmpUrl} 
-			/>
 		{/if}
 	{/if}
+
+	<!-- Action Buttons at Bottom -->
+	<div 
+		class="stream-actions-footer"
+		style="
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: {getSemanticSpacing('component', 'md')};
+			padding: {getSemanticSpacing('card', 'padding')['lg']};
+			border-top: 1px solid {colors.border.primary};
+			background: {colors.background.secondary};
+		"
+	>
+		<Button
+			variant="outline"
+			size="lg"
+			fullWidth
+			onclick={() => console.log('Phone to MUX clicked')}
+		>
+			Phone to MUX
+		</Button>
+		
+		<Button
+			variant="outline"
+			size="lg"
+			fullWidth
+			onclick={() => console.log('Phone to OBS clicked')}
+		>
+			Phone to OBS
+		</Button>
+		
+		<Button
+			variant="outline"
+			size="lg"
+			fullWidth
+			onclick={() => console.log('OBS clicked')}
+		>
+			OBS
+		</Button>
+	</div>
 </Card>
 
 <!-- Edit Schedule Modal -->

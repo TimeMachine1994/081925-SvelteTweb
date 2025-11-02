@@ -206,33 +206,6 @@
 
 ---
 
-### **Backward Compatibility**
-
-#### TC-BC-01: Legacy Stream (No Method Field)
-- [ ] Find existing stream created before refactor
-- [ ] Stream has `rtmpUrl` and `streamKey` but no `methodConfigured`
-- [ ] Navigate to stream page
-- [ ] **Expected:** Stream detected as legacy OBS stream
-- [ ] **Expected:** OBS credentials UI displayed (not method selection)
-- [ ] **Expected:** Functions identically to new OBS method
-
-#### TC-BC-02: Legacy Stream - Functionality
-- [ ] Use legacy stream credentials in OBS
-- [ ] Start streaming
-- [ ] **Expected:** Stream works normally
-- [ ] **Expected:** Live indicator appears
-- [ ] **Expected:** Recording works
-- [ ] **Expected:** No errors or warnings
-
-#### TC-BC-03: Migrating Legacy Stream
-- [ ] Legacy stream working
-- [ ] Create new stream
-- [ ] **Expected:** New stream has method selection
-- [ ] **Expected:** Old stream still works without changes
-- [ ] **Expected:** Both streams coexist peacefully
-
----
-
 ### **API & Backend**
 
 #### TC-API-01: Stream Creation with Method
@@ -454,9 +427,8 @@ Priority tests that MUST work before production:
 2. ✅ **TC-OBS-03:** OBS streaming works end-to-end
 3. ✅ **TC-P2O-06:** Phone to OBS complete workflow
 4. ✅ **TC-P2M-02:** Phone to MUX streaming works
-5. ✅ **TC-BC-01:** Legacy streams still work
-6. ✅ **TC-API-01:** Stream creation API works
-7. ✅ **TC-ERR-04:** Graceful degradation without MUX
+5. ✅ **TC-API-01:** Stream creation API works
+6. ✅ **TC-ERR-04:** Graceful degradation without MUX
 
 If any of these fail, **DO NOT DEPLOY TO PRODUCTION**.
 
@@ -467,7 +439,6 @@ If any of these fail, **DO NOT DEPLOY TO PRODUCTION**.
 - [ ] All critical path tests pass
 - [ ] No console errors in browser
 - [ ] No server errors in logs
-- [ ] Backward compatibility verified
 - [ ] All three methods tested end-to-end
 - [ ] Mobile responsiveness confirmed
 - [ ] Error handling works properly

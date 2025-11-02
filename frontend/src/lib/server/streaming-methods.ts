@@ -64,6 +64,14 @@ export async function setupPhoneToOBSMethod(): Promise<PhoneToOBSMethodConfig> {
 			throw new Error('CLOUDFLARE_ACCOUNT_ID not configured');
 		}
 
+		if (!phoneInput.webRTC) {
+			throw new Error('Cloudflare input missing WebRTC configuration');
+		}
+
+		if (!phoneInput.webRTC.url) {
+			throw new Error('Cloudflare input missing WebRTC URL - WHIP not enabled');
+		}
+
 		const config: PhoneToOBSMethodConfig = {
 			obsDestination: {
 				rtmpUrl: obsInput.rtmps.url,
@@ -93,73 +101,83 @@ export async function setupPhoneToOBSMethod(): Promise<PhoneToOBSMethodConfig> {
 
 /**
  * Setup Phone to MUX Method
- * Creates Cloudflare live input for phone streaming and MUX for recording backup
+ * Creates MUX stream for recording, then Cloudflare live input with restreaming
  * 
  * Architecture:
- * - Phone streams via WHIP to Cloudflare (live playback + primary recording)
- * - MUX live stream created for backup/redundancy
- * - User can optionally setup restreaming from OBS to MUX if needed
+ * - Phone streams via WHIP to Cloudflare (live playback)
+ * - Cloudflare automatically restreams to MUX via RTMP (server-side)
+ * - MUX records the stream (REQUIRED - WHIP cannot record)
+ * - No extra phone bandwidth used (restreaming is server-to-server)
+ * 
+ * CRITICAL: MUX is MANDATORY because Cloudflare WHIP inputs cannot record!
  */
 export async function setupPhoneToMUXMethod(): Promise<PhoneToMUXMethodConfig> {
 	console.log('🎬 [STREAMING_METHODS] Setting up Phone to MUX method...');
 
 	try {
-		// 1. Create Cloudflare live input for phone streaming
-		console.log('☁️ [STREAMING_METHODS] Creating Cloudflare live input...');
+		// 1. Create MUX live stream FIRST (we need the stream key for Cloudflare outputs)
+		console.log('🎥 [STREAMING_METHODS] Creating MUX live stream for recording...');
+		
+		if (!isMUXConfigured()) {
+			throw new Error('MUX not configured - Phone to MUX method requires MUX credentials (WHIP cannot record)');
+		}
+
+		const muxStream = await createMUXLiveStream({
+			name: 'TributeStream Phone Recording',
+			reconnectWindow: 60,
+			recordingEnabled: true
+		});
+		
+		console.log('✅ [STREAMING_METHODS] MUX stream created:', muxStream.id);
+
+		// 2. Create Cloudflare live input WITH restreaming outputs to MUX
+		console.log('☁️ [STREAMING_METHODS] Creating Cloudflare input with MUX restreaming...');
+		
 		const cloudflareInput = await createLiveInput({
 			name: 'Phone to MUX Stream',
-			recording: { mode: 'automatic' } // Primary recording on Cloudflare
+			recording: { 
+				mode: 'off' // WHIP can't record anyway, MUX handles it
+			},
+			// ⭐ CRITICAL: Configure restreaming to MUX
+			outputs: [
+				{
+					enabled: true,
+					url: 'rtmps://global-live.mux.com:443/app',
+					streamKey: muxStream.stream_key
+				}
+			]
 		});
 
-		// 2. Create MUX live stream for backup recording (optional but recommended)
-		let muxStream;
-		let muxConfigured = false;
-
-		if (isMUXConfigured()) {
-			try {
-				console.log('🎥 [STREAMING_METHODS] Creating MUX live stream for backup...');
-				muxStream = await createMUXLiveStream({
-					name: 'TributeStream Backup Recording',
-					reconnectWindow: 60,
-					recordingEnabled: true
-				});
-				muxConfigured = true;
-				console.log('✅ [STREAMING_METHODS] MUX backup configured');
-			} catch (error) {
-				console.error('⚠️ [STREAMING_METHODS] MUX setup failed, continuing with Cloudflare only:', error);
-				// Continue without MUX - Cloudflare recording will be primary
-			}
-		} else {
-			console.log('⚠️ [STREAMING_METHODS] MUX not configured, using Cloudflare recording only');
+		if (!cloudflareInput.webRTC?.url) {
+			throw new Error('Cloudflare input missing WebRTC URL - WHIP not enabled');
 		}
+
+		console.log(' [STREAMING_METHODS] Cloudflare input created with restreaming:', cloudflareInput.uid);
 
 		const config: PhoneToMUXMethodConfig = {
 			cloudflare: {
 				whipUrl: cloudflareInput.webRTC.url,
 				inputId: cloudflareInput.uid
 			},
-			mux: muxStream ? {
+			mux: {
 				streamId: muxStream.id,
 				streamKey: muxStream.stream_key,
 				playbackId: muxStream.playback_ids[0]?.id || ''
-			} : {
-				streamId: '',
-				streamKey: '',
-				playbackId: ''
 			},
-			restreamingConfigured: muxConfigured
+			restreamingConfigured: true
 		};
 
-		console.log('✅ [STREAMING_METHODS] Phone to MUX method configured:', {
+		console.log('✅ [STREAMING_METHODS] Phone to MUX method fully configured:', {
 			cloudflareInputId: config.cloudflare.inputId,
-			muxConfigured,
-			muxStreamId: config.mux.streamId || 'none'
+			cloudflareWhipUrl: config.cloudflare.whipUrl,
+			muxStreamId: config.mux.streamId,
+			restreamingEnabled: true
 		});
 
 		return config;
 	} catch (error) {
 		console.error('❌ [STREAMING_METHODS] Failed to setup Phone to MUX method:', error);
-		throw new Error('Failed to configure Phone to MUX streaming method');
+		throw new Error(`Failed to configure Phone to MUX streaming method: ${error instanceof Error ? error.message : 'Unknown error'}`);
 	}
 }
 

@@ -917,18 +917,38 @@
 
 	// Add slideshow to memorial (upload to Firebase)
 	async function addToMemorial() {
-		if (!generatedVideoBlob || !memorialId) return;
+		if (!generatedVideoBlob || !memorialId) {
+			console.warn('⚠️ Cannot add to memorial: missing video or memorial ID');
+			alert('Please generate a video and ensure memorial ID is set.');
+			return;
+		}
 
 		try {
 			isGenerating = true;
 			generationPhase = 'Adding to memorial...';
 			generationProgress = 95;
 
-			const response = await uploadToFirebase(generatedVideoBlob, photos, settings);
+			// uploadToFirebase returns the parsed JSON result directly, not a Response object
+			const result = await uploadToFirebase(generatedVideoBlob, photos, settings);
 
-			if (response.ok) {
-				const result = await response.json();
+			if (result && result.slideshowId) {
 				console.log('✅ Slideshow uploaded successfully:', result);
+				
+				// Update published status
+				isPublished = true;
+				publishedSlideshow = {
+					id: result.slideshowId,
+					title: `Memorial Slideshow - ${new Date().toLocaleDateString()}`,
+					playbackUrl: result.downloadURL,
+					photos: photos.map(photo => ({
+						id: photo.id,
+						caption: photo.caption || '',
+						duration: photo.duration || settings.photoDuration,
+						url: photo.storedUrl || photo.preview,
+						storagePath: photo.storagePath
+					})),
+					settings: settings
+				};
 				
 				// Clear draft since slideshow is now saved
 				clearDraft();
@@ -942,13 +962,13 @@
 					result
 				});
 				
-				alert('Slideshow uploaded successfully!');
+				alert('Slideshow successfully added to memorial!');
 			} else {
-				console.error('Failed to upload slideshow');
+				console.error('❌ Failed to upload slideshow: Invalid response', result);
 				alert('Failed to upload slideshow. Please try again.');
 			}
 		} catch (error) {
-			console.error('Error adding to memorial:', error);
+			console.error('❌ Error adding to memorial:', error);
 			alert(`Failed to add to memorial: ${error.message}`);
 		} finally {
 			isGenerating = false;
@@ -1739,22 +1759,22 @@
 						</button>
 					{/if}
 				{:else if memorialId}
-					<!-- Regular Publish Action -->
+					<!-- Regular Publish Action - Add to Memorial -->
 					<button 
 						class="primary-btn extra-large"
-						onclick={saveToMemorial}
+						onclick={addToMemorial}
 						disabled={isGenerating}
 					>
 						{#if isGenerating}
 							<svg class="btn-icon animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
 							</svg>
-							Publishing...
+							Adding to Memorial...
 						{:else}
 							<svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
 							</svg>
-							Publish to Memorial
+							Add to Memorial
 						{/if}
 					</button>
 				{/if}

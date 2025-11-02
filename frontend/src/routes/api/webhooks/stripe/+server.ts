@@ -3,10 +3,17 @@ import type { RequestHandler } from './$types';
 import Stripe from 'stripe';
 import { adminDb } from '$lib/firebase-admin';
 import { Timestamp, FieldValue } from 'firebase-admin/firestore';
-import { STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET } from '$env/static/private';
+import { env } from '$env/dynamic/private';
+
+const STRIPE_SECRET_KEY = env.STRIPE_SECRET_KEY;
+const STRIPE_WEBHOOK_SECRET = env.STRIPE_WEBHOOK_SECRET;
 
 if (!STRIPE_WEBHOOK_SECRET) {
 	console.error('⚠️ STRIPE_WEBHOOK_SECRET is not configured - webhook signature verification will fail');
+}
+
+if (!STRIPE_SECRET_KEY) {
+	throw new Error('STRIPE_SECRET_KEY is not configured');
 }
 
 const stripe = new Stripe(STRIPE_SECRET_KEY, {

@@ -52,8 +52,15 @@ interface CloudflareApiResponse<T> {
  */
 export async function createLiveInput(options: {
 	name: string;
-	recording?: boolean;
-	recordingTimeout?: number;
+	recording?: {
+		mode: 'automatic' | 'off';
+		timeoutSeconds?: number;
+	};
+	outputs?: Array<{
+		enabled: boolean;
+		url: string;
+		streamKey: string;
+	}>;
 }): Promise<CloudflareLiveInput> {
 	console.log('🎬 [CLOUDFLARE] Creating live input:', options.name);
 
@@ -73,17 +80,18 @@ export async function createLiveInput(options: {
 				meta: {
 					name: options.name
 				},
-				recording: {
-					mode: options.recording !== false ? 'automatic' : 'off',
-					timeoutSeconds: options.recordingTimeout || 10,
+				recording: options.recording || {
+					mode: 'automatic',
+					timeoutSeconds: 10,
 					requireSignedURLs: false
-				}
+				},
+				...(options.outputs && options.outputs.length > 0 && { outputs: options.outputs })
 			})
 		});
 
 		if (!response.ok) {
 			const errorText = await response.text();
-			console.error('❌ [CLOUDFLARE] API error:', response.status, errorText);
+			console.error(' [CLOUDFLARE] API error:', response.status, errorText);
 			throw new Error(`Cloudflare API error: ${response.status} ${errorText}`);
 		}
 
