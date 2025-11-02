@@ -17,7 +17,9 @@ export const SENDGRID_TEMPLATES = {
 	PAYMENT_FAILURE: env.SENDGRID_TEMPLATE_PAYMENT_FAILURE || 'placeholder',
 	CONTACT_SUPPORT: env.SENDGRID_TEMPLATE_CONTACT_SUPPORT || 'placeholder',
 	CONTACT_CONFIRMATION: env.SENDGRID_TEMPLATE_CONTACT_CONFIRMATION || 'placeholder',
-	PASSWORD_RESET: env.SENDGRID_TEMPLATE_PASSWORD_RESET || 'placeholder'
+	PASSWORD_RESET: env.SENDGRID_TEMPLATE_PASSWORD_RESET || 'placeholder',
+	OWNER_WELCOME: env.SENDGRID_TEMPLATE_OWNER_WELCOME || 'placeholder',
+	FUNERAL_DIRECTOR_WELCOME: env.SENDGRID_TEMPLATE_FUNERAL_DIRECTOR_WELCOME || 'placeholder'
 };
 
 export interface EnhancedRegistrationEmailData {
@@ -64,6 +66,16 @@ export interface PasswordResetEmailData {
 	email: string;
 	displayName: string;
 	resetLink: string;
+}
+
+export interface OwnerWelcomeEmailData {
+	email: string;
+	displayName: string;
+}
+
+export interface FuneralDirectorWelcomeEmailData {
+	email: string;
+	displayName: string;
 }
 
 export interface BasicRegistrationEmailData {
@@ -416,6 +428,76 @@ export async function sendPasswordResetEmail(data: PasswordResetEmailData) {
 		console.log('✅ Password reset email sent via dynamic template to:', data.email);
 	} catch (error) {
 		console.error('💥 Exception sending password reset email:', error);
+		throw error;
+	}
+}
+
+/**
+ * Send owner welcome email after registration
+ */
+export async function sendOwnerWelcomeEmail(data: OwnerWelcomeEmailData) {
+	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key') {
+		console.warn('⚠️ SendGrid client not initialized. Skipping owner welcome email.');
+		return;
+	}
+
+	// Check if template is configured
+	if (!SENDGRID_TEMPLATES.OWNER_WELCOME || SENDGRID_TEMPLATES.OWNER_WELCOME === 'placeholder') {
+		console.error('💥 Owner welcome template not configured. Template ID:', SENDGRID_TEMPLATES.OWNER_WELCOME);
+		throw new Error('Email template not configured. Please check SENDGRID_TEMPLATE_OWNER_WELCOME environment variable.');
+	}
+
+	const msg = {
+		to: data.email,
+		from: FROM_EMAIL,
+		templateId: SENDGRID_TEMPLATES.OWNER_WELCOME,
+		dynamicTemplateData: {
+			displayName: data.displayName,
+			email: data.email,
+			currentYear: new Date().getFullYear()
+		}
+	};
+
+	try {
+		await sgMail.send(msg);
+		console.log('✅ Owner welcome email sent to:', data.email);
+	} catch (error) {
+		console.error('💥 Exception sending owner welcome email:', error);
+		throw error;
+	}
+}
+
+/**
+ * Send funeral director welcome email after registration
+ */
+export async function sendFuneralDirectorWelcomeEmail(data: FuneralDirectorWelcomeEmailData) {
+	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key') {
+		console.warn('⚠️ SendGrid client not initialized. Skipping funeral director welcome email.');
+		return;
+	}
+
+	// Check if template is configured
+	if (!SENDGRID_TEMPLATES.FUNERAL_DIRECTOR_WELCOME || SENDGRID_TEMPLATES.FUNERAL_DIRECTOR_WELCOME === 'placeholder') {
+		console.error('💥 Funeral director welcome template not configured. Template ID:', SENDGRID_TEMPLATES.FUNERAL_DIRECTOR_WELCOME);
+		throw new Error('Email template not configured. Please check SENDGRID_TEMPLATE_FUNERAL_DIRECTOR_WELCOME environment variable.');
+	}
+
+	const msg = {
+		to: data.email,
+		from: FROM_EMAIL,
+		templateId: SENDGRID_TEMPLATES.FUNERAL_DIRECTOR_WELCOME,
+		dynamicTemplateData: {
+			displayName: data.displayName,
+			email: data.email,
+			currentYear: new Date().getFullYear()
+		}
+	};
+
+	try {
+		await sgMail.send(msg);
+		console.log('✅ Funeral director welcome email sent to:', data.email);
+	} catch (error) {
+		console.error('💥 Exception sending funeral director welcome email:', error);
 		throw error;
 	}
 }

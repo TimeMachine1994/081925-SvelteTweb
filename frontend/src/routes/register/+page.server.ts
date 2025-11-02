@@ -4,6 +4,7 @@ import type { Actions } from './$types';
 import { verifyRecaptcha, RECAPTCHA_ACTIONS, getScoreThreshold } from '$lib/utils/recaptcha';
 import { validateEmail } from '$lib/utils/email-validation';
 import { createStandardUserProfile, validateUserProfileData } from '$lib/utils/user-profile';
+import { sendOwnerWelcomeEmail, sendFuneralDirectorWelcomeEmail } from '$lib/server/email';
 
 export const actions: Actions = {
 	registerOwner: async ({ request }) => {
@@ -81,6 +82,18 @@ export const actions: Actions = {
 			await userDocRef.set(userProfile);
 
 			console.log(`[+page.server.ts] Owner created and profile stored successfully: ${email}`);
+
+			// Send welcome email
+			try {
+				await sendOwnerWelcomeEmail({
+					email: email.toString(),
+					displayName: name.toString()
+				});
+				console.log(`[+page.server.ts] Owner welcome email sent to: ${email}`);
+			} catch (emailError) {
+				console.error(`[+page.server.ts] Failed to send welcome email, but continuing:`, emailError);
+				// Don't fail registration if email fails
+			}
 
 			const customToken = await adminAuth.createCustomToken(userRecord.uid);
 
@@ -356,6 +369,18 @@ export const actions: Actions = {
 			await userDocRef.set(userProfile);
 
 			console.log(`[+page.server.ts] Funeral director basic account created successfully: ${email}`);
+
+			// Send welcome email
+			try {
+				await sendFuneralDirectorWelcomeEmail({
+					email: email.toString(),
+					displayName: name.toString()
+				});
+				console.log(`[+page.server.ts] Funeral director welcome email sent to: ${email}`);
+			} catch (emailError) {
+				console.error(`[+page.server.ts] Failed to send welcome email, but continuing:`, emailError);
+				// Don't fail registration if email fails
+			}
 
 			const customToken = await adminAuth.createCustomToken(userRecord.uid);
 
