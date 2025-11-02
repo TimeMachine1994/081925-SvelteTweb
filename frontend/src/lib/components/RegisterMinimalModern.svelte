@@ -14,7 +14,7 @@
 	let name = '';
 	let email = '';
 	let password = '';
-	let selectedRole: 'owner' | 'viewer' = 'owner';
+	let selectedRole: 'owner' | 'funeral_director' = 'owner';
 
 	// Props to receive form data from server
 	interface Props {
@@ -60,7 +60,9 @@
 
 		return async ({ result, update }) => {
 			// Execute reCAPTCHA before processing result
-			const recaptchaAction = selectedRole === 'owner' ? RECAPTCHA_ACTIONS.REGISTER_OWNER : RECAPTCHA_ACTIONS.REGISTER_VIEWER;
+			const recaptchaAction = selectedRole === 'owner' 
+				? RECAPTCHA_ACTIONS.REGISTER_OWNER 
+				: RECAPTCHA_ACTIONS.REGISTER_FUNERAL_DIRECTOR;
 			const recaptchaToken = await executeRecaptcha(recaptchaAction);
 			
 			if (!recaptchaToken) {
@@ -93,9 +95,10 @@
 					progress = 80;
 					
 					// Use SvelteKit navigation to session page
+					// Funeral directors go to complete their profile, owners go directly to profile
 					const redirectUrl = selectedRole === 'owner' 
 						? `/auth/session?token=${result.data.customToken}&redirect=profile`
-						: `/auth/session?token=${result.data.customToken}&redirect=profile`;
+						: `/auth/session?token=${result.data.customToken}&redirect=register/funeral-director`;
 					
 					currentStep = 'Redirecting...';
 					progress = 100;
@@ -151,7 +154,7 @@
 		</div>
 
 		<Card theme="minimal" class="p-8">
-			<form class="space-y-6" method="POST" action="?/{selectedRole === 'owner' ? 'registerOwner' : 'registerViewer'}" use:enhance={handleRegister}>
+			<form class="space-y-6" method="POST" action="?/{selectedRole === 'owner' ? 'registerOwner' : 'registerFuneralDirector'}" use:enhance={handleRegister}>
 				<div class="space-y-4">
 					<div>
 						<label for="name" class="block text-sm font-medium {theme.text} mb-1">
@@ -240,23 +243,23 @@
 								</div>
 							</label>
 							
-							<label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors {selectedRole === 'viewer' ? 'border-[#D5BA7F] bg-[#D5BA7F]/5' : 'border-gray-300'}">
+							<label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors {selectedRole === 'funeral_director' ? 'border-[#D5BA7F] bg-[#D5BA7F]/5' : 'border-gray-300'}">
 								<input
 									type="radio"
 									name="role"
-									value="viewer"
+									value="funeral_director"
 									bind:group={selectedRole}
 									class="sr-only"
 								/>
 								<div class="flex items-center space-x-3">
-									<div class="w-4 h-4 rounded-full border-2 flex items-center justify-center {selectedRole === 'viewer' ? 'border-[#D5BA7F] bg-[#D5BA7F]' : 'border-gray-300'}">
-										{#if selectedRole === 'viewer'}
+									<div class="w-4 h-4 rounded-full border-2 flex items-center justify-center {selectedRole === 'funeral_director' ? 'border-[#D5BA7F] bg-[#D5BA7F]' : 'border-gray-300'}">
+										{#if selectedRole === 'funeral_director'}
 											<div class="w-2 h-2 rounded-full bg-white"></div>
 										{/if}
 									</div>
 									<div>
-										<div class="font-medium text-gray-900">View and support memorials</div>
-										<div class="text-sm text-gray-600">Register as viewer</div>
+										<div class="font-medium text-gray-900">Create and manage memorials</div>
+										<div class="text-sm text-gray-600">Register as funeral director</div>
 									</div>
 								</div>
 							</label>

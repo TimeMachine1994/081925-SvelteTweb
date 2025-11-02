@@ -127,8 +127,8 @@
 									<div class="mt-3 space-y-2">
 										<p class="text-sm text-green-700">
 											<strong>Memorial URL:</strong> 
-											<a href="/tributes/{form.memorialSlug}" target="_blank" class="underline hover:text-green-800">
-												tributestream.com/tributes/{form.memorialSlug}
+											<a href="/{form.memorialSlug}" target="_blank" class="underline hover:text-green-800">
+												tributestream.com/{form.memorialSlug}
 											</a>
 										</p>
 										{#if form.familyContactEmail}
@@ -136,6 +136,9 @@
 												<strong>Family Email:</strong> {form.familyContactEmail}
 											</p>
 										{/if}
+										<p class="text-sm text-green-700 font-medium mt-3">
+											Redirecting to your profile in 3 seconds...
+										</p>
 									</div>
 								{/if}
 							</div>
@@ -148,9 +151,16 @@
 					onsubmit={handleSubmit}
 					use:enhance={() => {
 						isSubmitting = true;
-						return async ({ update }) => {
+						return async ({ result, update }) => {
 							await update({ reset: false });
 							isSubmitting = false;
+							
+							// If successful, redirect to profile after showing success message
+							if (result.type === 'success' && result.data?.success) {
+								setTimeout(() => {
+									window.location.href = '/profile';
+								}, 3000);
+							}
 						};
 					}}
 				>

@@ -327,16 +327,22 @@ export const actions: Actions = {
 			const customToken = await adminAuth.createCustomToken(userRecord.uid);
 			console.log(`✅ Custom token created for ${familyContactEmail}`);
 
-			// 7. Redirect to the memorial page directly
-			const memorialUrl = `/${fullSlug}`;
-			console.log(`🚀 Redirecting to memorial page: ${memorialUrl}`);
+			// 7. Return success to show to user, then redirect to profile
+			console.log(`🚀 Memorial created successfully: ${fullSlug}`);
 			
 			if (isExistingUser) {
 				console.log('🎉 Additional memorial created for existing user successfully!');
 			} else {
 				console.log('🎉 Enhanced funeral director registration completed successfully!');
 			}
-			throw redirect(303, memorialUrl);
+			
+			// For authenticated funeral directors completing their profile, show success then redirect to profile
+			return {
+				success: true,
+				message: `Memorial created successfully for ${lovedOneName}! Credentials have been emailed to ${familyContactEmail}.`,
+				memorialSlug: fullSlug,
+				familyContactEmail: familyContactEmail
+			};
 			
 		} catch (error: any) {
 			if (isRedirect(error)) {

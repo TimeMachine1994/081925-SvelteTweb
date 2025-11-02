@@ -79,7 +79,7 @@
 	{:else}
 		<div class="url-placeholder">
 			<p class="placeholder-text">
-				💡 Enter the loved one's name above to see the memorial URL preview
+				Enter your loved ones name below to preview your custom URL.
 			</p>
 		</div>
 	{/if}

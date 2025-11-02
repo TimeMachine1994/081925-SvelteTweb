@@ -280,5 +280,106 @@ export const actions: Actions = {
 				message: 'Registration failed. Please try again.'
 			});
 		}
+	},
+	registerFuneralDirector: async ({ request }) => {
+		console.log('[+page.server.ts] Register funeral director action started.');
+		const data = await request.formData();
+		const name = data.get('name');
+		const email = data.get('email');
+		const password = data.get('password');
+		const recaptchaToken = data.get('recaptchaToken');
+
+		if (!name || !email || !password) {
+			console.error('[+page.server.ts] Missing required fields.');
+			return fail(400, {
+				message: 'Name, email and password are required'
+			});
+		}
+
+		// Pre-validate email before expensive operations
+		console.log('[+page.server.ts] Pre-validating email...');
+		const emailValidation = await validateEmail(email.toString(), 'email');
+		if (!emailValidation.isValid) {
+			console.error('[+page.server.ts] Email validation failed:', emailValidation.error);
+			return fail(400, {
+				message: emailValidation.error,
+				field: emailValidation.field
+			});
+		}
+		console.log('[+page.server.ts] Email validation passed.');
+
+		// Verify reCAPTCHA
+		if (recaptchaToken) {
+			const recaptchaResult = await verifyRecaptcha(
+				recaptchaToken.toString(),
+				RECAPTCHA_ACTIONS.REGISTER_FUNERAL_DIRECTOR,
+				getScoreThreshold(RECAPTCHA_ACTIONS.REGISTER_FUNERAL_DIRECTOR)
+			);
+
+			if (!recaptchaResult.success) {
+				console.error('[+page.server.ts] reCAPTCHA verification failed:', recaptchaResult.error);
+				return fail(400, {
+					message: 'Security verification failed. Please try again.'
+				});
+			}
+
+			console.log(`[+page.server.ts] reCAPTCHA verified successfully. Score: ${recaptchaResult.score}`);
+		} else {
+			console.warn('[+page.server.ts] No reCAPTCHA token provided');
+			return fail(400, {
+				message: 'Security verification required. Please refresh and try again.'
+			});
+		}
+
+		try {
+			console.log(`[+page.server.ts] Attempting to create funeral director: ${email}`);
+			const userRecord = await adminAuth.createUser({
+				email: email.toString(),
+				password: password.toString(),
+				displayName: name.toString()
+			});
+
+			// Set custom claims for funeral director role
+			await adminAuth.setCustomUserClaims(userRecord.uid, {
+				role: 'funeral_director',
+				isFuneralDirector: true
+			});
+
+			// Create basic user profile - will be completed in the funeral director form
+			const userProfile = createStandardUserProfile({
+				email: userRecord.email!,
+				displayName: name.toString(),
+				role: 'funeral_director'
+			});
+
+			const userDocRef = adminDb.collection('users').doc(userRecord.uid);
+			await userDocRef.set(userProfile);
+
+			console.log(`[+page.server.ts] Funeral director basic account created successfully: ${email}`);
+
+			const customToken = await adminAuth.createCustomToken(userRecord.uid);
+
+			return {
+				success: true,
+				customToken
+			};
+		} catch (error: any) {
+			if (isRedirect(error)) {
+				throw error;
+			}
+			console.error(`[+page.server.ts] Error creating funeral director ${email}:`, error);
+			
+			// Since we pre-validated email, this should rarely happen
+			if (error.code === 'auth/email-already-exists') {
+				return fail(400, {
+					message: `An account with email ${email} already exists. Please use a different email or sign in to your existing account.`,
+					field: 'email'
+				});
+			}
+			
+			return fail(500, {
+				message: 'Registration failed. Please try again.'
+			});
+		}
 	}
 };
