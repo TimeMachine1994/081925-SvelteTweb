@@ -57,6 +57,19 @@
 		limit: 50
 	});
 
+	// Funeral director editing state
+	let editingDirector = $state<any>(null);
+	let directorEditForm = $state({
+		companyName: '',
+		contactPerson: '',
+		email: '',
+		phone: '',
+		licenseNumber: '',
+		businessType: ''
+	});
+	let isUpdatingDirector = $state(false);
+	let isDeletingDirector = $state(false);
+
 	/**
 	 * Approve a funeral director - updates their status and permissions
 	 * @param directorId - The funeral director's user ID
@@ -450,6 +463,111 @@
 		} catch (error) {
 			console.error('❌ [ADMIN] Error deleting user:', error);
 			alert('Network error occurred while deleting user');
+		}
+	}
+
+	/**
+	 * Start editing a funeral director
+	 */
+	function startEditingDirector(director: any) {
+		console.log('✏️ [ADMIN] Starting to edit director:', director.id);
+		editingDirector = director;
+		directorEditForm = {
+			companyName: director.companyName || '',
+			contactPerson: director.contactPerson || '',
+			email: director.email || '',
+			phone: director.phone || '',
+			licenseNumber: director.licenseNumber || '',
+			businessType: director.businessType || ''
+		};
+	}
+
+	/**
+	 * Cancel editing funeral director
+	 */
+	function cancelEditingDirector() {
+		editingDirector = null;
+		directorEditForm = {
+			companyName: '',
+			contactPerson: '',
+			email: '',
+			phone: '',
+			licenseNumber: '',
+			businessType: ''
+		};
+	}
+
+	/**
+	 * Update funeral director information
+	 */
+	async function updateFuneralDirector() {
+		if (!editingDirector) return;
+
+		console.log('✏️ [ADMIN] Updating funeral director:', editingDirector.id);
+		isUpdatingDirector = true;
+
+		try {
+			const response = await fetch('/api/admin/update-funeral-director', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					directorId: editingDirector.id,
+					updates: directorEditForm
+				})
+			});
+
+			const result = await response.json();
+
+			if (response.ok) {
+				console.log('✅ [ADMIN] Funeral director updated successfully');
+				await invalidateAll();
+				alert('Funeral director updated successfully!');
+				cancelEditingDirector();
+			} else {
+				console.error('❌ [ADMIN] Failed to update funeral director:', result.error);
+				alert(`Failed to update: ${result.error}`);
+			}
+		} catch (error) {
+			console.error('❌ [ADMIN] Error updating funeral director:', error);
+			alert('Network error occurred while updating');
+		} finally {
+			isUpdatingDirector = false;
+		}
+	}
+
+	/**
+	 * Delete a funeral director
+	 */
+	async function deleteFuneralDirector(directorId: string, companyName: string) {
+		if (!confirm(`⚠️ Are you sure you want to delete "${companyName}"?\n\nThis will:\n- Remove the funeral director profile\n- Downgrade their account to regular owner\n\nThis action cannot be undone!`)) {
+			return;
+		}
+
+		console.log('🗑️ [ADMIN] Deleting funeral director:', directorId);
+		isDeletingDirector = true;
+
+		try {
+			const response = await fetch('/api/admin/delete-funeral-director', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ directorId })
+			});
+
+			const result = await response.json();
+
+			if (response.ok) {
+				console.log('✅ [ADMIN] Funeral director deleted successfully');
+				await invalidateAll();
+				alert('Funeral director deleted successfully');
+			} else {
+				console.error('❌ [ADMIN] Failed to delete funeral director:', result.error);
+				alert(`Failed to delete: ${result.error}`);
+			}
+		} catch (error) {
+			console.error('❌ [ADMIN] Error deleting funeral director:', error);
+			alert('Network error occurred while deleting');
+		} finally {
+			isDeletingDirector = false;
 		}
 	}
 </script>
@@ -852,14 +970,140 @@
 					<h3 class="mb-4 text-lg font-semibold text-green-400">
 						✅ Approved Directors ({approvedFuneralDirectors.length})
 					</h3>
-					<div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+					<div class="space-y-3">
 						{#each approvedFuneralDirectors as director}
-							<div class="rounded-lg border border-white/10 bg-white/5 p-3">
-								<h4 class="text-sm font-semibold text-white">{director.companyName}</h4>
-								<p class="text-xs text-white/70">{director.contactPerson}</p>
-								<p class="text-xs text-white/70">{director.email}</p>
+							<div class="rounded-lg border border-white/10 bg-white/5 p-4">
+								<div class="flex items-start justify-between gap-4">
+									<div class="flex-1">
+										<h4 class="font-semibold text-white mb-1">{director.companyName}</h4>
+										<p class="text-sm text-white/70">Contact: {director.contactPerson}</p>
+										<p class="text-sm text-white/70">Email: {director.email}</p>
+										<p class="text-sm text-white/70">Phone: {director.phone || 'N/A'}</p>
+										<p class="text-sm text-white/70">License: {director.licenseNumber || 'N/A'}</p>
+										<p class="text-sm text-white/70">Type: {director.businessType || 'N/A'}</p>
+									</div>
+									<div class="flex flex-col sm:flex-row gap-2">
+										<Button
+											onclick={() => startEditingDirector(director)}
+											variant="secondary"
+											size="sm"
+											rounded="lg"
+											class="min-h-[44px]"
+										>
+											✏️ Edit
+										</Button>
+										<Button
+											onclick={() => deleteFuneralDirector(director.id, director.companyName)}
+											disabled={isDeletingDirector}
+											variant="danger"
+											size="sm"
+											rounded="lg"
+											class="min-h-[44px]"
+										>
+											{isDeletingDirector ? 'Deleting...' : '🗑️ Delete'}
+										</Button>
+									</div>
+								</div>
 							</div>
 						{/each}
+					</div>
+				</div>
+			{/if}
+
+			<!-- Edit Director Modal -->
+			{#if editingDirector}
+				<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+					<div class="w-full max-w-2xl rounded-xl border border-white/20 bg-gradient-to-br from-slate-900 to-slate-800 p-6 shadow-2xl">
+						<h3 class="mb-4 text-xl font-bold text-white">Edit Funeral Director</h3>
+						
+						<form onsubmit={(e) => { e.preventDefault(); updateFuneralDirector(); }} class="space-y-4">
+							<div>
+								<label class="block text-sm font-medium text-white/90 mb-1">Company Name</label>
+								<input
+									type="text"
+									bind:value={directorEditForm.companyName}
+									required
+									class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white placeholder-white/50 focus:border-amber-400 focus:outline-none"
+								/>
+							</div>
+
+							<div>
+								<label class="block text-sm font-medium text-white/90 mb-1">Contact Person</label>
+								<input
+									type="text"
+									bind:value={directorEditForm.contactPerson}
+									required
+									class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white placeholder-white/50 focus:border-amber-400 focus:outline-none"
+								/>
+							</div>
+
+							<div>
+								<label class="block text-sm font-medium text-white/90 mb-1">Email</label>
+								<input
+									type="email"
+									bind:value={directorEditForm.email}
+									required
+									class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white placeholder-white/50 focus:border-amber-400 focus:outline-none"
+								/>
+							</div>
+
+							<div>
+								<label class="block text-sm font-medium text-white/90 mb-1">Phone</label>
+								<input
+									type="tel"
+									bind:value={directorEditForm.phone}
+									class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white placeholder-white/50 focus:border-amber-400 focus:outline-none"
+								/>
+							</div>
+
+							<div>
+								<label class="block text-sm font-medium text-white/90 mb-1">License Number</label>
+								<input
+									type="text"
+									bind:value={directorEditForm.licenseNumber}
+									class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white placeholder-white/50 focus:border-amber-400 focus:outline-none"
+								/>
+							</div>
+
+							<div>
+								<label class="block text-sm font-medium text-white/90 mb-1">Business Type</label>
+								<select
+									bind:value={directorEditForm.businessType}
+									class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white focus:border-amber-400 focus:outline-none"
+								>
+									<option value="">Select Type</option>
+									<option value="funeral_home">Funeral Home</option>
+									<option value="cremation_service">Cremation Service</option>
+									<option value="memorial_service">Memorial Service Provider</option>
+									<option value="other">Other</option>
+								</select>
+							</div>
+
+							<div class="flex gap-3 pt-4">
+								<Button
+									type="submit"
+									disabled={isUpdatingDirector}
+									loading={isUpdatingDirector}
+									variant="primary"
+									size="md"
+									rounded="lg"
+									class="flex-1 min-h-[44px]"
+								>
+									{isUpdatingDirector ? 'Updating...' : '✅ Save Changes'}
+								</Button>
+								<Button
+									type="button"
+									onclick={cancelEditingDirector}
+									disabled={isUpdatingDirector}
+									variant="secondary"
+									size="md"
+									rounded="lg"
+									class="flex-1 min-h-[44px]"
+								>
+									❌ Cancel
+								</Button>
+							</div>
+						</form>
 					</div>
 				</div>
 			{/if}
