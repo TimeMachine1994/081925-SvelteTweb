@@ -635,6 +635,10 @@
 														href="/memorials/{memorial.id}/streams"
 														class="text-sm text-green-400 hover:text-green-300">Streams</a
 													>
+													<a
+														href="/schedule/{memorial.id}"
+														class="text-sm text-purple-400 hover:text-purple-300">Schedule</a
+													>
 													<button
 														onclick={() => toggleMemorialStatus(true)}
 														class="text-sm text-amber-400 hover:text-amber-300"
@@ -687,6 +691,12 @@
 										class="flex-1 min-w-[calc(50%-0.25rem)] text-center px-3 py-2 rounded-lg bg-green-500/20 text-green-300 text-sm font-medium min-h-[44px] flex items-center justify-center"
 									>
 										Streams
+									</a>
+									<a
+										href="/schedule/{memorial.id}"
+										class="w-full px-3 py-2 rounded-lg bg-purple-500/20 text-purple-300 text-sm font-medium min-h-[44px] flex items-center justify-center"
+									>
+										📅 Edit Schedule
 									</a>
 									<button
 										onclick={() => toggleMemorialStatus(true)}

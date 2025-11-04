@@ -310,7 +310,18 @@ export const actions: Actions = {
 			// Index the new memorial in Algolia
 			await indexMemorial({ ...memorialData, id: memorialRef.id } as unknown as Memorial);
 
-			// 5. Send funeral director registration email
+			// 5. Generate magic link for calculator access
+			console.log('🎟️ Generating magic link for calculator access...');
+			const calculatorToken = await adminAuth.createCustomToken(userRecord.uid, {
+				role: 'owner',
+				email: familyContactEmail,
+				memorial_id: memorialRef.id
+			});
+			const baseUrl = process.env.PUBLIC_BASE_URL || 'https://tributestream.com';
+			const calculatorMagicLink = `${baseUrl}/auth/session?token=${calculatorToken}&redirect=schedule/${memorialRef.id}`;
+			console.log('🔗 Calculator magic link created for memorial:', memorialRef.id);
+
+			// 6. Send funeral director registration email with magic link
 			console.log(`📧 Sending funeral director registration email to ${isExistingUser ? 'existing' : 'new'} user...`);
 			await sendFuneralDirectorRegistrationEmail({
 				email: familyContactEmail,
@@ -318,9 +329,10 @@ export const actions: Actions = {
 				lovedOneName: lovedOneName,
 				memorialUrl: `https://tributestream.com/${fullSlug}`,
 				password: isExistingUser ? '' : password, // Include password for new users only
-				additionalNotes: additionalNotes
+				additionalNotes: additionalNotes,
+				calculatorMagicLink: calculatorMagicLink // Add magic link to calculator
 			});
-			console.log('✅ Funeral director registration email sent successfully');
+			console.log('✅ Funeral director registration email sent successfully with calculator magic link');
 
 			// 6. Create a custom token for auto-login
 			console.log('🎟️ Creating custom token for auto-login...');

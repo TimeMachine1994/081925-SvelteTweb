@@ -127,6 +127,19 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		if (!userExists && password) {
 			try {
+				// Generate custom token for magic link authentication
+				console.log('🎟️ [ADMIN API] Generating magic link token...');
+				const customToken = await auth.createCustomToken(userUid, {
+					role: 'owner',
+					email: formData.creatorEmail,
+					memorial_id: memorialId
+				});
+
+				// Create magic link URL that goes directly to their memorial page
+				const baseUrl = process.env.PUBLIC_BASE_URL || 'https://tributestream.com';
+				const magicLink = `${baseUrl}/auth/session?token=${customToken}&fullSlug=${fullSlug}`;
+				console.log('🔗 [ADMIN API] Magic link created for memorial page:', fullSlug);
+
 				await sendEnhancedRegistrationEmail({
 					email: formData.creatorEmail,
 					password: password,
@@ -136,7 +149,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					familyContactPhone: '',
 					contactPreference: 'email',
 					directorName: 'Tributestream Admin',
-					funeralHomeName: 'Tributestream'
+					funeralHomeName: 'Tributestream',
+					magicLink: magicLink // Pass magic link to email
 				});
 			} catch (emailError) {
 				console.error('⚠️ [ADMIN API] Failed to send welcome email:', emailError);

@@ -28,6 +28,7 @@ export interface EnhancedRegistrationEmailData {
 	memorialUrl: string;
 	ownerName: string;
 	password: string; // Add password for the enhanced email
+	magicLink?: string; // Optional magic link for one-click access to memorial page
 }
 
 export interface InvitationEmailData {
@@ -94,6 +95,7 @@ export interface FuneralDirectorRegistrationEmailData {
 	memorialUrl: string;
 	password: string;
 	additionalNotes?: string;
+	calculatorMagicLink?: string; // Magic link for one-click calculator access
 }
 
 export async function sendEnhancedRegistrationEmail(data: EnhancedRegistrationEmailData) {
@@ -119,6 +121,8 @@ export async function sendEnhancedRegistrationEmail(data: EnhancedRegistrationEm
 			memorialSlug: data.memorialUrl.replace('https://tributestream.com/', ''),
 			email: data.email,
 			password: data.password,
+			magicLink: data.magicLink || '', // Include magic link for one-click access
+			hasMagicLink: !!data.magicLink, // Boolean flag for template conditional logic
 			currentYear: new Date().getFullYear()
 		},
 		// Disable click tracking to prevent URL mangling
@@ -206,6 +210,8 @@ export async function sendFuneralDirectorRegistrationEmail(data: FuneralDirector
 			password: data.password,
 			additionalNotes: data.additionalNotes || '',
 			hasAdditionalNotes: !!data.additionalNotes,
+			calculatorMagicLink: data.calculatorMagicLink || '', // Magic link for calculator
+			hasCalculatorMagicLink: !!data.calculatorMagicLink, // Boolean flag for template
 			currentYear: new Date().getFullYear()
 		},
 		// Disable click tracking to prevent URL mangling
