@@ -359,6 +359,68 @@
 	}
 
 	/**
+	 * Delete all selected memorials
+	 */
+	let isDeletingMemorials = $state(false);
+	async function deleteSelectedMemorials() {
+		if (selectedMemorials.size === 0) {
+			alert('Please select memorials to delete');
+			return;
+		}
+
+		const count = selectedMemorials.size;
+		if (!confirm(`⚠️ Are you sure you want to DELETE ${count} memorial${count > 1 ? 's' : ''}?\n\nThis action CANNOT be undone!`)) {
+			return;
+		}
+
+		isDeletingMemorials = true;
+		console.log('🗑️ [ADMIN] Bulk deleting memorials:', Array.from(selectedMemorials));
+
+		let successCount = 0;
+		let errorCount = 0;
+
+		try {
+			for (const memorialId of selectedMemorials) {
+				try {
+					const response = await fetch(`/api/admin/delete-memorial`, {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ memorialId })
+					});
+
+					if (response.ok) {
+						successCount++;
+					} else {
+						errorCount++;
+						console.error('Failed to delete memorial:', memorialId);
+					}
+				} catch (err) {
+					errorCount++;
+					console.error('Error deleting memorial:', memorialId, err);
+				}
+			}
+
+			console.log(`✅ [ADMIN] Bulk delete complete: ${successCount} succeeded, ${errorCount} failed`);
+			
+			if (errorCount > 0) {
+				alert(`Deleted ${successCount} memorial${successCount !== 1 ? 's' : ''}.\n${errorCount} failed.`);
+			} else {
+				alert(`Successfully deleted ${successCount} memorial${successCount !== 1 ? 's' : ''}!`);
+			}
+
+			// Clear selection and refresh
+			selectedMemorials.clear();
+			selectAll = false;
+			await invalidateAll();
+		} catch (error) {
+			console.error('❌ [ADMIN] Error in bulk delete:', error);
+			alert('An error occurred during bulk deletion');
+		} finally {
+			isDeletingMemorials = false;
+		}
+	}
+
+	/**
 	 * Delete a user
 	 */
 	async function deleteUser(userId: string, userEmail: string) {
@@ -508,14 +570,24 @@
 								Select All
 							</label>
 							{#if selectedMemorials.size > 0}
-								<div class="flex gap-2">
+								<div class="flex flex-col sm:flex-row gap-2">
 									<Button
 										onclick={() => toggleMemorialStatus(true)}
-										disabled={isTogglingStatus}
+										disabled={isTogglingStatus || isDeletingMemorials}
 										variant="primary"
 										rounded="lg"
+										class="min-h-[44px]"
 									>
 										{isTogglingStatus ? 'Updating...' : `✅ Mark Complete (${selectedMemorials.size})`}
+									</Button>
+									<Button
+										onclick={deleteSelectedMemorials}
+										disabled={isTogglingStatus || isDeletingMemorials}
+										variant="secondary"
+										rounded="lg"
+										class="min-h-[44px] bg-red-500/20 text-red-300 hover:bg-red-500/30 border-red-500/30"
+									>
+										{isDeletingMemorials ? 'Deleting...' : `🗑️ Delete All (${selectedMemorials.size})`}
 									</Button>
 								</div>
 							{/if}
