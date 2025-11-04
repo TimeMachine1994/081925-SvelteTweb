@@ -70,6 +70,14 @@
 	let isUpdatingDirector = $state(false);
 	let isDeletingDirector = $state(false);
 
+	// Payment status management
+	let paymentModal = $state<any>(null);
+	let paymentForm = $state({
+		method: 'cash',
+		notes: ''
+	});
+	let isTogglingPayment = $state(false);
+
 	/**
 	 * Approve a funeral director - updates their status and permissions
 	 * @param directorId - The funeral director's user ID
@@ -570,6 +578,139 @@
 			isDeletingDirector = false;
 		}
 	}
+
+	/**
+	 * Open payment modal for marking memorial as paid
+	 */
+	function openPaymentModal(memorial: any) {
+		console.log('💳 [ADMIN] Opening payment modal for:', memorial.id);
+		paymentModal = memorial;
+		paymentForm = {
+			method: 'cash',
+			notes: ''
+		};
+	}
+
+	/**
+	 * Close payment modal
+	 */
+	function closePaymentModal() {
+		paymentModal = null;
+		paymentForm = {
+			method: 'cash',
+			notes: ''
+		};
+	}
+
+	/**
+	 * Toggle payment status for a memorial
+	 */
+	async function togglePaymentStatus(memorialId: string, isPaid: boolean) {
+		console.log('💳 [ADMIN] Toggling payment status for:', memorialId, 'to:', isPaid);
+		isTogglingPayment = true;
+
+		try {
+			const response = await fetch('/api/admin/toggle-payment-status', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					memorialId,
+					isPaid,
+					paymentMethod: paymentForm.method,
+					paymentNotes: paymentForm.notes
+				})
+			});
+
+			const result = await response.json();
+
+			if (response.ok) {
+				console.log('✅ [ADMIN] Payment status updated successfully');
+				await invalidateAll();
+				alert(`Memorial marked as ${isPaid ? 'PAID' : 'UNPAID'}!`);
+				closePaymentModal();
+			} else {
+				console.error('❌ [ADMIN] Failed to update payment status:', result.error);
+				alert(`Failed to update payment: ${result.error}`);
+			}
+		} catch (error) {
+			console.error('❌ [ADMIN] Error toggling payment status:', error);
+			alert('Network error occurred while updating payment');
+		} finally {
+			isTogglingPayment = false;
+		}
+	}
+
+	/**
+	 * Quick toggle payment without modal (for unpaid -> paid with default values)
+	 */
+	async function quickMarkPaid(memorial: any) {
+		if (!confirm(`Mark "${memorial.lovedOneName}" as PAID?`)) {
+			return;
+		}
+
+		isTogglingPayment = true;
+		try {
+			const response = await fetch('/api/admin/toggle-payment-status', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					memorialId: memorial.id,
+					isPaid: true,
+					paymentMethod: 'manual',
+					paymentNotes: 'Marked as paid via admin portal'
+				})
+			});
+
+			const result = await response.json();
+
+			if (response.ok) {
+				await invalidateAll();
+				alert('Memorial marked as PAID!');
+			} else {
+				alert(`Failed: ${result.error}`);
+			}
+		} catch (error) {
+			console.error('Error:', error);
+			alert('Network error occurred');
+		} finally {
+			isTogglingPayment = false;
+		}
+	}
+
+	/**
+	 * Quick toggle to unpaid
+	 */
+	async function quickMarkUnpaid(memorial: any) {
+		if (!confirm(`Mark "${memorial.lovedOneName}" as UNPAID?`)) {
+			return;
+		}
+
+		isTogglingPayment = true;
+		try {
+			const response = await fetch('/api/admin/toggle-payment-status', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					memorialId: memorial.id,
+					isPaid: false
+				})
+			});
+
+			const result = await response.json();
+
+			if (response.ok) {
+				await invalidateAll();
+				alert('Memorial marked as UNPAID!');
+			} else {
+				alert(`Failed: ${result.error}`);
+			}
+		} catch (error) {
+			console.error('Error:', error);
+			alert('Network error occurred');
+		} finally {
+			isTogglingPayment = false;
+		}
+	}
 </script>
 
 <!-- Simplified Admin Dashboard with Tabs -->
@@ -758,15 +899,31 @@
 												{memorial.location}
 											</td>
 											<td class="px-3 py-2">
-												{#if memorial.isPaid}
-													<span class="rounded bg-green-500 px-2 py-1 text-xs text-white w-fit">✅ Paid</span>
-												{:else}
-													<span class="rounded bg-amber-500 px-2 py-1 text-xs text-white w-fit">⏳ Unpaid</span>
-												{/if}
+												<div class="flex items-center gap-2">
+													{#if memorial.isPaid}
+														<button
+															onclick={() => quickMarkUnpaid(memorial)}
+															disabled={isTogglingPayment}
+															class="rounded bg-green-500 px-2 py-1 text-xs text-white w-fit hover:bg-green-600 transition-colors"
+															title="Click to mark as unpaid"
+														>
+															✅ Paid
+														</button>
+													{:else}
+														<button
+															onclick={() => openPaymentModal(memorial)}
+															disabled={isTogglingPayment}
+															class="rounded bg-amber-500 px-2 py-1 text-xs text-white w-fit hover:bg-amber-600 transition-colors"
+															title="Click to mark as paid"
+														>
+															⏳ Unpaid
+														</button>
+													{/if}
+												</div>
 											</td>
 											<td class="px-3 py-2 text-sm text-white/70">{memorial.creatorEmail}</td>
 											<td class="px-3 py-2">
-												<div class="flex gap-2">
+												<div class="flex gap-2 flex-wrap">
 													<a
 														href="/{memorial.fullSlug}"
 														class="text-sm text-blue-400 hover:text-blue-300">View</a
@@ -832,9 +989,23 @@
 										
 										<div class="mb-2">
 											{#if memorial.isPaid}
-												<span class="inline-block rounded bg-green-500 px-2 py-1 text-xs text-white">✅ Paid</span>
+												<button
+													onclick={() => quickMarkUnpaid(memorial)}
+													disabled={isTogglingPayment}
+													class="inline-block rounded bg-green-500 px-2 py-1 text-xs text-white hover:bg-green-600 transition-colors"
+													title="Click to mark as unpaid"
+												>
+													✅ Paid
+												</button>
 											{:else}
-												<span class="inline-block rounded bg-amber-500 px-2 py-1 text-xs text-white">⏳ Unpaid</span>
+												<button
+													onclick={() => openPaymentModal(memorial)}
+													disabled={isTogglingPayment}
+													class="inline-block rounded bg-amber-500 px-2 py-1 text-xs text-white hover:bg-amber-600 transition-colors"
+													title="Click to mark as paid"
+												>
+													⏳ Unpaid
+												</button>
 											{/if}
 										</div>
 										
@@ -1687,6 +1858,74 @@
 					</div>
 				</div>
 			{/if}
+		</div>
+	{/if}
+
+	<!-- Payment Modal -->
+	{#if paymentModal}
+		<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+			<div class="w-full max-w-md rounded-xl border border-white/20 bg-gradient-to-br from-slate-900 to-slate-800 p-6 shadow-2xl">
+				<h3 class="mb-4 text-xl font-bold text-white">Mark Memorial as Paid</h3>
+				
+				<div class="mb-4 rounded-lg border border-white/10 bg-white/5 p-3">
+					<p class="text-sm text-white/70 mb-1">Memorial:</p>
+					<p class="font-semibold text-white">{paymentModal.lovedOneName}</p>
+					<p class="text-sm text-white/70 mt-1">Creator: {paymentModal.creatorEmail}</p>
+				</div>
+
+				<form onsubmit={(e) => { e.preventDefault(); togglePaymentStatus(paymentModal.id, true); }} class="space-y-4">
+					<div>
+						<label class="block text-sm font-medium text-white/90 mb-2">Payment Method</label>
+						<select
+							bind:value={paymentForm.method}
+							class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white focus:border-amber-400 focus:outline-none"
+						>
+							<option value="cash">Cash</option>
+							<option value="check">Check</option>
+							<option value="bank_transfer">Bank Transfer</option>
+							<option value="venmo">Venmo</option>
+							<option value="paypal">PayPal</option>
+							<option value="zelle">Zelle</option>
+							<option value="other">Other</option>
+						</select>
+					</div>
+
+					<div>
+						<label class="block text-sm font-medium text-white/90 mb-2">Notes (Optional)</label>
+						<textarea
+							bind:value={paymentForm.notes}
+							placeholder="Add any payment details or notes..."
+							rows="3"
+							class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white placeholder-white/50 focus:border-amber-400 focus:outline-none"
+						></textarea>
+					</div>
+
+					<div class="flex gap-3 pt-2">
+						<Button
+							type="submit"
+							disabled={isTogglingPayment}
+							loading={isTogglingPayment}
+							variant="primary"
+							size="md"
+							rounded="lg"
+							class="flex-1 min-h-[44px]"
+						>
+							{isTogglingPayment ? 'Processing...' : '✅ Mark as Paid'}
+						</Button>
+						<Button
+							type="button"
+							onclick={closePaymentModal}
+							disabled={isTogglingPayment}
+							variant="secondary"
+							size="md"
+							rounded="lg"
+							class="flex-1 min-h-[44px]"
+						>
+							❌ Cancel
+						</Button>
+					</div>
+				</form>
+			</div>
 		</div>
 	{/if}
 </div>
