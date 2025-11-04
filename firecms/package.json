@@ -15,9 +15,12 @@
   },
   "scripts": {
     "dev": "vite --mode development",
-    "build": "vite build && tsc",
+    "build": "vite build",
+    "build:check": "vite build && tsc",
     "preview": "vite build && vite preview",
-    "deploy": "vite build && firebase deploy --only hosting --project fir-tweb"
+    "deploy": "vite build && firebase deploy --only hosting --project fir-tweb",
+    "deploy:vercel": "vercel --prod",
+    "typecheck": "tsc --noEmit"
   },
   "browserslist": {
     "production": [

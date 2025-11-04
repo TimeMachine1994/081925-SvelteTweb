@@ -393,83 +393,102 @@
 </script>
 
 <!-- Simplified Admin Dashboard with Tabs -->
-<div class="rounded-2xl border border-white/20 bg-white/10 p-6 shadow-2xl backdrop-blur-md">
-	<!-- Tab Navigation -->
-	<div class="mb-6 flex flex-wrap gap-2 border-b border-white/20 pb-4">
-		<button
-			onclick={() => (activeTab = 'overview')}
-			class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 {activeTab === 'overview' 
-				? 'bg-white text-gray-900 shadow-lg' 
-				: 'bg-white/10 text-white hover:bg-white/20'}"
-		>
-			📊 Overview
-		</button>
-		<button
-			onclick={() => (activeTab = 'funeral-directors')}
-			class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 {activeTab === 'funeral-directors' 
-				? 'bg-white text-gray-900 shadow-lg' 
-				: 'bg-white/10 text-white hover:bg-white/20'}"
-		>
-			🏥 Funeral Directors
-		</button>
-		<button
-			onclick={() => (activeTab = 'memorials')}
-			class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 {activeTab === 'memorials' 
-				? 'bg-white text-gray-900 shadow-lg' 
-				: 'bg-white/10 text-white hover:bg-white/20'}"
-		>
-			💝 Memorials
-		</button>
-		<button
-			onclick={() => (activeTab = 'memorial-owners')}
-			class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 {activeTab === 'memorial-owners' 
-				? 'bg-white text-gray-900 shadow-lg' 
-				: 'bg-white/10 text-white hover:bg-white/20'}"
-		>
-			👥 Memorial Owners
-		</button>
-		<button
-			onclick={() => (activeTab = 'create-memorial')}
-			class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 {activeTab === 'create-memorial' 
-				? 'bg-white text-gray-900 shadow-lg' 
-				: 'bg-white/10 text-white hover:bg-white/20'}"
-		>
-			➕ Create Memorial
-		</button>
-		<button
-			onclick={() => {
-				activeTab = 'audit-logs';
-				loadAuditLogs();
-			}}
-			class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 {activeTab === 'audit-logs' 
-				? 'bg-white text-gray-900 shadow-lg' 
-				: 'bg-white/10 text-white hover:bg-white/20'}"
-		>
-			🔍 Audit Logs
-		</button>
+<div class="rounded-xl md:rounded-2xl border border-white/20 bg-white/10 p-4 md:p-6 shadow-2xl backdrop-blur-md">
+	<!-- Tab Navigation - Responsive: Dropdown on mobile, buttons on desktop -->
+	<div class="mb-6 border-b border-white/20 pb-4">
+		<!-- Mobile Dropdown -->
+		<div class="md:hidden">
+			<select
+				bind:value={activeTab}
+				onchange={() => activeTab === 'audit-logs' && loadAuditLogs()}
+				class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-white text-base font-medium focus:border-amber-400 focus:outline-none"
+			>
+				<option value="overview">📊 Overview</option>
+				<option value="funeral-directors">🏥 Funeral Directors</option>
+				<option value="memorials">💝 Memorials</option>
+				<option value="memorial-owners">👥 Memorial Owners</option>
+				<option value="create-memorial">➕ Create Memorial</option>
+				<option value="audit-logs">🔍 Audit Logs</option>
+			</select>
+		</div>
+		
+		<!-- Desktop Tabs -->
+		<div class="hidden md:flex flex-wrap gap-2">
+			<button
+				onclick={() => (activeTab = 'overview')}
+				class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px] {activeTab === 'overview' 
+					? 'bg-white text-gray-900 shadow-lg' 
+					: 'bg-white/10 text-white hover:bg-white/20'}"
+			>
+				📊 Overview
+			</button>
+			<button
+				onclick={() => (activeTab = 'funeral-directors')}
+				class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px] {activeTab === 'funeral-directors' 
+					? 'bg-white text-gray-900 shadow-lg' 
+					: 'bg-white/10 text-white hover:bg-white/20'}"
+			>
+				🏥 Funeral Directors
+			</button>
+			<button
+				onclick={() => (activeTab = 'memorials')}
+				class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px] {activeTab === 'memorials' 
+					? 'bg-white text-gray-900 shadow-lg' 
+					: 'bg-white/10 text-white hover:bg-white/20'}"
+			>
+				💝 Memorials
+			</button>
+			<button
+				onclick={() => (activeTab = 'memorial-owners')}
+				class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px] {activeTab === 'memorial-owners' 
+					? 'bg-white text-gray-900 shadow-lg' 
+					: 'bg-white/10 text-white hover:bg-white/20'}"
+			>
+				👥 Memorial Owners
+			</button>
+			<button
+				onclick={() => (activeTab = 'create-memorial')}
+				class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px] {activeTab === 'create-memorial' 
+					? 'bg-white text-gray-900 shadow-lg' 
+					: 'bg-white/10 text-white hover:bg-white/20'}"
+			>
+				➕ Create Memorial
+			</button>
+			<button
+				onclick={() => {
+					activeTab = 'audit-logs';
+					loadAuditLogs();
+				}}
+				class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px] {activeTab === 'audit-logs' 
+					? 'bg-white text-gray-900 shadow-lg' 
+					: 'bg-white/10 text-white hover:bg-white/20'}"
+			>
+				🔍 Audit Logs
+			</button>
+		</div>
 	</div>
 
 	<!-- Overview Tab -->
 	{#if activeTab === 'overview'}
-		<div class="space-y-6">
-			<h2 class="mb-4 text-2xl font-bold text-white">System Overview</h2>
+		<div class="space-y-4 md:space-y-6">
+			<h2 class="text-xl md:text-2xl font-bold text-white">System Overview</h2>
 
-			<div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-				<div class="rounded-xl border border-white/10 bg-white/5 p-4">
-					<div class="text-sm text-white/70">Scheduled Memorials</div>
-					<div class="text-2xl font-bold text-amber-400">{scheduledMemorials.length}</div>
+			<div class="grid grid-cols-2 gap-3 md:grid-cols-2 lg:grid-cols-4 md:gap-4">
+				<div class="rounded-xl border border-white/10 bg-white/5 p-3 md:p-4">
+					<div class="text-xs md:text-sm text-white/70 mb-1">Scheduled</div>
+					<div class="text-xl md:text-2xl font-bold text-amber-400">{scheduledMemorials.length}</div>
 				</div>
-				<div class="rounded-xl border border-white/10 bg-white/5 p-4">
-					<div class="text-sm text-white/70">Completed Memorials</div>
-					<div class="text-2xl font-bold text-green-400">{completedMemorials.length}</div>
+				<div class="rounded-xl border border-white/10 bg-white/5 p-3 md:p-4">
+					<div class="text-xs md:text-sm text-white/70 mb-1">Completed</div>
+					<div class="text-xl md:text-2xl font-bold text-green-400">{completedMemorials.length}</div>
 				</div>
-				<div class="rounded-xl border border-white/10 bg-white/5 p-4">
-					<div class="text-sm text-white/70">Pending Approvals</div>
-					<div class="text-2xl font-bold text-amber-400">{pendingFuneralDirectors.length}</div>
+				<div class="rounded-xl border border-white/10 bg-white/5 p-3 md:p-4">
+					<div class="text-xs md:text-sm text-white/70 mb-1">Pending</div>
+					<div class="text-xl md:text-2xl font-bold text-amber-400">{pendingFuneralDirectors.length}</div>
 				</div>
-				<div class="rounded-xl border border-white/10 bg-white/5 p-4">
-					<div class="text-sm text-white/70">Total Users</div>
-					<div class="text-2xl font-bold text-white">{allUsers.length}</div>
+				<div class="rounded-xl border border-white/10 bg-white/5 p-3 md:p-4">
+					<div class="text-xs md:text-sm text-white/70 mb-1">Total Users</div>
+					<div class="text-xl md:text-2xl font-bold text-white">{allUsers.length}</div>
 				</div>
 			</div>
 
@@ -505,7 +524,8 @@
 				</div>
 
 				{#if scheduledMemorials.length > 0}
-					<div class="overflow-hidden rounded-lg border border-white/10">
+					<!-- Desktop Table -->
+					<div class="hidden md:block overflow-hidden rounded-lg border border-white/10">
 						<div class="overflow-x-auto">
 							<table class="w-full">
 								<thead class="bg-white/10">
@@ -525,7 +545,7 @@
 													type="checkbox"
 													checked={selectedMemorials.has(memorial.id || '')}
 													onchange={(e) => handleMemorialSelect(memorial.id || '', e)}
-													class="rounded border-white/20 bg-white/10 text-blue-500"
+													class="rounded border-white/20 bg-white/10 text-blue-500 w-4 h-4"
 												/>
 											</td>
 											<td class="px-3 py-2 text-white font-medium">{memorial.lovedOneName}</td>
@@ -557,6 +577,49 @@
 							</table>
 						</div>
 					</div>
+
+					<!-- Mobile Cards -->
+					<div class="md:hidden space-y-3">
+						{#each scheduledMemorials as memorial}
+							<div class="rounded-lg border border-white/10 bg-white/5 p-4">
+								<div class="flex items-start gap-3 mb-3">
+									<input
+										type="checkbox"
+										checked={selectedMemorials.has(memorial.id || '')}
+										onchange={(e) => handleMemorialSelect(memorial.id || '', e)}
+										class="mt-1 rounded border-white/20 bg-white/10 text-blue-500 w-5 h-5 min-w-[20px]"
+									/>
+									<div class="flex-1 min-w-0">
+										<h3 class="text-white font-medium text-base mb-1 break-words">{memorial.lovedOneName}</h3>
+										<p class="text-sm text-white/70 mb-1 break-all">{memorial.creatorEmail}</p>
+										<p class="text-xs text-white/50">
+											{memorial.createdAt ? new Date(memorial.createdAt).toLocaleDateString() : 'Unknown'}
+										</p>
+									</div>
+								</div>
+								<div class="flex flex-wrap gap-2">
+									<a
+										href="/{memorial.fullSlug}"
+										class="flex-1 min-w-[calc(50%-0.25rem)] text-center px-3 py-2 rounded-lg bg-blue-500/20 text-blue-300 text-sm font-medium min-h-[44px] flex items-center justify-center"
+									>
+										View
+									</a>
+									<a
+										href="/memorials/{memorial.id}/streams"
+										class="flex-1 min-w-[calc(50%-0.25rem)] text-center px-3 py-2 rounded-lg bg-green-500/20 text-green-300 text-sm font-medium min-h-[44px] flex items-center justify-center"
+									>
+										Streams
+									</a>
+									<button
+										onclick={() => toggleMemorialStatus(true)}
+										class="w-full px-3 py-2 rounded-lg bg-amber-500/20 text-amber-300 text-sm font-medium min-h-[44px]"
+									>
+										✅ Mark Complete
+									</button>
+								</div>
+							</div>
+						{/each}
+					</div>
 				{:else}
 					<div class="text-center py-8 text-white/70">
 						<p>No scheduled memorials found</p>
@@ -566,14 +629,15 @@
 			</div>
 
 			<div class="rounded-xl border border-white/10 bg-white/5 p-4">
-				<h3 class="mb-3 text-lg font-semibold text-white">Quick Actions</h3>
-				<div class="flex flex-wrap gap-3">
+				<h3 class="mb-3 text-base md:text-lg font-semibold text-white">Quick Actions</h3>
+				<div class="flex flex-col sm:flex-row gap-3">
 					<Button
 						onclick={() => (activeTab = 'funeral-directors')}
 						variant="role"
 						role="admin"
 						size="md"
 						rounded="lg"
+						class="w-full sm:w-auto min-h-[44px]"
 					>
 						Review Pending Directors ({pendingFuneralDirectors.length})
 					</Button>
@@ -582,6 +646,7 @@
 						variant="secondary"
 						size="md"
 						rounded="lg"
+						class="w-full sm:w-auto min-h-[44px]"
 					>
 						Create New Memorial
 					</Button>
@@ -909,28 +974,28 @@
 
 	<!-- Create Memorial Tab -->
 	{#if activeTab === 'create-memorial'}
-		<div class="space-y-6">
-			<h2 class="mb-4 text-2xl font-bold text-white">Create New Memorial</h2>
+		<div class="space-y-4 md:space-y-6">
+			<h2 class="text-xl md:text-2xl font-bold text-white">Create New Memorial</h2>
 
-			<div class="rounded-xl border border-white/10 bg-white/5 p-6">
+			<div class="rounded-xl border border-white/10 bg-white/5 p-4 md:p-6">
 				<form onsubmit={createMemorial} class="space-y-4">
 					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<div>
-							<label class="mb-2 block font-semibold text-white">Loved One's Name *</label>
+							<label class="mb-2 block text-sm md:text-base font-semibold text-white">Loved One's Name *</label>
 							<input
 								type="text"
 								bind:value={newMemorialForm.lovedOneName}
-								class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white placeholder-white/50 focus:border-amber-400 focus:outline-none"
+								class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-base text-white placeholder-white/50 focus:border-amber-400 focus:outline-none min-h-[44px]"
 								placeholder="Enter the loved one's name"
 								required
 							/>
 						</div>
 						<div>
-							<label class="mb-2 block font-semibold text-white">Creator Email *</label>
+							<label class="mb-2 block text-sm md:text-base font-semibold text-white">Creator Email *</label>
 							<input
 								type="email"
 								bind:value={newMemorialForm.creatorEmail}
-								class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white placeholder-white/50 focus:border-amber-400 focus:outline-none"
+								class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-base text-white placeholder-white/50 focus:border-amber-400 focus:outline-none min-h-[44px]"
 								placeholder="Family contact email"
 								required
 							/>
@@ -939,20 +1004,20 @@
 
 					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<div>
-							<label class="mb-2 block font-semibold text-white">Creator Name</label>
+							<label class="mb-2 block text-sm md:text-base font-semibold text-white">Creator Name</label>
 							<input
 								type="text"
 								bind:value={newMemorialForm.creatorName}
-								class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white placeholder-white/50 focus:border-amber-400 focus:outline-none"
+								class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-base text-white placeholder-white/50 focus:border-amber-400 focus:outline-none min-h-[44px]"
 								placeholder="Family contact name"
 							/>
 						</div>
 						<div>
-							<label class="mb-2 block font-semibold text-white">Location</label>
+							<label class="mb-2 block text-sm md:text-base font-semibold text-white">Location</label>
 							<input
 								type="text"
 								bind:value={newMemorialForm.location}
-								class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white placeholder-white/50 focus:border-amber-400 focus:outline-none"
+								class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-base text-white placeholder-white/50 focus:border-amber-400 focus:outline-none min-h-[44px]"
 								placeholder="Service location"
 							/>
 						</div>
@@ -960,28 +1025,28 @@
 
 					<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<div>
-							<label class="mb-2 block font-semibold text-white">Service Date</label>
+							<label class="mb-2 block text-sm md:text-base font-semibold text-white">Service Date</label>
 							<input
 								type="date"
 								bind:value={newMemorialForm.serviceDate}
-								class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white focus:border-amber-400 focus:outline-none"
+								class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-base text-white focus:border-amber-400 focus:outline-none min-h-[44px]"
 							/>
 						</div>
 						<div>
-							<label class="mb-2 block font-semibold text-white">Service Time</label>
+							<label class="mb-2 block text-sm md:text-base font-semibold text-white">Service Time</label>
 							<input
 								type="time"
 								bind:value={newMemorialForm.serviceTime}
-								class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white focus:border-amber-400 focus:outline-none"
+								class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-base text-white focus:border-amber-400 focus:outline-none min-h-[44px]"
 							/>
 						</div>
 					</div>
 
 					<div>
-						<label class="mb-2 block font-semibold text-white">Memorial Description</label>
+						<label class="mb-2 block text-sm md:text-base font-semibold text-white">Memorial Description</label>
 						<textarea
 							bind:value={newMemorialForm.content}
-							class="h-24 w-full resize-none rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white placeholder-white/50 focus:border-amber-400 focus:outline-none"
+							class="h-24 w-full resize-none rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-base text-white placeholder-white/50 focus:border-amber-400 focus:outline-none"
 							placeholder="Brief description or obituary text"
 						></textarea>
 					</div>
@@ -996,7 +1061,7 @@
 						<label for="isPublic" class="text-white">Make memorial publicly visible</label>
 					</div>
 
-					<div class="flex gap-4 pt-4">
+					<div class="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
 						<Button
 							type="submit"
 							disabled={isCreatingMemorial}
@@ -1005,6 +1070,7 @@
 							role="admin"
 							size="lg"
 							rounded="lg"
+							class="w-full sm:w-auto min-h-[48px]"
 						>
 							{isCreatingMemorial ? 'Creating...' : '✨ Create Memorial'}
 						</Button>
@@ -1013,6 +1079,7 @@
 							size="lg"
 							onclick={() => (activeTab = 'overview')}
 							rounded="lg"
+							class="w-full sm:w-auto min-h-[48px]"
 						>
 							Cancel
 						</Button>
@@ -1024,18 +1091,18 @@
 
 	<!-- Audit Logs Tab -->
 	{#if activeTab === 'audit-logs'}
-		<div class="space-y-6">
-			<h2 class="mb-4 text-2xl font-bold text-white">🔍 Audit Logs</h2>
+		<div class="space-y-4 md:space-y-6">
+			<h2 class="text-xl md:text-2xl font-bold text-white">🔍 Audit Logs</h2>
 
 			<!-- Filters -->
 			<div class="rounded-xl border border-white/10 bg-white/5 p-4">
-				<h3 class="mb-4 text-lg font-semibold text-white">Filters</h3>
-				<div class="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-6">
+				<h3 class="mb-4 text-base md:text-lg font-semibold text-white">Filters</h3>
+				<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
 					<div>
-						<label class="mb-1 block text-sm text-white/70">Action</label>
+						<label class="mb-1 block text-xs sm:text-sm text-white/70">Action</label>
 						<select
 							bind:value={auditFilters.action}
-							class="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white focus:border-amber-400 focus:outline-none"
+							class="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-3 text-base text-white focus:border-amber-400 focus:outline-none min-h-[44px]"
 						>
 							<option value="">All Actions</option>
 							<option value="memorial_created">Memorial Created</option>
@@ -1049,19 +1116,19 @@
 						</select>
 					</div>
 					<div>
-						<label class="mb-1 block text-sm text-white/70">User Email</label>
+						<label class="mb-1 block text-xs sm:text-sm text-white/70">User Email</label>
 						<input
 							type="email"
 							bind:value={auditFilters.userEmail}
 							placeholder="Filter by user"
-							class="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white placeholder-white/50 focus:border-amber-400 focus:outline-none"
+							class="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-3 text-base text-white placeholder-white/50 focus:border-amber-400 focus:outline-none min-h-[44px]"
 						/>
 					</div>
 					<div>
-						<label class="mb-1 block text-sm text-white/70">Resource Type</label>
+						<label class="mb-1 block text-xs sm:text-sm text-white/70">Resource Type</label>
 						<select
 							bind:value={auditFilters.resourceType}
-							class="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white focus:border-amber-400 focus:outline-none"
+							class="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-3 text-base text-white focus:border-amber-400 focus:outline-none min-h-[44px]"
 						>
 							<option value="">All Types</option>
 							<option value="memorial">Memorial</option>
@@ -1071,26 +1138,26 @@
 						</select>
 					</div>
 					<div>
-						<label class="mb-1 block text-sm text-white/70">Date From</label>
+						<label class="mb-1 block text-xs sm:text-sm text-white/70">Date From</label>
 						<input
 							type="date"
 							bind:value={auditFilters.dateFrom}
-							class="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white focus:border-amber-400 focus:outline-none"
+							class="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-3 text-base text-white focus:border-amber-400 focus:outline-none min-h-[44px]"
 						/>
 					</div>
 					<div>
-						<label class="mb-1 block text-sm text-white/70">Date To</label>
+						<label class="mb-1 block text-xs sm:text-sm text-white/70">Date To</label>
 						<input
 							type="date"
 							bind:value={auditFilters.dateTo}
-							class="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white focus:border-amber-400 focus:outline-none"
+							class="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-3 text-base text-white focus:border-amber-400 focus:outline-none min-h-[44px]"
 						/>
 					</div>
 					<div>
-						<label class="mb-1 block text-sm text-white/70">Limit</label>
+						<label class="mb-1 block text-xs sm:text-sm text-white/70">Limit</label>
 						<select
 							bind:value={auditFilters.limit}
-							class="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white focus:border-amber-400 focus:outline-none"
+							class="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-3 text-base text-white focus:border-amber-400 focus:outline-none min-h-[44px]"
 						>
 							<option value={25}>25</option>
 							<option value={50}>50</option>
@@ -1099,7 +1166,7 @@
 						</select>
 					</div>
 				</div>
-				<div class="mt-4 flex gap-2">
+				<div class="mt-4 flex flex-col sm:flex-row gap-3 sm:gap-2">
 					<Button
 						onclick={loadAuditLogs}
 						disabled={auditLoading}
@@ -1108,6 +1175,7 @@
 						role="admin"
 						size="md"
 						rounded="lg"
+						class="w-full sm:w-auto min-h-[44px]"
 					>
 						{auditLoading ? 'Loading...' : '🔍 Search'}
 					</Button>
@@ -1122,6 +1190,7 @@
 						variant="secondary"
 						size="md"
 						rounded="lg"
+						class="w-full sm:w-auto min-h-[44px]"
 					>
 						🔄 Clear Filters
 					</Button>
