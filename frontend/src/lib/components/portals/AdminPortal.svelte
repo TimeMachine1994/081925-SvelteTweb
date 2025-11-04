@@ -569,6 +569,12 @@
 													>
 														Complete
 													</button>
+													<button
+														onclick={() => deleteMemorial(memorial.id || '', memorial.lovedOneName)}
+														class="text-sm text-red-400 hover:text-red-300"
+													>
+														Delete
+													</button>
 												</div>
 											</td>
 										</tr>
@@ -615,6 +621,12 @@
 										class="w-full px-3 py-2 rounded-lg bg-amber-500/20 text-amber-300 text-sm font-medium min-h-[44px]"
 									>
 										✅ Mark Complete
+									</button>
+									<button
+										onclick={() => deleteMemorial(memorial.id || '', memorial.lovedOneName)}
+										class="w-full px-3 py-2 rounded-lg bg-red-500/20 text-red-300 text-sm font-medium min-h-[44px]"
+									>
+										🗑️ Delete Memorial
 									</button>
 								</div>
 							</div>
