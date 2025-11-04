@@ -604,8 +604,10 @@
 									<tr>
 										<th class="px-3 py-2 text-left font-semibold text-white w-12">Select</th>
 										<th class="px-3 py-2 text-left font-semibold text-white">Loved One</th>
+										<th class="px-3 py-2 text-left font-semibold text-white">Scheduled Time</th>
+										<th class="px-3 py-2 text-left font-semibold text-white">Location</th>
+										<th class="px-3 py-2 text-left font-semibold text-white">Payment</th>
 										<th class="px-3 py-2 text-left font-semibold text-white">Creator</th>
-										<th class="px-3 py-2 text-left font-semibold text-white">Created</th>
 										<th class="px-3 py-2 text-left font-semibold text-white">Actions</th>
 									</tr>
 								</thead>
@@ -621,10 +623,30 @@
 												/>
 											</td>
 											<td class="px-3 py-2 text-white font-medium">{memorial.lovedOneName}</td>
-											<td class="px-3 py-2 text-sm text-white/70">{memorial.creatorEmail}</td>
 											<td class="px-3 py-2 text-sm text-white/70">
-												{memorial.createdAt ? new Date(memorial.createdAt).toLocaleDateString() : 'Unknown'}
+												{#if memorial.scheduledStartTime}
+													{new Date(memorial.scheduledStartTime).toLocaleString('en-US', {
+														month: 'short',
+														day: 'numeric',
+														year: 'numeric',
+														hour: 'numeric',
+														minute: '2-digit'
+													})}
+												{:else}
+													<span class="text-white/50">Not scheduled</span>
+												{/if}
 											</td>
+											<td class="px-3 py-2 text-sm text-white/70">
+												{memorial.location}
+											</td>
+											<td class="px-3 py-2">
+												{#if memorial.isPaid}
+													<span class="rounded bg-green-500 px-2 py-1 text-xs text-white w-fit">✅ Paid</span>
+												{:else}
+													<span class="rounded bg-amber-500 px-2 py-1 text-xs text-white w-fit">⏳ Unpaid</span>
+												{/if}
+											</td>
+											<td class="px-3 py-2 text-sm text-white/70">{memorial.creatorEmail}</td>
 											<td class="px-3 py-2">
 												<div class="flex gap-2">
 													<a
@@ -673,10 +695,32 @@
 									/>
 									<div class="flex-1 min-w-0">
 										<h3 class="text-white font-medium text-base mb-1 break-words">{memorial.lovedOneName}</h3>
-										<p class="text-sm text-white/70 mb-1 break-all">{memorial.creatorEmail}</p>
-										<p class="text-xs text-white/50">
-											{memorial.createdAt ? new Date(memorial.createdAt).toLocaleDateString() : 'Unknown'}
+										
+										{#if memorial.scheduledStartTime}
+											<p class="text-sm text-white/70 mb-1">
+												📅 {new Date(memorial.scheduledStartTime).toLocaleString('en-US', {
+													month: 'short',
+													day: 'numeric',
+													year: 'numeric',
+													hour: 'numeric',
+													minute: '2-digit'
+												})}
+											</p>
+										{/if}
+										
+										<p class="text-sm text-white/70 mb-1">
+											📍 {memorial.location}
 										</p>
+										
+										<div class="mb-2">
+											{#if memorial.isPaid}
+												<span class="inline-block rounded bg-green-500 px-2 py-1 text-xs text-white">✅ Paid</span>
+											{:else}
+												<span class="inline-block rounded bg-amber-500 px-2 py-1 text-xs text-white">⏳ Unpaid</span>
+											{/if}
+										</div>
+										
+										<p class="text-sm text-white/70 mb-1 break-all">{memorial.creatorEmail}</p>
 									</div>
 								</div>
 								<div class="flex flex-wrap gap-2">

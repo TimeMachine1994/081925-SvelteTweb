@@ -51,6 +51,26 @@ export const load = async ({ locals }: any) => {
 			const data = doc.data();
 			console.log(`💝 [ADMIN LOAD] Processing memorial: ${data.lovedOneName}`);
 
+			// Extract scheduled start time from new or legacy structure
+			let scheduledStartTime = null;
+			if (data.services?.main?.time?.date && data.services?.main?.time?.time && !data.services.main.time.isUnknown) {
+				scheduledStartTime = `${data.services.main.time.date}T${data.services.main.time.time}`;
+			} else if (data.memorialDate && data.memorialTime) {
+				// Fallback to legacy fields
+				scheduledStartTime = `${data.memorialDate}T${data.memorialTime}`;
+			}
+
+			// Extract location from new or legacy structure
+			const location = data.services?.main?.location?.name 
+				|| data.memorialLocationName 
+				|| 'Not specified';
+
+			// Extract payment status - check multiple sources
+			const isPaid = data.isPaid 
+				|| data.calculatorConfig?.isPaid 
+				|| data.paymentStatus === 'paid'
+				|| false;
+
 			return {
 				id: doc.id,
 				lovedOneName: data.lovedOneName || 'Unknown',
@@ -63,7 +83,12 @@ export const load = async ({ locals }: any) => {
 				// Payment status from calculatorConfig (following established pattern)
 				paymentStatus: data.calculatorConfig?.status || 'draft',
 				// Check if has active livestream
-				hasLivestream: !!data.livestream?.isActive
+				hasLivestream: !!data.livestream?.isActive,
+				// NEW FIELDS for enhanced display
+				scheduledStartTime,
+				location,
+				isPaid,
+				paymentAmount: data.calculatorConfig?.totalPrice || null
 			};
 		});
 
