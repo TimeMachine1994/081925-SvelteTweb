@@ -2,6 +2,8 @@
 	import { Upload, X, Play, Settings, Plus, ExternalLink, ChevronUp, ChevronDown } from 'lucide-svelte';
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	import { SimpleSlideshowGenerator } from '$lib/utils/SimpleSlideshowGenerator';
+	import AudioUploader from './AudioUploader.svelte';
+	import type { SlideshowAudio } from '$lib/types/slideshow';
 
 	interface SlideshowPhoto {
 		id: string;
@@ -68,6 +70,12 @@
 		videoQuality: 'medium', // Fixed to 1080p
 		aspectRatio: '16:9' // Fixed to widescreen
 	});
+
+	// Audio state
+	let audioTrack = $state<SlideshowAudio | null>(null);
+	let audioVolume = $state(0.5);
+	let audioFadeIn = $state(true);
+	let audioFadeOut = $state(true);
 
 	// Event dispatcher
 	const dispatch = createEventDispatcher();
@@ -908,7 +916,23 @@
 			}
 		});
 		
-		formData.append('settings', JSON.stringify(settings));
+		// Add audio file and settings if present
+		if (audioTrack?.file) {
+			formData.append('audio', audioTrack.file);
+			formData.append('audioName', audioTrack.name);
+			formData.append('audioDuration', audioTrack.duration.toString());
+			console.log('🎵 Including audio in upload:', audioTrack.name);
+		}
+		
+		// Add audio settings to settings object
+		const settingsWithAudio = {
+			...settings,
+			audioVolume,
+			audioFadeIn,
+			audioFadeOut
+		};
+		
+		formData.append('settings', JSON.stringify(settingsWithAudio));
 		
 		// This is always a new slideshow since we removed edit mode
 
@@ -1698,6 +1722,19 @@
 					{/if}
 				{/if}
 			</div>
+		</div>
+	{/if}
+
+	<!-- Step 2.5: Background Music (Optional) -->
+	{#if photos.length > 0 && !showVideoPreview}
+		<div class="workflow-step active">
+			<AudioUploader 
+				bind:audio={audioTrack}
+				bind:volume={audioVolume}
+				bind:fadeIn={audioFadeIn}
+				bind:fadeOut={audioFadeOut}
+				maxFileSize={50}
+			/>
 		</div>
 	{/if}
 		

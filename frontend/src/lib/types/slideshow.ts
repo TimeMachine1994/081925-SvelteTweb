@@ -9,6 +9,7 @@ export interface MemorialSlideshow {
 	isFirebaseHosted: boolean; // Always true for new slideshows
 	photos: SlideshowPhoto[];
 	settings: SlideshowSettings;
+	audio?: SlideshowAudio; // Optional background audio
 	createdBy: string;
 	createdAt: string;
 	updatedAt: string;
@@ -32,6 +33,20 @@ export interface SlideshowSettings {
 	transitionType: 'fade' | 'slide' | 'zoom';
 	videoQuality: 'low' | 'medium' | 'high';
 	aspectRatio: '16:9' | '4:3' | '1:1';
+	audioVolume?: number; // 0-1, default 0.5
+	audioFadeIn?: boolean; // Fade in at start
+	audioFadeOut?: boolean; // Fade out at end
+}
+
+export interface SlideshowAudio {
+	id: string;
+	name: string;
+	file?: File; // For upload
+	url?: string; // Firebase Storage URL after upload
+	storagePath?: string; // Firebase Storage path
+	duration: number; // Audio duration in seconds
+	size: number; // File size in bytes
+	type: string; // MIME type (audio/mpeg, audio/wav, etc.)
 }
 
 export interface SlideshowGenerationProgress {
