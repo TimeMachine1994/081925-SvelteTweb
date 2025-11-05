@@ -140,6 +140,7 @@
 						<SlideshowSection 
 							{slideshows} 
 							memorialName={memorial.lovedOneName || 'Unknown'}
+							memorialId={memorial.id}
 							editable={canEditSlideshows()}
 							currentUserId={user?.uid}
 							heroMode={true}
@@ -192,6 +193,7 @@
 							<SlideshowSection 
 								{slideshows} 
 								memorialName={memorial.lovedOneName || 'Unknown'}
+								memorialId={memorial.id}
 								editable={canEditSlideshows()}
 								currentUserId={user?.uid}
 								heroMode={true}

@@ -845,6 +845,18 @@
 			generationPhase = 'Preview ready!';
 			generationProgress = 100;
 
+			// Debug: Check if Step 4 should appear
+			console.log('🔍 [STEP 4 DEBUG] After video generation:', {
+				showVideoPreview,
+				isPublished,
+				hasDraftChanges,
+				draftVideoBlob: !!draftVideoBlob,
+				memorialId,
+				generatedVideoBlob: !!generatedVideoBlob,
+				shouldShowStep4: showVideoPreview && (!isPublished || (hasDraftChanges && !!draftVideoBlob)),
+				shouldShowButton: !!memorialId
+			});
+
 			// Auto-scroll to step 4 on mobile after video generation
 			setTimeout(() => {
 				if (window.innerWidth <= 768) { // Mobile breakpoint
@@ -1776,6 +1788,21 @@
 							</svg>
 							Add to Memorial
 						{/if}
+					</button>
+				{:else}
+					<!-- No Memorial ID - Show Warning and Download Option -->
+					<div class="no-memorial-warning">
+						<p class="warning-text">⚠️ No memorial linked. You can download the video, but can't publish to a memorial.</p>
+						<p class="warning-hint">To publish to a memorial, access this page from your profile or a memorial page.</p>
+					</div>
+					<button 
+						class="secondary-btn"
+						onclick={downloadVideo}
+					>
+						<svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+						</svg>
+						Download Video
 					</button>
 				{/if}
 			</div>
@@ -2763,6 +2790,33 @@
 		align-items: center;
 		flex-wrap: wrap;
 		margin-top: 2rem;
+	}
+
+	/* No Memorial Warning */
+	.no-memorial-warning {
+		background: rgba(251, 191, 36, 0.1);
+		border: 2px solid rgba(251, 191, 36, 0.3);
+		border-radius: 12px;
+		padding: 1.5rem;
+		margin-bottom: 1rem;
+		text-align: center;
+		max-width: 600px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	.warning-text {
+		color: #92400e;
+		font-size: 1.1rem;
+		font-weight: 600;
+		margin: 0 0 0.5rem 0;
+	}
+
+	.warning-hint {
+		color: #78350f;
+		font-size: 0.9rem;
+		margin: 0;
+		font-style: italic;
 	}
 
 	.draft-actions {
