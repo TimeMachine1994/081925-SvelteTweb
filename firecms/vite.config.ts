@@ -8,7 +8,8 @@ export default defineConfig({
     build: {
         outDir: "./build",
         target: "ESNEXT",
-        sourcemap: true
+        sourcemap: true,
+        chunkSizeWarningLimit: 1000
     },
     optimizeDeps: { include: ["react/jsx-runtime"] },
     plugins: [
