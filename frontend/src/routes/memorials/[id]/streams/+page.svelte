@@ -8,6 +8,7 @@
 	import { StreamCard } from '$lib/ui';
 	import CompletedStreamCard from '$lib/components/CompletedStreamCard.svelte';
 	import Button from '$lib/ui/primitives/Button.svelte';
+	import NewStreamCard from '$lib/ui/stream/NewStreamCard.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -471,6 +472,11 @@
 			{:else}
 				<!-- Streams Grid -->
 				<div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+					<!-- New Stream Creation Card -->
+					{#if data.user && (data.user.role === 'funeral_director' || data.user.role === 'admin')}
+						<NewStreamCard memorialId={memorialId} />
+					{/if}
+					
 					{#each streams as stream (stream.id)}
 						{#if stream.status === 'completed'}
 							{@const _ = console.log(
