@@ -24,7 +24,8 @@ if (admin.apps.length === 0) {
 			const firestore = firebaseAdminApp.firestore();
 			firestore.settings({
 				host: '127.0.0.1:8080',
-				ssl: false
+				ssl: false,
+				ignoreUndefinedProperties: true
 			});
 			console.log('✅ Firebase Admin initialized for local development with emulators.');
 		} else {
@@ -43,6 +44,10 @@ if (admin.apps.length === 0) {
 						credential: admin.credential.cert(serviceAccount),
 						projectId: serviceAccount.project_id, // Explicitly set projectId from service account
 						storageBucket: storageBucket
+					});
+					// Configure Firestore to ignore undefined properties
+					firebaseAdminApp.firestore().settings({
+						ignoreUndefinedProperties: true
 					});
 					console.log(`✅ Firebase Admin initialized for production. Project ID from service account: ${serviceAccount.project_id}`);
 				} catch (parseError) {
