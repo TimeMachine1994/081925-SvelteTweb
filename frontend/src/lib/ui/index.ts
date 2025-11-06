@@ -17,11 +17,8 @@ export { default as Input } from './primitives/Input.svelte';
 // Navigation Components
 export { default as Navbar } from './navigation/Navbar.svelte';
 
-// Stream Components
-export { default as StreamCard } from './stream/StreamCard.svelte';
-export { default as StreamHeader } from './stream/StreamHeader.svelte';
-export { default as StreamCredentials } from './stream/StreamCredentials.svelte';
-export { default as StreamActions } from './stream/StreamActions.svelte';
+// Stream Components - REMOVED FOR REBUILD
+// TODO: Re-export new stream components here after rebuilding
 
 // Re-export existing components that fit the new system
 export { default as LoadingSpinner } from '../components/LoadingSpinner.svelte';

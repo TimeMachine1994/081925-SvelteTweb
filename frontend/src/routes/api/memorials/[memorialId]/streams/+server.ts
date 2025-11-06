@@ -2,9 +2,7 @@ import { adminAuth, adminDb, FieldValue } from '$lib/server/firebase';
 import { error as SvelteKitError, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import type { Stream } from '$lib/types/stream';
-import { createLiveInput, isCloudflareConfigured } from '$lib/server/cloudflare-stream';
-import { setupOBSMethod, setupPhoneToOBSMethod, setupPhoneToMUXMethod } from '$lib/server/streaming-methods';
-import { isValidStreamingMethod } from '$lib/types/streaming-methods';
+import { setupOBSStreaming } from '$lib/server/streaming-methods';
 
 // GET - Fetch all streams for a memorial
 export const GET: RequestHandler = async ({ locals, params }) => {
@@ -110,8 +108,7 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 		const { 
 			title, 
 			description, 
-			scheduledStartTime, 
-			streamingMethod = 'obs', // Default to OBS method
+			scheduledStartTime,
 			calculatorServiceType, 
 			calculatorServiceIndex,
 			serviceHash,
@@ -122,13 +119,6 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 		if (!title || typeof title !== 'string' || title.trim().length === 0) {
 			throw SvelteKitError(400, 'Stream title is required');
 		}
-
-		// Validate streaming method
-		if (!isValidStreamingMethod(streamingMethod)) {
-			throw SvelteKitError(400, `Invalid streaming method: ${streamingMethod}`);
-		}
-
-		console.log('🎬 [STREAMS API] Selected streaming method:', streamingMethod);
 
 		// Verify memorial exists and user has access
 		const memorialDoc = await adminDb.collection('memorials').doc(memorialId).get();
@@ -151,51 +141,24 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			throw SvelteKitError(403, 'Permission denied');
 		}
 
-		// Setup streaming method
-		console.log('🎬 [STREAMS API] Setting up streaming method:', streamingMethod);
-		let methodConfig: any = {};
+		// Setup OBS RTMP streaming
+		console.log('🎬 [STREAMS API] Setting up OBS RTMP streaming');
 		let streamKey = '';
 		let rtmpUrl = '';
 		let cloudflareInputId = '';
 
 		try {
-			if (streamingMethod === 'obs') {
-				// OBS Method: Single RTMP stream
-				const config = await setupOBSMethod();
-				streamKey = config.streamKey;
-				rtmpUrl = config.rtmpUrl;
-				cloudflareInputId = config.cloudflareInputId;
-				methodConfig = { type: 'obs', cloudflareInputId };
-			} else if (streamingMethod === 'phone-to-obs') {
-				// Phone to OBS Method: Two streams (phone + OBS)
-				const config = await setupPhoneToOBSMethod();
-				streamKey = config.obsDestination.streamKey;
-				rtmpUrl = config.obsDestination.rtmpUrl;
-				cloudflareInputId = config.obsDestination.cloudflareInputId;
-				methodConfig = {
-					type: 'phone-to-obs',
-					obsDestination: config.obsDestination,
-					phoneSource: config.phoneSource
-				};
-			} else if (streamingMethod === 'phone-to-mux') {
-				// Phone to MUX Method: Phone + restreaming
-				const config = await setupPhoneToMUXMethod();
-				// This will throw an error until Phase 5
-				cloudflareInputId = config.cloudflare.inputId;
-				methodConfig = {
-					type: 'phone-to-mux',
-					cloudflare: config.cloudflare,
-					mux: config.mux
-				};
-			}
-
-			console.log('✅ [STREAMS API] Streaming method configured successfully');
+			const config = await setupOBSStreaming(title.trim());
+			streamKey = config.streamKey;
+			rtmpUrl = config.rtmpUrl;
+			cloudflareInputId = config.cloudflareInputId;
+			console.log('✅ [STREAMS API] OBS streaming configured successfully');
 		} catch (error) {
-			console.error('❌ [STREAMS API] Failed to setup streaming method:', error);
-			throw SvelteKitError(500, `Failed to configure ${streamingMethod} streaming: ${error instanceof Error ? error.message : 'Unknown error'}`);
+			console.error('❌ [STREAMS API] Failed to setup OBS streaming:', error);
+			throw SvelteKitError(500, `Failed to configure OBS streaming: ${error instanceof Error ? error.message : 'Unknown error'}`);
 		}
 
-		// Create stream object with method configuration (avoiding undefined values for Firestore)
+		// Create stream object (avoiding undefined values for Firestore)
 		const streamData: any = {
 			title: title.trim(),
 			description: description?.trim() || '',
@@ -204,8 +167,7 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			isVisible: true,
 			streamKey,
 			rtmpUrl,
-			streamingMethod, // NEW: Store selected method
-			methodConfigured: true, // NEW: Mark as configured
+			cloudflareInputId,
 			createdBy: userId,
 			createdAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
@@ -213,9 +175,6 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 		};
 
 		// Only add optional fields if they have values (avoid undefined)
-		if (cloudflareInputId) {
-			streamData.cloudflareInputId = cloudflareInputId;
-		}
 		if (scheduledStartTime) {
 			streamData.scheduledStartTime = scheduledStartTime;
 		}
@@ -232,17 +191,7 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			streamData.lastSyncedAt = lastSyncedAt;
 		}
 
-		// Add method-specific fields
-		if (streamingMethod === 'phone-to-obs') {
-			streamData.phoneSourceStreamId = methodConfig.phoneSource.cloudflareInputId;
-			streamData.phoneSourcePlaybackUrl = methodConfig.phoneSource.playbackUrl;
-			streamData.phoneSourceWhipUrl = methodConfig.phoneSource.whipUrl;
-		} else if (streamingMethod === 'phone-to-mux') {
-			streamData.muxStreamId = methodConfig.mux.streamId;
-			streamData.muxStreamKey = methodConfig.mux.streamKey;
-			streamData.muxPlaybackId = methodConfig.mux.playbackId;
-			streamData.restreamingEnabled = methodConfig.restreamingConfigured;
-		}
+		// OBS streaming only - no additional method-specific fields needed
 
 		console.log('💾 [STREAMS API] Stream data to save:', JSON.stringify(streamData, null, 2));
 

@@ -2,30 +2,26 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { onMount, onDestroy } from 'svelte';
-	import { Plus, Play, Eye, Camera } from 'lucide-svelte';
+	import { Plus } from 'lucide-svelte';
 	import type { PageData } from './$types';
 	import type { Stream } from '$lib/types/stream';
-	import { StreamCard } from '$lib/ui';
-	import CompletedStreamCard from '$lib/components/CompletedStreamCard.svelte';
 	import Button from '$lib/ui/primitives/Button.svelte';
-	import NewStreamCard from '$lib/ui/stream/NewStreamCard.svelte';
+
+	// TODO: Import new stream components here after rebuilding
 
 	let { data }: { data: PageData } = $props();
 
 	let streams = $state<Stream[]>([]);
 	let loading = $state(false);
 	let error = $state('');
-	let showCreateModal = $state(false);
-	let newStreamTitle = $state('');
-	let newStreamDescription = $state('');
-	let newStreamDate = $state('');
-	let newStreamTime = $state('');
-	let copiedStreamKey = $state<string | null>(null);
-	let copiedRtmpUrl = $state<string | null>(null);
 	let pollingInterval: NodeJS.Timeout | null = null;
 
 	const memorial = data.memorial;
 	const memorialId = memorial.id;
+	const user = data.user;
+
+	// Determine if user can create streams (funeral directors and admins)
+	const canCreateStreams = user && (user.role === 'funeral_director' || user.role === 'admin');
 
 	// Load streams on mount and start polling
 	onMount(async () => {
