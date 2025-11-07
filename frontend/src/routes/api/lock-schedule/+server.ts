@@ -1,11 +1,12 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import Stripe from 'stripe';
-import { STRIPE_SECRET_KEY } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 import { adminDb } from '$lib/firebase-admin';
 import { Timestamp } from 'firebase-admin/firestore';
 
 // Initialize Stripe
+const STRIPE_SECRET_KEY = env.STRIPE_SECRET_KEY!;
 const stripe = new Stripe(STRIPE_SECRET_KEY, {
 	apiVersion: '2025-08-27.basil'
 });

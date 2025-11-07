@@ -4,7 +4,9 @@
 -->
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { PUBLIC_RECAPTCHA_SITE_KEY } from '$env/static/public';
+	import { env } from '$env/dynamic/public';
+
+	const PUBLIC_RECAPTCHA_SITE_KEY = env.PUBLIC_RECAPTCHA_SITE_KEY;
 
 	export const badge: 'bottomright' | 'bottomleft' | 'inline' = 'bottomright';
 

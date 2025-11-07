@@ -1,6 +1,8 @@
-import { SENDGRID_API_KEY, FROM_EMAIL } from '$env/static/private';
 import { env } from '$env/dynamic/private';
 import sgMail from '@sendgrid/mail';
+
+const SENDGRID_API_KEY = env.SENDGRID_API_KEY;
+const FROM_EMAIL = env.FROM_EMAIL;
 
 if (SENDGRID_API_KEY && SENDGRID_API_KEY !== 'mock_key') {
 	sgMail.setApiKey(SENDGRID_API_KEY);

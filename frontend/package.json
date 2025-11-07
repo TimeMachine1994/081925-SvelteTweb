@@ -68,6 +68,7 @@
 	"dependencies": {
 		"@fontsource/fira-mono": "^5.2.6",
 		"@lucide/svelte": "^0.541.0",
+		"@mux/mux-node": "^12.8.0",
 		"@sendgrid/mail": "^8.1.5",
 		"@stripe/stripe-js": "^7.9.0",
 		"@sveltejs/adapter-vercel": "^5.10.2",

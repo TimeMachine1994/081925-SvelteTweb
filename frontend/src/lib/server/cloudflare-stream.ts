@@ -359,6 +359,60 @@ export function extractEmbedIframeUrl(embedHtml: string): string | undefined {
 }
 
 /**
+ * Create a Cloudflare Live Input Output (simulcast to Mux)
+ */
+export async function createLiveOutput(
+	inputId: string,
+	outputUrl: string,
+	streamKey: string
+): Promise<{ uid: string } | null> {
+	console.log('🎬 [CLOUDFLARE] Creating live output for:', inputId);
+
+	if (!CLOUDFLARE_ACCOUNT_ID || !CLOUDFLARE_API_TOKEN) {
+		console.error('❌ [CLOUDFLARE] Missing credentials');
+		return null;
+	}
+
+	try {
+		const response = await fetch(
+			`${CLOUDFLARE_STREAM_API_BASE}/live_inputs/${inputId}/outputs`,
+			{
+				method: 'POST',
+				headers: {
+					Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`,
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					url: outputUrl,
+					streamKey: streamKey,
+					enabled: true
+				})
+			}
+		);
+
+		if (!response.ok) {
+			const errorText = await response.text();
+			console.error('❌ [CLOUDFLARE] Output API error:', errorText);
+			return null;
+		}
+
+		const data: CloudflareApiResponse<{ uid: string }> = await response.json();
+		console.log('✅ [CLOUDFLARE] Live output created:', data.result.uid);
+		return data.result;
+	} catch (error) {
+		console.error('❌ [CLOUDFLARE] Failed to create output:', error);
+		return null;
+	}
+}
+
+/**
+ * Get WHIP URL for browser streaming
+ */
+export function getWHIPUrl(input: CloudflareLiveInput): string | undefined {
+	return input.webRTC?.url;
+}
+
+/**
  * Check if Cloudflare Stream is configured
  */
 export function isCloudflareConfigured(): boolean {

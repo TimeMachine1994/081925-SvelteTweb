@@ -1,12 +1,17 @@
 import { algoliasearch } from 'algoliasearch';
-import { ALGOLIA_ADMIN_KEY } from '$env/static/private';
-import { PUBLIC_ALGOLIA_APP_ID } from '$env/static/public';
+import { env } from '$env/dynamic/private';
+import { env as publicEnv } from '$env/dynamic/public';
 
-if (!ALGOLIA_ADMIN_KEY || !PUBLIC_ALGOLIA_APP_ID) {
-	throw new Error('Algolia environment variables are not set.');
+const ALGOLIA_ADMIN_KEY = env.ALGOLIA_ADMIN_KEY;
+const PUBLIC_ALGOLIA_APP_ID = publicEnv.PUBLIC_ALGOLIA_APP_ID;
+
+let client: ReturnType<typeof algoliasearch> | null = null;
+
+if (ALGOLIA_ADMIN_KEY && PUBLIC_ALGOLIA_APP_ID) {
+	client = algoliasearch(PUBLIC_ALGOLIA_APP_ID, ALGOLIA_ADMIN_KEY);
+} else {
+	console.warn('⚠️ [ALGOLIA] Environment variables not set - search functionality disabled');
 }
-
-const client = algoliasearch(PUBLIC_ALGOLIA_APP_ID, ALGOLIA_ADMIN_KEY);
 
 export { client };
 export default client;

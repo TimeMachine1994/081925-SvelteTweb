@@ -2,8 +2,9 @@ import { adminDb } from '$lib/server/firebase';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import Stripe from 'stripe';
-import { STRIPE_SECRET_KEY } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 
+const STRIPE_SECRET_KEY = env.STRIPE_SECRET_KEY!;
 const stripe = new Stripe(STRIPE_SECRET_KEY, {
 	apiVersion: '2024-10-28.acacia'
 });

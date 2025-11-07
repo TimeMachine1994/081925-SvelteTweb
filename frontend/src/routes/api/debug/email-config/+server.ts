@@ -6,7 +6,10 @@ import {
 	getTemplateIds,
 	isDynamicTemplatesConfigured 
 } from '$lib/server/email';
-import { SENDGRID_API_KEY, FROM_EMAIL } from '$env/static/private';
+import { env } from '$env/dynamic/private';
+
+const SENDGRID_API_KEY = env.SENDGRID_API_KEY;
+const FROM_EMAIL = env.FROM_EMAIL;
 
 export const GET: RequestHandler = async () => {
 	try {

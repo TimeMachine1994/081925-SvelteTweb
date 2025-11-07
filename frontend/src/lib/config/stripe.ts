@@ -1,19 +1,21 @@
 import { dev } from '$app/environment';
 import { browser } from '$app/environment';
-import { PUBLIC_STRIPE_PUBLISHABLE_KEY } from '$env/static/public';
+import { env } from '$env/dynamic/public';
 
 // Get Stripe key from environment or browser globals
 function getStripePublishableKey(): string {
+	const PUBLIC_STRIPE_PUBLISHABLE_KEY = env.PUBLIC_STRIPE_PUBLISHABLE_KEY;
+	
 	// Debug logging
 	console.log('🔍 Checking for Stripe key...');
 	console.log(
-		'PUBLIC_STRIPE_PUBLISHABLE_KEY from $env/static/public:',
+		'PUBLIC_STRIPE_PUBLISHABLE_KEY from $env/dynamic/public:',
 		PUBLIC_STRIPE_PUBLISHABLE_KEY ? 'Found' : 'Not found'
 	);
 
 	// First try SvelteKit's environment system
 	if (PUBLIC_STRIPE_PUBLISHABLE_KEY) {
-		console.log('✅ Using Stripe key from $env/static/public');
+		console.log('✅ Using Stripe key from $env/dynamic/public');
 		return PUBLIC_STRIPE_PUBLISHABLE_KEY;
 	}
 
