@@ -1,15 +1,8 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import Stripe from 'stripe';
 import { adminDb } from '$lib/firebase-admin';
 import { Timestamp } from 'firebase-admin/firestore';
-import { env } from '$env/dynamic/private';
-
-// Initialize Stripe with your secret key
-const STRIPE_SECRET_KEY = env.STRIPE_SECRET_KEY!;
-const stripe = new Stripe(STRIPE_SECRET_KEY, {
-	apiVersion: '2024-10-28.acacia'
-});
+import { stripe } from '$lib/server/stripe';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	try {
