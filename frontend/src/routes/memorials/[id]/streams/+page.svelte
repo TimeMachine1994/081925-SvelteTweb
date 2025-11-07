@@ -15,6 +15,13 @@
 	let loading = $state(false);
 	let error = $state('');
 	let pollingInterval: NodeJS.Timeout | null = null;
+	
+	// Stream creation modal state
+	let showCreateModal = $state(false);
+	let newStreamTitle = $state('');
+	let newStreamDescription = $state('');
+	let newStreamDate = $state('');
+	let newStreamTime = $state('');
 
 	const memorial = data.memorial;
 	const memorialId = memorial.id;
