@@ -1,54 +1,79 @@
 <script lang="ts">
-	// Stream Management Page - Simple Card Foundation
+	import type { PageData } from './$types';
+	import { Plus } from 'lucide-svelte';
+	import CreateStreamModal from '$lib/components/streaming/CreateStreamModal.svelte';
+	import StreamCard from '$lib/components/streaming/StreamCard.svelte';
+
+	export let data: PageData;
+
+	let showCreateModal = false;
+
+	$: ({ memorial, streams, canManage } = data);
 </script>
 
 <div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 py-12 px-4">
-	<div class="mx-auto max-w-4xl">
+	<div class="mx-auto max-w-6xl">
 		<!-- Page Header -->
-		<div class="mb-8 text-center">
-			<h1 class="mb-2 text-3xl font-bold text-gray-900">Stream Management</h1>
-			<p class="text-gray-600">Manage your memorial livestreams</p>
-		</div>
-
-		<!-- Centered Card -->
-		<div class="mx-auto max-w-2xl">
-			<div
-				class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg transition-all duration-300 hover:shadow-xl"
-			>
-				<!-- Card Header -->
-				<div class="border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white px-6 py-4">
-					<div>
-						<h2 class="text-xl font-semibold text-gray-900">Stream Title</h2>
-						<p class="mt-1 text-sm text-gray-500">Stream description goes here</p>
-					</div>
+		<div class="mb-8">
+			<div class="flex items-center justify-between">
+				<div>
+					<h1 class="mb-2 text-3xl font-bold text-gray-900">Stream Management</h1>
+					<p class="text-gray-600">
+						Manage livestreams for {memorial?.lovedOneName || 'Memorial'}
+					</p>
 				</div>
 
-				<!-- Card Body -->
-				<div class="p-6">
-					<div class="space-y-4">
-						<!-- Placeholder content -->
-						<div class="rounded-lg bg-gray-50 p-4">
-							<p class="text-sm text-gray-600">Stream content will go here</p>
-						</div>
-					</div>
-				</div>
-
-				<!-- Card Footer -->
-				<div class="border-t border-gray-100 bg-gray-50 px-6 py-4">
-					<div class="flex justify-end space-x-3">
-						<button
-							class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100"
-						>
-							Action 1
-						</button>
-						<button
-							class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-						>
-							Action 2
-						</button>
-					</div>
-				</div>
+				{#if canManage}
+					<button
+						on:click={() => (showCreateModal = true)}
+						class="flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-white transition-colors hover:bg-blue-700"
+					>
+						<Plus class="h-5 w-5" />
+						Create Stream
+					</button>
+				{/if}
 			</div>
 		</div>
+
+		<!-- Streams List -->
+		{#if streams.length === 0}
+			<div class="rounded-2xl border border-gray-200 bg-white p-12 text-center shadow-lg">
+				<div class="mb-4 text-6xl">📹</div>
+				<h3 class="mb-2 text-lg font-medium text-gray-900">No Live Streams Yet</h3>
+				<p class="mb-6 text-gray-600">
+					{canManage
+						? 'Create your first livestream session to get started.'
+						: 'No livestreams have been scheduled yet.'}
+				</p>
+				{#if canManage}
+					<button
+						on:click={() => (showCreateModal = true)}
+						class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-white transition-colors hover:bg-blue-700"
+					>
+						<Plus class="h-5 w-5" />
+						Create First Stream
+					</button>
+				{/if}
+			</div>
+		{:else}
+			<div class="grid gap-6 md:grid-cols-2 lg:grid-cols-1">
+				{#each streams as stream (stream.id)}
+					<StreamCard {stream} {canManage} memorialId={memorial?.id || ''} />
+				{/each}
+			</div>
+		{/if}
 	</div>
 </div>
+
+<!-- Create Stream Modal -->
+{#if showCreateModal && memorial}
+	<CreateStreamModal
+		memorialId={memorial.id}
+		on:close={() => (showCreateModal = false)}
+		on:created={() => {
+			showCreateModal = false;
+			// Reload page to show new stream
+			window.location.reload();
+		}}
+	/>
+{/if}

@@ -44,7 +44,7 @@
     "title": "Celebration of Life Service",
     "memorialId": "memorial_xyz789",
     "status": "scheduled",
-    "cloudflareInputId": "cf_input_456",
+    "cloudflareInputId": "CLOUDFLARE_input_456",
     "streamKey": "sk_secret_key_789",
     "rtmpUrl": "rtmp://live.cloudflare.com/live/sk_secret_key_789",
     "createdBy": "user_123",
@@ -325,7 +325,7 @@ Check if recordings are available for a completed stream.
   "recordingReady": true,
   "recordings": [
     {
-      "uid": "cf_video_789",
+      "uid": "CLOUDFLARE_video_789",
       "duration": 5220,
       "size": 1048576000,
       "status": {
@@ -426,10 +426,10 @@ Fetch Cloudflare Stream embed code for embedding in external websites.
 {
   "success": true,
   "streamId": "stream_abc123",
-  "embedUrl": "<iframe src=\"https://customer-xxx.cloudflarestream.com/cf_input_456/iframe\" ...></iframe>",
-  "iframeUrl": "https://customer-xxx.cloudflarestream.com/cf_input_456/iframe",
+  "embedUrl": "<iframe src=\"https://customer-xxx.cloudflarestream.com/CLOUDFLARE_input_456/iframe\" ...></iframe>",
+  "iframeUrl": "https://customer-xxx.cloudflarestream.com/CLOUDFLARE_input_456/iframe",
   "streamStatus": "live",
-  "cloudflareInputId": "cf_input_456"
+  "cloudflareInputId": "CLOUDFLARE_input_456"
 }
 ```
 
@@ -476,9 +476,9 @@ Generate WHIP URL for browser-based WebRTC streaming.
 ```json
 {
   "success": true,
-  "whipUrl": "https://customer-xxx.cloudflarestream.com/cf_input_456/webRTC/publish",
+  "whipUrl": "https://customer-xxx.cloudflarestream.com/CLOUDFLARE_input_456/webRTC/publish",
   "streamId": "stream_abc123",
-  "cloudflareInputId": "cf_input_456",
+  "cloudflareInputId": "CLOUDFLARE_input_456",
   "streamTitle": "Main Service"
 }
 ```
@@ -531,7 +531,7 @@ Get WHEP URL for WebRTC playback on memorial pages.
 ```json
 {
   "success": true,
-  "whepUrl": "https://customer-xxx.cloudflarestream.com/cf_input_456/webRTC/play",
+  "whepUrl": "https://customer-xxx.cloudflarestream.com/CLOUDFLARE_input_456/webRTC/play",
   "streamId": "stream_abc123",
   "streamTitle": "Main Service"
 }
@@ -550,7 +550,7 @@ Get HLS playback URL for OBS browser sources and standard video players.
 ```json
 {
   "success": true,
-  "hlsUrl": "https://customer-xxx.cloudflarestream.com/cf_input_456/manifest/video.m3u8",
+  "hlsUrl": "https://customer-xxx.cloudflarestream.com/CLOUDFLARE_input_456/manifest/video.m3u8",
   "streamId": "stream_abc123"
 }
 ```

@@ -60,9 +60,9 @@ Notes:
   - For live input status if needed; not required for MVP.
 
 ## Environment Variables
-- Cloudflare: `CF_ACCOUNT_ID`, `CF_STREAM_API_TOKEN` (scope: Stream)
+- Cloudflare: `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_STREAM_API_TOKEN` (scope: Stream)
 - Mux: `MUX_TOKEN_ID`, `MUX_TOKEN_SECRET`
-- Webhook secrets: `MUX_WEBHOOK_SECRET`, optional `CF_WEBHOOK_SECRET`
+- Webhook secrets: `MUX_WEBHOOK_SECRET`, optional `CLOUDFLARE_WEBHOOK_SECRET`
 
 ## Frontend (MVP UI)
 - Route: `/memorials/[id]/streams`
