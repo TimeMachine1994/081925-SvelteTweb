@@ -91,82 +91,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			isPublic: memorial.isPublic
 		});
 
-		// Load streams for this memorial
-		console.log('🎬 [MEMORIAL_PAGE] Loading streams for memorial:', memorial.id);
-		const streamsSnapshot = await adminDb
-			.collection('streams')
-			.where('memorialId', '==', memorial.id)
-			.orderBy('createdAt', 'desc')
-			.get();
-
-		const streams = streamsSnapshot.docs
-			.filter((doc) => {
-				const data = doc.data();
-				// Filter out hidden streams (isVisible === false)
-				return data.isVisible !== false;
-			})
-			.map((doc) => {
-				const data = doc.data();
-
-				return {
-					id: doc.id,
-					title: data.title || `Stream ${doc.id.slice(-6)}`,
-					description: data.description || '',
-					memorialId: data.memorialId || memorial.id,
-
-					// Status with fallback logic for legacy data
-					status: data.status || (data.isLive ? 'live' : 'ready'),
-					isVisible: data.isVisible !== false,
-
-					// Cloudflare integration with multiple field name support
-					cloudflareStreamId: data.cloudflareStreamId || data.streamId || null,
-					cloudflareInputId: data.cloudflareInputId || data.inputId || null,
-
-					// Legacy playback fields
-					playbackUrl: data.playbackUrl || null,
-					thumbnailUrl: data.thumbnailUrl || null,
-
-					// Scheduling with proper timestamp conversion
-					scheduledStartTime: convertTimestamp(data.scheduledStartTime),
-					scheduledEndTime: convertTimestamp(data.scheduledEndTime),
-					startedAt: convertTimestamp(data.startedAt),
-					endedAt: convertTimestamp(data.endedAt),
-
-					// Recording fields with intelligent fallbacks
-					recordingUrl: data.recordingUrl || null, // Legacy field
-					recordingPlaybackUrl: data.recordingPlaybackUrl || data.recordingUrl || null,
-					recordingReady:
-						data.recordingReady ||
-						!!data.recordingUrl ||
-						!!data.recordingPlaybackUrl ||
-						!!data.cloudflareStreamId,
-					recordingDuration: data.recordingDuration || null,
-					recordingSize: data.recordingSize || null,
-					recordingThumbnail: data.recordingThumbnail || data.thumbnailUrl || null,
-					recordingProcessedAt: convertTimestamp(data.recordingProcessedAt),
-					recordingCount: data.recordingCount || null,
-					cloudflareRecordings: Array.isArray(data.cloudflareRecordings)
-						? data.cloudflareRecordings
-						: [],
-
-					// Analytics with safe defaults
-					viewerCount: typeof data.viewerCount === 'number' ? data.viewerCount : null,
-					peakViewerCount: typeof data.peakViewerCount === 'number' ? data.peakViewerCount : null,
-					totalViews: typeof data.totalViews === 'number' ? data.totalViews : null,
-
-					// Emergency Override fields
-					overrideEmbedCode: data.overrideEmbedCode || null,
-					overrideActive: data.overrideActive || false,
-					overrideNote: data.overrideNote || null,
-
-					// Metadata with defensive handling
-					createdBy: data.createdBy || '',
-					createdAt: convertTimestamp(data.createdAt) || new Date().toISOString(),
-					updatedAt: convertTimestamp(data.updatedAt) || new Date().toISOString()
-				};
-			});
-
-		console.log('🎬 [MEMORIAL_PAGE] Found', streams.length, 'visible streams');
+		// Streams removed - no longer loading streaming data
+		console.log('🎬 [MEMORIAL_PAGE] Streaming functionality removed');
 
 		// Load slideshows for this memorial
 		console.log('📸 [MEMORIAL_PAGE] Loading slideshows for memorial:', memorial.id);
@@ -254,15 +180,13 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 					ownerUid: null, // Don't expose for unauthorized users
 					funeralDirectorUid: null // Don't expose for unauthorized users
 				},
-				streams: [], // No streams for unauthorized users
 				slideshows: [] // No slideshows for unauthorized users
 			};
 		}
 
-		// Return full memorial data, streams, and slideshows for authorized users
+		// Return full memorial data and slideshows for authorized users
 		return {
 			memorial,
-			streams,
 			slideshows,
 			user: locals.user ? {
 				uid: locals.user.uid,

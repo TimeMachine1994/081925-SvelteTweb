@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import StreamPlayer from '$lib/components/StreamPlayer.svelte';
 	import SlideshowSection from '$lib/components/SlideshowSection.svelte';
 	import BookingReminderBanner from '$lib/components/BookingReminderBanner.svelte';
 	import { shouldShowBookingBanner, markBannerAsSeen, debugBannerState } from '$lib/utils/bookingBanner';
@@ -8,9 +7,8 @@
 
 	let { data }: { data: PageData } = $props();
 
-	// Extract memorial, streams, and slideshows data from server load
+	// Extract memorial and slideshows data from server load
 	let memorial = $derived(data.memorial);
-	let streams = $derived((data.streams || []) as any);
 	let slideshows = $derived((data.slideshows || []) as any);
 	let user = $derived(data.user);
 	
@@ -94,9 +92,8 @@
 				id: memorial.id,
 				name: memorial.lovedOneName,
 				isPublic: memorial.isPublic,
-				streamCount: streams.length,
 				hasCustomHtml: hasCustomHtml,
-				layoutType: hasCustomHtml ? 'Legacy (custom HTML only)' : 'Standard (with streams)',
+				layoutType: hasCustomHtml ? 'Legacy (custom HTML only)' : 'Standard',
 				custom_html_length: (memorial as any)?.custom_html?.length || 0,
 				custom_html_preview: (memorial as any)?.custom_html ? 
 					(memorial as any).custom_html.substring(0, 100) + '...' : null,
@@ -204,10 +201,7 @@
 
 				<!-- Body Section -->
 				<div class="memorial-body">
-					<!-- Streaming Section -->
-					<div class="streaming-section">
-						<StreamPlayer {streams} memorialName={memorial.lovedOneName} memorialId={memorial.id} />
-					</div>
+					<!-- Content area for future features -->
 				</div>
 			</div>
 		{/if}

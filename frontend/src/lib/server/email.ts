@@ -187,7 +187,7 @@ export async function sendRegistrationEmail(data: BasicRegistrationEmailData) {
 	}
 }
 
-export async function sendFuneralDirectorRegistrationEmail(data: FuneralDirectorRegistrationEmailData) {
+	export async function sendFuneralDirectorRegistrationEmail(data: FuneralDirectorRegistrationEmailData) {
 	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key') {
 		console.warn('⚠️ SendGrid client not initialized. Skipping funeral director registration email.');
 		return;
@@ -199,18 +199,28 @@ export async function sendFuneralDirectorRegistrationEmail(data: FuneralDirector
 		throw new Error('Email template not configured. Please check SENDGRID_TEMPLATE_ENHANCED_REGISTRATION environment variable.');
 	}
 
+	// Sanitize data to prevent SendGrid template errors with special characters
+	const sanitizeForTemplate = (str: string) => {
+		if (!str) return '';
+		// Replace problematic characters that might cause SendGrid template errors
+		return str
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;');
+	};
+
 	const msg = {
 		to: data.email,
 		from: FROM_EMAIL,
 		templateId: SENDGRID_TEMPLATES.ENHANCED_REGISTRATION,
 		dynamicTemplateData: {
-			familyName: data.familyName,
-			lovedOneName: data.lovedOneName,
+			familyName: sanitizeForTemplate(data.familyName),
+			lovedOneName: sanitizeForTemplate(data.lovedOneName),
 			memorialUrl: data.memorialUrl,
 			memorialSlug: data.memorialUrl.replace('https://tributestream.com/', ''),
 			email: data.email,
 			password: data.password,
-			additionalNotes: data.additionalNotes || '',
+			additionalNotes: sanitizeForTemplate(data.additionalNotes || ''),
 			hasAdditionalNotes: !!data.additionalNotes,
 			calculatorMagicLink: data.calculatorMagicLink || '', // Magic link for calculator
 			hasCalculatorMagicLink: !!data.calculatorMagicLink, // Boolean flag for template
@@ -227,9 +237,14 @@ export async function sendFuneralDirectorRegistrationEmail(data: FuneralDirector
 	try {
 		await sgMail.send(msg);
 		console.log('✅ Funeral director registration email sent to:', data.email);
-	} catch (error) {
+	} catch (error: any) {
 		console.error('💥 Exception sending funeral director registration email:', error);
-		throw error;
+		// Log detailed SendGrid error information
+		if (error.response?.body?.errors) {
+			console.error('💥 SendGrid error details:', JSON.stringify(error.response.body.errors, null, 2));
+		}
+		// Don't throw - allow registration to complete even if email fails
+		console.warn('⚠️ Registration will complete despite email failure');
 	}
 }
 
