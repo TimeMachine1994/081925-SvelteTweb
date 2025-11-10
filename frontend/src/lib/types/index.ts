@@ -29,5 +29,5 @@ export * from './slideshow';
 // Stream types
 export * from './stream';
 
-// Streaming methods types
-export * from './streaming-methods';
+// Stream v2 types (WHIP + Mux)
+export * from './stream-v2';

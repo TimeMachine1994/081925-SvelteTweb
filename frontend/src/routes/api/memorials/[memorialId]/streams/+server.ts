@@ -2,7 +2,13 @@ import { adminAuth, adminDb, FieldValue } from '$lib/server/firebase';
 import { error as SvelteKitError, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import type { Stream } from '$lib/types/stream';
-import { setupOBSStreaming } from '$lib/server/streaming-methods';
+
+// DEPRECATED: This endpoint uses the old OBS streaming system
+// New streams should use /api/live-streams/create instead
+// Keeping this for backward compatibility with existing integrations
+async function setupOBSStreaming(title: string) {
+	throw new Error('OBS streaming via this endpoint is deprecated. Please use /api/live-streams/create for new WHIP streams.');
+}
 
 // GET - Fetch all streams for a memorial
 export const GET: RequestHandler = async ({ locals, params }) => {
