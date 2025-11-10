@@ -2,6 +2,7 @@
 	import { Calendar, Clock, MapPin, Phone, Mail, Gift, Users, Shield, Send } from 'lucide-svelte';
 	import { getTheme } from '$lib/design-tokens/minimal-modern-theme';
 	import { Button, Input, Card, Toast } from '$lib/components/minimal-modern';
+	import { executeRecaptcha, RECAPTCHA_ACTIONS } from '$lib/utils/recaptcha';
 
 	let funeralHomeName = $state('');
 	let contactName = $state('');
@@ -36,6 +37,20 @@
 		error = '';
 
 		try {
+			// Execute reCAPTCHA (only in browser)
+			let recaptchaToken = null;
+			if (typeof window !== 'undefined') {
+				try {
+					console.log('📞 Booking demo');
+					recaptchaToken = await executeRecaptcha(RECAPTCHA_ACTIONS.BOOK_DEMO);
+					if (!recaptchaToken) {
+						console.warn('reCAPTCHA returned null token');
+					}
+				} catch (recaptchaError) {
+					console.warn('reCAPTCHA failed, proceeding without token:', recaptchaError);
+				}
+			}
+
 			const response = await fetch('/api/book-demo', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -48,7 +63,8 @@
 					preferredTime,
 					address: address.trim(),
 					notes: notes.trim(),
-					wantAdvertising
+					wantAdvertising,
+					recaptchaToken
 				})
 			});
 
@@ -64,9 +80,13 @@
 				address = '';
 				notes = '';
 			} else {
-				error = 'Failed to submit request. Please try again.';
+				// Try to get error message from response
+				const result = await response.json();
+				error = result.error || 'Failed to submit request. Please try again.';
+				console.error('[BOOK_DEMO] Submission failed:', result);
 			}
 		} catch (err) {
+			console.error('[BOOK_DEMO] Error:', err);
 			error = 'Network error. Please try again.';
 		} finally {
 			isSubmitting = false;
