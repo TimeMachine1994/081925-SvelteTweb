@@ -1,14 +1,16 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import SlideshowSection from '$lib/components/SlideshowSection.svelte';
+	import MemorialStreamDisplay from '$lib/components/MemorialStreamDisplay.svelte';
 	import BookingReminderBanner from '$lib/components/BookingReminderBanner.svelte';
 	import { shouldShowBookingBanner, markBannerAsSeen, debugBannerState } from '$lib/utils/bookingBanner';
 	import { onMount } from 'svelte';
 
 	let { data }: { data: PageData } = $props();
 
-	// Extract memorial and slideshows data from server load
+	// Extract memorial, streams, and slideshows data from server load
 	let memorial = $derived(data.memorial);
+	let streams = $derived((data.streams || []) as any);
 	let slideshows = $derived((data.slideshows || []) as any);
 	let user = $derived(data.user);
 	
@@ -147,6 +149,16 @@
 
 				<!-- Legacy Custom HTML Content Only -->
 				<div class="memorial-content-container">
+					<!-- Stream Section for Legacy Layout -->
+					{#if streams && streams.length > 0}
+						<div class="streaming-section">
+							<MemorialStreamDisplay 
+								{streams} 
+								memorialName={memorial.lovedOneName}
+							/>
+						</div>
+					{/if}
+					
 					<div class="legacy-content">
 						{@html (memorial as any).custom_html}
 					</div>
@@ -201,6 +213,16 @@
 
 				<!-- Body Section -->
 				<div class="memorial-body">
+					<!-- Stream Section -->
+					{#if streams && streams.length > 0}
+						<div class="streaming-section">
+							<MemorialStreamDisplay 
+								{streams} 
+								memorialName={memorial.lovedOneName}
+							/>
+						</div>
+					{/if}
+					
 					<!-- Content area for future features -->
 				</div>
 			</div>

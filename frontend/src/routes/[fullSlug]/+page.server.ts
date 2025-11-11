@@ -91,8 +91,37 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			isPublic: memorial.isPublic
 		});
 
-		// Streams removed - no longer loading streaming data
-		console.log('🎬 [MEMORIAL_PAGE] Streaming functionality removed');
+		// Load streams for this memorial
+		console.log('🎬 [MEMORIAL_PAGE] Loading streams for memorial:', memorial.id);
+		let streams = [];
+		try {
+			const streamsSnapshot = await adminDb
+				.collection('streams')
+				.where('memorialId', '==', memorial.id)
+				.get();
+			
+			streams = streamsSnapshot.docs
+				.map(doc => {
+					const data = doc.data();
+					return {
+						id: doc.id,
+						...data,
+						createdAt: convertTimestamp(data.createdAt),
+						updatedAt: convertTimestamp(data.updatedAt),
+						scheduledStartTime: convertTimestamp(data.scheduledStartTime),
+						startedAt: convertTimestamp(data.startedAt),
+						endedAt: convertTimestamp(data.endedAt)
+					};
+				})
+				// Filter out hidden streams
+				.filter(stream => stream.isVisible !== false);
+			
+			console.log('🎬 [MEMORIAL_PAGE] Loaded', streams.length, 'streams');
+		} catch (error) {
+			console.error('🎬 [MEMORIAL_PAGE] Error loading streams:', error);
+			// Don't fail the entire page load if streams fail
+			streams = [];
+		}
 
 		// Load slideshows for this memorial
 		console.log('📸 [MEMORIAL_PAGE] Loading slideshows for memorial:', memorial.id);
@@ -180,13 +209,15 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 					ownerUid: null, // Don't expose for unauthorized users
 					funeralDirectorUid: null // Don't expose for unauthorized users
 				},
+				streams: [], // No streams for unauthorized users
 				slideshows: [] // No slideshows for unauthorized users
 			};
 		}
 
-		// Return full memorial data and slideshows for authorized users
+		// Return full memorial data, streams, and slideshows for authorized users
 		return {
 			memorial,
+			streams,
 			slideshows,
 			user: locals.user ? {
 				uid: locals.user.uid,
