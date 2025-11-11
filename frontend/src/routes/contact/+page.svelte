@@ -234,7 +234,7 @@
 							</div>
 							<div>
 								<h4 class="font-semibold {theme.text}">Email</h4>
-								<p class="{theme.hero.sub}">support@tributestream.com</p>
+								<p class="{theme.hero.sub}">contact@tributestream.com</p>
 								<p class="text-sm opacity-70">We typically respond within 24 hours</p>
 							</div>
 						</div>

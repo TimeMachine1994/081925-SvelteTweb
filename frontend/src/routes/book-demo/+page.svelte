@@ -299,7 +299,7 @@
 							<Mail class="h-5 w-5 text-[#D5BA7F]" />
 							<div>
 								<p class="font-medium {theme.text}">Email</p>
-								<a href="mailto:demos@tributestream.com" class="text-[#D5BA7F] hover:underline">demos@tributestream.com</a>
+								<a href="mailto:contact@tributestream.com" class="text-[#D5BA7F] hover:underline">contact@tributestream.com</a>
 							</div>
 						</div>
 						<div class="flex items-start space-x-3">
