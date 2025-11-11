@@ -172,10 +172,10 @@ This document covers the four main core collections that power Tributestream's p
   paymentStatus?: 'paid' | 'unpaid';
   
   manualPayment?: {
-    markedPaidBy: string,
+    markedPaidBy: string,           // Email of admin who marked paid
     markedPaidAt: Timestamp | string,
-    method: 'cash' | 'check' | 'venmo' | 'zelle' | 'manual',
-    notes?: string
+    method: 'cash' | 'check' | 'bank_transfer' | 'venmo' | 'paypal' | 'zelle' | 'other' | 'manual',
+    notes?: string                   // Payment details (supports line breaks via whitespace-pre-wrap)
   },
   
   calculatorConfig?: {
@@ -232,6 +232,7 @@ This document covers the four main core collections that power Tributestream's p
 **Memorial Display:**
 - `/[fullSlug]/+page.server.ts` - Load memorial by fullSlug for public/private display
 - `/profile/+page.server.ts` - Display user's owned memorials
+- `/schedule/[memorialId]/_components/ScheduleReceipt.svelte` - Payment confirmation page with notes
 
 **Memorial Creation:**
 - `/register/loved-one/+page.server.ts` - Create memorial during family registration
@@ -247,7 +248,8 @@ This document covers the four main core collections that power Tributestream's p
 
 **Payment Processing:**
 - `/api/webhooks/stripe/+server.ts` - Update `isPaid` flag and payment history
-- `/api/admin/toggle-payment-status/+server.ts` - Admin manual payment marking
+- `/api/admin/toggle-payment-status/+server.ts` - Admin manual payment marking with notes
+- Admin Portal `AdminPortal.svelte` - Edit payment notes for paid memorials
 
 **Content Management:**
 - `/api/memorials/[memorialId]/+server.ts` - Memorial CRUD operations
@@ -274,6 +276,8 @@ This document covers the four main core collections that power Tributestream's p
    - `calculatorConfig` stores detailed booking information
    - `paymentHistory` array tracks all payment attempts
    - Stripe webhook updates payment status automatically
+   - Manual payments tracked in `manualPayment` object with notes
+   - Admin can mark paid/unpaid and edit payment notes after marking
 
 4. **Legacy Content Support**
    - `custom_html` field stores migrated WordPress content
@@ -575,5 +579,10 @@ users (1) ────────────> (many) memorials
 
 ---
 
-*Last Updated: 2025-01-11*
+*Last Updated: 2025-11-11*
 *See also: FIRESTORE_COLLECTIONS_ADMIN.md and FIRESTORE_COLLECTIONS_OTHER.md*
+
+**Recent Updates (Nov 11, 2025):**
+- Updated `manualPayment` structure with expanded payment methods and notes field
+- Added documentation for payment notes editing in Admin Portal
+- Added payment confirmation page display location for manual payment notes
