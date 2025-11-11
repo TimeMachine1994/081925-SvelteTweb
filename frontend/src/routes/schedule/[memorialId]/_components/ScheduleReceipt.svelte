@@ -327,7 +327,7 @@ Thank you for choosing Tributestream!
 					{#if memorial.manualPayment?.notes}
 						<div class="flex flex-col gap-2 border-b border-gray-100 py-3">
 							<span class="font-medium text-gray-600">Payment Notes</span>
-							<span class="text-gray-900 max-w-md break-words ml-0">{memorial.manualPayment.notes}</span>
+							<p class="text-gray-900 max-w-md break-words ml-0 whitespace-pre-wrap">{memorial.manualPayment.notes}</p>
 						</div>
 					{/if}
 				</div>

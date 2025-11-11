@@ -2336,8 +2336,9 @@
 							bind:value={paymentForm.notes}
 							placeholder="Add any payment details or notes..."
 							rows="3"
-							class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white placeholder-white/50 focus:border-amber-400 focus:outline-none"
+							class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white placeholder-white/50 focus:border-amber-400 focus:outline-none whitespace-pre-wrap"
 						></textarea>
+						<p class="mt-1 text-xs text-white/60">Tip: Press Enter to add line breaks</p>
 					</div>
 
 					<div class="flex gap-3 pt-2">
@@ -2388,8 +2389,9 @@
 							bind:value={editNotesForm.notes}
 							placeholder="Update payment details or notes..."
 							rows="4"
-							class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white placeholder-white/50 focus:border-blue-400 focus:outline-none"
+							class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white placeholder-white/50 focus:border-blue-400 focus:outline-none whitespace-pre-wrap"
 						></textarea>
+						<p class="mt-1 text-xs text-white/60">Tip: Press Enter to add line breaks</p>
 					</div>
 
 					<div class="flex gap-3 pt-2">

@@ -216,17 +216,19 @@ let isUpdatingNotes = $state(false);
 {#if memorial.manualPayment?.notes}
   <div class="flex flex-col gap-2 border-b border-gray-100 py-3">
     <span class="font-medium text-gray-600">Payment Notes</span>
-    <span class="text-gray-900 max-w-md break-words ml-0">
+    <p class="text-gray-900 max-w-md break-words ml-0 whitespace-pre-wrap">
       {memorial.manualPayment.notes}
-    </span>
+    </p>
   </div>
 {/if}
 ```
 
 **Changes**:
 - Changed from `flex-row justify-between` to `flex-col gap-2` for better note display
+- Changed `<span>` to `<p>` tag for proper semantic structure
 - Added `max-w-md break-words ml-0` classes for proper text wrapping
-- Notes now display below label instead of inline for better readability
+- Added `whitespace-pre-wrap` class to **preserve line breaks and spacing**
+- Notes now display below label with all formatting preserved
 
 ### Technical Implementation Details:
 
@@ -248,7 +250,15 @@ let isUpdatingNotes = $state(false);
 1. User views payment confirmed page
 2. Payment notes section shows with improved spacing
 3. Long notes wrap properly without overflow
-4. Clean, readable presentation of admin notes
+4. **Line breaks and spacing are preserved** from admin input
+5. Clean, readable presentation of admin notes
+
+**Whitespace Preservation**:
+- Both payment modals now have `whitespace-pre-wrap` class on textareas
+- Display uses `<p>` tag with `whitespace-pre-wrap` class
+- Line breaks (Enter key) are preserved when admin types them
+- Multiple spaces and paragraph formatting maintained
+- Helpful tip added: "Tip: Press Enter to add line breaks"
 
 ---
 
@@ -260,6 +270,7 @@ let isUpdatingNotes = $state(false);
 2. **✅ Added payment notes field** - Admin notes now display on payment confirmation page
 3. **✅ Added Edit Notes button** - Admins can edit payment notes after marking memorial as paid
 4. **✅ Improved text spacing** - Payment notes wrap properly with better layout
+5. **✅ Whitespace preservation** - Line breaks and spacing are preserved in payment notes
 
 ### Testing Required:
 
@@ -270,11 +281,14 @@ let isUpdatingNotes = $state(false);
 - [ ] Update notes and save successfully updates memorial
 - [ ] Modal closes and data refreshes after successful save
 - [ ] Loading states work correctly during update
+- [ ] Tip text appears: "Tip: Press Enter to add line breaks"
 
 **Payment Confirmation Page Testing**:
 - [ ] Service date field no longer appears
 - [ ] Payment notes display when memorial is manually marked as paid
 - [ ] Long notes wrap properly without overflow
+- [ ] **Line breaks are preserved** (test with multi-line notes)
+- [ ] **Spacing is preserved** (test with multiple paragraphs)
 - [ ] Layout is clean with proper spacing between fields
 - [ ] Works on both desktop and mobile views
 
