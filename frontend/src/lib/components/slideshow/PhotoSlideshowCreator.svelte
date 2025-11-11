@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { Upload, X, Play, Settings, Plus, ExternalLink, ChevronUp, ChevronDown } from 'lucide-svelte';
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
-	import { SimpleSlideshowGenerator } from '$lib/utils/SimpleSlideshowGenerator';
-	import { uploadVideoToFirebaseStorage, uploadPhotosToFirebaseStorage } from '$lib/utils/clientFirebaseStorage';
+	import { SimpleSlideshowGenerator, type GenerationProgress } from '$lib/utils/SimpleSlideshowGenerator';
+	import { uploadVideoToFirebaseStorage, uploadPhotosToFirebaseStorage, uploadAudioToFirebaseStorage } from '$lib/utils/clientFirebaseStorage';
 	import AudioUploader from './AudioUploader.svelte';
 	import type { SlideshowAudio } from '$lib/types/slideshow';
 
@@ -834,18 +834,36 @@
 				}
 			};
 
-			console.log('🎬 Starting slideshow generation with:', { photos: photos.length, settings });
+			console.log('🎬 Starting slideshow generation with:', { 
+				photos: photos.length, 
+				settings,
+				hasAudio: !!audioTrack 
+			});
 			
-			// Generate the video
-			const videoBlob = await generator.generateVideo(photos, settings, onProgress);
+			// Prepare audio parameter if audio is selected
+			const audioParam = audioTrack ? {
+				file: audioTrack.file!,
+				duration: audioTrack.duration,
+				volume: audioVolume,
+				fadeIn: audioFadeIn,
+				fadeOut: audioFadeOut
+			} : undefined;
+			
+			// Generate the video WITH AUDIO
+			const videoBlob = await generator.generateVideo(
+				photos, 
+				settings, 
+				onProgress,
+				audioParam
+			);
 			
 			// Cleanup
 			generator.dispose();
 			
 			generatedVideoBlob = videoBlob;
-			console.log('Slideshow generated successfully:', videoBlob.size, 'bytes');
+			console.log('✅ Slideshow generated successfully:', videoBlob.size, 'bytes');
 
-			// Create preview URL and show video preview (hide photos)
+			// Create preview URL and show video preview
 			if (previewVideoUrl) {
 				URL.revokeObjectURL(previewVideoUrl);
 			}
@@ -897,7 +915,31 @@
 		try {
 			const title = `Memorial Slideshow - ${new Date().toLocaleDateString()}`;
 			
-			// Step 1: Upload video directly to Firebase Storage from client
+			// Step 1: Upload audio if present
+			let audioData = null;
+			if (audioTrack?.file) {
+				generationPhase = 'Uploading audio...';
+				generationProgress = 85;
+				
+				const audioResult = await uploadAudioToFirebaseStorage(
+					audioTrack.file,
+					memorialId || '',
+					(progress) => {
+						generationProgress = 85 + (progress * 0.03); // 85-88%
+					}
+				);
+				
+				audioData = {
+					name: audioTrack.name,
+					duration: audioTrack.duration,
+					url: audioResult.downloadURL,
+					storagePath: audioResult.storagePath
+				};
+				
+				console.log('✅ [CLIENT] Audio uploaded:', audioData);
+			}
+			
+			// Step 2: Upload video directly to Firebase Storage from client
 			console.log('📤 [CLIENT] Uploading video to Firebase Storage...');
 			generationPhase = 'Uploading video...';
 			
@@ -906,15 +948,15 @@
 				memorialId || '',
 				title,
 				(progress) => {
-					generationProgress = 90 + (progress * 0.05); // 90-95%
+					generationProgress = 88 + (progress * 0.05); // 88-93%
 				}
 			);
 			
 			console.log('✅ [CLIENT] Video uploaded:', videoResult.downloadURL);
 			
-			// Step 2: Upload photos that don't have stored URLs yet
+			// Step 3: Upload photos that don't have stored URLs yet
 			generationPhase = 'Uploading photos...';
-			generationProgress = 95;
+			generationProgress = 93;
 			
 			const photosToUpload = photos
 				.filter(photo => photo.file && !photo.storedUrl)
@@ -934,7 +976,7 @@
 				console.log(`✅ [CLIENT] Uploaded ${uploadedPhotos.length} new photos`);
 			}
 			
-			// Step 3: Build complete photos array with URLs
+			// Step 4: Build complete photos array with URLs
 			const allPhotos = photos.map(photo => {
 				// Find uploaded photo if this was newly uploaded
 				const uploaded = uploadedPhotos.find(p => p.id === photo.id);
@@ -948,7 +990,7 @@
 				};
 			});
 			
-			// Step 4: Send metadata to API (lightweight JSON, no files)
+			// Step 5: Send metadata to API (lightweight JSON, no files)
 			generationPhase = 'Saving slideshow metadata...';
 			generationProgress = 98;
 			
@@ -966,11 +1008,7 @@
 				videoStoragePath: videoResult.storagePath,
 				photos: allPhotos,
 				settings: settingsWithAudio,
-				audio: audioTrack ? {
-					name: audioTrack.name,
-					duration: audioTrack.duration,
-					url: audioTrack.url || ''
-				} : null
+				audio: audioData // Now includes actual Firebase Storage URL
 			};
 			
 			const response = await fetch('/api/slideshow/save-metadata', {
@@ -1297,11 +1335,29 @@
 				}
 			};
 
-			console.log('🎬 Starting draft video generation with:', { photos: photos.length, settings });
-			
-			// Generate the video
-			const videoBlob = await generator.generateVideo(photos, settings, onProgress);
-			
+			console.log('🎬 Starting draft video generation with:', { 
+				photos: photos.length, 
+				settings,
+				hasAudio: !!audioTrack 
+			});
+		
+			// Prepare audio parameter if audio is selected
+			const audioParam = audioTrack ? {
+				file: audioTrack.file!,
+				duration: audioTrack.duration,
+				volume: audioVolume,
+				fadeIn: audioFadeIn,
+				fadeOut: audioFadeOut
+			} : undefined;
+		
+			// Generate the video WITH AUDIO
+			const videoBlob = await generator.generateVideo(
+				photos, 
+				settings, 
+				onProgress,
+				audioParam
+			);
+		
 			// Cleanup
 			generator.dispose();
 			
@@ -1683,6 +1739,26 @@
 		</div>
 	{/if}
 
+	<!-- Step 2.5: Background Music (Optional) - Show when photos exist and not published -->
+	{#if photos.length > 0 && (!isPublished || hasDraftChanges)}
+		<div class="workflow-step active">
+			<div class="step-header">
+				<div class="step-number">2.5</div>
+				<h3 class="step-title">Background Music (Optional)</h3>
+				{#if audioTrack}
+					<div class="step-status completed">✓ Music added</div>
+				{/if}
+			</div>
+			<AudioUploader 
+				bind:audio={audioTrack}
+				bind:volume={audioVolume}
+				bind:fadeIn={audioFadeIn}
+				bind:fadeOut={audioFadeOut}
+				maxFileSize={50}
+			/>
+		</div>
+	{/if}
+
 	<!-- Step 3: Settings & Generate (Show for new slideshows or when there are draft changes) -->
 	{#if photos.length > 0 && (!isPublished || hasDraftChanges)}
 		<div class="workflow-step active">
@@ -1768,19 +1844,6 @@
 		</div>
 	{/if}
 
-	<!-- Step 2.5: Background Music (Optional) -->
-	{#if photos.length > 0 && !showVideoPreview}
-		<div class="workflow-step active">
-			<AudioUploader 
-				bind:audio={audioTrack}
-				bind:volume={audioVolume}
-				bind:fadeIn={audioFadeIn}
-				bind:fadeOut={audioFadeOut}
-				maxFileSize={50}
-			/>
-		</div>
-	{/if}
-		
 	<!-- Step 4: Save to Memorial (When video is ready and not published, or when there are draft changes) -->
 	{#if showVideoPreview && (!isPublished || (hasDraftChanges && draftVideoBlob))}
 		<div class="workflow-step active">

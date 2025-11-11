@@ -15,6 +15,17 @@ export interface SlideshowSettings {
 	transitionType: 'fade' | 'slide' | 'none';
 	videoQuality: 'low' | 'medium' | 'high';
 	aspectRatio: '16:9' | '4:3' | '1:1';
+	audioVolume?: number;
+	audioFadeIn?: boolean;
+	audioFadeOut?: boolean;
+}
+
+export interface SlideshowAudio {
+	file: File;
+	duration: number;
+	volume: number;
+	fadeIn: boolean;
+	fadeOut: boolean;
 }
 
 export interface GenerationProgress {
@@ -30,6 +41,10 @@ export class SimpleSlideshowGenerator {
 	private mediaRecorder: MediaRecorder | null = null;
 	private recordedChunks: Blob[] = [];
 	private onProgress?: (progress: GenerationProgress) => void;
+	private audioContext: AudioContext | null = null;
+	private audioBuffer: AudioBuffer | null = null;
+	private audioSource: AudioBufferSourceNode | null = null;
+	private audioDestination: MediaStreamAudioDestinationNode | null = null;
 
 	constructor(canvas: HTMLCanvasElement) {
 		this.canvas = canvas;
@@ -46,7 +61,8 @@ export class SimpleSlideshowGenerator {
 	async generateVideo(
 		photos: SlideshowPhoto[],
 		settings: SlideshowSettings,
-		onProgress?: (progress: GenerationProgress) => void
+		onProgress?: (progress: GenerationProgress) => void,
+		audio?: SlideshowAudio
 	): Promise<Blob> {
 		this.onProgress = onProgress;
 		
@@ -55,18 +71,26 @@ export class SimpleSlideshowGenerator {
 		}
 
 		console.log('🎬 Starting simplified video generation...');
-		console.log('📊 Input:', { photoCount: photos.length, settings });
+		console.log('📊 Input:', { photoCount: photos.length, settings, hasAudio: !!audio });
 
 		try {
 			// Setup canvas
 			this.setupCanvas(settings);
 			
+			// Load audio if provided
+			if (audio?.file) {
+				await this.loadAudio(audio);
+			}
+			
 			// Load images
 			const images = await this.loadImages(photos);
 			console.log(`✅ Loaded ${images.length} images`);
 
-			// Try to generate video with MediaRecorder
-			return await this.generateWithMediaRecorder(images, photos, settings);
+			// Calculate total slideshow duration
+			const totalDuration = photos.reduce((sum, photo) => sum + photo.duration, 0);
+			
+			// Generate video with MediaRecorder (with or without audio)
+			return await this.generateWithMediaRecorder(images, photos, settings, totalDuration, audio);
 			
 		} catch (error) {
 			console.error('❌ Video generation failed:', error);
@@ -120,32 +144,119 @@ export class SimpleSlideshowGenerator {
 	}
 
 	/**
+	 * Load and prepare audio file
+	 */
+	private async loadAudio(audio: SlideshowAudio): Promise<void> {
+		try {
+			console.log('🎵 Loading audio file...');
+			
+			// Create audio context
+			this.audioContext = new AudioContext();
+			
+			// Read file as ArrayBuffer
+			const arrayBuffer = await audio.file.arrayBuffer();
+			
+			// Decode audio data
+			this.audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+			
+			console.log(`✅ Audio loaded: ${this.audioBuffer.duration.toFixed(2)}s`);
+			
+		} catch (error) {
+			console.error('❌ Failed to load audio:', error);
+			throw new Error('Failed to load audio file');
+		}
+	}
+
+	/**
 	 * Generate video using MediaRecorder
 	 */
 	private async generateWithMediaRecorder(
 		images: HTMLImageElement[],
 		photos: SlideshowPhoto[],
-		settings: SlideshowSettings
+		settings: SlideshowSettings,
+		totalDuration: number,
+		audio?: SlideshowAudio
 	): Promise<Blob> {
 		console.log('🎥 Starting MediaRecorder generation...');
 
 		// Draw first frame to initialize canvas
 		this.drawPhoto(images[0], photos[0].caption || '');
 		
-		// Get stream
-		const stream = this.canvas.captureStream(30);
+		// Get canvas video stream
+		const videoStream = this.canvas.captureStream(30);
 		console.log('📹 Canvas stream created');
 
+		// Prepare final stream
+		let finalStream: MediaStream;
+		
+		if (audio && this.audioContext && this.audioBuffer) {
+			console.log('🎵 Mixing audio with video...');
+			
+			// Create audio destination node
+			this.audioDestination = this.audioContext.createMediaStreamDestination();
+			
+			// Create audio source
+			this.audioSource = this.audioContext.createBufferSource();
+			this.audioSource.buffer = this.audioBuffer;
+			
+			// Apply volume
+			const gainNode = this.audioContext.createGain();
+			gainNode.gain.value = audio.volume;
+			
+			// Handle looping if audio is shorter than video
+			if (this.audioBuffer.duration < totalDuration) {
+				console.log('🔁 Audio will loop (shorter than slideshow)');
+				this.audioSource.loop = true;
+			}
+			
+			// Handle fade in
+			if (audio.fadeIn) {
+				console.log('🎵 Applying fade in (2s)');
+				gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
+				gainNode.gain.linearRampToValueAtTime(audio.volume, this.audioContext.currentTime + 2);
+			}
+			
+			// Handle fade out if audio is longer than video
+			if (this.audioBuffer.duration > totalDuration && audio.fadeOut) {
+				console.log('🎵 Will apply fade out at end');
+				const fadeOutStart = totalDuration - 2; // 2 seconds before end
+				gainNode.gain.setValueAtTime(audio.volume, this.audioContext.currentTime + fadeOutStart);
+				gainNode.gain.linearRampToValueAtTime(0, this.audioContext.currentTime + totalDuration);
+			}
+			
+			// Connect audio nodes
+			this.audioSource.connect(gainNode);
+			gainNode.connect(this.audioDestination);
+			
+			// Start audio playback
+			this.audioSource.start(0);
+			
+			// Combine video and audio streams
+			const audioTrack = this.audioDestination.stream.getAudioTracks()[0];
+			const videoTrack = videoStream.getVideoTracks()[0];
+			
+			finalStream = new MediaStream([videoTrack, audioTrack]);
+			console.log('✅ Audio and video streams combined');
+			
+		} else {
+			// No audio, use video stream only
+			finalStream = videoStream;
+			console.log('📹 Using video stream only (no audio)');
+		}
+
 		// Check for video track
-		const videoTrack = stream.getVideoTracks()[0];
+		const videoTrack = finalStream.getVideoTracks()[0];
 		if (!videoTrack) {
 			throw new Error('No video track available');
 		}
 
-		console.log('📺 Video track ready:', videoTrack.readyState);
+		console.log('📺 Final stream ready:', {
+			videoTracks: finalStream.getVideoTracks().length,
+			audioTracks: finalStream.getAudioTracks().length
+		});
 
 		// Find supported codec
-		const codecs = ['video/webm;codecs=vp8', 'video/webm', 'video/mp4'];
+		const codecs = ['video/webm;codecs=vp8,opus', 'video/webm;codecs=vp8', 'video/webm', 'video/mp4'];
 		let mimeType = '';
 		
 		for (const codec of codecs) {
@@ -162,9 +273,10 @@ export class SimpleSlideshowGenerator {
 
 		// Setup MediaRecorder
 		this.recordedChunks = [];
-		this.mediaRecorder = new MediaRecorder(stream, {
+		this.mediaRecorder = new MediaRecorder(finalStream, {
 			mimeType,
-			videoBitsPerSecond: 1000000 // 1 Mbps
+			videoBitsPerSecond: 2000000, // 2 Mbps for better quality with audio
+			audioBitsPerSecond: 128000   // 128 kbps for audio
 		});
 
 		// Setup event handlers
@@ -175,10 +287,17 @@ export class SimpleSlideshowGenerator {
 			}
 		};
 
-		// Start recording
+		// Start recording and render
 		return new Promise((resolve, reject) => {
 			this.mediaRecorder!.onstop = () => {
 				console.log(`🛑 Recording stopped. Chunks: ${this.recordedChunks.length}`);
+				
+				// Stop audio source if exists
+				if (this.audioSource) {
+					this.audioSource.stop();
+					this.audioSource.disconnect();
+				}
+				
 				const blob = new Blob(this.recordedChunks, { type: mimeType });
 				console.log(`📹 Final video: ${blob.size} bytes`);
 				
@@ -316,6 +435,13 @@ export class SimpleSlideshowGenerator {
 	dispose() {
 		if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
 			this.mediaRecorder.stop();
+		}
+		if (this.audioSource) {
+			this.audioSource.stop();
+			this.audioSource.disconnect();
+		}
+		if (this.audioContext) {
+			this.audioContext.close();
 		}
 		this.recordedChunks = [];
 	}

@@ -117,3 +117,60 @@ export async function uploadPhotosToFirebaseStorage(
 		throw new Error(`Firebase Storage photo upload failed: ${error instanceof Error ? error.message : String(error)}`);
 	}
 }
+
+/**
+ * Upload audio file directly to Firebase Storage from client
+ */
+export async function uploadAudioToFirebaseStorage(
+	audioFile: File,
+	memorialId: string,
+	onProgress?: (progress: number) => void
+): Promise<{ downloadURL: string; storagePath: string }> {
+	try {
+		const storage = getStorage(clientAuth.app);
+		
+		// Create unique filename
+		const timestamp = Date.now();
+		const fileExtension = audioFile.name.split('.').pop() || 'mp3';
+		const storagePath = `slideshows/${memorialId}/audio/${timestamp}-${audioFile.name}`;
+		
+		// Create storage reference
+		const storageRef = ref(storage, storagePath);
+		
+		console.log('🎵 [CLIENT UPLOAD] Uploading audio to:', storagePath);
+		console.log('🎵 [CLIENT UPLOAD] Audio size:', audioFile.size, 'bytes');
+		
+		if (onProgress) {
+			onProgress(0);
+		}
+		
+		const metadata = {
+			contentType: audioFile.type || 'audio/mpeg',
+			customMetadata: {
+				memorialId,
+				fileName: audioFile.name,
+				uploadedAt: new Date().toISOString(),
+				type: 'slideshow-audio'
+			}
+		};
+		
+		const uploadResult = await uploadBytes(storageRef, audioFile, metadata);
+		
+		if (onProgress) {
+			onProgress(100);
+		}
+		
+		// Get download URL
+		const downloadURL = await getDownloadURL(uploadResult.ref);
+		
+		console.log('✅ [CLIENT UPLOAD] Audio upload successful:', downloadURL);
+		
+		return {
+			downloadURL,
+			storagePath
+		};
+	} catch (error) {
+		console.error('❌ [CLIENT UPLOAD] Audio upload failed:', error);
+		throw new Error(`Firebase Storage audio upload failed: ${error instanceof Error ? error.message : String(error)}`);
+	}
+}
