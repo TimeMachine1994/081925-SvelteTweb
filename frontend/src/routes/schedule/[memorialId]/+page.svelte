@@ -7,7 +7,8 @@
 		Clock,
 		Star,
 		MapPin,
-		Calendar
+		Calendar,
+		CheckCircle
 	} from 'lucide-svelte';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
@@ -16,8 +17,17 @@
 	import { useAutoSave } from '$lib/composables/useAutoSave';
 	import { syncStreamsWithSchedule } from '$lib/utils/streamMapper';
 	import type { CalculatorFormData, Tier } from '$lib/types/livestream';
+	import ScheduleReceipt from './_components/ScheduleReceipt.svelte';
+	import EditRequestModal from './_components/EditRequestModal.svelte';
 
 	let { data } = $props();
+
+	// Check if memorial is paid
+	const isPaid = $derived(data?.memorial?.isPaid || false);
+
+	// Edit request modal state
+	let showEditModal = $state(false);
+	let editRequestSuccess = $state(false);
 
 	// Get memorial ID from route params
 	const memorialId = $page.params.memorialId as string;
@@ -573,18 +583,80 @@
 			]
 		}
 	];
+
+	// Handle edit request submission
+	async function handleEditRequest(requestDetails: string) {
+		try {
+			const response = await fetch(`/api/memorials/${memorialId}/schedule/request-edit`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ requestDetails })
+			});
+
+			const result = await response.json();
+
+			if (!response.ok) {
+				throw new Error(result.error || 'Failed to submit request');
+			}
+
+			// Success
+			showEditModal = false;
+			editRequestSuccess = true;
+
+			// Hide success message after 5 seconds
+			setTimeout(() => {
+				editRequestSuccess = false;
+			}, 5000);
+		} catch (error) {
+			console.error('Failed to submit edit request:', error);
+			throw error;
+		}
+	}
 </script>
 
 <svelte:head>
-	<title>Price Calculator - Tributestream</title>
+	<title>{isPaid ? 'Payment Receipt' : 'Price Calculator'} - Tributestream</title>
 	<meta
 		name="description"
 		content="Configure your memorial service livestream package with our comprehensive pricing calculator."
 	/>
 </svelte:head>
 
-<!-- Header -->
-<section class="bg-gradient-to-br from-black via-gray-900 to-amber-900 py-16 text-white">
+{#if isPaid}
+	<!-- Payment Receipt View -->
+	<ScheduleReceipt
+		memorial={data.memorial}
+		calculatorConfig={data.calculatorConfig}
+		onRequestEdit={() => (showEditModal = true)}
+	/>
+
+	<!-- Success Message for Edit Request -->
+	{#if editRequestSuccess}
+		<div class="fixed bottom-4 right-4 z-50 max-w-md rounded-lg bg-green-500 p-4 text-white shadow-lg">
+			<div class="flex items-start">
+				<CheckCircle class="mr-3 h-5 w-5 flex-shrink-0" />
+				<div>
+					<p class="font-medium">Request Submitted Successfully!</p>
+					<p class="mt-1 text-sm text-green-100">
+						Our team will review your request and contact you soon.
+					</p>
+				</div>
+			</div>
+		</div>
+	{/if}
+
+	<!-- Edit Request Modal -->
+	{#if showEditModal}
+		<EditRequestModal
+			memorial={data.memorial}
+			onClose={() => (showEditModal = false)}
+			onSubmit={handleEditRequest}
+		/>
+	{/if}
+{:else}
+	<!-- Calculator View (Unpaid Memorial) -->
+	<!-- Header -->
+	<section class="bg-gradient-to-br from-black via-gray-900 to-amber-900 py-16 text-white">
 	<div class="mx-auto max-w-4xl px-4 text-center">
 		<div class="mb-6">
 			<h1
@@ -1099,3 +1171,4 @@
 		box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
 	}
 </style>
+{/if}
