@@ -1,22 +1,21 @@
 import { error, redirect } from '@sveltejs/kit';
-import { adminAuth, adminDb } from '$lib/firebase-admin';
+import { adminDb } from '$lib/server/firebase';
 import type { WikiPage } from '$lib/types/wiki';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ params, cookies }) => {
-	// Check authentication
-	const sessionCookie = cookies.get('session');
-	if (!sessionCookie) {
+export const load: PageServerLoad = async ({ params, locals }) => {
+	// Check authentication - same pattern as /admin page
+	if (!locals.user) {
 		throw redirect(302, '/login');
+	}
+
+	if (locals.user.role !== 'admin') {
+		throw redirect(302, '/profile');
 	}
 
 	const { slug } = params;
 
 	try {
-		const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
-		if (!decodedClaims.admin) {
-			throw redirect(302, '/');
-		}
 
 		// Fetch the wiki page by slug
 		const pagesSnapshot = await adminDb

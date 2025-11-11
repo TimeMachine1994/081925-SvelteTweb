@@ -1,30 +1,29 @@
 import { redirect } from '@sveltejs/kit';
-import { adminAuth, adminDb } from '$lib/firebase-admin';
+import { adminDb } from '$lib/server/firebase';
 import type { WikiPage } from '$lib/types/wiki';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ cookies }) => {
+export const load: PageServerLoad = async ({ locals }) => {
 	console.log('📖 [WIKI] Loading wiki pages...');
+	console.log('📖 [WIKI] User:', locals.user);
 	
-	// Check authentication
-	const sessionCookie = cookies.get('session');
-	if (!sessionCookie) {
-		console.log('❌ [WIKI] No session cookie found');
+	// Check authentication - same pattern as /admin page
+	if (!locals.user) {
+		console.log('❌ [WIKI] No authenticated user - redirecting to login');
 		throw redirect(302, '/login');
 	}
 
+	if (locals.user.role !== 'admin') {
+		console.log('❌ [WIKI] User lacks admin privileges:', {
+			uid: locals.user.uid,
+			role: locals.user.role
+		});
+		throw redirect(302, '/profile');
+	}
+
+	console.log('✅ [WIKI] Admin access verified for:', locals.user.email);
+
 	try {
-		// Verify admin session
-		const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
-		console.log('🔐 [WIKI] Session verified for user:', decodedClaims.uid);
-
-		// Check if user has admin role
-		if (!decodedClaims.admin) {
-			console.log('❌ [WIKI] User does not have admin role');
-			throw redirect(302, '/');
-		}
-
-		console.log('✅ [WIKI] Admin access verified');
 
 		// Fetch wiki pages
 		console.log('📖 [WIKI] Fetching pages from Firestore...');
@@ -73,7 +72,10 @@ export const load: PageServerLoad = async ({ cookies }) => {
 	} catch (error) {
 		console.error('❌ [WIKI] Error loading wiki pages:', error);
 		console.error('❌ [WIKI] Error details:', error instanceof Error ? error.message : 'Unknown error');
-		console.error('❌ [WIKI] Error stack:', error instanceof Error ? error.stack : 'No stack');
-		throw redirect(302, '/login');
+		
+		// Return empty array on error instead of redirecting
+		return {
+			pages: []
+		};
 	}
 };
