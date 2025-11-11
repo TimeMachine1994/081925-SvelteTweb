@@ -1,5 +1,5 @@
 import { error, redirect } from '@sveltejs/kit';
-import { adminDb } from '$lib/server/firebase-admin';
+import { adminDb } from '$lib/firebase-admin';
 import type { WikiPage } from '$lib/types/wiki';
 import type { PageServerLoad } from './$types';
 
