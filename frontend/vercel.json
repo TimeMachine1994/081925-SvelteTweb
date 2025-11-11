@@ -1,4 +1,10 @@
 {
+  "functions": {
+    "api/slideshow/upload-firebase.js": {
+      "maxDuration": 30,
+      "memory": 1024
+    }
+  },
   "headers": [
     {
       "source": "/static/(.*)",

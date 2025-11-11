@@ -2,6 +2,7 @@
 	import { Upload, X, Play, Settings, Plus, ExternalLink, ChevronUp, ChevronDown } from 'lucide-svelte';
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	import { SimpleSlideshowGenerator } from '$lib/utils/SimpleSlideshowGenerator';
+	import { uploadVideoToFirebaseStorage, uploadPhotosToFirebaseStorage } from '$lib/utils/clientFirebaseStorage';
 	import AudioUploader from './AudioUploader.svelte';
 	import type { SlideshowAudio } from '$lib/types/slideshow';
 
@@ -891,64 +892,106 @@
 
 	// Note: updateExistingSlideshow function removed since we no longer support edit mode
 
-	// Upload video to Firebase Storage and update/create slideshow
+	// Upload video to Firebase Storage (client-side to avoid Vercel's 4.5MB limit)
 	async function uploadToFirebase(videoBlob: Blob, photos: SlideshowPhoto[], settings: SlideshowSettings) {
-		const formData = new FormData();
-		formData.append('video', videoBlob, 'slideshow.webm');
-		formData.append('memorialId', memorialId || '');
-		formData.append('title', `Memorial Slideshow - ${new Date().toLocaleDateString()}`);
-		
-		// Send photo files directly instead of JSON
-		photos.forEach((photo, index) => {
-			// For new photos, send the file
-			if (photo.file) {
-				formData.append(`photo_${index}_file`, photo.file);
-			}
-			// Always send photo metadata
-			formData.append(`photo_${index}_id`, photo.id);
-			formData.append(`photo_${index}_caption`, photo.caption || '');
-			formData.append(`photo_${index}_duration`, photo.duration.toString());
+		try {
+			const title = `Memorial Slideshow - ${new Date().toLocaleDateString()}`;
 			
-			// For existing photos, send the stored URL and path
-			if (photo.storedUrl) {
-				formData.append(`photo_${index}_url`, photo.storedUrl);
-				formData.append(`photo_${index}_storagePath`, photo.storagePath || '');
+			// Step 1: Upload video directly to Firebase Storage from client
+			console.log('📤 [CLIENT] Uploading video to Firebase Storage...');
+			generationPhase = 'Uploading video...';
+			
+			const videoResult = await uploadVideoToFirebaseStorage(
+				videoBlob,
+				memorialId || '',
+				title,
+				(progress) => {
+					generationProgress = 90 + (progress * 0.05); // 90-95%
+				}
+			);
+			
+			console.log('✅ [CLIENT] Video uploaded:', videoResult.downloadURL);
+			
+			// Step 2: Upload photos that don't have stored URLs yet
+			generationPhase = 'Uploading photos...';
+			generationProgress = 95;
+			
+			const photosToUpload = photos
+				.filter(photo => photo.file && !photo.storedUrl)
+				.map(photo => ({
+					id: photo.id,
+					file: photo.file,
+					caption: photo.caption,
+					duration: photo.duration
+				}));
+			
+			let uploadedPhotos: any[] = [];
+			if (photosToUpload.length > 0) {
+				uploadedPhotos = await uploadPhotosToFirebaseStorage(
+					photosToUpload,
+					memorialId || ''
+				);
+				console.log(`✅ [CLIENT] Uploaded ${uploadedPhotos.length} new photos`);
 			}
-		});
-		
-		// Add audio file and settings if present
-		if (audioTrack?.file) {
-			formData.append('audio', audioTrack.file);
-			formData.append('audioName', audioTrack.name);
-			formData.append('audioDuration', audioTrack.duration.toString());
-			console.log('🎵 Including audio in upload:', audioTrack.name);
+			
+			// Step 3: Build complete photos array with URLs
+			const allPhotos = photos.map(photo => {
+				// Find uploaded photo if this was newly uploaded
+				const uploaded = uploadedPhotos.find(p => p.id === photo.id);
+				
+				return {
+					id: photo.id,
+					caption: photo.caption || '',
+					duration: photo.duration || settings.photoDuration,
+					url: uploaded?.downloadURL || photo.storedUrl || photo.preview,
+					storagePath: uploaded?.storagePath || photo.storagePath || ''
+				};
+			});
+			
+			// Step 4: Send metadata to API (lightweight JSON, no files)
+			generationPhase = 'Saving slideshow metadata...';
+			generationProgress = 98;
+			
+			const settingsWithAudio = {
+				...settings,
+				audioVolume,
+				audioFadeIn,
+				audioFadeOut
+			};
+			
+			const metadata = {
+				memorialId: memorialId || '',
+				title,
+				videoUrl: videoResult.downloadURL,
+				videoStoragePath: videoResult.storagePath,
+				photos: allPhotos,
+				settings: settingsWithAudio,
+				audio: audioTrack ? {
+					name: audioTrack.name,
+					duration: audioTrack.duration,
+					url: audioTrack.url || ''
+				} : null
+			};
+			
+			const response = await fetch('/api/slideshow/save-metadata', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(metadata)
+			});
+			
+			if (!response.ok) {
+				const errorData = await response.json();
+				throw new Error(errorData.message || `API failed: ${response.status}`);
+			}
+			
+			const result = await response.json();
+			console.log('✅ Slideshow metadata saved successfully:', result);
+			return result;
+			
+		} catch (error) {
+			console.error('❌ Upload failed:', error);
+			throw error;
 		}
-		
-		// Add audio settings to settings object
-		const settingsWithAudio = {
-			...settings,
-			audioVolume,
-			audioFadeIn,
-			audioFadeOut
-		};
-		
-		formData.append('settings', JSON.stringify(settingsWithAudio));
-		
-		// This is always a new slideshow since we removed edit mode
-
-		const response = await fetch('/api/slideshow/upload-firebase', {
-			method: 'POST',
-			body: formData
-		});
-
-		if (!response.ok) {
-			const errorData = await response.json();
-			throw new Error(errorData.message || `Upload failed: ${response.status} ${response.statusText}`);
-		}
-
-		const result = await response.json();
-		console.log('✅ Slideshow uploaded to Firebase successfully:', result);
-		return result;
 	}
 
 	// Add slideshow to memorial (upload to Firebase)

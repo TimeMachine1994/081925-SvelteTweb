@@ -28,11 +28,11 @@ console.log('🔥 Firebase Config:', {
 	mode: useProduction ? 'PRODUCTION' : 'EMULATORS'
 });
 
-// Initialize Firebase
-let app: FirebaseApp;
-let auth: Auth;
-let db: Firestore;
-let storage: FirebaseStorage;
+// Initialize Firebase  
+let app!: FirebaseApp;
+let auth!: Auth;
+let db!: Firestore;
+let storage!: FirebaseStorage;
 
 if (browser) {
 	app = getApps().length ? getApp() : initializeApp(firebaseConfig);
@@ -95,4 +95,8 @@ if (browser) {
 	}
 }
 
-export { auth, db, storage };
+export { auth, db, storage, app };
+
+// Export as clientAuth for clarity in client-side storage utilities  
+// Note: These are only available in browser context
+export const clientAuth = browser ? { auth, db, storage, app } : null as any;
