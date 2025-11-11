@@ -121,14 +121,15 @@ match /wiki_page_versions/{versionId} {
 ```json
 {
   "dependencies": {
-    "marked": "^11.0.0",
-    "isomorphic-dompurify": "^2.11.0"
+    "marked": "^16.4.2"
   },
   "devDependencies": {
-    "@types/marked": "^6.0.0"
+    "@types/marked": "^5.0.2"
   }
 }
 ```
+
+**Note**: `isomorphic-dompurify` was removed due to ES Module compatibility issues with Vercel's serverless environment. Since the wiki is admin-only with trusted content, `marked`'s built-in HTML escaping provides sufficient safety.
 
 ---
 

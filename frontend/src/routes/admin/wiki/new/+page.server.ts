@@ -1,15 +1,21 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { adminDb } from '$lib/firebase-admin';
+import { adminAuth, adminDb } from '$lib/firebase-admin';
 import type { Actions, PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ locals }) => {
-	// Check admin access
-	if (!locals.user || locals.user.role !== 'admin') {
-		throw redirect(303, '/admin');
+export const load: PageServerLoad = async ({ cookies }) => {
+	// Check authentication
+	const sessionCookie = cookies.get('session');
+	if (!sessionCookie) {
+		throw redirect(302, '/login');
 	}
 
-	// Load all pages to build wiki links map
 	try {
+		const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
+		if (!decodedClaims.admin) {
+			throw redirect(302, '/');
+		}
+
+		// Load all pages to build wiki links map
 		const pagesSnapshot = await adminDb.collection('wiki_pages').get();
 
 		const pageMap = new Map<string, string>();
@@ -23,19 +29,23 @@ export const load: PageServerLoad = async ({ locals }) => {
 		};
 	} catch (error) {
 		console.error('Error loading pages:', error);
-		return {
-			pageMap: {}
-		};
+		throw redirect(302, '/login');
 	}
 };
 
 export const actions: Actions = {
-	default: async ({ request, locals }) => {
-		if (!locals.user || locals.user.role !== 'admin') {
+	default: async ({ request, cookies }) => {
+		const sessionCookie = cookies.get('session');
+		if (!sessionCookie) {
 			return fail(403, { error: 'Unauthorized' });
 		}
 
 		try {
+			const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
+			if (!decodedClaims.admin) {
+				return fail(403, { error: 'Unauthorized' });
+			}
+
 			const formData = await request.formData();
 			const title = formData.get('title') as string;
 			const content = formData.get('content') as string;
@@ -82,11 +92,11 @@ export const actions: Actions = {
 				content,
 				category: category || null,
 				tags,
-				createdBy: locals.user.uid,
-				createdByEmail: locals.user.email || '',
+				createdBy: decodedClaims.uid,
+				createdByEmail: decodedClaims.email || '',
 				createdAt: now,
-				updatedBy: locals.user.uid,
-				updatedByEmail: locals.user.email || '',
+				updatedBy: decodedClaims.uid,
+				updatedByEmail: decodedClaims.email || '',
 				updatedAt: now,
 				version: 1,
 				viewCount: 0,

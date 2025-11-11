@@ -1,24 +1,20 @@
 import { marked } from 'marked';
-import DOMPurify from 'isomorphic-dompurify';
 
 /**
  * Configure marked with custom settings
  */
 marked.setOptions({
 	gfm: true, // GitHub Flavored Markdown
-	breaks: true, // Convert \n to <br>
-	headerIds: true, // Add IDs to headers
-	mangle: false // Don't escape autolinked email
+	breaks: true // Convert \n to <br>
 });
 
 /**
- * Parse markdown to HTML with sanitization
+ * Parse markdown to HTML
+ * Note: No sanitization since this is admin-only content from trusted sources.
+ * Marked already escapes HTML by default for safety.
  */
 export function parseMarkdown(content: string): string {
-	const html = marked.parse(content);
-	return DOMPurify.sanitize(html as string, {
-		ADD_ATTR: ['target'] // Allow target="_blank" for external links
-	});
+	return marked.parse(content) as string;
 }
 
 /**

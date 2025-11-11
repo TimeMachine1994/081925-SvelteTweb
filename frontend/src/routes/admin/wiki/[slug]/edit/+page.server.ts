@@ -1,17 +1,22 @@
 import { error, fail, redirect } from '@sveltejs/kit';
-import { adminDb } from '$lib/firebase-admin';
+import { adminAuth, adminDb } from '$lib/firebase-admin';
 import type { WikiPage } from '$lib/types/wiki';
 import type { Actions, PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ params, locals }) => {
-	// Check admin access
-	if (!locals.user || locals.user.role !== 'admin') {
-		throw redirect(303, '/admin');
+export const load: PageServerLoad = async ({ params, cookies }) => {
+	// Check authentication
+	const sessionCookie = cookies.get('session');
+	if (!sessionCookie) {
+		throw redirect(302, '/login');
 	}
 
 	const { slug } = params;
 
 	try {
+		const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
+		if (!decodedClaims.admin) {
+			throw redirect(302, '/');
+		}
 		// Fetch the wiki page by slug
 		const pagesSnapshot = await adminDb
 			.collection('wiki_pages')
@@ -65,14 +70,19 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 };
 
 export const actions: Actions = {
-	update: async ({ request, params, locals }) => {
-		if (!locals.user || locals.user.role !== 'admin') {
+	update: async ({ request, params, cookies }) => {
+		const sessionCookie = cookies.get('session');
+		if (!sessionCookie) {
 			return fail(403, { error: 'Unauthorized' });
 		}
 
 		const { slug } = params;
 
 		try {
+			const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
+			if (!decodedClaims.admin) {
+				return fail(403, { error: 'Unauthorized' });
+			}
 			const formData = await request.formData();
 			const title = formData.get('title') as string;
 			const content = formData.get('content') as string;
@@ -138,8 +148,8 @@ export const actions: Actions = {
 				content,
 				category: category || null,
 				tags,
-				updatedBy: locals.user.uid,
-				updatedByEmail: locals.user.email || '',
+				updatedBy: decodedClaims.uid,
+				updatedByEmail: decodedClaims.email || '',
 				updatedAt: now,
 				version: (currentData.version || 1) + 1
 			};
@@ -157,14 +167,20 @@ export const actions: Actions = {
 		}
 	},
 
-	delete: async ({ params, locals }) => {
-		if (!locals.user || locals.user.role !== 'admin') {
+	delete: async ({ params, cookies }) => {
+		const sessionCookie = cookies.get('session');
+		if (!sessionCookie) {
 			return fail(403, { error: 'Unauthorized' });
 		}
 
 		const { slug } = params;
 
 		try {
+			const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
+			if (!decodedClaims.admin) {
+				return fail(403, { error: 'Unauthorized' });
+			}
+
 			// Find the page
 			const pagesSnapshot = await adminDb
 				.collection('wiki_pages')

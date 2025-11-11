@@ -1,21 +1,32 @@
 import { redirect } from '@sveltejs/kit';
-import { adminDb } from '$lib/firebase-admin';
+import { adminAuth, adminDb } from '$lib/firebase-admin';
 import type { WikiPage } from '$lib/types/wiki';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: PageServerLoad = async ({ cookies }) => {
 	console.log('📖 [WIKI] Loading wiki pages...');
-	console.log('📖 [WIKI] User:', locals.user);
 	
-	// Check admin access
-	if (!locals.user || locals.user.role !== 'admin') {
-		console.log('❌ [WIKI] Access denied - not admin');
-		throw redirect(303, '/admin');
+	// Check authentication
+	const sessionCookie = cookies.get('session');
+	if (!sessionCookie) {
+		console.log('❌ [WIKI] No session cookie found');
+		throw redirect(302, '/login');
 	}
 
-	console.log('✅ [WIKI] Admin access verified');
-
 	try {
+		// Verify admin session
+		const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie, true);
+		console.log('🔐 [WIKI] Session verified for user:', decodedClaims.uid);
+
+		// Check if user has admin role
+		if (!decodedClaims.admin) {
+			console.log('❌ [WIKI] User does not have admin role');
+			throw redirect(302, '/');
+		}
+
+		console.log('✅ [WIKI] Admin access verified');
+
+		// Fetch wiki pages
 		console.log('📖 [WIKI] Fetching pages from Firestore...');
 		
 		// Fetch all wiki pages (no orderBy to avoid index requirement on first run)
@@ -63,10 +74,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 		console.error('❌ [WIKI] Error loading wiki pages:', error);
 		console.error('❌ [WIKI] Error details:', error instanceof Error ? error.message : 'Unknown error');
 		console.error('❌ [WIKI] Error stack:', error instanceof Error ? error.stack : 'No stack');
-		
-		// Return empty array on error instead of throwing
-		return {
-			pages: []
-		};
+		throw redirect(302, '/login');
 	}
 };
