@@ -307,18 +307,39 @@ export async function syncStreamsWithSchedule(
 		const desiredStreams = mapScheduleToStreams(scheduleData);
 
 		// Sync logic: compare desired vs existing
+		console.log('🔄 [SYNC] Starting sync with', existingStreams.length, 'existing streams and', desiredStreams.length, 'desired streams');
+		
 		for (const desiredStream of desiredStreams) {
 			const serviceHash = generateServiceHash(getServiceFromStream(scheduleData, desiredStream));
 			
+			console.log('🔍 [SYNC] Looking for existing stream:', {
+				serviceType: desiredStream.calculatorServiceType,
+				serviceIndex: desiredStream.calculatorServiceIndex,
+				title: desiredStream.title
+			});
+			
 			// Find existing stream for this service
-			const existingStream = existingStreams.find(stream => 
-				stream.calculatorServiceType === desiredStream.calculatorServiceType &&
-				stream.calculatorServiceIndex === desiredStream.calculatorServiceIndex
-			);
+			const existingStream = existingStreams.find(stream => {
+				const typeMatch = stream.calculatorServiceType === desiredStream.calculatorServiceType;
+				const indexMatch = stream.calculatorServiceIndex === desiredStream.calculatorServiceIndex;
+				
+				console.log('🔍 [SYNC] Checking stream:', {
+					streamId: stream.id,
+					streamType: stream.calculatorServiceType,
+					streamIndex: stream.calculatorServiceIndex,
+					typeMatch,
+					indexMatch,
+					bothMatch: typeMatch && indexMatch
+				});
+				
+				return typeMatch && indexMatch;
+			});
 
 			if (existingStream) {
+				console.log('✅ [SYNC] Found existing stream:', existingStream.id);
 				// Check if update is needed
 				if (existingStream.serviceHash !== serviceHash) {
+					console.log('🔄 [SYNC] Stream needs update (hash changed)');
 					// Update existing stream
 					const updateResult = await updateStream(existingStream.id, {
 						...desiredStream,
@@ -329,11 +350,16 @@ export async function syncStreamsWithSchedule(
 					
 					if (updateResult.success) {
 						result.operations.updated.push(updateResult.stream!);
+						console.log('✅ [SYNC] Stream updated successfully');
 					} else {
 						result.errors.push(`Failed to update stream: ${updateResult.error}`);
+						console.error('❌ [SYNC] Update failed:', updateResult.error);
 					}
+				} else {
+					console.log('ℹ️ [SYNC] Stream unchanged, skipping update');
 				}
 			} else {
+				console.log('➕ [SYNC] No existing stream found, creating new one');
 				// Create new stream
 				const createResult = await createStream(memorialId, {
 					...desiredStream,
@@ -344,27 +370,51 @@ export async function syncStreamsWithSchedule(
 				
 				if (createResult.success) {
 					result.operations.created.push(createResult.stream!);
+					console.log('✅ [SYNC] Stream created successfully:', createResult.stream!.id);
 				} else {
 					result.errors.push(`Failed to create stream: ${createResult.error}`);
+					console.error('❌ [SYNC] Create failed:', createResult.error);
 				}
 			}
 		}
 
 		// Find orphaned streams (exist but no longer in schedule)
-		const orphanedStreams = existingStreams.filter(existing => 
-			!desiredStreams.some(desired => 
+		// ONLY consider streams with calculator linking fields as candidates for deletion
+		const orphanedStreams = existingStreams.filter(existing => {
+			// Skip streams without calculator linking fields (manually created or legacy)
+			if (!existing.calculatorServiceType) {
+				console.log('⚠️ [SYNC] Skipping stream without calculator linking:', existing.id, existing.title);
+				return false;
+			}
+			
+			// Check if this stream matches any desired stream
+			const isOrphaned = !desiredStreams.some(desired => 
 				desired.calculatorServiceType === existing.calculatorServiceType &&
 				desired.calculatorServiceIndex === existing.calculatorServiceIndex
-			)
-		);
+			);
+			
+			if (isOrphaned) {
+				console.log('🗑️ [SYNC] Found orphaned stream:', {
+					id: existing.id,
+					title: existing.title,
+					serviceType: existing.calculatorServiceType,
+					serviceIndex: existing.calculatorServiceIndex
+				});
+			}
+			
+			return isOrphaned;
+		});
 
 		// Delete orphaned streams
+		console.log('🗑️ [SYNC] Deleting', orphanedStreams.length, 'orphaned streams');
 		for (const orphanedStream of orphanedStreams) {
 			const deleteResult = await deleteStream(orphanedStream.id);
 			if (deleteResult.success) {
 				result.operations.deleted.push(orphanedStream.id);
+				console.log('✅ [SYNC] Deleted orphaned stream:', orphanedStream.id);
 			} else {
 				result.errors.push(`Failed to delete orphaned stream: ${deleteResult.error}`);
+				console.error('❌ [SYNC] Delete failed:', deleteResult.error);
 			}
 		}
 
