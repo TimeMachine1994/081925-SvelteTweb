@@ -43,8 +43,9 @@ export async function convertWikiLinksToHtml(
 			const htmlLink = `<a href="/admin/wiki/${slug}" class="wiki-link">${link.displayText}</a>`;
 			result = result.replace(link.fullMatch, htmlLink);
 		} else {
-			// Invalid link - show as red/broken link
-			const htmlLink = `<span class="wiki-link-broken" title="Page does not exist">${link.displayText}</span>`;
+			// Invalid link - create link to new page with pre-filled title
+			const encodedTitle = encodeURIComponent(link.pageTitle);
+			const htmlLink = `<a href="/admin/wiki/new?title=${encodedTitle}" class="wiki-link-broken" title="Page does not exist - Click to create">${link.displayText}</a>`;
 			result = result.replace(link.fullMatch, htmlLink);
 		}
 	}
@@ -75,8 +76,9 @@ export function replaceWikiLinksClient(content: string, pageMap: Map<string, str
 			const htmlLink = `<a href="/admin/wiki/${slug}" class="wiki-link">${link.displayText}</a>`;
 			result = result.replace(link.fullMatch, htmlLink);
 		} else {
-			// Broken link
-			const htmlLink = `<span class="wiki-link-broken" title="Page does not exist">${link.displayText}</span>`;
+			// Broken link - create link to new page with pre-filled title
+			const encodedTitle = encodeURIComponent(link.pageTitle);
+			const htmlLink = `<a href="/admin/wiki/new?title=${encodedTitle}" class="wiki-link-broken" title="Page does not exist - Click to create">${link.displayText}</a>`;
 			result = result.replace(link.fullMatch, htmlLink);
 		}
 	}

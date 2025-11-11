@@ -1,11 +1,33 @@
 import { marked } from 'marked';
 
 /**
+ * Generate slug from heading text for anchor IDs
+ */
+function generateHeadingId(text: string): string {
+	return text
+		.toLowerCase()
+		.replace(/[^\w\s-]/g, '')
+		.replace(/\s+/g, '-');
+}
+
+/**
+ * Custom renderer to add IDs to headings
+ */
+const renderer = new marked.Renderer();
+const originalHeading = renderer.heading.bind(renderer);
+
+renderer.heading = function({ text, depth }) {
+	const id = generateHeadingId(text);
+	return `<h${depth} id="${id}">${text}</h${depth}>`;
+};
+
+/**
  * Configure marked with custom settings
  */
 marked.setOptions({
 	gfm: true, // GitHub Flavored Markdown
-	breaks: true // Convert \n to <br>
+	breaks: true, // Convert \n to <br>
+	renderer: renderer
 });
 
 /**

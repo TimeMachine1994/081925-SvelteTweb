@@ -1,11 +1,15 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { page } from '$app/stores';
 	import WikiEditor from '$lib/components/wiki/WikiEditor.svelte';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
 
-	let title = $state('');
+	// Pre-fill title from URL query parameter
+	const titleFromUrl = $page.url.searchParams.get('title') || '';
+	
+	let title = $state(titleFromUrl);
 	let content = $state('');
 	let category = $state('');
 	let tags = $state('');

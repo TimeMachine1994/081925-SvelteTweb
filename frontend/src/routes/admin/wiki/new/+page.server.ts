@@ -104,8 +104,8 @@ export const actions: Actions = {
 
 			console.log('Created wiki page:', docRef.id);
 
-			// Redirect to the new page
-			throw redirect(303, `/admin/wiki/${slug}`);
+			// Redirect to edit the new page
+			throw redirect(303, `/admin/wiki/${slug}/edit`);
 		} catch (error) {
 			if (error instanceof Response) throw error;
 			console.error('Error creating wiki page:', error);

@@ -11,7 +11,16 @@
 	function scrollToHeading(id: string) {
 		const element = document.getElementById(id);
 		if (element) {
-			element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			// Get element position and scroll with offset
+			const offset = 80; // Account for any fixed headers
+			const elementPosition = element.getBoundingClientRect().top;
+			const offsetPosition = elementPosition + window.pageYOffset - offset;
+
+			window.scrollTo({
+				top: offsetPosition,
+				behavior: 'smooth'
+			});
+			
 			currentId = id;
 		}
 	}

@@ -367,10 +367,18 @@
 		border-bottom-color: #b8a06d;
 	}
 
-	.wiki-content :global(.wiki-link-broken) {
+	.wiki-content :global(a.wiki-link-broken) {
 		color: #dc2626;
+		text-decoration: none;
 		border-bottom: 1px dashed #dc2626;
-		cursor: help;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+
+	.wiki-content :global(a.wiki-link-broken:hover) {
+		color: #991b1b;
+		border-bottom-color: #991b1b;
+		background: #fee2e2;
 	}
 
 	.wiki-content :global(code) {
@@ -442,6 +450,27 @@
 		height: auto;
 		border-radius: 0.5rem;
 		margin: 1.5rem 0;
+	}
+
+	/* Scroll target highlight */
+	.wiki-content :global(h1:target),
+	.wiki-content :global(h2:target),
+	.wiki-content :global(h3:target),
+	.wiki-content :global(h4:target) {
+		background: linear-gradient(90deg, #fef3c7 0%, transparent 100%);
+		padding-left: 1rem;
+		margin-left: -1rem;
+		border-left: 3px solid #d5ba7f;
+		animation: highlight 2s ease-out;
+	}
+
+	@keyframes highlight {
+		0% {
+			background: #fef3c7;
+		}
+		100% {
+			background: linear-gradient(90deg, #fef3c7 0%, transparent 100%);
+		}
 	}
 
 	@media (max-width: 1024px) {

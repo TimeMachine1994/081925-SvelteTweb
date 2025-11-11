@@ -391,10 +391,18 @@
 		border-bottom-color: #b8a06d;
 	}
 
-	.preview-content :global(.wiki-link-broken) {
+	.preview-content :global(a.wiki-link-broken) {
 		color: #dc2626;
+		text-decoration: none;
 		border-bottom: 1px dashed #dc2626;
-		cursor: help;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+
+	.preview-content :global(a.wiki-link-broken:hover) {
+		color: #991b1b;
+		border-bottom-color: #991b1b;
+		background: #fee2e2;
 	}
 
 	.preview-content :global(ul),
