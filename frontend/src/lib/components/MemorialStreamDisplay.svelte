@@ -174,6 +174,76 @@
 			</div>
 		{/if}
 	</div>
+{:else}
+	<!-- Stock Placeholder Player for New Memorials -->
+	<div class="memorial-streams">
+		<div class="stream-section no-stream-section">
+			<h2 class="stream-section-title">Memorial Service</h2>
+			<div class="stream-item">
+				<div class="stock-player">
+					<div class="video-container">
+						<!-- Video Screen -->
+						<div class="video-screen">
+							<!-- Subtle gradient background -->
+							<div class="placeholder-bg"></div>
+							
+							<!-- Message Overlay -->
+							<div class="placeholder-overlay">
+								<div class="placeholder-content">
+									<div class="placeholder-icon">
+										<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+											<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+										</svg>
+									</div>
+									<h3 class="placeholder-title">No Service Scheduled Yet</h3>
+									<p class="placeholder-description">
+										The memorial service livestream will appear here once scheduled.
+									</p>
+								</div>
+							</div>
+						</div>
+						
+						<!-- Fake Video Controls -->
+						<div class="video-controls">
+							<div class="control-bar">
+								<!-- Play Button (Disabled) -->
+								<button class="play-button" disabled aria-label="No stream available">
+									<svg class="play-icon" viewBox="0 0 24 24" fill="currentColor">
+										<polygon points="5,3 19,12 5,21"></polygon>
+									</svg>
+								</button>
+								
+								<!-- Progress Bar (Empty) -->
+								<div class="progress-container">
+									<div class="progress-bar">
+										<div class="progress-fill" style="width: 0%"></div>
+									</div>
+								</div>
+								
+								<!-- Time Display -->
+								<span class="time-display">--:--</span>
+								
+								<!-- Volume Button (Disabled) -->
+								<button class="volume-button" disabled aria-label="Volume control unavailable">
+									<svg class="volume-icon" viewBox="0 0 24 24" fill="currentColor">
+										<polygon points="11,5 6,9 2,9 2,15 6,15 11,19"></polygon>
+										<path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+									</svg>
+								</button>
+								
+								<!-- Fullscreen Button (Disabled) -->
+								<button class="fullscreen-button" disabled aria-label="Fullscreen unavailable">
+									<svg class="fullscreen-icon" viewBox="0 0 24 24" fill="currentColor">
+										<path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+									</svg>
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 {/if}
 
 <style>

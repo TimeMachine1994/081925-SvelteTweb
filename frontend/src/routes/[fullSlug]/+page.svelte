@@ -149,15 +149,13 @@
 
 				<!-- Legacy Custom HTML Content Only -->
 				<div class="memorial-content-container">
-					<!-- Stream Section for Legacy Layout -->
-					{#if streams && streams.length > 0}
-						<div class="streaming-section">
-							<MemorialStreamDisplay 
-								{streams} 
-								memorialName={memorial.lovedOneName}
-							/>
-						</div>
-					{/if}
+					<!-- Stream Section for Legacy Layout - Always show, component handles empty state -->
+					<div class="streaming-section">
+						<MemorialStreamDisplay 
+							streams={streams || []} 
+							memorialName={memorial.lovedOneName}
+						/>
+					</div>
 					
 					<div class="legacy-content">
 						{@html (memorial as any).custom_html}
@@ -213,15 +211,13 @@
 
 				<!-- Body Section -->
 				<div class="memorial-body">
-					<!-- Stream Section -->
-					{#if streams && streams.length > 0}
-						<div class="streaming-section">
-							<MemorialStreamDisplay 
-								{streams} 
-								memorialName={memorial.lovedOneName}
-							/>
-						</div>
-					{/if}
+					<!-- Stream Section - Always show, component handles empty state -->
+					<div class="streaming-section">
+						<MemorialStreamDisplay 
+							streams={streams || []} 
+							memorialName={memorial.lovedOneName}
+						/>
+					</div>
 					
 					<!-- Content area for future features -->
 				</div>
