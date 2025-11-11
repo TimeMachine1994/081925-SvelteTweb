@@ -342,7 +342,7 @@ Thank you for choosing Tributestream!
 		<!-- Action Buttons -->
 		<div class="mt-8 rounded-lg bg-white p-6 shadow-lg">
 			<h2 class="mb-4 text-xl font-semibold text-gray-900">What's Next?</h2>
-			<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+			<div class="grid gap-4 sm:grid-cols-2">
 				<!-- Request Changes -->
 				<button
 					onclick={onRequestEdit}
@@ -362,31 +362,13 @@ Thank you for choosing Tributestream!
 						View Memorial
 					</a>
 				{/if}
-
-				<!-- Manage Streams -->
-				<a
-					href="/memorials/{memorial.id}/streams"
-					class="flex items-center justify-center rounded-lg border-2 border-purple-400 bg-purple-50 px-4 py-3 text-sm font-medium text-purple-700 transition-colors hover:bg-purple-100"
-				>
-					<Calendar class="mr-2 h-4 w-4" />
-					Manage Streams
-				</a>
-
-				<!-- Profile -->
-				<a
-					href="/profile"
-					class="flex items-center justify-center rounded-lg border-2 border-gray-400 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100"
-				>
-					<DollarSign class="mr-2 h-4 w-4" />
-					My Profile
-				</a>
 			</div>
 		</div>
 
 		<!-- Support Information -->
 		<div class="mt-8 text-center text-sm text-gray-600">
-			<p>Need help? Contact us at <strong>support@tributestream.com</strong></p>
+			<p>Need help? Contact us at <strong>tributestream@tributestream.com</strong></p>
 			<p class="mt-1">or call <strong>(407) 221-5922</strong></p>
-		</div>
+		</div> 
 	</div>
 </div>
