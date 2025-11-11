@@ -1888,10 +1888,42 @@
 					<!-- Draft Actions -->
 					<button 
 						class="secondary-btn"
+						onclick={() => {
+							if (previewVideoUrl) URL.revokeObjectURL(previewVideoUrl);
+							previewVideoUrl = draftVideoUrl;
+							showVideoPreview = true;
+						}}
+					>
+						Preview Draft
+					</button>
+					
+					<button 
+						class="secondary-btn"
 						onclick={discardDraftChanges}
 					>
 						<X class="btn-icon" />
-						Discard Draft
+						Discard Changes
+					</button>
+					
+					<!-- Download button for draft video -->
+					<button 
+						class="secondary-btn"
+						onclick={() => {
+							if (!draftVideoBlob) return;
+							const url = URL.createObjectURL(draftVideoBlob);
+							const a = document.createElement('a');
+							a.href = url;
+							a.download = `memorial-slideshow-draft-${Date.now()}.webm`;
+							document.body.appendChild(a);
+							a.click();
+							document.body.removeChild(a);
+							URL.revokeObjectURL(url);
+						}}
+					>
+						<svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+						</svg>
+						Download Draft
 					</button>
 					
 					{#if memorialId}
@@ -1915,23 +1947,35 @@
 					{/if}
 				{:else if memorialId}
 					<!-- Regular Publish Action - Add to Memorial -->
-					<button 
-						class="primary-btn extra-large"
-						onclick={addToMemorial}
-						disabled={isGenerating}
-					>
-						{#if isGenerating}
-							<svg class="btn-icon animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-							</svg>
-							Adding to Memorial...
-						{:else}
+					<div class="button-group">
+						<button 
+							class="secondary-btn"
+							onclick={downloadVideo}
+						>
 							<svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
 							</svg>
-							Add to Memorial
-						{/if}
-					</button>
+							Download Video
+						</button>
+						
+						<button 
+							class="primary-btn extra-large"
+							onclick={addToMemorial}
+							disabled={isGenerating}
+						>
+							{#if isGenerating}
+								<svg class="btn-icon animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+								</svg>
+								Adding to Memorial...
+							{:else}
+								<svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+								</svg>
+								Add to Memorial
+							{/if}
+						</button>
+					</div>
 				{:else}
 					<!-- No Memorial ID - Show Warning and Download Option -->
 					<div class="no-memorial-warning">
@@ -2933,6 +2977,20 @@
 		align-items: center;
 		flex-wrap: wrap;
 		margin-top: 2rem;
+	}
+
+	.button-group {
+		display: flex;
+		gap: 1rem;
+		justify-content: center;
+		align-items: center;
+		flex-wrap: wrap;
+		width: 100%;
+	}
+
+	.button-group .secondary-btn,
+	.button-group .primary-btn {
+		flex: 0 1 auto;
 	}
 
 	/* No Memorial Warning */
