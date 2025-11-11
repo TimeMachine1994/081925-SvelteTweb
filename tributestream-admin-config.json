@@ -1,0 +1,301 @@
+{
+  "app": {
+    "title": "TributeStream Admin",
+    "brand": "TributeStream",
+    "apiBase": "https://tributestream.com/api",
+    "auth": { 
+      "scheme": "firebase", 
+      "tokenHeader": "Authorization",
+      "customClaims": true
+    }
+  },
+  "roles": ["admin", "funeral_director", "owner", "viewer"],
+  "resources": [
+    {
+      "name": "memorials",
+      "label": "Memorials",
+      "endpoint": "/api/admin/memorials",
+      "idField": "id",
+      "permissions": { 
+        "list": ["admin", "funeral_director"], 
+        "read": ["*"], 
+        "create": ["admin", "funeral_director", "owner"], 
+        "update": ["admin", "funeral_director", "owner"], 
+        "delete": ["admin"] 
+      },
+      "fields": [
+        { "name": "id", "type": "id", "hidden": true },
+        { "name": "lovedOneName", "type": "text", "label": "Loved One's Name", "required": true, "min": 2, "max": 200 },
+        { "name": "slug", "type": "text", "label": "URL Slug", "required": true, "readOnly": true },
+        { "name": "fullSlug", "type": "text", "label": "Full URL Slug", "required": true, "unique": true },
+        { "name": "ownerUid", "type": "reference", "label": "Owner", "referenceCollection": "users", "required": true },
+        { "name": "creatorEmail", "type": "email", "label": "Creator Email", "required": true },
+        { "name": "creatorName", "type": "text", "label": "Creator Name" },
+        { "name": "funeralDirectorUid", "type": "reference", "label": "Funeral Director", "referenceCollection": "funeral_directors" },
+        { "name": "directorFullName", "type": "text", "label": "Director Name" },
+        { "name": "funeralHomeName", "type": "text", "label": "Funeral Home" },
+        { "name": "isPublic", "type": "boolean", "label": "Public", "default": false },
+        { "name": "isComplete", "type": "boolean", "label": "Setup Complete", "default": false },
+        { "name": "isPaid", "type": "boolean", "label": "Paid", "default": false },
+        { "name": "paymentStatus", "type": "select", "label": "Payment Status", "options": ["paid", "unpaid"], "default": "unpaid" },
+        { "name": "content", "type": "textarea", "label": "Memorial Description", "max": 5000 },
+        { "name": "birthDate", "type": "date", "label": "Date of Birth" },
+        { "name": "deathDate", "type": "date", "label": "Date of Death" },
+        { "name": "imageUrl", "type": "url", "label": "Featured Image URL" },
+        { "name": "scheduledStartTime", "type": "datetime", "label": "Service Date & Time" },
+        { "name": "location", "type": "text", "label": "Service Location" },
+        { "name": "locationAddress", "type": "text", "label": "Location Address" },
+        { "name": "createdAt", "type": "datetime", "label": "Created", "readOnly": true },
+        { "name": "updatedAt", "type": "datetime", "label": "Updated", "readOnly": true }
+      ],
+      "list": {
+        "columns": ["lovedOneName", "creatorEmail", "scheduledStartTime", "isPaid", "paymentStatus", "isPublic", "createdAt"],
+        "defaultSort": { "field": "scheduledStartTime", "dir": "desc" },
+        "filters": [
+          { "type": "search", "fields": ["lovedOneName", "creatorEmail", "funeralHomeName"] },
+          { "type": "select", "field": "paymentStatus", "options": ["paid", "unpaid"] },
+          { "type": "select", "field": "isPublic", "options": [true, false], "labels": ["Public", "Private"] },
+          { "type": "dateRange", "field": "scheduledStartTime", "label": "Service Date" }
+        ],
+        "bulkActions": ["delete", "mark-paid", "mark-unpaid", "mark-complete"]
+      },
+      "forms": {
+        "create": ["lovedOneName", "creatorEmail", "creatorName", "content", "birthDate", "deathDate", "scheduledStartTime", "location", "isPublic"],
+        "edit": ["lovedOneName", "content", "birthDate", "deathDate", "scheduledStartTime", "location", "locationAddress", "isPublic", "isPaid"]
+      },
+      "actions": [
+        { "name": "markPaid", "label": "Mark as Paid", "method": "POST", "path": "/api/admin/toggle-payment-status", "roles": ["admin"], "confirm": true },
+        { "name": "markComplete", "label": "Mark Complete", "method": "POST", "path": "/api/admin/memorials/:id/complete", "roles": ["admin"], "confirm": false },
+        { "name": "viewPublic", "label": "View Public Page", "method": "LINK", "path": "/:fullSlug", "roles": ["*"] }
+      ]
+    },
+    {
+      "name": "users",
+      "label": "Users",
+      "endpoint": "/api/admin/users",
+      "idField": "uid",
+      "permissions": { 
+        "list": ["admin"], 
+        "read": ["admin"], 
+        "create": ["admin"], 
+        "update": ["admin"], 
+        "delete": ["admin"] 
+      },
+      "fields": [
+        { "name": "uid", "type": "id", "hidden": true },
+        { "name": "email", "type": "email", "label": "Email", "required": true, "unique": true },
+        { "name": "displayName", "type": "text", "label": "Display Name", "required": true, "min": 2, "max": 100 },
+        { "name": "role", "type": "select", "label": "Role", "options": ["admin", "funeral_director", "owner", "viewer"], "default": "viewer", "required": true },
+        { "name": "phone", "type": "tel", "label": "Phone Number" },
+        { "name": "photoURL", "type": "url", "label": "Profile Photo URL" },
+        { "name": "memorialCount", "type": "number", "label": "Memorial Count", "readOnly": true, "default": 0 },
+        { "name": "hasPaidForMemorial", "type": "boolean", "label": "Has Paid Memorial", "default": false },
+        { "name": "createdAt", "type": "datetime", "label": "Created", "readOnly": true },
+        { "name": "lastLoginAt", "type": "datetime", "label": "Last Login", "readOnly": true }
+      ],
+      "list": {
+        "columns": ["displayName", "email", "role", "memorialCount", "hasPaidForMemorial", "createdAt", "lastLoginAt"],
+        "defaultSort": { "field": "createdAt", "dir": "desc" },
+        "filters": [
+          { "type": "search", "fields": ["displayName", "email"] },
+          { "type": "select", "field": "role", "options": ["admin", "funeral_director", "owner", "viewer"] },
+          { "type": "select", "field": "hasPaidForMemorial", "options": [true, false], "labels": ["Paid", "Unpaid"] }
+        ],
+        "bulkActions": ["delete"]
+      },
+      "forms": {
+        "create": ["email", "displayName", "role", "phone"],
+        "edit": ["displayName", "role", "phone", "photoURL"]
+      },
+      "actions": [
+        { "name": "resetPassword", "label": "Reset Password", "method": "POST", "path": "/api/admin/users/:uid/reset-password", "roles": ["admin"], "confirm": true },
+        { "name": "viewMemorials", "label": "View Memorials", "method": "LINK", "path": "/admin/users/:uid/memorials", "roles": ["admin"] }
+      ]
+    },
+    {
+      "name": "funeral_directors",
+      "label": "Funeral Directors",
+      "endpoint": "/api/admin/funeral-directors",
+      "idField": "id",
+      "permissions": { 
+        "list": ["admin"], 
+        "read": ["admin"], 
+        "create": ["admin"], 
+        "update": ["admin", "funeral_director"], 
+        "delete": ["admin"] 
+      },
+      "fields": [
+        { "name": "id", "type": "id", "hidden": true },
+        { "name": "uid", "type": "reference", "label": "User Account", "referenceCollection": "users", "required": true },
+        { "name": "email", "type": "email", "label": "Email", "required": true, "unique": true },
+        { "name": "companyName", "type": "text", "label": "Company Name", "required": true, "min": 2, "max": 200 },
+        { "name": "contactPerson", "type": "text", "label": "Contact Person", "required": true },
+        { "name": "phone", "type": "tel", "label": "Phone Number", "required": true },
+        { "name": "licenseNumber", "type": "text", "label": "License Number" },
+        { "name": "businessType", "type": "select", "label": "Business Type", "options": ["funeral_home", "crematorium", "memorial_service", "other"], "default": "funeral_home" },
+        { "name": "address", "type": "text", "label": "Address" },
+        { "name": "city", "type": "text", "label": "City" },
+        { "name": "state", "type": "text", "label": "State" },
+        { "name": "zipCode", "type": "text", "label": "ZIP Code" },
+        { "name": "isApproved", "type": "boolean", "label": "Approved", "default": false },
+        { "name": "approvedAt", "type": "datetime", "label": "Approved Date", "readOnly": true },
+        { "name": "approvedBy", "type": "text", "label": "Approved By", "readOnly": true },
+        { "name": "createdAt", "type": "datetime", "label": "Created", "readOnly": true }
+      ],
+      "list": {
+        "columns": ["companyName", "contactPerson", "email", "phone", "businessType", "isApproved", "createdAt"],
+        "defaultSort": { "field": "createdAt", "dir": "desc" },
+        "filters": [
+          { "type": "search", "fields": ["companyName", "contactPerson", "email"] },
+          { "type": "select", "field": "businessType", "options": ["funeral_home", "crematorium", "memorial_service", "other"] },
+          { "type": "select", "field": "isApproved", "options": [true, false], "labels": ["Approved", "Pending"] }
+        ],
+        "bulkActions": ["approve", "delete"]
+      },
+      "forms": {
+        "create": ["email", "companyName", "contactPerson", "phone", "licenseNumber", "businessType", "address", "city", "state", "zipCode"],
+        "edit": ["companyName", "contactPerson", "phone", "licenseNumber", "businessType", "address", "city", "state", "zipCode", "isApproved"]
+      },
+      "actions": [
+        { "name": "approve", "label": "Approve", "method": "POST", "path": "/api/admin/funeral-directors/:id/approve", "roles": ["admin"], "confirm": false },
+        { "name": "reject", "label": "Reject", "method": "POST", "path": "/api/admin/funeral-directors/:id/reject", "roles": ["admin"], "confirm": true },
+        { "name": "viewMemorials", "label": "View Memorials", "method": "LINK", "path": "/admin/funeral-directors/:id/memorials", "roles": ["admin"] }
+      ]
+    },
+    {
+      "name": "streams",
+      "label": "Livestreams",
+      "endpoint": "/api/admin/streams",
+      "idField": "id",
+      "permissions": { 
+        "list": ["admin", "funeral_director"], 
+        "read": ["*"], 
+        "create": ["admin", "funeral_director", "owner"], 
+        "update": ["admin", "funeral_director", "owner"], 
+        "delete": ["admin"] 
+      },
+      "fields": [
+        { "name": "id", "type": "id", "hidden": true },
+        { "name": "memorialId", "type": "reference", "label": "Memorial", "referenceCollection": "memorials", "required": true },
+        { "name": "title", "type": "text", "label": "Stream Title", "required": true },
+        { "name": "status", "type": "select", "label": "Status", "options": ["idle", "live", "offline"], "default": "idle" },
+        { "name": "cloudflareInputId", "type": "text", "label": "Cloudflare Input ID", "readOnly": true },
+        { "name": "cloudflareStreamId", "type": "text", "label": "Cloudflare Stream ID", "readOnly": true },
+        { "name": "whipUrl", "type": "url", "label": "WHIP URL", "readOnly": true },
+        { "name": "rtmpUrl", "type": "url", "label": "RTMP URL", "readOnly": true },
+        { "name": "streamKey", "type": "text", "label": "Stream Key", "readOnly": true, "sensitive": true },
+        { "name": "playbackUrl", "type": "url", "label": "Playback URL", "readOnly": true },
+        { "name": "embedUrl", "type": "url", "label": "Embed URL", "readOnly": true },
+        { "name": "recordingEnabled", "type": "boolean", "label": "Recording Enabled", "default": true },
+        { "name": "recordingUrl", "type": "url", "label": "Recording URL", "readOnly": true },
+        { "name": "scheduledStartTime", "type": "datetime", "label": "Scheduled Start" },
+        { "name": "actualStartTime", "type": "datetime", "label": "Actual Start", "readOnly": true },
+        { "name": "actualEndTime", "type": "datetime", "label": "Actual End", "readOnly": true },
+        { "name": "createdAt", "type": "datetime", "label": "Created", "readOnly": true },
+        { "name": "updatedAt", "type": "datetime", "label": "Updated", "readOnly": true }
+      ],
+      "list": {
+        "columns": ["title", "memorialId", "status", "scheduledStartTime", "recordingEnabled", "createdAt"],
+        "defaultSort": { "field": "scheduledStartTime", "dir": "desc" },
+        "filters": [
+          { "type": "search", "fields": ["title"] },
+          { "type": "select", "field": "status", "options": ["idle", "live", "offline"] },
+          { "type": "select", "field": "recordingEnabled", "options": [true, false], "labels": ["Recording On", "Recording Off"] },
+          { "type": "dateRange", "field": "scheduledStartTime", "label": "Scheduled Date" }
+        ],
+        "bulkActions": ["delete"]
+      },
+      "forms": {
+        "create": ["memorialId", "title", "scheduledStartTime", "recordingEnabled"],
+        "edit": ["title", "scheduledStartTime", "recordingEnabled"]
+      },
+      "actions": [
+        { "name": "viewStream", "label": "View Stream", "method": "LINK", "path": "/memorials/:memorialId/streams", "roles": ["*"] },
+        { "name": "getCredentials", "label": "Get Stream Credentials", "method": "GET", "path": "/api/streams/:id/credentials", "roles": ["admin", "funeral_director", "owner"] }
+      ]
+    },
+    {
+      "name": "schedule_edit_requests",
+      "label": "Schedule Edit Requests",
+      "endpoint": "/api/admin/schedule-edit-requests",
+      "idField": "id",
+      "permissions": { 
+        "list": ["admin"], 
+        "read": ["admin"], 
+        "create": ["owner", "funeral_director"], 
+        "update": ["admin"], 
+        "delete": ["admin"] 
+      },
+      "fields": [
+        { "name": "id", "type": "id", "hidden": true },
+        { "name": "memorialId", "type": "reference", "label": "Memorial", "referenceCollection": "memorials", "required": true },
+        { "name": "requestedBy", "type": "email", "label": "Requested By", "required": true },
+        { "name": "requestedByName", "type": "text", "label": "Requester Name" },
+        { "name": "status", "type": "select", "label": "Status", "options": ["pending", "approved", "rejected"], "default": "pending" },
+        { "name": "reason", "type": "textarea", "label": "Reason for Edit", "required": true, "max": 1000 },
+        { "name": "adminNotes", "type": "textarea", "label": "Admin Notes", "max": 1000 },
+        { "name": "processedBy", "type": "email", "label": "Processed By", "readOnly": true },
+        { "name": "processedAt", "type": "datetime", "label": "Processed Date", "readOnly": true },
+        { "name": "createdAt", "type": "datetime", "label": "Created", "readOnly": true }
+      ],
+      "list": {
+        "columns": ["memorialId", "requestedBy", "reason", "status", "createdAt", "processedAt"],
+        "defaultSort": { "field": "createdAt", "dir": "desc" },
+        "filters": [
+          { "type": "search", "fields": ["requestedBy", "requestedByName", "reason"] },
+          { "type": "select", "field": "status", "options": ["pending", "approved", "rejected"] },
+          { "type": "dateRange", "field": "createdAt", "label": "Request Date" }
+        ],
+        "bulkActions": ["approve", "reject", "delete"]
+      },
+      "forms": {
+        "create": ["memorialId", "reason"],
+        "edit": ["status", "adminNotes"]
+      },
+      "actions": [
+        { "name": "approve", "label": "Approve Request", "method": "POST", "path": "/api/admin/schedule-edit-requests/:id/approve", "roles": ["admin"], "confirm": false },
+        { "name": "reject", "label": "Reject Request", "method": "POST", "path": "/api/admin/schedule-edit-requests/:id/reject", "roles": ["admin"], "confirm": true }
+      ]
+    },
+    {
+      "name": "admin_audit_logs",
+      "label": "Audit Logs",
+      "endpoint": "/api/admin/audit-logs",
+      "idField": "id",
+      "permissions": { 
+        "list": ["admin"], 
+        "read": ["admin"], 
+        "create": ["system"], 
+        "update": ["system"], 
+        "delete": ["admin"] 
+      },
+      "fields": [
+        { "name": "id", "type": "id", "hidden": true },
+        { "name": "action", "type": "select", "label": "Action", "options": ["memorial_created", "memorial_updated", "memorial_deleted", "user_created", "payment_toggled", "director_approved", "director_rejected", "stream_created", "stream_deleted", "api_access_denied"], "required": true },
+        { "name": "userEmail", "type": "email", "label": "User Email" },
+        { "name": "userRole", "type": "select", "label": "User Role", "options": ["admin", "funeral_director", "owner", "viewer"] },
+        { "name": "resourceType", "type": "text", "label": "Resource Type" },
+        { "name": "resourceId", "type": "text", "label": "Resource ID" },
+        { "name": "details", "type": "json", "label": "Details" },
+        { "name": "ipAddress", "type": "text", "label": "IP Address" },
+        { "name": "timestamp", "type": "datetime", "label": "Timestamp", "readOnly": true, "required": true }
+      ],
+      "list": {
+        "columns": ["timestamp", "action", "userEmail", "userRole", "resourceType", "ipAddress"],
+        "defaultSort": { "field": "timestamp", "dir": "desc" },
+        "filters": [
+          { "type": "search", "fields": ["userEmail"] },
+          { "type": "select", "field": "action", "options": ["memorial_created", "memorial_updated", "memorial_deleted", "user_created", "payment_toggled", "director_approved", "director_rejected", "stream_created", "stream_deleted", "api_access_denied"] },
+          { "type": "select", "field": "userRole", "options": ["admin", "funeral_director", "owner", "viewer"] },
+          { "type": "dateRange", "field": "timestamp", "label": "Date Range" }
+        ],
+        "bulkActions": ["delete"]
+      },
+      "forms": {
+        "create": [],
+        "edit": []
+      },
+      "actions": []
+    }
+  ]
+}

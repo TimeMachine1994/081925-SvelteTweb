@@ -108,5 +108,20 @@ service cloud.firestore {
       allow read: if isAdmin() || isAdminEmail();
     }
 
+    // Wiki pages - Admin only
+    match /wiki_pages/{pageId} {
+      allow read, write: if isAdmin() || isAdminEmail();
+    }
+
+    // Wiki categories - Admin only
+    match /wiki_categories/{categoryId} {
+      allow read, write: if isAdmin() || isAdminEmail();
+    }
+
+    // Wiki page versions - Admin only (for future use)
+    match /wiki_page_versions/{versionId} {
+      allow read, write: if isAdmin() || isAdminEmail();
+    }
+
   }
 }
