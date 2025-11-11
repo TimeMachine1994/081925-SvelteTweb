@@ -29,7 +29,7 @@
 
 	let { 
 		memorialId, 
-		maxPhotos = 30, 
+		maxPhotos = 50, 
 		maxFileSize = 10 
 	}: Props = $props();
 
@@ -1538,7 +1538,7 @@
 						</button>
 					</div>
 					<p class="upload-limits">
-						Up to 30 photos • 10MB per file
+						Up to {maxPhotos} photos • {maxFileSize}MB per file
 					</p>
 				</div>
 			</div>

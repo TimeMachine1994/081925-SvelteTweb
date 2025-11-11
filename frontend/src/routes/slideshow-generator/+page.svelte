@@ -1,38 +1,13 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import PhotoSlideshowCreator from '$lib/components/slideshow/PhotoSlideshowCreator.svelte';
-	import type { MemorialSlideshow } from '$lib/types/slideshow';
+	import type { PageData } from './$types';
 
-	// Get edit data from URL parameters
-	let editData: MemorialSlideshow | null = null;
-	let isEditMode = false;
-	let memorialId: string | null = null;
-
-	onMount(() => {
-		// Check for edit parameter first
-		const editParam = $page.url.searchParams.get('edit');
-		if (editParam) {
-			try {
-				editData = JSON.parse(decodeURIComponent(editParam));
-				isEditMode = true;
-				memorialId = editData?.memorialId || null;
-				console.log('🎬 Edit mode activated for slideshow:', editData?.id);
-			} catch (error) {
-				console.error('Failed to parse edit data:', error);
-				// Fallback to creation mode
-				isEditMode = false;
-			}
-		}
-
-		// Check for memorialId parameter (when coming from memorial page)
-		const memorialParam = $page.url.searchParams.get('memorialId');
-		if (memorialParam && !isEditMode) {
-			memorialId = memorialParam;
-			console.log('🎬 Memorial ID found, will check for existing slideshow:', memorialId);
-		}
-
-	});
+	// Get data from SvelteKit load function
+	let { data }: { data: PageData } = $props();
+	
+	// Destructure for easier access
+	let { memorialId, editData, isEditMode } = $derived(data);
 	
 	// Memorial data for proper navigation
 	let memorial = $state<any>(null);
@@ -55,8 +30,12 @@
 	}
 	
 	onMount(() => {
-		// Load memorial data on mount
+		// Log the loaded data
+		if (isEditMode) {
+			console.log('🎬 Edit mode activated for slideshow:', editData?.id);
+		}
 		if (memorialId) {
+			console.log('🎬 Memorial ID loaded:', memorialId);
 			fetchMemorialData();
 		}
 	});
@@ -164,7 +143,7 @@
 	<div class="creator-container">
 		<PhotoSlideshowCreator 
 			memorialId={memorialId || undefined}
-			maxPhotos={30}
+			maxPhotos={50}
 			maxFileSize={10}
 			on:slideshowGenerated={handleSlideshowGenerated}
 			on:existingSlideshowFound={handleExistingSlideshowFound}
