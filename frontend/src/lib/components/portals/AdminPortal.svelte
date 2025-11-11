@@ -78,6 +78,11 @@
 	});
 	let isTogglingPayment = $state(false);
 
+	// Edit payment notes management
+	let editNotesModal = $state<any>(null);
+	let editNotesForm = $state({ notes: '' });
+	let isUpdatingNotes = $state(false);
+
 	// Schedule edit requests state
 	let editRequests = $state<any[]>([]);
 	let editRequestsLoading = $state(false);
@@ -610,6 +615,65 @@
 	}
 
 	/**
+	 * Open edit notes modal for a paid memorial
+	 */
+	function openEditNotesModal(memorial: any) {
+		console.log('📝 [ADMIN] Opening edit notes modal for:', memorial.id);
+		editNotesModal = memorial;
+		editNotesForm = {
+			notes: memorial.manualPayment?.notes || ''
+		};
+	}
+
+	/**
+	 * Close edit notes modal
+	 */
+	function closeEditNotesModal() {
+		editNotesModal = null;
+		editNotesForm = { notes: '' };
+	}
+
+	/**
+	 * Update payment notes for a paid memorial
+	 */
+	async function updatePaymentNotes() {
+		if (!editNotesModal) return;
+
+		console.log('📝 [ADMIN] Updating payment notes for:', editNotesModal.id);
+		isUpdatingNotes = true;
+
+		try {
+			const response = await fetch('/api/admin/toggle-payment-status', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					memorialId: editNotesModal.id,
+					isPaid: true,
+					paymentMethod: editNotesModal.manualPayment?.method || 'manual',
+					paymentNotes: editNotesForm.notes
+				})
+			});
+
+			const result = await response.json();
+
+			if (response.ok) {
+				console.log('✅ [ADMIN] Payment notes updated successfully');
+				await invalidateAll();
+				alert('Payment notes updated successfully!');
+				closeEditNotesModal();
+			} else {
+				console.error('❌ [ADMIN] Failed to update payment notes:', result.error);
+				alert(`Failed to update notes: ${result.error}`);
+			}
+		} catch (error) {
+			console.error('❌ [ADMIN] Error updating payment notes:', error);
+			alert('Network error occurred while updating notes');
+		} finally {
+			isUpdatingNotes = false;
+		}
+	}
+
+	/**
 	 * Toggle payment status for a memorial
 	 */
 	async function togglePaymentStatus(memorialId: string, isPaid: boolean) {
@@ -1038,6 +1102,14 @@
 														>
 															✅ Paid
 														</button>
+														<button
+															onclick={() => openEditNotesModal(memorial)}
+															disabled={isUpdatingNotes}
+															class="rounded bg-blue-500 px-2 py-1 text-xs text-white w-fit hover:bg-blue-600 transition-colors"
+															title="Edit payment notes"
+														>
+															📝 Edit Notes
+														</button>
 													{:else}
 														<button
 															onclick={() => openPaymentModal(memorial)}
@@ -1116,27 +1188,35 @@
 											📍 {memorial.location}
 										</p>
 										
-										<div class="mb-2">
-											{#if memorial.isPaid}
-												<button
-													onclick={() => quickMarkUnpaid(memorial)}
-													disabled={isTogglingPayment}
-													class="inline-block rounded bg-green-500 px-2 py-1 text-xs text-white hover:bg-green-600 transition-colors"
-													title="Click to mark as unpaid"
-												>
-													✅ Paid
-												</button>
-											{:else}
-												<button
-													onclick={() => openPaymentModal(memorial)}
-													disabled={isTogglingPayment}
-													class="inline-block rounded bg-amber-500 px-2 py-1 text-xs text-white hover:bg-amber-600 transition-colors"
-													title="Click to mark as paid"
-												>
-													⏳ Unpaid
-												</button>
-											{/if}
-										</div>
+										<div class="mb-2 flex gap-2">
+										{#if memorial.isPaid}
+											<button
+												onclick={() => quickMarkUnpaid(memorial)}
+												disabled={isTogglingPayment}
+												class="inline-block rounded bg-green-500 px-2 py-1 text-xs text-white hover:bg-green-600 transition-colors"
+												title="Click to mark as unpaid"
+											>
+												✅ Paid
+											</button>
+											<button
+												onclick={() => openEditNotesModal(memorial)}
+												disabled={isUpdatingNotes}
+												class="inline-block rounded bg-blue-500 px-2 py-1 text-xs text-white hover:bg-blue-600 transition-colors"
+												title="Edit payment notes"
+											>
+												📝 Edit Notes
+											</button>
+										{:else}
+											<button
+												onclick={() => openPaymentModal(memorial)}
+												disabled={isTogglingPayment}
+												class="inline-block rounded bg-amber-500 px-2 py-1 text-xs text-white hover:bg-amber-600 transition-colors"
+												title="Click to mark as paid"
+											>
+												⏳ Unpaid
+											</button>
+										{/if}
+									</div>
 										
 										<p class="text-sm text-white/70 mb-1 break-all">{memorial.creatorEmail}</p>
 									</div>
@@ -2276,6 +2356,58 @@
 							type="button"
 							onclick={closePaymentModal}
 							disabled={isTogglingPayment}
+							variant="secondary"
+							size="md"
+							rounded="lg"
+							class="flex-1 min-h-[44px]"
+						>
+							❌ Cancel
+						</Button>
+					</div>
+				</form>
+			</div>
+		</div>
+	{/if}
+
+	<!-- Edit Payment Notes Modal -->
+	{#if editNotesModal}
+		<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+			<div class="w-full max-w-md rounded-xl border border-white/20 bg-gradient-to-br from-slate-900 to-slate-800 p-6 shadow-2xl">
+				<h3 class="mb-4 text-xl font-bold text-white">Edit Payment Notes</h3>
+				
+				<div class="mb-4 rounded-lg border border-white/10 bg-white/5 p-3">
+					<p class="text-sm text-white/70 mb-1">Memorial:</p>
+					<p class="font-semibold text-white">{editNotesModal.lovedOneName}</p>
+					<p class="text-sm text-white/70 mt-1">Creator: {editNotesModal.creatorEmail}</p>
+				</div>
+
+				<form onsubmit={(e) => { e.preventDefault(); updatePaymentNotes(); }} class="space-y-4">
+					<div>
+						<label class="block text-sm font-medium text-white/90 mb-2">Payment Notes</label>
+						<textarea
+							bind:value={editNotesForm.notes}
+							placeholder="Update payment details or notes..."
+							rows="4"
+							class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white placeholder-white/50 focus:border-blue-400 focus:outline-none"
+						></textarea>
+					</div>
+
+					<div class="flex gap-3 pt-2">
+						<Button
+							type="submit"
+							disabled={isUpdatingNotes}
+							loading={isUpdatingNotes}
+							variant="primary"
+							size="md"
+							rounded="lg"
+							class="flex-1 min-h-[44px]"
+						>
+							{isUpdatingNotes ? 'Updating...' : '💾 Save Notes'}
+						</Button>
+						<Button
+							type="button"
+							onclick={closeEditNotesModal}
+							disabled={isUpdatingNotes}
 							variant="secondary"
 							size="md"
 							rounded="lg"

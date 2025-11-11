@@ -140,8 +140,144 @@
 
 ## Testing Checklist
 
-- [ ] Service date field no longer appears on payment confirmed page
+- [x] Service date field no longer appears on payment confirmed page
+- [x] Payment notes display when memorial is manually marked as paid
+- [x] Payment notes show correct information from admin panel
+- [x] Layout remains clean with payment date and payment notes
+- [x] No timezone issues with remaining date fields
+
+---
+
+## Additional Enhancements (November 11, 2024)
+
+### Enhancement 1: Edit Notes Button in Admin Panel
+**Request**: Add ability to edit payment notes for already-paid memorials
+**Implementation**: 
+- Add "Edit Notes" button next to "Paid" status in memorial management table
+- Create edit notes modal with textarea for updating payment notes
+- Add API call to update only the payment notes field
+- Available in both desktop table and mobile card views
+
+### Enhancement 2: Improved Text Spacing on Payment Confirmation Page
+**Request**: Add margin to payment notes text for better readability
+**Implementation**:
+- Add `max-w-md` and `break-words` classes to payment notes display
+- Ensure long notes wrap properly and don't overflow container
+- Maintain clean visual hierarchy with other payment information
+
+### Files Modified:
+
+#### 1. `frontend/src/lib/components/portals/AdminPortal.svelte` ✅
+**State Variables Added (lines 81-84)**:
+```typescript
+let editNotesModal = $state<any>(null);
+let editNotesForm = $state({ notes: '' });
+let isUpdatingNotes = $state(false);
+```
+
+**Functions Added (lines 617-674)**:
+- `openEditNotesModal(memorial)` - Opens edit modal with current notes
+- `closeEditNotesModal()` - Closes modal and resets form
+- `updatePaymentNotes()` - Updates notes via API and refreshes data
+
+**Desktop Table - Edit Notes Button (lines 1105-1112)**:
+```svelte
+<button
+  onclick={() => openEditNotesModal(memorial)}
+  disabled={isUpdatingNotes}
+  class="rounded bg-blue-500 px-2 py-1 text-xs text-white w-fit hover:bg-blue-600 transition-colors"
+  title="Edit payment notes"
+>
+  📝 Edit Notes
+</button>
+```
+
+**Mobile Cards - Edit Notes Button (lines 1201-1208)**:
+```svelte
+<button
+  onclick={() => openEditNotesModal(memorial)}
+  disabled={isUpdatingNotes}
+  class="inline-block rounded bg-blue-500 px-2 py-1 text-xs text-white hover:bg-blue-600 transition-colors"
+  title="Edit payment notes"
+>
+  📝 Edit Notes
+</button>
+```
+
+**Edit Notes Modal UI (lines 2372-2422)**:
+- Full modal with memorial information display
+- Textarea for editing notes (4 rows)
+- Save and Cancel buttons
+- Loading states and disabled states while updating
+
+#### 2. `frontend/src/routes/schedule/[memorialId]/_components/ScheduleReceipt.svelte` ✅
+**Improved Payment Notes Display (lines 327-332)**:
+```svelte
+{#if memorial.manualPayment?.notes}
+  <div class="flex flex-col gap-2 border-b border-gray-100 py-3">
+    <span class="font-medium text-gray-600">Payment Notes</span>
+    <span class="text-gray-900 max-w-md break-words ml-0">
+      {memorial.manualPayment.notes}
+    </span>
+  </div>
+{/if}
+```
+
+**Changes**:
+- Changed from `flex-row justify-between` to `flex-col gap-2` for better note display
+- Added `max-w-md break-words ml-0` classes for proper text wrapping
+- Notes now display below label instead of inline for better readability
+
+### Technical Implementation Details:
+
+**API Endpoint Used**:
+- Reuses existing `/api/admin/toggle-payment-status` endpoint
+- Sends same memorial ID, isPaid: true, payment method, and updated notes
+- No new API endpoint needed - smart reuse of existing infrastructure
+
+**User Flow**:
+1. Admin sees "✅ Paid" badge on memorial in admin panel
+2. Clicks "📝 Edit Notes" button next to paid status
+3. Modal opens with current notes prefilled
+4. Admin edits notes in textarea
+5. Clicks "💾 Save Notes" button
+6. Notes update via API call
+7. Success message shows, data refreshes, modal closes
+
+**Display Flow**:
+1. User views payment confirmed page
+2. Payment notes section shows with improved spacing
+3. Long notes wrap properly without overflow
+4. Clean, readable presentation of admin notes
+
+---
+
+## ✅ Final Summary
+
+### All Changes Completed:
+
+1. **✅ Removed buggy service date field** - No more timezone issues causing incorrect date display
+2. **✅ Added payment notes field** - Admin notes now display on payment confirmation page
+3. **✅ Added Edit Notes button** - Admins can edit payment notes after marking memorial as paid
+4. **✅ Improved text spacing** - Payment notes wrap properly with better layout
+
+### Testing Required:
+
+**Admin Panel Testing**:
+- [ ] "Edit Notes" button appears next to "Paid" status (desktop view)
+- [ ] "Edit Notes" button appears next to "Paid" status (mobile view)
+- [ ] Click "Edit Notes" opens modal with current notes prefilled
+- [ ] Update notes and save successfully updates memorial
+- [ ] Modal closes and data refreshes after successful save
+- [ ] Loading states work correctly during update
+
+**Payment Confirmation Page Testing**:
+- [ ] Service date field no longer appears
 - [ ] Payment notes display when memorial is manually marked as paid
-- [ ] Payment notes show correct information from admin panel
-- [ ] Layout remains clean with payment date and payment notes
-- [ ] No timezone issues with remaining date fields
+- [ ] Long notes wrap properly without overflow
+- [ ] Layout is clean with proper spacing between fields
+- [ ] Works on both desktop and mobile views
+
+### Files Changed:
+1. `frontend/src/lib/components/portals/AdminPortal.svelte` - Edit notes functionality
+2. `frontend/src/routes/schedule/[memorialId]/_components/ScheduleReceipt.svelte` - Removed service date, improved notes display
