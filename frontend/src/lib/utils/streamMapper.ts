@@ -321,7 +321,9 @@ export async function syncStreamsWithSchedule(
 			// Find existing stream for this service
 			const existingStream = existingStreams.find(stream => {
 				const typeMatch = stream.calculatorServiceType === desiredStream.calculatorServiceType;
-				const indexMatch = stream.calculatorServiceIndex === desiredStream.calculatorServiceIndex;
+				// Treat null and undefined as equivalent for index matching
+				const normalizeIndex = (val: any) => (val === null || val === undefined) ? null : val;
+				const indexMatch = normalizeIndex(stream.calculatorServiceIndex) === normalizeIndex(desiredStream.calculatorServiceIndex);
 				
 				console.log('🔍 [SYNC] Checking stream:', {
 					streamId: stream.id,
@@ -380,21 +382,22 @@ export async function syncStreamsWithSchedule(
 
 		// Find orphaned streams (exist but no longer in schedule)
 		// ONLY consider streams with calculator linking fields as candidates for deletion
+		const normalizeIndex = (val: any) => (val === null || val === undefined) ? null : val;
 		const orphanedStreams = existingStreams.filter(existing => {
 			// Skip streams without calculator linking fields (manually created or legacy)
 			if (!existing.calculatorServiceType) {
-				console.log('⚠️ [SYNC] Skipping stream without calculator linking:', existing.id, existing.title);
+				console.log(' [SYNC] Skipping stream without calculator linking:', existing.id, existing.title);
 				return false;
 			}
 			
-			// Check if this stream matches any desired stream
+			// Check if this stream matches any desired stream (using normalized comparison)
 			const isOrphaned = !desiredStreams.some(desired => 
 				desired.calculatorServiceType === existing.calculatorServiceType &&
-				desired.calculatorServiceIndex === existing.calculatorServiceIndex
+				normalizeIndex(desired.calculatorServiceIndex) === normalizeIndex(existing.calculatorServiceIndex)
 			);
 			
 			if (isOrphaned) {
-				console.log('🗑️ [SYNC] Found orphaned stream:', {
+				console.log(' [SYNC] Found orphaned stream:', {
 					id: existing.id,
 					title: existing.title,
 					serviceType: existing.calculatorServiceType,
@@ -405,18 +408,26 @@ export async function syncStreamsWithSchedule(
 			return isOrphaned;
 		});
 
-		// Delete orphaned streams
-		console.log('🗑️ [SYNC] Deleting', orphanedStreams.length, 'orphaned streams');
+		// DISABLED: Delete orphaned streams (no DELETE endpoint exists yet)
+		// TODO: Create DELETE endpoint at /api/memorials/[memorialId]/streams/[streamId]
+		if (orphanedStreams.length > 0) {
+			console.log(' [SYNC] Found', orphanedStreams.length, 'orphaned streams but deletion is disabled (no API endpoint)');
+			console.log(' [SYNC] Orphaned streams will remain in database until DELETE endpoint is created');
+		}
+		// Commenting out deletion code until endpoint exists:
+		/*
+		console.log(' [SYNC] Deleting', orphanedStreams.length, 'orphaned streams');
 		for (const orphanedStream of orphanedStreams) {
 			const deleteResult = await deleteStream(orphanedStream.id);
 			if (deleteResult.success) {
 				result.operations.deleted.push(orphanedStream.id);
-				console.log('✅ [SYNC] Deleted orphaned stream:', orphanedStream.id);
+				console.log(' [SYNC] Deleted orphaned stream:', orphanedStream.id);
 			} else {
 				result.errors.push(`Failed to delete orphaned stream: ${deleteResult.error}`);
-				console.error('❌ [SYNC] Delete failed:', deleteResult.error);
+				console.error(' [SYNC] Delete failed:', deleteResult.error);
 			}
 		}
+		*/
 
 		result.success = result.errors.length === 0;
 		return result;

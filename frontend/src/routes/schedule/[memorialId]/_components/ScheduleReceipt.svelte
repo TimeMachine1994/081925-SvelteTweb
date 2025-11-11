@@ -324,15 +324,10 @@ Thank you for choosing Tributestream!
 							<span class="text-gray-900">{formatDate(memorial.paidAt)}</span>
 						</div>
 					{/if}
-					{#if memorial.services?.main?.time?.date}
+					{#if memorial.manualPayment?.notes}
 						<div class="flex items-center justify-between border-b border-gray-100 py-3">
-							<span class="font-medium text-gray-600">Service Date</span>
-							<span class="text-gray-900">
-								{formatServiceDate(
-									memorial.services.main.time.date,
-									memorial.services.main.time.time
-								)}
-							</span>
+							<span class="font-medium text-gray-600">Payment Notes</span>
+							<span class="text-gray-900">{memorial.manualPayment.notes}</span>
 						</div>
 					{/if}
 				</div>
