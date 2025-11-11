@@ -93,5 +93,20 @@ service cloud.firestore {
       allow read: if resource.data.status == 'published';
     }
 
+    // Schedule edit requests rules
+    match /schedule_edit_requests/{requestId} {
+      // Users can read their own requests
+      allow read: if request.auth != null && request.auth.uid == resource.data.requestedBy;
+      
+      // Users can create requests (API will validate permissions)
+      allow create: if request.auth != null;
+      
+      // Only admins can update/delete requests
+      allow update, delete: if isAdmin() || isAdminEmail();
+      
+      // Admins can read all requests
+      allow read: if isAdmin() || isAdminEmail();
+    }
+
   }
 }

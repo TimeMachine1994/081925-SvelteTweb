@@ -147,21 +147,21 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			throw SvelteKitError(403, 'Permission denied');
 		}
 
-		// Setup OBS RTMP streaming
-		console.log('🎬 [STREAMS API] Setting up OBS RTMP streaming');
+		// For scheduled streams, OBS streaming setup is deferred until the actual start time
+		// Only immediate live streams need streaming credentials right away
 		let streamKey = '';
 		let rtmpUrl = '';
 		let cloudflareInputId = '';
 
-		try {
-			const config = await setupOBSStreaming(title.trim());
-			streamKey = config.streamKey;
-			rtmpUrl = config.rtmpUrl;
-			cloudflareInputId = config.cloudflareInputId;
-			console.log('✅ [STREAMS API] OBS streaming configured successfully');
-		} catch (error) {
-			console.error('❌ [STREAMS API] Failed to setup OBS streaming:', error);
-			throw SvelteKitError(500, `Failed to configure OBS streaming: ${error instanceof Error ? error.message : 'Unknown error'}`);
+		if (scheduledStartTime) {
+			// Scheduled stream - just create the record for countdown display
+			console.log('📅 [STREAMS API] Scheduled stream - deferring streaming setup until start time');
+			console.log('📅 [STREAMS API] Creating database record for: ' + new Date(scheduledStartTime).toLocaleString());
+		} else {
+			// Immediate live stream - would need OBS setup, but that's deprecated
+			console.log('⚠️ [STREAMS API] Immediate live stream requested, but OBS streaming is deprecated');
+			console.log('⚠️ [STREAMS API] Creating record - streaming credentials must be configured separately');
+			// TODO: Integrate with new WHIP streaming system for live streams
 		}
 
 		// Create stream object (avoiding undefined values for Firestore)

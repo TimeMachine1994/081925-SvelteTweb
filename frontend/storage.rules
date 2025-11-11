@@ -16,7 +16,11 @@ service firebase.storage {
     }
 
     function isOwner(memorialId) {
-      return firestore.get(/databases/(default)/documents/memorials/$(memorialId)).data.creatorUid == request.auth.uid;
+      return firestore.get(/databases/(default)/documents/memorials/$(memorialId)).data.ownerUid == request.auth.uid;
+    }
+
+    function isFuneralDirector(memorialId) {
+      return firestore.get(/databases/(default)/documents/memorials/$(memorialId)).data.funeralDirectorUid == request.auth.uid;
     }
 
     function isFamilyMember(memorialId) {
@@ -69,18 +73,18 @@ service firebase.storage {
 
     // Memorial photos:
     // - Publicly readable.
-    // - Writable by the memorial owner OR an invited family member OR admins.
+    // - Writable by the memorial owner OR an invited family member OR funeral director OR admins.
     match /memorials/{memorialId}/{allPaths=**} {
       allow read;
-      allow write: if request.auth != null && (isOwner(memorialId) || isFamilyMember(memorialId) || isAdmin() || isAdminEmail());
+      allow write: if request.auth != null && (isOwner(memorialId) || isFamilyMember(memorialId) || isFuneralDirector(memorialId) || isAdmin() || isAdminEmail());
     }
 
     // Memorial slideshows (videos and photos):
     // - Publicly readable so slideshows can be viewed on memorial pages
-    // - Writable by the memorial owner OR an invited family member OR admins
+    // - Writable by the memorial owner OR an invited family member OR funeral director OR admins
     match /slideshows/{memorialId}/{allPaths=**} {
       allow read;
-      allow write: if request.auth != null && (isOwner(memorialId) || isFamilyMember(memorialId) || isAdmin() || isAdminEmail());
+      allow write: if request.auth != null && (isOwner(memorialId) || isFamilyMember(memorialId) || isFuneralDirector(memorialId) || isAdmin() || isAdminEmail());
     }
 
     // Fallback rule for admin access to any file (for backend operations)
