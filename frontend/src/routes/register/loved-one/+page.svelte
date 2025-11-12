@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { tick } from 'svelte';
 	import LiveUrlPreview from '$lib/components/LiveUrlPreview.svelte';
 	import { page } from '$app/stores';
 	import { Button } from '$lib/ui';
@@ -89,6 +90,10 @@
 			
 			recaptchaToken = token;
 			console.log('✅ reCAPTCHA token obtained');
+			
+			// Wait for Svelte to update the DOM with the token
+			await tick();
+			console.log('✅ DOM updated with reCAPTCHA token');
 			
 			// Submit the form programmatically
 			const form = event.target as HTMLFormElement;
