@@ -94,52 +94,54 @@
 
 		<form 
 			method="POST"
-			use:enhance={() => {
-				return async ({ formData, cancel }) => {
-					console.log('📤 Form submission started');
-					
-					// Client-side validation first
-					if (!validateFormFields()) {
-						console.log('❌ Form validation failed');
-						cancel(); // Cancel submission
-						return;
-					}
-					
-					// Get reCAPTCHA token if not already set
-					if (!recaptchaToken) {
-						isSubmitting = true;
-						
-						// Dev mode bypass for local testing
-						if (dev) {
-							console.log('🔧 Dev mode: bypassing reCAPTCHA');
-							recaptchaToken = 'dev-bypass';
-							formData.set('recaptchaToken', 'dev-bypass');
-						} else {
-							console.log('🤖 Executing reCAPTCHA verification...');
-							
-							const token = await executeRecaptcha(RECAPTCHA_ACTIONS.CREATE_MEMORIAL);
-							
-							if (!token) {
-								console.warn('⚠️ reCAPTCHA token fetch failed');
-								isSubmitting = false;
-								cancel(); // Cancel if reCAPTCHA fails
-								validationErrors = ['Security verification failed. Please refresh and try again.'];
-								return;
-							}
-							
-							console.log('✅ reCAPTCHA token obtained');
-							recaptchaToken = token;
-							formData.set('recaptchaToken', token);
-						}
-					}
-					
+			use:enhance={async ({ formData, cancel }) => {
+				console.log('📤 Form submission started');
+				
+				// Client-side validation first
+				if (!validateFormFields()) {
+					console.log('❌ Form validation failed');
+					cancel(); // Cancel submission
+					return;
+				}
+				
+				// Get reCAPTCHA token if not already set
+				if (!recaptchaToken) {
 					isSubmitting = true;
 					
-					return async ({ update }) => {
-						await update();
-						isSubmitting = false;
-						recaptchaToken = ''; // Reset token after submission
-					};
+					// Dev mode bypass for local testing
+					if (dev) {
+						console.log('🔧 Dev mode: bypassing reCAPTCHA');
+						recaptchaToken = 'dev-bypass';
+						formData.set('recaptchaToken', 'dev-bypass');
+					} else {
+						console.log('🤖 Executing reCAPTCHA verification...');
+						
+						const token = await executeRecaptcha(RECAPTCHA_ACTIONS.CREATE_MEMORIAL);
+						
+						if (!token) {
+							console.warn('⚠️ reCAPTCHA token fetch failed');
+							isSubmitting = false;
+							cancel(); // Cancel if reCAPTCHA fails
+							validationErrors = ['Security verification failed. Please refresh and try again.'];
+							return;
+						}
+						
+						console.log('✅ reCAPTCHA token obtained');
+						recaptchaToken = token;
+						formData.set('recaptchaToken', token);
+					}
+				} else {
+					// Token already exists, add it to formData
+					console.log('✅ Using existing reCAPTCHA token');
+					formData.set('recaptchaToken', recaptchaToken);
+				}
+				
+				isSubmitting = true;
+				
+				return async ({ update }) => {
+					await update();
+					isSubmitting = false;
+					recaptchaToken = ''; // Reset token after submission
 				};
 			}}
 		>
