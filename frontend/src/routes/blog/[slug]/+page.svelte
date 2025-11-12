@@ -59,7 +59,7 @@
 	});
 
 	// Social sharing functions
-	function openShareWindow(url: string) {
+	function openShareWindow(url) {
 		const width = 600;
 		const height = 400;
 		const left = window.innerWidth / 2 - width / 2;
@@ -95,7 +95,7 @@
 					text: post?.excerpt || '',
 					url: absoluteUrl
 				});
-			} catch (err: any) {
+			} catch (err) {
 				if (err.name !== 'AbortError') {
 					console.error('Error sharing:', err);
 				}
@@ -227,11 +227,11 @@
 					src={post.featuredImage} 
 					alt={post.featuredImageAlt || post.title} 
 					class="featured-image"
-					on:error={(e) => {
+					onerror={(e) => {
 						console.error('Failed to load featured image:', post.featuredImage);
 						e.target.style.display = 'none';
 					}}
-					on:load={() => {
+					onload={() => {
 						console.log('Featured image loaded successfully:', post.featuredImage);
 					}}
 				/>
