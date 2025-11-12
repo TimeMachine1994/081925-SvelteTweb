@@ -112,7 +112,7 @@
 </script>
 
 <svelte:head>
-	<title>{isEditMode ? 'Edit Slideshow' : 'Create Slideshow'} - TributeStream</title>
+	<title>{isEditMode ? 'Edit Slideshow' : 'Create Slideshow'} - Tributestream</title>
 	<meta name="description" content={isEditMode ? 'Edit your memorial slideshow' : 'Create a beautiful memorial slideshow'} />
 </svelte:head>
 

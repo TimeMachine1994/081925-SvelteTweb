@@ -1,8 +1,8 @@
-# TributeStream API Documentation
+# Tributestream API Documentation
 
 ## Overview
 
-TributeStream provides a comprehensive API for user registration, memorial creation, and funeral director services. All endpoints implement pre-validation for optimal performance and consistent error handling.
+Tributestream provides a comprehensive API for user registration, memorial creation, and funeral director services. All endpoints implement pre-validation for optimal performance and consistent error handling.
 
 ## Authentication
 

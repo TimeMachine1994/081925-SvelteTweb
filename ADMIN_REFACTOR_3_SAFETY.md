@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document covers RBAC/ABAC permissions, destructive action guards, undo systems, dry-runs, and rate limiting for TributeStream admin operations.
+This document covers RBAC/ABAC permissions, destructive action guards, undo systems, dry-runs, and rate limiting for Tributestream admin operations.
 
 ---
 

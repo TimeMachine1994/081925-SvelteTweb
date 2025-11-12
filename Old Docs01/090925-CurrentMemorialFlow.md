@@ -1,4 +1,4 @@
-# TributeStream User Flow Analysis: Memorial Collections and APIs
+# Tributestream User Flow Analysis: Memorial Collections and APIs
 
 **Date:** September 9, 2025  
 **Analysis of:** Complete user journey from memorial creation to payment completion

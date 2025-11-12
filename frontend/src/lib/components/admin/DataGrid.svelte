@@ -64,8 +64,11 @@ Based on ADMIN_REFACTOR_2_DATA_OPERATIONS.md
 		});
 	});
 
-	// Select all checkbox - derived from actual selection state
-	let selectAll = $derived(selectedMemorials.size === data.length && data.length > 0);
+	// Select all checkbox - check against visible sorted data
+	let selectAll = $derived(
+		sortedData.length > 0 && 
+		sortedData.every((row) => selectedMemorials.has(row.id))
+	);
 
 	function handleSort(column: Column) {
 		if (!column.sortable) return;
@@ -79,15 +82,16 @@ Based on ADMIN_REFACTOR_2_DATA_OPERATIONS.md
 	}
 
 	function toggleSelectAll() {
-		// Check current selection state, not the checkbox state
-		const allSelected = selectedMemorials.size === data.length && data.length > 0;
+		// Check if all visible items are selected
+		const allSelected = sortedData.length > 0 && 
+			sortedData.every((row) => selectedMemorials.has(row.id));
 		
 		if (allSelected) {
-			// Deselect all
-			selectedMemorials.clear();
+			// Deselect all visible items
+			sortedData.forEach((row) => selectedMemorials.delete(row.id));
 		} else {
 			// Select all visible items
-			data.forEach((row) => selectedMemorials.add(row.id));
+			sortedData.forEach((row) => selectedMemorials.add(row.id));
 		}
 		selectedMemorials = selectedMemorials; // Trigger reactivity
 	}
@@ -132,7 +136,7 @@ Based on ADMIN_REFACTOR_2_DATA_OPERATIONS.md
 							<input
 								type="checkbox"
 								checked={selectAll}
-								onchange={toggleSelectAll}
+								onclick={toggleSelectAll}
 								aria-label="Select all"
 							/>
 						</th>
@@ -182,7 +186,7 @@ Based on ADMIN_REFACTOR_2_DATA_OPERATIONS.md
 								<input
 									type="checkbox"
 									checked={selectedMemorials.has(row.id)}
-									onchange={() => toggleSelection(row.id)}
+									onclick={() => toggleSelection(row.id)}
 									aria-label="Select row"
 								/>
 							</td>

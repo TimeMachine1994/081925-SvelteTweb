@@ -2,7 +2,7 @@
 
 ## Overview
 
-TributeStream uses Firebase Authentication with custom session cookies for secure, server-side authentication. The system supports multiple user roles: **admin**, **funeral_director**, and **owner** (memorial creators).
+Tributestream uses Firebase Authentication with custom session cookies for secure, server-side authentication. The system supports multiple user roles: **admin**, **funeral_director**, and **owner** (memorial creators).
 
 ## Authentication Architecture
 

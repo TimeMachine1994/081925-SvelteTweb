@@ -2,7 +2,7 @@
 
 ## Overview
 
-TributeStream uses **Mux** for livestreaming and video hosting. Mux provides professional-grade video infrastructure with automatic transcoding, adaptive bitrate streaming, and global CDN delivery.
+Tributestream uses **Mux** for livestreaming and video hosting. Mux provides professional-grade video infrastructure with automatic transcoding, adaptive bitrate streaming, and global CDN delivery.
 
 ## Architecture
 

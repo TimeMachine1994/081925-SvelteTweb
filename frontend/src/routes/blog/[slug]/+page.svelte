@@ -52,7 +52,7 @@
 
 <svelte:head>
 	{#if post}
-		<title>{post.title} | TributeStream Blog</title>
+		<title>{post.title} | Tributestream Blog</title>
 		<meta name="description" content={post.excerpt} />
 		<meta name="keywords" content={post.tags?.join(', ') || ''} />
 		
@@ -68,7 +68,7 @@
 		<meta name="twitter:description" content={post.excerpt} />
 		<meta name="twitter:image" content={post.featuredImage} />
 	{:else}
-		<title>Blog Post Not Found | TributeStream</title>
+		<title>Blog Post Not Found | Tributestream</title>
 	{/if}
 </svelte:head>
 

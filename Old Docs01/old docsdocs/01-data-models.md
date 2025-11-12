@@ -2,7 +2,7 @@
 
 ## Overview
 
-TributeStream uses a comprehensive type system built with TypeScript interfaces to ensure data consistency across the application. This document covers all core data models, their relationships, and usage patterns.
+Tributestream uses a comprehensive type system built with TypeScript interfaces to ensure data consistency across the application. This document covers all core data models, their relationships, and usage patterns.
 
 ## Core Data Models
 
@@ -507,4 +507,4 @@ const streamRequest: CreateStreamRequest = {
 
 ---
 
-*This document covers the complete data model structure for TributeStream. For API usage patterns, see [API Routes Reference](./02-api-routes.md).*
+*This document covers the complete data model structure for Tributestream. For API usage patterns, see [API Routes Reference](./02-api-routes.md).*

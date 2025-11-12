@@ -53,7 +53,7 @@ Based on ADMIN_REFACTOR_1_ARCHITECTURE.md
 </script>
 
 <svelte:head>
-	<title>{title} - TributeStream Admin</title>
+	<title>{title} - Tributestream Admin</title>
 </svelte:head>
 
 <!-- Keyboard shortcuts -->
@@ -74,7 +74,7 @@ Based on ADMIN_REFACTOR_1_ARCHITECTURE.md
 		<div class="sidebar-header">
 			<div class="logo">
 				<span class="logo-icon">🕊️</span>
-				<span class="logo-text">TributeStream</span>
+				<span class="logo-text">Tributestream</span>
 			</div>
 			<button class="close-mobile" onclick={() => (mobileMenuOpen = false)}>✕</button>
 		</div>

@@ -138,7 +138,7 @@ Easiest streaming method for non-technical users:
 ```typescript
 // Create live stream with recording
 const muxStream = await createMUXLiveStream({
-  name: 'TributeStream Live',
+  name: 'Tributestream Live',
   reconnectWindow: 60,
   recordingEnabled: true
 });

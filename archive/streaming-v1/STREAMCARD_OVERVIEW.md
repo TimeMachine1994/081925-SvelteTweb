@@ -20,7 +20,7 @@
 
 ## System Overview
 
-The **StreamCard** component system is the core UI infrastructure for managing livestreams in TributeStream's memorial service platform. It provides comprehensive stream management capabilities including:
+The **StreamCard** component system is the core UI infrastructure for managing livestreams in Tributestream's memorial service platform. It provides comprehensive stream management capabilities including:
 
 - **RTMP Streaming** - Traditional streaming with OBS/external software
 - **Browser Streaming** - WebRTC/WHIP streaming directly from browser
@@ -81,7 +81,7 @@ frontend/src/lib/components/
 
 ### 🎨 User Experience
 
-- **Professional UI** - TributeStream Minimal Modern design system
+- **Professional UI** - Tributestream Minimal Modern design system
 - **Responsive Design** - Mobile-optimized layouts
 - **Real-Time Feedback** - Loading states, success/error messages
 - **Copy Functions** - One-click copy for credentials
@@ -217,7 +217,7 @@ StreamCard.svelte
 
 - **Framework**: SvelteKit (Svelte 5 with runes)
 - **Language**: TypeScript
-- **Styling**: TributeStream Minimal Modern Design System
+- **Styling**: Tributestream Minimal Modern Design System
 - **Icons**: Lucide Svelte
 - **WebRTC**: Native Browser APIs + Cloudflare WHIP
 

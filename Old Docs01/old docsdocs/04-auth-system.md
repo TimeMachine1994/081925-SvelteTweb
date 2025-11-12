@@ -2,7 +2,7 @@
 
 ## Overview
 
-TributeStream implements a comprehensive authentication and authorization system using Firebase Auth with custom claims for role-based access control. The system supports three primary user roles with hierarchical permissions and secure session management.
+Tributestream implements a comprehensive authentication and authorization system using Firebase Auth with custom claims for role-based access control. The system supports three primary user roles with hierarchical permissions and secure session management.
 
 ## User Roles & Permissions
 

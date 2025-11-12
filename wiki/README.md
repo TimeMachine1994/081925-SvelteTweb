@@ -1,6 +1,6 @@
-# TributeStream Technical Documentation
+# Tributestream Technical Documentation
 
-Welcome to the TributeStream internal wiki! This documentation covers the technical architecture, implementation details, and operational procedures for the TributeStream platform.
+Welcome to the Tributestream internal wiki! This documentation covers the technical architecture, implementation details, and operational procedures for the Tributestream platform.
 
 ## 📚 Documentation Index
 

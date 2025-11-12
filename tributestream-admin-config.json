@@ -1,7 +1,7 @@
 {
   "app": {
-    "title": "TributeStream Admin",
-    "brand": "TributeStream",
+    "title": "Tributestream Admin",
+    "brand": "Tributestream",
     "apiBase": "https://tributestream.com/api",
     "auth": { 
       "scheme": "firebase", 

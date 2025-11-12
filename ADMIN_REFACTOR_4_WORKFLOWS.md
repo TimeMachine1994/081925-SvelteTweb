@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document covers state machines, multi-step approvals, task inboxes, SLA tracking, and embedded runbooks for TributeStream admin workflows.
+This document covers state machines, multi-step approvals, task inboxes, SLA tracking, and embedded runbooks for Tributestream admin workflows.
 
 ---
 

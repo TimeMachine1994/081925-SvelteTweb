@@ -2,7 +2,7 @@
 
 ## Overview
 
-TributeStream uses Firebase Firestore as the primary database. This document outlines all collections and their schemas.
+Tributestream uses Firebase Firestore as the primary database. This document outlines all collections and their schemas.
 
 ## Collections
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-TributeStream's integration flows define how different components, services, and user interactions work together to deliver a seamless memorial service experience. This document covers end-to-end workflows, data flows, and system integrations.
+Tributestream's integration flows define how different components, services, and user interactions work together to deliver a seamless memorial service experience. This document covers end-to-end workflows, data flows, and system integrations.
 
 ## Core User Workflows
 
@@ -804,4 +804,4 @@ class StreamStatusManager {
 
 ---
 
-*These integration flows provide the foundation for TributeStream's seamless user experience, connecting all system components through well-defined workflows and robust error handling.*
+*These integration flows provide the foundation for Tributestream's seamless user experience, connecting all system components through well-defined workflows and robust error handling.*

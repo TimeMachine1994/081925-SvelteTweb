@@ -1,4 +1,4 @@
-# TributeStream - Three-Option Streaming Architecture
+# Tributestream - Three-Option Streaming Architecture
 
 **Document Version:** 1.0  
 **Last Updated:** October 29, 2025  

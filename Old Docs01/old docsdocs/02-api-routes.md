@@ -2,7 +2,7 @@
 
 ## Overview
 
-TributeStream provides a comprehensive REST API built with SvelteKit API routes. All endpoints follow RESTful conventions and return JSON responses. Authentication is handled via Firebase Auth with role-based access control.
+Tributestream provides a comprehensive REST API built with SvelteKit API routes. All endpoints follow RESTful conventions and return JSON responses. Authentication is handled via Firebase Auth with role-based access control.
 
 ## Base URL Structure
 

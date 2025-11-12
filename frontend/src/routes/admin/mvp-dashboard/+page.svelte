@@ -191,7 +191,7 @@
 	<div class="mx-auto max-w-7xl">
 		<!-- Header -->
 		<div class="mb-8">
-			<h1 class="text-3xl font-bold text-gray-900">🏛️ TributeStream Admin Dashboard</h1>
+			<h1 class="text-3xl font-bold text-gray-900">🏛️ Tributestream Admin Dashboard</h1>
 			<p class="text-gray-600">Manage memorials, users, purchases, and streams</p>
 		</div>
 

@@ -2,7 +2,7 @@
 *Date: September 12, 2025*
 
 ## Overview
-This document outlines a comprehensive refactor to standardize session management, authentication, and data model consistency across the TributeStream application.
+This document outlines a comprehensive refactor to standardize session management, authentication, and data model consistency across the Tributestream application.
 
 ## Current Issues Identified
 

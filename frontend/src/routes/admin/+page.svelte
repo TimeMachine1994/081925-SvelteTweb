@@ -18,8 +18,8 @@
 
 		console.log('🏛️ [ADMIN PAGE] Admin dashboard mounted');
 		console.log('📊 [ADMIN PAGE] Data loaded:', {
+			incompleteMemorials: data.incompleteMemorials?.length || 0,
 			recentMemorials: data.recentMemorials?.length || 0,
-			stats: data.stats,
 			adminUser: data.adminUser
 		});
 	});
@@ -27,41 +27,43 @@
 
 <AdminLayout
 	title="Admin Dashboard"
-	subtitle="System overview and key metrics"
+	subtitle="Monitor incomplete memorials and quick access to admin tools"
 >
-	<!-- Stats Grid -->
-	<div class="stats-grid">
-		<div class="stat-card">
-			<div class="stat-icon">💝</div>
-			<div class="stat-content">
-				<div class="stat-value">{data.stats?.totalMemorials || 0}</div>
-				<div class="stat-label">Total Memorials</div>
-			</div>
+	<!-- Incomplete Memorials - Priority Section -->
+	<div class="incomplete-section">
+		<div class="section-header">
+			<h2>⚠️ Incomplete Memorials</h2>
+			<span class="count-badge">{data.incompleteMemorials?.length || 0} pending</span>
 		</div>
-
-		<div class="stat-card">
-			<div class="stat-icon">👥</div>
-			<div class="stat-content">
-				<div class="stat-value">{data.allUsers?.length || 0}</div>
-				<div class="stat-label">Total Users</div>
+		
+		{#if (data.incompleteMemorials?.length || 0) === 0}
+			<div class="empty-state">
+				<div class="empty-icon">✅</div>
+				<p>All memorials are complete! Great job.</p>
 			</div>
-		</div>
-
-		<div class="stat-card">
-			<div class="stat-icon">🏥</div>
-			<div class="stat-content">
-				<div class="stat-value">{data.stats?.totalFuneralDirectors || 0}</div>
-				<div class="stat-label">Funeral Directors</div>
+		{:else}
+			<div class="memorials-list">
+				{#each (data.incompleteMemorials || []) as memorial}
+					<a href="/admin/services/memorials" class="memorial-row incomplete">
+						<div class="memorial-info">
+							<div class="memorial-name">{memorial.lovedOneName}</div>
+							<div class="memorial-meta">
+								<span class="memorial-owner">👤 {memorial.creatorEmail}</span>
+								<span class="memorial-date">
+									📅 {new Date(memorial.createdAt).toLocaleDateString()}
+								</span>
+							</div>
+						</div>
+						<div class="memorial-badges">
+							<span class="status-badge incomplete">⚠️ Incomplete</span>
+							<span class="status-badge" class:paid={memorial.isPaid}>
+								{memorial.isPaid ? '✅ Paid' : '❌ Unpaid'}
+							</span>
+						</div>
+					</a>
+				{/each}
 			</div>
-		</div>
-
-		<div class="stat-card">
-			<div class="stat-icon">📊</div>
-			<div class="stat-content">
-				<div class="stat-value">{data.recentMemorials?.length || 0}</div>
-				<div class="stat-label">Recent Memorials</div>
-			</div>
-		</div>
+		{/if}
 	</div>
 
 	<!-- Quick Actions -->
@@ -89,65 +91,136 @@
 			</button>
 		</div>
 	</div>
-
-	<!-- Recent Activity -->
-	<div class="recent-section">
-		<h2>Recent Memorials</h2>
-		<div class="memorials-list">
-			{#each (data.recentMemorials || []).slice(0, 10) as memorial}
-				<a href="/admin/services/memorials/{memorial.id}" class="memorial-row">
-					<div class="memorial-name">{memorial.lovedOneName}</div>
-					<div class="memorial-meta">
-						<span class="memorial-owner">{memorial.creatorEmail}</span>
-						<span class="memorial-status" class:paid={memorial.isPaid}>
-							{memorial.isPaid ? '✅ Paid' : '❌ Unpaid'}
-						</span>
-					</div>
-				</a>
-			{/each}
-		</div>
-	</div>
 </AdminLayout>
 
 <style>
-	.stats-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-		gap: 1.5rem;
-		margin-bottom: 2rem;
-	}
-
-	.stat-card {
+	/* Incomplete Memorials Section */
+	.incomplete-section {
 		background: white;
 		border: 1px solid #e2e8f0;
 		border-radius: 0.5rem;
 		padding: 1.5rem;
+		margin-bottom: 2rem;
+	}
+
+	.section-header {
 		display: flex;
+		justify-content: space-between;
 		align-items: center;
-		gap: 1rem;
+		margin-bottom: 1rem;
 	}
 
-	.stat-icon {
-		font-size: 2.5rem;
-	}
-
-	.stat-content {
-		flex: 1;
-	}
-
-	.stat-value {
-		font-size: 2rem;
-		font-weight: 700;
+	.section-header h2 {
+		font-size: 1.25rem;
+		font-weight: 600;
 		color: #1a202c;
-		line-height: 1;
-		margin-bottom: 0.25rem;
+		margin: 0;
 	}
 
-	.stat-label {
-		font-size: 0.875rem;
+	.count-badge {
+		background: #fed7d7;
+		color: #742a2a;
+		padding: 0.375rem 0.875rem;
+		border-radius: 0.375rem;
+		font-size: 0.8125rem;
+		font-weight: 600;
+	}
+
+	.empty-state {
+		text-align: center;
+		padding: 3rem 1rem;
 		color: #718096;
 	}
 
+	.empty-icon {
+		font-size: 3rem;
+		margin-bottom: 1rem;
+	}
+
+	.empty-state p {
+		margin: 0;
+		font-size: 1rem;
+	}
+
+	.memorials-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.memorial-row {
+		padding: 1rem;
+		border: 1px solid #e2e8f0;
+		border-radius: 0.375rem;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		transition: all 0.2s;
+		text-decoration: none;
+		color: inherit;
+	}
+
+	.memorial-row.incomplete {
+		border-left: 4px solid #f59e0b;
+		background: #fffbeb;
+	}
+
+	.memorial-row:hover {
+		background: #f7fafc;
+		border-color: #cbd5e0;
+		transform: translateX(4px);
+	}
+
+	.memorial-row.incomplete:hover {
+		background: #fef3c7;
+	}
+
+	.memorial-info {
+		flex: 1;
+	}
+
+	.memorial-name {
+		font-weight: 600;
+		color: #2d3748;
+		margin-bottom: 0.375rem;
+		font-size: 1rem;
+	}
+
+	.memorial-meta {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		font-size: 0.8125rem;
+		color: #718096;
+	}
+
+	.memorial-badges {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+	}
+
+	.status-badge {
+		padding: 0.375rem 0.75rem;
+		border-radius: 0.25rem;
+		background: #fed7d7;
+		color: #742a2a;
+		font-size: 0.8125rem;
+		font-weight: 500;
+		white-space: nowrap;
+	}
+
+	.status-badge.incomplete {
+		background: #fef3c7;
+		color: #92400e;
+	}
+
+	.status-badge.paid {
+		background: #c6f6d5;
+		color: #22543d;
+	}
+
+	/* Quick Actions */
 	.quick-actions {
 		background: white;
 		border: 1px solid #e2e8f0;
@@ -201,70 +274,11 @@
 		text-align: center;
 	}
 
-	.recent-section {
-		background: white;
-		border: 1px solid #e2e8f0;
-		border-radius: 0.5rem;
-		padding: 1.5rem;
-	}
-
-	.recent-section h2 {
-		font-size: 1.25rem;
-		font-weight: 600;
-		color: #1a202c;
-		margin: 0 0 1rem 0;
-	}
-
-	.memorials-list {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-	}
-
-	.memorial-row {
-		padding: 1rem;
-		border: 1px solid #e2e8f0;
-		border-radius: 0.375rem;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		transition: all 0.2s;
-		text-decoration: none;
-		color: inherit;
-	}
-
-	.memorial-row:hover {
-		background: #f7fafc;
-		border-color: #cbd5e0;
-	}
-
-	.memorial-name {
-		font-weight: 500;
-		color: #2d3748;
-	}
-
-	.memorial-meta {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-		font-size: 0.875rem;
-	}
-
 	.memorial-owner {
 		color: #718096;
 	}
 
-	.memorial-status {
-		padding: 0.25rem 0.75rem;
-		border-radius: 0.25rem;
-		background: #fed7d7;
-		color: #742a2a;
-		font-size: 0.8125rem;
-		font-weight: 500;
-	}
-
-	.memorial-status.paid {
-		background: #c6f6d5;
-		color: #22543d;
+	.memorial-date {
+		color: #718096;
 	}
 </style>

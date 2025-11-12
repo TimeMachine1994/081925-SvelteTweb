@@ -2,7 +2,7 @@
 
 ## Overview
 
-TributeStream uses Firebase Firestore as its primary database with a document-based NoSQL structure. The schema is designed for scalability, real-time updates, and efficient querying while maintaining data consistency across the memorial service platform.
+Tributestream uses Firebase Firestore as its primary database with a document-based NoSQL structure. The schema is designed for scalability, real-time updates, and efficient querying while maintaining data consistency across the memorial service platform.
 
 ## Collections Structure
 
@@ -750,4 +750,4 @@ const updateMemorialSummary = async (memorialId: string) => {
 
 ---
 
-*This database schema provides a comprehensive foundation for TributeStream's memorial service platform with proper relationships, indexing, and security. For API integration patterns, see [API Routes Reference](./02-api-routes.md).*
+*This database schema provides a comprehensive foundation for Tributestream's memorial service platform with proper relationships, indexing, and security. For API integration patterns, see [API Routes Reference](./02-api-routes.md).*

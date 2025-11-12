@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide covers setting up a local development environment for TributeStream, including all dependencies, services, and configuration required for full-stack development.
+This guide covers setting up a local development environment for Tributestream, including all dependencies, services, and configuration required for full-stack development.
 
 ## Prerequisites
 
@@ -491,4 +491,4 @@ const routes = {
 
 ---
 
-*This development setup provides a complete local environment for TributeStream development with hot reloading, testing, and debugging capabilities.*
+*This development setup provides a complete local environment for Tributestream development with hot reloading, testing, and debugging capabilities.*

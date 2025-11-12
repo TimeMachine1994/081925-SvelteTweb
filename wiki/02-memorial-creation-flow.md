@@ -2,7 +2,7 @@
 
 ## Overview
 
-TributeStream memorials follow a multi-step creation process from initial setup to livestream. The system supports both direct user creation and funeral director-assisted creation.
+Tributestream memorials follow a multi-step creation process from initial setup to livestream. The system supports both direct user creation and funeral director-assisted creation.
 
 ## Creation Methods
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document covers high-density data grids, powerful filtering, bulk actions, inline editing, validation, and revision history for TributeStream admin operations.
+This document covers high-density data grids, powerful filtering, bulk actions, inline editing, validation, and revision history for Tributestream admin operations.
 
 ---
 

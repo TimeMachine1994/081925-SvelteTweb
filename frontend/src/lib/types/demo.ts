@@ -1,7 +1,7 @@
 /**
  * Demo Mode Type Definitions
  * 
- * Core interfaces for TributeStream's demo system including sessions,
+ * Core interfaces for Tributestream's demo system including sessions,
  * users, and entity tagging for sandboxed demo data.
  */
 

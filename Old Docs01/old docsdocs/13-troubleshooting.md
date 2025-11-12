@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide provides solutions to common issues encountered when developing, deploying, or using TributeStream. Issues are organized by category with step-by-step resolution instructions.
+This guide provides solutions to common issues encountered when developing, deploying, or using Tributestream. Issues are organized by category with step-by-step resolution instructions.
 
 ## Development Issues
 
@@ -646,7 +646,7 @@ export function handleError(error: Error, context: any) {
    await sendEmergencyNotification({
      type: 'service_outage',
      severity: 'high',
-     message: 'TributeStream experiencing issues'
+     message: 'Tributestream experiencing issues'
    });
    ```
 

@@ -1,10 +1,10 @@
-# TributeStream Component Library Migration Guide
+# Tributestream Component Library Migration Guide
 
 *Updated: October 11, 2024*
 
 ## 🎯 Overview
 
-This guide provides step-by-step instructions for migrating your existing TributeStream components to use the new design system and component library.
+This guide provides step-by-step instructions for migrating your existing Tributestream components to use the new design system and component library.
 
 ## 📁 New File Structure
 

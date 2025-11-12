@@ -1,7 +1,7 @@
 # Documentation Cleanup Script (Simple Version)
 # Run this from the project root directory
 
-Write-Host "TributeStream Documentation Cleanup Script" -ForegroundColor Cyan
+Write-Host "Tributestream Documentation Cleanup Script" -ForegroundColor Cyan
 Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host ""
 

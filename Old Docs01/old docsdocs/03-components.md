@@ -2,7 +2,7 @@
 
 ## Overview
 
-TributeStream's frontend is built with Svelte 5 components organized in a hierarchical structure. Components follow modern patterns with reactive state management using runes ($state, $derived, $effect) and proper separation of concerns.
+Tributestream's frontend is built with Svelte 5 components organized in a hierarchical structure. Components follow modern patterns with reactive state management using runes ($state, $derived, $effect) and proper separation of concerns.
 
 ## Component Hierarchy
 

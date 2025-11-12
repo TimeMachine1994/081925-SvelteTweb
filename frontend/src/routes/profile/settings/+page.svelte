@@ -75,7 +75,7 @@
 </script>
 
 <svelte:head>
-	<title>Account Settings | TributeStream</title>
+	<title>Account Settings | Tributestream</title>
 	<meta name="description" content="Manage your account settings and preferences" />
 </svelte:head>
 

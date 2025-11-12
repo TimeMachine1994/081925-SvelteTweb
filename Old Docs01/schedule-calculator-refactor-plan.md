@@ -1,4 +1,4 @@
-# TributeStream Schedule Calculator Refactor Plan
+# Tributestream Schedule Calculator Refactor Plan
 
 ## Executive Summary
 
@@ -319,13 +319,13 @@ export function generateConfirmationEmail(data: {
     <!DOCTYPE html>
     <html>
       <head>
-        <title>TributeStream Confirmation</title>
+        <title>Tributestream Confirmation</title>
       </head>
       <body>
         <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif;">
           <h1>Service Confirmation</h1>
           <p>Dear ${data.customerName},</p>
-          <p>Thank you for choosing TributeStream for ${data.lovedOneName}'s memorial service.</p>
+          <p>Thank you for choosing Tributestream for ${data.lovedOneName}'s memorial service.</p>
           
           <div style="background: #f5f5f5; padding: 20px; margin: 20px 0;">
             <h3>Service Details</h3>
@@ -338,7 +338,7 @@ export function generateConfirmationEmail(data: {
             <ul>
               <li>Your schedule has been locked and confirmed</li>
               <li>Our team will contact you within 24 hours</li>
-              <li>Access your booking anytime in your TributeStream portal</li>
+              <li>Access your booking anytime in your Tributestream portal</li>
             </ul>
           </div>
         </div>

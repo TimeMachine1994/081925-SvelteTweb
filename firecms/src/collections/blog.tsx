@@ -7,13 +7,13 @@ console.log("🏗️ Initializing Blog Collection Schema");
 
 /**
  * Schema definition for the 'blog' collection in Firestore.
- * Comprehensive blog management for TributeStream content marketing.
+ * Comprehensive blog management for Tributestream content marketing.
  */
 export const blogCollection = buildCollection<BlogPost>({
     id: "blog",
     name: "Blog Posts",
     path: "blog",
-    description: "Blog posts and articles for TributeStream content marketing",
+    description: "Blog posts and articles for Tributestream content marketing",
     permissions: ({ authController }) => {
         // Check multiple ways to determine admin status
         const isAdmin = authController.extra?.admin || 

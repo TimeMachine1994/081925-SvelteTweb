@@ -109,7 +109,7 @@ Callback when browser streaming ends.
 
 ### Styling
 
-Uses TributeStream design system tokens:
+Uses Tributestream design system tokens:
 - `colors.border.primary` - Card borders
 - `colors.background.secondary` - Section backgrounds
 - `getSemanticSpacing('card', 'padding')` - Consistent padding

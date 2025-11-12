@@ -13,8 +13,8 @@ describe('Navbar Component', () => {
     mockUserContext(null);
     render(Navbar);
     
-    expect(screen.getByText('TributeStream')).toBeInTheDocument();
-    expect(screen.getByAltText('TributeStream')).toBeInTheDocument();
+    expect(screen.getByText('Tributestream')).toBeInTheDocument();
+    expect(screen.getByAltText('Tributestream')).toBeInTheDocument();
   });
 
   it('shows login/register links when not authenticated', () => {

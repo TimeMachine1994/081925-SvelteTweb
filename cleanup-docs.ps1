@@ -2,7 +2,7 @@
 # Run this from the project root directory
 # Usage: .\cleanup-docs.ps1
 
-Write-Host "🧹 TributeStream Documentation Cleanup Script" -ForegroundColor Cyan
+Write-Host "🧹 Tributestream Documentation Cleanup Script" -ForegroundColor Cyan
 Write-Host "=============================================" -ForegroundColor Cyan
 Write-Host ""
 

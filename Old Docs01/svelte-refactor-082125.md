@@ -2,7 +2,7 @@
 
 ## 1. Overview
 
-This document provides a comprehensive breakdown of the TributeStream Calculator page. The calculator is a multi-step form designed to guide users through selecting a livestreaming package, customizing it with add-ons and additional services, and calculating the total cost. It serves as the primary tool for users to configure and book a TributeStream event.
+This document provides a comprehensive breakdown of the Tributestream Calculator page. The calculator is a multi-step form designed to guide users through selecting a livestreaming package, customizing it with add-ons and additional services, and calculating the total cost. It serves as the primary tool for users to configure and book a Tributestream event.
 
 The page is built as a single, dynamic view that transitions between a booking/configuration step and a secure payment step. It is designed to be user-friendly, providing clear options and a real-time summary of the selected services and their costs.
 

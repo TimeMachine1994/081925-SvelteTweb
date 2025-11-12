@@ -2,7 +2,7 @@
 
 ## Overview
 
-The TributeStream Admin Dashboard provides comprehensive oversight and management capabilities for all system operations. Available at `/admin`, it requires admin role authentication.
+The Tributestream Admin Dashboard provides comprehensive oversight and management capabilities for all system operations. Available at `/admin`, it requires admin role authentication.
 
 ## Architecture
 

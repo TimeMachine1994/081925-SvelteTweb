@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the information architecture and navigation refactor for the TributeStream admin dashboard, based on our Firestore collections and enterprise admin UI best practices.
+This document outlines the information architecture and navigation refactor for the Tributestream admin dashboard, based on our Firestore collections and enterprise admin UI best practices.
 
 ---
 
@@ -528,7 +528,7 @@ export const recentlyViewed = derived(adminNav, $nav => $nav.recentlyViewed);
 
 **Mobile: Hamburger menu**
 ```
-[☰] TributeStream Admin                            [Search] [Tasks]
+[☰] Tributestream Admin                            [Search] [Tasks]
 
 --- Sidebar when opened ---
 Dashboard

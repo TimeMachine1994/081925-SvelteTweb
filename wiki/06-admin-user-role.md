@@ -2,7 +2,7 @@
 
 ## Overview
 
-The **admin** role is the highest privilege level in TributeStream, granting full system access and management capabilities. Admins can manage all memorials, users, and system configurations regardless of ownership.
+The **admin** role is the highest privilege level in Tributestream, granting full system access and management capabilities. Admins can manage all memorials, users, and system configurations regardless of ownership.
 
 ## Role Definition
 

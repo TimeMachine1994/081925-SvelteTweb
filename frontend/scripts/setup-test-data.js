@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Setup test data for TributeStream testing
+ * Setup test data for Tributestream testing
  * This script creates test accounts and data in Firebase emulators
  */
 
@@ -192,7 +192,7 @@ async function createTestFuneralDirectors() {
 
 async function setupTestData() {
   try {
-    console.log('🚀 Setting up test data for TributeStream...\n');
+    console.log('🚀 Setting up test data for Tributestream...\n');
     
     await createTestUsers();
     console.log('');

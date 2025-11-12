@@ -4,7 +4,7 @@
  * Import Legacy Memorials Script
  * 
  * This script imports the 59 legacy memorials with Vimeo content
- * into the Firebase memorials collection for the new TributeStream system.
+ * into the Firebase memorials collection for the new Tributestream system.
  */
 
 import admin from 'firebase-admin';
@@ -77,7 +77,7 @@ function createMemorialDocument(memorial, index) {
     
     // Standard memorial fields (with defaults for legacy)
     title: `Celebration of Life for ${memorial.lovedOnesName}`,
-    description: `A memorial service celebrating the life of ${memorial.lovedOnesName}. This is a legacy memorial imported from the previous TributeStream system.`,
+    description: `A memorial service celebrating the life of ${memorial.lovedOnesName}. This is a legacy memorial imported from the previous Tributestream system.`,
     
     // Dates (using extraction date as placeholder since original dates weren't preserved)
     createdAt: now,
@@ -136,7 +136,7 @@ function createMemorialDocument(memorial, index) {
     },
     
     // SEO and routing
-    seoTitle: `${memorial.lovedOnesName} - Memorial Service | TributeStream`,
+    seoTitle: `${memorial.lovedOnesName} - Memorial Service | Tributestream`,
     seoDescription: `Join us in celebrating the life of ${memorial.lovedOnesName}. Watch the memorial service and share memories with family and friends.`,
     
     // Tags for categorization
@@ -342,7 +342,7 @@ switch (command) {
     break;
     
   default:
-    console.log('TributeStream Legacy Memorial Import Script');
+    console.log('Tributestream Legacy Memorial Import Script');
     console.log('');
     console.log('Usage:');
     console.log('  node import-legacy-memorials.js import           # Import all legacy memorials');
