@@ -4,6 +4,7 @@
 	import { page } from '$app/stores';
 	import { Button } from '$lib/ui';
 	import { CheckCircle, Package } from 'lucide-svelte';
+	import { executeRecaptcha, RECAPTCHA_ACTIONS } from '$lib/utils/recaptcha';
 
 	console.log('🎯 Loved-One Registration form initializing');
 
@@ -18,6 +19,8 @@
 	
 	// Submission state for double-click prevention
 	let isSubmitting = $state(false);
+	let recaptchaError = $state('');
+	let recaptchaToken = $state('');
 
 	console.log('📝 Form state initialized with runes');
 
@@ -58,11 +61,38 @@
 		return errors.length === 0;
 	}
 
-	function handleSubmit(event: SubmitEvent) {
+	async function handleSubmit(event: SubmitEvent) {
 		console.log('📤 Form submission started');
+		
+		// Basic validation first
 		if (!validateForm()) {
 			event.preventDefault();
 			console.log('❌ Form validation failed, preventing submission');
+			return;
+		}
+		
+		// Execute reCAPTCHA before submission
+		if (!recaptchaToken) {
+			event.preventDefault();
+			isSubmitting = true;
+			recaptchaError = '';
+			
+			console.log('🤖 Executing reCAPTCHA verification...');
+			const token = await executeRecaptcha(RECAPTCHA_ACTIONS.CREATE_MEMORIAL);
+			
+			if (!token) {
+				recaptchaError = 'Security verification failed. Please refresh the page and try again.';
+				isSubmitting = false;
+				console.error('❌ reCAPTCHA execution failed');
+				return;
+			}
+			
+			recaptchaToken = token;
+			console.log('✅ reCAPTCHA token obtained');
+			
+			// Submit the form programmatically
+			const form = event.target as HTMLFormElement;
+			form.requestSubmit();
 		} else {
 			console.log('✅ Form validation passed, proceeding with submission');
 		}
@@ -108,9 +138,26 @@
 				return async ({ update }) => {
 					await update();
 					isSubmitting = false;
+					recaptchaToken = ''; // Reset token after submission
 				};
 			}}
 		>
+			<!-- reCAPTCHA token hidden field -->
+			<input type="hidden" name="recaptchaToken" bind:value={recaptchaToken} />
+			
+			<!-- 🍯 HONEYPOT FIELD - Hidden trap for bots -->
+			<div style="position: absolute; left: -9999px; opacity: 0; pointer-events: none;" aria-hidden="true">
+				<label for="website">Website (leave blank)</label>
+				<input 
+					type="text" 
+					name="website" 
+					id="website" 
+					tabindex="-1" 
+					autocomplete="off"
+					placeholder="Leave this field blank"
+				/>
+			</div>
+			
 			<section class="form-section">
 				<LiveUrlPreview bind:lovedOneName />
 			</section>
@@ -168,6 +215,13 @@
 					</div>
 				</div>
 			</section>
+
+			{#if recaptchaError}
+				<div class="form-message error-message">
+					<span class="message-icon">🛡️</span>
+					<span class="message-text">{recaptchaError}</span>
+				</div>
+			{/if}
 
 			{#if validationErrors.length > 0}
 				<div class="error-section">
