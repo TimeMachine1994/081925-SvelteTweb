@@ -83,6 +83,46 @@
 	<title>Tributestream Blog - Memorial Planning & Live Streaming Insights</title>
 	<meta name="description" content="Expert guidance on memorial planning, live streaming services, and supporting families during difficult times. Professional insights for funeral directors and families." />
 	<meta name="keywords" content="memorial planning, live streaming, funeral services, grief support, tribute stream" />
+	
+	<!-- Canonical URL -->
+	<link rel="canonical" href="https://tributestream.com/blog" />
+	
+	<!-- Open Graph / Facebook -->
+	<meta property="og:type" content="website" />
+	<meta property="og:site_name" content="Tributestream" />
+	<meta property="og:title" content="Tributestream Blog - Memorial Planning & Live Streaming" />
+	<meta property="og:description" content="Expert guidance on memorial planning, live streaming services, and supporting families during difficult times." />
+	<meta property="og:url" content="https://tributestream.com/blog" />
+	<meta property="og:image" content="https://tributestream.com/blog-og-image.jpg" />
+	<meta property="og:image:alt" content="Tributestream Blog" />
+	<meta property="og:image:width" content="1200" />
+	<meta property="og:image:height" content="630" />
+	
+	<!-- Twitter Card -->
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:site" content="@tributestream" />
+	<meta name="twitter:creator" content="@tributestream" />
+	<meta name="twitter:title" content="Tributestream Blog - Memorial Planning & Live Streaming" />
+	<meta name="twitter:description" content="Expert guidance on memorial planning, live streaming services, and supporting families during difficult times." />
+	<meta name="twitter:image" content="https://tributestream.com/blog-og-image.jpg" />
+	<meta name="twitter:image:alt" content="Tributestream Blog" />
+	
+	<!-- Structured Data (JSON-LD) -->
+	{@html `<script type="application/ld+json">${JSON.stringify({
+		'@context': 'https://schema.org',
+		'@type': 'Blog',
+		name: 'Tributestream Blog',
+		description: 'Expert guidance on memorial planning, live streaming services, and supporting families during difficult times.',
+		url: 'https://tributestream.com/blog',
+		publisher: {
+			'@type': 'Organization',
+			name: 'Tributestream',
+			logo: {
+				'@type': 'ImageObject',
+				url: 'https://tributestream.com/logo.png'
+			}
+		}
+	})}</script>`}
 </svelte:head>
 
 <div class="blog-container" style="font-family: {theme.font.body}">

@@ -1,12 +1,21 @@
 <script>
 	import { getTheme } from '$lib/design-tokens/minimal-modern-theme';
 	import { Card, Button } from '$lib/components/minimal-modern';
+	import { Facebook, Twitter, Linkedin, Share2 } from 'lucide-svelte';
 	import { marked } from 'marked';
+	import { browser } from '$app/environment';
 
 	const theme = getTheme('minimal');
 
 	let { data } = $props();
 	const { post, relatedPosts } = $derived(data);
+
+	// Get absolute URL for sharing
+	const absoluteUrl = browser
+		? window.location.href
+		: post
+			? `https://tributestream.com/blog/${post.slug}`
+			: 'https://tributestream.com/blog';
 
 	function formatDate(date) {
 		if (!date) return '';
@@ -48,6 +57,55 @@
 		breaks: true,
 		gfm: true
 	});
+
+	// Social sharing functions
+	function openShareWindow(url: string) {
+		const width = 600;
+		const height = 400;
+		const left = window.innerWidth / 2 - width / 2;
+		const top = window.innerHeight / 2 - height / 2;
+		window.open(
+			url,
+			'share',
+			`width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes`
+		);
+	}
+
+	function shareOnFacebook() {
+		const url = encodeURIComponent(absoluteUrl);
+		openShareWindow(`https://www.facebook.com/sharer/sharer.php?u=${url}`);
+	}
+
+	function shareOnTwitter() {
+		const url = encodeURIComponent(absoluteUrl);
+		const text = encodeURIComponent(post?.title || '');
+		openShareWindow(`https://twitter.com/intent/tweet?url=${url}&text=${text}&via=tributestream`);
+	}
+
+	function shareOnLinkedIn() {
+		const url = encodeURIComponent(absoluteUrl);
+		openShareWindow(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`);
+	}
+
+	async function handleWebShare() {
+		if (navigator.share) {
+			try {
+				await navigator.share({
+					title: post?.title || 'Tributestream Blog',
+					text: post?.excerpt || '',
+					url: absoluteUrl
+				});
+			} catch (err: any) {
+				if (err.name !== 'AbortError') {
+					console.error('Error sharing:', err);
+				}
+			}
+		} else {
+			// Fallback: Copy to clipboard
+			await navigator.clipboard.writeText(absoluteUrl);
+			alert('Link copied to clipboard!');
+		}
+	}
 </script>
 
 <svelte:head>
@@ -55,18 +113,69 @@
 		<title>{post.title} | Tributestream Blog</title>
 		<meta name="description" content={post.excerpt} />
 		<meta name="keywords" content={post.tags?.join(', ') || ''} />
+		<meta name="author" content={post.authorName} />
+		
+		<!-- Canonical URL -->
+		<link rel="canonical" href="https://tributestream.com/blog/{post.slug}" />
 		
 		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content="article" />
+		<meta property="og:site_name" content="Tributestream" />
 		<meta property="og:title" content={post.title} />
 		<meta property="og:description" content={post.excerpt} />
-		<meta property="og:image" content={post.featuredImage} />
+		<meta property="og:url" content="https://tributestream.com/blog/{post.slug}" />
+		{#if post.featuredImage}
+			<meta property="og:image" content={post.featuredImage} />
+			<meta property="og:image:alt" content={post.featuredImageAlt || post.title} />
+			<meta property="og:image:width" content="1200" />
+			<meta property="og:image:height" content="630" />
+		{/if}
+		<meta property="article:published_time" content={new Date(post.publishedAt).toISOString()} />
+		<meta property="article:author" content={post.authorName} />
+		<meta property="article:section" content={post.category} />
+		{#if post.tags}
+			{#each post.tags as tag}
+				<meta property="article:tag" content={tag} />
+			{/each}
+		{/if}
 		
-		<!-- Twitter -->
+		<!-- Twitter Card -->
 		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:site" content="@tributestream" />
+		<meta name="twitter:creator" content="@tributestream" />
 		<meta name="twitter:title" content={post.title} />
 		<meta name="twitter:description" content={post.excerpt} />
-		<meta name="twitter:image" content={post.featuredImage} />
+		{#if post.featuredImage}
+			<meta name="twitter:image" content={post.featuredImage} />
+			<meta name="twitter:image:alt" content={post.featuredImageAlt || post.title} />
+		{/if}
+		
+		<!-- Structured Data (JSON-LD) -->
+		{@html `<script type="application/ld+json">${JSON.stringify({
+			'@context': 'https://schema.org',
+			'@type': 'BlogPosting',
+			headline: post.title,
+			description: post.excerpt,
+			image: post.featuredImage || '',
+			datePublished: new Date(post.publishedAt).toISOString(),
+			dateModified: new Date(post.updatedAt || post.publishedAt).toISOString(),
+			author: {
+				'@type': 'Person',
+				name: post.authorName
+			},
+			publisher: {
+				'@type': 'Organization',
+				name: 'Tributestream',
+				logo: {
+					'@type': 'ImageObject',
+					url: 'https://tributestream.com/logo.png'
+				}
+			},
+			mainEntityOfPage: {
+				'@type': 'WebPage',
+				'@id': `https://tributestream.com/blog/${post.slug}`
+			}
+		})}</script>`}
 	{:else}
 		<title>Blog Post Not Found | Tributestream</title>
 	{/if}
@@ -163,10 +272,41 @@
 						<div class="article-actions">
 							<a href="/blog" class="back-to-blog-btn">← Back to Blog</a>
 							<div class="social-share">
-								<span>Share:</span>
-								<button class="share-btn" on:click={() => navigator.share?.({ title: post.title, url: window.location.href })}>
-									📤 Share
-								</button>
+								<span class="share-label">Share:</span>
+								<div class="share-buttons">
+									<button
+										onclick={shareOnFacebook}
+										class="share-btn facebook"
+										title="Share on Facebook"
+										aria-label="Share on Facebook"
+									>
+										<Facebook size={20} />
+									</button>
+									<button
+										onclick={shareOnTwitter}
+										class="share-btn twitter"
+										title="Share on X (Twitter)"
+										aria-label="Share on X (Twitter)"
+									>
+										<Twitter size={20} />
+									</button>
+									<button
+										onclick={shareOnLinkedIn}
+										class="share-btn linkedin"
+										title="Share on LinkedIn"
+										aria-label="Share on LinkedIn"
+									>
+										<Linkedin size={20} />
+									</button>
+									<button
+										onclick={handleWebShare}
+										class="share-btn generic"
+										title="Share or copy link"
+										aria-label="Share or copy link"
+									>
+										<Share2 size={20} />
+									</button>
+								</div>
 							</div>
 						</div>
 					</footer>
@@ -477,20 +617,64 @@
 	.social-share {
 		display: flex;
 		align-items: center;
+		gap: 0.75rem;
+		flex-wrap: wrap;
+	}
+
+	.share-label {
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: #6b7280;
+	}
+
+	.share-buttons {
+		display: flex;
 		gap: 0.5rem;
+		flex-wrap: wrap;
 	}
 
 	.share-btn {
-		background: none;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 40px;
+		height: 40px;
+		padding: 0;
 		border: 1px solid #d1d5db;
-		padding: 0.5rem 1rem;
 		border-radius: 6px;
+		background: white;
+		color: #374151;
 		cursor: pointer;
-		transition: all 0.3s ease;
+		transition: all 0.2s ease;
 	}
 
 	.share-btn:hover {
-		background: #f9fafb;
+		transform: translateY(-2px);
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	}
+
+	/* Platform-specific colors on hover */
+	.share-btn.facebook:hover {
+		background: #1877f2;
+		color: white;
+		border-color: #1877f2;
+	}
+
+	.share-btn.twitter:hover {
+		background: #000000;
+		color: white;
+		border-color: #000000;
+	}
+
+	.share-btn.linkedin:hover {
+		background: #0a66c2;
+		color: white;
+		border-color: #0a66c2;
+	}
+
+	.share-btn.generic:hover {
+		background: #D5BA7F;
+		color: white;
 		border-color: #D5BA7F;
 	}
 

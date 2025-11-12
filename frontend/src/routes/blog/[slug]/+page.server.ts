@@ -22,10 +22,16 @@ async function getStorageUrl(storagePath: string): Promise<string> {
             expires: '03-09-2491' // Far future date for public images
         });
         
+        // Ensure URL is absolute (signed URLs should already be absolute)
         return url;
     } catch (err) {
         console.error('Error getting storage URL for:', storagePath, err);
-        return storagePath; // Return original path as fallback
+        // If error, try to construct a fallback URL if possible
+        if (storagePath && !storagePath.startsWith('http')) {
+            // This is a fallback - signed URLs are preferred for security
+            return `https://firebasestorage.googleapis.com/v0/b/${adminStorage.bucket().name}/o/${encodeURIComponent(storagePath)}?alt=media`;
+        }
+        return storagePath; // Return original path as last resort
     }
 }
 
