@@ -20,7 +20,6 @@
 	
 	// Submission state for double-click prevention
 	let isSubmitting = $state(false);
-	let recaptchaError = $state('');
 	let recaptchaToken = $state('');
 
 	console.log('📝 Form state initialized with runes');
@@ -72,28 +71,21 @@
 			return;
 		}
 		
-		// Execute reCAPTCHA before submission
+		// Execute reCAPTCHA before submission (silently)
 		if (!recaptchaToken) {
 			event.preventDefault();
 			isSubmitting = true;
-			recaptchaError = '';
 			
 			console.log('🤖 Executing reCAPTCHA verification...');
 			const token = await executeRecaptcha(RECAPTCHA_ACTIONS.CREATE_MEMORIAL);
 			
-			if (!token) {
-				recaptchaError = 'Security verification failed. Please refresh the page and try again.';
-				isSubmitting = false;
-				console.error('❌ reCAPTCHA execution failed');
-				return;
-			}
-			
-			recaptchaToken = token;
-			console.log('✅ reCAPTCHA token obtained');
+			// If token fetch fails, let server-side validation handle it
+			// (server will return proper error message)
+			recaptchaToken = token || '';
+			console.log(token ? '✅ reCAPTCHA token obtained' : '⚠️ reCAPTCHA token fetch failed, proceeding to server validation');
 			
 			// Wait for Svelte to update the DOM with the token
 			await tick();
-			console.log('✅ DOM updated with reCAPTCHA token');
 			
 			// Submit the form programmatically
 			const form = event.target as HTMLFormElement;
@@ -221,12 +213,7 @@
 				</div>
 			</section>
 
-			{#if recaptchaError}
-				<div class="form-message error-message">
-					<span class="message-icon">🛡️</span>
-					<span class="message-text">{recaptchaError}</span>
-				</div>
-			{/if}
+			<!-- reCAPTCHA validation happens server-side, errors shown via form.error -->
 
 			{#if validationErrors.length > 0}
 				<div class="error-section">
