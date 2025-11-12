@@ -197,10 +197,10 @@ Manage and monitor demo mode sessions
 		data={data.sessions}
 		selectable={$can('demo_session', 'delete')}
 		selectedMemorials={selectedSessions}
-		onRowClick={handleRowClick}
 		onBulkAction={handleBulkAction}
 		resourceType="demo_session"
 	/>
+	<!-- onRowClick disabled - will show modal with session details when implemented -->
 </AdminLayout>
 
 <style>

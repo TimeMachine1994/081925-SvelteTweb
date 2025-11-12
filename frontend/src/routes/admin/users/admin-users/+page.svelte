@@ -159,10 +159,10 @@ Manage admin user accounts and roles
 		data={data.admins}
 		selectable={$can('admin_user', 'update')}
 		selectedMemorials={selectedAdmins}
-		onRowClick={handleRowClick}
 		onBulkAction={handleBulkAction}
 		resourceType="admin_user"
 	/>
+	<!-- onRowClick disabled until detail pages are created -->
 </AdminLayout>
 
 <style>

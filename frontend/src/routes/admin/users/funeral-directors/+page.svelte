@@ -148,10 +148,10 @@ Manage funeral home partners
 		data={data.funeralDirectors}
 		selectable={$can('funeral_director', 'update')}
 		selectedMemorials={selectedDirectors}
-		onRowClick={handleRowClick}
 		onBulkAction={handleBulkAction}
 		resourceType="funeral_director"
 	/>
+	<!-- onRowClick disabled until detail pages are created -->
 </AdminLayout>
 
 <style>

@@ -170,9 +170,9 @@ View all administrative actions and system events
 		{columns}
 		data={data.logs}
 		selectable={false}
-		onRowClick={handleRowClick}
 		resourceType="audit_log"
 	/>
+	<!-- onRowClick disabled - will show modal with full details when implemented -->
 </AdminLayout>
 
 <style>

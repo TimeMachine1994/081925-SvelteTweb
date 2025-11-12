@@ -52,9 +52,10 @@ Based on ADMIN_REFACTOR_2_DATA_OPERATIONS.md
 	let sortedData = $derived.by(() => {
 		if (!sortedColumn) return data;
 
+		const col = sortedColumn;
 		return [...data].sort((a, b) => {
-			const aVal = a[sortedColumn];
-			const bVal = b[sortedColumn];
+			const aVal = a[col];
+			const bVal = b[col];
 
 			if (aVal === bVal) return 0;
 
@@ -166,17 +167,21 @@ Based on ADMIN_REFACTOR_2_DATA_OPERATIONS.md
 					<tr
 						class="data-row"
 						class:selected={selectedMemorials.has(row.id)}
-						onclick={() => onRowClick?.(row)}
+						class:clickable={onRowClick}
+						onclick={(e) => {
+							// Don't trigger row click if clicking checkbox or if no handler
+							if (!onRowClick) return;
+							const target = e.target as HTMLElement;
+							if (target.tagName === 'INPUT' || target.closest('.checkbox-cell')) return;
+							onRowClick(row);
+						}}
 					>
 						{#if selectable}
-							<td class="checkbox-cell">
+							<td class="checkbox-cell" onclick={(e) => e.stopPropagation()}>
 								<input
 									type="checkbox"
 									checked={selectedMemorials.has(row.id)}
-									onchange={(e) => {
-										e.stopPropagation();
-										toggleSelection(row.id);
-									}}
+									onchange={() => toggleSelection(row.id)}
 									aria-label="Select row"
 								/>
 							</td>
@@ -293,11 +298,18 @@ Based on ADMIN_REFACTOR_2_DATA_OPERATIONS.md
 
 	.data-row:hover {
 		background: #f7fafc;
+	}
+
+	.data-row.clickable:hover {
 		cursor: pointer;
 	}
 
 	.data-row.selected {
 		background: #ebf8ff;
+	}
+
+	.checkbox-cell {
+		cursor: pointer;
 	}
 
 	.body-cell {

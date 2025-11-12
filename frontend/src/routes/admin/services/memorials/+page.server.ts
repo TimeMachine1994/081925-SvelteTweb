@@ -14,9 +14,16 @@ export const load = async ({ locals, url }: any) => {
 	const sortDir = url.searchParams.get('sortDir') || 'desc';
 
 	// Load memorials
-	let query = adminDb.collection('memorials').orderBy(sortBy, sortDir as any).limit(limit);
-
-	const snapshot = await query.get();
+	let snapshot;
+	try {
+		let query = adminDb.collection('memorials').orderBy(sortBy, sortDir as any).limit(limit);
+		snapshot = await query.get();
+	} catch (error) {
+		console.error('Error loading memorials with sorting:', error);
+		// Fallback to no sorting if index doesn't exist
+		let query = adminDb.collection('memorials').limit(limit);
+		snapshot = await query.get();
+	}
 
 	const memorials = snapshot.docs.map((doc) => {
 		const data = doc.data();

@@ -122,9 +122,9 @@ Review and approve memorial schedule change requests
 		{columns}
 		data={data.requests}
 		selectable={false}
-		onRowClick={handleRowClick}
 		resourceType="schedule_request"
 	/>
+	<!-- onRowClick disabled until detail pages are created -->
 </AdminLayout>
 
 <style>

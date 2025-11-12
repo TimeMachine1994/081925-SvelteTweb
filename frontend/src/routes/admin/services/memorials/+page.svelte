@@ -97,7 +97,9 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 	}
 
 	function handleRowClick(memorial: any) {
-		goto(`/admin/services/memorials/${memorial.id}`);
+		// TODO: Create detail page first
+		// goto(`/admin/services/memorials/${memorial.id}`);
+		console.log('Memorial detail page coming soon:', memorial.id);
 	}
 </script>
 
@@ -141,11 +143,11 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 		{columns}
 		data={data.memorials}
 		selectable={$can('memorial', 'update')}
-		{selectedMemorials}
-		onRowClick={handleRowClick}
+		selectedMemorials={selectedMemorials}
 		onBulkAction={handleBulkAction}
 		resourceType="memorial"
 	/>
+	<!-- onRowClick={handleRowClick} - Temporarily disabled until detail pages are created -->
 </AdminLayout>
 
 <style>

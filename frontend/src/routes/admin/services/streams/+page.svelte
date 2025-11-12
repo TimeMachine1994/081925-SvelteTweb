@@ -108,7 +108,8 @@ Manage all livestreams across memorials
 	}
 
 	function handleRowClick(stream: any) {
-		goto(`/admin/services/streams/${stream.id}`);
+		// TODO: Create detail page first
+		console.log('Stream detail page coming soon:', stream.id);
 	}
 </script>
 
@@ -147,10 +148,10 @@ Manage all livestreams across memorials
 		data={data.streams}
 		selectable={$can('stream', 'update')}
 		selectedMemorials={selectedStreams}
-		onRowClick={handleRowClick}
 		onBulkAction={handleBulkAction}
 		resourceType="stream"
 	/>
+	<!-- onRowClick disabled until detail pages are created -->
 </AdminLayout>
 
 <style>

@@ -136,9 +136,9 @@ Manage memorial slideshows across all memorials
 		{columns}
 		data={data.slideshows}
 		selectable={false}
-		onRowClick={handleRowClick}
 		resourceType="slideshow"
 	/>
+	<!-- onRowClick disabled - clicking will be re-enabled when detail pages exist -->
 </AdminLayout>
 
 <style>

@@ -191,10 +191,10 @@ Recovery system for soft-deleted items
 		data={data.items}
 		selectable={$can('deleted_item', 'update')}
 		selectedMemorials={selectedItems}
-		onRowClick={handleRowClick}
 		onBulkAction={handleBulkAction}
 		resourceType="deleted_item"
 	/>
+	<!-- onRowClick disabled - will show modal with full item details when implemented -->
 
 	{#if selectedItems.size > 0}
 		<div class="action-buttons">
