@@ -25,14 +25,43 @@
 	}
 
 	const publicUrl = memorial.fullSlug ? `https://tributestream.com/${memorial.fullSlug}` : '';
+
+	async function handleDelete() {
+		const confirmMessage = `Are you sure you want to delete "${memorial.lovedOneName}"?\n\nThis will mark it as deleted and hide it from the admin list.`;
+		
+		if (!confirm(confirmMessage)) {
+			return;
+		}
+
+		try {
+			const response = await fetch('/api/admin/bulk-actions', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ 
+					action: 'delete', 
+					ids: [memorial.id], 
+					resourceType: 'memorial' 
+				})
+			});
+
+			if (response.ok) {
+				alert('Memorial deleted successfully');
+				goto('/admin/services/memorials');
+			} else {
+				alert('Failed to delete memorial. Please try again.');
+			}
+		} catch (error) {
+			console.error('Error deleting memorial:', error);
+			alert('An error occurred while deleting the memorial.');
+		}
+	}
 </script>
 
 <AdminLayout title="Memorial Details" subtitle="View and manage all aspects of this memorial">
 	<div class="header-actions">
 		<button onclick={() => goto('/admin/services/memorials')}>← Back</button>
 		<div>
-			<button>Clone</button>
-			<button>Delete</button>
+			<button class="danger-btn" onclick={handleDelete}>🗑️ Delete</button>
 		</div>
 	</div>
 
@@ -111,4 +140,6 @@
 	.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; text-align: center; }
 	button { padding: 0.5rem 1rem; border: 1px solid #e2e8f0; border-radius: 0.375rem; background: white; cursor: pointer; }
 	button:hover { background: #f7fafc; }
+	button.danger-btn { background: #e53e3e; color: white; border-color: #e53e3e; }
+	button.danger-btn:hover { background: #c53030; }
 </style>

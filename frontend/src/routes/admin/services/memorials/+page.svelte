@@ -84,6 +84,17 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 	async function handleBulkAction(action: string, ids: string[]) {
 		console.log('Bulk action:', action, ids);
 		
+		// Confirm delete action
+		if (action === 'delete') {
+			const count = ids.length;
+			const memorial = count === 1 ? 'memorial' : 'memorials';
+			const confirmMessage = `Are you sure you want to delete ${count} ${memorial}?\n\nThis will mark them as deleted and they will be hidden from the admin list.`;
+			
+			if (!confirm(confirmMessage)) {
+				return;
+			}
+		}
+		
 		const response = await fetch('/api/admin/bulk-actions', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
@@ -91,15 +102,23 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 		});
 
 		if (response.ok) {
+			const result = await response.json();
+			const successCount = result.success?.length || 0;
+			const failedCount = result.failed?.length || 0;
+			
+			if (failedCount > 0) {
+				alert(`Action completed with errors:\n✅ ${successCount} succeeded\n❌ ${failedCount} failed`);
+			}
+			
 			// Reload data
 			location.reload();
+		} else {
+			alert('Action failed. Please try again.');
 		}
 	}
 
 	function handleRowClick(memorial: any) {
-		// TODO: Create detail page first
-		// goto(`/admin/services/memorials/${memorial.id}`);
-		console.log('Memorial detail page coming soon:', memorial.id);
+		goto(`/admin/services/memorials/${memorial.id}`);
 	}
 </script>
 
@@ -145,9 +164,9 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 		selectable={$can('memorial', 'update')}
 		selectedMemorials={selectedMemorials}
 		onBulkAction={handleBulkAction}
+		onRowClick={handleRowClick}
 		resourceType="memorial"
 	/>
-	<!-- onRowClick={handleRowClick} - Temporarily disabled until detail pages are created -->
 </AdminLayout>
 
 <style>

@@ -13,52 +13,72 @@ export const load = async ({ locals, url }: any) => {
 	const sortBy = url.searchParams.get('sortBy') || 'createdAt';
 	const sortDir = url.searchParams.get('sortDir') || 'desc';
 
-	// Load memorials
+	// Load memorials (exclude soft-deleted ones)
 	let snapshot;
 	try {
-		let query = adminDb.collection('memorials').orderBy(sortBy, sortDir as any).limit(limit);
+		let query = adminDb
+			.collection('memorials')
+			.where('isDeleted', '==', false)
+			.orderBy(sortBy, sortDir as any)
+			.limit(limit);
 		snapshot = await query.get();
 	} catch (error) {
 		console.error('Error loading memorials with sorting:', error);
-		// Fallback to no sorting if index doesn't exist
-		let query = adminDb.collection('memorials').limit(limit);
-		snapshot = await query.get();
+		// Fallback: try without sorting but still filter deleted
+		try {
+			let query = adminDb
+				.collection('memorials')
+				.where('isDeleted', '==', false)
+				.limit(limit);
+			snapshot = await query.get();
+		} catch (fallbackError) {
+			console.error('Error loading memorials with filter:', fallbackError);
+			// Final fallback: load all and filter client-side
+			let query = adminDb.collection('memorials').limit(limit);
+			snapshot = await query.get();
+		}
 	}
 
-	const memorials = snapshot.docs.map((doc) => {
-		const data = doc.data();
-		
-		// Extract scheduled start time
-		let scheduledStartTime = null;
-		if (
-			data.services?.main?.time?.date &&
-			data.services?.main?.time?.time &&
-			!data.services.main.time.isUnknown
-		) {
-			scheduledStartTime = `${data.services.main.time.date}T${data.services.main.time.time}`;
-		}
+	const memorials = snapshot.docs
+		.filter((doc) => {
+			const data = doc.data();
+			// Client-side filter for deleted memorials (in case fallback query loaded them)
+			return !data.isDeleted;
+		})
+		.map((doc) => {
+			const data = doc.data();
+			
+			// Extract scheduled start time
+			let scheduledStartTime = null;
+			if (
+				data.services?.main?.time?.date &&
+				data.services?.main?.time?.time &&
+				!data.services.main.time.isUnknown
+			) {
+				scheduledStartTime = `${data.services.main.time.date}T${data.services.main.time.time}`;
+			}
 
-		// Extract location
-		const location = data.services?.main?.location?.name || 'Not specified';
+			// Extract location
+			const location = data.services?.main?.location?.name || 'Not specified';
 
-		// Payment status
-		const isPaid = data.isPaid || data.calculatorConfig?.isPaid || false;
+			// Payment status
+			const isPaid = data.isPaid || data.calculatorConfig?.isPaid || false;
 
-		return {
-			id: doc.id,
-			lovedOneName: data.lovedOneName || 'Unknown',
-			fullSlug: data.fullSlug,
-			creatorEmail: data.creatorEmail || '',
-			creatorName: data.creatorName || '',
-			createdAt: data.createdAt?.toDate?.()?.toISOString() || null,
-			isPublic: data.isPublic !== false,
-			isComplete: data.isComplete || false,
-			isPaid,
-			scheduledStartTime,
-			location,
-			paymentAmount: data.calculatorConfig?.totalPrice || null
-		};
-	});
+			return {
+				id: doc.id,
+				lovedOneName: data.lovedOneName || 'Unknown',
+				fullSlug: data.fullSlug,
+				creatorEmail: data.creatorEmail || '',
+				creatorName: data.creatorName || '',
+				createdAt: data.createdAt?.toDate?.()?.toISOString() || null,
+				isPublic: data.isPublic !== false,
+				isComplete: data.isComplete || false,
+				isPaid,
+				scheduledStartTime,
+				location,
+				paymentAmount: data.calculatorConfig?.totalPrice || null
+			};
+		});
 
 	return {
 		memorials,
