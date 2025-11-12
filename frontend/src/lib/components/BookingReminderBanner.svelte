@@ -11,7 +11,6 @@
 
 	let { memorialId, memorialName, onDismiss, visible = false }: Props = $props();
 	
-	let bannerElement: HTMLElement;
 	let isVisible = $state(visible);
 	let isAnimating = $state(false);
 
@@ -19,11 +18,7 @@
 	function showBanner() {
 		isVisible = true;
 		isAnimating = true;
-		
-		// Scroll to top on mobile to ensure banner is visible
-		if (window.innerWidth <= 768) {
-			window.scrollTo({ top: 0, behavior: 'smooth' });
-		}
+		// No need to scroll - banner is now positioned below nav bar
 	}
 
 	// Hide banner with animation
@@ -37,8 +32,7 @@
 
 	// Navigate to calculator
 	function goToCalculator() {
-		// Mark as seen before navigating
-		sessionStorage.setItem(`memorial-booking-banner-seen-${memorialId}`, 'true');
+		// Banner will be marked as seen by parent component's onDismiss handler
 		goto(`/schedule/${memorialId}`);
 	}
 
@@ -53,7 +47,6 @@
 
 {#if isVisible}
 	<div 
-		bind:this={bannerElement}
 		class="booking-reminder-banner {isAnimating ? 'banner-visible' : 'banner-hidden'}"
 		role="banner"
 		aria-live="polite"
@@ -99,10 +92,10 @@
 <style>
 	.booking-reminder-banner {
 		position: fixed;
-		top: 0;
+		top: 72px; /* Position below nav bar (nav is ~72px tall) */
 		left: 0;
 		right: 0;
-		z-index: 1000;
+		z-index: 40; /* Below nav bar (z-50) but above content */
 		background: linear-gradient(135deg, #D5BA7F 0%, #C5AA6F 100%);
 		color: white;
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -257,17 +250,9 @@
 		.banner-actions {
 			justify-content: center;
 		}
-	}
-
-	/* Ensure banner pushes content down */
-	:global(body.banner-visible) {
-		padding-top: var(--banner-height, 80px);
-		transition: padding-top 0.3s ease-out;
-	}
-
-	/* Animation for content push */
-	:global(.memorial-page.banner-active) {
-		transform: translateY(var(--banner-height, 80px));
-		transition: transform 0.3s ease-out;
+		
+		.booking-reminder-banner {
+			top: 64px; /* Shorter nav on mobile */
+		}
 	}
 </style>

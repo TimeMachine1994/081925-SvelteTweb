@@ -37,9 +37,7 @@
 
 	// Handle banner dismissal
 	function handleBannerDismiss() {
-		if (memorial?.id) {
-			markBannerAsSeen(memorial.id);
-		}
+		// View counter already incremented when banner was shown
 		bannerVisible = false;
 		showBookingBanner = false;
 	}
@@ -81,6 +79,11 @@
 				console.log('🎯 [BOOKING_BANNER] Showing booking banner');
 				showBookingBanner = true;
 				bannerVisible = true;
+				
+				// Increment view counter when banner is shown
+				if (memorial?.id) {
+					markBannerAsSeen(memorial.id);
+				}
 			}, 3000); // 3 second delay
 
 			return () => clearTimeout(timer);

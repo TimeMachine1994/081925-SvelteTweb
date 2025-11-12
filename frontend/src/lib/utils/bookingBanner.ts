@@ -28,12 +28,13 @@ export function shouldShowBookingBanner(
 		return { shouldShow: false, reason: 'no-memorial' };
 	}
 
-	// Check if user has already seen banner for this memorial in this session
-	const bannerSeenKey = `memorial-booking-banner-seen-${memorialId}`;
-	const hasSeenBanner = sessionStorage.getItem(bannerSeenKey) === 'true';
+	// Check if user has already seen banner for this memorial (persistent across sessions)
+	const bannerSeenKey = `memorial-booking-banner-views-${memorialId}`;
+	const viewCount = parseInt(localStorage.getItem(bannerSeenKey) || '0', 10);
+	const MAX_VIEWS = 1; // Show banner only once, ever
 	
-	if (hasSeenBanner) {
-		return { shouldShow: false, reason: 'already-seen' };
+	if (viewCount >= MAX_VIEWS) {
+		return { shouldShow: false, reason: `already-seen-${viewCount}-times` };
 	}
 
 	// Only show for memorial owners (users who created/own the memorial)
@@ -72,13 +73,38 @@ export function shouldShowBookingBanner(
 }
 
 /**
- * Mark the banner as seen for this memorial
+ * Mark the banner as seen for this memorial (increments view counter)
  */
 export function markBannerAsSeen(memorialId: string): void {
 	if (!browser) return;
 	
-	const bannerSeenKey = `memorial-booking-banner-seen-${memorialId}`;
-	sessionStorage.setItem(bannerSeenKey, 'true');
+	const bannerSeenKey = `memorial-booking-banner-views-${memorialId}`;
+	const currentViews = parseInt(localStorage.getItem(bannerSeenKey) || '0', 10);
+	const newViewCount = currentViews + 1;
+	
+	localStorage.setItem(bannerSeenKey, newViewCount.toString());
+	console.log(`🔔 [BOOKING_BANNER] View count for memorial ${memorialId}: ${newViewCount}`);
+}
+
+/**
+ * Get current view count for a memorial banner
+ */
+export function getBannerViewCount(memorialId: string): number {
+	if (!browser) return 0;
+	
+	const bannerSeenKey = `memorial-booking-banner-views-${memorialId}`;
+	return parseInt(localStorage.getItem(bannerSeenKey) || '0', 10);
+}
+
+/**
+ * Reset banner view count for a memorial (useful for testing or special cases)
+ */
+export function resetBannerViewCount(memorialId: string): void {
+	if (!browser) return;
+	
+	const bannerSeenKey = `memorial-booking-banner-views-${memorialId}`;
+	localStorage.removeItem(bannerSeenKey);
+	console.log(`🔄 [BOOKING_BANNER] Reset view count for memorial ${memorialId}`);
 }
 
 /**
@@ -92,22 +118,24 @@ export function setLoginTimestamp(): void {
 }
 
 /**
- * Clear all banner-related session storage
+ * Clear all banner-related storage (both session and local storage)
  * Useful for testing or when user logs out
  */
 export function clearBannerState(): void {
 	if (!browser) return;
 	
-	// Clear login timestamp
+	// Clear login timestamp from sessionStorage
 	sessionStorage.removeItem('login-timestamp');
 	
-	// Clear all banner seen flags
-	const keys = Object.keys(sessionStorage);
-	keys.forEach(key => {
-		if (key.startsWith('memorial-booking-banner-seen-')) {
-			sessionStorage.removeItem(key);
+	// Clear all banner view counters from localStorage
+	const localKeys = Object.keys(localStorage);
+	localKeys.forEach(key => {
+		if (key.startsWith('memorial-booking-banner-views-')) {
+			localStorage.removeItem(key);
 		}
 	});
+	
+	console.log('🧹 [BOOKING_BANNER] Cleared all banner state');
 }
 
 /**
@@ -116,10 +144,16 @@ export function clearBannerState(): void {
 export function debugBannerState(memorialId: string): void {
 	if (!browser) return;
 	
+	const viewCount = getBannerViewCount(memorialId);
+	const loginTimestamp = sessionStorage.getItem('login-timestamp');
+	const loginTime = loginTimestamp ? new Date(parseInt(loginTimestamp)) : null;
+	
 	console.log('🎯 [BOOKING_BANNER] Debug State:', {
 		memorialId,
-		bannerSeen: sessionStorage.getItem(`memorial-booking-banner-seen-${memorialId}`),
-		loginTimestamp: sessionStorage.getItem('login-timestamp'),
-		sessionKeys: Object.keys(sessionStorage).filter(k => k.includes('banner') || k.includes('login'))
+		viewCount,
+		maxViews: 1,
+		willShowAgain: viewCount < 1,
+		loginTimestamp: loginTime?.toLocaleString() || 'none',
+		allBannerKeys: Object.keys(localStorage).filter(k => k.includes('memorial-booking-banner'))
 	});
 }

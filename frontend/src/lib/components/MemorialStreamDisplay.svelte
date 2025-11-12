@@ -184,20 +184,26 @@
 					<div class="video-container">
 						<!-- Video Screen -->
 						<div class="video-screen">
-							<!-- Subtle gradient background -->
+							<!-- Background gradient -->
 							<div class="placeholder-bg"></div>
 							
-							<!-- Message Overlay -->
+							<!-- Message Overlay - Similar to scheduled video layer -->
 							<div class="placeholder-overlay">
 								<div class="placeholder-content">
 									<div class="placeholder-icon">
-										<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-											<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+										<!-- Calendar/Clock icon instead of dollar sign -->
+										<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+											<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+											<line x1="16" y1="2" x2="16" y2="6"></line>
+											<line x1="8" y1="2" x2="8" y2="6"></line>
+											<line x1="3" y1="10" x2="21" y2="10"></line>
+											<circle cx="12" cy="15" r="2"></circle>
 										</svg>
 									</div>
-									<h3 class="placeholder-title">No Service Scheduled Yet</h3>
+									<div class="placeholder-label">LIVESTREAM UPCOMING</div>
+									<h3 class="placeholder-title">Video Coming Soon</h3>
 									<p class="placeholder-description">
-										The memorial service livestream will appear here once scheduled.
+										The memorial service will be livestreamed here. This page will go live automatically when the service begins.
 									</p>
 								</div>
 							</div>
@@ -352,6 +358,144 @@
 		margin-top: 1rem;
 	}
 	
+	/* Stock Player Styles - Match scheduled video layer */
+	.stock-player {
+		width: 100%;
+	}
+	
+	.video-container {
+		position: relative;
+		width: 100%;
+		padding-bottom: 56.25%; /* 16:9 aspect ratio */
+		background: #000;
+		border-radius: 8px;
+		overflow: hidden;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+	}
+	
+	.video-screen {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+	}
+	
+	.placeholder-bg {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+	}
+	
+	.placeholder-overlay {
+		position: absolute;
+		inset: 0;
+		background: rgba(255, 255, 255, 0.85);
+		backdrop-filter: blur(8px);
+		-webkit-backdrop-filter: blur(8px);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	
+	.placeholder-content {
+		text-align: center;
+		padding: 2rem;
+		max-width: 500px;
+	}
+	
+	.placeholder-icon {
+		color: #D5BA7F;
+		margin: 0 auto 1.5rem;
+		opacity: 0.9;
+	}
+	
+	.placeholder-icon svg {
+		display: block;
+		margin: 0 auto;
+	}
+	
+	.placeholder-label {
+		font-size: 0.75rem;
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		color: rgba(0, 0, 0, 0.6);
+		margin-bottom: 0.5rem;
+		font-weight: 600;
+	}
+	
+	.placeholder-title {
+		font-size: 1.5rem;
+		font-weight: 600;
+		color: #1a1a1a;
+		margin-bottom: 0.75rem;
+	}
+	
+	.placeholder-description {
+		font-size: 0.95rem;
+		color: rgba(0, 0, 0, 0.7);
+		line-height: 1.6;
+	}
+	
+	.video-controls {
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+		padding: 1rem;
+	}
+	
+	.control-bar {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+	
+	.play-button,
+	.volume-button,
+	.fullscreen-button {
+		background: none;
+		border: none;
+		color: rgba(255, 255, 255, 0.4);
+		cursor: not-allowed;
+		padding: 0.25rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	
+	.play-icon,
+	.volume-icon,
+	.fullscreen-icon {
+		width: 20px;
+		height: 20px;
+	}
+	
+	.progress-container {
+		flex: 1;
+	}
+	
+	.progress-bar {
+		width: 100%;
+		height: 4px;
+		background: rgba(255, 255, 255, 0.2);
+		border-radius: 2px;
+		overflow: hidden;
+	}
+	
+	.progress-fill {
+		height: 100%;
+		background: rgba(255, 255, 255, 0.3);
+	}
+	
+	.time-display {
+		font-size: 0.875rem;
+		color: rgba(255, 255, 255, 0.4);
+		font-family: monospace;
+		min-width: 45px;
+	}
+	
 	/* Responsive Design */
 	@media (max-width: 768px) {
 		.stream-section {
@@ -368,6 +512,23 @@
 		
 		.stream-description {
 			font-size: 0.9rem;
+		}
+		
+		.placeholder-content {
+			padding: 1.5rem;
+		}
+		
+		.placeholder-icon svg {
+			width: 48px;
+			height: 48px;
+		}
+		
+		.placeholder-title {
+			font-size: 1.25rem;
+		}
+		
+		.placeholder-description {
+			font-size: 0.875rem;
 		}
 	}
 </style>
