@@ -103,7 +103,7 @@ export const ADMIN_NAV: NavDomain[] = [
 			{
 				id: 'admin-users',
 				label: 'Admin Users',
-				href: '/admin/users/admins',
+				href: '/admin/users/admin-users',
 				icon: '🔑',
 				description: 'Administrator accounts',
 				requiredPermission: { resource: 'system', action: 'read' }

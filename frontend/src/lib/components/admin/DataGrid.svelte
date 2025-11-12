@@ -64,12 +64,8 @@ Based on ADMIN_REFACTOR_2_DATA_OPERATIONS.md
 		});
 	});
 
-	// Select all checkbox
-	let selectAll = $state(false);
-
-	$effect(() => {
-		selectAll = selectedMemorials.size === data.length && data.length > 0;
-	});
+	// Select all checkbox - derived from actual selection state
+	let selectAll = $derived(selectedMemorials.size === data.length && data.length > 0);
 
 	function handleSort(column: Column) {
 		if (!column.sortable) return;
@@ -83,9 +79,14 @@ Based on ADMIN_REFACTOR_2_DATA_OPERATIONS.md
 	}
 
 	function toggleSelectAll() {
-		if (selectAll) {
+		// Check current selection state, not the checkbox state
+		const allSelected = selectedMemorials.size === data.length && data.length > 0;
+		
+		if (allSelected) {
+			// Deselect all
 			selectedMemorials.clear();
 		} else {
+			// Select all visible items
 			data.forEach((row) => selectedMemorials.add(row.id));
 		}
 		selectedMemorials = selectedMemorials; // Trigger reactivity

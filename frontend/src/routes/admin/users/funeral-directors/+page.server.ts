@@ -15,14 +15,25 @@ export const load = async ({ locals, url }: any) => {
 	const statusFilter = url.searchParams.get('status');
 
 	// Load funeral directors
-	let query = adminDb.collection('funeral_directors');
+	let snapshot;
+	try {
+		let query: any = adminDb.collection('funeral_directors');
 
-	// Apply status filter if provided
-	if (statusFilter) {
-		query = query.where('status', '==', statusFilter);
+		// Apply status filter if provided
+		if (statusFilter) {
+			query = query.where('status', '==', statusFilter);
+		}
+
+		snapshot = await query.orderBy(sortBy, sortDir as any).limit(limit).get();
+	} catch (error) {
+		console.error('Error loading funeral directors with sorting:', error);
+		// Fallback: try without sorting
+		let query: any = adminDb.collection('funeral_directors');
+		if (statusFilter) {
+			query = query.where('status', '==', statusFilter);
+		}
+		snapshot = await query.limit(limit).get();
 	}
-
-	const snapshot = await (query.orderBy(sortBy, sortDir as any).limit(limit).get());
 
 	// Count memorials created by each director
 	const directorIds = snapshot.docs.map((doc) => doc.id);

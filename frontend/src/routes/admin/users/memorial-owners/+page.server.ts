@@ -14,13 +14,21 @@ export const load = async ({ locals, url }: any) => {
 	const sortDir = url.searchParams.get('sortDir') || 'desc';
 
 	// Load users with role 'owner'
-	let query = adminDb
-		.collection('users')
-		.where('role', '==', 'owner')
-		.orderBy(sortBy, sortDir as any)
-		.limit(limit);
-
-	const snapshot = await query.get();
+	let snapshot;
+	try {
+		// Try with compound query (requires Firestore index)
+		let query = adminDb
+			.collection('users')
+			.where('role', '==', 'owner')
+			.orderBy(sortBy, sortDir as any)
+			.limit(limit);
+		snapshot = await query.get();
+	} catch (error) {
+		console.error('Error loading memorial owners with sorting:', error);
+		// Fallback: just filter by role without sorting
+		let query = adminDb.collection('users').where('role', '==', 'owner').limit(limit);
+		snapshot = await query.get();
+	}
 
 	const users = snapshot.docs.map((doc) => {
 		const data = doc.data();
