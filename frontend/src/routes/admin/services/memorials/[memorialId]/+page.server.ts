@@ -37,6 +37,82 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		}
 
 		const memorialData = memorialDoc.data();
+		if (!memorialData) {
+			console.log('❌ [MEMORIAL DETAIL] Memorial data is empty:', memorialId);
+			throw error(404, 'Memorial data not found');
+		}
+
+		// Helper function to convert any timestamp format to ISO string
+		const convertTimestamp = (value: any): string | null => {
+			if (!value) return null;
+			
+			// Firestore Timestamp with toDate method
+			if (value.toDate && typeof value.toDate === 'function') {
+				return value.toDate().toISOString();
+			}
+			
+			// Raw timestamp object with _seconds
+			if (value._seconds !== undefined) {
+				return new Date(value._seconds * 1000).toISOString();
+			}
+			
+			// Already a string
+			if (typeof value === 'string') {
+				return value;
+			}
+			
+			// Try to parse as Date
+			try {
+				return new Date(value).toISOString();
+			} catch {
+				return null;
+			}
+		};
+
+		// Helper function to clean calculator config timestamps
+		const cleanCalculatorConfig = (config: any) => {
+			if (!config) return null;
+			
+			const cleaned = { ...config };
+			
+			// Convert timestamps in formData
+			if (cleaned.formData) {
+				cleaned.formData = { ...cleaned.formData };
+				if (cleaned.formData.updatedAt) {
+					cleaned.formData.updatedAt = convertTimestamp(cleaned.formData.updatedAt);
+				}
+				if (cleaned.formData.createdAt) {
+					cleaned.formData.createdAt = convertTimestamp(cleaned.formData.createdAt);
+				}
+			}
+			
+			// Convert top-level timestamps
+			if (cleaned.lastModified) {
+				cleaned.lastModified = convertTimestamp(cleaned.lastModified);
+			}
+			if (cleaned.paymentDate) {
+				cleaned.paymentDate = convertTimestamp(cleaned.paymentDate);
+			}
+			
+			// Convert timestamps in autoSave
+			if (cleaned.autoSave) {
+				cleaned.autoSave = { ...cleaned.autoSave };
+				if (cleaned.autoSave.lastModified) {
+					cleaned.autoSave.lastModified = convertTimestamp(cleaned.autoSave.lastModified);
+				}
+				if (cleaned.autoSave.timestamp) {
+					cleaned.autoSave.timestamp = convertTimestamp(cleaned.autoSave.timestamp);
+				}
+				if (cleaned.autoSave.formData?.updatedAt) {
+					cleaned.autoSave.formData.updatedAt = convertTimestamp(cleaned.autoSave.formData.updatedAt);
+				}
+				if (cleaned.autoSave.formData?.createdAt) {
+					cleaned.autoSave.formData.createdAt = convertTimestamp(cleaned.autoSave.formData.createdAt);
+				}
+			}
+			
+			return cleaned;
+		};
 
 		// Process memorial data
 		const memorial = {
@@ -46,8 +122,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			createdBy: memorialData.createdBy || '',
 			creatorEmail: memorialData.creatorEmail || '',
 			creatorName: memorialData.creatorName || '',
-			createdAt: memorialData.createdAt?.toDate?.()?.toISOString() || null,
-			updatedAt: memorialData.updatedAt?.toDate?.()?.toISOString() || null,
+			createdAt: convertTimestamp(memorialData.createdAt),
+			updatedAt: convertTimestamp(memorialData.updatedAt),
 			
 			// Status flags
 			isPublic: memorialData.isPublic !== false,
@@ -66,12 +142,12 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			// Livestream legacy field (mostly replaced by streams collection)
 			livestream: memorialData.livestream || null,
 			
-			// Calculator/Payment
-			calculatorConfig: memorialData.calculatorConfig || null,
+			// Calculator/Payment - properly cleaned
+			calculatorConfig: cleanCalculatorConfig(memorialData.calculatorConfig),
 			isPaid: memorialData.isPaid || memorialData.calculatorConfig?.isPaid || false,
 			paymentStatus: memorialData.calculatorConfig?.status || 'draft',
 			totalPrice: memorialData.calculatorConfig?.totalPrice || 0,
-			paymentDate: memorialData.calculatorConfig?.paymentDate?.toDate?.()?.toISOString() || null,
+			paymentDate: convertTimestamp(memorialData.calculatorConfig?.paymentDate),
 			
 			// Demo fields
 			demoSessionId: memorialData.demoSessionId || null,
