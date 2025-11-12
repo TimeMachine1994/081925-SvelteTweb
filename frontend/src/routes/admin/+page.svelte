@@ -44,7 +44,7 @@
 		{:else}
 			<div class="memorials-list">
 				{#each (data.incompleteMemorials || []) as memorial}
-					<a href="/admin/services/memorials" class="memorial-row incomplete">
+					<a href="/admin/services/memorials/{memorial.id}" class="memorial-row incomplete">
 						<div class="memorial-info">
 							<div class="memorial-name">{memorial.lovedOneName}</div>
 							<div class="memorial-meta">
