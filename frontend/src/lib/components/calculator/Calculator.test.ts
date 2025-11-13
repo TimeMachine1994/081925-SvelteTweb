@@ -54,7 +54,7 @@ describe('Calculator Component', () => {
 		const { component } = render(Calculator, { props: mockProps });
 
 		// Test that record tier shows correct base price
-		expect(screen.getByText('$599')).toBeInTheDocument();
+		expect(screen.getByText('$699')).toBeInTheDocument();
 	});
 
 	it('updates pricing when tier changes', async () => {
@@ -205,7 +205,7 @@ describe('Calculator Component', () => {
 
 // Test the calculation functions directly
 describe('Calculator Logic Functions', () => {
-	const TIER_PRICES = { record: 599, live: 1299, legacy: 1599 };
+	const TIER_PRICES = { record: 699, live: 1299, legacy: 1599 };
 	const ADDON_PRICES = {
 		photography: 400,
 		audioVisualSupport: 200,
@@ -406,8 +406,8 @@ describe('Calculator Logic Functions', () => {
 
 		expect(items).toHaveLength(1);
 		expect(items[0].name).toBe('Tributestream Record');
-		expect(items[0].total).toBe(599);
-		expect(total).toBe(599);
+		expect(items[0].total).toBe(699);
+		expect(total).toBe(699);
 	});
 
 	it('calculates complex scenario correctly', () => {

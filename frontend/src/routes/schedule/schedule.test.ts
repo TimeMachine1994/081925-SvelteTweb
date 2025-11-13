@@ -5,7 +5,7 @@ import type { CalculatorFormData, BookingItem, Tier } from '$lib/types/livestrea
 
 describe('Schedule Calculator - Pricing Logic', () => {
 	const TIER_PRICES = {
-		record: 599,
+		record: 699,
 		live: 1299,
 		legacy: 1599
 	};
@@ -188,7 +188,7 @@ describe('Schedule Calculator - Pricing Logic', () => {
 
 		expect(items).toHaveLength(1);
 		expect(items[0].name).toBe('Tributestream Record');
-		expect(items[0].total).toBe(599);
+		expect(items[0].total).toBe(699);
 	});
 
 	it('calculates overage charges correctly', () => {
@@ -321,7 +321,7 @@ describe('Schedule Page - Navigation Logic', () => {
 		const paymentData = {
 			memorialId: 'test-123',
 			clientSecret: 'pi_test_secret',
-			amount: 599,
+			amount: 699,
 			bookingItems: []
 		};
 
@@ -354,7 +354,7 @@ describe('Schedule Page - API Integration', () => {
 
 		const bookingData = {
 			memorialId: 'test-123',
-			amount: 599,
+			amount: 699,
 			bookingItems: [],
 			customerInfo: { email: 'test@example.com' }
 		};

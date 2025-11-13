@@ -293,7 +293,7 @@ describe('Calculator Component', () => {
   it('calculates record tier correctly', () => {
     const formData: CalculatorFormData = { /* test data */ };
     const items = calculateBookingItems('record', formData);
-    expect(items[0].total).toBe(599);
+    expect(items[0].total).toBe(699);
   });
 
   it('handles overage charges correctly', () => {

@@ -73,3 +73,84 @@ export async function createLiveInput(name: string): Promise<{
 	};
 }
 
+/**
+ * Gets the status of a Cloudflare Live Input
+ * @param liveInputId - The Live Input ID to check
+ * @returns Current status information
+ */
+export async function getLiveInputStatus(liveInputId: string): Promise<{
+	status: string;
+	isLive: boolean;
+	videoUid?: string;
+}> {
+	console.log('🔍 [Cloudflare] Checking Live Input status:', liveInputId);
+
+	const response = await fetch(`${CLOUDFLARE_API_BASE}/live_inputs/${liveInputId}`, {
+		method: 'GET',
+		headers: {
+			Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`
+		}
+	});
+
+	if (!response.ok) {
+		const error = await response.text();
+		console.error('❌ [Cloudflare] Failed to get Live Input status:', error);
+		throw new Error(`Cloudflare API error: ${response.status} - ${error}`);
+	}
+
+	const data: CloudflareAPIResponse<any> = await response.json();
+
+	if (!data.success) {
+		throw new Error(`Cloudflare API error: ${data.errors.map((e) => e.message).join(', ')}`);
+	}
+
+	const status = data.result.status || 'unknown';
+	const isLive = status === 'connected' || status === 'live';
+	const videoUid = data.result.recording?.uid;
+
+	console.log('✅ [Cloudflare] Live Input status:', status, 'Is Live:', isLive);
+
+	return {
+		status,
+		isLive,
+		videoUid
+	};
+}
+
+/**
+ * Gets playback URL for a completed stream recording
+ * @param videoUid - The video UID from completed stream
+ * @returns Playback URLs
+ */
+export async function getStreamPlaybackUrl(videoUid: string): Promise<{
+	hlsUrl?: string;
+	dashUrl?: string;
+	embedUrl?: string;
+}> {
+	console.log('🎥 [Cloudflare] Getting playback URL for video:', videoUid);
+
+	const response = await fetch(`${CLOUDFLARE_API_BASE}/${videoUid}`, {
+		method: 'GET',
+		headers: {
+			Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`
+		}
+	});
+
+	if (!response.ok) {
+		const error = await response.text();
+		console.error('❌ [Cloudflare] Failed to get video:', error);
+		throw new Error(`Cloudflare API error: ${response.status} - ${error}`);
+	}
+
+	const data: CloudflareAPIResponse<any> = await response.json();
+
+	if (!data.success) {
+		throw new Error(`Cloudflare API error: ${data.errors.map((e) => e.message).join(', ')}`);
+	}
+
+	return {
+		hlsUrl: data.result.playback?.hls,
+		dashUrl: data.result.playback?.dash,
+		embedUrl: `https://customer-${CLOUDFLARE_ACCOUNT_ID}.cloudflarestream.com/${videoUid}/iframe`
+	};
+}

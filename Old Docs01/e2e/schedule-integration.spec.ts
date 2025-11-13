@@ -81,7 +81,7 @@ test.describe('Schedule Integration Tests', () => {
     
     // Verify payment page loads with correct data
     await expect(page.locator('text=Complete Payment')).toBeVisible();
-    await expect(page.locator('text=$599')).toBeVisible();
+    await expect(page.locator('text=$699')).toBeVisible();
   });
 
   test('Save and Pay Later functionality', async ({ page }) => {

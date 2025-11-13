@@ -27,4 +27,4 @@ export * from './memorial';
 export * from './slideshow';
 
 // Stream types
-export * from './livestream';
+export * from './stream';

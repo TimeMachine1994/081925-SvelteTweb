@@ -29,7 +29,7 @@ describe('Schedule Page Calculator', () => {
 		render(SchedulePage);
 
 		// Should show record tier as selected and display its price
-		expect(screen.getByText('$599')).toBeInTheDocument();
+		expect(screen.getByText('$699')).toBeInTheDocument();
 	});
 
 	it('updates total when tier selection changes', async () => {
@@ -53,7 +53,7 @@ describe('Schedule Page Calculator', () => {
 		await fireEvent.input(hoursSlider, { target: { value: '4' } });
 
 		// Should show overage charges (2 hours * $125 = $250)
-		// Total should be $599 (record) + $250 (overage) = $849
+		// Total should be $699 (record) + $250 (overage) = $849
 		expect(screen.getByText('$849')).toBeInTheDocument();
 	});
 
@@ -65,7 +65,7 @@ describe('Schedule Page Calculator', () => {
 		await fireEvent.click(additionalLocationCheckbox);
 
 		// Should add $325 for additional location
-		// Total should be $599 (record) + $325 (additional location) = $924
+		// Total should be $699 (record) + $325 (additional location) = $924
 		expect(screen.getByText('$924')).toBeInTheDocument();
 	});
 
@@ -77,7 +77,7 @@ describe('Schedule Page Calculator', () => {
 		await fireEvent.click(additionalDayCheckbox);
 
 		// Should add $325 for additional day
-		// Total should be $599 (record) + $325 (additional day) = $924
+		// Total should be $699 (record) + $325 (additional day) = $924
 		expect(screen.getByText('$924')).toBeInTheDocument();
 	});
 
@@ -89,7 +89,7 @@ describe('Schedule Page Calculator', () => {
 		await fireEvent.click(photographyCheckbox);
 
 		// Should add $400 for photography
-		// Total should be $599 (record) + $400 (photography) = $999
+		// Total should be $699 (record) + $400 (photography) = $999
 		expect(screen.getByText('$999')).toBeInTheDocument();
 	});
 
@@ -101,7 +101,7 @@ describe('Schedule Page Calculator', () => {
 		await fireEvent.input(usbInput, { target: { value: '2' } });
 
 		// Should add $300 (first) + $100 (second) = $400
-		// Total should be $599 (record) + $400 (USB drives) = $999
+		// Total should be $699 (record) + $400 (USB drives) = $999
 		expect(screen.getByText('$999')).toBeInTheDocument();
 	});
 
@@ -292,20 +292,20 @@ describe('Schedule Page Reactive Calculations', () => {
 		};
 
 		// Expected items:
-		// 1. Record tier: $599
+		// 1. Record tier: $699
 		// 2. Main overage: 1 hour * $125 = $125
 		// 3. Additional location: $325
 		// 4. Photography: $400
 		// 5. USB drive: $300
 
-		const expectedTotal = 599 + 125 + 325 + 400 + 300; // $1749
+		const expectedTotal = 699 + 125 + 325 + 400 + 300; // $1749
 		expect(expectedTotal).toBe(1749);
 	});
 
 	it('handles tier price lookup correctly', () => {
-		const TIER_PRICES = { record: 599, live: 1299, legacy: 1599 };
+		const TIER_PRICES = { record: 699, live: 1299, legacy: 1599 };
 
-		expect(TIER_PRICES.record).toBe(599);
+		expect(TIER_PRICES.record).toBe(699);
 		expect(TIER_PRICES.live).toBe(1299);
 		expect(TIER_PRICES.legacy).toBe(1599);
 	});

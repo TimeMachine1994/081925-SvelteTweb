@@ -7,7 +7,7 @@ Tributestream offers professional memorial service livestreaming solutions with 
 
 ## Core Packages
 
-### 1. Tributestream Record - $599
+### 1. Tributestream Record - $699
 **Perfect for families who want to handle their own livestreaming**
 
 **Included Features:**
@@ -36,7 +36,7 @@ Tributestream offers professional memorial service livestreaming solutions with 
 
 ---
 
-### 3. Tributestream Legacy - $1,599
+### 3. Tributestream Legacy - $1,699
 **Complete premium package with keepsakes**
 
 **Included Features:**
@@ -103,8 +103,8 @@ Tributestream offers professional memorial service livestreaming solutions with 
 ## Pricing Examples
 
 ### Basic Record Service (2 hours)
-- Tributestream Record: **$599**
-- **Total: $599**
+- Tributestream Record: **$699**
+- **Total: $699**
 
 ### Professional Live Service with Extensions
 - Tributestream Live: $1,299
@@ -113,7 +113,7 @@ Tributestream offers professional memorial service livestreaming solutions with 
 - **Total: $1,949**
 
 ### Premium Legacy Service with Full Options
-- Tributestream Legacy: $1,599
+- Tributestream Legacy: $1,699
 - Additional location: $325
 - Additional day: $325
 - Live musician: $500
@@ -133,7 +133,7 @@ Tributestream offers professional memorial service livestreaming solutions with 
 
 | Feature | Record | Live | Legacy |
 |---------|------|------|--------|
-| Base Price | $599 | $1,299 | $1,599 |
+| Base Price | $699 | $1,299 | $1,699 |
 | Broadcast Time | 2 hours | 2 hours | 2 hours |
 | Custom Link | ✅ | ✅ | ✅ |
 | Download | ✅ | ✅ | ✅ |

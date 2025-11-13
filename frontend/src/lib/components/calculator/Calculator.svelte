@@ -137,7 +137,7 @@
 	});
 
 	const TIER_PRICES: Record<string, number> = {
-		record: 599,
+		record: 699,
 		live: 1299,
 		legacy: 1599
 	};

@@ -31,7 +31,7 @@ The user's journey begins by selecting a service tier. The `TierSelector` compon
 
 | Tier Name | Base Price | Included Features |
 | :--- | :--- | :--- |
-| **Tributestream Record** | $599 | - 2 Hours of Broadcast Time<br>- Custom Link<br>- Complimentary Download<br>- One Year Hosting<br>- DIY Livestream Kit |
+| **Tributestream Record** | $699 | - 2 Hours of Broadcast Time<br>- Custom Link<br>- Complimentary Download<br>- One Year Hosting<br>- DIY Livestream Kit |
 | **Tributestream Live** | $1299 | - 2 Hours of Broadcast Time<br>- Custom Link<br>- Complimentary Download<br>- One Year Hosting<br>- Professional Videographer<br>- Professional Livestream Tech |
 | **Tributestream Legacy**| $1599 | - 2 Hours of Broadcast Time<br>- Custom Link<br>- Complimentary Download<br>- One Year Hosting<br>- Professional Videographer<br>- Professional Livestream Tech<br>- Video Editing<br>- Engraved USB Drive and Wooden Keepsake Box |
 

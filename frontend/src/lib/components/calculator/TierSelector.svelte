@@ -14,7 +14,7 @@
 		{
 			name: 'Tributestream Record',
 			alias: 'record',
-			price: 599,
+			price: 699,
 			features: [
 				'2 Hours of Broadcast Time',
 				'Custom Link',

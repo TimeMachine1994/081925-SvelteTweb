@@ -138,7 +138,7 @@
 
 	// Pricing constants
 	const TIER_PRICES = {
-		record: 599,
+		record: 699,
 		live: 1299,
 		legacy: 1599
 	};
@@ -545,7 +545,7 @@
 		{
 			name: 'Tributestream Record',
 			alias: 'record',
-			price: 599,
+			price: 699,
 			features: [
 				'2 Hours of Record Time',
 				'Custom Link',
