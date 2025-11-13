@@ -236,20 +236,6 @@
 						</h1>
 					</div>
 					
-					
-					<!-- Hero Slideshow Section - Outside glass box -->
-					<div class="hero-slideshow">
-						<SlideshowSection 
-							{slideshows} 
-							memorialName={memorial.lovedOneName || 'Unknown'}
-							memorialId={memorial.id}
-							editable={canEditSlideshows()}
-							currentUserId={user?.uid}
-							heroMode={true}
-						/>
-					</div>
-				</div>
-
 					<!-- Share Button with Popup -->
 					<div class="share-container">
 						<button 
@@ -282,6 +268,19 @@
 							</div>
 						{/if}
 					</div>
+					
+					<!-- Hero Slideshow Section - Outside glass box -->
+					<div class="hero-slideshow">
+						<SlideshowSection 
+							{slideshows} 
+							memorialName={memorial.lovedOneName || 'Unknown'}
+							memorialId={memorial.id}
+							editable={canEditSlideshows()}
+							currentUserId={user?.uid}
+							heroMode={true}
+						/>
+					</div>
+				</div>
 				<!-- Legacy Custom HTML Content Only -->
 				<div class="memorial-content-container">
 					<!-- Stream Section for Legacy Layout - Always show, component handles empty state -->
@@ -307,6 +306,40 @@
 							<img src={memorial.imageUrl} alt={memorial.lovedOneName} />
 						</div>
 					{/if}
+					
+					<!-- Share Button with Popup -->
+					<div class="share-container">
+						<button 
+							class="share-button"
+							onclick={toggleSharePopup}
+							title="Share memorial"
+							aria-label="Share memorial"
+						>
+							<Share2 size={18} />
+						</button>
+						
+						{#if showSharePopup}
+							<div class="share-popup">
+								<button onclick={shareOnFacebook} class="share-option facebook" title="Share on Facebook">
+									<Facebook size={18} />
+									<span>Facebook</span>
+								</button>
+								<button onclick={shareOnTwitter} class="share-option twitter" title="Share on X (Twitter)">
+									<Twitter size={18} />
+									<span>Twitter</span>
+								</button>
+								<button onclick={shareOnLinkedIn} class="share-option linkedin" title="Share on LinkedIn">
+									<Linkedin size={18} />
+									<span>LinkedIn</span>
+								</button>
+								<button onclick={copyLink} class="share-option copy" title="Copy link">
+									<Share2 size={18} />
+									<span>Copy Link</span>
+								</button>
+							</div>
+						{/if}
+					</div>
+					
 					<div class="memorial-header-content">
 						<!-- Glass box wrapper for title and dates only -->
 						<div class="glass-box">
@@ -326,39 +359,6 @@
 									{#if memorial.deathDate}
 										<span>{formatDate(memorial.deathDate)}</span>
 									{/if}
-								</div>
-							{/if}
-						</div>
-						
-						<!-- Share Button with Popup -->
-						<div class="share-container">
-							<button 
-								class="share-button"
-								onclick={toggleSharePopup}
-								title="Share memorial"
-								aria-label="Share memorial"
-							>
-								<Share2 size={18} />
-							</button>
-							
-							{#if showSharePopup}
-								<div class="share-popup">
-									<button onclick={shareOnFacebook} class="share-option facebook" title="Share on Facebook">
-										<Facebook size={18} />
-										<span>Facebook</span>
-									</button>
-									<button onclick={shareOnTwitter} class="share-option twitter" title="Share on X (Twitter)">
-										<Twitter size={18} />
-										<span>Twitter</span>
-									</button>
-									<button onclick={shareOnLinkedIn} class="share-option linkedin" title="Share on LinkedIn">
-										<Linkedin size={18} />
-										<span>LinkedIn</span>
-									</button>
-									<button onclick={copyLink} class="share-option copy" title="Copy link">
-										<Share2 size={18} />
-										<span>Copy Link</span>
-									</button>
 								</div>
 							{/if}
 						</div>
