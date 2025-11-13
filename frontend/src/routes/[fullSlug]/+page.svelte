@@ -236,6 +236,20 @@
 						</h1>
 					</div>
 					
+					
+					<!-- Hero Slideshow Section - Outside glass box -->
+					<div class="hero-slideshow">
+						<SlideshowSection 
+							{slideshows} 
+							memorialName={memorial.lovedOneName || 'Unknown'}
+							memorialId={memorial.id}
+							editable={canEditSlideshows()}
+							currentUserId={user?.uid}
+							heroMode={true}
+						/>
+					</div>
+				</div>
+
 					<!-- Share Button with Popup -->
 					<div class="share-container">
 						<button 
@@ -268,20 +282,6 @@
 							</div>
 						{/if}
 					</div>
-					
-					<!-- Hero Slideshow Section - Outside glass box -->
-					<div class="hero-slideshow">
-						<SlideshowSection 
-							{slideshows} 
-							memorialName={memorial.lovedOneName || 'Unknown'}
-							memorialId={memorial.id}
-							editable={canEditSlideshows()}
-							currentUserId={user?.uid}
-							heroMode={true}
-						/>
-					</div>
-				</div>
-
 				<!-- Legacy Custom HTML Content Only -->
 				<div class="memorial-content-container">
 					<!-- Stream Section for Legacy Layout - Always show, component handles empty state -->
