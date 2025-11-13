@@ -5,161 +5,136 @@ Manage all livestreams across memorials
 -->
 <script lang="ts">
 	import AdminLayout from '$lib/components/admin/AdminLayout.svelte';
-	import DataGrid from '$lib/components/admin/DataGrid.svelte';
-	import FilterBuilder from '$lib/components/admin/FilterBuilder.svelte';
-	import { can } from '$lib/stores/adminUser';
-	import { goto } from '$app/navigation';
+	import StreamCard from '$lib/components/streaming/StreamCard.svelte';
+	import { Video } from 'lucide-svelte';
 
 	let { data } = $props();
 
-	// State
-	let selectedStreams = $state<Set<string>>(new Set());
-	let showFilters = $state(false);
+	// Group streams by status
+	const scheduledStreams = $derived(data.streams.filter(s => s.status === 'scheduled' || s.status === 'ready'));
+	const liveStreams = $derived(data.streams.filter(s => s.status === 'live'));
+	const completedStreams = $derived(data.streams.filter(s => s.status === 'completed'));
+	const otherStreams = $derived(data.streams.filter(s => !['scheduled', 'ready', 'live', 'completed'].includes(s.status)));
 
-	// Column configuration
-	const columns = [
-		{
-			id: 'title',
-			label: 'Stream Title',
-			field: 'title',
-			width: 250,
-			sortable: true
-		},
-		{
-			id: 'memorialName',
-			label: 'Memorial',
-			field: 'memorialName',
-			width: 200,
-			sortable: true
-		},
-		{
-			id: 'status',
-			label: 'Status',
-			field: 'status',
-			width: 120,
-			formatter: (val: string) => {
-				const statusMap: Record<string, string> = {
-					live: '🔴 Live',
-					scheduled: '🕒 Scheduled',
-					ended: '✅ Ended',
-					idle: '⚪ Idle'
-				};
-				return statusMap[val] || val;
-			}
-		},
-		{
-			id: 'isVisible',
-			label: 'Visibility',
-			field: 'isVisible',
-			width: 100,
-			formatter: (val: boolean) => (val ? '👁️ Visible' : '🚫 Hidden')
-		},
-		{
-			id: 'scheduledTime',
-			label: 'Scheduled',
-			field: 'scheduledStartTime',
-			width: 150,
-			formatter: (val: string) => {
-				if (!val) return '-';
-				const date = new Date(val);
-				return date.toLocaleString();
-			}
-		},
-		{
-			id: 'duration',
-			label: 'Duration',
-			field: 'duration',
-			width: 100,
-			formatter: (val: number) => {
-				if (!val) return '-';
-				const hours = Math.floor(val / 3600);
-				const minutes = Math.floor((val % 3600) / 60);
-				return `${hours}h ${minutes}m`;
-			}
-		},
-		{
-			id: 'recordingStatus',
-			label: 'Recording',
-			field: 'recordingStatus',
-			width: 120,
-			formatter: (val: string) => {
-				const statusMap: Record<string, string> = {
-					ready: '✅ Ready',
-					processing: '⏳ Processing',
-					failed: '❌ Failed',
-					none: '-'
-				};
-				return statusMap[val] || val;
-			}
-		}
-	];
-
-	// Actions
-	async function handleBulkAction(action: string, ids: string[]) {
-		const response = await fetch('/api/admin/bulk-actions', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ action, ids, resourceType: 'stream' })
-		});
-
-		if (response.ok) {
-			location.reload();
-		}
-	}
-
-	function handleRowClick(stream: any) {
-		// TODO: Create detail page first
-		console.log('Stream detail page coming soon:', stream.id);
-	}
 </script>
 
 <AdminLayout
 	title="Livestreams"
-	subtitle="Manage all memorial livestreams and recordings"
-	actions={[
-		{
-			label: 'Filters',
-			icon: '🔍',
-			onclick: () => (showFilters = !showFilters)
-		}
-	]}
+	subtitle="Manage all memorial livestreams and recordings across all memorials"
 >
-	{#if showFilters}
-		<div class="filters-panel">
-			<FilterBuilder
-				fields={[
-					{ id: 'title', label: 'Title', type: 'string' },
-					{ id: 'status', label: 'Status', type: 'enum', options: [
-						{ value: 'live', label: 'Live' },
-						{ value: 'scheduled', label: 'Scheduled' },
-						{ value: 'ended', label: 'Ended' },
-						{ value: 'idle', label: 'Idle' }
-					]},
-					{ id: 'isVisible', label: 'Visibility', type: 'boolean' },
-					{ id: 'scheduledStartTime', label: 'Scheduled Date', type: 'date' }
-				]}
-				onFilterChange={(filters) => console.log('Filters:', filters)}
-			/>
-		</div>
-	{/if}
+	<div class="streams-container">
+		{#if data.streams.length === 0}
+			<div class="empty-state">
+				<Video class="empty-icon" size={48} />
+				<h3>No Streams Yet</h3>
+				<p>Streams will appear here once they are created in memorials</p>
+			</div>
+		{:else}
+			<!-- Live Streams -->
+			{#if liveStreams.length > 0}
+				<div class="stream-section">
+					<h2 class="section-title">🔴 Live Now ({liveStreams.length})</h2>
+					<div class="stream-grid">
+						{#each liveStreams as stream (stream.id)}
+							<StreamCard {stream} canManage={data.canManage} memorialId={stream.memorialId} />
+						{/each}
+					</div>
+				</div>
+			{/if}
 
-	<DataGrid
-		{columns}
-		data={data.streams}
-		selectable={$can('stream', 'update')}
-		selectedMemorials={selectedStreams}
-		onBulkAction={handleBulkAction}
-		resourceType="stream"
-	/>
-	<!-- onRowClick disabled until detail pages are created -->
+			<!-- Scheduled Streams -->
+			{#if scheduledStreams.length > 0}
+				<div class="stream-section">
+					<h2 class="section-title">📅 Scheduled & Ready ({scheduledStreams.length})</h2>
+					<div class="stream-grid">
+						{#each scheduledStreams as stream (stream.id)}
+							<StreamCard {stream} canManage={data.canManage} memorialId={stream.memorialId} />
+						{/each}
+					</div>
+				</div>
+			{/if}
+
+			<!-- Completed Streams -->
+			{#if completedStreams.length > 0}
+				<div class="stream-section">
+					<h2 class="section-title">✅ Completed ({completedStreams.length})</h2>
+					<div class="stream-grid">
+						{#each completedStreams as stream (stream.id)}
+							<StreamCard {stream} canManage={data.canManage} memorialId={stream.memorialId} />
+						{/each}
+					</div>
+				</div>
+			{/if}
+
+			<!-- Other Streams -->
+			{#if otherStreams.length > 0}
+				<div class="stream-section">
+					<h2 class="section-title">Other Streams ({otherStreams.length})</h2>
+					<div class="stream-grid">
+						{#each otherStreams as stream (stream.id)}
+							<StreamCard {stream} canManage={data.canManage} memorialId={stream.memorialId} />
+						{/each}
+					</div>
+				</div>
+			{/if}
+		{/if}
+	</div>
 </AdminLayout>
 
 <style>
-	.filters-panel {
-		background: white;
-		border: 1px solid #e2e8f0;
-		border-radius: 0.5rem;
-		padding: 1.5rem;
+	.streams-container {
+		max-width: 1400px;
+		margin: 0 auto;
+	}
+
+	.empty-state {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 4rem 2rem;
+		text-align: center;
+		color: #64748b;
+	}
+
+	.empty-icon {
+		color: #cbd5e1;
+		margin-bottom: 1rem;
+	}
+
+	.empty-state h3 {
+		font-size: 1.25rem;
+		font-weight: 600;
+		color: #475569;
+		margin-bottom: 0.5rem;
+	}
+
+	.empty-state p {
+		color: #94a3b8;
+	}
+
+	.stream-section {
+		margin-bottom: 3rem;
+	}
+
+	.section-title {
+		font-size: 1.25rem;
+		font-weight: 600;
+		color: #1e293b;
 		margin-bottom: 1.5rem;
+		padding-bottom: 0.75rem;
+		border-bottom: 2px solid #e2e8f0;
+	}
+
+	.stream-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
+		gap: 1.5rem;
+	}
+
+	@media (max-width: 768px) {
+		.stream-grid {
+			grid-template-columns: 1fr;
+		}
 	}
 </style>
