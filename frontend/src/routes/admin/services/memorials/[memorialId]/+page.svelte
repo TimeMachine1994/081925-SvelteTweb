@@ -1,5 +1,6 @@
 <script lang="ts">
 	import AdminLayout from '$lib/components/admin/AdminLayout.svelte';
+	import StreamCard from '$lib/components/streaming/StreamCard.svelte';
 	import { goto } from '$app/navigation';
 	
 	let { data } = $props();
@@ -210,14 +211,11 @@
 			<p class="empty-message">No livestreams yet. Click "Create Livestream" to add one.</p>
 		{/if}
 
-		{#each streams as stream}
-			<div class="item">
-				<h3>{stream.title}</h3>
-				<p>Status: {stream.status} {#if stream.status === 'live'}({stream.viewerCount} viewers){/if}</p>
-				{#if stream.scheduledStartTime}<p>Scheduled: {formatDate(stream.scheduledStartTime)}</p>{/if}
-				{#if stream.rtmpUrl}<p>RTMP: {stream.rtmpUrl}</p>{/if}
-			</div>
-		{/each}
+		<div class="streams-grid">
+			{#each streams as stream}
+				<StreamCard {stream} canManage={true} memorialId={memorial.id} />
+			{/each}
+		</div>
 	</div>
 
 	<div class="card">
@@ -290,4 +288,6 @@
 	.form-actions button { flex: 0 0 auto; }
 
 	.empty-message { color: #718096; font-style: italic; padding: 1rem 0; }
+	
+	.streams-grid { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1rem; }
 </style>

@@ -1,35 +1,32 @@
 <script lang="ts">
 	import type { Stream, StreamArmType } from '$lib/types/stream';
 	import { Video, Eye, EyeOff, Archive, StopCircle, Copy, Check, ChevronDown, Calendar } from 'lucide-svelte';
-	import { onMount } from 'svelte';
 
-	export let stream: Stream;
-	export let canManage: boolean;
-	export let memorialId: string;
+	let { stream, canManage, memorialId }: { stream: Stream; canManage: boolean; memorialId: string } = $props();
 
-	let loading = false;
-	let copiedWhip = false;
-	let copiedRtmp = false;
-	let copiedStreamKey = false;
-	let selectedArmType: StreamArmType = 'mobile_input';
-	let showArmDropdown = false;
-	let showEditTime = false;
-	let editedStartTime = '';
+	let loading = $state(false);
+	let copiedWhip = $state(false);
+	let copiedRtmp = $state(false);
+	let copiedStreamKey = $state(false);
+	let selectedArmType = $state<StreamArmType>('mobile_input');
+	let showArmDropdown = $state(false);
+	let showEditTime = $state(false);
+	let editedStartTime = $state('');
 
 	// Status badge styling
-	$: statusColor = {
+	const statusColor = $derived({
 		ready: 'bg-green-100 text-green-800',
 		scheduled: 'bg-blue-100 text-blue-800',
 		live: 'bg-red-100 text-red-800 animate-pulse',
 		completed: 'bg-gray-100 text-gray-800',
 		error: 'bg-red-100 text-red-800'
-	}[stream.status];
+	}[stream.status]);
 
-	$: visibilityIcon = {
+	const visibilityIcon = $derived({
 		public: Eye,
 		hidden: EyeOff,
 		archived: Archive
-	}[stream.visibility || 'public'];
+	}[stream.visibility || 'public']);
 
 	async function handleStop() {
 		if (!confirm('Are you sure you want to stop this stream?')) return;
