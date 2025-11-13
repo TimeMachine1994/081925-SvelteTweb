@@ -113,6 +113,32 @@
 		streamDate = '';
 		streamTime = '';
 	}
+
+	async function handleDeleteStream(streamId: string, streamTitle: string) {
+		const confirmMessage = `Are you sure you want to delete this livestream?\n\n"${streamTitle}"\n\nThis action cannot be undone.`;
+		
+		if (!confirm(confirmMessage)) {
+			return;
+		}
+
+		try {
+			const response = await fetch(`/api/streams/${streamId}/delete`, {
+				method: 'DELETE'
+			});
+
+			if (response.ok) {
+				alert('Livestream deleted successfully');
+				// Reload the page to show updated stream list
+				location.reload();
+			} else {
+				const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+				alert(`Failed to delete livestream: ${errorData.message || 'Please try again.'}`);
+			}
+		} catch (error) {
+			console.error('Error deleting livestream:', error);
+			alert('An error occurred while deleting the livestream.');
+		}
+	}
 </script>
 
 <AdminLayout title="Memorial Details" subtitle="View and manage all aspects of this memorial">
@@ -213,7 +239,16 @@
 
 		<div class="streams-grid">
 			{#each streams as stream}
-				<StreamCard {stream} canManage={true} memorialId={memorial.id} />
+				<div class="stream-item">
+					<StreamCard {stream} canManage={true} memorialId={memorial.id} />
+					<button 
+						class="delete-stream-btn" 
+						onclick={() => handleDeleteStream(stream.id, stream.title)}
+						title="Delete this livestream"
+					>
+						🗑️ Delete Stream
+					</button>
+				</div>
 			{/each}
 		</div>
 	</div>
@@ -290,4 +325,38 @@
 	.empty-message { color: #718096; font-style: italic; padding: 1rem 0; }
 	
 	.streams-grid { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1rem; }
+	
+	/* Stream item with delete button */
+	.stream-item { 
+		position: relative; 
+		border: 1px solid #e2e8f0; 
+		border-radius: 0.5rem; 
+		padding: 1rem; 
+		background: white; 
+	}
+	
+	.delete-stream-btn { 
+		position: absolute; 
+		top: 1rem; 
+		right: 1rem; 
+		padding: 0.5rem 0.75rem; 
+		background: #e53e3e; 
+		color: white; 
+		border: 1px solid #c53030; 
+		border-radius: 0.375rem; 
+		font-size: 0.875rem; 
+		cursor: pointer; 
+		transition: all 0.2s; 
+		z-index: 10;
+	}
+	
+	.delete-stream-btn:hover { 
+		background: #c53030; 
+		transform: translateY(-1px); 
+		box-shadow: 0 2px 4px rgba(197, 48, 48, 0.2); 
+	}
+	
+	.delete-stream-btn:active { 
+		transform: translateY(0); 
+	}
 </style>
