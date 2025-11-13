@@ -21,6 +21,19 @@ interface CloudflareLiveInput {
 	webRTCPlayback?: {
 		url: string;
 	};
+	rtmps: {
+		url: string;
+		streamKey: string;
+	};
+	rtmpsPlayback?: {
+		url: string;
+		streamKey: string;
+	};
+	srt?: {
+		url: string;
+		streamId: string;
+		passphrase: string;
+	};
 }
 
 /**
@@ -32,6 +45,8 @@ export async function createLiveInput(name: string): Promise<{
 	liveInputId: string;
 	whipUrl: string;
 	whepUrl?: string;
+	rtmpsUrl: string;
+	rtmpsStreamKey: string;
 }> {
 	console.log('🎬 [Cloudflare] Creating Live Input:', name);
 	console.log('🔑 [Cloudflare] Account ID:', CLOUDFLARE_ACCOUNT_ID ? 'SET' : 'MISSING');
@@ -65,11 +80,15 @@ export async function createLiveInput(name: string): Promise<{
 	}
 
 	console.log('✅ [Cloudflare] Live Input created:', data.result.uid);
+	console.log('📺 [Cloudflare] RTMPS URL:', data.result.rtmps.url);
+	console.log('🔑 [Cloudflare] RTMPS Stream Key:', data.result.rtmps.streamKey);
 
 	return {
 		liveInputId: data.result.uid,
 		whipUrl: data.result.webRTC.url,
-		whepUrl: data.result.webRTCPlayback?.url
+		whepUrl: data.result.webRTCPlayback?.url,
+		rtmpsUrl: data.result.rtmps.url,
+		rtmpsStreamKey: data.result.rtmps.streamKey
 	};
 }
 

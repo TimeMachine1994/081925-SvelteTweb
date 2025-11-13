@@ -69,17 +69,15 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			console.log('✅ [ARM API] WHIP credentials created');
 		} else if (armType === 'stream_key') {
 			// RTMP-based streaming (OBS)
-			// Cloudflare provides RTMP via Live Input as well
-			const rtmpUrl = `rtmps://live.cloudflare.com:443/live/`;
-			const streamKey = liveInput.liveInputId; // Using input ID as stream key
-
 			credentials = {
-				rtmpUrl,
-				streamKey,
+				rtmpUrl: liveInput.rtmpsUrl,
+				streamKey: liveInput.rtmpsStreamKey,
 				cloudflareInputId: liveInput.liveInputId,
 				whepUrl: liveInput.whepUrl // For playback
 			};
-			console.log('✅ [ARM API] RTMP credentials created');
+			console.log('✅ [ARM API] RTMPS credentials created');
+			console.log('📺 [ARM API] RTMPS URL:', liveInput.rtmpsUrl);
+			console.log('🔑 [ARM API] Stream Key:', liveInput.rtmpsStreamKey);
 		}
 
 		// Create arm status
