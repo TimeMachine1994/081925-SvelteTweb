@@ -159,20 +159,28 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			const data = doc.data();
 			return {
 				id: doc.id,
+				memorialId: data.memorialId,
 				title: data.title || 'Untitled Stream',
 				description: data.description || '',
 				status: data.status || 'scheduled',
-				isVisible: data.isVisible !== false,
+				visibility: data.visibility || 'public',
 				scheduledStartTime: data.scheduledStartTime || null,
 				startedAt: data.startedAt || null,
 				endedAt: data.endedAt || null,
+				liveStartedAt: data.liveStartedAt || null,
+				liveEndedAt: data.liveEndedAt || null,
 				
-				// Streaming config
+				// Stream Arming (NEW)
+				armStatus: data.armStatus || null,
+				streamCredentials: data.streamCredentials || null,
+				
+				// Legacy streaming config
 				streamingMethod: data.streamingMethod || null,
 				cloudflareStreamId: data.cloudflareStreamId || null,
 				rtmpUrl: data.rtmpUrl || null,
 				streamKey: data.streamKey || null,
 				playbackUrl: data.playbackUrl || null,
+				embedUrl: data.embedUrl || null,
 				
 				// Phone source (dual stream)
 				phoneSourceStreamId: data.phoneSourceStreamId || null,

@@ -16,10 +16,33 @@ export const load: PageServerLoad = async ({ locals }) => {
 		.limit(100) // Limit to recent 100 streams
 		.get();
 
-	const streams: Stream[] = streamsSnapshot.docs.map((doc) => ({
-		id: doc.id,
-		...doc.data()
-	})) as Stream[];
+	const streams = streamsSnapshot.docs.map((doc) => {
+		const data = doc.data();
+		return {
+			id: doc.id,
+			memorialId: data.memorialId,
+			title: data.title || 'Untitled Stream',
+			description: data.description || '',
+			status: data.status || 'scheduled',
+			visibility: data.visibility || 'public',
+			scheduledStartTime: data.scheduledStartTime || null,
+			
+			// Stream Arming
+			armStatus: data.armStatus || null,
+			streamCredentials: data.streamCredentials || null,
+			
+			// Timestamps
+			liveStartedAt: data.liveStartedAt || null,
+			liveEndedAt: data.liveEndedAt || null,
+			createdAt: data.createdAt || null,
+			updatedAt: data.updatedAt || null,
+			
+			// Other fields
+			playbackUrl: data.playbackUrl || null,
+			embedUrl: data.embedUrl || null,
+			recordingReady: data.recordingReady || false
+		};
+	});
 
 	// Fetch memorial names for each stream
 	const memorialIds = [...new Set(streams.map(s => s.memorialId))];
