@@ -43,17 +43,17 @@ describe('Calculator Component', () => {
 		expect(container).toBeTruthy();
 	});
 
-	it('initializes with solo tier selected by default', () => {
+	it('initializes with record tier selected by default', () => {
 		const { component } = render(Calculator, { props: mockProps });
 
 		// Access component state (this might need adjustment based on your testing setup)
 		expect(screen.getByText('Choose Your Package')).toBeInTheDocument();
 	});
 
-	it('calculates correct pricing for solo tier', () => {
+	it('calculates correct pricing for record tier', () => {
 		const { component } = render(Calculator, { props: mockProps });
 
-		// Test that solo tier shows correct base price
+		// Test that record tier shows correct base price
 		expect(screen.getByText('$599')).toBeInTheDocument();
 	});
 
@@ -205,7 +205,7 @@ describe('Calculator Component', () => {
 
 // Test the calculation functions directly
 describe('Calculator Logic Functions', () => {
-	const TIER_PRICES = { solo: 599, live: 1299, legacy: 1599 };
+	const TIER_PRICES = { record: 599, live: 1299, legacy: 1599 };
 	const ADDON_PRICES = {
 		photography: 400,
 		audioVisualSupport: 200,
@@ -371,7 +371,7 @@ describe('Calculator Logic Functions', () => {
 		return items;
 	}
 
-	it('calculates solo tier correctly', () => {
+	it('calculates record tier correctly', () => {
 		const formData: CalculatorFormData = {
 			lovedOneName: 'Test',
 			mainService: {
@@ -401,11 +401,11 @@ describe('Calculator Logic Functions', () => {
 			}
 		};
 
-		const items = calculateBookingItems('solo', formData);
+		const items = calculateBookingItems('record', formData);
 		const total = items.reduce((acc, item) => acc + item.total, 0);
 
 		expect(items).toHaveLength(1);
-		expect(items[0].name).toBe('Tributestream Solo');
+		expect(items[0].name).toBe('Tributestream Record');
 		expect(items[0].total).toBe(599);
 		expect(total).toBe(599);
 	});

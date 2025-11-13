@@ -24,7 +24,7 @@
 
 	const packages = [
 		{ 
-			name: "DIY Solo", 
+			name: "DIY Record", 
 			price: "$395", 
 			features: ["2 hour broadcast", "Private link", "HD recording", "Mobile ready"] 
 		},

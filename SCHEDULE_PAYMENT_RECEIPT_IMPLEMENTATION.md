@@ -40,7 +40,7 @@ Use `memorial.calculatorConfig` fields:
   paymentIntentId?: string,
   checkoutSessionId?: string,
   formData: {
-    selectedTier: 'solo' | 'live' | 'legacy',
+    selectedTier: 'record' | 'live' | 'legacy',
     addons: { ... }
   }
 }
@@ -55,7 +55,7 @@ Your memorial service booking is confirmed and paid
 ```
 
 #### B. Package Summary
-- Tier name (Tributestream Solo/Live/Legacy)
+- Tier name (Tributestream Record/Live/Legacy)
 - Base price
 - Service date and time (from `memorial.services.main.time`)
 - Location (from `memorial.services.main.location`)

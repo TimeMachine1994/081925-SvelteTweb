@@ -1,6 +1,6 @@
 // Livestream and Calculator Types
 
-export type Tier = 'solo' | 'standard' | 'premium' | 'legacy';
+export type Tier = 'record' | 'standard' | 'premium' | 'legacy';
 
 export interface CalculatorFormData {
 	selectedTier: Tier;
@@ -27,8 +27,8 @@ export interface TierInfo {
 }
 
 export const TIER_PRICING: Record<Tier, TierInfo> = {
-	solo: {
-		name: 'Solo',
+	record: {
+		name: 'Record',
 		price: 99,
 		features: ['Single camera angle', 'HD streaming', 'Basic recording']
 	},

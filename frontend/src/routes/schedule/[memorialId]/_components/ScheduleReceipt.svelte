@@ -60,7 +60,7 @@
 
 	function getTierName(tier: string): string {
 		const tierNames: Record<string, string> = {
-			solo: 'Tributestream Record',
+			record: 'Tributestream Record',
 			live: 'Tributestream Live',
 			legacy: 'Tributestream Legacy'
 		};

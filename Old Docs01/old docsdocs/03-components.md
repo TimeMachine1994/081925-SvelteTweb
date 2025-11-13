@@ -297,7 +297,7 @@ Main pricing calculator with tier selection.
 - `initialData?: CalculatorFormData` - Pre-filled data
 
 **Features:**
-- Tier selection (Solo, Live, Legacy)
+- Tier selection (Record, Live, Legacy)
 - Add-on services selection
 - Real-time pricing updates
 - Auto-save functionality
@@ -305,7 +305,7 @@ Main pricing calculator with tier selection.
 
 **State Management:**
 ```typescript
-let selectedTier = $state('solo');
+let selectedTier = $state('record');
 let addons = $state({
   photography: false,
   audioVisualSupport: false,
@@ -483,7 +483,7 @@ Components follow the standard Svelte pattern of passing data down via props and
 
 ```typescript
 // Parent component
-let selectedTier = $state('solo');
+let selectedTier = $state('record');
 
 // Child component
 <TierSelector 

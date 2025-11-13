@@ -34,7 +34,7 @@
 
 	let clientSecret = $state<string | null>(null);
 	let configId = $state<string | null>(null);
-	let selectedTier = $state<Tier>('solo');
+	let selectedTier = $state<Tier>('record');
 
 	let formData = $state<CalculatorFormData>({
 		lovedOneName: '',
@@ -87,7 +87,7 @@
 	$inspect(formData, selectedTier, currentStep, clientSecret, configId);
 
 	const TIER_PRICES: Record<string, number> = {
-		solo: 599,
+		record: 599,
 		live: 1299,
 		legacy: 1599
 	};

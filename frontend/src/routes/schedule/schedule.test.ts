@@ -5,7 +5,7 @@ import type { CalculatorFormData, BookingItem, Tier } from '$lib/types/livestrea
 
 describe('Schedule Calculator - Pricing Logic', () => {
 	const TIER_PRICES = {
-		solo: 599,
+		record: 599,
 		live: 1299,
 		legacy: 1599
 	};
@@ -53,7 +53,7 @@ describe('Schedule Calculator - Pricing Logic', () => {
 			items.push({
 				id: 'main-overage',
 				name: 'Main Location Overage',
-				package: selectedTier || 'solo',
+				package: selectedTier || 'record',
 				price: HOURLY_OVERAGE_RATE,
 				quantity: mainOverageHours,
 				total: HOURLY_OVERAGE_RATE * mainOverageHours
@@ -65,7 +65,7 @@ describe('Schedule Calculator - Pricing Logic', () => {
 			items.push({
 				id: 'additional-location-base',
 				name: 'Additional Location',
-				package: selectedTier || 'solo',
+				package: selectedTier || 'record',
 				price: ADDITIONAL_SERVICE_FEE,
 				quantity: 1,
 				total: ADDITIONAL_SERVICE_FEE
@@ -76,7 +76,7 @@ describe('Schedule Calculator - Pricing Logic', () => {
 				items.push({
 					id: 'additional-location-overage',
 					name: 'Additional Location Overage',
-					package: selectedTier || 'solo',
+					package: selectedTier || 'record',
 					price: HOURLY_OVERAGE_RATE,
 					quantity: addlLocationOverage,
 					total: HOURLY_OVERAGE_RATE * addlLocationOverage
@@ -89,7 +89,7 @@ describe('Schedule Calculator - Pricing Logic', () => {
 			items.push({
 				id: 'additional-day-base',
 				name: 'Additional Day',
-				package: selectedTier || 'solo',
+				package: selectedTier || 'record',
 				price: ADDITIONAL_SERVICE_FEE,
 				quantity: 1,
 				total: ADDITIONAL_SERVICE_FEE
@@ -100,7 +100,7 @@ describe('Schedule Calculator - Pricing Logic', () => {
 				items.push({
 					id: 'additional-day-overage',
 					name: 'Additional Day Overage',
-					package: selectedTier || 'solo',
+					package: selectedTier || 'record',
 					price: HOURLY_OVERAGE_RATE,
 					quantity: addlDayOverage,
 					total: HOURLY_OVERAGE_RATE * addlDayOverage
@@ -113,7 +113,7 @@ describe('Schedule Calculator - Pricing Logic', () => {
 			items.push({
 				id: 'photography',
 				name: 'Photography Service',
-				package: selectedTier || 'solo',
+				package: selectedTier || 'record',
 				price: ADDON_PRICES.photography,
 				quantity: 1,
 				total: ADDON_PRICES.photography
@@ -124,7 +124,7 @@ describe('Schedule Calculator - Pricing Logic', () => {
 			items.push({
 				id: 'audio-visual',
 				name: 'Audio/Visual Support',
-				package: selectedTier || 'solo',
+				package: selectedTier || 'record',
 				price: ADDON_PRICES.audioVisualSupport,
 				quantity: 1,
 				total: ADDON_PRICES.audioVisualSupport
@@ -135,7 +135,7 @@ describe('Schedule Calculator - Pricing Logic', () => {
 			items.push({
 				id: 'live-musician',
 				name: 'Live Musician',
-				package: selectedTier || 'solo',
+				package: selectedTier || 'record',
 				price: ADDON_PRICES.liveMusician,
 				quantity: 1,
 				total: ADDON_PRICES.liveMusician
@@ -161,7 +161,7 @@ describe('Schedule Calculator - Pricing Logic', () => {
 				items.push({
 					id: 'wooden-usb',
 					name: `Wooden USB Drive${chargeableDrives > 1 ? 's' : ''}`,
-					package: selectedTier || 'solo',
+					package: selectedTier || 'record',
 					price: totalUsbPrice / chargeableDrives,
 					quantity: chargeableDrives,
 					total: totalUsbPrice
@@ -172,9 +172,9 @@ describe('Schedule Calculator - Pricing Logic', () => {
 		return items;
 	}
 
-	it('calculates solo tier base price correctly', () => {
+	it('calculates record tier base price correctly', () => {
 		const items = calculateBookingItems(
-			'solo',
+			'record',
 			2,
 			{ enabled: false, hours: 2 },
 			{ enabled: false, hours: 2 },
@@ -187,13 +187,13 @@ describe('Schedule Calculator - Pricing Logic', () => {
 		);
 
 		expect(items).toHaveLength(1);
-		expect(items[0].name).toBe('Tributestream Solo');
+		expect(items[0].name).toBe('Tributestream Record');
 		expect(items[0].total).toBe(599);
 	});
 
 	it('calculates overage charges correctly', () => {
 		const items = calculateBookingItems(
-			'solo',
+			'record',
 			4,
 			{ enabled: false, hours: 2 },
 			{ enabled: false, hours: 2 },
@@ -213,7 +213,7 @@ describe('Schedule Calculator - Pricing Logic', () => {
 
 	it('calculates additional location fees', () => {
 		const items = calculateBookingItems(
-			'solo',
+			'record',
 			2,
 			{ enabled: true, hours: 3 },
 			{ enabled: false, hours: 2 },
@@ -234,7 +234,7 @@ describe('Schedule Calculator - Pricing Logic', () => {
 
 	it('calculates USB drive pricing for non-legacy tiers', () => {
 		const items = calculateBookingItems(
-			'solo',
+			'record',
 			2,
 			{ enabled: false, hours: 2 },
 			{ enabled: false, hours: 2 },

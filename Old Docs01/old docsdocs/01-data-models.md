@@ -128,7 +128,7 @@ interface CalculatorFormData {
   autoSaved?: boolean;
 }
 
-type Tier = 'solo' | 'live' | 'legacy' | null;
+type Tier = 'record' | 'live' | 'legacy' | null;
 
 interface Addons {
   photography: boolean;

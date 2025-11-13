@@ -44,7 +44,7 @@ interface UnifiedCalculatorData {
   lovedOneName: string;
   
   // Service configuration
-  selectedTier: 'solo' | 'live' | 'legacy';
+  selectedTier: 'record' | 'live' | 'legacy';
   mainService: {
     location: { name: string; address: string; isUnknown: boolean };
     time: { date: string | null; time: string | null; isUnknown: boolean };

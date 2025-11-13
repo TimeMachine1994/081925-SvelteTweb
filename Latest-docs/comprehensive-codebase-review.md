@@ -231,7 +231,7 @@ if (!hasPermission) {
 ### **State Management Patterns**
 ```typescript
 // ✅ Good: Modern Svelte 5 patterns
-let selectedTier = $state<Tier>('solo');
+let selectedTier = $state<Tier>('record');
 let services = $state({
   main: { location: {...}, time: {...}, hours: 2 },
   additional: []
@@ -290,9 +290,9 @@ vi.mock('$lib/firebase-admin', () => ({
 
 // ✅ Good: Comprehensive test scenarios
 describe('Calculator Component', () => {
-  it('calculates solo tier correctly', () => {
+  it('calculates record tier correctly', () => {
     const formData: CalculatorFormData = { /* test data */ };
-    const items = calculateBookingItems('solo', formData);
+    const items = calculateBookingItems('record', formData);
     expect(items[0].total).toBe(599);
   });
 
@@ -323,7 +323,7 @@ it('handles authentication failures gracefully', async () => {
 #### 1. **Missing Type Definitions**
 ```typescript
 // CRITICAL: Create src/lib/types/livestream.ts
-export type Tier = 'solo' | 'live' | 'legacy';
+export type Tier = 'record' | 'live' | 'legacy';
 
 export interface CalculatorFormData {
   memorialId: string;
@@ -405,7 +405,7 @@ export let selectedTier: Tier;
 $: calculatorData.selectedTier = selectedTier;
 
 // New pattern (preferred):
-let selectedTier = $state<Tier>('solo');
+let selectedTier = $state<Tier>('record');
 $effect(() => {
   calculatorData.selectedTier = selectedTier;
 });

@@ -31,7 +31,7 @@ The user's journey begins by selecting a service tier. The `TierSelector` compon
 
 | Tier Name | Base Price | Included Features |
 | :--- | :--- | :--- |
-| **Tributestream Solo** | $599 | - 2 Hours of Broadcast Time<br>- Custom Link<br>- Complimentary Download<br>- One Year Hosting<br>- DIY Livestream Kit |
+| **Tributestream Record** | $599 | - 2 Hours of Broadcast Time<br>- Custom Link<br>- Complimentary Download<br>- One Year Hosting<br>- DIY Livestream Kit |
 | **Tributestream Live** | $1299 | - 2 Hours of Broadcast Time<br>- Custom Link<br>- Complimentary Download<br>- One Year Hosting<br>- Professional Videographer<br>- Professional Livestream Tech |
 | **Tributestream Legacy**| $1599 | - 2 Hours of Broadcast Time<br>- Custom Link<br>- Complimentary Download<br>- One Year Hosting<br>- Professional Videographer<br>- Professional Livestream Tech<br>- Video Editing<br>- Engraved USB Drive and Wooden Keepsake Box |
 
@@ -100,7 +100,7 @@ A series of toggle buttons allow users to select optional add-on services. When 
 
 The total cost is calculated in real-time and displayed in the Booking Summary panel. The calculation is the sum of several components:
 
-1.  **Base Package Price**: The price of the selected tier (`Solo`, `Live`, or `Legacy`).
+1.  **Base Package Price**: The price of the selected tier (`Record`, `Live`, or `Legacy`).
 2.  **Hourly Overage Charges**:
     -   Each package includes 2 hours of broadcast time at the main location.
     -   Each additional location or day also includes 2 hours of broadcast time.
@@ -134,7 +134,7 @@ The calculator's state is managed within the `CalculatorView` parent component a
 ### State Management:
 
 -   **`formData`**: A large state object that holds the values of all form inputs (e.g., `lovedOneName`, `serviceDate`, `addons`, etc.).
--   **`selectedTier`**: A state variable that stores the currently selected package ('Solo', 'Live', or 'Legacy').
+-   **`selectedTier`**: A state variable that stores the currently selected package ('Record', 'Live', or 'Legacy').
 -   **`bookingItems`**: An array of `BookingItem` objects. Each object represents a line item in the summary (the package, add-ons, etc.) and contains its name, price, and quantity.
 -   **`currentStep`**: A state variable that controls the view, switching between `"booking"` and `"payment"`.
 

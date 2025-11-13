@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest';
 // Simple unit tests for calculator logic without component dependencies
 describe('Calculator Logic Tests', () => {
 	const TIER_PRICES = {
-		solo: 599,
+		record: 599,
 		live: 1299,
 		legacy: 1599
 	};
@@ -20,7 +20,7 @@ describe('Calculator Logic Tests', () => {
 
 	// Test basic tier pricing
 	it('should return correct tier prices', () => {
-		expect(TIER_PRICES.solo).toBe(599);
+		expect(TIER_PRICES.record).toBe(599);
 		expect(TIER_PRICES.live).toBe(1299);
 		expect(TIER_PRICES.legacy).toBe(1599);
 	});
@@ -203,9 +203,9 @@ describe('Calculator Logic Tests', () => {
 			return total;
 		}
 
-		// Test solo tier with basic configuration
-		const soloConfig = {
-			selectedTier: 'solo' as const,
+		// Test record tier with basic configuration
+		const recordConfig = {
+			selectedTier: 'record' as const,
 			mainServiceHours: 2,
 			additionalLocation: { enabled: false, hours: 2 },
 			additionalDay: { enabled: false, hours: 2 },
@@ -217,7 +217,7 @@ describe('Calculator Logic Tests', () => {
 			}
 		};
 
-		expect(calculateTotal(soloConfig)).toBe(599);
+		expect(calculateTotal(recordConfig)).toBe(599);
 
 		// Test legacy tier with USB drives
 		const legacyConfig = {

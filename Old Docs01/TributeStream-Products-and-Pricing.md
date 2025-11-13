@@ -7,7 +7,7 @@ Tributestream offers professional memorial service livestreaming solutions with 
 
 ## Core Packages
 
-### 1. Tributestream Solo - $599
+### 1. Tributestream Record - $599
 **Perfect for families who want to handle their own livestreaming**
 
 **Included Features:**
@@ -93,7 +93,7 @@ Tributestream offers professional memorial service livestreaming solutions with 
 - Enhanced memorial experience
 
 ### Wooden USB Drives
-- **First Drive:** $300 (Solo/Live packages) | Included (Legacy package)
+- **First Drive:** $300 (Record/Live packages) | Included (Legacy package)
 - **Additional Drives:** $100 each
 - **Features:** Engraved wooden USB drives with service recording
 - **Maximum:** Up to 10 drives available
@@ -102,8 +102,8 @@ Tributestream offers professional memorial service livestreaming solutions with 
 
 ## Pricing Examples
 
-### Basic Solo Service (2 hours)
-- Tributestream Solo: **$599**
+### Basic Record Service (2 hours)
+- Tributestream Record: **$599**
 - **Total: $599**
 
 ### Professional Live Service with Extensions
@@ -131,7 +131,7 @@ Tributestream offers professional memorial service livestreaming solutions with 
 
 ## Package Comparison
 
-| Feature | Solo | Live | Legacy |
+| Feature | Record | Live | Legacy |
 |---------|------|------|--------|
 | Base Price | $599 | $1,299 | $1,599 |
 | Broadcast Time | 2 hours | 2 hours | 2 hours |
@@ -166,7 +166,7 @@ Tributestream offers professional memorial service livestreaming solutions with 
 - **Download:** Complimentary service recording download
 
 ### Equipment & Support
-- **Solo Package:** Self-service kit with instructions
+- **Record Package:** Self-service kit with instructions
 - **Live/Legacy Packages:** Professional on-site technician and videographer
 - **Technical Support:** Professional troubleshooting during service
 

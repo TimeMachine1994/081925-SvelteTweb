@@ -50,7 +50,7 @@
 	});
 
 	// Calculator data (booking/pricing)
-	let selectedTier: Tier = $state('solo');
+	let selectedTier: Tier = $state('record');
 	let addons = $state<Addons>({
 		photography: false,
 		audioVisualSupport: false,
@@ -105,7 +105,7 @@
 
 	// Original pricing constants
 	const TIER_PRICES = {
-		solo: 599,
+		record: 599,
 		live: 1299,
 		legacy: 1599
 	};
@@ -187,7 +187,7 @@
 			items.push({
 				id: 'additional-location-base',
 				name: 'Additional Location',
-				package: selectedTier || 'solo',
+				package: selectedTier || 'record',
 				price: ADDITIONAL_SERVICE_FEE,
 				quantity: 1,
 				total: ADDITIONAL_SERVICE_FEE
@@ -199,7 +199,7 @@
 				items.push({
 					id: 'additional-location-overage',
 					name: 'Additional Location Overage',
-					package: selectedTier || 'solo',
+					package: selectedTier || 'record',
 					price: HOURLY_OVERAGE_RATE,
 					quantity: addlLocationOverage,
 					total: HOURLY_OVERAGE_RATE * addlLocationOverage
@@ -214,7 +214,7 @@
 			items.push({
 				id: 'additional-day-base',
 				name: 'Additional Day',
-				package: selectedTier || 'solo',
+				package: selectedTier || 'record',
 				price: ADDITIONAL_SERVICE_FEE,
 				quantity: 1,
 				total: ADDITIONAL_SERVICE_FEE
@@ -226,7 +226,7 @@
 				items.push({
 					id: 'additional-day-overage',
 					name: 'Additional Day Overage',
-					package: selectedTier || 'solo',
+					package: selectedTier || 'record',
 					price: HOURLY_OVERAGE_RATE,
 					quantity: addlDayOverage,
 					total: HOURLY_OVERAGE_RATE * addlDayOverage
@@ -239,7 +239,7 @@
 			items.push({
 				id: 'photography',
 				name: 'Photography Service',
-				package: selectedTier || 'solo',
+				package: selectedTier || 'record',
 				price: ADDON_PRICES.photography,
 				quantity: 1,
 				total: ADDON_PRICES.photography
@@ -250,7 +250,7 @@
 			items.push({
 				id: 'audio-visual',
 				name: 'Audio/Visual Support',
-				package: selectedTier || 'solo',
+				package: selectedTier || 'record',
 				price: ADDON_PRICES.audioVisualSupport,
 				quantity: 1,
 				total: ADDON_PRICES.audioVisualSupport
@@ -261,7 +261,7 @@
 			items.push({
 				id: 'live-musician',
 				name: 'Live Musician',
-				package: selectedTier || 'solo',
+				package: selectedTier || 'record',
 				price: ADDON_PRICES.liveMusician,
 				quantity: 1,
 				total: ADDON_PRICES.liveMusician
@@ -287,7 +287,7 @@
 				items.push({
 					id: 'wooden-usb',
 					name: `Wooden USB Drive${chargeableDrives > 1 ? 's' : ''}`,
-					package: selectedTier || 'solo',
+					package: selectedTier || 'record',
 					price: totalUsbPrice / chargeableDrives,
 					quantity: chargeableDrives,
 					total: totalUsbPrice
@@ -475,7 +475,7 @@
 					const savedData = result.autoSave.formData;
 
 					// Populate form with saved data
-					selectedTier = (savedData.selectedTier || 'solo') as Tier;
+					selectedTier = (savedData.selectedTier || 'record') as Tier;
 					lovedOneName = savedData.lovedOneName || '';
 
 					if (savedData.mainService) {
@@ -547,8 +547,8 @@
 
 	const tiers = [
 		{
-			name: 'Tributestream Solo',
-			alias: 'solo',
+			name: 'Tributestream Record',
+			alias: 'record',
 			price: 599,
 			features: [
 				'2 Hours of Broadcast Time',

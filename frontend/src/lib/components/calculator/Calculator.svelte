@@ -27,7 +27,7 @@
 	let currentStep = $state<'booking' | 'payment' | 'payNow'>('booking');
 	let clientSecret = $state<string | null>(null);
 	let configId = $state<string | null>(null);
-	let selectedTier = $state<Tier>('solo');
+	let selectedTier = $state<Tier>('record');
 
 	// Auto-save functionality
 	let autoSaveEnabled = $state(false);
@@ -51,7 +51,7 @@
 	// Calculator-specific data (booking/pricing)
 	let calculatorData = $state<CalculatorFormData>({
 		memorialId: memorialId || '',
-		selectedTier: 'solo',
+		selectedTier: 'record',
 		addons: {
 			photography: false,
 			audioVisualSupport: false,
@@ -137,7 +137,7 @@
 	});
 
 	const TIER_PRICES: Record<string, number> = {
-		solo: 599,
+		record: 599,
 		live: 1299,
 		legacy: 1599
 	};

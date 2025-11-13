@@ -38,7 +38,7 @@
 	// Calculator form data (design spec compliant)
 	let calculatorData = $state<CalculatorFormData>({
 		memorialId,
-		selectedTier: 'solo',
+		selectedTier: 'record',
 		addons: {
 			photography: false,
 			audioVisualSupport: false,
@@ -138,7 +138,7 @@
 
 	// Pricing constants
 	const TIER_PRICES = {
-		solo: 599,
+		record: 599,
 		live: 1299,
 		legacy: 1599
 	};
@@ -544,7 +544,7 @@
 	const tiers = [
 		{
 			name: 'Tributestream Record',
-			alias: 'solo',
+			alias: 'record',
 			price: 599,
 			features: [
 				'2 Hours of Record Time',

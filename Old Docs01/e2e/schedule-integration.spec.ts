@@ -26,7 +26,7 @@ test.describe('Schedule Integration Tests', () => {
     
     // Verify schedule page loads correctly
     await expect(page.locator('text=Choose Your Package')).toBeVisible();
-    await expect(page.locator('text=Tributestream Solo')).toBeVisible();
+    await expect(page.locator('text=Tributestream Record')).toBeVisible();
   });
 
   test('Complete schedule configuration flow', async ({ page }) => {
@@ -67,7 +67,7 @@ test.describe('Schedule Integration Tests', () => {
     await page.goto('/schedule?memorialId=test-memorial-123');
     
     // Configure basic package
-    await page.click('text=Tributestream Solo');
+    await page.click('text=Tributestream Record');
     
     // Fill required contact information
     await page.fill('[data-testid="funeral-director-name"]', 'John Smith');
@@ -145,8 +145,8 @@ test.describe('Calculator Edge Cases', () => {
     // Should only charge for 2 additional drives
     await expect(page.locator('text=$200')).toBeVisible(); // 2 * $100
     
-    // Switch to Solo tier (0 included)
-    await page.click('text=Tributestream Solo');
+    // Switch to Record tier (0 included)
+    await page.click('text=Tributestream Record');
     
     // Should charge for all 3 drives
     await expect(page.locator('text=$500')).toBeVisible(); // $300 + 2 * $100

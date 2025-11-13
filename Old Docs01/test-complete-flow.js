@@ -344,7 +344,7 @@ function testComponentCompatibility() {
   const services = memorialData.services;
   const calculatorData = {
     memorialId: 'test-memorial-id',
-    selectedTier: 'solo',
+    selectedTier: 'record',
     addons: {
       photography: false,
       audioVisualSupport: false,

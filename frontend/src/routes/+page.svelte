@@ -74,7 +74,7 @@
 
 	const packages = [
 		{ 
-			name: "Solo", 
+			name: "Record", 
 			description: "Perfect for intimate services",
 			features: ["Single camera", "Custom link", "HD streaming", "Complimentary download"],
 			popular: false,

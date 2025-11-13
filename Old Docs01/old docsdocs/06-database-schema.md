@@ -237,7 +237,7 @@ Booking and calculator configuration data, separate from memorial content.
   // Calculator Form Data
   formData: {
     memorialId: string;           // Memorial reference
-    selectedTier: 'solo' | 'live' | 'legacy' | null; // Service tier
+    selectedTier: 'record' | 'live' | 'legacy' | null; // Service tier
     addons: {
       photography: boolean;       // Photography service
       audioVisualSupport: boolean; // A/V support
@@ -253,8 +253,8 @@ Booking and calculator configuration data, separate from memorial content.
   bookingItems: [                 // Itemized booking breakdown
     {
       id: string;                 // Item ID
-      name: string;               // "Solo Tier Service"
-      package: string;            // "Solo"
+      name: string;               // "Record Tier Service"
+      package: string;            // "Record"
       price: number;              // 299.00
       quantity: number;           // 1
       total: number;              // 299.00
