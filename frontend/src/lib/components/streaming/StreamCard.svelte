@@ -99,25 +99,36 @@
 	}
 
 	async function handleArm() {
-		if (!confirm(`Arm this stream for ${selectedArmType.replace(/_/g, ' ')}?`)) return;
+		console.log('🎯 Arming stream with type:', selectedArmType);
+		
+		if (!confirm(`Arm this stream for ${selectedArmType.replace(/_/g, ' ')}?`)) {
+			console.log('❌ User cancelled arm');
+			return;
+		}
 
 		loading = true;
 		try {
+			console.log('📡 Calling arm API:', `/api/streams/${stream.id}/arm`);
 			const response = await fetch(`/api/streams/${stream.id}/arm`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ armType: selectedArmType })
 			});
 
+			console.log('📥 Response status:', response.status);
+			const data = await response.json();
+			console.log('📥 Response data:', data);
+
 			if (response.ok) {
+				console.log('✅ Stream armed successfully, reloading...');
 				window.location.reload();
 			} else {
-				const data = await response.json();
-				alert(`Failed to arm stream: ${data.error || 'Unknown error'}`);
+				console.error('❌ Failed to arm stream:', data);
+				alert(`Failed to arm stream: ${data.error || data.message || 'Unknown error'}`);
 			}
 		} catch (error) {
-			console.error('Error arming stream:', error);
-			alert('Failed to arm stream');
+			console.error('❌ Error arming stream:', error);
+			alert(`Failed to arm stream: ${error}`);
 		} finally {
 			loading = false;
 		}
