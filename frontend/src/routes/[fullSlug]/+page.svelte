@@ -244,8 +244,7 @@
 							title="Share memorial"
 							aria-label="Share memorial"
 						>
-							<Share2 size={20} />
-							<span>Share</span>
+							<Share2 size={18} />
 						</button>
 						
 						{#if showSharePopup}
@@ -339,8 +338,7 @@
 								title="Share memorial"
 								aria-label="Share memorial"
 							>
-								<Share2 size={20} />
-								<span>Share</span>
+								<Share2 size={18} />
 							</button>
 							
 							{#if showSharePopup}
@@ -666,26 +664,26 @@
 	.share-button {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
-		padding: 0.75rem 1.25rem;
-		background: rgba(255, 255, 255, 0.95);
+		justify-content: center;
+		width: 48px;
+		height: 48px;
+		padding: 0;
+		background: rgba(213, 186, 127, 0.95);
 		backdrop-filter: blur(10px);
-		color: #1f2937;
-		border: 1px solid rgba(213, 186, 127, 0.3);
-		border-radius: 8px;
-		font-size: 0.9rem;
-		font-weight: 600;
+		color: white;
+		border: 2px solid rgba(255, 255, 255, 0.3);
+		border-radius: 50%;
 		cursor: pointer;
 		transition: all 0.3s ease;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 	}
 
 	.share-button:hover {
-		background: rgba(213, 186, 127, 0.95);
+		background: rgba(213, 186, 127, 1);
 		color: white;
-		transform: translateY(-2px);
-		box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
-		border-color: #D5BA7F;
+		transform: translateY(-2px) scale(1.05);
+		box-shadow: 0 6px 20px rgba(213, 186, 127, 0.4);
+		border-color: rgba(255, 255, 255, 0.5);
 	}
 
 	.share-popup {
@@ -764,12 +762,8 @@
 		}
 
 		.share-button {
-			padding: 0.625rem 1rem;
-			font-size: 0.85rem;
-		}
-
-		.share-button span {
-			display: none;
+			width: 44px;
+			height: 44px;
 		}
 
 		.share-popup {
