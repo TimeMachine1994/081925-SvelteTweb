@@ -26,6 +26,13 @@
 
 	const publicUrl = memorial.fullSlug ? `https://tributestream.com/${memorial.fullSlug}` : '';
 
+	// Stream creation state
+	let showStreamForm = $state(false);
+	let streamTitle = $state('');
+	let streamDate = $state('');
+	let streamTime = $state('');
+	let isCreatingStream = $state(false);
+
 	async function handleDelete() {
 		const confirmMessage = `Are you sure you want to delete "${memorial.lovedOneName}"?\n\nThis will mark it as deleted and hide it from the admin list.`;
 		
@@ -54,6 +61,56 @@
 			console.error('Error deleting memorial:', error);
 			alert('An error occurred while deleting the memorial.');
 		}
+	}
+
+	async function handleCreateStream() {
+		if (!streamTitle.trim()) {
+			alert('Please enter a stream title');
+			return;
+		}
+
+		if (!streamDate || !streamTime) {
+			alert('Please select a date and time');
+			return;
+		}
+
+		isCreatingStream = true;
+
+		try {
+			// Combine date and time into ISO format
+			const scheduledStartTime = `${streamDate}T${streamTime}:00`;
+
+			const response = await fetch(`/api/memorials/${memorial.id}/streams`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					title: streamTitle,
+					scheduledStartTime,
+					description: ''
+				})
+			});
+
+			if (response.ok) {
+				alert('Stream created successfully!');
+				// Reload the page to show the new stream
+				location.reload();
+			} else {
+				const error = await response.json();
+				alert(`Failed to create stream: ${error.message || 'Unknown error'}`);
+			}
+		} catch (error) {
+			console.error('Error creating stream:', error);
+			alert('An error occurred while creating the stream.');
+		} finally {
+			isCreatingStream = false;
+		}
+	}
+
+	function cancelStreamForm() {
+		showStreamForm = false;
+		streamTitle = '';
+		streamDate = '';
+		streamTime = '';
 	}
 </script>
 
@@ -88,7 +145,71 @@
 	</div>
 
 	<div class="card">
-		<h2>📹 Livestreams ({streams.length})</h2>
+		<div class="section-header">
+			<h2>📹 Livestreams ({streams.length})</h2>
+			<button class="create-btn" onclick={() => showStreamForm = !showStreamForm}>
+				{showStreamForm ? '✖ Cancel' : '➕ Create Livestream'}
+			</button>
+		</div>
+
+		{#if showStreamForm}
+			<div class="stream-form">
+				<h3>Create New Livestream</h3>
+				<div class="form-group">
+					<label for="stream-title">Title *</label>
+					<input
+						id="stream-title"
+						type="text"
+						bind:value={streamTitle}
+						placeholder="Enter stream title (e.g., Memorial Service for {memorial.lovedOneName})"
+						disabled={isCreatingStream}
+					/>
+				</div>
+
+				<div class="form-row">
+					<div class="form-group">
+						<label for="stream-date">Date *</label>
+						<input
+							id="stream-date"
+							type="date"
+							bind:value={streamDate}
+							disabled={isCreatingStream}
+						/>
+					</div>
+
+					<div class="form-group">
+						<label for="stream-time">Time *</label>
+						<input
+							id="stream-time"
+							type="time"
+							bind:value={streamTime}
+							disabled={isCreatingStream}
+						/>
+					</div>
+				</div>
+
+				<div class="form-actions">
+					<button 
+						class="primary-btn" 
+						onclick={handleCreateStream}
+						disabled={isCreatingStream}
+					>
+						{isCreatingStream ? '⏳ Creating...' : '📅 Schedule Stream'}
+					</button>
+					<button 
+						onclick={cancelStreamForm}
+						disabled={isCreatingStream}
+					>
+						Cancel
+					</button>
+				</div>
+			</div>
+		{/if}
+
+		{#if streams.length === 0 && !showStreamForm}
+			<p class="empty-message">No livestreams yet. Click "Create Livestream" to add one.</p>
+		{/if}
+
 		{#each streams as stream}
 			<div class="item">
 				<h3>{stream.title}</h3>
@@ -138,8 +259,35 @@
 	.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
 	.item { border: 1px solid #e2e8f0; padding: 1rem; border-radius: 0.375rem; margin-bottom: 0.75rem; }
 	.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; text-align: center; }
-	button { padding: 0.5rem 1rem; border: 1px solid #e2e8f0; border-radius: 0.375rem; background: white; cursor: pointer; }
+	
+	/* Buttons */
+	button { padding: 0.5rem 1rem; border: 1px solid #e2e8f0; border-radius: 0.375rem; background: white; cursor: pointer; transition: all 0.2s; }
 	button:hover { background: #f7fafc; }
+	button:disabled { opacity: 0.5; cursor: not-allowed; }
 	button.danger-btn { background: #e53e3e; color: white; border-color: #e53e3e; }
 	button.danger-btn:hover { background: #c53030; }
+	button.create-btn { background: #3182ce; color: white; border-color: #3182ce; }
+	button.create-btn:hover { background: #2c5282; }
+	button.primary-btn { background: #3182ce; color: white; border-color: #3182ce; font-weight: 600; }
+	button.primary-btn:hover { background: #2c5282; }
+
+	/* Section header */
+	.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+
+	/* Stream form */
+	.stream-form { background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 1rem; }
+	.stream-form h3 { margin: 0 0 1rem 0; font-size: 1.125rem; color: #2d3748; }
+	
+	.form-group { margin-bottom: 1rem; }
+	.form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #4a5568; font-size: 0.875rem; }
+	.form-group input { width: 100%; padding: 0.625rem; border: 1px solid #cbd5e0; border-radius: 0.375rem; font-size: 0.875rem; }
+	.form-group input:focus { outline: none; border-color: #3182ce; box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1); }
+	.form-group input:disabled { background: #edf2f7; cursor: not-allowed; }
+	
+	.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+	
+	.form-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
+	.form-actions button { flex: 0 0 auto; }
+
+	.empty-message { color: #718096; font-style: italic; padding: 1rem 0; }
 </style>
