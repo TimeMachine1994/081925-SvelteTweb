@@ -75,6 +75,20 @@ async function verifyWebhookSignature(
 }
 
 /**
+ * Health check endpoint for webhook
+ * GET /api/webhooks/cloudflare-stream
+ */
+export const GET: RequestHandler = async () => {
+	return json({
+		status: 'ok',
+		endpoint: 'cloudflare-stream-webhook',
+		message: 'Webhook endpoint is active',
+		hasSecret: !!CLOUDFLARE_WEBHOOK_SECRET,
+		timestamp: new Date().toISOString()
+	});
+};
+
+/**
  * Cloudflare Stream Webhook Handler
  * Receives notifications when stream status changes (connected, live, disconnected, etc.)
  * 
