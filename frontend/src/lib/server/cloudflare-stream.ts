@@ -123,14 +123,16 @@ export async function getLiveInputStatus(liveInputId: string): Promise<{
 		throw new Error(`Cloudflare API error: ${data.errors.map((e) => e.message).join(', ')}`);
 	}
 
-	const status = data.result.status || 'unknown';
-	const isLive = status === 'connected' || status === 'live';
+	// Cloudflare returns status in current.state field
+	const currentState = data.result.current?.state || data.result.status || 'unknown';
+	const isLive = currentState === 'connected' || currentState === 'live';
 	const videoUid = data.result.recording?.uid;
 
-	console.log('✅ [Cloudflare] Live Input status:', status, 'Is Live:', isLive);
+	console.log('✅ [Cloudflare] Live Input status:', currentState, 'Is Live:', isLive);
+	console.log('📊 [Cloudflare] Full status data:', JSON.stringify(data.result.current || data.result, null, 2));
 
 	return {
-		status,
+		status: currentState,
 		isLive,
 		videoUid
 	};
