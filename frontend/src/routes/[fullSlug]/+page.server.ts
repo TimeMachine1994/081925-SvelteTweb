@@ -103,7 +103,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			streams = streamsSnapshot.docs
 				.map(doc => {
 					const data = doc.data();
-					return {
+					const stream = {
 						id: doc.id,
 						...data,
 						createdAt: convertTimestamp(data.createdAt),
@@ -112,11 +112,25 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 						startedAt: convertTimestamp(data.startedAt),
 						endedAt: convertTimestamp(data.endedAt)
 					};
+					
+					// DEBUG: Log each stream's details
+					console.log('📺 [STREAM DEBUG]', {
+						id: stream.id,
+						title: stream.title,
+						status: stream.status,
+						isVisible: stream.isVisible,
+						scheduledStartTime: stream.scheduledStartTime,
+						playbackUrl: stream.playbackUrl,
+						embedUrl: stream.embedUrl,
+						cloudflareInputId: stream.streamCredentials?.cloudflareInputId || stream.cloudflareInputId
+					});
+					
+					return stream;
 				})
 				// Filter out hidden streams
 				.filter(stream => stream.isVisible !== false);
 			
-			console.log('🎬 [MEMORIAL_PAGE] Loaded', streams.length, 'streams');
+			console.log('🎬 [MEMORIAL_PAGE] Loaded', streams.length, 'streams after filtering');
 		} catch (error) {
 			console.error('🎬 [MEMORIAL_PAGE] Error loading streams:', error);
 			// Don't fail the entire page load if streams fail
