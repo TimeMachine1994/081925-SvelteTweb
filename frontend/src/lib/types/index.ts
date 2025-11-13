@@ -27,7 +27,4 @@ export * from './memorial';
 export * from './slideshow';
 
 // Stream types
-export * from './stream';
-
-// Stream v2 types (WHIP + Mux)
-export * from './stream-v2';
+export * from './livestream';
