@@ -15,6 +15,12 @@
 		isVisible?: boolean;
 		recordingReady?: boolean;
 		createdAt: string;
+		streamCredentials?: {
+			cloudflareInputId?: string;
+			whepUrl?: string;
+			rtmpUrl?: string;
+			streamKey?: string;
+		};
 	}
 	
 	interface Props {
@@ -103,12 +109,22 @@
 		// Try different URL sources in order of preference
 		if (stream.playbackUrl) return stream.playbackUrl;
 		if (stream.embedUrl) return stream.embedUrl;
+		
+		// For live streams with streamCredentials, use the cloudflareInputId
+		if (stream.status === 'live' && stream.streamCredentials?.cloudflareInputId) {
+			return `https://iframe.cloudflarestream.com/${stream.streamCredentials.cloudflareInputId}`;
+		}
+		
+		// Legacy: Try cloudflareStreamId
 		if (stream.cloudflareStreamId) {
-			return `https://customer-${stream.cloudflareStreamId}.cloudflarestream.com/iframe`;
+			return `https://iframe.cloudflarestream.com/${stream.cloudflareStreamId}`;
 		}
+		
+		// Legacy: Try cloudflareInputId
 		if (stream.cloudflareInputId) {
-			return `https://customer-${stream.cloudflareInputId}.cloudflarestream.com/iframe`;
+			return `https://iframe.cloudflarestream.com/${stream.cloudflareInputId}`;
 		}
+		
 		return null;
 	}
 	
@@ -138,7 +154,7 @@
 								<iframe
 									src={getPlaybackUrl(stream)}
 									allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
-									allowfullscreen="true"
+									allowfullscreen={true}
 									title={stream.title}
 								></iframe>
 							</div>
@@ -195,7 +211,7 @@
 								<iframe
 									src={getPlaybackUrl(stream)}
 									allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
-									allowfullscreen="true"
+									allowfullscreen={true}
 									title={stream.title}
 								></iframe>
 							</div>
