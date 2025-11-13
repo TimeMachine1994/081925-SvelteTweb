@@ -32,7 +32,6 @@
 	
 	// Current time for countdown
 	let currentTime = $state(new Date());
-	let statusPollInterval: ReturnType<typeof setInterval> | null = null;
 	
 	// Update time every second for countdown
 	onMount(() => {
@@ -40,40 +39,8 @@
 			currentTime = new Date();
 		}, 1000);
 		
-		// Poll for stream status updates every 10 seconds
-		// Only poll scheduled/ready streams that might go live
-		const pollStatus = async () => {
-			const streamsToCheck = streams.filter(
-				s => (s.status === 'scheduled' || s.status === 'ready') && s.isVisible !== false
-			);
-			
-			for (const stream of streamsToCheck) {
-				try {
-					const response = await fetch(`/api/streams/${stream.id}/check-status`);
-					if (response.ok) {
-						const data = await response.json();
-						// If status changed, reload the page to get updated stream data
-						if (data.updated) {
-							console.log('🔄 Stream status updated, reloading...');
-							window.location.reload();
-							return; // Stop after first update to avoid multiple reloads
-						}
-					}
-				} catch (err) {
-					console.error('Failed to check stream status:', err);
-				}
-			}
-		};
-		
-		// Initial poll after 5 seconds
-		setTimeout(pollStatus, 5000);
-		
-		// Then poll every 10 seconds
-		statusPollInterval = setInterval(pollStatus, 10000);
-		
 		return () => {
 			clearInterval(timeInterval);
-			if (statusPollInterval) clearInterval(statusPollInterval);
 		};
 	});
 	

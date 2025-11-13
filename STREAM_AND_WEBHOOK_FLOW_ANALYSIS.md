@@ -1,8 +1,8 @@
-# Complete Stream and Webhook Flow Analysis
+# Stream and Webhook Flow - Production Architecture
 
-## 🎯 Current Status Overview
+## 🎯 Architecture Overview
 
-**Critical Finding**: Your streams are created with `status: 'scheduled'` or `status: 'ready'` but they **do NOT have streaming credentials** until they are manually "armed".
+**System Design**: Webhook-only architecture for instant stream status updates. Streams are manually armed to generate Cloudflare credentials, then webhooks provide real-time status updates when streaming begins.
 
 ## 📊 The Complete Stream Lifecycle
 
@@ -330,103 +330,89 @@ await streamDoc.ref.update({
 });
 ```
 
-## 🔧 What Needs to Happen
+## 🔧 How The System Works
 
-### For Streams to Work Properly:
+### Production Flow:
 
-1. **Stream Creation** ✅ (Working)
+1. **Stream Creation** ✅
    - Creates stream in Firestore
-   - Sets status based on schedule
+   - Sets status: 'scheduled' or 'ready'
 
-2. **Stream Arming** ⚠️ (Manual - Should be Automatic)
-   - Admin must manually click "Arm" button
-   - **SHOULD**: Auto-arm when stream is created
+2. **Stream Arming** ✅ (Manual Process)
+   - Admin clicks "Arm" button in UI
    - Creates Cloudflare Live Input
-   - Stores streaming credentials
+   - Stores streaming credentials (RTMP/WHIP)
+   - **This is intentional** - gives control over when streams are ready
 
-3. **Webhook Configuration** ❓ (Unknown Status)
-   - Cloudflare webhook must point to your server
+3. **Webhook Configuration** ⚠️ (Must Verify)
+   - Cloudflare webhook must point to production domain
    - Secret must match `CLOUDFLARE_WEBHOOK_SECRET`
-   - **CHECK**: Run `./check-webhook-config.sh`
+   - **Only ONE webhook URL per Cloudflare account**
+   - Cannot have separate dev/staging/prod webhooks
 
-4. **Go Live** (Depends on 2 & 3)
-   - User streams via WHIP or RTMP
-   - Cloudflare detects connection
+4. **Go Live via Webhook** ✅
+   - User streams via OBS (RTMP) or browser (WHIP)
+   - Cloudflare detects connection (2-5 seconds)
    - Sends webhook to your server
-   - Handler updates stream to 'live'
+   - Handler updates stream to 'live' instantly
 
-5. **Frontend Display** ✅ (Working)
-   - StreamCard shows current status
-   - Polls every 10 seconds for updates
-   - Shows LIVE badge when status changes
+5. **Frontend Display** ✅
+   - Shows current status from Firestore
+   - User refreshes to see live stream
+   - No polling - relies on webhooks only
 
-## 🎯 Recommended Fixes
+## 🎯 Configuration Requirements
 
-### Fix #1: Auto-Arm Streams After Creation
+### Requirement #1: Webhook Domain Configuration
 
-**Location**: `/api/memorials/[memorialId]/streams/+server.ts`
+**Check current webhook URL:**
 
-```typescript
-// After line 206 (after creating stream)
-const streamRef = await adminDb.collection('streams').add(streamData);
-
-// AUTO-ARM THE STREAM
-try {
-  console.log('🎯 [STREAMS API] Auto-arming stream...');
-  
-  // Import at top of file
-  const { createLiveInput } = await import('$lib/server/cloudflare-stream');
-  
-  // Create Cloudflare Live Input
-  const liveInput = await createLiveInput(title.trim());
-  
-  // Update stream with credentials
-  await streamRef.update({
-    armStatus: {
-      isArmed: true,
-      armType: 'stream_key',  // Default to OBS
-      armedAt: new Date().toISOString(),
-      armedBy: userId
-    },
-    streamCredentials: {
-      cloudflareInputId: liveInput.liveInputId,
-      whipUrl: liveInput.whipUrl,
-      whepUrl: liveInput.whepUrl,
-      rtmpUrl: liveInput.rtmpsUrl,
-      streamKey: liveInput.rtmpsStreamKey
-    }
-  });
-  
-  console.log('✅ [STREAMS API] Stream auto-armed successfully');
-} catch (armError) {
-  console.error('⚠️ [STREAMS API] Failed to auto-arm stream:', armError);
-  // Don't fail stream creation if arming fails
-}
-```
-
-### Fix #2: Verify Webhook Configuration
-
-**Run**:
 ```bash
-cd frontend
-./check-webhook-config.sh
+curl -X GET \
+  "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/stream/webhook" \
+  -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN"
 ```
 
-**This will show**:
-- Is webhook configured in Cloudflare?
-- What URL is it pointing to?
-- Does webhook secret match your .env?
+**Set webhook to production domain:**
 
-### Fix #3: Add Status Transition on Arm
-
-**Location**: `/api/streams/[streamId]/arm/+server.ts`
-
-```typescript
-// After line 92, add:
-if (streamData.status === 'scheduled') {
-  updates.status = 'ready';  // Change from scheduled to ready when armed
-}
+```bash
+curl -X PUT \
+  "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/stream/webhook" \
+  -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "notificationUrl": "https://tributestream.com/api/webhooks/cloudflare-stream"
+  }'
 ```
+
+**Important:** Webhook URL must match where your production app is deployed.
+
+### Requirement #2: Environment Variables
+
+**Ensure these are set in production:**
+
+```bash
+CLOUDFLARE_ACCOUNT_ID=your-account-id
+CLOUDFLARE_API_TOKEN=your-api-token
+CLOUDFLARE_WEBHOOK_SECRET=your-webhook-secret
+```
+
+**The webhook secret must match** what's configured in Cloudflare. Get it with:
+
+```bash
+curl -X GET \
+  "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/stream/webhook" \
+  -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" | jq .result.secret
+```
+
+### Requirement #3: Test on Production Domain
+
+**Cannot test on Vercel preview URLs** because:
+- Cloudflare only supports ONE webhook URL
+- Every deploy gets a new Vercel URL
+- Changing webhook URL for each test is impractical
+
+**Solution:** Test on your production domain (e.g., `tributestream.com`) where webhook is configured.
 
 ## 📊 Data Flow Diagram
 

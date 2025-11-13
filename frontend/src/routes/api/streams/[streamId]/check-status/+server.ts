@@ -5,7 +5,8 @@ import { getLiveInputStatus, getStreamPlaybackUrl } from '$lib/server/cloudflare
 
 /**
  * Manual endpoint to check and update stream status
- * Can be called periodically as fallback if webhooks aren't working
+ * FOR DEBUGGING/TESTING ONLY - Not used in production
+ * Production relies on Cloudflare webhooks for instant status updates
  */
 export const GET: RequestHandler = async ({ params, locals }) => {
 	console.log('🔍 [CHECK STATUS] Checking stream status:', params.streamId);
