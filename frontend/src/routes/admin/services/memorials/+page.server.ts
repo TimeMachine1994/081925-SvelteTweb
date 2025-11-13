@@ -13,30 +13,16 @@ export const load = async ({ locals, url }: any) => {
 	const sortBy = url.searchParams.get('sortBy') || 'createdAt';
 	const sortDir = url.searchParams.get('sortDir') || 'desc';
 
-	// Load memorials (exclude soft-deleted ones)
+	// Load memorials (we'll filter deleted ones client-side since not all docs have isDeleted field)
 	let snapshot;
 	try {
-		let query = adminDb
-			.collection('memorials')
-			.where('isDeleted', '==', false)
-			.orderBy(sortBy, sortDir as any)
-			.limit(limit);
+		let query = adminDb.collection('memorials').orderBy(sortBy, sortDir as any).limit(limit);
 		snapshot = await query.get();
 	} catch (error) {
 		console.error('Error loading memorials with sorting:', error);
-		// Fallback: try without sorting but still filter deleted
-		try {
-			let query = adminDb
-				.collection('memorials')
-				.where('isDeleted', '==', false)
-				.limit(limit);
-			snapshot = await query.get();
-		} catch (fallbackError) {
-			console.error('Error loading memorials with filter:', fallbackError);
-			// Final fallback: load all and filter client-side
-			let query = adminDb.collection('memorials').limit(limit);
-			snapshot = await query.get();
-		}
+		// Fallback to no sorting if index doesn't exist
+		let query = adminDb.collection('memorials').limit(limit);
+		snapshot = await query.get();
 	}
 
 	const memorials = snapshot.docs
