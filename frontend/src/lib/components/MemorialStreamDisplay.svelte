@@ -112,19 +112,52 @@
 	}
 	
 	// Categorize streams based on REAL-TIME status from liveStreams
+	// Smart live stream detection:
+	// 1. Status is explicitly 'live', OR
+	// 2. Stream is 'scheduled'/'ready' but past its start time (likely broadcasting)
 	let categorizedLiveStreams = $derived(
-		liveStreams.filter(s => s.status === 'live' && s.isVisible !== false)
+		liveStreams.filter(s => {
+			if (s.isVisible === false) return false;
+			
+			// Explicitly marked as live
+			if (s.status === 'live') return true;
+			
+			// Smart detection: If scheduled/ready BUT past the scheduled start time,
+			// treat as live (stream is probably broadcasting even if webhook didn't fire)
+			if ((s.status === 'scheduled' || s.status === 'ready') && s.scheduledStartTime) {
+				const scheduledTime = new Date(s.scheduledStartTime).getTime();
+				const now = currentTime.getTime();
+				
+				// If we're past the scheduled time, assume it's live
+				if (now >= scheduledTime) {
+					console.log('🎥 [SMART DETECT] Treating as LIVE (past scheduled time):', s.id, {
+						status: s.status,
+						scheduledTime: new Date(scheduledTime).toLocaleString(),
+						currentTime: new Date(now).toLocaleString()
+					});
+					return true;
+				}
+			}
+			
+			return false;
+		})
 	);
 	
+	// Scheduled streams: Only show if FUTURE scheduled time
+	// (if past scheduled time, they'll be in categorizedLiveStreams)
 	let scheduledStreams = $derived(
 		liveStreams.filter(s => {
 			if (s.isVisible === false) return false;
-			if (s.status === 'scheduled') return true;
 			
-			// Also treat 'ready' status with future scheduledStartTime as scheduled
-			if (s.status === 'ready' && s.scheduledStartTime) {
+			// Must have a future scheduled time
+			if (s.scheduledStartTime) {
 				const scheduledTime = new Date(s.scheduledStartTime).getTime();
-				return scheduledTime > currentTime.getTime();
+				const now = currentTime.getTime();
+				
+				// Only show as scheduled if it's in the FUTURE
+				if (scheduledTime > now && (s.status === 'scheduled' || s.status === 'ready')) {
+					return true;
+				}
 			}
 			
 			return false;
@@ -141,7 +174,7 @@
 	// Get playback URL for a stream - prioritize live watch URL
 	function getPlaybackUrl(stream: Stream): string | null {
 		// Priority 1: Live watch URL from webhook (for active broadcasts)
-		if (stream.status === 'live' && stream.liveWatchUrl) {
+		if (stream.liveWatchUrl) {
 			return stream.liveWatchUrl;
 		}
 		
@@ -150,19 +183,19 @@
 		if (stream.embedUrl) return stream.embedUrl;
 		
 		// Priority 3: Construct iframe URL from Cloudflare IDs
-		// For live streams with streamCredentials, use the cloudflareInputId
-		if (stream.status === 'live' && stream.streamCredentials?.cloudflareInputId) {
+		// For live/scheduled streams, use the cloudflareInputId to show live feed
+		if (stream.streamCredentials?.cloudflareInputId) {
 			return `https://iframe.cloudflarestream.com/${stream.streamCredentials.cloudflareInputId}`;
-		}
-		
-		// Legacy: Try cloudflareStreamId
-		if (stream.cloudflareStreamId) {
-			return `https://iframe.cloudflarestream.com/${stream.cloudflareStreamId}`;
 		}
 		
 		// Legacy: Try cloudflareInputId
 		if (stream.cloudflareInputId) {
 			return `https://iframe.cloudflarestream.com/${stream.cloudflareInputId}`;
+		}
+		
+		// Legacy: Try cloudflareStreamId
+		if (stream.cloudflareStreamId) {
+			return `https://iframe.cloudflarestream.com/${stream.cloudflareStreamId}`;
 		}
 		
 		return null;
