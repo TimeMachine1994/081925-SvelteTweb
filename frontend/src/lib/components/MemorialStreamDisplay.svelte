@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
+	import { browser } from '$app/environment';
 	import CountdownVideoPlayer from './CountdownVideoPlayer.svelte';
 	
 	interface Stream {
@@ -21,6 +22,13 @@
 			rtmpUrl?: string;
 			streamKey?: string;
 		};
+		// NEW: Real-time live status fields
+		liveWatchUrl?: string | null;
+		liveVideoUid?: string;
+		hlsUrl?: string;
+		dashUrl?: string;
+		liveStartedAt?: string;
+		liveEndedAt?: string;
 	}
 	
 	interface Props {
@@ -30,8 +38,14 @@
 	
 	let { streams, memorialName }: Props = $props();
 	
+	// Real-time stream updates - this will be updated by Firestore listeners
+	let liveStreams = $state<Stream[]>(streams || []);
+	
 	// Current time for countdown
 	let currentTime = $state(new Date());
+	
+	// Firestore unsubscribe functions
+	let firestoreUnsubscribes: (() => void)[] = [];
 	
 	// Update time every second for countdown
 	onMount(() => {
@@ -39,18 +53,71 @@
 			currentTime = new Date();
 		}, 1000);
 		
+		// Setup Firestore real-time listeners for all streams
+		if (browser && liveStreams.length > 0) {
+			setupFirestoreListeners();
+		}
+		
 		return () => {
 			clearInterval(timeInterval);
+			// Cleanup Firestore listeners
+			firestoreUnsubscribes.forEach(unsub => unsub());
 		};
 	});
 	
-	// Categorize streams
-	let liveStreams = $derived(
-		streams.filter(s => s.status === 'live' && s.isVisible !== false)
+	/**
+	 * Setup real-time Firestore listeners for all streams
+	 * This allows instant UI updates when webhooks change stream status
+	 */
+	async function setupFirestoreListeners() {
+		try {
+			// Dynamically import Firestore to avoid SSR issues
+			const { db } = await import('$lib/firebase');
+			const { doc, onSnapshot } = await import('firebase/firestore');
+			
+			liveStreams.forEach((stream, index) => {
+				const streamDocRef = doc(db, 'streams', stream.id);
+				
+				// Subscribe to real-time updates
+				const unsubscribe = onSnapshot(
+					streamDocRef,
+					(snapshot) => {
+						if (snapshot.exists()) {
+							const updatedData = snapshot.data();
+							
+							console.log('🔄 [REALTIME] Stream updated:', stream.id, {
+								status: updatedData.status,
+								liveWatchUrl: updatedData.liveWatchUrl,
+								hasPreview: !!updatedData.liveWatchUrl
+							});
+							
+							// Update the stream in our local state
+							liveStreams = liveStreams.map((s, i) => 
+								i === index ? { ...s, ...updatedData, id: stream.id } : s
+							);
+						}
+					},
+					(error) => {
+						console.error('❌ [REALTIME] Firestore listener error for stream', stream.id, error);
+					}
+				);
+				
+				firestoreUnsubscribes.push(unsubscribe);
+			});
+			
+			console.log('✅ [REALTIME] Firestore listeners setup for', liveStreams.length, 'streams');
+		} catch (error) {
+			console.error('❌ [REALTIME] Failed to setup Firestore listeners:', error);
+		}
+	}
+	
+	// Categorize streams based on REAL-TIME status from liveStreams
+	let categorizedLiveStreams = $derived(
+		liveStreams.filter(s => s.status === 'live' && s.isVisible !== false)
 	);
 	
 	let scheduledStreams = $derived(
-		streams.filter(s => {
+		liveStreams.filter(s => {
 			if (s.isVisible === false) return false;
 			if (s.status === 'scheduled') return true;
 			
@@ -65,18 +132,24 @@
 	);
 	
 	let recordedStreams = $derived(
-		streams.filter(s => 
+		liveStreams.filter(s => 
 			s.isVisible !== false && 
 			(s.status === 'completed' || s.recordingReady === true)
 		)
 	);
 	
-	// Get playback URL for a stream
+	// Get playback URL for a stream - prioritize live watch URL
 	function getPlaybackUrl(stream: Stream): string | null {
-		// Try different URL sources in order of preference
+		// Priority 1: Live watch URL from webhook (for active broadcasts)
+		if (stream.status === 'live' && stream.liveWatchUrl) {
+			return stream.liveWatchUrl;
+		}
+		
+		// Priority 2: Recording playback URLs
 		if (stream.playbackUrl) return stream.playbackUrl;
 		if (stream.embedUrl) return stream.embedUrl;
 		
+		// Priority 3: Construct iframe URL from Cloudflare IDs
 		// For live streams with streamCredentials, use the cloudflareInputId
 		if (stream.status === 'live' && stream.streamCredentials?.cloudflareInputId) {
 			return `https://iframe.cloudflarestream.com/${stream.streamCredentials.cloudflareInputId}`;
@@ -97,20 +170,20 @@
 	
 	// Determine if we should show any streams section
 	let hasVisibleStreams = $derived(
-		liveStreams.length > 0 || scheduledStreams.length > 0 || recordedStreams.length > 0
+		categorizedLiveStreams.length > 0 || scheduledStreams.length > 0 || recordedStreams.length > 0
 	);
 </script>
 
 {#if hasVisibleStreams}
 	<div class="memorial-streams">
 		<!-- Live Streams -->
-		{#if liveStreams.length > 0}
+		{#if categorizedLiveStreams.length > 0}
 			<div class="stream-section live-section">
 				<h2 class="stream-section-title">
 					<span class="live-indicator"></span>
 					Live Now
 				</h2>
-				{#each liveStreams as stream (stream.id)}
+				{#each categorizedLiveStreams as stream (stream.id)}
 					<div class="stream-item">
 						<h3 class="stream-title">{stream.title}</h3>
 						{#if stream.description}
@@ -301,21 +374,59 @@
 		background: #ef4444;
 		border-radius: 50%;
 		animation: pulse 2s ease-in-out infinite;
+		box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
 	}
 	
 	@keyframes pulse {
 		0%, 100% {
 			opacity: 1;
 			transform: scale(1);
+			box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
 		}
 		50% {
-			opacity: 0.6;
+			opacity: 0.8;
 			transform: scale(1.1);
+			box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
 		}
 	}
 	
 	.stream-item {
 		margin-bottom: 2rem;
+		transition: all 0.5s ease-in-out;
+	}
+	
+	/* Smooth entry animation for live streams */
+	.live-section .stream-item {
+		animation: fadeInScale 0.8s ease-out;
+	}
+	
+	@keyframes fadeInScale {
+		0% {
+			opacity: 0;
+			transform: scale(0.95) translateY(10px);
+		}
+		50% {
+			opacity: 1;
+			transform: scale(1.02) translateY(0);
+		}
+		100% {
+			opacity: 1;
+			transform: scale(1) translateY(0);
+		}
+	}
+	
+	/* Smooth fade for scheduled streams that disappear */
+	.scheduled-section .stream-item {
+		animation: fadeIn 0.5s ease-in;
+	}
+	
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
 	}
 	
 	.stream-title {

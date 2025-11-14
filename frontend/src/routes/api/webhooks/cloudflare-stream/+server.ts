@@ -119,85 +119,131 @@ export const POST: RequestHandler = async ({ request }) => {
 		console.log('📦 [CLOUDFLARE WEBHOOK] Payload:', JSON.stringify(payload, null, 2));
 
 		// Cloudflare Stream webhook payload structure
-		const { uid, status, meta } = payload;
+		// For live videos: { uid: "video-uid", status: { state: "..." }, liveInput: { uid: "input-id" }, preview: "...", playback: {...} }
+		const videoUid = payload.uid;
+		const state = payload.status?.state;
+		const liveInputId = payload.liveInput?.uid;
+		const preview = payload.preview;
+		const hlsUrl = payload.playback?.hls;
+		const dashUrl = payload.playback?.dash;
+		const meta = payload.meta;
 
-		if (!uid) {
-			console.log('❌ [CLOUDFLARE WEBHOOK] No UID in payload');
-			return json({ error: 'Missing UID' }, { status: 400 });
+		// For live streams, we need the Live Input ID to find the stream
+		const searchId = liveInputId || videoUid;
+		
+		if (!searchId) {
+			console.log('❌ [CLOUDFLARE WEBHOOK] No UID or liveInput.uid in payload');
+			return json({ error: 'Missing identifier' }, { status: 400 });
 		}
 
-		// Find stream by Cloudflare Input ID
-		const streamsSnapshot = await adminDb
+		console.log('🔍 [CLOUDFLARE WEBHOOK] Searching for stream with ID:', searchId, 'State:', state);
+
+		// Find stream by Cloudflare Input ID (check both new and legacy fields)
+		const newFieldQuery = adminDb
 			.collection('streams')
-			.where('streamCredentials.cloudflareInputId', '==', uid)
+			.where('streamCredentials.cloudflareInputId', '==', searchId)
 			.limit(1)
 			.get();
 
-		if (streamsSnapshot.empty) {
-			console.log('❌ [CLOUDFLARE WEBHOOK] Stream not found for UID:', uid);
+		const legacyFieldQuery = adminDb
+			.collection('streams')
+			.where('cloudflareInputId', '==', searchId)
+			.limit(1)
+			.get();
+
+		const [newFieldSnapshot, legacyFieldSnapshot] = await Promise.all([
+			newFieldQuery,
+			legacyFieldQuery
+		]);
+
+		let streamDoc;
+		if (!newFieldSnapshot.empty) {
+			streamDoc = newFieldSnapshot.docs[0];
+		} else if (!legacyFieldSnapshot.empty) {
+			streamDoc = legacyFieldSnapshot.docs[0];
+		}
+
+		if (!streamDoc) {
+			console.log('❌ [CLOUDFLARE WEBHOOK] Stream not found for ID:', searchId);
 			return json({ error: 'Stream not found' }, { status: 404 });
 		}
 
-		const streamDoc = streamsSnapshot.docs[0];
 		const streamData = streamDoc.data();
 		
 		console.log('✅ [CLOUDFLARE WEBHOOK] Found stream:', streamDoc.id);
 
-		// Map Cloudflare status to our stream status
+		// Map Cloudflare state to our stream status
 		let newStatus = streamData.status;
 		let updates: any = {
 			updatedAt: new Date().toISOString()
 		};
 
-		switch (status) {
-			case 'connected':
-			case 'live':
-				// Stream is now live
+		switch (state) {
+			case 'live-inprogress':
+				// Stream is NOW LIVE!
 				newStatus = 'live';
 				updates.status = 'live';
 				updates.liveStartedAt = streamData.liveStartedAt || new Date().toISOString();
 				
-				// Set playback URL for live stream
-				// When Live Input goes live, it creates a video that can be played back
-				// Extract video UID from webhook payload if available
-				const videoUid = payload.liveInput?.uid || uid;
+				// Set live watch URL from preview field
+				if (preview) {
+					updates.liveWatchUrl = preview;
+					console.log('📺 [CLOUDFLARE WEBHOOK] Set live watch URL:', preview);
+				}
 				
-				if (!streamData.playbackUrl && videoUid) {
-					// Use iframe player URL for the live stream
-					updates.playbackUrl = `https://iframe.cloudflarestream.com/${videoUid}`;
-					updates.embedUrl = `https://iframe.cloudflarestream.com/${videoUid}`;
-					console.log('📺 [CLOUDFLARE WEBHOOK] Set playback URL:', updates.playbackUrl);
+				// Set video UID for reference
+				if (videoUid) {
+					updates.liveVideoUid = videoUid;
+				}
+				
+				// Set HLS/DASH URLs if available
+				if (hlsUrl) {
+					updates.hlsUrl = hlsUrl;
+				}
+				if (dashUrl) {
+					updates.dashUrl = dashUrl;
 				}
 				
 				console.log('🔴 [CLOUDFLARE WEBHOOK] Stream going LIVE');
 				break;
 
-			case 'disconnected':
-			case 'ended':
-				// Stream has ended
+			case 'ready':
+				// Stream ended - recording is ready
 				newStatus = 'completed';
 				updates.status = 'completed';
 				updates.liveEndedAt = new Date().toISOString();
-				console.log('⚪ [CLOUDFLARE WEBHOOK] Stream ENDED');
-				break;
-
-			case 'ready':
-				// Stream is ready but not yet live
-				newStatus = 'ready';
-				updates.status = 'ready';
-				console.log('✅ [CLOUDFLARE WEBHOOK] Stream READY');
+				updates.recordingReady = true;
+				
+				// Set playback/embed URLs for recording
+				if (preview) {
+					updates.playbackUrl = preview;
+					updates.embedUrl = preview;
+				}
+				
+				// Clear live-specific fields
+				updates.liveWatchUrl = null;
+				updates.liveVideoUid = null;
+				
+				console.log('✅ [CLOUDFLARE WEBHOOK] Stream COMPLETED - Recording ready');
 				break;
 
 			case 'error':
 				// Stream encountered an error
 				newStatus = 'error';
 				updates.status = 'error';
-				updates.errorMessage = meta?.errorMessage || 'Unknown error';
-				console.log('❌ [CLOUDFLARE WEBHOOK] Stream ERROR');
+				updates.errorMessage = meta?.errorMessage || payload.status?.errorReasonText || 'Unknown error';
+				console.log('❌ [CLOUDFLARE WEBHOOK] Stream ERROR:', updates.errorMessage);
+				break;
+
+			case 'queued':
+			case 'inprogress':
+				// Stream is processing (usually for recordings)
+				console.log('⏳ [CLOUDFLARE WEBHOOK] Stream processing:', state);
+				// Don't change status, just log
 				break;
 
 			default:
-				console.log('⚠️ [CLOUDFLARE WEBHOOK] Unknown status:', status);
+				console.log('⚠️ [CLOUDFLARE WEBHOOK] Unknown state:', state);
 		}
 
 		// Update stream document
