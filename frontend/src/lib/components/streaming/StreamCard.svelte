@@ -350,25 +350,48 @@
 
 			<!-- Stream Credentials (When Armed) -->
 			{#if stream.armStatus?.isArmed}
-				<!-- WHIP URL (Mobile Input & Mobile Streaming) -->
-				{#if (stream.armStatus.armType === 'mobile_input' || stream.armStatus.armType === 'mobile_streaming') && stream.streamCredentials?.whipUrl}
-					<div class="rounded-lg bg-blue-50 p-4">
-						<h3 class="mb-2 text-sm font-semibold text-blue-900">Browser Streaming URL (WHIP)</h3>
-						<div class="flex items-center gap-2">
-							<code class="flex-1 truncate rounded bg-white px-3 py-2 text-xs text-blue-800">
-								{stream.streamCredentials.whipUrl}
+				<!-- Mobile Input/Streaming - Show Link to Mobile Page -->
+				{#if (stream.armStatus.armType === 'mobile_input' || stream.armStatus.armType === 'mobile_streaming')}
+					<div class="rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-200 p-4">
+						<h3 class="mb-3 text-sm font-semibold text-purple-900">📱 Mobile Camera Streaming</h3>
+						
+						<p class="mb-3 text-sm text-purple-800">
+							Send this link to the person who will stream from their phone/tablet:
+						</p>
+						
+						<div class="mb-3 rounded-lg bg-white p-3 border border-purple-200">
+							<code class="block text-xs text-purple-900 break-all">
+								{window.location.origin}/stream/mobile/{stream.id}
 							</code>
+						</div>
+						
+						<div class="flex gap-2">
 							<button
-								on:click={() => copyToClipboard(stream.streamCredentials!.whipUrl!, 'whip')}
-								class="rounded-lg bg-blue-600 p-2 text-white transition-colors hover:bg-blue-700"
-								title="Copy WHIP URL"
+								on:click={() => copyToClipboard(`${window.location.origin}/stream/mobile/${stream.id}`, 'whip')}
+								class="flex-1 flex items-center justify-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700"
 							>
 								{#if copiedWhip}
 									<Check class="h-4 w-4" />
+									Copied!
 								{:else}
 									<Copy class="h-4 w-4" />
+									Copy Link
 								{/if}
 							</button>
+							<a
+								href="/stream/mobile/{stream.id}"
+								target="_blank"
+								class="flex items-center justify-center gap-2 rounded-lg border-2 border-purple-600 px-4 py-2 text-sm font-medium text-purple-600 transition-colors hover:bg-purple-50"
+							>
+								<ExternalLink class="h-4 w-4" />
+								Open
+							</a>
+						</div>
+						
+						<div class="mt-3 pt-3 border-t border-purple-200">
+							<p class="text-xs text-purple-700">
+								<strong>For OBS:</strong> The mobile page will display an HLS URL that you can add as a Media Source in OBS.
+							</p>
 						</div>
 					</div>
 				{/if}
