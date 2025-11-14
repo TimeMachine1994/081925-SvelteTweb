@@ -88,7 +88,9 @@
 							console.log('🔄 [REALTIME] Stream updated:', stream.id, {
 								status: updatedData.status,
 								liveWatchUrl: updatedData.liveWatchUrl,
-								hasPreview: !!updatedData.liveWatchUrl
+								scheduledStartTime: updatedData.scheduledStartTime,
+								isVisible: updatedData.isVisible,
+								hasCloudflareId: !!(updatedData.streamCredentials?.cloudflareInputId || updatedData.cloudflareInputId)
 							});
 							
 							// Update the stream in our local state
@@ -106,6 +108,17 @@
 			});
 			
 			console.log('✅ [REALTIME] Firestore listeners setup for', liveStreams.length, 'streams');
+		
+		// Log initial stream states
+		liveStreams.forEach(s => {
+			console.log('📊 [INITIAL STATE]', s.id, {
+				status: s.status,
+				scheduledStartTime: s.scheduledStartTime,
+				isVisible: s.isVisible,
+				hasCloudflareId: !!(s.streamCredentials?.cloudflareInputId || s.cloudflareInputId),
+				cloudflareInputId: s.streamCredentials?.cloudflareInputId || s.cloudflareInputId
+			});
+		});
 		} catch (error) {
 			console.error('❌ [REALTIME] Failed to setup Firestore listeners:', error);
 		}
@@ -117,10 +130,22 @@
 	// 2. Stream is 'scheduled'/'ready' but past its start time (likely broadcasting)
 	let categorizedLiveStreams = $derived(
 		liveStreams.filter(s => {
-			if (s.isVisible === false) return false;
+			console.log('🔍 [CATEGORIZE] Checking stream:', s.id, {
+				status: s.status,
+				isVisible: s.isVisible,
+				scheduledStartTime: s.scheduledStartTime
+			});
+			
+			if (s.isVisible === false) {
+				console.log('❌ [CATEGORIZE] Stream hidden (isVisible=false):', s.id);
+				return false;
+			}
 			
 			// Explicitly marked as live
-			if (s.status === 'live') return true;
+			if (s.status === 'live') {
+				console.log('✅ [CATEGORIZE] Stream is LIVE (status=live):', s.id);
+				return true;
+			}
 			
 			// Smart detection: If scheduled/ready BUT past the scheduled start time,
 			// treat as live (stream is probably broadcasting even if webhook didn't fire)
@@ -128,17 +153,22 @@
 				const scheduledTime = new Date(s.scheduledStartTime).getTime();
 				const now = currentTime.getTime();
 				
+				console.log('🕒 [CATEGORIZE] Time check:', s.id, {
+					scheduledTime: new Date(scheduledTime).toLocaleString(),
+					currentTime: new Date(now).toLocaleString(),
+					isPastScheduledTime: now >= scheduledTime
+				});
+				
 				// If we're past the scheduled time, assume it's live
 				if (now >= scheduledTime) {
-					console.log('🎥 [SMART DETECT] Treating as LIVE (past scheduled time):', s.id, {
-						status: s.status,
-						scheduledTime: new Date(scheduledTime).toLocaleString(),
-						currentTime: new Date(now).toLocaleString()
-					});
+					console.log('🎥 [SMART DETECT] Treating as LIVE (past scheduled time):', s.id);
 					return true;
+				} else {
+					console.log('⏰ [CATEGORIZE] Still scheduled (future time):', s.id);
 				}
 			}
 			
+			console.log('❌ [CATEGORIZE] Not live:', s.id);
 			return false;
 		})
 	);
@@ -205,6 +235,23 @@
 	let hasVisibleStreams = $derived(
 		categorizedLiveStreams.length > 0 || scheduledStreams.length > 0 || recordedStreams.length > 0
 	);
+	
+	// Log stream counts for debugging
+	$effect(() => {
+		console.log('📊 [STREAM COUNTS]', {
+			live: categorizedLiveStreams.length,
+			scheduled: scheduledStreams.length,
+			recorded: recordedStreams.length,
+			total: liveStreams.length
+		});
+		
+		if (categorizedLiveStreams.length > 0) {
+			console.log('🔴 [LIVE STREAMS]:', categorizedLiveStreams.map(s => s.id));
+		}
+		if (scheduledStreams.length > 0) {
+			console.log('📅 [SCHEDULED STREAMS]:', scheduledStreams.map(s => s.id));
+		}
+	});}
 </script>
 
 {#if hasVisibleStreams}
