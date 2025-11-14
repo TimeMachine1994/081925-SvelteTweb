@@ -251,7 +251,7 @@
 		if (scheduledStreams.length > 0) {
 			console.log('📅 [SCHEDULED STREAMS]:', scheduledStreams.map(s => s.id));
 		}
-	});}
+	});
 </script>
 
 {#if hasVisibleStreams}
