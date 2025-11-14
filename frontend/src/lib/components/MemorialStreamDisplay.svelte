@@ -127,13 +127,15 @@
 	// Categorize streams based on REAL-TIME status from liveStreams
 	// Smart live stream detection:
 	// 1. Status is explicitly 'live', OR
-	// 2. Stream is 'scheduled'/'ready' but past its start time (likely broadcasting)
+	// 2. Stream is 'scheduled'/'ready' but past its start time, OR
+	// 3. Stream has a valid Cloudflare iframe URL available (means it's streamable)
 	let categorizedLiveStreams = $derived(
 		liveStreams.filter(s => {
 			console.log('🔍 [CATEGORIZE] Checking stream:', s.id, {
 				status: s.status,
 				isVisible: s.isVisible,
-				scheduledStartTime: s.scheduledStartTime
+				scheduledStartTime: s.scheduledStartTime,
+				hasCloudflareId: !!(s.streamCredentials?.cloudflareInputId || s.cloudflareInputId)
 			});
 			
 			if (s.isVisible === false) {
@@ -163,9 +165,15 @@
 				if (now >= scheduledTime) {
 					console.log('🎥 [SMART DETECT] Treating as LIVE (past scheduled time):', s.id);
 					return true;
-				} else {
-					console.log('⏰ [CATEGORIZE] Still scheduled (future time):', s.id);
 				}
+			}
+			
+			// FALLBACK: If stream has a Cloudflare Input ID, show it as available
+			// This handles cases where scheduled time is wrong but stream is ready
+			if ((s.status === 'scheduled' || s.status === 'ready') && 
+			    (s.streamCredentials?.cloudflareInputId || s.cloudflareInputId)) {
+				console.log('📡 [SMART DETECT] Stream has Cloudflare ID - showing as available:', s.id);
+				return true;
 			}
 			
 			console.log('❌ [CATEGORIZE] Not live:', s.id);
