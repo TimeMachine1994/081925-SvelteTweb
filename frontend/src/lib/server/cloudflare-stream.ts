@@ -175,3 +175,75 @@ export async function getStreamPlaybackUrl(videoUid: string): Promise<{
 		embedUrl: `https://customer-${CLOUDFLARE_ACCOUNT_ID}.cloudflarestream.com/${videoUid}/iframe`
 	};
 }
+
+/**
+ * Gets the list of videos associated with a Live Input
+ * This shows the active broadcast (if live) and all recordings
+ * @param liveInputId - The Live Input ID
+ * @returns Array of videos with status and playback URLs
+ */
+export async function getLiveInputVideos(liveInputId: string): Promise<{
+	videos: Array<{
+		uid: string;
+		status: string;
+		isLive: boolean;
+		preview: string;
+		hlsUrl?: string;
+		dashUrl?: string;
+		created: string;
+	}>;
+	activeVideo?: {
+		uid: string;
+		preview: string;
+		hlsUrl?: string;
+		dashUrl?: string;
+	};
+}> {
+	console.log('🎬 [Cloudflare] Getting videos for Live Input:', liveInputId);
+
+	const response = await fetch(`${CLOUDFLARE_API_BASE}/live_inputs/${liveInputId}/videos`, {
+		method: 'GET',
+		headers: {
+			Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`
+		}
+	});
+
+	if (!response.ok) {
+		const error = await response.text();
+		console.error('❌ [Cloudflare] Failed to get Live Input videos:', error);
+		throw new Error(`Cloudflare API error: ${response.status} - ${error}`);
+	}
+
+	const data: CloudflareAPIResponse<any[]> = await response.json();
+
+	if (!data.success) {
+		throw new Error(`Cloudflare API error: ${data.errors.map((e) => e.message).join(', ')}`);
+	}
+
+	const videos = data.result.map((video) => ({
+		uid: video.uid,
+		status: video.status?.state || 'unknown',
+		isLive: video.status?.state === 'live-inprogress',
+		preview: video.preview,
+		hlsUrl: video.playback?.hls,
+		dashUrl: video.playback?.dash,
+		created: video.created
+	}));
+
+	// Find the active live video (if any)
+	const activeVideo = videos.find((v) => v.isLive);
+
+	console.log('✅ [Cloudflare] Found', videos.length, 'videos, Active:', activeVideo ? 'YES' : 'NO');
+
+	return {
+		videos,
+		activeVideo: activeVideo
+			? {
+					uid: activeVideo.uid,
+					preview: activeVideo.preview,
+					hlsUrl: activeVideo.hlsUrl,
+					dashUrl: activeVideo.dashUrl
+			  }
+			: undefined
+	};
+}

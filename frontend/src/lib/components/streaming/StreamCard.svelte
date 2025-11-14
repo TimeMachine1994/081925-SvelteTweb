@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Stream, StreamArmType } from '$lib/types/stream';
-	import { Video, Eye, EyeOff, Archive, StopCircle, Copy, Check, ChevronDown, Calendar } from 'lucide-svelte';
+	import { Video, Eye, EyeOff, Archive, StopCircle, Copy, Check, ChevronDown, Calendar, ExternalLink } from 'lucide-svelte';
+	import { onMount, onDestroy } from 'svelte';
 
 	let { stream, canManage, memorialId }: { stream: Stream; canManage: boolean; memorialId: string } = $props();
 
@@ -12,6 +13,12 @@
 	let showArmDropdown = $state(false);
 	let showEditTime = $state(false);
 	let editedStartTime = $state('');
+
+	// Live stream detection
+	let isStreamingLive = $state(false);
+	let liveWatchUrl = $state<string | null>(null);
+	let checkingLive = $state(false);
+	let liveCheckInterval: NodeJS.Timeout | null = null;
 
 	// Status badge styling
 	const statusColor = $derived({
@@ -187,6 +194,53 @@
 			loading = false;
 		}
 	}
+
+	async function checkIfLive() {
+		if (checkingLive) return; // Prevent overlapping checks
+		
+		checkingLive = true;
+		try {
+			const response = await fetch(`/api/streams/${stream.id}/check-live`);
+			if (response.ok) {
+				const data = await response.json();
+				isStreamingLive = data.isLive;
+				liveWatchUrl = data.watchUrl || null;
+				
+				if (data.isLive) {
+					console.log('🔴 [StreamCard] Stream is LIVE!', stream.id);
+				} else {
+					console.log('📴 [StreamCard] Stream is NOT live', stream.id);
+				}
+			}
+		} catch (error) {
+			console.error('❌ [StreamCard] Error checking if live:', error);
+		} finally {
+			checkingLive = false;
+		}
+	}
+
+	function openStream() {
+		if (liveWatchUrl) {
+			window.open(liveWatchUrl, '_blank');
+		}
+	}
+
+	// Check if stream is live on mount and periodically
+	onMount(() => {
+		// Only check if stream is armed with stream key (OBS)
+		if (stream.armStatus?.isArmed && stream.armStatus.armType === 'stream_key') {
+			checkIfLive(); // Initial check
+			
+			// Check every 15 seconds
+			liveCheckInterval = setInterval(checkIfLive, 15000);
+		}
+	});
+
+	onDestroy(() => {
+		if (liveCheckInterval) {
+			clearInterval(liveCheckInterval);
+		}
+	});
 </script>
 
 <div
@@ -392,6 +446,16 @@
 	{#if canManage}
 		<div class="border-t border-gray-100 bg-gray-50 px-6 py-4">
 			<div class="flex flex-wrap gap-3">
+				{#if isStreamingLive && liveWatchUrl}
+					<button
+						on:click={openStream}
+						class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+					>
+						<ExternalLink class="h-4 w-4" />
+						Open Stream
+					</button>
+				{/if}
+
 				{#if stream.status === 'live'}
 					<button
 						on:click={handleStop}
@@ -413,7 +477,6 @@
 						Edit Start Time
 					</button>
 				{/if}
-
 				{#if (stream.visibility || 'public') !== 'archived'}
 					<button
 						on:click={handleVisibilityToggle}
