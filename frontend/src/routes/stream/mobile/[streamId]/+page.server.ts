@@ -44,6 +44,7 @@ export const load: PageServerLoad = async ({ params }) => {
 				title: streamData.title,
 				description: streamData.description,
 				whipUrl: streamData.streamCredentials.whipUrl,
+				whepUrl: streamData.streamCredentials.whepUrl, // For playback in OBS
 				cloudflareInputId: streamData.streamCredentials.cloudflareInputId,
 				status: streamData.status
 			},

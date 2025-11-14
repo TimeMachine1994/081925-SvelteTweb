@@ -6,32 +6,32 @@
 	let { data }: { data: PageData } = $props();
 
 	let isStreaming = $state(false);
-	let copiedHls = $state(false);
+	let copiedWhep = $state(false);
 	let copiedIframe = $state(false);
 
 	// Cloudflare Stream URLs for OBS
-	// Use iframe URL - works best with OBS Browser Source or Media Source
-	const iframeUrl = `https://iframe.cloudflarestream.com/${data.stream.cloudflareInputId}`;
+	// WHEP URL - WebRTC playback for live streams (BEST for live)
+	const whepUrl = data.stream.whepUrl || `https://customer-${data.stream.cloudflareInputId?.split('-')[0]}.cloudflarestream.com/${data.stream.cloudflareInputId}/webrtc/play`;
 	
-	// Alternative: Direct HLS manifest (may have delay before available)
-	const hlsUrl = `https://customer-${data.stream.cloudflareInputId.split('-')[0]}.cloudflarestream.com/${data.stream.cloudflareInputId}/manifest/video.m3u8`;
+	// Iframe URL - For recorded playback (may not work during live streaming)
+	const iframeUrl = `https://iframe.cloudflarestream.com/${data.stream.cloudflareInputId}`;
 
-	async function copyIframeUrl() {
+	async function copyWhepUrl() {
 		try {
-			await navigator.clipboard.writeText(iframeUrl);
-			copiedIframe = true;
-			setTimeout(() => (copiedIframe = false), 2000);
+			await navigator.clipboard.writeText(whepUrl);
+			copiedWhep = true;
+			setTimeout(() => (copiedWhep = false), 2000);
 		} catch (error) {
 			console.error('Failed to copy:', error);
 			alert('Failed to copy URL. Please copy manually.');
 		}
 	}
 
-	async function copyHlsUrl() {
+	async function copyIframeUrl() {
 		try {
-			await navigator.clipboard.writeText(hlsUrl);
-			copiedHls = true;
-			setTimeout(() => (copiedHls = false), 2000);
+			await navigator.clipboard.writeText(iframeUrl);
+			copiedIframe = true;
+			setTimeout(() => (copiedIframe = false), 2000);
 		} catch (error) {
 			console.error('Failed to copy:', error);
 			alert('Failed to copy URL. Please copy manually.');
@@ -91,15 +91,44 @@
 			</div>
 
 			<p class="obs-description">
-				Copy one of these URLs and add it to OBS Studio to display this camera feed.
+				Copy this URL and use it with <strong>VLC Media Source</strong> or a <strong>WebRTC-capable player</strong> in OBS.
 			</p>
 
-			<!-- Recommended: Browser Source / Iframe URL -->
+			<!-- Recommended: WHEP URL for live streaming -->
 			<div class="url-box recommended">
 				<div class="url-header">
-					<label for="iframe-url" class="url-label">✅ Browser Source URL (Recommended)</label>
-					<span class="badge-small">Works Best</span>
+					<label for="whep-url" class="url-label">✅ WebRTC Playback URL (For Live Streaming)</label>
+					<span class="badge-small">LIVE</span>
 				</div>
+				<div class="url-input-group">
+					<input
+						id="whep-url"
+						type="text"
+						readonly
+						value={whepUrl}
+						class="url-input"
+						onclick={(e) => e.currentTarget.select()}
+					/>
+					<button
+						class="copy-btn copy-btn-primary"
+						onclick={copyWhepUrl}
+						title="Copy WHEP URL"
+					>
+						{#if copiedWhep}
+							<Check class="icon" />
+							Copied!
+						{:else}
+							<Copy class="icon" />
+							Copy
+						{/if}
+					</button>
+				</div>
+				<p class="url-hint">⚠️ <strong>Note:</strong> OBS doesn't natively support WHEP. You'll need to use VLC Media Source or wait for the recording to be ready for iframe playback.</p>
+			</div>
+
+			<!-- Alternative: Iframe URL (for recorded playback) -->
+			<div class="url-box">
+				<label for="iframe-url" class="url-label">Browser Source URL (After Recording)</label>
 				<div class="url-input-group">
 					<input
 						id="iframe-url"
@@ -110,9 +139,9 @@
 						onclick={(e) => e.currentTarget.select()}
 					/>
 					<button
-						class="copy-btn copy-btn-primary"
+						class="copy-btn"
 						onclick={copyIframeUrl}
-						title="Copy Browser Source URL"
+						title="Copy Iframe URL"
 					>
 						{#if copiedIframe}
 							<Check class="icon" />
@@ -123,67 +152,31 @@
 						{/if}
 					</button>
 				</div>
-				<p class="url-hint">Use with <strong>Browser Source</strong> in OBS (best quality, lowest latency)</p>
-			</div>
-
-			<!-- Alternative: HLS URL -->
-			<div class="url-box">
-				<label for="hls-url" class="url-label">Alternative: HLS Media Source URL</label>
-				<div class="url-input-group">
-					<input
-						id="hls-url"
-						type="text"
-						readonly
-						value={hlsUrl}
-						class="url-input"
-						onclick={(e) => e.currentTarget.select()}
-					/>
-					<button
-						class="copy-btn"
-						onclick={copyHlsUrl}
-						title="Copy HLS URL"
-					>
-						{#if copiedHls}
-							<Check class="icon" />
-							Copied!
-						{:else}
-							<Copy class="icon" />
-							Copy
-						{/if}
-					</button>
-				</div>
-				<p class="url-hint">Use with <strong>Media Source</strong> if Browser Source doesn't work</p>
+				<p class="url-hint">This URL works in <strong>Browser Source</strong> but only after the stream is recorded (not during live streaming)</p>
 			</div>
 
 			<!-- OBS Instructions -->
 			<details class="obs-instructions">
-				<summary>📖 How to add to OBS</summary>
+				<summary>⚠️ Important: OBS Limitations for Live Streaming</summary>
 				
-				<div class="instruction-method">
-					<h4>Method 1: Browser Source (Recommended)</h4>
-					<ol>
-						<li>Open OBS Studio on your computer</li>
-						<li>Click <strong>+</strong> in the Sources panel</li>
-						<li>Select <strong>Browser</strong></li>
-						<li>Name it (e.g., "Mobile Camera")</li>
-						<li>Paste the <strong>Browser Source URL</strong> above into the <strong>URL</strong> field</li>
-						<li>Set Width: 1920, Height: 1080</li>
-						<li>Click OK</li>
-						<li>Your phone camera will appear in OBS! 📱→🖥️</li>
-					</ol>
-				</div>
+				<div class="warning-box">
+					<p><strong>⚠️ Known Issue:</strong> Cloudflare Live Inputs don't provide immediate OBS-compatible playback URLs during live streaming.</p>
+					
+					<p><strong>The Problem:</strong></p>
+					<ul>
+						<li>WHEP URL requires WebRTC support (OBS doesn't have this natively)</li>
+						<li>Iframe/HLS URLs only work AFTER the stream is recorded</li>
+						<li>There's no real-time playback URL that OBS can use directly</li>
+					</ul>
 
-				<div class="instruction-method">
-					<h4>Method 2: Media Source (Alternative)</h4>
+					<p><strong>Workarounds:</strong></p>
 					<ol>
-						<li>Click <strong>+</strong> in the Sources panel</li>
-						<li>Select <strong>Media Source</strong></li>
-						<li>Name it (e.g., "Mobile Camera HLS")</li>
-						<li>Paste the <strong>HLS URL</strong> above into the <strong>Input</strong> field</li>
-						<li>Uncheck "Local File"</li>
-						<li>Check <strong>"Restart playback when source becomes active"</strong></li>
-						<li>Click OK</li>
+						<li><strong>Wait for Recording:</strong> After streaming ends, the iframe URL will work in Browser Source</li>
+						<li><strong>Use WHEPClient Plugin:</strong> Install an OBS plugin that supports WHEP protocol</li>
+						<li><strong>Use Different Tool:</strong> Consider using a tool that supports WebRTC playback (like VLC or browser-based solutions)</li>
 					</ol>
+
+					<p><strong>Best Solution:</strong> For now, mobile camera streaming is best used for <em>recording</em> rather than real-time OBS mixing. The recording will be available via the iframe URL once streaming completes.</p>
 				</div>
 			</details>
 
@@ -446,28 +439,6 @@
 		line-height: 1.5;
 	}
 
-	.instruction-method {
-		margin-top: 1.5rem;
-		padding: 1rem;
-		background: #f8f9fa;
-		border-radius: 6px;
-	}
-
-	.instruction-method:first-child {
-		margin-top: 1rem;
-	}
-
-	.instruction-method h4 {
-		margin: 0 0 0.75rem 0;
-		color: #667eea;
-		font-size: 1rem;
-	}
-
-	.instruction-method ol {
-		margin: 0;
-		padding-left: 1.5rem;
-	}
-
 	.memorial-link {
 		margin-top: 1.5rem;
 		padding-top: 1.5rem;
@@ -502,6 +473,32 @@
 	.tips-section h3 {
 		margin: 0 0 1rem 0;
 		color: #8B7355;
+	}
+
+	.warning-box {
+		padding: 1.5rem;
+		background: #fff3cd;
+		border: 2px solid #ffc107;
+		border-radius: 8px;
+		color: #856404;
+	}
+
+	.warning-box p {
+		margin: 0 0 1rem 0;
+	}
+
+	.warning-box p:last-child {
+		margin-bottom: 0;
+	}
+
+	.warning-box ul,
+	.warning-box ol {
+		margin: 0.5rem 0 1rem 1.5rem;
+		padding: 0;
+	}
+
+	.warning-box li {
+		margin: 0.25rem 0;
 	}
 
 	.tips-section ul {

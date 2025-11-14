@@ -9,8 +9,8 @@ The Mobile Input arm type allows you to use a **phone/tablet as a camera** and s
 ## 🔄 How It Works
 
 ```
-Phone Browser → WHIP → Cloudflare → HLS → OBS → Main Stream
-   (Camera)   (WebRTC)  (Stream)   (Playback) (Mix)  (Broadcast)
+Phone Browser → WHIP → Cloudflare → Iframe URL → OBS → Main Stream
+   (Camera)   (WebRTC)  (Stream)   (Browser Src)  (Mix)  (Broadcast)
 ```
 
 ### **The Flow:**
@@ -22,8 +22,8 @@ Phone Browser → WHIP → Cloudflare → HLS → OBS → Main Stream
 5. **Grant camera/mic permissions**
 6. **Click "Start Streaming"**
 7. **Phone starts broadcasting** to Cloudflare via WHIP (WebRTC)
-8. **Cloudflare generates HLS stream**
-9. **Copy HLS URL into OBS** as Media Source
+8. **Cloudflare generates live stream**
+9. **Copy Browser Source URL (iframe) into OBS** as Browser Source
 10. **Phone camera appears in OBS!** 📹
 
 ---
@@ -66,8 +66,37 @@ Phone Browser → WHIP → Cloudflare → HLS → OBS → Main Stream
 
 ### **Part 3: OBS Setup**
 
+**Method 1: Browser Source (Recommended)** ✅
+
+1. **Copy Browser Source URL**
+   - Browser Source URL is shown on the mobile page (top box with ✅)
+   - Format: `https://iframe.cloudflarestream.com/{inputId}`
+   - Click "Copy" button
+
+2. **Add to OBS**
+   - Open OBS Studio
+   - Click **+** in Sources
+   - Select **"Browser"**
+   - Name it (e.g., "Mobile Camera 1")
+   - Paste Browser Source URL into **"URL"** field
+   - Set **Width: 1920**, **Height: 1080**
+   - Click OK
+
+3. **Phone Camera in OBS!**
+   - Feed appears in OBS immediately
+   - Best quality and lowest latency
+   - Position/resize as needed
+   - Mix with other cameras/sources
+   - Stream to memorial page via main stream
+
+---
+
+**Method 2: Media Source (Alternative)**
+
+If Browser Source doesn't work for some reason:
+
 1. **Copy HLS URL**
-   - HLS URL is shown on the mobile page
+   - HLS URL is shown in the alternative box on mobile page
    - Format: `https://customer-xxx.cloudflarestream.com/xxx/manifest/video.m3u8`
    - Click "Copy" button
 
@@ -75,17 +104,11 @@ Phone Browser → WHIP → Cloudflare → HLS → OBS → Main Stream
    - Open OBS Studio
    - Click **+** in Sources
    - Select **"Media Source"**
-   - Name it (e.g., "Mobile Camera 1")
+   - Name it (e.g., "Mobile Camera HLS")
    - **Uncheck** "Local File"
    - Paste HLS URL into **"Input"** field
    - **Check** "Restart playback when source becomes active"
    - Click OK
-
-3. **Phone Camera in OBS!**
-   - Feed appears in OBS
-   - Position/resize as needed
-   - Mix with other cameras/sources
-   - Stream to memorial page via main stream
 
 ---
 
@@ -123,7 +146,8 @@ Phone 3 (Crowd)      ─┘
 - Good for live mixing
 
 ### ✅ **OBS Integration**
-- HLS playback in OBS
+- Browser Source (iframe) for best quality
+- HLS playback as fallback
 - Treat like any other source
 - Positioning, filters, transitions all work
 
@@ -143,10 +167,17 @@ Phone 3 (Crowd)      ─┘
   - Real-time, low latency
   - Browser native support
 
-- **HLS** (HTTP Live Streaming)
+- **Browser Source / Iframe Embed** (Recommended)
+  - Cloudflare → OBS playback
+  - Best quality and lowest latency
+  - OBS Browser Source compatible
+  - Direct embed of live stream player
+
+- **HLS** (HTTP Live Streaming) (Alternative)
   - Cloudflare → OBS playback
   - Standard streaming protocol
   - OBS Media Source compatible
+  - Fallback if Browser Source unavailable
 
 ### **Stream Quality:**
 
@@ -167,7 +198,12 @@ Phone streams at:
    https://customer-xxx.cloudflarestream.com/{inputId}/webrtc/publish
    ```
 
-3. **HLS Playback (for OBS):**
+3. **Browser Source / Iframe URL (for OBS - Recommended):**
+   ```
+   https://iframe.cloudflarestream.com/{inputId}
+   ```
+
+4. **HLS Playback (for OBS - Alternative):**
    ```
    https://customer-xxx.cloudflarestream.com/{inputId}/manifest/video.m3u8
    ```
@@ -200,15 +236,17 @@ Phone streams at:
 
 ### **For OBS Operators:**
 
-1. **Media Source Settings**
-   - Always check "Restart playback when source becomes active"
-   - This ensures stream reconnects if interrupted
-   - Set buffering to 1-2 seconds for lower latency
+1. **Source Settings**
+   - **Browser Source (Recommended):** Set Width: 1920, Height: 1080
+   - **Media Source (Alternative):** Check "Restart playback when source becomes active"
+   - Browser Source typically has lower latency
+   - Set buffering to 1-2 seconds if using Media Source
 
 2. **Monitoring**
    - Add audio meter for phone camera
    - Monitor for frozen frames
    - Have phone operator's contact ready
+   - Browser Source auto-reconnects on interruptions
 
 3. **Layouts**
    - Create scenes for multi-camera switching
@@ -250,14 +288,28 @@ Phone streams at:
 
 ### **OBS Shows Black Screen**
 
-**Symptom:** Media Source added but no video
+**Symptom:** Source added but no video
 
 **Solutions:**
+
+**For Browser Source:**
+- Verify iframe URL is correct (`https://iframe.cloudflarestream.com/...`)
+- Ensure Width: 1920, Height: 1080 is set
+- Check that phone is actually streaming (LIVE indicator)
+- Try refreshing the browser source (right-click → Refresh)
+- Check browser console for errors
+
+**For Media Source:**
 - Verify HLS URL is correct
+- **Uncheck** "Local File"
 - Check "Restart playback when source becomes active"
 - Ensure phone is actually streaming (check LIVE indicator)
 - Wait 10-15 seconds for stream to buffer
 - Try toggling source visibility in OBS
+
+**If both fail:**
+- Try using Browser Source instead of Media Source
+- Browser Source typically works more reliably for live streams
 
 ---
 
@@ -342,7 +394,7 @@ Phone streams at:
 
 Mobile Input streaming allows you to:
 - ✅ Use phones as cameras
-- ✅ Stream phone feed to OBS via HLS
+- ✅ Stream phone feed to OBS via Browser Source (recommended) or HLS (fallback)
 - ✅ Create multi-camera setups affordably
 - ✅ No apps or downloads needed
 - ✅ Browser-based (Chrome/Safari)
@@ -351,5 +403,7 @@ Mobile Input streaming allows you to:
 
 **The flow is simple:**
 ```
-Arm → Send Link → Phone Streams → Copy HLS → Add to OBS → Go Live! 🎉
+Arm → Send Link → Phone Streams → Copy iframe URL → Add Browser Source → Go Live! 🎉
 ```
+
+**Alternative:** Copy HLS URL → Add Media Source → Go Live!
