@@ -7,9 +7,25 @@
 
 	let isStreaming = $state(false);
 	let copiedHls = $state(false);
+	let copiedIframe = $state(false);
 
-	// Generate HLS playback URL for OBS
+	// Cloudflare Stream URLs for OBS
+	// Use iframe URL - works best with OBS Browser Source or Media Source
+	const iframeUrl = `https://iframe.cloudflarestream.com/${data.stream.cloudflareInputId}`;
+	
+	// Alternative: Direct HLS manifest (may have delay before available)
 	const hlsUrl = `https://customer-${data.stream.cloudflareInputId.split('-')[0]}.cloudflarestream.com/${data.stream.cloudflareInputId}/manifest/video.m3u8`;
+
+	async function copyIframeUrl() {
+		try {
+			await navigator.clipboard.writeText(iframeUrl);
+			copiedIframe = true;
+			setTimeout(() => (copiedIframe = false), 2000);
+		} catch (error) {
+			console.error('Failed to copy:', error);
+			alert('Failed to copy URL. Please copy manually.');
+		}
+	}
 
 	async function copyHlsUrl() {
 		try {
@@ -75,11 +91,44 @@
 			</div>
 
 			<p class="obs-description">
-				Copy this URL and add it as a <strong>Media Source</strong> in OBS Studio to display this camera feed.
+				Copy one of these URLs and add it to OBS Studio to display this camera feed.
 			</p>
 
+			<!-- Recommended: Browser Source / Iframe URL -->
+			<div class="url-box recommended">
+				<div class="url-header">
+					<label for="iframe-url" class="url-label">✅ Browser Source URL (Recommended)</label>
+					<span class="badge-small">Works Best</span>
+				</div>
+				<div class="url-input-group">
+					<input
+						id="iframe-url"
+						type="text"
+						readonly
+						value={iframeUrl}
+						class="url-input"
+						onclick={(e) => e.currentTarget.select()}
+					/>
+					<button
+						class="copy-btn copy-btn-primary"
+						onclick={copyIframeUrl}
+						title="Copy Browser Source URL"
+					>
+						{#if copiedIframe}
+							<Check class="icon" />
+							Copied!
+						{:else}
+							<Copy class="icon" />
+							Copy
+						{/if}
+					</button>
+				</div>
+				<p class="url-hint">Use with <strong>Browser Source</strong> in OBS (best quality, lowest latency)</p>
+			</div>
+
+			<!-- Alternative: HLS URL -->
 			<div class="url-box">
-				<label for="hls-url" class="url-label">HLS Playback URL</label>
+				<label for="hls-url" class="url-label">Alternative: HLS Media Source URL</label>
 				<div class="url-input-group">
 					<input
 						id="hls-url"
@@ -103,21 +152,39 @@
 						{/if}
 					</button>
 				</div>
+				<p class="url-hint">Use with <strong>Media Source</strong> if Browser Source doesn't work</p>
 			</div>
 
 			<!-- OBS Instructions -->
 			<details class="obs-instructions">
 				<summary>📖 How to add to OBS</summary>
-				<ol>
-					<li>Open OBS Studio on your computer</li>
-					<li>Click <strong>+</strong> in the Sources panel</li>
-					<li>Select <strong>Media Source</strong></li>
-					<li>Name it (e.g., "Mobile Camera")</li>
-					<li>Paste the HLS URL above into the <strong>Input</strong> field</li>
-					<li>Check <strong>"Restart playback when source becomes active"</strong></li>
-					<li>Click OK</li>
-					<li>Your phone camera will appear in OBS! 📱→🖥️</li>
-				</ol>
+				
+				<div class="instruction-method">
+					<h4>Method 1: Browser Source (Recommended)</h4>
+					<ol>
+						<li>Open OBS Studio on your computer</li>
+						<li>Click <strong>+</strong> in the Sources panel</li>
+						<li>Select <strong>Browser</strong></li>
+						<li>Name it (e.g., "Mobile Camera")</li>
+						<li>Paste the <strong>Browser Source URL</strong> above into the <strong>URL</strong> field</li>
+						<li>Set Width: 1920, Height: 1080</li>
+						<li>Click OK</li>
+						<li>Your phone camera will appear in OBS! 📱→🖥️</li>
+					</ol>
+				</div>
+
+				<div class="instruction-method">
+					<h4>Method 2: Media Source (Alternative)</h4>
+					<ol>
+						<li>Click <strong>+</strong> in the Sources panel</li>
+						<li>Select <strong>Media Source</strong></li>
+						<li>Name it (e.g., "Mobile Camera HLS")</li>
+						<li>Paste the <strong>HLS URL</strong> above into the <strong>Input</strong> field</li>
+						<li>Uncheck "Local File"</li>
+						<li>Check <strong>"Restart playback when source becomes active"</strong></li>
+						<li>Click OK</li>
+					</ol>
+				</div>
 			</details>
 
 			{#if data.memorial?.fullSlug}
@@ -253,7 +320,23 @@
 	}
 
 	.url-box {
-		margin-bottom: 1rem;
+		margin-bottom: 1.5rem;
+		padding: 1rem;
+		border: 1px solid #e0e0e0;
+		border-radius: 8px;
+		background: #fafafa;
+	}
+
+	.url-box.recommended {
+		border-color: #667eea;
+		background: #f0f4ff;
+	}
+
+	.url-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: 0.5rem;
 	}
 
 	.url-label {
@@ -261,6 +344,22 @@
 		font-weight: 600;
 		margin-bottom: 0.5rem;
 		color: #333;
+	}
+
+	.badge-small {
+		padding: 0.15rem 0.5rem;
+		border-radius: 999px;
+		font-size: 0.65rem;
+		font-weight: 600;
+		background: #28a745;
+		color: white;
+		text-transform: uppercase;
+	}
+
+	.url-hint {
+		margin-top: 0.5rem;
+		font-size: 0.8rem;
+		color: #666;
 	}
 
 	.url-input-group {
@@ -306,6 +405,14 @@
 		transform: translateY(0);
 	}
 
+	.copy-btn-primary {
+		background: #28a745;
+	}
+
+	.copy-btn-primary:hover {
+		background: #218838;
+	}
+
 	.icon {
 		width: 1rem;
 		height: 1rem;
@@ -337,6 +444,28 @@
 	.obs-instructions li {
 		margin: 0.5rem 0;
 		line-height: 1.5;
+	}
+
+	.instruction-method {
+		margin-top: 1.5rem;
+		padding: 1rem;
+		background: #f8f9fa;
+		border-radius: 6px;
+	}
+
+	.instruction-method:first-child {
+		margin-top: 1rem;
+	}
+
+	.instruction-method h4 {
+		margin: 0 0 0.75rem 0;
+		color: #667eea;
+		font-size: 1rem;
+	}
+
+	.instruction-method ol {
+		margin: 0;
+		padding-left: 1.5rem;
 	}
 
 	.memorial-link {
