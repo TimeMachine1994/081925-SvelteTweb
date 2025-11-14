@@ -182,10 +182,17 @@
 	);
 	
 	// Scheduled streams: Only show if FUTURE scheduled time
-	// (if past scheduled time, they'll be in categorizedLiveStreams)
+	// AND not already showing as live
 	let scheduledStreams = $derived(
 		liveStreams.filter(s => {
 			if (s.isVisible === false) return false;
+			
+			// If already in live streams, don't show in scheduled
+			const isInLiveStreams = categorizedLiveStreams.some(live => live.id === s.id);
+			if (isInLiveStreams) {
+				console.log('⏭️ [CATEGORIZE] Stream already in live section, skipping scheduled:', s.id);
+				return false;
+			}
 			
 			// Must have a future scheduled time
 			if (s.scheduledStartTime) {
