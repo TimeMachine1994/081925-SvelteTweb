@@ -2,6 +2,7 @@
 	import type { Stream, StreamArmType } from '$lib/types/stream';
 	import { Video, Eye, EyeOff, Archive, StopCircle, Copy, Check, ChevronDown, Calendar, ExternalLink } from 'lucide-svelte';
 	import { onMount, onDestroy } from 'svelte';
+	import { page } from '$app/stores';
 
 	let { stream, canManage, memorialId }: { stream: Stream; canManage: boolean; memorialId: string } = $props();
 
@@ -297,7 +298,7 @@
 					<div class="flex items-center gap-2">
 						<div class="relative flex-1">
 							<button
-								on:click={() => (showArmDropdown = !showArmDropdown)}
+								onclick={() => (showArmDropdown = !showArmDropdown)}
 								class="flex w-full items-center justify-between rounded-lg border border-purple-300 bg-white px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-purple-50"
 							>
 								<span>{getArmTypeLabel(selectedArmType)}</span>
@@ -308,7 +309,7 @@
 									class="absolute z-10 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg"
 								>
 									<button
-										on:click={() => {
+										onclick={() => {
 											selectedArmType = 'mobile_input';
 											showArmDropdown = false;
 										}}
@@ -317,7 +318,7 @@
 										Mobile Input
 									</button>
 									<button
-										on:click={() => {
+										onclick={() => {
 											selectedArmType = 'mobile_streaming';
 											showArmDropdown = false;
 										}}
@@ -326,7 +327,7 @@
 										Mobile Streaming
 									</button>
 									<button
-										on:click={() => {
+										onclick={() => {
 											selectedArmType = 'stream_key';
 											showArmDropdown = false;
 										}}
@@ -338,7 +339,7 @@
 							{/if}
 						</div>
 						<button
-							on:click={handleArm}
+							onclick={handleArm}
 							disabled={loading}
 							class="rounded-lg bg-purple-600 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700 disabled:opacity-50"
 						>
@@ -361,13 +362,13 @@
 						
 						<div class="mb-3 rounded-lg bg-white p-3 border border-purple-200">
 							<code class="block text-xs text-purple-900 break-all">
-								{window.location.origin}/stream/mobile/{stream.id}
+								{$page.url.origin}/stream/mobile/{stream.id}
 							</code>
 						</div>
 						
 						<div class="flex gap-2">
 							<button
-								on:click={() => copyToClipboard(`${window.location.origin}/stream/mobile/${stream.id}`, 'whip')}
+								onclick={() => copyToClipboard(`${$page.url.origin}/stream/mobile/${stream.id}`, 'whip')}
 								class="flex-1 flex items-center justify-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700"
 							>
 								{#if copiedWhip}
@@ -408,7 +409,7 @@
 									{stream.streamCredentials.rtmpUrl}
 								</code>
 								<button
-									on:click={() => copyToClipboard(stream.streamCredentials!.rtmpUrl!, 'rtmp')}
+									onclick={() => copyToClipboard(stream.streamCredentials!.rtmpUrl!, 'rtmp')}
 									class="rounded-lg bg-green-600 p-2 text-white transition-colors hover:bg-green-700"
 									title="Copy RTMP URL"
 								>
@@ -428,7 +429,7 @@
 									{stream.streamCredentials.streamKey}
 								</code>
 								<button
-									on:click={() => copyToClipboard(stream.streamCredentials!.streamKey!, 'streamKey')}
+									onclick={() => copyToClipboard(stream.streamCredentials!.streamKey!, 'streamKey')}
 									class="rounded-lg bg-green-600 p-2 text-white transition-colors hover:bg-green-700"
 									title="Copy Stream Key"
 								>
@@ -452,13 +453,13 @@
 			{#if stream.status === 'live'}
 				<div class="rounded-lg bg-red-50 p-4">
 					<p class="text-sm text-red-800">
-						🔴 <strong>Live Now</strong> - Stream is currently broadcasting
+						 <strong>Live Now</strong> - Stream is currently broadcasting
 					</p>
 				</div>
 			{:else if stream.status === 'completed'}
 				<div class="rounded-lg bg-green-50 p-4">
 					<p class="text-sm text-green-800">
-						✅ <strong>Recording Available</strong> - Stream has been saved and is ready for playback
+						 <strong>Recording Available</strong> - Stream has been saved and is ready for playback
 					</p>
 				</div>
 			{/if}
@@ -471,7 +472,7 @@
 			<div class="flex flex-wrap gap-3">
 				{#if isStreamingLive && liveWatchUrl}
 					<button
-						on:click={openStream}
+						onclick={openStream}
 						class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
 					>
 						<ExternalLink class="h-4 w-4" />
@@ -481,7 +482,7 @@
 
 				{#if stream.status === 'live'}
 					<button
-						on:click={handleStop}
+						onclick={handleStop}
 						disabled={loading}
 						class="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-700 disabled:opacity-50"
 					>
@@ -492,7 +493,7 @@
 
 				{#if stream.scheduledStartTime}
 					<button
-						on:click={openEditTime}
+						onclick={openEditTime}
 						disabled={loading}
 						class="flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:opacity-50"
 					>
@@ -502,7 +503,7 @@
 				{/if}
 				{#if (stream.visibility || 'public') !== 'archived'}
 					<button
-						on:click={handleVisibilityToggle}
+						onclick={handleVisibilityToggle}
 						disabled={loading}
 						class="flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:opacity-50"
 					>
@@ -517,8 +518,8 @@
 
 <!-- Edit Start Time Modal -->
 {#if showEditTime}
-	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" on:click={() => (showEditTime = false)}>
-		<div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl" on:click|stopPropagation>
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onclick={() => (showEditTime = false)}>
+		<div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl" onclick={(e) => e.stopPropagation()}>
 			<h3 class="mb-4 text-lg font-semibold text-gray-900">Edit Start Time</h3>
 			
 			<div class="mb-4">
@@ -535,14 +536,14 @@
 
 			<div class="flex gap-3">
 				<button
-					on:click={handleUpdateTime}
+					onclick={handleUpdateTime}
 					disabled={loading}
 					class="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
 				>
 					{loading ? 'Updating...' : 'Update'}
 				</button>
 				<button
-					on:click={() => (showEditTime = false)}
+					onclick={() => (showEditTime = false)}
 					disabled={loading}
 					class="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:opacity-50"
 				>
