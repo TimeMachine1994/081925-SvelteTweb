@@ -44,9 +44,10 @@ export const load: PageServerLoad = async ({ params }) => {
 				title: streamData.title,
 				description: streamData.description,
 				whipUrl: streamData.streamCredentials.whipUrl,
-				whepUrl: streamData.streamCredentials.whepUrl, // For playback in OBS
 				cloudflareInputId: streamData.streamCredentials.cloudflareInputId,
-				status: streamData.status
+				status: streamData.status,
+				hlsUrl: streamData.hlsUrl, // HLS URL set by webhook when live
+				liveWatchUrl: streamData.liveWatchUrl // Preview URL from webhook
 			},
 			memorial: memorialData ? {
 				lovedOneName: memorialData.lovedOneName,

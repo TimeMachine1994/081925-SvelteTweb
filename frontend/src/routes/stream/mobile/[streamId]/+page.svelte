@@ -6,32 +6,29 @@
 	let { data }: { data: PageData } = $props();
 
 	let isStreaming = $state(false);
-	let copiedWhep = $state(false);
-	let copiedIframe = $state(false);
+	let copiedHls = $state(false);
+	let copiedPreview = $state(false);
 
-	// Cloudflare Stream URLs for OBS
-	// WHEP URL - WebRTC playback for live streams (BEST for live)
-	const whepUrl = data.stream.whepUrl || `https://customer-${data.stream.cloudflareInputId?.split('-')[0]}.cloudflarestream.com/${data.stream.cloudflareInputId}/webrtc/play`;
-	
-	// Iframe URL - For recorded playback (may not work during live streaming)
-	const iframeUrl = `https://iframe.cloudflarestream.com/${data.stream.cloudflareInputId}`;
+	// Reactive URLs - these get set by Cloudflare webhooks when stream goes live
+	let hlsUrl = $state(data.stream.hlsUrl || '');
+	let liveWatchUrl = $state(data.stream.liveWatchUrl || '');
 
-	async function copyWhepUrl() {
+	async function copyHlsUrl() {
 		try {
-			await navigator.clipboard.writeText(whepUrl);
-			copiedWhep = true;
-			setTimeout(() => (copiedWhep = false), 2000);
+			await navigator.clipboard.writeText(hlsUrl);
+			copiedHls = true;
+			setTimeout(() => (copiedHls = false), 2000);
 		} catch (error) {
 			console.error('Failed to copy:', error);
 			alert('Failed to copy URL. Please copy manually.');
 		}
 	}
 
-	async function copyIframeUrl() {
+	async function copyPreviewUrl() {
 		try {
-			await navigator.clipboard.writeText(iframeUrl);
-			copiedIframe = true;
-			setTimeout(() => (copiedIframe = false), 2000);
+			await navigator.clipboard.writeText(liveWatchUrl);
+			copiedPreview = true;
+			setTimeout(() => (copiedPreview = false), 2000);
 		} catch (error) {
 			console.error('Failed to copy:', error);
 			alert('Failed to copy URL. Please copy manually.');
@@ -90,93 +87,109 @@
 				{/if}
 			</div>
 
-			<p class="obs-description">
-				Copy this URL and use it with <strong>VLC Media Source</strong> or a <strong>WebRTC-capable player</strong> in OBS.
-			</p>
+			{#if hlsUrl}
+				<!-- HLS URL is available - stream is live! -->
+				<p class="obs-description success-message">
+					✅ <strong>Stream is LIVE!</strong> Copy the HLS URL below and add it to OBS as a <strong>Media Source</strong>.
+				</p>
 
-			<!-- Recommended: WHEP URL for live streaming -->
-			<div class="url-box recommended">
-				<div class="url-header">
-					<label for="whep-url" class="url-label">✅ WebRTC Playback URL (For Live Streaming)</label>
-					<span class="badge-small">LIVE</span>
+				<div class="url-box recommended">
+					<div class="url-header">
+						<label for="hls-url" class="url-label">✅ HLS Playback URL (For OBS)</label>
+						<span class="badge-small">LIVE</span>
+					</div>
+					<div class="url-input-group">
+						<input
+							id="hls-url"
+							type="text"
+							readonly
+							value={hlsUrl}
+							class="url-input"
+							onclick={(e) => e.currentTarget.select()}
+						/>
+						<button
+							class="copy-btn copy-btn-primary"
+							onclick={copyHlsUrl}
+							title="Copy HLS URL"
+						>
+							{#if copiedHls}
+								<Check class="icon-check" />
+								Copied!
+							{:else}
+								<Copy class="icon-copy" />
+								Copy
+							{/if}
+						</button>
+					</div>
+					<p class="url-hint">Use this with <strong>Media Source</strong> in OBS. Uncheck "Local File" and paste this URL.</p>
 				</div>
-				<div class="url-input-group">
-					<input
-						id="whep-url"
-						type="text"
-						readonly
-						value={whepUrl}
-						class="url-input"
-						onclick={(e) => e.currentTarget.select()}
-					/>
-					<button
-						class="copy-btn copy-btn-primary"
-						onclick={copyWhepUrl}
-						title="Copy WHEP URL"
-					>
-						{#if copiedWhep}
-							<Check class="icon" />
-							Copied!
-						{:else}
-							<Copy class="icon" />
-							Copy
-						{/if}
-					</button>
-				</div>
-				<p class="url-hint">⚠️ <strong>Note:</strong> OBS doesn't natively support WHEP. You'll need to use VLC Media Source or wait for the recording to be ready for iframe playback.</p>
-			</div>
+			{:else}
+				<!-- HLS URL not available yet -->
+				<p class="obs-description waiting-message">
+					⏳ <strong>Waiting for stream...</strong> The HLS URL will appear here automatically once you start streaming and Cloudflare processes the feed (usually 10-30 seconds).
+				</p>
 
-			<!-- Alternative: Iframe URL (for recorded playback) -->
-			<div class="url-box">
-				<label for="iframe-url" class="url-label">Browser Source URL (After Recording)</label>
-				<div class="url-input-group">
-					<input
-						id="iframe-url"
-						type="text"
-						readonly
-						value={iframeUrl}
-						class="url-input"
-						onclick={(e) => e.currentTarget.select()}
-					/>
-					<button
-						class="copy-btn"
-						onclick={copyIframeUrl}
-						title="Copy Iframe URL"
-					>
-						{#if copiedIframe}
-							<Check class="icon" />
-							Copied!
-						{:else}
-							<Copy class="icon" />
-							Copy
-						{/if}
-					</button>
+				<div class="url-box waiting">
+					<div class="url-header">
+						<label class="url-label">HLS Playback URL (Pending)</label>
+						<span class="badge-small badge-waiting">Waiting</span>
+					</div>
+					<p class="url-hint">Start streaming from your phone, and the URL will appear here automatically via webhook.</p>
 				</div>
-				<p class="url-hint">This URL works in <strong>Browser Source</strong> but only after the stream is recorded (not during live streaming)</p>
-			</div>
+			{/if}
+
+			{#if liveWatchUrl}
+				<!-- Preview URL for viewing in browser -->
+				<div class="url-box">
+					<label for="preview-url" class="url-label">Preview URL (View in Browser)</label>
+					<div class="url-input-group">
+						<input
+							id="preview-url"
+							type="text"
+							readonly
+							value={liveWatchUrl}
+							class="url-input"
+							onclick={(e) => e.currentTarget.select()}
+						/>
+						<button
+							class="copy-btn"
+							onclick={copyPreviewUrl}
+							title="Copy Preview URL"
+						>
+							{#if copiedPreview}
+								<Check class="icon-check" />
+								Copied!
+							{:else}
+								<Copy class="icon-copy" />
+								Copy
+							{/if}
+						</button>
+					</div>
+					<p class="url-hint">Open this URL in a browser to preview the live stream</p>
+				</div>
+			{/if}
 
 			<!-- OBS Instructions -->
 			<details class="obs-instructions">
-				<summary>⚠️ Important: OBS Limitations for Live Streaming</summary>
+				<summary>📖 How to add to OBS</summary>
 				
-				<div class="warning-box">
-					<p><strong>⚠️ Known Issue:</strong> Cloudflare Live Inputs don't provide immediate OBS-compatible playback URLs during live streaming.</p>
-					
-					<p><strong>The Problem:</strong></p>
-					<ul>
-						<li>WHEP URL requires WebRTC support (OBS doesn't have this natively)</li>
-						<li>Iframe/HLS URLs only work AFTER the stream is recorded</li>
-						<li>There's no real-time playback URL that OBS can use directly</li>
-					</ul>
-
-					<p><strong>Workarounds:</strong></p>
+				<div class="instruction-steps">
+					<h4>Step-by-Step:</h4>
 					<ol>
-						<li><strong>Wait for Recording:</strong> After streaming ends, the iframe URL will work in Browser Source</li>
-						<li><strong>Use WHEPClient Plugin:</strong> Install an OBS plugin that supports WHEP protocol</li>
-						<li><strong>Use Different Tool:</strong> Consider using a tool that supports WebRTC playback (like VLC or browser-based solutions)</li>
+						<li>Start streaming from your phone (click "Start Streaming" above)</li>
+						<li>Wait 10-30 seconds for Cloudflare to process the stream</li>
+						<li>The HLS URL will appear automatically on this page</li>
+						<li>Copy the HLS URL</li>
+						<li>In OBS Studio, click <strong>+</strong> in Sources panel</li>
+						<li>Select <strong>Media Source</strong></li>
+						<li>Name it (e.g., "Mobile Camera")</li>
+						<li><strong>Uncheck "Local File"</strong></li>
+						<li>Paste the HLS URL into the <strong>Input</strong> field</li>
+						<li>Check <strong>"Restart playback when source becomes active"</strong></li>
+						<li>Click OK - your phone camera appears in OBS! 📱→🖥️</li>
 					</ol>
 
-					<p><strong>Best Solution:</strong> For now, mobile camera streaming is best used for <em>recording</em> rather than real-time OBS mixing. The recording will be available via the iframe URL once streaming completes.</p>
+					<p><strong>💡 Tip:</strong> There's a 10-30 second delay between starting the stream and the HLS URL becoming available. Be patient - it will appear automatically!</p>
 				</div>
 			</details>
 
@@ -406,9 +419,62 @@
 		background: #218838;
 	}
 
-	.icon {
+	.icon-check,
+	.icon-copy {
 		width: 1rem;
 		height: 1rem;
+	}
+
+	.success-message {
+		color: #155724;
+		background: #d4edda;
+		padding: 1rem;
+		border-radius: 6px;
+		border: 1px solid #c3e6cb;
+	}
+
+	.waiting-message {
+		color: #856404;
+		background: #fff3cd;
+		padding: 1rem;
+		border-radius: 6px;
+		border: 1px solid #ffeeba;
+	}
+
+	.url-box.waiting {
+		background: #fafafa;
+		border-color: #ddd;
+	}
+
+	.badge-waiting {
+		background: #6c757d;
+	}
+
+	.instruction-steps {
+		padding: 1rem;
+	}
+
+	.instruction-steps h4 {
+		margin: 0 0 0.75rem 0;
+		color: #667eea;
+	}
+
+	.instruction-steps ol {
+		margin: 0.5rem 0;
+		padding-left: 1.5rem;
+	}
+
+	.instruction-steps li {
+		margin: 0.5rem 0;
+		line-height: 1.6;
+	}
+
+	.instruction-steps p {
+		margin: 1rem 0 0 0;
+		padding: 0.75rem;
+		background: #e7f3ff;
+		border-left: 3px solid #667eea;
+		border-radius: 4px;
 	}
 
 	.obs-instructions {
@@ -473,32 +539,6 @@
 	.tips-section h3 {
 		margin: 0 0 1rem 0;
 		color: #8B7355;
-	}
-
-	.warning-box {
-		padding: 1.5rem;
-		background: #fff3cd;
-		border: 2px solid #ffc107;
-		border-radius: 8px;
-		color: #856404;
-	}
-
-	.warning-box p {
-		margin: 0 0 1rem 0;
-	}
-
-	.warning-box p:last-child {
-		margin-bottom: 0;
-	}
-
-	.warning-box ul,
-	.warning-box ol {
-		margin: 0.5rem 0 1rem 1.5rem;
-		padding: 0;
-	}
-
-	.warning-box li {
-		margin: 0.25rem 0;
 	}
 
 	.tips-section ul {
