@@ -2,6 +2,9 @@
 	import type { PageData } from './$types';
 	import BrowserStreamer from '$lib/components/BrowserStreamer.svelte';
 	import { Copy, Check, ExternalLink } from 'lucide-svelte';
+	import { onMount, onDestroy } from 'svelte';
+	import { db } from '$lib/firebase';
+	import { doc, onSnapshot } from 'firebase/firestore';
 
 	let { data }: { data: PageData } = $props();
 
@@ -12,10 +15,53 @@
 	// Reactive URLs - these get set by Cloudflare webhooks when stream goes live
 	let hlsUrl = $state(data.stream.hlsUrl || '');
 	let liveWatchUrl = $state(data.stream.liveWatchUrl || '');
+	
+	// Fallback: Construct HLS URL from cloudflareInputId if webhook hasn't arrived yet
+	// Format: https://customer-{subdomain}.cloudflarestream.com/{inputId}/manifest/video.m3u8
+	const fallbackHlsUrl = data.stream.cloudflareInputId 
+		? `https://customer-${data.stream.cloudflareInputId.split('-')[0]}.cloudflarestream.com/${data.stream.cloudflareInputId}/manifest/video.m3u8`
+		: '';
+	
+	// Use fallback if streaming but webhook hasn't set hlsUrl yet
+	const displayHlsUrl = $derived(hlsUrl || (isStreaming ? fallbackHlsUrl : ''));
+	
+	let unsubscribe: (() => void) | null = null;
+
+	// Listen for real-time updates from Firestore when webhook arrives
+	onMount(() => {
+		const streamRef = doc(db, 'streams', data.stream.id);
+		
+		unsubscribe = onSnapshot(streamRef, (snapshot) => {
+			if (snapshot.exists()) {
+				const streamData = snapshot.data();
+				console.log('📡 [MOBILE] Stream updated:', streamData);
+				
+				// Update URLs when webhook sets them
+				if (streamData.hlsUrl) {
+					hlsUrl = streamData.hlsUrl;
+					console.log('✅ [MOBILE] HLS URL received:', hlsUrl);
+				}
+				if (streamData.liveWatchUrl) {
+					liveWatchUrl = streamData.liveWatchUrl;
+					console.log('✅ [MOBILE] Live watch URL received:', liveWatchUrl);
+				}
+			}
+		});
+		
+		console.log('👂 [MOBILE] Listening for stream updates...');
+		console.log('📋 [MOBILE] Fallback HLS URL:', fallbackHlsUrl);
+	});
+
+	onDestroy(() => {
+		if (unsubscribe) {
+			unsubscribe();
+			console.log('🔇 [MOBILE] Stopped listening for stream updates');
+		}
+	});
 
 	async function copyHlsUrl() {
 		try {
-			await navigator.clipboard.writeText(hlsUrl);
+			await navigator.clipboard.writeText(displayHlsUrl);
 			copiedHls = true;
 			setTimeout(() => (copiedHls = false), 2000);
 		} catch (error) {
@@ -87,7 +133,7 @@
 				{/if}
 			</div>
 
-			{#if hlsUrl}
+			{#if displayHlsUrl}
 				<!-- HLS URL is available - stream is live! -->
 				<p class="obs-description success-message">
 					✅ <strong>Stream is LIVE!</strong> Copy the HLS URL below and add it to OBS as a <strong>Media Source</strong>.
@@ -103,7 +149,7 @@
 							id="hls-url"
 							type="text"
 							readonly
-							value={hlsUrl}
+							value={displayHlsUrl}
 							class="url-input"
 							onclick={(e) => e.currentTarget.select()}
 						/>
@@ -122,11 +168,16 @@
 						</button>
 					</div>
 					<p class="url-hint">Use this with <strong>Media Source</strong> in OBS. Uncheck "Local File" and paste this URL.</p>
+					{#if !hlsUrl && isStreaming}
+						<p class="url-hint" style="color: #856404; margin-top: 0.5rem;">
+							📡 <em>Using fallback URL - webhook will update with official URL soon</em>
+						</p>
+					{/if}
 				</div>
 			{:else}
 				<!-- HLS URL not available yet -->
 				<p class="obs-description waiting-message">
-					⏳ <strong>Waiting for stream...</strong> The HLS URL will appear here automatically once you start streaming and Cloudflare processes the feed (usually 10-30 seconds).
+					⏳ <strong>Waiting for stream...</strong> The HLS URL will appear here automatically once you start streaming.
 				</p>
 
 				<div class="url-box waiting">
@@ -134,7 +185,7 @@
 						<label class="url-label">HLS Playback URL (Pending)</label>
 						<span class="badge-small badge-waiting">Waiting</span>
 					</div>
-					<p class="url-hint">Start streaming from your phone, and the URL will appear here automatically via webhook.</p>
+					<p class="url-hint">Click "Start Streaming" above, and the URL will appear here immediately!</p>
 				</div>
 			{/if}
 
