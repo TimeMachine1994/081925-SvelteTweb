@@ -228,9 +228,15 @@
 						</button>
 					</div>
 					<p class="url-hint">In OBS: Add <strong>Browser Source</strong> → Paste this URL → Set size to 1920x1080</p>
-					<p class="url-hint" style="margin-top: 0.5rem; padding: 0.5rem; background: #e7f3ff; border-left: 3px solid #667eea; border-radius: 4px;">
-						<span class="spinner-small"></span> <strong>HLS URL coming soon...</strong> Cloudflare is processing. HLS URL for Media Source will appear when webhook arrives (10-30 sec).
-					</p>
+					{#if !hlsUrl}
+						<p class="url-hint" style="margin-top: 0.5rem; padding: 0.5rem; background: #e7f3ff; border-left: 3px solid #667eea; border-radius: 4px;">
+							<span class="spinner-small"></span> <strong>HLS URL coming soon...</strong> Cloudflare is processing. HLS URL for Media Source will appear when webhook arrives (10-30 sec).
+						</p>
+					{:else}
+						<p class="url-hint" style="margin-top: 0.5rem; padding: 0.5rem; background: #d4edda; border-left: 3px solid #28a745; border-radius: 4px;">
+							✅ <strong>HLS URL is ready!</strong> Scroll down to see the HLS URL for OBS Media Source.
+						</p>
+					{/if}
 				</div>
 			{:else}
 				<!-- Not streaming yet -->
