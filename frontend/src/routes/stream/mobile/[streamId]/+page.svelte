@@ -16,23 +16,22 @@
 	let hlsUrl = $state(data.stream.hlsUrl || '');
 	let liveWatchUrl = $state(data.stream.liveWatchUrl || '');
 	
-	// Fallback: Construct HLS URL from cloudflareInputId if webhook hasn't arrived yet
-	// Format: https://customer-{subdomain}.cloudflarestream.com/{inputId}/manifest/video.m3u8
+	// Display HLS URL - either from webhook or fallback
+	let displayHlsUrl = $state('');
+	
+	// Fallback: Construct HLS URL from cloudflareInputId
 	const cloudflareInputId = data.stream.cloudflareInputId;
-	
-	console.log('🔧 [MOBILE] Cloudflare Input ID:', cloudflareInputId);
-	
 	const fallbackHlsUrl = cloudflareInputId 
 		? `https://customer-${cloudflareInputId.split('-')[0]}.cloudflarestream.com/${cloudflareInputId}/manifest/video.m3u8`
 		: '';
 	
+	console.log('🔧 [MOBILE] Cloudflare Input ID:', cloudflareInputId);
 	console.log('🔧 [MOBILE] Fallback HLS URL:', fallbackHlsUrl);
 	
-	// Use fallback if streaming but webhook hasn't set hlsUrl yet
-	const displayHlsUrl = $derived.by(() => {
-		const url = hlsUrl || (isStreaming ? fallbackHlsUrl : '');
-		console.log('🔧 [MOBILE] Display HLS URL:', url, '(isStreaming:', isStreaming, ')');
-		return url;
+	// Update display URL when streaming state changes
+	$effect(() => {
+		displayHlsUrl = hlsUrl || (isStreaming ? fallbackHlsUrl : '');
+		console.log('🔧 [MOBILE] Display HLS URL updated:', displayHlsUrl, '(isStreaming:', isStreaming, ')');
 	});
 	
 	let unsubscribe: (() => void) | null = null;
@@ -92,14 +91,12 @@
 	}
 
 	function handleStreamStart() {
-		console.log('🔴 [MOBILE] Stream started - setting isStreaming to true');
+		console.log('🔴 [MOBILE] Stream started!');
 		isStreaming = true;
-		console.log('🔴 [MOBILE] isStreaming is now:', isStreaming);
-		console.log('🔴 [MOBILE] displayHlsUrl should be:', displayHlsUrl);
 	}
 
 	function handleStreamStop() {
-		console.log('⏹️ [MOBILE] Stream stopped - setting isStreaming to false');
+		console.log('⏹️ [MOBILE] Stream stopped');
 		isStreaming = false;
 	}
 </script>
