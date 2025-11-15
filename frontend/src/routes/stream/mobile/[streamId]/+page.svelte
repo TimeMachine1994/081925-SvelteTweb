@@ -10,14 +10,21 @@
 
 	let isStreaming = $state(false);
 	let copiedHls = $state(false);
+	let copiedIframe = $state(false);
 	let copiedPreview = $state(false);
 
 	// Reactive URLs - these get set by Cloudflare webhooks when stream goes live
 	let hlsUrl = $state(data.stream.hlsUrl || '');
 	let liveWatchUrl = $state(data.stream.liveWatchUrl || '');
 	
+	// Immediate iframe URL for OBS Browser Source (works while streaming, no webhook needed)
+	const iframeUrl = data.stream.cloudflareInputId 
+		? `https://iframe.cloudflarestream.com/${data.stream.cloudflareInputId}`
+		: '';
+	
 	console.log('🔧 [MOBILE] Initial HLS URL from server:', hlsUrl);
 	console.log('🔧 [MOBILE] Cloudflare Input ID:', data.stream.cloudflareInputId);
+	console.log('🔧 [MOBILE] Iframe URL (immediate):', iframeUrl);
 	
 	let unsubscribe: (() => void) | null = null;
 
@@ -28,16 +35,29 @@
 		unsubscribe = onSnapshot(streamRef, (snapshot) => {
 			if (snapshot.exists()) {
 				const streamData = snapshot.data();
-				console.log('📡 [MOBILE] Stream updated:', streamData);
+				console.log('📡 [MOBILE] Stream updated:', {
+					status: streamData.status,
+					hlsUrl: streamData.hlsUrl,
+					liveWatchUrl: streamData.liveWatchUrl,
+					playbackUrl: streamData.playbackUrl,
+					embedUrl: streamData.embedUrl,
+					cloudflareInputId: streamData.streamCredentials?.cloudflareInputId,
+					fullData: streamData
+				});
 				
 				// Update URLs when webhook sets them
 				if (streamData.hlsUrl) {
 					hlsUrl = streamData.hlsUrl;
 					console.log('✅ [MOBILE] HLS URL received:', hlsUrl);
+				} else {
+					console.log('⚠️ [MOBILE] No hlsUrl in stream data yet');
 				}
+				
 				if (streamData.liveWatchUrl) {
 					liveWatchUrl = streamData.liveWatchUrl;
 					console.log('✅ [MOBILE] Live watch URL received:', liveWatchUrl);
+				} else {
+					console.log('⚠️ [MOBILE] No liveWatchUrl in stream data yet');
 				}
 			}
 		});
@@ -57,6 +77,17 @@
 			await navigator.clipboard.writeText(hlsUrl);
 			copiedHls = true;
 			setTimeout(() => (copiedHls = false), 2000);
+		} catch (error) {
+			console.error('Failed to copy:', error);
+			alert('Failed to copy URL. Please copy manually.');
+		}
+	}
+
+	async function copyIframeUrl() {
+		try {
+			await navigator.clipboard.writeText(iframeUrl);
+			copiedIframe = true;
+			setTimeout(() => (copiedIframe = false), 2000);
 		} catch (error) {
 			console.error('Failed to copy:', error);
 			alert('Failed to copy URL. Please copy manually.');
@@ -162,18 +193,44 @@
 					</div>
 					<p class="url-hint">Use this with <strong>Media Source</strong> in OBS. Uncheck "Local File" and paste this URL.</p>
 				</div>
-			{:else if isStreaming}
-				<!-- Streaming but waiting for webhook -->
-				<p class="obs-description waiting-message">
-					📡 <strong>Processing stream...</strong> Cloudflare is processing your live stream. The HLS URL will appear here automatically in 10-30 seconds.
+			{:else if isStreaming && iframeUrl}
+				<!-- Streaming - show iframe URL immediately -->
+				<p class="obs-description success-message">
+					✅ <strong>Stream Active!</strong> Use the iframe URL below with OBS <strong>Browser Source</strong>.
 				</p>
 
-				<div class="url-box waiting">
+				<div class="url-box recommended">
 					<div class="url-header">
-						<label class="url-label">HLS Playback URL (Processing)</label>
-						<span class="badge-small badge-waiting">Processing</span>
+						<label for="iframe-url" class="url-label">🌐 Iframe URL (For OBS Browser Source)</label>
+						<span class="badge-small">LIVE</span>
 					</div>
-					<p class="url-hint">Keep streaming! The URL will appear automatically when Cloudflare's webhook arrives.</p>
+					<div class="url-input-group">
+						<input
+							id="iframe-url"
+							type="text"
+							readonly
+							value={iframeUrl}
+							class="url-input"
+							onclick={(e) => e.currentTarget.select()}
+						/>
+						<button
+							class="copy-btn copy-btn-primary"
+							onclick={copyIframeUrl}
+							title="Copy Iframe URL"
+						>
+							{#if copiedIframe}
+								<Check class="icon-check" />
+								Copied!
+							{:else}
+								<Copy class="icon-copy" />
+								Copy
+							{/if}
+						</button>
+					</div>
+					<p class="url-hint">In OBS: Add <strong>Browser Source</strong> → Paste this URL → Set size to 1920x1080</p>
+					<p class="url-hint" style="margin-top: 0.5rem; padding: 0.5rem; background: #e7f3ff; border-left: 3px solid #667eea; border-radius: 4px;">
+						<span class="spinner-small"></span> <strong>HLS URL coming soon...</strong> Cloudflare is processing. HLS URL for Media Source will appear when webhook arrives (10-30 sec).
+					</p>
 				</div>
 			{:else}
 				<!-- Not streaming yet -->
@@ -500,6 +557,37 @@
 
 	.badge-waiting {
 		background: #6c757d;
+	}
+
+	/* Loading spinners */
+	.spinner,
+	.spinner-small {
+		display: inline-block;
+		border: 2px solid rgba(0, 0, 0, 0.1);
+		border-left-color: #667eea;
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+	}
+
+	.spinner {
+		width: 1.25rem;
+		height: 1.25rem;
+		border-width: 3px;
+		vertical-align: middle;
+		margin-right: 0.5rem;
+	}
+
+	.spinner-small {
+		width: 0.875rem;
+		height: 0.875rem;
+		border-width: 2px;
+		vertical-align: middle;
+		margin-right: 0.375rem;
+	}
+
+	@keyframes spin {
+		0% { transform: rotate(0deg); }
+		100% { transform: rotate(360deg); }
 	}
 
 	.instruction-steps {
