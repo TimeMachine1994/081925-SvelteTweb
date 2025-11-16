@@ -21,8 +21,7 @@
 <button
 	type="button"
 	onclick={onclick}
-	class="w-full max-w-2xl mx-auto flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-[#D5BA7F] text-gray-800 font-medium rounded-lg hover:bg-[#D5BA7F]/10 transition-all duration-200 shadow-sm relative"
-	class:bg-[#D5BA7F]/5={isOpen}
+	class="w-full max-w-2xl mx-auto flex items-center justify-center gap-2 px-6 py-3 border-2 border-[#D5BA7F] text-gray-800 font-medium rounded-lg hover:bg-[#D5BA7F]/10 transition-all duration-200 shadow-sm relative {isOpen ? 'bg-[#D5BA7F]/5' : 'bg-white'}"
 >
 	<MessageCircle class="w-5 h-5 text-[#D5BA7F]" />
 	<span>{buttonText()}</span>

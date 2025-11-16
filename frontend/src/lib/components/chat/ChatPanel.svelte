@@ -21,7 +21,7 @@
 	let isLoading = $state(false);
 	let isSending = $state(false);
 	let error = $state('');
-	let messagesContainer: HTMLDivElement;
+	let messagesContainer = $state<HTMLDivElement | undefined>(undefined);
 	let pollInterval: ReturnType<typeof setInterval>;
 	
 	// Auto-scroll to bottom
