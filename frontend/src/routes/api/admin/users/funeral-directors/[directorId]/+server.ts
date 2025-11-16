@@ -42,25 +42,28 @@ export async function GET({ params, locals }: any) {
 		}
 
 		// Get memorials created by this director
+		// Note: Removed orderBy to avoid composite index requirement
 		const memorialsSnapshot = await adminDb
 			.collection('memorials')
 			.where('createdBy', '==', directorId)
-			.orderBy('createdAt', 'desc')
 			.limit(50)
 			.get();
 
-		const memorials = memorialsSnapshot.docs.map(doc => {
-			const data = doc.data();
-			return {
-				id: doc.id,
-				lovedOneName: data.lovedOneName,
-				fullSlug: data.fullSlug,
-				isPaid: data.isPaid || false,
-				isPublic: data.isPublic || false,
-				createdAt: data.createdAt?.toDate?.()?.toISOString() || null,
-				services: data.services
-			};
-		});
+		const memorials = memorialsSnapshot.docs
+			.map(doc => {
+				const data = doc.data();
+				return {
+					id: doc.id,
+					lovedOneName: data.lovedOneName,
+					fullSlug: data.fullSlug,
+					isPaid: data.isPaid || false,
+					isPublic: data.isPublic || false,
+					createdAt: data.createdAt?.toDate?.()?.toISOString() || null,
+					createdAtTimestamp: data.createdAt?.toDate?.()?.getTime() || 0,
+					services: data.services
+				};
+			})
+			.sort((a, b) => b.createdAtTimestamp - a.createdAtTimestamp); // Sort in memory, newest first
 
 		// Calculate statistics
 		const totalMemorials = memorials.length;
@@ -143,5 +146,63 @@ export async function PUT({ params, request, locals }: any) {
 	} catch (error: any) {
 		console.error('Error updating funeral director:', error);
 		return json({ error: 'Failed to update funeral director' }, { status: 500 });
+	}
+}
+
+export async function DELETE({ params, locals }: any) {
+	// Auth check
+	if (!locals.user || locals.user.role !== 'admin') {
+		return json({ error: 'Unauthorized' }, { status: 401 });
+	}
+
+	const { directorId } = params;
+
+	try {
+		const directorRef = adminDb.collection('funeral_directors').doc(directorId);
+		const directorDoc = await directorRef.get();
+
+		if (!directorDoc.exists) {
+			return json({ error: 'Funeral director not found' }, { status: 404 });
+		}
+
+		const directorData = directorDoc.data();
+
+		// Soft delete the funeral director profile
+		await directorRef.update({
+			isDeleted: true,
+			deletedAt: new Date(),
+			deletedBy: locals.user.uid,
+			status: 'deleted'
+		});
+
+		// If there's a linked user account, disable it (don't delete to preserve data integrity)
+		if (directorData?.userId) {
+			const userRef = adminDb.collection('users').doc(directorData.userId);
+			await userRef.update({
+				isActive: false,
+				disabledAt: new Date(),
+				disabledBy: locals.user.uid
+			});
+		}
+
+		// Log audit event
+		await adminDb.collection('admin_audit_logs').add({
+			adminId: locals.user.uid,
+			adminEmail: locals.user.email,
+			action: 'delete_funeral_director',
+			resourceType: 'funeral_director',
+			resourceId: directorId,
+			metadata: {
+				companyName: directorData?.companyName,
+				email: directorData?.email
+			},
+			timestamp: new Date(),
+			severity: 'high'
+		});
+
+		return json({ success: true, message: 'Funeral director deleted' });
+	} catch (error: any) {
+		console.error('Error deleting funeral director:', error);
+		return json({ error: 'Failed to delete funeral director' }, { status: 500 });
 	}
 }

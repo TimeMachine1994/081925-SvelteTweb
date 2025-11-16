@@ -14,10 +14,11 @@ export const load = async ({ locals, url }: any) => {
 	const sortDir = url.searchParams.get('sortDir') || 'desc';
 	const statusFilter = url.searchParams.get('status');
 
-	// Load funeral directors
+	// Load funeral directors (exclude deleted)
 	let snapshot;
 	try {
-		let query: any = adminDb.collection('funeral_directors');
+		let query: any = adminDb.collection('funeral_directors')
+			.where('isDeleted', '==', false);
 
 		// Apply status filter if provided
 		if (statusFilter) {
@@ -28,7 +29,8 @@ export const load = async ({ locals, url }: any) => {
 	} catch (error) {
 		console.error('Error loading funeral directors with sorting:', error);
 		// Fallback: try without sorting
-		let query: any = adminDb.collection('funeral_directors');
+		let query: any = adminDb.collection('funeral_directors')
+			.where('isDeleted', '==', false);
 		if (statusFilter) {
 			query = query.where('status', '==', statusFilter);
 		}

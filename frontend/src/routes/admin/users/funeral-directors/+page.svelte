@@ -85,14 +85,35 @@ Manage funeral home partners
 
 	// Actions
 	async function handleBulkAction(action: string, ids: string[]) {
-		const response = await fetch('/api/admin/bulk-actions', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ action, ids, resourceType: 'funeral_director' })
-		});
+		// Confirmation for dangerous actions
+		if (action === 'delete') {
+			if (!confirm(`⚠️ Delete ${ids.length} funeral director(s)?\n\nThis will soft delete the profiles and disable their accounts.\n\nContinue?`)) {
+				return;
+			}
+		} else if (action === 'suspend') {
+			if (!confirm(`Suspend ${ids.length} funeral director account(s)?`)) {
+				return;
+			}
+		}
 
-		if (response.ok) {
-			location.reload();
+		try {
+			const response = await fetch('/api/admin/bulk-operations', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ operation: action, resourceType: 'funeral_director', ids })
+			});
+
+			const result = await response.json();
+
+			if (response.ok) {
+				alert(`✅ Bulk action completed: ${result.results.success} succeeded, ${result.results.failed} failed`);
+				location.reload();
+			} else {
+				alert(`❌ Bulk action failed: ${result.error || 'Unknown error'}`);
+			}
+		} catch (error) {
+			console.error('Bulk action error:', error);
+			alert('An error occurred during bulk action');
 		}
 	}
 

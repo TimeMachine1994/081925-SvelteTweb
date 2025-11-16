@@ -133,6 +133,36 @@ Following UX principles: Recognition over Recall, Clear hierarchy
 		}
 	}
 
+	async function handleDelete() {
+		if (!confirm(`⚠️ Delete ${director.companyName}?\n\nThis will:\n- Soft delete the funeral director profile\n- Disable their user account\n- Preserve all memorial data\n\nThis action can be reversed by an admin.`)) {
+			return;
+		}
+
+		isProcessing = true;
+		processingMessage = 'Deleting funeral director account...';
+
+		try {
+			const response = await fetch(`/api/admin/users/funeral-directors/${director.id}`, {
+				method: 'DELETE'
+			});
+
+			const result = await response.json();
+
+			if (response.ok) {
+				alert('✅ Funeral director account deleted successfully!');
+				goto('/admin/users/funeral-directors');
+			} else {
+				alert(`❌ Failed to delete: ${result.error || 'Unknown error'}`);
+			}
+		} catch (error) {
+			console.error('Error deleting funeral director:', error);
+			alert('An error occurred while deleting.');
+		} finally {
+			isProcessing = false;
+			processingMessage = '';
+		}
+	}
+
 	function formatCurrency(amount: number) {
 		return new Intl.NumberFormat('en-US', {
 			style: 'currency',
@@ -184,6 +214,9 @@ Following UX principles: Recognition over Recall, Clear hierarchy
 				{/if}
 				<button class="btn-reset" onclick={handleResetPassword}>
 					🔑 Reset Password
+				</button>
+				<button class="btn-delete" onclick={handleDelete}>
+					🗑️ Delete Account
 				</button>
 			</div>
 		</div>
@@ -452,7 +485,8 @@ Following UX principles: Recognition over Recall, Clear hierarchy
 	.btn-edit,
 	.btn-suspend,
 	.btn-activate,
-	.btn-reset {
+	.btn-reset,
+	.btn-delete {
 		padding: 0.625rem 1.25rem;
 		border-radius: 0.5rem;
 		font-weight: 600;
@@ -500,6 +534,16 @@ Following UX principles: Recognition over Recall, Clear hierarchy
 
 	.btn-reset:hover {
 		background: #475569;
+		transform: translateY(-1px);
+	}
+
+	.btn-delete {
+		background: #dc2626;
+		color: white;
+	}
+
+	.btn-delete:hover {
+		background: #b91c1c;
 		transform: translateY(-1px);
 	}
 
@@ -773,7 +817,8 @@ Following UX principles: Recognition over Recall, Clear hierarchy
 		.btn-edit,
 		.btn-suspend,
 		.btn-activate,
-		.btn-reset {
+		.btn-reset,
+		.btn-delete {
 			width: 100%;
 		}
 
