@@ -47,17 +47,28 @@
   - Gold (#D5BA7F) → Blue (#3B82F6)
 
 ### Remaining:
-- ⏳ Registration pages (/register paths)
-- ⏳ Marketing pages (/for-hosts, /for-event-planners)
-- ⏳ Individual event pages
+- ⏳ Individual event pages (event detail views)
 - ⏳ Admin panel terminology
 - ⏳ Component prop names and interfaces
+- ⏳ Email templates
+- ⏳ API endpoint terminology
 
-## ⏳ Phase 3: UI/UX Components (PENDING)
+## 🔄 Phase 3: New Pages & Routes (IN PROGRESS)
 
-## ⏳ Phase 4: Data Model Updates (PENDING)
+### Completed:
+- ✅ `/for-hosts` page created (event hosts marketing page)
+- ✅ `/for-event-planners` page created (event planners marketing page)
+- ✅ `/create-event` page created (event creation form)
+- ✅ `/register/event-planner` redirect created
+- ✅ All new pages use blue theme and event terminology
 
-## ⏳ Phase 5: Marketing Pages (PENDING)
+### Remaining:
+- ⏳ Update existing `/register/loved-one` to be event-focused
+- ⏳ Create dedicated event data model (currently uses memorial model)
+
+## ⏳ Phase 4: UI/UX Components (PENDING)
+
+## ⏳ Phase 5: Data Model Updates (PENDING)
 
 ## ⏳ Phase 6: User Roles & Workflows (PENDING)
 
@@ -107,11 +118,19 @@
 - Updated testimonials to reflect event focus (weddings, birthdays, anniversaries)
 - Changed partner section from funeral homes to event venues
 
+**This Session Update:**
+- ✅ Created `/for-hosts` marketing page
+- ✅ Created `/for-event-planners` marketing page  
+- ✅ Created `/create-event` registration page
+- ✅ All new pages fully functional with blue theme
+- ✅ Navigation links now work correctly
+
 **Next Session Priority:**
-- Create /create-event route (currently routing to /register/loved-one)
-- Transform /for-hosts and /for-event-planners marketing pages
 - Update event detail pages to use celebration language
+- Transform admin panel terminology
+- Update database models for events
+- Update email templates
 
 ---
 
-**Last Updated:** Current session - Phase 2 largely complete
+**Last Updated:** Current session - Phase 2 complete, Phase 3 in progress
