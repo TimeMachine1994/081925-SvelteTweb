@@ -403,7 +403,10 @@
 				<div class="memorial-body">
 					<!-- Stream Section - Always show, component handles empty state -->
 					<div class="streaming-section">
-						<StreamPlayer {streams} memorialName={memorial.lovedOneName} memorialId={memorial.id} />
+						<MemorialStreamDisplay 
+							streams={streams || []} 
+							memorialName={memorial.lovedOneName}
+						/>
 						
 						<!-- Chat Section -->
 						<div class="chat-section">
