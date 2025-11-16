@@ -271,7 +271,7 @@
 	/* Styles adapted from funeral-director registration */
 	.registration-container {
 		min-height: 100vh;
-		background: linear-gradient(135deg, #d5ba7f 0%, #b8a06b 100%);
+		background: linear-gradient(135deg, #3B82F6 0%, #b8a06b 100%);
 		padding: 2rem 1rem;
 		display: flex;
 		align-items: center;
@@ -291,7 +291,7 @@
 
 	.form-header {
 		background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-		color: #d5ba7f;
+		color: #3B82F6;
 		padding: 2rem;
 		text-align: center;
 	}
@@ -359,7 +359,7 @@
 
 	.form-input:focus {
 		outline: none;
-		border-color: #d5ba7f;
+		border-color: #3B82F6;
 		box-shadow: 0 0 0 3px rgba(213, 186, 127, 0.1);
 	}
 
@@ -422,7 +422,7 @@
 	}
 
 	.submit-button {
-		background: linear-gradient(135deg, #d5ba7f 0%, #b8a06b 100%);
+		background: linear-gradient(135deg, #3B82F6 0%, #b8a06b 100%);
 		color: #1a1a1a;
 		border: none;
 		padding: 1rem 2rem;
@@ -436,7 +436,7 @@
 	}
 
 	.submit-button:hover {
-		background: linear-gradient(135deg, #e5ca8f 0%, #c5aa6f 100%);
+		background: linear-gradient(135deg, #e5ca8f 0%, #2563EB 100%);
 		transform: translateY(-1px);
 		box-shadow: 0 8px 15px -3px rgba(0, 0, 0, 0.1);
 	}

@@ -130,7 +130,7 @@
 		align-items: center;
 		gap: 0.75rem;
 		padding: 1rem 2rem;
-		background: #D5BA7F;
+		background: #3B82F6;
 		color: white;
 		border: none;
 		border-radius: 12px;
@@ -177,7 +177,7 @@
 	}
 	
 	.add-slideshow-btn:hover {
-		border-color: #D5BA7F;
+		border-color: #3B82F6;
 		color: #92400e;
 		background: #fffbf5;
 		transform: translateY(-1px);

@@ -190,7 +190,7 @@
         id="isPublic"
         type="checkbox"
         bind:checked={formData.isPublic}
-        class="mt-1 h-4 w-4 rounded border-slate-300 text-[#D5BA7F] focus:ring-[#D5BA7F]"
+        class="mt-1 h-4 w-4 rounded border-slate-300 text-blue-500 focus:ring-blue-500"
       />
       <div>
         <label for="isPublic" class="text-sm font-medium {themeConfig.text}">

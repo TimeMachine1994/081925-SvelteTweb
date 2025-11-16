@@ -60,7 +60,7 @@
 	<header class="sticky top-16 z-40 border-b bg-white/90 backdrop-blur">
 		<div class="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
 			<div class="flex items-center gap-3">
-				<div class="h-9 w-9 rounded-full bg-[#D5BA7F]"></div>
+				<div class="h-9 w-9 rounded-full bg-blue-500"></div>
 				<span class="font-semibold tracking-wide">Tributestream®</span>
 			</div>
 			<nav class="hidden md:flex items-center gap-6 text-sm">
@@ -94,7 +94,7 @@
 				<div class="mt-6 flex gap-3">
 					<a
 						href="#packages"
-						class="rounded-xl px-4 py-2 bg-[#D5BA7F] text-black font-medium hover:opacity-90"
+						class="rounded-xl px-4 py-2 bg-blue-500 text-black font-medium hover:opacity-90"
 						>Compare Packages</a
 					>
 					<a href="#payment" class="rounded-xl px-4 py-2 border font-medium hover:bg-zinc-50"
@@ -103,16 +103,16 @@
 				</div>
 				<ul class="mt-6 grid grid-cols-2 gap-2 text-sm text-zinc-700">
 					<li class="flex items-center gap-2">
-						<span class="h-1.5 w-1.5 rounded-full bg-[#D5BA7F]"></span> 24/7 producers
+						<span class="h-1.5 w-1.5 rounded-full bg-blue-500"></span> 24/7 producers
 					</li>
 					<li class="flex items-center gap-2">
-						<span class="h-1.5 w-1.5 rounded-full bg-[#D5BA7F]"></span> No‑hidden‑fees guarantee
+						<span class="h-1.5 w-1.5 rounded-full bg-blue-500"></span> No‑hidden‑fees guarantee
 					</li>
 					<li class="flex items-center gap-2">
-						<span class="h-1.5 w-1.5 rounded-full bg-[#D5BA7F]"></span> Funeral‑centric platform
+						<span class="h-1.5 w-1.5 rounded-full bg-blue-500"></span> Funeral‑centric platform
 					</li>
 					<li class="flex items-center gap-2">
-						<span class="h-1.5 w-1.5 rounded-full bg-[#D5BA7F]"></span> One custom link + 1‑yr hosting
+						<span class="h-1.5 w-1.5 rounded-full bg-blue-500"></span> One custom link + 1‑yr hosting
 					</li>
 				</ul>
 			</div>
@@ -210,23 +210,23 @@
 					<p class="mt-1 text-3xl font-semibold">$1,699</p>
 					<ul class="mt-4 grid gap-2 text-sm text-zinc-800">
 						<li class="flex items-start gap-2">
-							<span class="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-[#D5BA7F]"></span>
+							<span class="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-blue-500"></span>
 							<span>Setup + Videographer + Livestream Tech + Remote Producer</span>
 						</li>
 						<li class="flex items-start gap-2">
-							<span class="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-[#D5BA7F]"></span>
+							<span class="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-blue-500"></span>
 							<span>Plays back your pre‑sent media to the online audience</span>
 						</li>
 						<li class="flex items-start gap-2">
-							<span class="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-[#D5BA7F]"></span>
+							<span class="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-blue-500"></span>
 							<span>Post‑editing included</span>
 						</li>
 						<li class="flex items-start gap-2">
-							<span class="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-[#D5BA7F]"></span>
+							<span class="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-blue-500"></span>
 							<span>Wooden USB drive mailed after service</span>
 						</li>
 						<li class="flex items-start gap-2">
-							<span class="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-[#D5BA7F]"></span>
+							<span class="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-blue-500"></span>
 							<span>Flower montage when applicable</span>
 						</li>
 					</ul>
@@ -243,15 +243,15 @@
 					<p class="mt-1 text-3xl font-semibold">$1,299</p>
 					<ul class="mt-4 grid gap-2 text-sm text-zinc-800">
 						<li class="flex items-start gap-2">
-							<span class="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-[#D5BA7F]"></span>
+							<span class="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-blue-500"></span>
 							<span>Setup + Videographer + Livestream Tech + Remote Producer</span>
 						</li>
 						<li class="flex items-start gap-2">
-							<span class="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-[#D5BA7F]"></span>
+							<span class="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-blue-500"></span>
 							<span>Media playback to online audience</span>
 						</li>
 						<li class="flex items-start gap-2">
-							<span class="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-[#D5BA7F]"></span>
+							<span class="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-blue-500"></span>
 							<span>No post‑edit or USB drive</span>
 						</li>
 					</ul>
@@ -268,15 +268,15 @@
 					<p class="mt-1 text-3xl font-semibold">$699</p>
 					<ul class="mt-4 grid gap-2 text-sm text-zinc-800">
 						<li class="flex items-start gap-2">
-							<span class="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-[#D5BA7F]"></span>
+							<span class="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-blue-500"></span>
 							<span>Most economical—no live stream</span>
 						</li>
 						<li class="flex items-start gap-2">
-							<span class="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-[#D5BA7F]"></span>
+							<span class="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-blue-500"></span>
 							<span>Professional videographer records up to 2 hours</span>
 						</li>
 						<li class="flex items-start gap-2">
-							<span class="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-[#D5BA7F]"></span>
+							<span class="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-blue-500"></span>
 							<span>Recording uploaded to the link within 24 hours</span>
 						</li>
 					</ul>
@@ -460,7 +460,7 @@
 						</div>
 						<a
 							href="/{data.userMemorial.fullSlug}#booking"
-							class="inline-block rounded-xl bg-[#D5BA7F] px-6 py-3 text-center font-semibold text-black hover:opacity-90 whitespace-nowrap"
+							class="inline-block rounded-xl bg-blue-500 px-6 py-3 text-center font-semibold text-black hover:opacity-90 whitespace-nowrap"
 						>
 							Go to My Memorial Booking →
 						</a>
@@ -483,10 +483,10 @@
 					<h3 class="font-medium">Booking Process</h3>
 					<ol class="mt-3 list-decimal pl-5 text-zinc-800 space-y-2">
 						<li>
-							<a class="underline hover:text-[#D5BA7F]" href="/profile">Create custom link</a>
+							<a class="underline hover:text-blue-500" href="/profile">Create custom link</a>
 						</li>
 						<li>
-							<a class="underline hover:text-[#D5BA7F]" href="/login">Login to account</a>
+							<a class="underline hover:text-blue-500" href="/login">Login to account</a>
 						</li>
 						<li>Enter booking details</li>
 						<li>Checkout to lock in the reservation</li>
@@ -496,7 +496,7 @@
 							href="https://www.tributestream.com"
 							target="_blank"
 							rel="noreferrer"
-							class="inline-block rounded-xl bg-[#D5BA7F] px-5 py-2.5 font-medium hover:opacity-90"
+							class="inline-block rounded-xl bg-blue-500 px-5 py-2.5 font-medium hover:opacity-90"
 							>Visit Tributestream.com</a
 						>
 					</div>

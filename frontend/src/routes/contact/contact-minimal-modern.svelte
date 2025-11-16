@@ -202,8 +202,8 @@
 				<Card title="Contact Information" theme="minimal" class="p-8">
 					<div class="space-y-6">
 						<div class="flex items-start space-x-4">
-							<div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-[#D5BA7F]/20">
-								<Mail class="h-6 w-6 text-[#D5BA7F]" />
+							<div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-500/20">
+								<Mail class="h-6 w-6 text-blue-500" />
 							</div>
 							<div>
 								<h4 class="font-semibold {theme.text}">Email</h4>
@@ -213,8 +213,8 @@
 						</div>
 
 						<div class="flex items-start space-x-4">
-							<div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-[#D5BA7F]/20">
-								<Phone class="h-6 w-6 text-[#D5BA7F]" />
+							<div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-500/20">
+								<Phone class="h-6 w-6 text-blue-500" />
 							</div>
 							<div>
 								<h4 class="font-semibold {theme.text}">Phone</h4>
@@ -226,8 +226,8 @@
 						</div>
 
 						<div class="flex items-start space-x-4">
-							<div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-[#D5BA7F]/20">
-								<MapPin class="h-6 w-6 text-[#D5BA7F]" />
+							<div class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-500/20">
+								<MapPin class="h-6 w-6 text-blue-500" />
 							</div>
 							<div>
 								<h4 class="font-semibold {theme.text}">Service Area</h4>

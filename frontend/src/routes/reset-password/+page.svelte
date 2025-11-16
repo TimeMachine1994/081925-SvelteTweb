@@ -152,7 +152,7 @@
 							<button
 								type="button"
 								onclick={() => showNewPassword = !showNewPassword}
-								class="absolute right-3 top-1/2 transform -translate-y-1/2 {theme.hero.sub} hover:text-[#D5BA7F]"
+								class="absolute right-3 top-1/2 transform -translate-y-1/2 {theme.hero.sub} hover:text-blue-500"
 							>
 								{#if showNewPassword}
 									<EyeOff class="h-4 w-4" />
@@ -181,7 +181,7 @@
 							<button
 								type="button"
 								onclick={() => showConfirmPassword = !showConfirmPassword}
-								class="absolute right-3 top-1/2 transform -translate-y-1/2 {theme.hero.sub} hover:text-[#D5BA7F]"
+								class="absolute right-3 top-1/2 transform -translate-y-1/2 {theme.hero.sub} hover:text-blue-500"
 							>
 								{#if showConfirmPassword}
 									<EyeOff class="h-4 w-4" />

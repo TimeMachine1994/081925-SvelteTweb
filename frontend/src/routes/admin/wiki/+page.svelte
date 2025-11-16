@@ -204,7 +204,7 @@
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.75rem 1.5rem;
-		background: #d5ba7f;
+		background: #3B82F6;
 		color: white;
 		border: none;
 		border-radius: 0.5rem;
@@ -245,7 +245,7 @@
 	.stat-icon {
 		width: 2.5rem;
 		height: 2.5rem;
-		color: #d5ba7f;
+		color: #3B82F6;
 		flex-shrink: 0;
 	}
 
@@ -326,7 +326,7 @@
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.75rem 1.5rem;
-		background: #d5ba7f;
+		background: #3B82F6;
 		color: white;
 		border-radius: 0.5rem;
 		font-weight: 500;

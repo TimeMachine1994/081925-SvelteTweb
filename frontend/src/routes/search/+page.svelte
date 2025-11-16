@@ -91,7 +91,7 @@
 		<input
 			type="text"
 			placeholder="Search by name, date, or creator..."
-			class="w-full rounded-md border border-gray-300 px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-[#D5BA7F] focus:border-transparent"
+			class="w-full rounded-md border border-gray-300 px-4 py-3 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 			bind:value={searchQuery}
 			onkeypress={handleKeyPress}
 			aria-label="Search memorials"
@@ -100,7 +100,7 @@
 		<div class="mt-8">
 			{#if isSearching}
 				<div class="text-center py-8">
-					<div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#D5BA7F]"></div>
+					<div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#3B82F6]"></div>
 					<p class="text-gray-600 mt-4">Searching...</p>
 				</div>
 			{:else if searchResults.length > 0}

@@ -20,7 +20,7 @@
 
 	function getCategoryColor(category: string): string {
 		const colors: Record<string, string> = {
-			'memorial-planning': '#D5BA7F',
+			'memorial-planning': '#3B82F6',
 			'grief-support': '#8B9DC3',
 			'technology': '#7C9885',
 			'funeral-industry': '#A67C7C',
@@ -52,7 +52,7 @@
 			subtitle: 'Our expert team is here to guide you through every step',
 			cta: 'Get Started Free',
 			link: '/register/loved-one',
-			background: 'linear-gradient(135deg, #D5BA7F 0%, #B8860B 100%)'
+			background: 'linear-gradient(135deg, #3B82F6 0%, #B8860B 100%)'
 		},
 		{
 			title: 'Professional Live Streaming Services',
@@ -284,7 +284,7 @@
 	}
 
 	.hero-section {
-		background: linear-gradient(135deg, #D5BA7F 0%, #B8860B 100%);
+		background: linear-gradient(135deg, #3B82F6 0%, #B8860B 100%);
 		color: white;
 		padding: 80px 20px;
 		text-align: center;
@@ -461,7 +461,7 @@
 	.read-more-btn {
 		display: inline-block;
 		padding: 0.75rem 1.5rem;
-		background-color: #D5BA7F;
+		background-color: #3B82F6;
 		color: white;
 		text-decoration: none;
 		border-radius: 6px;
@@ -473,7 +473,7 @@
 	}
 
 	.read-more-btn:hover {
-		background-color: #C5AA6F;
+		background-color: #2563EB;
 		transform: translateY(-1px);
 		box-shadow: 0 4px 12px rgba(213, 186, 127, 0.3);
 	}

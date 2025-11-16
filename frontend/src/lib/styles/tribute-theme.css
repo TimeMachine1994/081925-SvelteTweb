@@ -2,7 +2,7 @@
 
 :root {
 	/* Base Colors */
-	--fa-gold: #d5ba7f;
+	--fa-gold: #3B82F6;
 	--fa-dark-gold: #8b7a4f;
 	--fa-black: #1a1a1a;
 	--fa-white: #ffffff;
@@ -12,8 +12,8 @@
 	--owner-secondary: #d97706;
 	--owner-accent: #fbbf24;
 
-	--funeral-director-primary: #d5ba7f;
-	--funeral-director-secondary: #c5aa6f;
+	--funeral-director-primary: #3B82F6;
+	--funeral-director-secondary: #2563EB;
 	--funeral-director-accent: #e5ca8f;
 
 	--family-member-primary: #b8a06b;

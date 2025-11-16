@@ -68,7 +68,7 @@
 	}
 
 	.wiki-page-card:hover {
-		border-color: #d5ba7f;
+		border-color: #3B82F6;
 		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 		transform: translateY(-2px);
 	}

@@ -95,7 +95,7 @@
 <div class="google-reviews-carousel" onmouseenter={stopAutoplay} onmouseleave={startAutoplay}>
 	{#if isLoading}
 		<div class="text-center py-8">
-			<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D5BA7F] mx-auto"></div>
+			<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#3B82F6] mx-auto"></div>
 			<p class="text-slate-600 mt-2">Loading reviews...</p>
 		</div>
 	{:else if error}
@@ -191,7 +191,7 @@
 				<div class="flex justify-center mt-6 gap-2">
 					{#each reviews as _, index}
 						<button
-							class="w-2 h-2 rounded-full transition-colors {index === currentIndex ? 'bg-[#D5BA7F]' : 'bg-gray-300'}"
+							class="w-2 h-2 rounded-full transition-colors {index === currentIndex ? 'bg-blue-500' : 'bg-gray-300'}"
 							onclick={() => goToReview(index)}
 							aria-label="Go to review {index + 1}"
 						></button>
@@ -205,7 +205,7 @@
 			<div class="text-center mt-4">
 				<p class="text-xs text-slate-500">
 					Reviews powered by 
-					<a href="https://www.google.com/maps" target="_blank" rel="noopener noreferrer" class="text-[#D5BA7F] hover:underline">
+					<a href="https://www.google.com/maps" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:underline">
 						Google
 					</a>
 				</p>

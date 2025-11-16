@@ -161,11 +161,11 @@
 	.slideshow-player.editable:hover {
 		transform: translateY(-2px);
 		box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-		border-color: #D5BA7F;
+		border-color: #3B82F6;
 	}
 	
 	.slideshow-player.editable:focus {
-		outline: 2px solid #D5BA7F;
+		outline: 2px solid #3B82F6;
 		outline-offset: 2px;
 	}
 	
@@ -240,7 +240,7 @@
 	
 	.caption-number {
 		font-weight: 600;
-		color: #D5BA7F;
+		color: #3B82F6;
 		min-width: 2rem;
 		font-size: 0.875rem;
 	}
@@ -337,7 +337,7 @@
 	}
 	
 	.play-btn {
-		background: #D5BA7F;
+		background: #3B82F6;
 	}
 	
 	.play-btn:hover {
@@ -396,7 +396,7 @@
 		width: 2.5rem;
 		height: 2.5rem;
 		border: 3px solid #e5e7eb;
-		border-top: 3px solid #D5BA7F;
+		border-top: 3px solid #3B82F6;
 		border-radius: 50%;
 		animation: spin 1s linear infinite;
 	}

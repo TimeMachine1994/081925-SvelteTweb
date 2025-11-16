@@ -194,7 +194,7 @@
 							<button
 								type="button"
 								onclick={togglePasswordVisibility}
-								class="absolute right-3 top-1/2 transform -translate-y-1/2 {theme.hero.sub} hover:text-[#D5BA7F]"
+								class="absolute right-3 top-1/2 transform -translate-y-1/2 {theme.hero.sub} hover:text-blue-500"
 							>
 								{#if showPassword}
 									<EyeOff class="h-4 w-4" />
@@ -207,13 +207,13 @@
 
 					<div class="flex items-center justify-between">
 						<label class="flex items-center">
-							<input type="checkbox" class="h-4 w-4 text-[#D5BA7F] focus:ring-[#D5BA7F] border-gray-300 rounded" />
+							<input type="checkbox" class="h-4 w-4 text-blue-500 focus:ring-blue-500 border-gray-300 rounded" />
 							<span class="ml-2 text-sm {theme.hero.sub}">Remember me</span>
 						</label>
 						<button
 							type="button"
 							onclick={() => showPasswordReset = true}
-							class="text-sm text-[#D5BA7F] hover:underline"
+							class="text-sm text-blue-500 hover:underline"
 						>
 							Forgot password?
 						</button>
@@ -268,7 +268,7 @@
 				<div class="mt-6 text-center">
 					<p class="text-sm {theme.hero.sub}">
 						Don't have an account?
-						<a href="/register" class="font-medium text-[#D5BA7F] hover:underline">
+						<a href="/register" class="font-medium text-blue-500 hover:underline">
 							Create Account
 						</a>
 					</p>
@@ -280,7 +280,7 @@
 				<div class="text-center mb-6">
 					<button
 						onclick={() => showPasswordReset = false}
-						class="inline-flex items-center text-sm text-[#D5BA7F] hover:underline mb-4"
+						class="inline-flex items-center text-sm text-blue-500 hover:underline mb-4"
 					>
 						<ArrowLeft class="h-4 w-4 mr-1" />
 						Back to Sign In

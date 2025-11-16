@@ -222,12 +222,12 @@
 	}
 
 	.btn-primary {
-		background: #d5ba7f;
+		background: #3B82F6;
 		color: white;
 	}
 
 	.btn-primary:hover {
-		background: #c5aa6f;
+		background: #2563EB;
 	}
 
 	.btn-danger {

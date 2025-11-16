@@ -288,7 +288,7 @@
 	.header-icon {
 		width: 1.5rem;
 		height: 1.5rem;
-		color: #D5BA7F;
+		color: #3B82F6;
 	}
 
 	.header-title {
@@ -316,7 +316,7 @@
 	}
 
 	.audio-upload-area:hover {
-		border-color: #D5BA7F;
+		border-color: #3B82F6;
 		background: #fffbf5;
 		transform: translateY(-2px);
 	}
@@ -366,7 +366,7 @@
 	.audio-icon {
 		width: 2rem;
 		height: 2rem;
-		color: #D5BA7F;
+		color: #3B82F6;
 	}
 
 	.audio-name {
@@ -413,7 +413,7 @@
 		width: 3rem;
 		height: 3rem;
 		border-radius: 50%;
-		background: #D5BA7F;
+		background: #3B82F6;
 		color: white;
 		border: none;
 		display: flex;
@@ -439,7 +439,7 @@
 
 	.progress-fill {
 		height: 100%;
-		background: #D5BA7F;
+		background: #3B82F6;
 		transition: width 0.1s linear;
 	}
 
@@ -483,7 +483,7 @@
 		width: 18px;
 		height: 18px;
 		border-radius: 50%;
-		background: #D5BA7F;
+		background: #3B82F6;
 		cursor: pointer;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 	}
@@ -492,7 +492,7 @@
 		width: 18px;
 		height: 18px;
 		border-radius: 50%;
-		background: #D5BA7F;
+		background: #3B82F6;
 		cursor: pointer;
 		border: none;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);

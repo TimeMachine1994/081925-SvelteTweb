@@ -110,7 +110,7 @@
 					}}
 				/>
 				<div class="flex gap-4 flex-wrap justify-center">
-					<Button theme="minimal" onclick={handleCreateTribute} class="bg-[#D5BA7F] text-black hover:brightness-110">
+					<Button theme="minimal" onclick={handleCreateTribute} class="bg-blue-500 text-black hover:brightness-110">
 						Create Tribute
 					</Button>
 					<Button theme="minimal" variant="secondary" onclick={handleSearchTributes} class="bg-white/20 text-white border-white/30 hover:bg-white/30">
@@ -119,7 +119,7 @@
 				</div>
 			</div>
 			
-			<p class="mt-8 text-xl font-semibold">Call Us To Book Today: <a href="tel:407-221-5922" class="text-[#D5BA7F] hover:underline">407-221-5922</a></p>
+			<p class="mt-8 text-xl font-semibold">Call Us To Book Today: <a href="tel:407-221-5922" class="text-blue-500 hover:underline">407-221-5922</a></p>
 		</div>
 	</div>
 
@@ -159,7 +159,7 @@
 			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 				<Card title="Professional Quality" theme="minimal">
 					<div class="text-center">
-						<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-[#D5BA7F]/20 flex items-center justify-center text-2xl">
+						<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-500/20 flex items-center justify-center text-2xl">
 							📹
 						</div>
 						<p class="text-sm opacity-80">
@@ -170,7 +170,7 @@
 
 				<Card title="Private & Secure" theme="minimal">
 					<div class="text-center">
-						<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-[#D5BA7F]/20 flex items-center justify-center text-2xl">
+						<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-500/20 flex items-center justify-center text-2xl">
 							🔒
 						</div>
 						<p class="text-sm opacity-80">
@@ -181,7 +181,7 @@
 
 				<Card title="Mobile Ready" theme="minimal">
 					<div class="text-center">
-						<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-[#D5BA7F]/20 flex items-center justify-center text-2xl">
+						<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-500/20 flex items-center justify-center text-2xl">
 							📱
 						</div>
 						<p class="text-sm opacity-80">
@@ -211,7 +211,7 @@
 	</section>
 
 	<!-- Call to Action -->
-	<section class="py-16 bg-[#D5BA7F]/10">
+	<section class="py-16 bg-blue-500/10">
 		<div class="max-w-4xl mx-auto px-6 text-center">
 			<h2 class="text-3xl font-bold {theme.text}" style="font-family: {theme.font.heading}">
 				Ready to Create a Memorial?

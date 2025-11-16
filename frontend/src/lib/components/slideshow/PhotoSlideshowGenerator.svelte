@@ -781,7 +781,7 @@
 	
 	.edit-badge {
 		display: inline-block;
-		background: linear-gradient(135deg, #D5BA7F 0%, #c4a96e 100%);
+		background: linear-gradient(135deg, #3B82F6 0%, #c4a96e 100%);
 		color: white;
 		padding: 0.5rem 1rem;
 		border-radius: 20px;

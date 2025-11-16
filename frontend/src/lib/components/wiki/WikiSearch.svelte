@@ -135,7 +135,7 @@
 
 	.search-input:focus {
 		outline: none;
-		border-color: #d5ba7f;
+		border-color: #3B82F6;
 		box-shadow: 0 0 0 3px rgba(213, 186, 127, 0.1);
 	}
 

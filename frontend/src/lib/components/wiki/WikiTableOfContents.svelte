@@ -121,14 +121,14 @@
 
 	.toc-item button:hover {
 		background: #f3f4f6;
-		color: #d5ba7f;
-		border-left-color: #d5ba7f;
+		color: #3B82F6;
+		border-left-color: #3B82F6;
 	}
 
 	.toc-item button.active {
 		background: #fef3c7;
 		color: #92400e;
-		border-left-color: #d5ba7f;
+		border-left-color: #3B82F6;
 		font-weight: 500;
 	}
 

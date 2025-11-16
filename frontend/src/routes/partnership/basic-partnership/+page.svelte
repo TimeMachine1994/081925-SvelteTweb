@@ -31,7 +31,7 @@
 <section class="py-20 bg-gradient-to-br from-slate-50 to-slate-100">
 	<div class="max-w-4xl mx-auto px-6 text-center">
 		<div class="mb-6">
-			<span class="bg-[#D5BA7F] text-black px-4 py-2 rounded-full text-sm font-semibold">No Cost Partnership</span>
+			<span class="bg-blue-500 text-black px-4 py-2 rounded-full text-sm font-semibold">No Cost Partnership</span>
 		</div>
 		<h1 class="text-4xl md:text-5xl font-bold text-slate-900 mb-6" style="font-family: {theme.font.heading}">
 			Basic Partnership
@@ -40,7 +40,7 @@
 			Start offering professional memorial streaming services to families at no upfront cost. Everything you need to get started is included.
 		</p>
 		<div class="flex flex-col sm:flex-row gap-4 justify-center">
-			<Button theme="minimal" class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F] px-8 py-3" onclick={handleGetStarted}>
+			<Button theme="minimal" class="bg-blue-500 text-black hover:bg-[#2563EB] px-8 py-3" onclick={handleGetStarted}>
 				Get Started Today
 			</Button>
 			<Button theme="minimal" variant="secondary" class="px-8 py-3" onclick={handleContactUs}>
@@ -66,8 +66,8 @@
 			{#each features as feature}
 				<Card theme="minimal" class="p-6 h-full">
 					<div class="flex items-start gap-4">
-						<div class="bg-[#D5BA7F]/10 p-3 rounded-lg flex-shrink-0">
-							<svelte:component this={feature.icon} class="h-6 w-6 text-[#D5BA7F]" />
+						<div class="bg-blue-500/10 p-3 rounded-lg flex-shrink-0">
+							<svelte:component this={feature.icon} class="h-6 w-6 text-blue-500" />
 						</div>
 						<div>
 							<h3 class="text-xl font-semibold text-slate-900 mb-2">{feature.title}</h3>
@@ -91,17 +91,17 @@
 
 		<div class="grid md:grid-cols-3 gap-8">
 			<div class="text-center">
-				<div class="bg-[#D5BA7F] text-black w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">1</div>
+				<div class="bg-blue-500 text-black w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">1</div>
 				<h3 class="text-lg font-semibold text-slate-900 mb-2">Sign Up</h3>
 				<p class="text-slate-600">Complete our simple registration process and get instant access to your partner portal</p>
 			</div>
 			<div class="text-center">
-				<div class="bg-[#D5BA7F] text-black w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">2</div>
+				<div class="bg-blue-500 text-black w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">2</div>
 				<h3 class="text-lg font-semibold text-slate-900 mb-2">Get Trained</h3>
 				<p class="text-slate-600">Access our comprehensive training materials and get your team up to speed</p>
 			</div>
 			<div class="text-center">
-				<div class="bg-[#D5BA7F] text-black w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">3</div>
+				<div class="bg-blue-500 text-black w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">3</div>
 				<h3 class="text-lg font-semibold text-slate-900 mb-2">Start Serving</h3>
 				<p class="text-slate-600">Begin offering streaming services to families with our full support</p>
 			</div>
@@ -119,7 +119,7 @@
 			Join our Basic Partnership program today and start offering professional memorial streaming services to families at no cost to you.
 		</p>
 		<div class="flex flex-col sm:flex-row gap-4 justify-center">
-			<Button theme="minimal" class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F] px-8 py-3" onclick={handleGetStarted}>
+			<Button theme="minimal" class="bg-blue-500 text-black hover:bg-[#2563EB] px-8 py-3" onclick={handleGetStarted}>
 				Get Started Now
 			</Button>
 			<Button theme="minimal" variant="secondary" class="px-8 py-3" onclick={handleContactUs}>

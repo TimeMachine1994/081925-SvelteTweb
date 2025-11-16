@@ -248,7 +248,7 @@
 								type="checkbox" 
 								bind:checked={wantAdvertising} 
 								id="advertising" 
-								class="rounded border-gray-300 text-[#D5BA7F] focus:ring-[#D5BA7F]" 
+								class="rounded border-gray-300 text-blue-500 focus:ring-blue-500" 
 							/>
 							<label for="advertising" class="text-sm {theme.text}">
 								Yes, please bring free marketing materials (brochures, business cards, signage)
@@ -274,8 +274,8 @@
 						{#each benefits as benefit}
 							{@const IconComponent = benefit.icon}
 							<div class="flex items-start space-x-3">
-								<div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#D5BA7F]/20">
-									<IconComponent class="h-5 w-5 text-[#D5BA7F]" />
+								<div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-blue-500/20">
+									<IconComponent class="h-5 w-5 text-blue-500" />
 								</div>
 								<div>
 									<h4 class="font-semibold {theme.text}">{benefit.title}</h4>
@@ -289,21 +289,21 @@
 				<Card title="Contact Info" theme="minimal" class="p-6">
 					<div class="space-y-4">
 						<div class="flex items-center space-x-3">
-							<Phone class="h-5 w-5 text-[#D5BA7F]" />
+							<Phone class="h-5 w-5 text-blue-500" />
 							<div>
 								<p class="font-medium {theme.text}">Call Direct</p>
-								<a href="tel:407-221-5922" class="text-[#D5BA7F] hover:underline">407-221-5922</a>
+								<a href="tel:407-221-5922" class="text-blue-500 hover:underline">407-221-5922</a>
 							</div>
 						</div>
 						<div class="flex items-center space-x-3">
-							<Mail class="h-5 w-5 text-[#D5BA7F]" />
+							<Mail class="h-5 w-5 text-blue-500" />
 							<div>
 								<p class="font-medium {theme.text}">Email</p>
-								<a href="mailto:contact@tributestream.com" class="text-[#D5BA7F] hover:underline">contact@tributestream.com</a>
+								<a href="mailto:contact@tributestream.com" class="text-blue-500 hover:underline">contact@tributestream.com</a>
 							</div>
 						</div>
 						<div class="flex items-start space-x-3">
-							<MapPin class="h-5 w-5 text-[#D5BA7F] mt-0.5" />
+							<MapPin class="h-5 w-5 text-blue-500 mt-0.5" />
 							<div>
 								<p class="font-medium {theme.text}">Service Area</p>
 								<p class="text-sm {theme.hero.sub}">Central Florida<br />Orlando & surrounding areas</p>
@@ -313,22 +313,22 @@
 				</Card>
 
 				<!-- Demo Benefits -->
-				<Card title="Why Partner With Us?" theme="minimal" class="p-6 bg-[#D5BA7F]/5">
+				<Card title="Why Partner With Us?" theme="minimal" class="p-6 bg-blue-500/5">
 					<div class="space-y-3 text-sm">
 						<div class="flex items-center space-x-2">
-							<div class="w-2 h-2 bg-[#D5BA7F] rounded-full"></div>
+							<div class="w-2 h-2 bg-blue-500 rounded-full"></div>
 							<span>No upfront costs or equipment investment</span>
 						</div>
 						<div class="flex items-center space-x-2">
-							<div class="w-2 h-2 bg-[#D5BA7F] rounded-full"></div>
+							<div class="w-2 h-2 bg-blue-500 rounded-full"></div>
 							<span>Professional on-site technical support</span>
 						</div>
 						<div class="flex items-center space-x-2">
-							<div class="w-2 h-2 bg-[#D5BA7F] rounded-full"></div>
+							<div class="w-2 h-2 bg-blue-500 rounded-full"></div>
 							<span>Additional revenue stream for your business</span>
 						</div>
 						<div class="flex items-center space-x-2">
-							<div class="w-2 h-2 bg-[#D5BA7F] rounded-full"></div>
+							<div class="w-2 h-2 bg-blue-500 rounded-full"></div>
 							<span>Enhanced service offering for families</span>
 						</div>
 					</div>

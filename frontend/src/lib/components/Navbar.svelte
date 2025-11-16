@@ -46,10 +46,10 @@
 	};
 
 
-	// Navigation items - slim nav as specified
+	// Navigation items - events focused
 	const navigationItems = [
-		{ label: 'For Families', href: '/for-families', icon: Heart },
-		{ label: 'For Funeral Directors', href: '/for-funeral-directors', icon: Users },
+		{ label: 'For Hosts', href: '/for-hosts', icon: Heart },
+		{ label: 'For Event Planners', href: '/for-event-planners', icon: Users },
 		{ label: 'Blog', href: '/blog', icon: BookOpen },
 		{ label: 'Contact', href: '/contact', icon: Mail }
 	];
@@ -60,10 +60,10 @@
 		<!-- Logo/Title -->
 		<a
 			href="/"
-			class="flex items-center italic transition-colors text-white hover:text-[#D5BA7F]"
+			class="flex items-center italic transition-colors text-white hover:text-blue-400"
 			style="font-family: {theme.font.heading}; font-size: 1.5rem; font-weight: 700;"
 		>
-			Tributestream
+			Tributestream Live
 		</a>
 
 		<!-- Desktop Navigation -->
@@ -74,7 +74,7 @@
 					<li>
 						<a
 							href={item.href}
-							class="nav-link flex items-center gap-2 transition-colors text-white hover:text-[#D5BA7F] font-medium py-2"
+							class="nav-link flex items-center gap-2 transition-colors text-white hover:text-blue-400 font-medium py-2"
 							style="font-family: {theme.font.body}; text-decoration: none;"
 						>
 							<IconComponent class="w-4 h-4" />
@@ -86,17 +86,17 @@
 				<li>
 					<Button
 						theme="minimal"
-						class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F] hover:text-black"
+						class="bg-blue-500 text-white hover:bg-blue-600"
 					>
 						{#if $user}
-							<a href={getUserPortalLink($user)} class="flex items-center gap-2 no-underline text-black hover:text-black">
+							<a href={getUserPortalLink($user)} class="flex items-center gap-2 no-underline text-white hover:text-white">
 								<User class="w-4 h-4" />
 								{getUserPortalLabel($user)}
 							</a>
 						{:else}
-							<a href="/register/loved-one" class="flex items-center gap-2 no-underline text-black hover:text-black">
+							<a href="/create-event" class="flex items-center gap-2 no-underline text-white hover:text-white">
 								<Plus class="w-4 h-4" />
-								Create Memorial
+								Create Event
 							</a>
 						{/if}
 					</Button>
@@ -107,7 +107,7 @@
 					{#if $user}
 						<a
 							href="/logout"
-							class="nav-link flex items-center gap-2 transition-colors text-white hover:text-[#D5BA7F] font-medium py-2"
+							class="nav-link flex items-center gap-2 transition-colors text-white hover:text-blue-400 font-medium py-2"
 							style="font-family: {theme.font.body}; text-decoration: none;"
 						>
 							<LogOut class="w-4 h-4" />
@@ -116,7 +116,7 @@
 					{:else}
 						<a
 							href="/login"
-							class="nav-link flex items-center gap-2 transition-colors text-white hover:text-[#D5BA7F] font-medium py-2"
+							class="nav-link flex items-center gap-2 transition-colors text-white hover:text-blue-400 font-medium py-2"
 							style="font-family: {theme.font.body}; text-decoration: none;"
 						>
 							<LogIn class="w-4 h-4" />
@@ -154,7 +154,7 @@
 					<li>
 						<a
 							href={item.href}
-							class="mobile-nav-link flex items-center gap-3 transition-colors border-b text-white hover:text-[#D5BA7F] font-medium py-4 border-slate-700"
+							class="mobile-nav-link flex items-center gap-3 transition-colors border-b text-white hover:text-blue-400 font-medium py-4 border-slate-700"
 							style="font-family: {theme.font.body}; text-decoration: none;"
 							onclick={closeMobileMenu}
 						>
@@ -167,18 +167,18 @@
 				<li class="pt-4">
 					<Button
 						theme="minimal"
-						class="w-full bg-[#D5BA7F] text-black hover:bg-[#C5AA6F] hover:text-black"
+						class="w-full bg-blue-500 text-white hover:bg-blue-600"
 						onclick={closeMobileMenu}
 					>
 						{#if $user}
-							<a href={getUserPortalLink($user)} class="flex items-center justify-center gap-2 no-underline text-black hover:text-black">
+							<a href={getUserPortalLink($user)} class="flex items-center justify-center gap-2 no-underline text-white hover:text-white">
 								<User class="w-4 h-4" />
 								{getUserPortalLabel($user)}
 							</a>
 						{:else}
-							<a href="/register/loved-one" class="flex items-center justify-center gap-2 no-underline text-black hover:text-black">
+							<a href="/create-event" class="flex items-center justify-center gap-2 no-underline text-white hover:text-white">
 								<Plus class="w-4 h-4" />
-								Create Memorial
+								Create Event
 							</a>
 						{/if}
 					</Button>
@@ -189,7 +189,7 @@
 					{#if $user}
 						<a
 							href="/logout"
-							class="mobile-nav-link flex items-center gap-3 transition-colors border-b text-white hover:text-[#D5BA7F] font-medium py-4 border-slate-700"
+							class="mobile-nav-link flex items-center gap-3 transition-colors border-b text-white hover:text-blue-400 font-medium py-4 border-slate-700"
 							style="font-family: {theme.font.body}; text-decoration: none;"
 							onclick={closeMobileMenu}
 						>
@@ -199,7 +199,7 @@
 					{:else}
 						<a
 							href="/login"
-							class="mobile-nav-link flex items-center gap-3 transition-colors border-b text-white hover:text-[#D5BA7F] font-medium py-4 border-slate-700"
+							class="mobile-nav-link flex items-center gap-3 transition-colors border-b text-white hover:text-blue-400 font-medium py-4 border-slate-700"
 							style="font-family: {theme.font.body}; text-decoration: none;"
 							onclick={closeMobileMenu}
 						>

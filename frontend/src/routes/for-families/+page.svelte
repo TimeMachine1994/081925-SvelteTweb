@@ -84,7 +84,7 @@
 	<section class="{theme.hero.wrap}">
 		<div class="{theme.hero.decoration}" aria-hidden="true"></div>
 		<div class="relative z-10 mx-auto max-w-4xl px-6 text-center">
-			<div class="mb-4 inline-block rounded-full bg-[#D5BA7F]/20 px-4 py-2 text-sm font-semibold text-[#D5BA7F]">
+			<div class="mb-4 inline-block rounded-full bg-blue-500/20 px-4 py-2 text-sm font-semibold text-blue-500">
 				✨ Honor Their Memory
 			</div>
 			<h1 class="text-4xl md:text-6xl font-bold {theme.hero.heading} mb-6" style="font-family: {theme.font.heading}">
@@ -114,7 +114,7 @@
 							theme="minimal"
 							type="submit"
 							disabled={isSubmitting || !lovedOneName.trim()}
-							class="bg-white text-black border border-gray-300 hover:bg-[#D5BA7F] hover:text-black flex items-center justify-center px-8 py-3 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+							class="bg-white text-black border border-gray-300 hover:bg-blue-500 hover:text-black flex items-center justify-center px-8 py-3 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 						>
 							{#if isSubmitting}
 								<div class="animate-spin rounded-full h-5 w-5 border-b-2 border-black mr-2"></div>
@@ -134,7 +134,7 @@
 				<Button
 					theme="minimal"
 					onclick={handleGetStarted}
-					class="bg-white text-black border border-gray-300 hover:bg-[#D5BA7F] hover:text-black flex items-center justify-center transition-colors"
+					class="bg-white text-black border border-gray-300 hover:bg-blue-500 hover:text-black flex items-center justify-center transition-colors"
 				>
 					<Sparkles class="h-5 w-5 mr-2" />
 					Get Started Free
@@ -167,8 +167,8 @@
 				{#each benefits as benefit}
 					{@const IconComponent = benefit.icon}
 					<Card theme="minimal" class="p-8 text-center">
-						<div class="flex h-12 w-12 items-center justify-center rounded-full bg-[#D5BA7F]/20 mx-auto mb-4">
-							<IconComponent class="h-6 w-6 text-[#D5BA7F]" />
+						<div class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-500/20 mx-auto mb-4">
+							<IconComponent class="h-6 w-6 text-blue-500" />
 						</div>
 						<h3 class="text-xl font-bold text-slate-900 mb-4">{benefit.title}</h3>
 						<p class="text-slate-600">{benefit.description}</p>
@@ -194,7 +194,7 @@
 				<div class="space-y-6">
 					{#each features as feature}
 						<div class="flex items-start space-x-4">
-							<CheckCircle class="mt-1 h-6 w-6 flex-shrink-0 text-[#D5BA7F]" />
+							<CheckCircle class="mt-1 h-6 w-6 flex-shrink-0 text-blue-500" />
 							<div>
 								<h4 class="font-semibold text-slate-900 mb-1">{feature.title}</h4>
 								<p class="text-slate-600">{feature.description}</p>
@@ -206,7 +206,7 @@
 				<!-- Visual Element -->
 				<Card theme="minimal" class="p-8">
 					<div class="text-center">
-						<div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-r from-[#D5BA7F] to-[#C5AA6F]">
+						<div class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-r from-[#3B82F6] to-[#2563EB]">
 							<Heart class="h-10 w-10 text-white" />
 						</div>
 						<h3 class="mb-4 text-2xl font-bold text-slate-900">Start in Minutes</h3>
@@ -217,7 +217,7 @@
 							<Button
 								theme="minimal"
 								onclick={handleGetStarted}
-								class="bg-white text-black border border-gray-300 hover:bg-[#D5BA7F] hover:text-black flex items-center justify-center px-6 py-3 transition-colors"
+								class="bg-white text-black border border-gray-300 hover:bg-blue-500 hover:text-black flex items-center justify-center px-6 py-3 transition-colors"
 							>
 								<Sparkles class="h-5 w-5 mr-2" />
 								Get Started Free
@@ -244,7 +244,7 @@
 				{#each testimonials as testimonial}
 					<Card theme="minimal" class="p-6">
 						<div class="mb-4 flex items-center">
-							<div class="flex text-[#D5BA7F]">
+							<div class="flex text-blue-500">
 								{#each Array(testimonial.rating) as _}
 									<Star class="h-4 w-4 fill-current" />
 								{/each}
@@ -274,7 +274,7 @@
 				<Button
 					theme="minimal"
 					onclick={handleGetStarted}
-					class="bg-white text-black border border-gray-300 hover:bg-[#D5BA7F] hover:text-black flex items-center justify-center text-lg px-8 py-4 transition-colors"
+					class="bg-white text-black border border-gray-300 hover:bg-blue-500 hover:text-black flex items-center justify-center text-lg px-8 py-4 transition-colors"
 				>
 					<Sparkles class="h-6 w-6 mr-2" />
 					Get Started Free

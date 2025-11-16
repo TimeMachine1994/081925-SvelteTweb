@@ -274,7 +274,7 @@
 	.schedule-icon {
 		width: 2rem;
 		height: 2rem;
-		color: #D5BA7F;
+		color: #3B82F6;
 		filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.8));
 	}
 
@@ -317,7 +317,7 @@
 	.time-value {
 		font-size: 1.1rem;
 		font-weight: 600;
-		color: #D5BA7F;
+		color: #3B82F6;
 		text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 	}
 

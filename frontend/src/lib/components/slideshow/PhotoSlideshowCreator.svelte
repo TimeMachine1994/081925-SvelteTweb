@@ -2138,7 +2138,7 @@
 	.title-icon {
 		width: 2.5rem;
 		height: 2.5rem;
-		color: #D5BA7F;
+		color: #3B82F6;
 	}
 
 	.creator-subtitle {
@@ -2217,7 +2217,7 @@
 	}
 
 	.back-btn:hover {
-		color: #D5BA7F;
+		color: #3B82F6;
 	}
 
 	/* Existing Slideshows Section */
@@ -2249,7 +2249,7 @@
 		align-items: center;
 		gap: 0.5rem;
 		padding: 0.75rem 1.5rem;
-		background: #D5BA7F;
+		background: #3B82F6;
 		color: white;
 		border: none;
 		border-radius: 8px;
@@ -2380,7 +2380,7 @@
 	}
 
 	.workflow-step.active {
-		border-color: #D5BA7F;
+		border-color: #3B82F6;
 		box-shadow: 0 4px 20px rgba(213, 186, 127, 0.1);
 	}
 
@@ -2396,7 +2396,7 @@
 	.step-number {
 		width: 3rem;
 		height: 3rem;
-		background: #D5BA7F;
+		background: #3B82F6;
 		color: white;
 		border-radius: 50%;
 		display: flex;
@@ -2438,7 +2438,7 @@
 
 	.primary-upload-area:hover,
 	.primary-upload-area.drag-over {
-		border-color: #D5BA7F;
+		border-color: #3B82F6;
 		background: linear-gradient(135deg, #fffbf5 0%, #fef7e7 100%);
 		transform: translateY(-4px);
 		box-shadow: 0 8px 25px rgba(213, 186, 127, 0.25);
@@ -2452,7 +2452,7 @@
 	.upload-icon {
 		width: 4rem;
 		height: 4rem;
-		color: #D5BA7F;
+		color: #3B82F6;
 		margin-bottom: 1.5rem;
 	}
 
@@ -2485,7 +2485,7 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 0.75rem;
-		background: #D5BA7F;
+		background: #3B82F6;
 		color: white;
 		border: none;
 		border-radius: 12px;
@@ -2537,7 +2537,7 @@
 	}
 
 	.secondary-btn:hover {
-		border-color: #D5BA7F;
+		border-color: #3B82F6;
 		color: #92400e;
 		background: #fffbf5;
 		transform: translateY(-1px);
@@ -2602,7 +2602,7 @@
 
 	.add-more-area:hover,
 	.add-more-area.drag-over {
-		border-color: #D5BA7F;
+		border-color: #3B82F6;
 		background: #fffbf5;
 	}
 
@@ -2663,9 +2663,9 @@
 	}
 
 	.action-btn.primary {
-		background: #D5BA7F;
+		background: #3B82F6;
 		color: white;
-		border-color: #D5BA7F;
+		border-color: #3B82F6;
 		font-weight: 600;
 	}
 
@@ -2675,7 +2675,7 @@
 	}
 
 	.action-btn.secondary {
-		border-color: #D5BA7F;
+		border-color: #3B82F6;
 		color: #92400e;
 	}
 
@@ -2803,7 +2803,7 @@
 		padding: 0.5rem 1rem;
 		background: #f3f4f6;
 		border-radius: 8px;
-		border-left: 4px solid #D5BA7F;
+		border-left: 4px solid #3B82F6;
 	}
 
 	.chunk-label {
@@ -2940,7 +2940,7 @@
 		width: 24px;
 		height: 24px;
 		border-radius: 50%;
-		background: #D5BA7F;
+		background: #3B82F6;
 		cursor: pointer;
 		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 	}
@@ -2949,7 +2949,7 @@
 		width: 24px;
 		height: 24px;
 		border-radius: 50%;
-		background: #D5BA7F;
+		background: #3B82F6;
 		cursor: pointer;
 		border: none;
 		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
@@ -3302,7 +3302,7 @@
 		align-items: center;
 		gap: 0.75rem;
 		padding: 1rem 2rem;
-		background: #D5BA7F;
+		background: #3B82F6;
 		color: white;
 		border: none;
 		border-radius: 8px;
@@ -3344,7 +3344,7 @@
 	.progress-percentage {
 		font-size: 1.1rem;
 		font-weight: 600;
-		color: #D5BA7F;
+		color: #3B82F6;
 	}
 
 	.progress-bar {
@@ -3359,7 +3359,7 @@
 
 	.progress-fill {
 		height: 100%;
-		background: linear-gradient(90deg, #D5BA7F 0%, #c4a96e 100%);
+		background: linear-gradient(90deg, #3B82F6 0%, #c4a96e 100%);
 		transition: width 0.3s ease;
 		border-radius: 6px;
 	}
@@ -3537,7 +3537,7 @@
 	}
 
 	.add-more-card:hover {
-		border-color: #D5BA7F;
+		border-color: #3B82F6;
 		background: #fffbf5;
 		transform: translateY(-2px);
 		box-shadow: 0 4px 12px rgba(213, 186, 127, 0.2);
@@ -3578,7 +3578,7 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 0.5rem;
-		background: #D5BA7F;
+		background: #3B82F6;
 		color: white;
 		border: none;
 		padding: 0.75rem 1.5rem;
@@ -3590,7 +3590,7 @@
 	}
 
 	.add-photos-btn:hover {
-		background: #C5AA6F;
+		background: #2563EB;
 		transform: translateY(-1px);
 		box-shadow: 0 4px 12px rgba(213, 186, 127, 0.3);
 	}

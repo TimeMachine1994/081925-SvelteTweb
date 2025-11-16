@@ -125,7 +125,7 @@
 	}
 
 	.test-info strong {
-		color: #D5BA7F;
+		color: #3B82F6;
 		font-weight: 600;
 	}
 

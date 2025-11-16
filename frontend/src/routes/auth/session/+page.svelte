@@ -127,7 +127,7 @@
 	<div class="w-full max-w-md">
 		<div class="bg-white rounded-xl shadow-lg p-8 text-center">
 			<!-- Logo/Icon -->
-			<div class="mx-auto w-16 h-16 bg-gradient-to-br from-[#D5BA7F] to-[#C5AA6F] rounded-full flex items-center justify-center mb-6">
+			<div class="mx-auto w-16 h-16 bg-gradient-to-br from-[#3B82F6] to-[#2563EB] rounded-full flex items-center justify-center mb-6">
 				{#if isLoading}
 					<div class="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
 				{:else if error}
@@ -155,7 +155,7 @@
 			{#if error}
 				<p class="text-red-600 mb-6">{error}</p>
 				<button 
-					class="px-4 py-2 bg-[#D5BA7F] text-white rounded-lg hover:bg-[#C5AA6F] transition-colors"
+					class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-[#2563EB] transition-colors"
 					onclick={() => window.location.href = '/register'}
 				>
 					Try Again
@@ -168,7 +168,7 @@
 					<!-- Progress bar -->
 					<div class="w-full bg-slate-200 rounded-full h-2 mb-4">
 						<div 
-							class="bg-gradient-to-r from-[#D5BA7F] to-[#C5AA6F] h-2 rounded-full transition-all duration-500 ease-out"
+							class="bg-gradient-to-r from-[#3B82F6] to-[#2563EB] h-2 rounded-full transition-all duration-500 ease-out"
 							style="width: {progress}%"
 						></div>
 					</div>

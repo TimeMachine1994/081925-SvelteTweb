@@ -36,7 +36,7 @@
           <div class="mt-2 text-sm opacity-80">This page will go live automatically. Refresh not required.</div>
           <div class="mt-4 flex items-center justify-center gap-2 text-sm">
             <span class="inline-flex items-center gap-2 rounded-full px-3 py-1 border border-slate-200 bg-white">
-              <span class="h-1.5 w-1.5 rounded-full bg-[#D5BA7F]"></span>
+              <span class="h-1.5 w-1.5 rounded-full bg-blue-500"></span>
               Notify me
             </span>
             <button class="underline">{cta}</button>
@@ -46,7 +46,7 @@
     {:else}
       <button 
         aria-label="Play" 
-        class="absolute inset-0 m-auto h-16 w-16 rounded-full flex items-center justify-center bg-[#D5BA7F] text-[#070707] shadow-lg hover:brightness-110 transition-all"
+        class="absolute inset-0 m-auto h-16 w-16 rounded-full flex items-center justify-center bg-blue-500 text-[#070707] shadow-lg hover:brightness-110 transition-all"
       >
         ▶
       </button>
@@ -55,13 +55,13 @@
   
   {#if !scheduled}
     <div class="px-4 py-3 flex items-center gap-3 border-t border-slate-200">
-      <button class="text-sm hover:text-[#D5BA7F] transition-colors">Play</button>
-      <button class="text-sm hover:text-[#D5BA7F] transition-colors">Mute</button>
+      <button class="text-sm hover:text-blue-500 transition-colors">Play</button>
+      <button class="text-sm hover:text-blue-500 transition-colors">Mute</button>
       <div class="flex-1 h-1 bg-slate-200 rounded">
-        <div class="h-1 w-1/5 bg-[#D5BA7F] rounded"></div>
+        <div class="h-1 w-1/5 bg-blue-500 rounded"></div>
       </div>
       <div class="text-xs opacity-70">00:24 / 10:00</div>
-      <button class="text-sm hover:text-[#D5BA7F] transition-colors">⛶</button>
+      <button class="text-sm hover:text-blue-500 transition-colors">⛶</button>
     </div>
   {/if}
 </div>

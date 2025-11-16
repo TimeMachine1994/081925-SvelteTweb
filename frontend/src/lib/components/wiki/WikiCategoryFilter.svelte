@@ -131,7 +131,7 @@
 	}
 
 	.category-btn.active .category-count {
-		background: #d5ba7f;
+		background: #3B82F6;
 		color: white;
 	}
 </style>

@@ -1,6 +1,7 @@
 /**
- * Minimal Modern Theme System for Tributestream
- * Ported from React design system - clean, airy design with ABeeZee font and gold accents
+ * Minimal Modern Theme System for Tributestream Live
+ * Celebration-focused design system with ABeeZee font and vibrant blue accents
+ * Optimized for events: birthdays, weddings, anniversaries, and celebrations
  */
 
 export type ThemeKey = 'minimal';
@@ -43,21 +44,21 @@ export const MINIMAL_MODERN_THEME: Record<ThemeKey, ThemeDefinition> = {
       heading: '"ABeeZee", system-ui, sans-serif',
       body: '"ABeeZee", system-ui, sans-serif'
     },
-    root: 'bg-gradient-to-b from-[#faf8f5] via-white to-[#faf8f5] text-slate-800',
+    root: 'bg-gradient-to-b from-blue-50 via-white to-blue-50 text-slate-800',
     text: 'text-slate-800',
     link: 'text-slate-700 hover:text-slate-900 transition-colors',
     hero: {
       wrap: 'py-20 md:py-28 relative overflow-hidden',
       heading: 'text-slate-900',
       sub: 'text-slate-600',
-      decoration: 'absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,_rgba(213,186,127,0.18),_transparent_40%)]'
+      decoration: 'absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,_rgba(59,130,246,0.15),_transparent_40%)]'
     },
     card: 'bg-white border border-slate-200 shadow-md rounded-2xl',
     button: {
-      primary: 'bg-[#D5BA7F] text-[#070707] hover:brightness-110 transition-all duration-200 rounded-xl px-4 py-2 font-medium',
+      primary: 'bg-blue-500 text-white hover:bg-blue-600 transition-all duration-200 rounded-xl px-4 py-2 font-medium',
       secondary: 'bg-white text-slate-900 border border-slate-300 hover:bg-slate-50 transition-all duration-200 rounded-xl px-4 py-2 font-medium'
     },
-    input: 'bg-white border border-slate-300 placeholder-slate-400 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-[#D5BA7F] focus:border-[#D5BA7F] transition-all duration-200',
+    input: 'bg-white border border-slate-300 placeholder-slate-400 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200',
     badge: {
       wrap: '',
       item: 'bg-slate-900 text-white rounded-xl px-3 py-2 text-sm inline-flex items-center justify-center'
@@ -69,12 +70,12 @@ export const MINIMAL_MODERN_THEME: Record<ThemeKey, ThemeDefinition> = {
   }
 };
 
-// Background presets for the theme
+// Background presets for the theme - celebration focused
 export const BACKGROUND_PRESETS = {
-  goldMist: 'bg-[radial-gradient(40%_30%_at_10%_10%,rgba(213,186,127,0.25),transparent),radial-gradient(40%_30%_at_90%_20%,rgba(7,7,7,0.05),transparent)]',
-  emeraldDrift: 'bg-[conic-gradient(at_70%_30%,rgba(16,185,129,0.15),transparent_40%,rgba(213,186,127,0.2),transparent_80%)]',
-  amberVeil: 'bg-[radial-gradient(circle_at_20%_10%,rgba(245,158,11,0.16),transparent_40%),radial-gradient(circle_at_80%_0%,rgba(213,186,127,0.18),transparent_45%)]',
-  charcoalFog: 'bg-neutral-50 relative after:content-[\'\'] after:absolute after:inset-0 after:opacity-[0.06] after:[background-image:radial-gradient(#000_1px,transparent_1px)] after:[background-size:8px_8px]'
+  blueMist: 'bg-[radial-gradient(40%_30%_at_10%_10%,rgba(59,130,246,0.2),transparent),radial-gradient(40%_30%_at_90%_20%,rgba(96,165,250,0.15),transparent)]',
+  celebrationGlow: 'bg-[conic-gradient(at_70%_30%,rgba(59,130,246,0.15),transparent_40%,rgba(245,158,11,0.2),transparent_80%)]',
+  skyVeil: 'bg-[radial-gradient(circle_at_20%_10%,rgba(96,165,250,0.18),transparent_40%),radial-gradient(circle_at_80%_0%,rgba(59,130,246,0.15),transparent_45%)]',
+  lightDrift: 'bg-blue-50 relative after:content-[\'\'] after:absolute after:inset-0 after:opacity-[0.04] after:[background-image:radial-gradient(rgb(59,130,246)_1px,transparent_1px)] after:[background-size:8px_8px]'
 };
 
 // Helper function to get theme
@@ -88,13 +89,16 @@ export function generateMinimalModernCSS(): string {
   
   return `
     :root {
-      --mm-color-primary: #D5BA7F;
-      --mm-color-primary-dark: #070707;
+      --mm-color-primary: #3B82F6; /* blue-500 */
+      --mm-color-primary-light: #60A5FA; /* blue-400 */
+      --mm-color-primary-dark: #1E40AF; /* blue-800 */
+      --mm-color-accent: #F59E0B; /* amber-500 celebration accent */
+      --mm-color-success: #10B981; /* emerald-500 */
       --mm-color-text: rgb(30 41 59); /* slate-800 */
       --mm-color-text-muted: rgb(100 116 139); /* slate-500 */
       --mm-color-border: rgb(226 232 240); /* slate-200 */
       --mm-color-background: #ffffff;
-      --mm-color-background-soft: #faf8f5;
+      --mm-color-background-soft: #F0F9FF; /* blue-50 */
       --mm-font-family: "ABeeZee", system-ui, sans-serif;
       --mm-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
       --mm-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);

@@ -30,10 +30,10 @@
 </svelte:head>
 
 <!-- Hero Section -->
-<section class="py-20 bg-gradient-to-br from-[#D5BA7F]/10 to-slate-50">
+<section class="py-20 bg-gradient-to-br from-[#3B82F6]/10 to-slate-50">
 	<div class="max-w-4xl mx-auto px-6 text-center">
 		<div class="mb-6">
-			<span class="bg-[#D5BA7F] text-black px-4 py-2 rounded-full text-sm font-semibold">Most Popular</span>
+			<span class="bg-blue-500 text-black px-4 py-2 rounded-full text-sm font-semibold">Most Popular</span>
 		</div>
 		<h1 class="text-4xl md:text-5xl font-bold text-slate-900 mb-6" style="font-family: {theme.font.heading}">
 			Premium Partnership
@@ -42,7 +42,7 @@
 			The complete solution for funeral homes ready to offer world-class memorial streaming services with full marketing support and custom branding.
 		</p>
 		<div class="flex flex-col sm:flex-row gap-4 justify-center">
-			<Button theme="minimal" class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F] px-8 py-3" onclick={handleLearnMore}>
+			<Button theme="minimal" class="bg-blue-500 text-black hover:bg-[#2563EB] px-8 py-3" onclick={handleLearnMore}>
 				Learn More
 			</Button>
 			<Button theme="minimal" variant="secondary" class="px-8 py-3" onclick={handleScheduleCall}>
@@ -68,8 +68,8 @@
 			{#each features as feature}
 				<Card theme="minimal" class="p-6 h-full">
 					<div class="text-center">
-						<div class="bg-[#D5BA7F]/10 p-4 rounded-lg inline-flex mb-4">
-							<svelte:component this={feature.icon} class="h-8 w-8 text-[#D5BA7F]" />
+						<div class="bg-blue-500/10 p-4 rounded-lg inline-flex mb-4">
+							<svelte:component this={feature.icon} class="h-8 w-8 text-blue-500" />
 						</div>
 						<h3 class="text-xl font-semibold text-slate-900 mb-3">{feature.title}</h3>
 						<p class="text-slate-600">{feature.description}</p>
@@ -90,28 +90,28 @@
 				</h2>
 				<div class="space-y-4">
 					<div class="flex items-start gap-3">
-						<CheckCircle class="h-6 w-6 text-[#D5BA7F] flex-shrink-0 mt-0.5" />
+						<CheckCircle class="h-6 w-6 text-blue-500 flex-shrink-0 mt-0.5" />
 						<div>
 							<h4 class="font-semibold text-slate-900">White-Glove Service</h4>
 							<p class="text-slate-600">Our technicians handle everything so you can focus on the family</p>
 						</div>
 					</div>
 					<div class="flex items-start gap-3">
-						<CheckCircle class="h-6 w-6 text-[#D5BA7F] flex-shrink-0 mt-0.5" />
+						<CheckCircle class="h-6 w-6 text-blue-500 flex-shrink-0 mt-0.5" />
 						<div>
 							<h4 class="font-semibold text-slate-900">Your Brand, Elevated</h4>
 							<p class="text-slate-600">Custom branding that reinforces your funeral home's reputation</p>
 						</div>
 					</div>
 					<div class="flex items-start gap-3">
-						<CheckCircle class="h-6 w-6 text-[#D5BA7F] flex-shrink-0 mt-0.5" />
+						<CheckCircle class="h-6 w-6 text-blue-500 flex-shrink-0 mt-0.5" />
 						<div>
 							<h4 class="font-semibold text-slate-900">Marketing That Works</h4>
 							<p class="text-slate-600">Professional marketing campaigns that bring in new families</p>
 						</div>
 					</div>
 					<div class="flex items-start gap-3">
-						<CheckCircle class="h-6 w-6 text-[#D5BA7F] flex-shrink-0 mt-0.5" />
+						<CheckCircle class="h-6 w-6 text-blue-500 flex-shrink-0 mt-0.5" />
 						<div>
 							<h4 class="font-semibold text-slate-900">Digital Presence</h4>
 							<p class="text-slate-600">SEO and social media marketing to reach families online</p>
@@ -125,7 +125,7 @@
 					Our Premium Partnership is designed for funeral homes that want to offer the highest level of memorial streaming services with comprehensive support.
 				</p>
 				<div class="space-y-3">
-					<Button theme="minimal" class="w-full bg-[#D5BA7F] text-black hover:bg-[#C5AA6F] py-3" onclick={handleLearnMore}>
+					<Button theme="minimal" class="w-full bg-blue-500 text-black hover:bg-[#2563EB] py-3" onclick={handleLearnMore}>
 						Get Custom Pricing
 					</Button>
 					<Button theme="minimal" variant="secondary" class="w-full py-3" onclick={handleScheduleCall}>
@@ -148,22 +148,22 @@
 
 		<div class="grid md:grid-cols-4 gap-8">
 			<div class="text-center">
-				<div class="bg-[#D5BA7F] text-black w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">1</div>
+				<div class="bg-blue-500 text-black w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">1</div>
 				<h3 class="text-lg font-semibold text-slate-900 mb-2">Consultation</h3>
 				<p class="text-slate-600">We discuss your needs and create a custom partnership plan</p>
 			</div>
 			<div class="text-center">
-				<div class="bg-[#D5BA7F] text-black w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">2</div>
+				<div class="bg-blue-500 text-black w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">2</div>
 				<h3 class="text-lg font-semibold text-slate-900 mb-2">Setup</h3>
 				<p class="text-slate-600">Custom branding, training, and marketing materials are created</p>
 			</div>
 			<div class="text-center">
-				<div class="bg-[#D5BA7F] text-black w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">3</div>
+				<div class="bg-blue-500 text-black w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">3</div>
 				<h3 class="text-lg font-semibold text-slate-900 mb-2">Launch</h3>
 				<p class="text-slate-600">We launch your streaming services with full marketing support</p>
 			</div>
 			<div class="text-center">
-				<div class="bg-[#D5BA7F] text-black w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">4</div>
+				<div class="bg-blue-500 text-black w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">4</div>
 				<h3 class="text-lg font-semibold text-slate-900 mb-2">Ongoing</h3>
 				<p class="text-slate-600">Continuous support, marketing, and service optimization</p>
 			</div>
@@ -181,7 +181,7 @@
 			Join our Premium Partnership and become the go-to funeral home for memorial streaming services in your area.
 		</p>
 		<div class="flex flex-col sm:flex-row gap-4 justify-center">
-			<Button theme="minimal" class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F] px-8 py-3" onclick={handleLearnMore}>
+			<Button theme="minimal" class="bg-blue-500 text-black hover:bg-[#2563EB] px-8 py-3" onclick={handleLearnMore}>
 				Get Started Today
 			</Button>
 			<Button theme="minimal" class="bg-transparent border-2 border-white text-white hover:bg-white hover:text-slate-900 px-8 py-3" onclick={handleScheduleCall}>

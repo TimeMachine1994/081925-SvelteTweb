@@ -5,19 +5,19 @@
 
 	const theme = getTheme('minimal');
 
-	function handleFuneralDirectorClick() {
+	function handleEventPlannerClick() {
 		if ($user) {
 			// User is logged in - check their role
 			if ($user.role === 'funeral_director' || $user.role === 'admin') {
-				// Funeral director or admin - go to quick family registration tool
-				goto('/register/funeral-director');
+				// Event planner or admin - go to quick registration tool
+				goto('/register/event-planner');
 			} else {
-				// Other logged-in users - go to funeral director information page
-				goto('/for-funeral-directors');
+				// Other logged-in users - go to event planner information page
+				goto('/for-event-planners');
 			}
 		} else {
-			// User not logged in - go to funeral director information page
-			goto('/for-funeral-directors');
+			// User not logged in - go to event planner information page
+			goto('/for-event-planners');
 		}
 	}
 </script>
@@ -25,14 +25,14 @@
 <footer class="footer">
 	<div class="footer-container">
 		<div class="footer-section">
-			<h3 class="footer-heading">Tributestream®</h3>
+			<h3 class="footer-heading">Tributestream Live®</h3>
 			<p>
-				Tributestream is a premier, affordable, and reliable livestreaming service to transport your
-				families and friends to a celebration of life.
+				Tributestream Live is a premier, affordable, and reliable livestreaming service to bring your
+				family and friends together for life's special moments and celebrations.
 			</p>
-			<p>We don't make videos, we make documentaries.</p>
-			<button onclick={handleFuneralDirectorClick} class="footer-link funeral-director-btn"
-				>Funeral Director Form</button
+			<p>We don't just stream events, we capture memories.</p>
+			<button onclick={handleEventPlannerClick} class="footer-link event-planner-btn"
+				>Event Planner Form</button
 			>
 		</div>
 		<div class="footer-section">
@@ -62,7 +62,7 @@
 	</div>
 	<div class="footer-bottom">
 		<p>
-			© {new Date().getFullYear()} All rights reserved | Tributestream is a Registered Trademark
+			{new Date().getFullYear()} All rights reserved | Tributestream Live is a Registered Trademark
 		</p>
 	</div>
 </footer>
@@ -98,7 +98,7 @@
 	}
 
 	.footer-link {
-		color: #d4af37;
+		color: #60A5FA;
 		text-decoration: none;
 	}
 
@@ -106,7 +106,7 @@
 		text-decoration: underline;
 	}
 
-	.funeral-director-btn {
+	.event-planner-btn {
 		background: none;
 		border: none;
 		padding: 0;

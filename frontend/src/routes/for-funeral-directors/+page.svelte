@@ -71,7 +71,7 @@
 	<section class="{theme.hero.wrap}">
 		<div class="{theme.hero.decoration}" aria-hidden="true"></div>
 		<div class="relative z-10 mx-auto max-w-4xl px-6 text-center">
-			<div class="mb-4 inline-block rounded-full bg-[#D5BA7F]/20 px-4 py-2 text-sm font-semibold text-[#D5BA7F]">
+			<div class="mb-4 inline-block rounded-full bg-blue-500/20 px-4 py-2 text-sm font-semibold text-blue-500">
 				Partner with Tributestream
 			</div>
 			<h1 class="text-4xl md:text-6xl font-bold {theme.hero.heading} mb-6" style="font-family: {theme.font.heading}">
@@ -81,7 +81,7 @@
 				Register your individual director account to create memorial pages, manage livestreams, and help families build lasting digital tributes with photos, videos, and slideshows.
 			</p>
 			<div class="flex flex-col sm:flex-row gap-4 justify-center">
-				<Button theme="minimal" onclick={handleBookDemo} class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F] flex items-center justify-center">
+				<Button theme="minimal" onclick={handleBookDemo} class="bg-blue-500 text-black hover:bg-[#2563EB] flex items-center justify-center">
 					<Calendar class="h-5 w-5 mr-2" />
 					Book Free Demo
 				</Button>
@@ -108,8 +108,8 @@
 				{#each benefits as benefit}
 					{@const IconComponent = benefit.icon}
 					<Card theme="minimal" class="p-8 text-center">
-						<div class="flex h-12 w-12 items-center justify-center rounded-full bg-[#D5BA7F]/20 mx-auto mb-4">
-							<IconComponent class="h-6 w-6 text-[#D5BA7F]" />
+						<div class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-500/20 mx-auto mb-4">
+							<IconComponent class="h-6 w-6 text-blue-500" />
 						</div>
 						<h3 class="text-xl font-bold text-slate-900 mb-4">{benefit.title}</h3>
 						<p class="text-slate-600">{benefit.description}</p>
@@ -141,19 +141,19 @@
 					<h3 class="text-xl font-bold text-slate-900 mb-6">Your Director Dashboard Includes</h3>
 					<div class="space-y-4">
 						<div class="flex items-center space-x-3">
-							<Users class="h-5 w-5 text-[#D5BA7F]" />
+							<Users class="h-5 w-5 text-blue-500" />
 							<span class="text-slate-700">Create memorials for families</span>
 						</div>
 						<div class="flex items-center space-x-3">
-							<Video class="h-5 w-5 text-[#D5BA7F]" />
+							<Video class="h-5 w-5 text-blue-500" />
 							<span class="text-slate-700">Manage livestreams & recordings</span>
 						</div>
 						<div class="flex items-center space-x-3">
-							<Sparkles class="h-5 w-5 text-[#D5BA7F]" />
+							<Sparkles class="h-5 w-5 text-blue-500" />
 							<span class="text-slate-700">Help families create slideshows</span>
 						</div>
 						<div class="flex items-center space-x-3">
-							<Phone class="h-5 w-5 text-[#D5BA7F]" />
+							<Phone class="h-5 w-5 text-blue-500" />
 							<span class="text-slate-700">Track memorial progress & analytics</span>
 						</div>
 					</div>
@@ -178,10 +178,10 @@
 			<div class="flex justify-center">
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl">
 					{#each packages as pkg}
-						<div class="bg-white rounded-lg border-2 p-8 shadow-lg transition-all duration-200 hover:shadow-xl {pkg.popular ? 'border-[#D5BA7F] ring-2 ring-[#D5BA7F]/20' : 'border-gray-200 hover:border-[#D5BA7F]/50'}">
+						<div class="bg-white rounded-lg border-2 p-8 shadow-lg transition-all duration-200 hover:shadow-xl {pkg.popular ? 'border-[#3B82F6] ring-2 ring-[#3B82F6]/20' : 'border-gray-200 hover:border-[#3B82F6]/50'}">
 							{#if pkg.popular}
 								<div class="text-center mb-4">
-									<span class="bg-[#D5BA7F] text-black px-3 py-1 rounded-full text-sm font-semibold">Most Popular</span>
+									<span class="bg-blue-500 text-black px-3 py-1 rounded-full text-sm font-semibold">Most Popular</span>
 								</div>
 							{/if}
 							
@@ -189,20 +189,20 @@
 								<h3 class="text-2xl font-bold text-slate-900 mb-2" style="font-family: {theme.font.heading}">
 									{pkg.name}
 								</h3>
-								<div class="text-3xl font-extrabold text-[#D5BA7F]">{pkg.price}</div>
+								<div class="text-3xl font-extrabold text-blue-500">{pkg.price}</div>
 							</div>
 							
 							<ul class="space-y-4 mb-8">
 								{#each pkg.features as feature}
 									<li class="flex items-start gap-3">
-										<div class="mt-1.5 h-2 w-2 rounded-full bg-[#D5BA7F] flex-shrink-0"></div>
+										<div class="mt-1.5 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0"></div>
 										<span class="text-slate-700">{feature}</span>
 									</li>
 								{/each}
 							</ul>
 							
 							<div class="text-center">
-								<Button theme="minimal" class="w-full bg-[#D5BA7F] text-black hover:bg-[#C5AA6F] py-3">
+								<Button theme="minimal" class="w-full bg-blue-500 text-black hover:bg-[#2563EB] py-3">
 									<a href="/partnership/{pkg.name.toLowerCase().replace(' ', '-')}" class="no-underline text-black">
 										{pkg.directorCta}
 									</a>
@@ -225,7 +225,7 @@
 				Create your director account today and start building beautiful, lasting memorials for the families you serve. Help them create slideshows, manage livestreams, and preserve precious memories.
 			</p>
 			<div class="flex flex-col sm:flex-row gap-4 justify-center">
-				<Button theme="minimal" onclick={handleBookDemo} class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F] flex items-center justify-center">
+				<Button theme="minimal" onclick={handleBookDemo} class="bg-blue-500 text-black hover:bg-[#2563EB] flex items-center justify-center">
 					<Calendar class="h-5 w-5 mr-2" />
 					Schedule Free Demo
 				</Button>
@@ -239,12 +239,12 @@
 			<div class="mt-12 pt-8 border-t border-slate-200">
 				<div class="grid md:grid-cols-2 gap-8 text-center">
 					<div>
-						<Phone class="h-6 w-6 text-[#D5BA7F] mx-auto mb-2" />
+						<Phone class="h-6 w-6 text-blue-500 mx-auto mb-2" />
 						<h4 class="font-semibold text-slate-900 mb-1">Call Direct</h4>
-						<a href="tel:407-221-5922" class="text-[#D5BA7F] hover:underline">407-221-5922</a>
+						<a href="tel:407-221-5922" class="text-blue-500 hover:underline">407-221-5922</a>
 					</div>
 					<div>
-						<Clock class="h-6 w-6 text-[#D5BA7F] mx-auto mb-2" />
+						<Clock class="h-6 w-6 text-blue-500 mx-auto mb-2" />
 						<h4 class="font-semibold text-slate-900 mb-1">Service Area</h4>
 						<p class="text-slate-600">Central Florida & Surrounding Areas</p>
 					</div>

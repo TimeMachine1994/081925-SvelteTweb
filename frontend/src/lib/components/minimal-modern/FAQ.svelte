@@ -27,7 +27,7 @@
       <summary class="cursor-pointer py-3 font-medium {themeConfig.text} list-none">
         <div class="flex items-center justify-between">
           {item.q}
-          <span class="text-[#D5BA7F] group-open:rotate-45 transition-transform">+</span>
+          <span class="text-blue-500 group-open:rotate-45 transition-transform">+</span>
         </div>
       </summary>
       <div class="pb-3 text-sm opacity-80">{item.a}</div>

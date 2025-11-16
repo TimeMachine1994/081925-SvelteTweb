@@ -27,7 +27,7 @@
   <ul class="space-y-4">
     {#each events as event, idx}
       <li class="relative">
-        <div class="absolute -left-5 top-1.5 h-2.5 w-2.5 rounded-full bg-[#D5BA7F]"></div>
+        <div class="absolute -left-5 top-1.5 h-2.5 w-2.5 rounded-full bg-blue-500"></div>
         <div class="text-xs opacity-60">{event.time}</div>
         <div class="font-medium">{event.title}</div>
         <div class="text-sm opacity-80">{event.detail}</div>

@@ -577,7 +577,7 @@
 	}
 	
 	.stream-status {
-		color: #D5BA7F;
+		color: #3B82F6;
 		font-style: italic;
 		margin-top: 1rem;
 	}
@@ -629,7 +629,7 @@
 	}
 	
 	.placeholder-icon {
-		color: #D5BA7F;
+		color: #3B82F6;
 		margin: 0 auto 1.5rem;
 		opacity: 0.9;
 	}

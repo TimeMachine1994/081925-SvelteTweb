@@ -20,7 +20,7 @@
 
 <ol class="grid grid-cols-2 md:grid-cols-4 gap-3 {className}">
   {#each items as label, i}
-    <li class="rounded-xl px-3 py-2 border {themeConfig.footer.border} {i <= current ? 'bg-[#D5BA7F]/10' : 'bg-white'}">
+    <li class="rounded-xl px-3 py-2 border {themeConfig.footer.border} {i <= current ? 'bg-blue-500/10' : 'bg-white'}">
       <div class="text-xs opacity-60">Step {i + 1}</div>
       <div class="font-medium">{label}</div>
     </li>

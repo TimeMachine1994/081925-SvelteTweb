@@ -276,7 +276,7 @@
 					theme="minimal"
 					onclick={sendTestEmail}
 					disabled={isLoading || !testEmail}
-					class="flex-1 bg-[#D5BA7F] text-black hover:bg-[#C5AA6F] disabled:opacity-50 disabled:cursor-not-allowed"
+					class="flex-1 bg-blue-500 text-black hover:bg-[#2563EB] disabled:opacity-50 disabled:cursor-not-allowed"
 				>
 					{isLoading ? '⏳ Sending...' : `📤 Send ${templateLabels[selectedTemplate as keyof typeof templateLabels]}`}
 				</Button>

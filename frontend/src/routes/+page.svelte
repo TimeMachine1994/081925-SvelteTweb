@@ -6,9 +6,9 @@
 	import { OPTIMIZED_VIDEO_POSTERS, getResponsivePoster } from '$lib/utils/optimizedPosters';
 	import { Star, Shield, Users, Play, Search, Phone, Clock, Pause, Volume2, Maximize, CheckCircle, Globe } from 'lucide-svelte';
 
-	let lovedOneName = $state('');
+	let eventName = $state('');
 	let searchQuery = $state('');
-	let activeTab = $state('families');
+	let activeTab = $state('hosts');
 	let currentStep = $state(0);
 	
 	// Hero video player state
@@ -36,38 +36,38 @@
 
 	// Testimonials
 	const testimonials = [
-		{ text: "I joined an online funeral held for my coworker that was streamed by Tributestream. The streaming quality was great and they really respected and honored our friend. I was not able to go to the physical funeral and I still felt as if I was there.", author: "Joshua Hernandez", rating: 5, date: "Dec 6, 2022" },
-		{ text: "These guys are great. My wife who passed was European, and we had well over 100 live viewers who could not make it to the states for the event. Everyone said the audio and video was top notch. Flawless. They are self sufficient and practically invisible. I highly recommend this service.", author: "Troy Kelly", rating: 5, date: "Sep 16, 2024" },
-		{ text: "What an awesome company. They captured the entire experience. From the service to the entombment. Highly recommended.", author: "Donna Hinckson-Torres", rating: 5, date: "Sep 24, 2024" }
+		{ text: "Tributestream Live made our wedding accessible to family overseas. The streaming quality was incredible and they captured every special moment beautifully. Everyone felt like they were right there with us!", author: "Sarah & Michael Chen", rating: 5, date: "Jun 15, 2024" },
+		{ text: "We used Tributestream Live for my mom's 80th birthday celebration and had over 150 viewers from around the world. The audio and video quality was outstanding. The team was professional and invisible. Highly recommend!", author: "Jennifer Rodriguez", rating: 5, date: "Sep 22, 2024" },
+		{ text: "Amazing service for our anniversary celebration. They captured the entire event from start to finish. The recording is something we'll treasure forever. Five stars!", author: "David & Amanda Thompson", rating: 5, date: "Oct 8, 2024" }
 	];
 
 	// How it works steps
-	const familySteps = [
-		{ title: "Create Memorial", description: "Set up your loved one's memorial page in minutes" },
-		{ title: "Schedule Service", description: "Choose date, time, and streaming options" },
-		{ title: "Share & Stream", description: "Send custom link to family and friends" }
+	const hostSteps = [
+		{ title: "Create Event", description: "Set up your event page in minutes" },
+		{ title: "Schedule Stream", description: "Choose date, time, and streaming options" },
+		{ title: "Share & Celebrate", description: "Send custom link to family and friends" }
 	];
 
-	const directorSteps = [
+	const plannerSteps = [
 		{ title: "Book Demo", description: "Schedule a consultation with our team" },
-		{ title: "Setup Service", description: "We handle all technical setup on-site" },
+		{ title: "Setup Event", description: "We handle all technical setup on-site" },
 		{ title: "Go Live", description: "Professional streaming with expert support" }
 	];
 
 	// Timeline example
 	const sampleTimeline = [
-		{ time: "1:00 PM", title: "Tributestream Setup", detail: "Tributestream arrives early to setup gear" },
-		{ time: "2:00 PM", title: "Livestream", detail: "Memorial service broadcast" },
-		{ time: "3:00 PM", title: "Recording Available", detail: "Complimentary download available shortly after the service" }
+		{ time: "1:00 PM", title: "Tributestream Setup", detail: "Tributestream Live arrives early to setup gear" },
+		{ time: "2:00 PM", title: "Event Livestream", detail: "Your celebration broadcast worldwide" },
+		{ time: "3:00 PM", title: "Recording Available", detail: "Complimentary download available shortly after your event" }
 	];
 
 	const faqItems = [
 		{ q: "How quickly can we set up streaming?", a: "Same-day streaming available in most areas. Call 407-221-5922 for immediate availability." },
-		{ q: "Is the memorial link private?", a: "Yes, you control who receives the custom link. Optional password protection available." },
-		{ q: "Can we download the recording?", a: "Yes, you receive a high-quality downloadable archive after the service." },
+		{ q: "Is the event link private?", a: "Yes, you control who receives the custom link. Optional password protection available." },
+		{ q: "Can we download the recording?", a: "Yes, you receive a high-quality downloadable archive after your event." },
 		{ q: "What if there are technical issues?", a: "Our expert technicians provide on-site support to ensure flawless streaming." },
 		{ q: "How many people can watch?", a: "Unlimited viewers. Our worldwide content delivery network handles any audience size." },
-		{ q: "Do you work with funeral homes?", a: "Yes, we partner with funeral directors to provide seamless memorial streaming services." },
+		{ q: "Do you work with event planners?", a: "Yes, we partner with event planners and venues to provide seamless streaming services." },
 		{ q: "What's included in the recording?", a: "Full HD recording, downloadable file, and optional edited highlights reel." },
 		{ q: "How do we share the link?", a: "We provide a custom, secure link that you can share via email, text, or social media." }
 	];
@@ -75,28 +75,28 @@
 	const packages = [
 		{ 
 			name: "Record", 
-			description: "Perfect for intimate services",
+			description: "Perfect for intimate gatherings",
 			features: ["Single camera", "Custom link", "HD streaming", "Complimentary download"],
 			popular: false,
-			familyCta: "Select Package",
-			directorCta: "Get Quote"
+			hostCta: "Select Package",
+			plannerCta: "Get Quote"
 		},
 		{ 
 			name: "Live", 
-			description: "Complete professional service",
+			description: "Complete professional streaming",
 			popular: false,
 			features: ["Multi-camera setup", "On-site technician", "Live support", "Custom graphics"],
-			familyCta: "Select Package",
-			directorCta: "Get Quote"
+			hostCta: "Select Package",
+			plannerCta: "Get Quote"
 		},
 		{ 
-			name: "Legacy", 
-			description: "Complete professional service",
+			name: "Premium", 
+			description: "Ultimate celebration coverage",
 			features: ["2+ locations", "On-site videographer", "Professional editing", "Custom USB"],
 			popular: true,
 			premium: true,
-			familyCta: "Select Package",
-			directorCta: "Get Quote"
+			hostCta: "Select Package",
+			plannerCta: "Get Quote"
 		}
 	];
 
@@ -105,17 +105,17 @@
 		return Array(5).fill(0).map((_, i) => i < rating);
 	}
 
-	function handleCreateTribute() {
-		console.log('🎯 Creating tribute for:', lovedOneName);
+	function handleCreateEvent() {
+		console.log('🎯 Creating event for:', eventName);
 		const params = new URLSearchParams();
-		if (lovedOneName.trim()) {
-			params.set('name', lovedOneName.trim());
+		if (eventName.trim()) {
+			params.set('name', eventName.trim());
 		}
-		goto(`/register/loved-one?${params.toString()}`);
+		goto(`/create-event?${params.toString()}`);
 	}
 
-	function handleSearchTributes() {
-		console.log('🔍 Searching tributes for:', searchQuery);
+	function handleSearchEvents() {
+		console.log('🔍 Searching events for:', searchQuery);
 		if (searchQuery.trim()) {
 			goto(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
 		}
@@ -225,16 +225,16 @@
 		console.log('📦 Package selected:', packageName);
 		const params = new URLSearchParams();
 		params.set('package', packageName.toLowerCase());
-		if (lovedOneName.trim()) {
-			params.set('name', lovedOneName.trim());
+		if (eventName.trim()) {
+			params.set('name', eventName.trim());
 		}
-		goto(`/register/loved-one?${params.toString()}`);
+		goto(`/create-event?${params.toString()}`);
 	}
 </script>
 
 <svelte:head>
-	<title>Beautiful, reliable memorial livestreams - Tributestream</title>
-	<meta name="description" content="Custom links. On-site technicians. Heirloom recordings. Professional memorial livestreaming for families and funeral directors." />
+	<title>Beautiful, reliable event livestreams - Tributestream Live</title>
+	<meta name="description" content="Custom links. On-site technicians. Professional recordings. Livestream weddings, birthdays, anniversaries, and celebrations with Tributestream Live." />
 </svelte:head>
 
 <div class="bg-white text-gray-900" style="font-family: {theme.font.body}">
@@ -261,40 +261,40 @@
 				<div class="mx-auto max-w-7xl px-6">
 					<div class="text-center mb-8">
 						<h1 class="text-4xl md:text-6xl font-bold text-white mb-4" style="font-family: {theme.font.heading}">
-							Beautiful, reliable memorial livestreams
+							Beautiful, reliable event livestreams
 						</h1>
 						<p class="text-xl md:text-2xl text-white max-w-3xl mx-auto mb-8">
-							Bring everyone together—at church, graveside, or from home
+							Bring everyone together for life's celebrations—from anywhere
 						</p>
 					</div>
 
 					<!-- Dual CTA Clusters -->
 					<div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-						<!-- Families CTA Cluster -->
+						<!-- Event Hosts CTA Cluster -->
 						<div class="text-center">
-							<h3 class="text-2xl font-semibold text-white mb-4">For Families</h3>
+							<h3 class="text-2xl font-semibold text-white mb-4">For Event Hosts</h3>
 							<div class="space-y-3">
 								<div class="flex gap-2">
 									<Input
 										type="text"
-										placeholder="Loved one's name"
-										bind:value={lovedOneName}
+										placeholder="Event name"
+										bind:value={eventName}
 										theme="minimal"
 										class="flex-1"
 									/>
-									<Button theme="minimal" onclick={handleCreateTribute} class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F]">
-										Create Memorial
+									<Button theme="minimal" onclick={handleCreateEvent} class="bg-blue-500 text-white hover:bg-blue-600">
+										Create Event
 									</Button>
 								</div>
 								<div class="flex gap-2">
 									<Input
 										type="text"
-										placeholder="Search memorials..."
+										placeholder="Search events..."
 										bind:value={searchQuery}
 										theme="minimal"
 										class="flex-1"
 									/>
-									<Button theme="minimal" onclick={handleSearchTributes} class="bg-white text-gray-900 hover:bg-gray-100 flex items-center">
+									<Button theme="minimal" onclick={handleSearchEvents} class="bg-white text-gray-900 hover:bg-gray-100 flex items-center">
 										<Search class="h-4 w-4 mr-2" />
 										Search
 									</Button>
@@ -302,9 +302,9 @@
 							</div>
 						</div>
 
-						<!-- Funeral Directors CTA Cluster -->
+						<!-- Event Planners CTA Cluster -->
 						<div class="text-center">
-							<h3 class="text-2xl font-semibold text-white mb-4">For Funeral Directors</h3>
+							<h3 class="text-2xl font-semibold text-white mb-4">For Event Planners</h3>
 							<div class="space-y-3">
 								<Button theme="minimal" onclick={handleBookDemo} class="w-full bg-slate-900 text-white hover:bg-slate-800 flex items-center justify-center">
 									<Phone class="h-4 w-4 mr-2" />
@@ -355,7 +355,7 @@
 						{#if heroIsPlaying}
 							<button
 								onclick={heroTogglePlay}
-								class="w-16 h-16 rounded-full bg-[#D5BA7F]/90 hover:bg-[#D5BA7F] flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-lg"
+								class="w-16 h-16 rounded-full bg-blue-500/90 hover:bg-blue-500 flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-lg"
 								aria-label="Pause video"
 							>
 								<Pause class="w-6 h-6 text-black ml-0" />
@@ -431,7 +431,7 @@
 				{#each trustBadges as badge}
 					{@const IconComponent = badge.icon}
 					<div class="flex items-center gap-2 text-sm text-white">
-						<IconComponent class="h-5 w-5 text-[#D5BA7F]" />
+						<IconComponent class="h-5 w-5 text-blue-500" />
 						<span>{badge.text}</span>
 					</div>
 				{/each}
@@ -460,23 +460,23 @@
 			</div>
 			
 			<div class="text-center">
-				<p class="text-sm text-slate-600 mb-4">Trusted by funeral homes across Central Florida</p>
+				<p class="text-sm text-slate-600 mb-4">Trusted by venues and event spaces across Central Florida</p>
 				<div class="space-y-2">
-					<div class="text-xs font-medium text-slate-500 uppercase tracking-wider">PARTNER FUNERAL HOMES</div>
+					<div class="text-xs font-medium text-slate-500 uppercase tracking-wider">PARTNER VENUES</div>
 					<div class="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-xs text-slate-400">
-						<span>A Community Funeral Home</span>
+						<span>Event Centers</span>
 						<span class="hidden sm:inline">•</span>
-						<span>Osceola Memory Gardens (All Locations)</span>
+						<span>Wedding Venues</span>
 						<span class="hidden sm:inline">•</span>
-						<span>De Guispe Funeral Home</span>
+						<span>Community Halls</span>
 						<span class="hidden sm:inline">•</span>
-						<span>Woodward Funeral Home</span>
+						<span>Hotels & Resorts</span>
 						<span class="hidden sm:inline">•</span>
-						<span>Baldwin Bros. Funeral Home</span>
+						<span>Conference Centers</span>
 						<span class="hidden sm:inline">•</span>
-						<span>Lohman Funeral Home</span>
+						<span>Banquet Halls</span>
 						<span class="hidden sm:inline">•</span>
-						<span>Cape Canaveral National Cemetery</span>
+						<span>Gardens & Parks</span>
 					</div>
 				</div>
 			</div>
@@ -496,16 +496,16 @@
 			<div class="flex justify-center mb-12">
 				<div class="bg-white rounded-lg p-1 shadow-sm">
 					<button 
-						class="px-6 py-2 rounded-md transition-colors {activeTab === 'families' ? 'bg-[#D5BA7F] text-white' : 'text-gray-600 hover:text-gray-900'}"
-						onclick={() => { activeTab = 'families'; currentStep = 0; }}
+						class="px-6 py-2 rounded-md transition-colors {activeTab === 'hosts' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-gray-900'}"
+						onclick={() => { activeTab = 'hosts'; currentStep = 0; }}
 					>
-						Families
+						Event Hosts
 					</button>
 					<button 
-						class="px-6 py-2 rounded-md transition-colors {activeTab === 'directors' ? 'bg-[#D5BA7F] text-white' : 'text-gray-600 hover:text-gray-900'}"
-						onclick={() => { activeTab = 'directors'; currentStep = 0; }}
+						class="px-6 py-2 rounded-md transition-colors {activeTab === 'planners' ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-gray-900'}"
+						onclick={() => { activeTab = 'planners'; currentStep = 0; }}
 					>
-						Funeral Directors
+						Event Planners
 					</button>
 				</div>
 			</div>
@@ -514,12 +514,12 @@
 				<div>
 					<!-- Interactive Step Buttons -->
 					<div class="flex flex-col sm:flex-row gap-3 mb-8">
-						{#each (activeTab === 'families' ? familySteps : directorSteps) as step, index}
+						{#each (activeTab === 'hosts' ? hostSteps : plannerSteps) as step, index}
 							<button
-								class="flex-1 px-4 py-3 rounded-lg border-2 transition-all duration-200 text-left {currentStep === index ? 'border-[#D5BA7F] bg-[#D5BA7F]/10' : 'border-gray-200 bg-white hover:border-[#D5BA7F]/50'}"
+								class="flex-1 px-4 py-3 rounded-lg border-2 transition-all duration-200 text-left {currentStep === index ? 'border-[#3B82F6] bg-blue-500/10' : 'border-gray-200 bg-white hover:border-[#3B82F6]/50'}"
 								onclick={() => currentStep = index}
 							>
-								<div class="text-xs font-semibold text-[#D5BA7F] mb-1">Step {index + 1}</div>
+								<div class="text-xs font-semibold text-blue-500 mb-1">Step {index + 1}</div>
 								<div class="font-medium text-slate-900">{step.title}</div>
 							</button>
 						{/each}
@@ -527,28 +527,28 @@
 
 					<!-- Dynamic Step Description -->
 					<div class="mb-8">
-						{#if activeTab === 'families'}
+						{#if activeTab === 'hosts'}
 							<p class="text-slate-600 text-lg leading-relaxed">
-								{familySteps[currentStep].description}
+								{hostSteps[currentStep].description}
 							</p>
 						{:else}
 							<p class="text-slate-600 text-lg leading-relaxed">
-								{directorSteps[currentStep].description}
+								{plannerSteps[currentStep].description}
 							</p>
 						{/if}
 					</div>
 
 					<!-- CTA Button -->
 					<div class="flex justify-center sm:justify-start">
-						{#if activeTab === 'families'}
-							<Button theme="minimal" class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F] px-8 py-3">
-								<a href="/register/loved-one" class="no-underline text-black font-semibold">
-									Create Memorial
+						{#if activeTab === 'hosts'}
+							<Button theme="minimal" class="bg-blue-500 text-white hover:bg-blue-600 px-8 py-3">
+								<a href="/create-event" class="no-underline text-white font-semibold">
+									Create Event
 								</a>
 							</Button>
 						{:else}
-							<Button theme="minimal" class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F] px-8 py-3">
-								<a href="/contact" class="no-underline text-black font-semibold">
+							<Button theme="minimal" class="bg-blue-500 text-white hover:bg-blue-600 px-8 py-3">
+								<a href="/contact" class="no-underline text-white font-semibold">
 									Book Demo
 								</a>
 							</Button>
@@ -603,12 +603,12 @@
 						{/if}
 						
 						<!-- Custom Control Bar -->
-						<div class="bg-gradient-to-r from-[#D5BA7F] to-[#C5AA6F] p-4 border-t border-[#B59A5F]">
+						<div class="bg-gradient-to-r from-[#3B82F6] to-[#2563EB] p-4 border-t border-[#B59A5F]">
 							<div class="flex items-center space-x-4">
 								<!-- Play/Pause Button -->
 								<button 
 									onclick={togglePlay}
-									class="flex items-center justify-center w-12 h-12 bg-black text-[#D5BA7F] rounded-full hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl"
+									class="flex items-center justify-center w-12 h-12 bg-black text-blue-500 rounded-full hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl"
 								>
 									{#if isPlaying}
 										<Pause class="h-6 w-6" />
@@ -672,19 +672,19 @@
 					<h3 class="text-2xl font-bold text-slate-900 mb-6">Professional Streaming Technology</h3>
 					<ul class="space-y-4">
 						<li class="flex items-start gap-3">
-							<Shield class="h-5 w-5 text-[#D5BA7F] mt-0.5 flex-shrink-0" />
+							<Shield class="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
 							<div>
 								<strong>Reliability:</strong> 99.9% uptime with automatic failover systems
 							</div>
 						</li>
 						<li class="flex items-start gap-3">
-							<Users class="h-5 w-5 text-[#D5BA7F] mt-0.5 flex-shrink-0" />
+							<Users class="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
 							<div>
 								<strong>Custom links:</strong> Unique, custom links allow easy access for your invited guests
 							</div>
 						</li>
 						<li class="flex items-start gap-3">
-							<Play class="h-5 w-5 text-[#D5BA7F] mt-0.5 flex-shrink-0" />
+							<Play class="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
 							<div>
 								<strong>Downloadable archive:</strong> High-quality recording available within 24 hours
 							</div>
@@ -703,15 +703,15 @@
 					Packages & Pricing
 				</h2>
 				<p class="mt-4 text-lg text-slate-600">
-					Professional memorial streaming options for every family's needs
+					Professional event streaming options for every celebration
 				</p>
 			</div>
 			<!-- Custom Package Cards -->
 			<div class="grid md:grid-cols-3 gap-8">
 				{#each packages as pkg}
-					<Card theme="minimal" class="relative p-8 text-center {pkg.popular ? 'ring-2 ring-[#D5BA7F] ring-offset-2' : ''}">
+					<Card theme="minimal" class="relative p-8 text-center {pkg.popular ? 'ring-2 ring-[#3B82F6] ring-offset-2' : ''}">
 						{#if pkg.popular}
-							<div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#D5BA7F] text-black px-4 py-1 rounded-full text-sm font-semibold">
+							<div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-500 text-black px-4 py-1 rounded-full text-sm font-semibold">
 								Most Popular
 							</div>
 						{/if}
@@ -720,17 +720,17 @@
 						<ul class="space-y-3 mb-8">
 							{#each pkg.features as feature}
 								<li class="flex items-center justify-center space-x-2">
-									<CheckCircle class="h-4 w-4 text-[#D5BA7F] flex-shrink-0" />
+									<CheckCircle class="h-4 w-4 text-blue-500 flex-shrink-0" />
 									<span class="text-slate-700">{feature}</span>
 								</li>
 							{/each}
 						</ul>
 						<Button 
 							theme="minimal" 
-							class="w-full {pkg.popular ? 'bg-[#D5BA7F] text-black hover:bg-[#C5AA6F]' : ''}"
+							class="w-full {pkg.popular ? 'bg-blue-500 text-white hover:bg-blue-600' : ''}"
 							onclick={() => handlePackageSelection(pkg.name)}
 						>
-							{pkg.familyCta}
+							{pkg.hostCta}
 						</Button>
 					</Card>
 				{/each}
@@ -744,17 +744,17 @@
 			<h3 class="text-2xl font-bold text-slate-900 mb-8">Central Florida Coverage</h3>
 			<div class="grid md:grid-cols-3 gap-8 mb-8">
 				<div>
-					<Clock class="h-8 w-8 text-[#D5BA7F] mx-auto mb-3" />
+					<Clock class="h-8 w-8 text-blue-500 mx-auto mb-3" />
 					<h4 class="font-semibold text-slate-900 mb-2">Same-Day Available</h4>
 					<p class="text-sm text-slate-600">Emergency streaming setup in most areas</p>
 				</div>
 				<div>
-					<Phone class="h-8 w-8 text-[#D5BA7F] mx-auto mb-3" />
+					<Phone class="h-8 w-8 text-blue-500 mx-auto mb-3" />
 					<h4 class="font-semibold text-slate-900 mb-2">24/7 Support</h4>
-					<p class="text-sm text-slate-600">Call or text: <a href="tel:407-221-5922" class="text-[#D5BA7F] hover:underline">407-221-5922</a></p>
+					<p class="text-sm text-slate-600">Call or text: <a href="tel:407-221-5922" class="text-blue-500 hover:underline">407-221-5922</a></p>
 				</div>
 				<div>
-					<Users class="h-8 w-8 text-[#D5BA7F] mx-auto mb-3" />
+					<Users class="h-8 w-8 text-blue-500 mx-auto mb-3" />
 					<h4 class="font-semibold text-slate-900 mb-2">9 Counties</h4>
 					<p class="text-sm text-slate-600">Orange, Seminole, Lake, Volusia & more</p>
 				</div>
@@ -790,7 +790,7 @@
 	}
 
 	:global(.video-player-custom video:focus) {
-		outline: 2px solid #D5BA7F;
+		outline: 2px solid #3B82F6;
 		outline-offset: 2px;
 	}
 
@@ -812,7 +812,7 @@
 		height: 18px;
 		border-radius: 50%;
 		background: #000;
-		border: 3px solid #D5BA7F;
+		border: 3px solid #3B82F6;
 		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 		cursor: pointer;
 		margin-top: -6px;
@@ -829,7 +829,7 @@
 		height: 18px;
 		border-radius: 50%;
 		background: #000;
-		border: 3px solid #D5BA7F;
+		border: 3px solid #3B82F6;
 		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 		cursor: pointer;
 		-moz-appearance: none;
@@ -861,7 +861,7 @@
 		height: 14px;
 		border-radius: 50%;
 		background: #000;
-		border: 2px solid #D5BA7F;
+		border: 2px solid #3B82F6;
 		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 		cursor: pointer;
 		margin-top: -5px; /* Centers 14px thumb on 4px track */
@@ -878,7 +878,7 @@
 		height: 14px;
 		border-radius: 50%;
 		background: #000;
-		border: 2px solid #D5BA7F;
+		border: 2px solid #3B82F6;
 		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
 		cursor: pointer;
 		-moz-appearance: none;
@@ -926,7 +926,7 @@
 		height: 16px;
 		width: 16px;
 		border-radius: 50%;
-		background: #D5BA7F;
+		background: #3B82F6;
 		cursor: pointer;
 		border: 2px solid white;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -943,7 +943,7 @@
 		height: 16px;
 		width: 16px;
 		border-radius: 50%;
-		background: #D5BA7F;
+		background: #3B82F6;
 		cursor: pointer;
 		border: 2px solid white;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);

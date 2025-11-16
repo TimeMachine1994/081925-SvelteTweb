@@ -96,7 +96,7 @@
 		left: 0;
 		right: 0;
 		z-index: 40; /* Below nav bar (z-50) but above content */
-		background: linear-gradient(135deg, #D5BA7F 0%, #C5AA6F 100%);
+		background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
 		color: white;
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 		transform: translateY(-100%);

@@ -26,7 +26,7 @@
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 {className}">
   {#each tiers as tier}
-    <div class="{themeConfig.card} p-6 {tier.featured ? 'ring-2 ring-[#D5BA7F]' : ''}">
+    <div class="{themeConfig.card} p-6 {tier.featured ? 'ring-2 ring-[#3B82F6]' : ''}">
       <div class="flex items-baseline justify-between">
         <div class="text-lg font-semibold">{tier.name}</div>
         <div class="text-2xl font-extrabold">{tier.price}</div>
@@ -34,7 +34,7 @@
       <ul class="mt-4 space-y-2 text-sm">
         {#each tier.features as feature}
           <li class="flex items-start gap-2">
-            <span class="mt-1 h-1.5 w-1.5 rounded-full bg-[#D5BA7F]"></span>
+            <span class="mt-1 h-1.5 w-1.5 rounded-full bg-blue-500"></span>
             {feature}
           </li>
         {/each}

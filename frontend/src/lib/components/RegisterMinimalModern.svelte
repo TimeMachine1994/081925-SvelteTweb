@@ -222,7 +222,7 @@
 							I want to:
 						</label>
 						<div class="space-y-3">
-							<label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors {selectedRole === 'owner' ? 'border-[#D5BA7F] bg-[#D5BA7F]/5' : 'border-gray-300'}">
+							<label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors {selectedRole === 'owner' ? 'border-[#3B82F6] bg-blue-500/5' : 'border-gray-300'}">
 								<input
 									type="radio"
 									name="role"
@@ -231,7 +231,7 @@
 									class="sr-only"
 								/>
 								<div class="flex items-center space-x-3">
-									<div class="w-4 h-4 rounded-full border-2 flex items-center justify-center {selectedRole === 'owner' ? 'border-[#D5BA7F] bg-[#D5BA7F]' : 'border-gray-300'}">
+									<div class="w-4 h-4 rounded-full border-2 flex items-center justify-center {selectedRole === 'owner' ? 'border-[#3B82F6] bg-blue-500' : 'border-gray-300'}">
 										{#if selectedRole === 'owner'}
 											<div class="w-2 h-2 rounded-full bg-white"></div>
 										{/if}
@@ -243,7 +243,7 @@
 								</div>
 							</label>
 							
-							<label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors {selectedRole === 'funeral_director' ? 'border-[#D5BA7F] bg-[#D5BA7F]/5' : 'border-gray-300'}">
+							<label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors {selectedRole === 'funeral_director' ? 'border-[#3B82F6] bg-blue-500/5' : 'border-gray-300'}">
 								<input
 									type="radio"
 									name="role"
@@ -252,7 +252,7 @@
 									class="sr-only"
 								/>
 								<div class="flex items-center space-x-3">
-									<div class="w-4 h-4 rounded-full border-2 flex items-center justify-center {selectedRole === 'funeral_director' ? 'border-[#D5BA7F] bg-[#D5BA7F]' : 'border-gray-300'}">
+									<div class="w-4 h-4 rounded-full border-2 flex items-center justify-center {selectedRole === 'funeral_director' ? 'border-[#3B82F6] bg-blue-500' : 'border-gray-300'}">
 										{#if selectedRole === 'funeral_director'}
 											<div class="w-2 h-2 rounded-full bg-white"></div>
 										{/if}
@@ -278,7 +278,7 @@
 							<p class="text-sm text-slate-600 mb-2">{currentStep}</p>
 							<div class="w-full bg-slate-200 rounded-full h-2">
 								<div 
-									class="bg-gradient-to-r from-[#D5BA7F] to-[#C5AA6F] h-2 rounded-full transition-all duration-500 ease-out"
+									class="bg-gradient-to-r from-[#3B82F6] to-[#2563EB] h-2 rounded-full transition-all duration-500 ease-out"
 									style="width: {progress}%"
 								></div>
 							</div>
@@ -315,19 +315,19 @@
 		<div class="mt-8 text-center">
 			<div class="grid grid-cols-3 gap-4 text-xs {theme.hero.sub}">
 				<div class="flex flex-col items-center">
-					<div class="w-8 h-8 rounded-full bg-[#D5BA7F]/20 flex items-center justify-center mb-2">
+					<div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center mb-2">
 						🔒
 					</div>
 					<span>Secure</span>
 				</div>
 				<div class="flex flex-col items-center">
-					<div class="w-8 h-8 rounded-full bg-[#D5BA7F]/20 flex items-center justify-center mb-2">
+					<div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center mb-2">
 						📱
 					</div>
 					<span>Mobile Ready</span>
 				</div>
 				<div class="flex flex-col items-center">
-					<div class="w-8 h-8 rounded-full bg-[#D5BA7F]/20 flex items-center justify-center mb-2">
+					<div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center mb-2">
 						💝
 					</div>
 					<span>Compassionate</span>

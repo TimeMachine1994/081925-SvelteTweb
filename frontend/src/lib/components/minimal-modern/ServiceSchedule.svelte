@@ -68,11 +68,11 @@
       {#each events as event, index}
         <div class="relative flex items-start gap-4">
           <!-- Timeline dot -->
-          <div class="relative z-10 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full {event.isLive ? 'bg-red-100 ring-2 ring-red-500' : 'bg-[#D5BA7F]/20'}">
+          <div class="relative z-10 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full {event.isLive ? 'bg-red-100 ring-2 ring-red-500' : 'bg-blue-500/20'}">
             {#if event.isLive}
               <div class="h-3 w-3 rounded-full bg-red-500 animate-pulse"></div>
             {:else}
-              <div class="h-3 w-3 rounded-full bg-[#D5BA7F]"></div>
+              <div class="h-3 w-3 rounded-full bg-blue-500"></div>
             {/if}
           </div>
 

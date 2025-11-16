@@ -140,7 +140,7 @@
 						For general questions, service setup, or non-urgent technical support, please use our regular contact methods:
 					</p>
 					<div class="flex flex-col sm:flex-row gap-4 justify-center">
-						<Button theme="minimal" class="bg-[#D5BA7F] text-black hover:bg-[#C5AA6F] px-6 py-3">
+						<Button theme="minimal" class="bg-blue-500 text-black hover:bg-[#2563EB] px-6 py-3">
 							<a href="/contact" class="no-underline text-black">Contact Us</a>
 						</Button>
 						<Button theme="minimal" variant="secondary" class="px-6 py-3">

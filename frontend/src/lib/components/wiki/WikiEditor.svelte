@@ -263,14 +263,14 @@
 
 	.toolbar-btn:hover {
 		background: white;
-		border-color: #d5ba7f;
-		color: #d5ba7f;
+		border-color: #3B82F6;
+		color: #3B82F6;
 	}
 
 	.toolbar-btn.toggle-btn.active {
 		background: #fef3c7;
 		color: #92400e;
-		border-color: #d5ba7f;
+		border-color: #3B82F6;
 	}
 
 	.toolbar-btn svg {
@@ -381,9 +381,9 @@
 	}
 
 	.preview-content :global(a.wiki-link) {
-		color: #d5ba7f;
+		color: #3B82F6;
 		text-decoration: none;
-		border-bottom: 1px solid #d5ba7f;
+		border-bottom: 1px solid #3B82F6;
 	}
 
 	.preview-content :global(a.wiki-link:hover) {
