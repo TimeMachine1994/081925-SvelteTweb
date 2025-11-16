@@ -197,9 +197,9 @@ Manage blog posts and articles
 		selectable={$can('blog_post', 'update')}
 		selectedMemorials={selectedPosts}
 		onBulkAction={handleBulkAction}
+		onRowClick={handleRowClick}
 		resourceType="blog_post"
 	/>
-	<!-- onRowClick disabled until detail pages are created -->
 </AdminLayout>
 
 <style>

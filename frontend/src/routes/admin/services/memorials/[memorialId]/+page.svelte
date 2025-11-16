@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AdminLayout from '$lib/components/admin/AdminLayout.svelte';
 	import StreamCard from '$lib/components/streaming/StreamCard.svelte';
+	import SlideshowManager from '$lib/components/admin/SlideshowManager.svelte';
 	import { goto } from '$app/navigation';
 	
 	let { data } = $props();
@@ -33,6 +34,32 @@
 	let streamDate = $state('');
 	let streamTime = $state('');
 	let isCreatingStream = $state(false);
+
+	// Slideshow state
+	let slideshowImages = $state([]);
+	let slideshowSettings = $state({});
+	let loadingSlideshow = $state(false);
+
+	async function loadSlideshow() {
+		loadingSlideshow = true;
+		try {
+			const response = await fetch(`/api/admin/memorials/${memorial.id}/slideshow`);
+			if (response.ok) {
+				const data = await response.json();
+				slideshowImages = data.images || [];
+				slideshowSettings = data.settings || {};
+			}
+		} catch (error) {
+			console.error('Error loading slideshow:', error);
+		} finally {
+			loadingSlideshow = false;
+		}
+	}
+
+	// Load slideshow on mount
+	$effect(() => {
+		loadSlideshow();
+	});
 
 	async function handleDelete() {
 		const confirmMessage = `Are you sure you want to delete "${memorial.lovedOneName}"?\n\nThis will mark it as deleted and hide it from the admin list.`;
@@ -253,15 +280,19 @@
 		</div>
 	</div>
 
-	<div class="card">
-		<h2>🖼️ Slideshows ({slideshows.length})</h2>
-		{#each slideshows as slideshow}
-			<div class="item">
-				<h3>{slideshow.title}</h3>
-				<p>{slideshow.photos?.length || 0} photos • Status: {slideshow.status}</p>
-			</div>
-		{/each}
-	</div>
+	<!-- Slideshow Management -->
+	{#if loadingSlideshow}
+		<div class="card">
+			<p>Loading slideshow...</p>
+		</div>
+	{:else}
+		<SlideshowManager 
+			memorialId={memorial.id}
+			images={slideshowImages}
+			settings={slideshowSettings}
+			onUpdate={loadSlideshow}
+		/>
+	{/if}
 
 	<div class="card">
 		<h2>💳 Payment</h2>

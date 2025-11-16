@@ -139,14 +139,6 @@ export const ADMIN_NAV: NavDomain[] = [
 				requiredPermission: { resource: 'audit_log', action: 'read' }
 			},
 			{
-				id: 'demo-sessions',
-				label: 'Demo Sessions',
-				href: '/admin/system/demo-sessions',
-				icon: '🎭',
-				description: 'Active demo environments',
-				requiredPermission: { resource: 'system', action: 'read' }
-			},
-			{
 				id: 'deleted-items',
 				label: 'Deleted Items',
 				href: '/admin/system/deleted-items',

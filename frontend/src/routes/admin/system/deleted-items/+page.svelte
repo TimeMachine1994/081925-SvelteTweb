@@ -8,6 +8,8 @@ Recovery system for soft-deleted items
 	import AdminLayout from '$lib/components/admin/AdminLayout.svelte';
 	import DataGrid from '$lib/components/admin/DataGrid.svelte';
 	import FilterBuilder from '$lib/components/admin/FilterBuilder.svelte';
+	import RestoreConfirmationModal from '$lib/components/admin/RestoreConfirmationModal.svelte';
+	import PermanentDeleteModal from '$lib/components/admin/PermanentDeleteModal.svelte';
 	import { can } from '$lib/stores/adminUser';
 
 	let { data } = $props();
@@ -15,6 +17,10 @@ Recovery system for soft-deleted items
 	// State
 	let selectedItems = $state<Set<string>>(new Set());
 	let showFilters = $state(false);
+	let showRestoreModal = $state(false);
+	let showPermanentDeleteModal = $state(false);
+	let isProcessing = $state(false);
+	let processingMessage = $state('');
 
 	// Column configuration
 	const columns = [
@@ -75,36 +81,85 @@ Recovery system for soft-deleted items
 		}
 	];
 
+	// Get selected items with details for modal display
+	let selectedItemsDetails = $derived(
+		data.items.filter(item => selectedItems.has(item.id)).map(item => ({
+			id: `${item.collectionName}:${item.id}`,
+			name: item.name,
+			resourceType: item.resourceType
+		}))
+	);
+
 	// Actions
 	async function handleBulkAction(action: string, ids: string[]) {
 		if (action === 'restore') {
-			if (confirm(`Restore ${ids.length} item(s)?`)) {
-				const response = await fetch('/api/admin/restore-deleted', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ ids })
-				});
-
-				if (response.ok) {
-					location.reload();
-				}
-			}
+			showRestoreModal = true;
 		} else if (action === 'permanent_delete') {
-			if (
-				confirm(
-					`PERMANENTLY delete ${ids.length} item(s)? This action CANNOT be undone!`
-				)
-			) {
-				const response = await fetch('/api/admin/permanent-delete', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ ids })
-				});
+			showPermanentDeleteModal = true;
+		}
+	}
 
-				if (response.ok) {
-					location.reload();
+	async function confirmRestore() {
+		showRestoreModal = false;
+		isProcessing = true;
+		processingMessage = `Restoring ${selectedItemsDetails.length} item(s)...`;
+
+		try {
+			const response = await fetch('/api/admin/restore-deleted', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ ids: selectedItemsDetails.map(i => i.id) })
+			});
+
+			const result = await response.json();
+
+			if (response.ok) {
+				if (result.failed.length > 0) {
+					alert(`Restored ${result.success.length} items, but ${result.failed.length} failed. Check console for details.`);
+					console.error('Failed restorations:', result.failed);
 				}
+				location.reload();
+			} else {
+				alert(`Failed to restore items: ${result.error || 'Unknown error'}`);
 			}
+		} catch (error) {
+			console.error('Error restoring items:', error);
+			alert('An error occurred while restoring items.');
+		} finally {
+			isProcessing = false;
+			processingMessage = '';
+		}
+	}
+
+	async function confirmPermanentDelete() {
+		showPermanentDeleteModal = false;
+		isProcessing = true;
+		processingMessage = `Permanently deleting ${selectedItemsDetails.length} item(s)...`;
+
+		try {
+			const response = await fetch('/api/admin/permanent-delete', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ ids: selectedItemsDetails.map(i => i.id) })
+			});
+
+			const result = await response.json();
+
+			if (response.ok) {
+				if (result.failed.length > 0) {
+					alert(`Deleted ${result.success.length} items, but ${result.failed.length} failed. Check console for details.`);
+					console.error('Failed deletions:', result.failed);
+				}
+				location.reload();
+			} else {
+				alert(`Failed to delete items: ${result.error || 'Unknown error'}`);
+			}
+		} catch (error) {
+			console.error('Error deleting items:', error);
+			alert('An error occurred while deleting items.');
+		} finally {
+			isProcessing = false;
+			processingMessage = '';
 		}
 	}
 
@@ -207,6 +262,34 @@ Recovery system for soft-deleted items
 			>
 				🗑️ Permanently Delete ({selectedItems.size})
 			</button>
+		</div>
+	{/if}
+
+	<!-- Restore Confirmation Modal -->
+	{#if showRestoreModal}
+		<RestoreConfirmationModal
+			items={selectedItemsDetails}
+			onConfirm={confirmRestore}
+			onCancel={() => showRestoreModal = false}
+		/>
+	{/if}
+
+	<!-- Permanent Delete Modal -->
+	{#if showPermanentDeleteModal}
+		<PermanentDeleteModal
+			items={selectedItemsDetails}
+			onConfirm={confirmPermanentDelete}
+			onCancel={() => showPermanentDeleteModal = false}
+		/>
+	{/if}
+
+	<!-- Processing Overlay -->
+	{#if isProcessing}
+		<div class="processing-overlay">
+			<div class="processing-content">
+				<div class="spinner"></div>
+				<p>{processingMessage}</p>
+			</div>
 		</div>
 	{/if}
 </AdminLayout>
@@ -324,6 +407,10 @@ Recovery system for soft-deleted items
 		box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
 	}
 
+	.restore-btn:active {
+		transform: translateY(0);
+	}
+
 	.permanent-delete-btn {
 		background: #e53e3e;
 		color: white;
@@ -333,5 +420,51 @@ Recovery system for soft-deleted items
 		background: #c53030;
 		transform: translateY(-2px);
 		box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+	}
+
+	.permanent-delete-btn:active {
+		transform: translateY(0);
+	}
+
+	/* Processing overlay */
+	.processing-overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(0, 0, 0, 0.5);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 2000;
+	}
+
+	.processing-content {
+		background: white;
+		padding: 2rem;
+		border-radius: 0.75rem;
+		text-align: center;
+		box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+	}
+
+	.spinner {
+		width: 40px;
+		height: 40px;
+		border: 4px solid #e2e8f0;
+		border-top-color: #3b82f6;
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+		margin: 0 auto 1rem;
+	}
+
+	@keyframes spin {
+		to { transform: rotate(360deg); }
+	}
+
+	.processing-content p {
+		margin: 0;
+		color: #475569;
+		font-weight: 500;
 	}
 </style>

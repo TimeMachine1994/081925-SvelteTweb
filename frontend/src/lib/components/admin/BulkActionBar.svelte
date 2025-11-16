@@ -22,31 +22,40 @@ Based on ADMIN_REFACTOR_2_DATA_OPERATIONS.md
 		switch (resourceType) {
 			case 'memorial':
 				return [
-					{ id: 'markPaid', label: 'Mark Paid', icon: '✅', variant: 'primary' },
-					{ id: 'makePublic', label: 'Make Public', icon: '🌐', variant: 'secondary' },
-					{ id: 'makePrivate', label: 'Make Private', icon: '🔒', variant: 'secondary' },
-					{ id: 'export', label: 'Export CSV', icon: '📥', variant: 'secondary' },
-					{ id: 'delete', label: 'Delete', icon: '🗑️', variant: 'danger' }
+					{ id: 'delete', label: 'Delete', icon: '🗑️', variant: 'danger' },
+					{ id: 'export', label: 'Export CSV', icon: '📥', variant: 'secondary' }
 				];
 
 			case 'stream':
 				return [
-					{ id: 'makeVisible', label: 'Make Visible', icon: '👁️', variant: 'primary' },
-					{ id: 'makeInvisible', label: 'Hide', icon: '🚫', variant: 'secondary' },
-					{ id: 'delete', label: 'Delete', icon: '🗑️', variant: 'danger' }
+					{ id: 'delete', label: 'Delete', icon: '🗑️', variant: 'danger' },
+					{ id: 'export', label: 'Export CSV', icon: '📥', variant: 'secondary' }
 				];
 
 			case 'user':
+			case 'memorial_owner':
 				return [
-					{ id: 'sendEmail', label: 'Email Users', icon: '📧', variant: 'primary' },
-					{ id: 'export', label: 'Export CSV', icon: '📥', variant: 'secondary' },
-					{ id: 'suspend', label: 'Suspend', icon: '🚫', variant: 'danger' }
+					{ id: 'send_email', label: 'Send Email', icon: '📧', variant: 'primary' },
+					{ id: 'export', label: 'Export CSV', icon: '📥', variant: 'secondary' }
+				];
+
+			case 'blog_post':
+				return [
+					{ id: 'publish', label: 'Publish', icon: '🚀', variant: 'primary' },
+					{ id: 'unpublish', label: 'Unpublish', icon: '📦', variant: 'secondary' },
+					{ id: 'delete', label: 'Delete', icon: '🗑️', variant: 'danger' }
+				];
+
+			case 'schedule_request':
+				return [
+					{ id: 'approve', label: 'Approve', icon: '✅', variant: 'primary' },
+					{ id: 'deny', label: 'Deny', icon: '❌', variant: 'danger' }
 				];
 
 			default:
 				return [
-					{ id: 'export', label: 'Export', icon: '📥', variant: 'secondary' },
-					{ id: 'delete', label: 'Delete', icon: '🗑️', variant: 'danger' }
+					{ id: 'delete', label: 'Delete', icon: '🗑️', variant: 'danger' },
+					{ id: 'export', label: 'Export', icon: '📥', variant: 'secondary' }
 				];
 		}
 	});

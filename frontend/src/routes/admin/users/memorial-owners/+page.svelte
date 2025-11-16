@@ -136,9 +136,9 @@ Manage users who own memorial pages
 		selectable={$can('user', 'update')}
 		selectedMemorials={selectedUsers}
 		onBulkAction={handleBulkAction}
+		onRowClick={handleRowClick}
 		resourceType="user"
 	/>
-	<!-- onRowClick disabled until detail pages are created -->
 </AdminLayout>
 
 <style>
