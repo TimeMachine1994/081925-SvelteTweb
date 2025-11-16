@@ -61,7 +61,7 @@
 
 	function shareOnTwitter() {
 		const url = encodeURIComponent(absoluteUrl());
-		const text = encodeURIComponent(`Celebrating the life of ${memorial?.lovedOneName || ''}`);
+		const text = encodeURIComponent(`Join us for ${memorial?.lovedOneName || ''}`);
 		openShareWindow(`https://twitter.com/intent/tweet?url=${url}&text=${text}&via=tributestream`);
 		showSharePopup = false;
 	}
@@ -182,15 +182,15 @@
 </script>
 
 <svelte:head>
-	<title>{memorial?.lovedOneName ? `Celebration of Life for ${memorial.lovedOneName}` : 'Memorial'}</title>
-	<meta name="description" content={memorial?.content || 'Memorial service information'} />
+	<title>{memorial?.lovedOneName ? `${memorial.lovedOneName} | Tributestream Live` : 'Event'}</title>
+	<meta name="description" content={memorial?.content || 'Livestream event information'} />
 	
 	{#if memorial}
 		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content="website" />
-		<meta property="og:site_name" content="Tributestream" />
-		<meta property="og:title" content={`Celebration of Life for ${memorial.lovedOneName}`} />
-		<meta property="og:description" content={memorial.content || `Join us in celebrating the life of ${memorial.lovedOneName}`} />
+		<meta property="og:site_name" content="Tributestream Live" />
+		<meta property="og:title" content={`${memorial.lovedOneName} | Tributestream Live`} />
+		<meta property="og:description" content={memorial.content || `Join us for ${memorial.lovedOneName}'s celebration`} />
 		<meta property="og:url" content={browser ? window.location.href : `https://tributestream.com/${memorial.fullSlug || memorial.slug}`} />
 		{#if memorial.imageUrl}
 			<meta property="og:image" content={memorial.imageUrl} />
@@ -203,8 +203,8 @@
 		<meta name="twitter:card" content="summary_large_image" />
 		<meta name="twitter:site" content="@tributestream" />
 		<meta name="twitter:creator" content="@tributestream" />
-		<meta name="twitter:title" content={`Celebration of Life for ${memorial.lovedOneName}`} />
-		<meta name="twitter:description" content={memorial.content || `Join us in celebrating the life of ${memorial.lovedOneName}`} />
+		<meta name="twitter:title" content={`${memorial.lovedOneName} | Tributestream Live`} />
+		<meta name="twitter:description" content={memorial.content || `Join us for ${memorial.lovedOneName}'s celebration`} />
 		{#if memorial.imageUrl}
 			<meta name="twitter:image" content={memorial.imageUrl} />
 			<meta name="twitter:image:alt" content={memorial.lovedOneName} />
@@ -231,7 +231,7 @@
 					<!-- Glass box wrapper for title only -->
 					<div class="glass-box">
 						<h1 class="memorial-title">
-							<span class="celebration-prefix">Celebration of Life for</span>
+							<span class="celebration-prefix">Celebrating</span>
 							<span class="loved-one-name">{memorial.lovedOneName}</span>
 						</h1>
 					</div>
@@ -344,7 +344,7 @@
 						<!-- Glass box wrapper for title and dates only -->
 						<div class="glass-box">
 							<h1 class="memorial-title">
-								<span class="celebration-prefix">Celebration of Life for</span>
+								<span class="celebration-prefix">Celebrating</span>
 								<span class="loved-one-name">{memorial.lovedOneName}</span>
 							</h1>
 							

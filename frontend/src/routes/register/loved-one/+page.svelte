@@ -64,29 +64,29 @@
 <div class="registration-container">
 	<div class="registration-card">
 		<div class="form-header">
-			<h1 class="form-title">Create a Memorial</h1>
+			<h1 class="form-title">Create Your Event</h1>
 			<p class="form-description">
-				Enter your loved one's name to create a beautiful memorial page.
+				Enter your event details to create a beautiful celebration page.
 			</p>
 		</div>
 
 		<!-- Package Selection Banner -->
 		{#if selectedPackage}
-			<div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+			<div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
 				<div class="flex items-center space-x-3">
 					<div class="flex-shrink-0">
-						<CheckCircle class="h-6 w-6 text-green-600" />
+						<CheckCircle class="h-6 w-6 text-blue-600" />
 					</div>
 					<div class="flex-1">
-						<h3 class="text-sm font-semibold text-green-800 capitalize">
+						<h3 class="text-sm font-semibold text-blue-800 capitalize">
 							{selectedPackage} Package Selected
 						</h3>
-						<p class="text-sm text-green-700">
-							Your package has been selected. Create a memorial to continue.
+						<p class="text-sm text-blue-700">
+							Your package has been selected. Create an event to continue.
 						</p>
 					</div>
 					<div class="flex-shrink-0">
-						<Package class="h-5 w-5 text-green-600" />
+						<Package class="h-5 w-5 text-blue-600" />
 					</div>
 				</div>
 			</div>
@@ -164,11 +164,11 @@
 
 			<section class="form-section">
 				<div class="section-header">
-					<h2 class="section-title">Memorial Details</h2>
+					<h2 class="section-title">Event Details</h2>
 				</div>
 				<div class="form-grid">
 					<div class="form-group">
-						<label for="lovedOneName" class="form-label">Loved One's Name *</label>
+						<label for="lovedOneName" class="form-label">Event Name or Honoree *</label>
 						<input
 							id="lovedOneName"
 							name="lovedOneName"

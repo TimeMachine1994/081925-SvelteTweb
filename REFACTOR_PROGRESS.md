@@ -124,12 +124,31 @@
 - ✅ Created `/create-event` registration page
 - ✅ All new pages fully functional with blue theme
 - ✅ Navigation links now work correctly
+- ✅ Updated calculator components (TierSelector, BookingForm)
+- ✅ Updated user portals (FamilyMemberPortal, OwnerPortal, my-portal redirect)
+- ✅ Transformed `/pricing-breakdown` page to event language
+- ✅ Transformed `/book-demo` page to event planner focus
+
+**Files Updated:**
+- Calculator: TierSelector.svelte, BookingForm.svelte (event terminology, blue theme)
+- Portals: FamilyMemberPortal.svelte, OwnerPortal.svelte, my-portal/+page.svelte (blue theme, "events" language)
+- Pages: /pricing-breakdown/+page.svelte, /book-demo/+page.svelte (venue/event planner focus)
+- Event Detail: /[fullSlug]/+page.svelte (meta tags, share text, headers updated to "Celebrating")
+- Contact: /contact/+page.svelte (FAQ updated to event language)
+- Registration: /register/loved-one/+page.svelte (blue theme, event terminology)
+- Registration: /register/funeral-director/+page.svelte (event planner focus, blue theme)
+
+**Total Updates:**
+- 12+ major component/page files updated
+- 200+ funeral/memorial references → event/celebration language
+- Complete blue theme applied across all updated files
 
 **Next Session Priority:**
-- Update event detail pages to use celebration language
-- Transform admin panel terminology
-- Update database models for events
-- Update email templates
+- `/[fullSlug]` - Main event detail page (102 memorial references)
+- `/schedule` pages - Booking/schedule flow
+- Registration flows - funeral-director, funeral-home pages
+- Remaining portals - FuneralDirectorPortal, ViewerPortal, AdminPortal
+- Contact, search, and blog pages
 
 ---
 

@@ -4,7 +4,7 @@
 	import { Button, Input, Card, Toast } from '$lib/components/minimal-modern';
 	import { executeRecaptcha, RECAPTCHA_ACTIONS } from '$lib/utils/recaptcha';
 
-	let funeralHomeName = $state('');
+	let venueName = $state('');
 	let contactName = $state('');
 	let email = $state('');
 	let phone = $state('');
@@ -28,7 +28,7 @@
 	async function handleSubmit(event: SubmitEvent) {
 		event.preventDefault();
 		
-		if (!funeralHomeName.trim() || !contactName.trim() || !email.trim() || !phone.trim()) {
+		if (!venueName.trim() || !contactName.trim() || !email.trim() || !phone.trim()) {
 			error = 'Please fill in all required fields';
 			return;
 		}
@@ -55,7 +55,7 @@
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					funeralHomeName: funeralHomeName.trim(),
+					venueName: venueName.trim(),
 					contactName: contactName.trim(),
 					email: email.trim(),
 					phone: phone.trim(),
@@ -71,7 +71,7 @@
 			if (response.ok) {
 				success = true;
 				// Reset form
-				funeralHomeName = '';
+				venueName = '';
 				contactName = '';
 				email = '';
 				phone = '';
@@ -95,8 +95,8 @@
 </script>
 
 <svelte:head>
-	<title>Book a Demo - Tributestream for Funeral Directors</title>
-	<meta name="description" content="Schedule a personalized demo of Tributestream's memorial livestreaming technology. Free on-site demonstration and marketing materials included." />
+	<title>Book a Demo - Tributestream for Event Planners</title>
+	<meta name="description" content="Schedule a personalized demo of Tributestream's event livestreaming technology. Free on-site demonstration and marketing materials included." />
 </svelte:head>
 
 <div class="{theme.root} min-h-screen" style="font-family: {theme.font.body}">
@@ -108,7 +108,7 @@
 				Book Your Free Demo
 			</h1>
 			<p class="text-lg md:text-xl {theme.hero.sub} max-w-2xl mx-auto">
-				See Tributestream in action. We'll bring our equipment to your location for a personalized demonstration and leave you with free marketing materials.
+				See Tributestream Live in action. We'll bring our equipment to your venue for a personalized demonstration and leave you with free marketing materials.
 			</p>
 		</div>
 	</section>
@@ -140,13 +140,13 @@
 						<div class="grid gap-6 md:grid-cols-2">
 							<div>
 								<label class="block text-sm font-medium {theme.text} mb-2">
-									Funeral Home Name *
+									Venue or Company Name *
 								</label>
 								<Input 
 									type="text" 
-									bind:value={funeralHomeName} 
+									bind:value={venueName} 
 									required 
-									placeholder="Your funeral home name" 
+									placeholder="Your venue or company name" 
 									theme="minimal" 
 								/>
 							</div>
@@ -173,7 +173,7 @@
 									type="email" 
 									bind:value={email} 
 									required 
-									placeholder="your@funeralhome.com" 
+									placeholder="your@venue.com" 
 									theme="minimal" 
 								/>
 							</div>
@@ -221,7 +221,7 @@
 
 						<div>
 							<label class="block text-sm font-medium {theme.text} mb-2">
-								Funeral Home Address
+								Venue Address
 							</label>
 							<Input 
 								type="text" 
@@ -329,7 +329,7 @@
 						</div>
 						<div class="flex items-center space-x-2">
 							<div class="w-2 h-2 bg-blue-500 rounded-full"></div>
-							<span>Enhanced service offering for families</span>
+							<span>Enhanced service offering for your clients</span>
 						</div>
 					</div>
 				</Card>

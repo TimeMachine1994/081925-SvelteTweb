@@ -46,15 +46,15 @@
 
 	// Form validation
 	function validateForm() {
-		if (!lovedOneName.trim()) return 'Loved one\'s name is required';
-		if (!directorName.trim()) return 'Director name is required';
-		if (!familyContactEmail.trim()) return 'Family contact email is required';
-		if (!familyContactPhone.trim()) return 'Family contact phone is required';
-		if (!funeralHomeName.trim()) return 'Funeral home name is required';
+		if (!lovedOneName.trim()) return 'Event name is required';
+		if (!directorName.trim()) return 'Planner name is required';
+		if (!familyContactEmail.trim()) return 'Client contact email is required';
+		if (!familyContactPhone.trim()) return 'Client contact phone is required';
+		if (!funeralHomeName.trim()) return 'Venue or company name is required';
 		
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		if (!emailRegex.test(familyContactEmail)) return 'Family contact email must be valid';
-		if (directorEmail && !emailRegex.test(directorEmail)) return 'Director email must be valid';
+		if (!emailRegex.test(familyContactEmail)) return 'Client contact email must be valid';
+		if (directorEmail && !emailRegex.test(directorEmail)) return 'Planner email must be valid';
 		
 		return null;
 	}
@@ -77,25 +77,25 @@
 </script>
 
 <svelte:head>
-	<title>Quick Family Registration - Tributestream</title>
+	<title>Quick Event Registration - Tributestream Live</title>
 	<meta
 		name="description"
-		content="Quickly register families and create memorial pages for funeral services. Professional tools for funeral directors."
+		content="Quickly register events and create celebration pages for clients. Professional tools for event planners."
 	/>
 </svelte:head>
 
-<div class="min-h-screen bg-gradient-to-br from-yellow-50 to-white">
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-white">
 	<div class="container mx-auto px-4 py-12">
 		<!-- Header -->
 		<div class="mb-12 text-center">
 			<div
-				class="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-yellow-600 to-amber-600"
+				class="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-blue-500 to-blue-600"
 			>
 				<Heart class="h-8 w-8 text-white" />
 			</div>
-			<h1 class="mb-4 text-4xl font-bold text-gray-900">Quick Family Registration</h1>
-			<p class="mx-auto max-w-2xl text-xl text-gray-600">
-				Quickly register families and create memorial pages for their loved ones. This will create their account, memorial page, and send them login credentials via email.
+			<h1 class="mb-4 text-4xl font-bold text-slate-900">Quick Event Registration</h1>
+			<p class="mx-auto max-w-2xl text-xl text-slate-600">
+				Quickly register clients and create event pages for their celebrations. This will create their account, event page, and send them login credentials via email.
 			</p>
 			
 			<!-- User Info Display -->

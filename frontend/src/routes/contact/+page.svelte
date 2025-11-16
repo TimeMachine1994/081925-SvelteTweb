@@ -18,16 +18,16 @@
 
 	const faqItems = [
 		{ 
-			q: "How quickly can I set up a memorial?", 
-			a: "Most memorials can be set up within minutes. Our team is also available to help with setup if needed." 
+			q: "How quickly can I set up an event page?", 
+			a: "Most event pages can be set up within minutes. Our team is also available to help with setup if needed." 
 		},
 		{ 
-			q: "Do you offer technical support during services?", 
-			a: "Yes, we provide live technical support during memorial services to ensure everything runs smoothly." 
+			q: "Do you offer technical support during events?", 
+			a: "Yes, we provide live technical support during your livestream to ensure everything runs smoothly." 
 		},
 		{ 
-			q: "Can I customize the memorial page?", 
-			a: "Absolutely! You can add photos, videos, stories, and customize the design to reflect your loved one's personality." 
+			q: "Can I customize the event page?", 
+			a: "Absolutely! You can add photos, videos, stories, and customize the design to reflect your celebration." 
 		}
 	];
 

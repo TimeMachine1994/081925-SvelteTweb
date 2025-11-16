@@ -39,8 +39,8 @@
 
 	const bookingItems = [
 		'Your Name',
-		"Loved One's Full Name",
-		'Location of Service',
+		"Event Name or Honoree",
+		'Event Location',
 		'Livestream Start Time',
 		'Livestream End Time',
 		'Additional Locations (Yes/No)',
@@ -85,11 +85,11 @@
 			<div>
 				<p class="text-xs uppercase tracking-widest text-zinc-500">Effective April 5, 2025</p>
 				<h1 class="mt-2 text-3xl md:text-4xl font-semibold leading-tight">
-					Memorial Livestreaming—clear pricing, compassionate service.
+					Event Livestreaming—clear pricing, professional service.
 				</h1>
 				<p class="mt-4 text-zinc-600">
-					Since 2019, we've focused exclusively on Celebrations of Life. We handle the tech—so your
-					family can honor, remember, and participate from anywhere.
+					Since 2019, we've specialized in livestreaming life's important moments. We handle the tech—so you
+					can celebrate, connect, and share from anywhere.
 				</p>
 				<div class="mt-6 flex gap-3">
 					<a
@@ -109,7 +109,7 @@
 						<span class="h-1.5 w-1.5 rounded-full bg-blue-500"></span> No‑hidden‑fees guarantee
 					</li>
 					<li class="flex items-center gap-2">
-						<span class="h-1.5 w-1.5 rounded-full bg-blue-500"></span> Funeral‑centric platform
+						<span class="h-1.5 w-1.5 rounded-full bg-blue-500"></span> Event‑focused platform
 					</li>
 					<li class="flex items-center gap-2">
 						<span class="h-1.5 w-1.5 rounded-full bg-blue-500"></span> One custom link + 1‑yr hosting
@@ -118,7 +118,7 @@
 			</div>
 			<div class="md:pl-8">
 				<div class="rounded-2xl border shadow-sm p-4 bg-white">
-					<h2 class="text-lg font-medium">Locations We Livestream</h2>
+					<h2 class="text-lg font-medium">Event Venues We Serve</h2>
 					<ul class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-zinc-700">
 						{#each locations as item}
 							<li class="flex gap-2">
@@ -128,7 +128,7 @@
 						{/each}
 					</ul>
 					<p class="mt-4 text-sm text-zinc-500">
-						Servicing families from Central Florida to across the world.
+						Servicing events from Central Florida to across the world.
 					</p>
 				</div>
 			</div>
@@ -144,14 +144,14 @@
 					<div class="rounded-xl border p-4">
 						<h3 class="font-medium">Focused & Exceptional</h3>
 						<p class="mt-1 text-sm text-zinc-700">
-							We specialize in memorials and celebrations of life—kind, gentle, and knowledgeable
-							support without pressure.
+							We specialize in livestreaming celebrations and life events—professional, reliable, and knowledgeable
+							support for your special moments.
 						</p>
 					</div>
 					<div class="rounded-xl border p-4">
 						<h3 class="font-medium">Price & Value</h3>
 						<p class="mt-1 text-sm text-zinc-700">
-							Funeral‑focused operations allow us to cut costs responsibly and pass savings on to you.
+							Event‑focused operations allow us to provide exceptional quality at competitive prices.
 						</p>
 					</div>
 					<div class="rounded-xl border p-4">
@@ -162,10 +162,10 @@
 						</p>
 					</div>
 					<div class="rounded-xl border p-4">
-						<h3 class="font-medium">Funeral‑Centric Platform</h3>
+						<h3 class="font-medium">Event‑Focused Platform</h3>
 						<p class="mt-1 text-sm text-zinc-700">
-							The only funeral‑centric streaming platform in Florida—families value the lasting
-							recording.
+							Florida's premier event streaming platform—hosts and guests value the lasting
+							recording and global reach.
 						</p>
 					</div>
 					<div class="rounded-xl border p-4">
@@ -179,11 +179,11 @@
 			</div>
 			<div class="md:pl-8">
 				<div class="rounded-2xl border shadow-sm p-6">
-					<h3 class="text-lg font-medium">Why Host a Tributestream?</h3>
+					<h3 class="text-lg font-medium">Why Livestream Your Event?</h3>
 					<p class="mt-3 text-zinc-700">
-						Funerals help the living reconstruct life after loss. Modern distance shouldn't prevent
-						participation. Livestreaming lets anyone gather, reconcile, and later revisit the service
-						as part of healing.
+						Important moments deserve to be shared. Distance shouldn't prevent
+						participation. Livestreaming lets everyone join your celebration in real-time and relive
+						the memories forever.
 					</p>
 				</div>
 			</div>
@@ -459,10 +459,10 @@
 							</p>
 						</div>
 						<a
-							href="/{data.userMemorial.fullSlug}#booking"
+							href="/{data.userEvent.fullSlug}#booking"
 							class="inline-block rounded-xl bg-blue-500 px-6 py-3 text-center font-semibold text-black hover:opacity-90 whitespace-nowrap"
 						>
-							Go to My Memorial Booking →
+								Go to My Event Booking →
 						</a>
 					</div>
 				</div>
@@ -552,11 +552,11 @@
 					<summary
 						class="cursor-pointer list-none font-medium flex items-center justify-between"
 					>
-						<span>Do you work outside listed funeral homes?</span>
+						<span>Do you work outside listed venues?</span>
 						<span class="transition-transform group-open:rotate-45 text-xl leading-none">+</span>
 					</summary>
 					<p class="mt-2 text-sm text-zinc-700">
-						Yes. We serve churches, graveside, special locations, and funeral homes not listed.
+						Yes. We serve all types of venues including ballrooms, community centers, private estates, and unlisted locations.
 					</p>
 				</details>
 			</div>
@@ -568,7 +568,7 @@
 		<div class="mx-auto max-w-7xl px-4 py-10 text-sm text-zinc-600">
 			<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 				<div>
-					<p>Tributestream® Memorial Livestreaming</p>
+					<p>Tributestream® Event Livestreaming</p>
 					<p>Effective 4/5/2025 · Prices subject to change without notice.</p>
 				</div>
 				<div class="flex items-center gap-4">
