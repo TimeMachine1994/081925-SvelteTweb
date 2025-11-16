@@ -90,18 +90,18 @@
 
 <div class="space-y-8">
 	<div class="card space-y-4 p-4 md:p-6">
-		<h3 class="h3">In Loving Memory Of</h3>
+		<h3 class="h3 text-slate-900">Event Details</h3>
 		<label class="label">
-			<span>Your Loved One's Name</span>
-			<input class="input" type="text" bind:value={lovedOneName} placeholder="e.g., Jane Doe" />
+			<span>Event Name or Honoree</span>
+			<input class="input" type="text" bind:value={lovedOneName} placeholder="e.g., Sarah's 50th Birthday" />
 		</label>
 	</div>
 
 	<div class="card space-y-4 p-4 md:p-6">
-		<h3 class="h3">Main Service Details</h3>
+		<h3 class="h3 text-slate-900">Main Event Details</h3>
 		<div class="grid grid-cols-1 items-end gap-4 md:grid-cols-3">
 			<label class="label">
-				<span>Date of Service</span>
+				<span>Date of Event</span>
 				<input
 					class="input"
 					type="date"
@@ -139,7 +139,7 @@
 					type="text"
 					bind:value={services.main.location.name}
 					disabled={services.main.location.isUnknown}
-					placeholder="e.g., St. Mary's Church"
+					placeholder="e.g., Grand Ballroom, Community Center"
 				/>
 			</label>
 			<label class="label md:col-span-3">
@@ -164,21 +164,21 @@
 	</div>
 
 	<div class="card space-y-4 p-4 md:p-6">
-		<h3 class="h3">Funeral Professional Information (Optional)</h3>
+		<h3 class="h3 text-slate-900">Event Coordinator Information (Optional)</h3>
 		<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 			<label class="label">
-				<span>Funeral Director Name</span>
+				<span>Event Planner Name</span>
 				<input class="input" type="text" bind:value={funeralDirectorName} />
 			</label>
 			<label class="label">
-				<span>Funeral Home</span>
+				<span>Venue or Company</span>
 				<input class="input" type="text" bind:value={funeralHome} />
 			</label>
 		</div>
 	</div>
 
 	<div class="card space-y-6 p-4 md:p-6">
-		<h3 class="h3">Additional Services</h3>
+		<h3 class="h3 text-slate-900">Additional Streaming Options</h3>
 		<div class="flex items-center justify-between">
 			<span>Add a second location for the same day?</span>
 			<div class="flex gap-2">
@@ -231,7 +231,7 @@
 		{/if}
 
 		<div class="flex items-center justify-between">
-			<span>Add another day of service?</span>
+			<span>Add streaming for another day?</span>
 			<div class="flex gap-2">
 				<Button
 					variant={hasAdditionalDay ? 'primary' : 'outline'}
@@ -263,7 +263,7 @@
 						<input class="input" type="text" bind:value={additionalDay.location.address} />
 					</label>
 					<label class="label">
-						<span>Date of Service</span>
+						<span>Date of Event</span>
 						<input class="input" type="date" bind:value={additionalDay.time.date} />
 					</label>
 					<label class="label">
@@ -287,7 +287,7 @@
 	</div>
 
 	<div class="card space-y-4 p-4 md:p-6">
-		<h3 class="h3">Add-ons</h3>
+		<h3 class="h3 text-slate-900">Event Add-ons</h3>
 		<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 			<label class="card preset-tonal-surface flex items-center space-x-4 p-4">
 				<input class="checkbox" type="checkbox" bind:checked={calculatorData.addons.photography} />

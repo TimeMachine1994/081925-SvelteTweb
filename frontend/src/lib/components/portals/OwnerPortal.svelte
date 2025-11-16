@@ -15,7 +15,7 @@
 
 	let { memorials, invitations }: { memorials: Memorial[]; invitations: [] } = $props();
 
-	console.log('👑 OwnerPortal rendering with', memorials.length, 'memorials');
+	console.log('👑 OwnerPortal rendering with', memorials.length, 'events');
 
 	// State for selected memorial
 	let selectedMemorialId = $state('');
@@ -26,7 +26,7 @@
 			const defaultMemorial = getDefaultMemorial(memorials);
 			if (defaultMemorial) {
 				selectedMemorialId = defaultMemorial.id;
-				console.log('🎯 Default memorial selected:', defaultMemorial.lovedOneName);
+				console.log('🎯 Default event selected:', defaultMemorial.lovedOneName);
 			}
 		}
 	});
@@ -44,7 +44,7 @@
 
 	// Handle memorial selection change
 	function handleMemorialChange(memorialId: string) {
-		console.log('🔄 Memorial selection changed to:', memorialId);
+		console.log('🔄 Event selection changed to:', memorialId);
 		selectedMemorialId = memorialId;
 	}
 
@@ -62,7 +62,7 @@
 			return;
 		}
 
-		console.log(`📨 Inviting ${email} to memorial ${memorialId}`);
+		console.log(`📨 Inviting ${email} to event ${memorialId}`);
 
 		const response = await fetch(`/api/memorials/${memorialId}/invite`, {
 			method: 'POST',
@@ -84,7 +84,7 @@
 </script>
 
 <div class="mx-auto max-w-6xl px-4 py-6">
-	<h2 class="mb-6 text-2xl font-bold text-gray-900">Memorials You Own</h2>
+	<h2 class="mb-6 text-3xl font-bold text-slate-900">Your Events</h2>
 
 	{#if memorials && memorials.length > 0}
 		{@const currentMemorial = selectedMemorial()}
@@ -105,38 +105,35 @@
 			<!-- Livestream Schedule Table -->
 			<LivestreamScheduleTable memorial={currentMemorial} />
 
-			<!-- Legacy Invitation Section (keeping for now) -->
-			<div class="mt-8 rounded-lg border border-gray-200 bg-white p-6">
-				<h3 class="mb-4 text-lg font-medium text-gray-900">Invite Family Members</h3>
+			<!-- Invitation Section -->
+			<div class="mt-8 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+				<h3 class="mb-4 text-lg font-semibold text-slate-900">Invite Guests</h3>
 				<div class="mb-4 flex gap-3">
 					<input
 						type="email"
-						placeholder="family@example.com"
+						placeholder="guest@example.com"
 						bind:value={inviteEmails[currentMemorial.id]}
-						class="flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-purple-500 focus:ring-2 focus:ring-purple-500 focus:outline-none"
+						class="flex-1 rounded-md border border-slate-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none"
 					/>
-					<Button
+					<button
 						onclick={() => handleInvite(currentMemorial.id)}
-						variant="role"
-						role="owner"
-						size="md"
-						rounded="md"
+						class="px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors font-medium"
 					>
 						Invite
-					</Button>
+					</button>
 				</div>
 
 				<!-- Display Invitations -->
 				{#if getInvitationsForMemorial(currentMemorial.id).length > 0}
 					<div class="space-y-2">
-						<h4 class="text-sm font-medium text-gray-700">Pending Invitations:</h4>
+						<h4 class="text-sm font-medium text-slate-700">Pending Invitations:</h4>
 						{#each getInvitationsForMemorial(currentMemorial.id) as invitation}
-							<div class="flex items-center justify-between rounded bg-gray-50 px-3 py-2">
-								<span class="text-sm text-gray-900">{invitation.inviteeEmail}</span>
+							<div class="flex items-center justify-between rounded bg-blue-50 px-3 py-2">
+								<span class="text-sm text-slate-900">{invitation.inviteeEmail}</span>
 								<span
 									class="rounded-full px-2 py-1 text-xs {invitation.status === 'accepted'
-										? 'bg-green-100 text-green-800'
-										: 'bg-yellow-100 text-yellow-800'}"
+										? 'bg-emerald-100 text-emerald-800'
+										: 'bg-amber-100 text-amber-800'}"
 								>
 									{invitation.status}
 								</span>
@@ -154,18 +151,18 @@
 			{/if}
 		{/if}
 	{:else}
-		<!-- No memorials state -->
+		<!-- No events state -->
 		<div class="py-12 text-center">
-			<div class="mb-4 text-6xl text-gray-400">🏛️</div>
-			<h3 class="mb-2 text-lg font-medium text-gray-900">No Memorials Yet</h3>
-			<p class="mb-6 text-gray-600">
-				You haven't created any memorials yet. Get started by creating your first memorial.
+			<div class="mb-4 text-6xl">🎉</div>
+			<h3 class="mb-2 text-xl font-semibold text-slate-900">No Events Yet</h3>
+			<p class="mb-6 text-slate-600">
+				You haven't created any events yet. Get started by creating your first livestream event.
 			</p>
 			<a
-				href="/register/family"
-				class="inline-flex items-center rounded-lg bg-purple-600 px-4 py-2 text-white transition-colors hover:bg-purple-700"
+				href="/create-event"
+				class="inline-flex items-center rounded-lg bg-blue-500 px-6 py-3 text-white font-semibold transition-colors hover:bg-blue-600 shadow-md"
 			>
-				Create Your First Memorial
+				Create Your First Event
 			</a>
 		</div>
 	{/if}

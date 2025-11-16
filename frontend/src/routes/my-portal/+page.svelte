@@ -9,9 +9,9 @@
 	});
 </script>
 
-<div class="flex min-h-screen items-center justify-center">
+<div class="flex min-h-screen items-center justify-center bg-gradient-to-b from-blue-50 to-white">
 	<div class="text-center">
-		<div class="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-amber-600"></div>
-		<p class="text-gray-600">Redirecting to your profile...</p>
+		<div class="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-blue-500"></div>
+		<p class="text-slate-600">Redirecting to your profile...</p>
 	</div>
 </div>
