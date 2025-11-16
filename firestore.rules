@@ -93,5 +93,44 @@ service cloud.firestore {
       allow read: if resource.data.status == 'published';
     }
 
+    // Chat collection rules - for memorial chat
+    match /memorials/{memorialId}/chat/{chatId} {
+      // Helper to check if memorial is public
+      function memorialIsPublic() {
+        return get(/databases/$(database)/documents/memorials/$(memorialId)).data.isPublic == true;
+      }
+      
+      // Helper to check if user is memorial owner
+      function isMemorialOwner() {
+        let memorial = get(/databases/$(database)/documents/memorials/$(memorialId)).data;
+        return request.auth != null && 
+               (request.auth.uid == memorial.ownerUid || 
+                request.auth.uid == memorial.funeralDirectorUid);
+      }
+      
+      // Anyone can read chat messages in public memorials
+      // Authenticated users can read chat in their own memorials
+      allow read: if memorialIsPublic() || isAdmin() || isAdminEmail() || isMemorialOwner();
+      
+      // Authenticated users can create messages in public memorials
+      allow create: if request.auth != null && 
+                       (memorialIsPublic() || isAdmin() || isAdminEmail() || isMemorialOwner()) &&
+                       request.resource.data.userId == request.auth.uid &&
+                       request.resource.data.message.size() > 0 &&
+                       request.resource.data.message.size() <= 500;
+      
+      // Users can update their own messages
+      allow update: if request.auth != null && 
+                       request.auth.uid == resource.data.userId &&
+                       request.resource.data.userId == resource.data.userId;
+      
+      // Users can delete their own messages, memorial owners can delete any message
+      allow delete: if request.auth != null && 
+                       (request.auth.uid == resource.data.userId || 
+                        isMemorialOwner() || 
+                        isAdmin() || 
+                        isAdminEmail());
+    }
+
   }
 }

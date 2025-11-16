@@ -3,6 +3,7 @@
 	import StreamPlayer from '$lib/components/StreamPlayer.svelte';
 	import SlideshowSection from '$lib/components/SlideshowSection.svelte';
 	import BookingReminderBanner from '$lib/components/BookingReminderBanner.svelte';
+	import { ChatPanel, ChatToggleButton } from '$lib/components/chat';
 	import { shouldShowBookingBanner, markBannerAsSeen, debugBannerState } from '$lib/utils/bookingBanner';
 	import { onMount } from 'svelte';
 
@@ -24,6 +25,27 @@
 			memorial.funeralDirectorUid === user.uid
 		);
 	});
+	
+	// Determine if user is memorial owner (for chat moderation)
+	let isMemorialOwner = $derived(() => {
+		if (!user || !memorial) return false;
+		return (
+			user.role === 'admin' ||
+			memorial.ownerUid === user.uid
+		);
+	});
+	
+	// Chat state
+	let isChatOpen = $state(false);
+	let unreadChatCount = $state(0);
+	
+	function toggleChat() {
+		isChatOpen = !isChatOpen;
+		// Reset unread count when opening chat
+		if (isChatOpen) {
+			unreadChatCount = 0;
+		}
+	}
 
 	// Booking banner state
 	let showBookingBanner = $state(false);
@@ -207,6 +229,25 @@
 					<!-- Streaming Section -->
 					<div class="streaming-section">
 						<StreamPlayer {streams} memorialName={memorial.lovedOneName} memorialId={memorial.id} />
+						
+						<!-- Chat Section -->
+						<div class="chat-section">
+							<ChatToggleButton
+								isOpen={isChatOpen}
+								unreadCount={unreadChatCount}
+								isAuthenticated={!!user}
+								onclick={toggleChat}
+							/>
+							
+							<ChatPanel
+								memorialId={memorial.id}
+								memorialName={memorial.lovedOneName}
+								currentUserId={user?.uid}
+								isMemorialOwner={isMemorialOwner()}
+								isOpen={isChatOpen}
+								onClose={() => isChatOpen = false}
+							/>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -350,6 +391,7 @@
 	}
 
 	.streaming-section {
+		margin-bottom: 2rem;
 		max-width: 1000px;
 		margin: 0 auto;
 		width: 100%;
@@ -363,6 +405,11 @@
 		margin-bottom: 1.5rem;
 		font-family: 'Fanwood Text', serif;
 		font-style: italic;
+	}
+	
+	.chat-section {
+		margin-top: 2rem;
+		margin-bottom: 2rem;
 	}
 
 	.loading {

@@ -8,14 +8,6 @@
 	import { Button, Input, Card, Toast } from '$lib/components/minimal-modern';
 	import { executeRecaptcha, RECAPTCHA_ACTIONS } from '$lib/utils/recaptcha';
 
-	let error: string | null = null;
-	let fieldErrors: Record<string, string> = {};
-	let loading = false;
-	let name = '';
-	let email = '';
-	let password = '';
-	let selectedRole: 'owner' | 'funeral_director' = 'owner';
-
 	// Props to receive form data from server
 	interface Props {
 		form?: {
@@ -25,6 +17,37 @@
 	}
 	
 	let { form }: Props = $props();
+
+	// Reactive state using Svelte 5 runes
+	let error = $state<string | null>(null);
+	let fieldErrors = $state<Record<string, string>>({});
+	let loading = $state(false);
+	let name = $state('');
+	let email = $state('');
+	let password = $state('');
+	let selectedRole = $state<'owner' | 'funeral_director'>('owner');
+	let currentStep = $state('');
+	let progress = $state(0);
+
+	// Non-reactive constant
+	const theme = getTheme('minimal');
+
+	// Derived values using $derived() for computed properties
+	const formAction = $derived(
+		selectedRole === 'owner' ? '?/registerOwner' : '?/registerFuneralDirector'
+	);
+	
+	const nameInputClass = $derived(
+		fieldErrors.name ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
+	);
+	
+	const emailInputClass = $derived(
+		fieldErrors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
+	);
+	
+	const passwordInputClass = $derived(
+		fieldErrors.password ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''
+	);
 
 	// Handle server-side validation errors
 	$effect(() => {
@@ -41,15 +64,11 @@
 		}
 	});
 
-	const theme = getTheme('minimal');
-
-	let currentStep = $state('');
-	let progress = $state(0);
-
-	const handleRegister: SubmitFunction = ({ formData }) => {
+	const handleRegister: SubmitFunction = async ({ formData, cancel }) => {
 		// Prevent double submission
 		if (loading) {
-			return async () => {};
+			cancel();
+			return;
 		}
 		
 		loading = true;
@@ -58,11 +77,12 @@
 		currentStep = 'Verifying security...';
 		progress = 10;
 
-		return async ({ result, update }) => {
-			// Execute reCAPTCHA before processing result
-			const recaptchaAction = selectedRole === 'owner' 
-				? RECAPTCHA_ACTIONS.REGISTER_OWNER 
-				: RECAPTCHA_ACTIONS.REGISTER_FUNERAL_DIRECTOR;
+		// Execute reCAPTCHA BEFORE form submission
+		const recaptchaAction = selectedRole === 'owner' 
+			? RECAPTCHA_ACTIONS.REGISTER_OWNER 
+			: RECAPTCHA_ACTIONS.REGISTER_FUNERAL_DIRECTOR;
+		
+		try {
 			const recaptchaToken = await executeRecaptcha(recaptchaAction);
 			
 			if (!recaptchaToken) {
@@ -70,24 +90,25 @@
 				loading = false;
 				currentStep = '';
 				progress = 0;
-				await update({ reset: false });
+				cancel();
 				return;
 			}
 
-			// We need to resubmit with reCAPTCHA token
-			if (result.type === 'failure' && !formData.get('recaptchaToken')) {
-				// Resubmit with reCAPTCHA token
-				formData.append('recaptchaToken', recaptchaToken);
-				currentStep = 'Creating your account...';
-				progress = 30;
-				
-				const form = document.querySelector('form') as HTMLFormElement;
-				if (form) {
-					form.requestSubmit();
-				}
-				return;
-			}
+			// Add reCAPTCHA token to form data
+			formData.append('recaptchaToken', recaptchaToken);
 			
+			currentStep = 'Creating your account...';
+			progress = 30;
+		} catch (err) {
+			error = 'Security verification failed. Please try again.';
+			loading = false;
+			currentStep = '';
+			progress = 0;
+			cancel();
+			return;
+		}
+
+		return async ({ result, update }) => {
 			if (result.type === 'success' && result.data?.customToken) {
 				try {
 					// Navigate to session page with token for better UX
@@ -154,7 +175,7 @@
 		</div>
 
 		<Card theme="minimal" class="p-8">
-			<form class="space-y-6" method="POST" action="?/{selectedRole === 'owner' ? 'registerOwner' : 'registerFuneralDirector'}" use:enhance={handleRegister}>
+			<form class="space-y-6" method="POST" action={formAction} use:enhance={handleRegister}>
 				<div class="space-y-4">
 					<div>
 						<label for="name" class="block text-sm font-medium {theme.text} mb-1">
@@ -169,7 +190,7 @@
 							placeholder="Enter your full name"
 							theme="minimal"
 							bind:value={name}
-							class={fieldErrors.name ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}
+							class={nameInputClass}
 						/>
 						{#if fieldErrors.name}
 							<p class="mt-1 text-sm text-red-600">{fieldErrors.name}</p>
@@ -189,7 +210,7 @@
 							placeholder="Enter your email"
 							theme="minimal"
 							bind:value={email}
-							class={fieldErrors.email ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}
+							class={emailInputClass}
 						/>
 						{#if fieldErrors.email}
 							<p class="mt-1 text-sm text-red-600">{fieldErrors.email}</p>
@@ -209,7 +230,7 @@
 							placeholder="Create a secure password"
 							theme="minimal"
 							bind:value={password}
-							class={fieldErrors.password ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : ''}
+							class={passwordInputClass}
 						/>
 						{#if fieldErrors.password}
 							<p class="mt-1 text-sm text-red-600">{fieldErrors.password}</p>
@@ -222,7 +243,10 @@
 							I want to:
 						</label>
 						<div class="space-y-3">
-							<label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors {selectedRole === 'owner' ? 'border-[#D5BA7F] bg-[#D5BA7F]/5' : 'border-gray-300'}">
+							<label 
+								class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors {selectedRole === 'owner' ? 'border-[#D5BA7F] bg-[#D5BA7F]/5' : 'border-gray-300'}"
+								onclick={() => selectedRole = 'owner'}
+							>
 								<input
 									type="radio"
 									name="role"
@@ -243,7 +267,10 @@
 								</div>
 							</label>
 							
-							<label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors {selectedRole === 'funeral_director' ? 'border-[#D5BA7F] bg-[#D5BA7F]/5' : 'border-gray-300'}">
+							<label 
+								class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors {selectedRole === 'funeral_director' ? 'border-[#D5BA7F] bg-[#D5BA7F]/5' : 'border-gray-300'}"
+								onclick={() => selectedRole = 'funeral_director'}
+							>
 								<input
 									type="radio"
 									name="role"

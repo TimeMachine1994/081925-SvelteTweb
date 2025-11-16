@@ -185,7 +185,8 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 				methodConfig = {
 					type: 'phone-to-mux',
 					cloudflare: config.cloudflare,
-					mux: config.mux
+					mux: config.mux,
+					restreamingConfigured: config.restreamingConfigured
 				};
 			}
 
@@ -241,7 +242,10 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			streamData.muxStreamId = methodConfig.mux.streamId;
 			streamData.muxStreamKey = methodConfig.mux.streamKey;
 			streamData.muxPlaybackId = methodConfig.mux.playbackId;
-			streamData.restreamingEnabled = methodConfig.restreamingConfigured;
+			// Only add restreamingEnabled if it has a value (avoid undefined for Firestore)
+			if (methodConfig.restreamingConfigured !== undefined) {
+				streamData.restreamingEnabled = methodConfig.restreamingConfigured;
+			}
 		}
 
 		console.log('💾 [STREAMS API] Stream data to save:', JSON.stringify(streamData, null, 2));
