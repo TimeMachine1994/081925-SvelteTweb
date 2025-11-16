@@ -1,7 +1,7 @@
 # Stripe Payment Gateway Setup Guide
 
 ## Overview
-This guide covers the complete Stripe payment integration for the TributeStream MyPortal owner flow. When users click "Book Now" in the scheduling calculator, they're taken through a production-ready payment gateway with address collection, Stripe processing, receipt generation, and email confirmation.
+This guide covers the complete Stripe payment integration for the Tributestream MyPortal owner flow. When users click "Book Now" in the scheduling calculator, they're taken through a production-ready payment gateway with address collection, Stripe processing, receipt generation, and email confirmation.
 
 ## Flow Summary
 1. **MyPortal** → **Schedule Calculator** → **"Book Now"** → **Payment Gateway** → **Receipt Page** → **Email Confirmation** → **Schedule Locked**

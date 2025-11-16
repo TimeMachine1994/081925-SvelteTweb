@@ -1,366 +1,249 @@
-import { env } from '$env/dynamic/private';
-const CLOUDFLARE_ACCOUNT_ID = env.CLOUDFLARE_ACCOUNT_ID;
-const CLOUDFLARE_API_TOKEN = env.CLOUDFLARE_API_TOKEN;
-const CLOUDFLARE_STREAM_API_BASE = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/stream`;
+// Cloudflare Stream API Client
+// Handles Live Input creation and Live Output configuration
 
+import { CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN } from '$env/static/private';
+
+const CLOUDFLARE_API_BASE = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/stream`;
+
+interface CloudflareAPIResponse<T> {
+	result: T;
+	success: boolean;
+	errors: Array<{ code: number; message: string }>;
+	messages: Array<string>;
+}
+
+// Cloudflare API types
 interface CloudflareLiveInput {
 	uid: string;
-	rtmps: {
-		url: string;
-		streamKey: string;
-	};
-	rtmp?: {
-		url: string;
-		streamKey: string;
-	};
-	rtmpsPlayback: {
-		url: string;
-	};
-	srt?: {
-		url: string;
-		streamId: string;
-	};
-	webRTC?: {
+	webRTC: {
 		url: string;
 	};
 	webRTCPlayback?: {
 		url: string;
 	};
-	created: string;
-	modified: string;
-	meta?: {
-		name?: string;
-		[key: string]: any;
-	};
-	recording?: {
-		mode: 'automatic' | 'off';
-		timeoutSeconds?: number;
-		requireSignedURLs?: boolean;
-	};
-}
-
-interface CloudflareApiResponse<T> {
-	result: T;
-	success: boolean;
-	errors: Array<{ code: number; message: string }>;
-	messages: string[];
-}
-
-/**
- * Create a Cloudflare Stream Live Input
- * This generates RTMP credentials for streaming
- */
-export async function createLiveInput(options: {
-	name: string;
-	recording?: {
-		mode: 'automatic' | 'off';
-		timeoutSeconds?: number;
-	};
-	outputs?: Array<{
-		enabled: boolean;
+	rtmps: {
 		url: string;
 		streamKey: string;
-	}>;
-}): Promise<CloudflareLiveInput> {
-	console.log('🎬 [CLOUDFLARE] Creating live input:', options.name);
-
-	if (!CLOUDFLARE_ACCOUNT_ID || !CLOUDFLARE_API_TOKEN) {
-		console.error('❌ [CLOUDFLARE] Missing credentials');
-		throw new Error('Cloudflare Stream credentials not configured');
-	}
-
-	try {
-		const response = await fetch(`${CLOUDFLARE_STREAM_API_BASE}/live_inputs`, {
-			method: 'POST',
-			headers: {
-				Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`,
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({
-				meta: {
-					name: options.name
-				},
-				recording: options.recording || {
-					mode: 'automatic',
-					timeoutSeconds: 10,
-					requireSignedURLs: false
-				},
-				...(options.outputs && options.outputs.length > 0 && { outputs: options.outputs })
-			})
-		});
-
-		if (!response.ok) {
-			const errorText = await response.text();
-			console.error(' [CLOUDFLARE] API error:', response.status, errorText);
-			throw new Error(`Cloudflare API error: ${response.status} ${errorText}`);
-		}
-
-		const data: CloudflareApiResponse<CloudflareLiveInput> = await response.json();
-
-		if (!data.success) {
-			console.error('❌ [CLOUDFLARE] API returned errors:', data.errors);
-			throw new Error(`Cloudflare API error: ${data.errors.map((e) => e.message).join(', ')}`);
-		}
-
-		console.log('✅ [CLOUDFLARE] Live input created:', data.result.uid);
-		return data.result;
-	} catch (error) {
-		console.error('❌ [CLOUDFLARE] Failed to create live input:', error);
-		throw error;
-	}
+	};
+	rtmpsPlayback?: {
+		url: string;
+		streamKey: string;
+	};
+	srt?: {
+		url: string;
+		streamId: string;
+		passphrase: string;
+	};
 }
 
 /**
- * Get live input details
+ * Creates a Cloudflare Live Input with automatic recording enabled
+ * @param name - Name/title for the live input
+ * @returns Live Input details including WHIP URL
  */
-export async function getLiveInput(inputId: string): Promise<CloudflareLiveInput> {
-	console.log('🚀 [CLOUDFLARE_GET_LIVE] ===== GETTING LIVE INPUT =====');
-	console.log('🎬 [CLOUDFLARE_GET_LIVE] Getting live input for ID:', inputId);
-	console.log('🎬 [CLOUDFLARE_GET_LIVE] Input ID type:', typeof inputId);
-	console.log('🎬 [CLOUDFLARE_GET_LIVE] Input ID length:', inputId?.length);
+export async function createLiveInput(name: string): Promise<{
+	liveInputId: string;
+	whipUrl: string;
+	whepUrl?: string;
+	rtmpsUrl: string;
+	rtmpsStreamKey: string;
+}> {
+	console.log('🎬 [Cloudflare] Creating Live Input:', name);
+	console.log('🔑 [Cloudflare] Account ID:', CLOUDFLARE_ACCOUNT_ID ? 'SET' : 'MISSING');
+	console.log('🔑 [Cloudflare] API Token:', CLOUDFLARE_API_TOKEN ? `SET (${CLOUDFLARE_API_TOKEN.substring(0, 10)}...)` : 'MISSING');
 
-	console.log('🔍 [CLOUDFLARE_GET_LIVE] Checking credentials...');
-	if (!CLOUDFLARE_ACCOUNT_ID || !CLOUDFLARE_API_TOKEN) {
-		console.error('❌ [CLOUDFLARE_GET_LIVE] Missing credentials!');
-		console.error('❌ [CLOUDFLARE_GET_LIVE] CLOUDFLARE_ACCOUNT_ID:', !!CLOUDFLARE_ACCOUNT_ID);
-		console.error('❌ [CLOUDFLARE_GET_LIVE] CLOUDFLARE_API_TOKEN:', !!CLOUDFLARE_API_TOKEN);
-		throw new Error('Cloudflare Stream credentials not configured');
-	}
-	console.log('✅ [CLOUDFLARE_GET_LIVE] Credentials found');
-
-	try {
-		const url = `${CLOUDFLARE_STREAM_API_BASE}/live_inputs/${inputId}`;
-		console.log('🔍 [CLOUDFLARE_GET_LIVE] Making API request to:', url);
-		console.log('🔍 [CLOUDFLARE_GET_LIVE] API base:', CLOUDFLARE_STREAM_API_BASE);
-
-		const response = await fetch(url, {
-			headers: {
-				Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`
+	const response = await fetch(`${CLOUDFLARE_API_BASE}/live_inputs`, {
+		method: 'POST',
+		headers: {
+			Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`,
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({
+			meta: { name },
+			recording: {
+				mode: 'automatic',
+				timeoutSeconds: 60
 			}
-		});
-
-		console.log('📞 [CLOUDFLARE_GET_LIVE] Response status:', response.status);
-		console.log('📞 [CLOUDFLARE_GET_LIVE] Response ok:', response.ok);
-		console.log(
-			'📞 [CLOUDFLARE_GET_LIVE] Response headers:',
-			Object.fromEntries(response.headers.entries())
-		);
-
-		if (!response.ok) {
-			const errorText = await response.text();
-			console.error('❌ [CLOUDFLARE_GET_LIVE] API error response:', errorText);
-			throw new Error(`Cloudflare API error: ${response.status} - ${errorText}`);
-		}
-
-		const data: CloudflareApiResponse<CloudflareLiveInput> = await response.json();
-		console.log('📋 [CLOUDFLARE_GET_LIVE] Full API response:', JSON.stringify(data, null, 2));
-		console.log('📋 [CLOUDFLARE_GET_LIVE] Result data:', JSON.stringify(data.result, null, 2));
-		return data.result;
-	} catch (error) {
-		console.error('❌ [CLOUDFLARE_GET_LIVE] ===== ERROR GETTING LIVE INPUT =====');
-		console.error('❌ [CLOUDFLARE_GET_LIVE] Failed to get live input:', error);
-		console.error('❌ [CLOUDFLARE_GET_LIVE] Error type:', typeof error);
-		console.error(
-			'❌ [CLOUDFLARE_GET_LIVE] Error message:',
-			error instanceof Error ? error.message : 'Unknown'
-		);
-		throw error;
-	}
-}
-
-/**
- * Delete a live input
- */
-export async function deleteLiveInput(inputId: string): Promise<void> {
-	console.log('🎬 [CLOUDFLARE] Deleting live input:', inputId);
-
-	if (!CLOUDFLARE_ACCOUNT_ID || !CLOUDFLARE_API_TOKEN) {
-		throw new Error('Cloudflare Stream credentials not configured');
-	}
-
-	try {
-		const response = await fetch(`${CLOUDFLARE_STREAM_API_BASE}/live_inputs/${inputId}`, {
-			method: 'DELETE',
-			headers: {
-				Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`
-			}
-		});
-
-		if (!response.ok) {
-			throw new Error(`Cloudflare API error: ${response.status}`);
-		}
-
-		console.log('✅ [CLOUDFLARE] Live input deleted:', inputId);
-	} catch (error) {
-		console.error('❌ [CLOUDFLARE] Failed to delete live input:', error);
-		throw error;
-	}
-}
-
-/**
- * List all live inputs for the account
- */
-export async function listLiveInputs(): Promise<CloudflareLiveInput[]> {
-	console.log('🎬 [CLOUDFLARE] Listing live inputs');
-
-	if (!CLOUDFLARE_ACCOUNT_ID || !CLOUDFLARE_API_TOKEN) {
-		throw new Error('Cloudflare Stream credentials not configured');
-	}
-
-	try {
-		const response = await fetch(`${CLOUDFLARE_STREAM_API_BASE}/live_inputs`, {
-			headers: {
-				Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`
-			}
-		});
-
-		if (!response.ok) {
-			throw new Error(`Cloudflare API error: ${response.status}`);
-		}
-
-		const data: CloudflareApiResponse<CloudflareLiveInput[]> = await response.json();
-		return data.result;
-	} catch (error) {
-		console.error('❌ [CLOUDFLARE] Failed to list live inputs:', error);
-		throw error;
-	}
-}
-
-/**
- * Get the WHEP playback URL for a live input (for OBS Browser Source)
- */
-export function getWHEPPlaybackURL(input: CloudflareLiveInput): string | undefined {
-	return input.webRTCPlayback?.url;
-}
-
-/**
- * Get the HLS playback URL for a live input (for OBS Media Source)
- * Cloudflare Live Inputs provide HLS at: https://customer-{customer-code}.cloudflarestream.com/{uid}/manifest/video.m3u8
- */
-export function getHLSPlaybackURL(input: CloudflareLiveInput): string | undefined {
-	console.log('🔍 [HLS] Live input data:', {
-		uid: input.uid,
-		rtmps: input.rtmps?.url,
-		webRTC: input.webRTC?.url,
-		rtmpsPlayback: input.rtmpsPlayback?.url
+		})
 	});
 
-	// Use the known working customer code from our Cloudflare account
-	// This is more reliable than trying to extract it from URLs
-	const customerCode = 'dyz4fsbg86xy3krn';
-
-	if (!input.uid) {
-		console.log('❌ [HLS] No UID found in live input');
-		return undefined;
+	if (!response.ok) {
+		const error = await response.text();
+		console.error('❌ [Cloudflare] Failed to create Live Input:', error);
+		throw new Error(`Cloudflare API error: ${response.status} - ${error}`);
 	}
 
-	// Construct HLS URL: https://customer-{customer-code}.cloudflarestream.com/{uid}/manifest/video.m3u8
-	const hlsUrl = `https://customer-${customerCode}.cloudflarestream.com/${input.uid}/manifest/video.m3u8`;
-	console.log('🎯 [HLS] Generated HLS URL:', hlsUrl);
+	const data: CloudflareAPIResponse<CloudflareLiveInput> = await response.json();
 
-	return hlsUrl;
+	if (!data.success) {
+		throw new Error(`Cloudflare API error: ${data.errors.map((e) => e.message).join(', ')}`);
+	}
+
+	console.log('✅ [Cloudflare] Live Input created:', data.result.uid);
+	console.log('📺 [Cloudflare] RTMPS URL:', data.result.rtmps.url);
+	console.log('🔑 [Cloudflare] RTMPS Stream Key:', data.result.rtmps.streamKey);
+
+	return {
+		liveInputId: data.result.uid,
+		whipUrl: data.result.webRTC.url,
+		whepUrl: data.result.webRTCPlayback?.url,
+		rtmpsUrl: data.result.rtmps.url,
+		rtmpsStreamKey: data.result.rtmps.streamKey
+	};
 }
 
 /**
- * Get embed code HTML for a live input
- * Returns the full HTML embed code from Cloudflare Stream
+ * Gets the status of a Cloudflare Live Input
+ * @param liveInputId - The Live Input ID to check
+ * @returns Current status information
  */
-export async function getEmbedCode(inputId: string): Promise<string> {
-	console.log('🚀 [CLOUDFLARE_EMBED] ===== GETTING EMBED CODE =====');
-	console.log('🎬 [CLOUDFLARE_EMBED] Getting embed code for:', inputId);
-	console.log('🎬 [CLOUDFLARE_EMBED] Input ID type:', typeof inputId);
-	console.log('🎬 [CLOUDFLARE_EMBED] Input ID length:', inputId?.length);
+export async function getLiveInputStatus(liveInputId: string): Promise<{
+	status: string;
+	isLive: boolean;
+	videoUid?: string;
+}> {
+	console.log('🔍 [Cloudflare] Checking Live Input status:', liveInputId);
 
-	console.log('🔍 [CLOUDFLARE_EMBED] Checking credentials...');
-	if (!CLOUDFLARE_ACCOUNT_ID || !CLOUDFLARE_API_TOKEN) {
-		console.error('❌ [CLOUDFLARE_EMBED] Missing credentials!');
-		throw new Error('Cloudflare Stream credentials not configured');
-	}
-	console.log('✅ [CLOUDFLARE_EMBED] Credentials found');
-
-	try {
-		const url = `${CLOUDFLARE_STREAM_API_BASE}/${inputId}/embed`;
-		console.log('🔍 [CLOUDFLARE_EMBED] Making embed API request to:', url);
-		console.log('🔍 [CLOUDFLARE_EMBED] API base:', CLOUDFLARE_STREAM_API_BASE);
-
-		const response = await fetch(url, {
-			headers: {
-				Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`
-			}
-		});
-
-		console.log('📞 [CLOUDFLARE_EMBED] Response status:', response.status);
-		console.log('📞 [CLOUDFLARE_EMBED] Response ok:', response.ok);
-		console.log(
-			'📞 [CLOUDFLARE_EMBED] Response headers:',
-			Object.fromEntries(response.headers.entries())
-		);
-
-		if (!response.ok) {
-			const errorText = await response.text();
-			console.error('❌ [CLOUDFLARE_EMBED] API error response:', errorText);
-			throw new Error(`Cloudflare API error: ${response.status} - ${errorText}`);
+	const response = await fetch(`${CLOUDFLARE_API_BASE}/live_inputs/${liveInputId}`, {
+		method: 'GET',
+		headers: {
+			Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`
 		}
+	});
 
-		const embedHtml = await response.text();
-		console.log('✅ [CLOUDFLARE_EMBED] Got embed code!');
-		console.log('✅ [CLOUDFLARE_EMBED] Embed HTML full:', embedHtml);
-		console.log('✅ [CLOUDFLARE_EMBED] Embed HTML preview:', embedHtml.substring(0, 200) + '...');
-		console.log('✅ [CLOUDFLARE_EMBED] Embed HTML length:', embedHtml.length);
-		return embedHtml;
-	} catch (error) {
-		console.error('❌ [CLOUDFLARE_EMBED] ===== ERROR GETTING EMBED CODE =====');
-		console.error('❌ [CLOUDFLARE_EMBED] Failed to get embed code:', error);
-		console.error('❌ [CLOUDFLARE_EMBED] Error type:', typeof error);
-		console.error(
-			'❌ [CLOUDFLARE_EMBED] Error message:',
-			error instanceof Error ? error.message : 'Unknown'
-		);
-		throw error;
+	if (!response.ok) {
+		const error = await response.text();
+		console.error('❌ [Cloudflare] Failed to get Live Input status:', error);
+		throw new Error(`Cloudflare API error: ${response.status} - ${error}`);
 	}
+
+	const data: CloudflareAPIResponse<any> = await response.json();
+
+	if (!data.success) {
+		throw new Error(`Cloudflare API error: ${data.errors.map((e) => e.message).join(', ')}`);
+	}
+
+	// Cloudflare returns status in current.state field
+	const currentState = data.result.current?.state || data.result.status || 'unknown';
+	const isLive = currentState === 'connected' || currentState === 'live';
+	const videoUid = data.result.recording?.uid;
+
+	console.log('✅ [Cloudflare] Live Input status:', currentState, 'Is Live:', isLive);
+	console.log('📊 [Cloudflare] Full status data:', JSON.stringify(data.result.current || data.result, null, 2));
+
+	return {
+		status: currentState,
+		isLive,
+		videoUid
+	};
 }
 
 /**
- * Extract the video ID and construct the iframe src URL from Cloudflare embed HTML
- * Parses the embed HTML to get the video ID and constructs the full iframe URL
+ * Gets playback URL for a completed stream recording
+ * @param videoUid - The video UID from completed stream
+ * @returns Playback URLs
  */
-export function extractEmbedIframeUrl(embedHtml: string): string | undefined {
-	console.log('🚀 [EXTRACT_IFRAME] ===== EXTRACTING IFRAME URL =====');
-	console.log('🔍 [EXTRACT_IFRAME] Extracting video ID from embed HTML');
-	console.log('🔍 [EXTRACT_IFRAME] Embed HTML input:', embedHtml);
-	console.log('🔍 [EXTRACT_IFRAME] Embed HTML type:', typeof embedHtml);
-	console.log('🔍 [EXTRACT_IFRAME] Embed HTML length:', embedHtml?.length);
+export async function getStreamPlaybackUrl(videoUid: string): Promise<{
+	hlsUrl?: string;
+	dashUrl?: string;
+	embedUrl?: string;
+}> {
+	console.log('🎥 [Cloudflare] Getting playback URL for video:', videoUid);
 
-	// Look for the stream id attribute in the <stream> tag
-	console.log('🔍 [EXTRACT_IFRAME] Looking for stream id pattern...');
-	const streamIdMatch = embedHtml.match(/id="([^"]+)"/);
-	console.log('🔍 [EXTRACT_IFRAME] Regex match result:', streamIdMatch);
+	const response = await fetch(`${CLOUDFLARE_API_BASE}/${videoUid}`, {
+		method: 'GET',
+		headers: {
+			Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`
+		}
+	});
 
-	if (streamIdMatch && streamIdMatch[1]) {
-		const videoId = streamIdMatch[1];
-		console.log('✅ [EXTRACT_IFRAME] Extracted video ID:', videoId);
-		console.log('✅ [EXTRACT_IFRAME] Video ID length:', videoId.length);
-
-		// Use the same customer code as in HLS function
-		const customerCode = 'dyz4fsbg86xy3krn';
-		console.log('🔍 [EXTRACT_IFRAME] Using customer code:', customerCode);
-
-		// Construct the iframe src URL
-		const iframeUrl = `https://customer-${customerCode}.cloudflarestream.com/${videoId}/iframe`;
-		console.log('✅ [EXTRACT_IFRAME] Constructed iframe URL:', iframeUrl);
-		console.log('✅ [EXTRACT_IFRAME] Iframe URL length:', iframeUrl.length);
-
-		return iframeUrl;
+	if (!response.ok) {
+		const error = await response.text();
+		console.error('❌ [Cloudflare] Failed to get video:', error);
+		throw new Error(`Cloudflare API error: ${response.status} - ${error}`);
 	}
 
-	console.log('❌ [EXTRACT_IFRAME] No video ID found in embed HTML');
-	console.log('❌ [EXTRACT_IFRAME] Tried to match pattern: /id="([^"]+)"/');
-	return undefined;
+	const data: CloudflareAPIResponse<any> = await response.json();
+
+	if (!data.success) {
+		throw new Error(`Cloudflare API error: ${data.errors.map((e) => e.message).join(', ')}`);
+	}
+
+	return {
+		hlsUrl: data.result.playback?.hls,
+		dashUrl: data.result.playback?.dash,
+		embedUrl: `https://customer-${CLOUDFLARE_ACCOUNT_ID}.cloudflarestream.com/${videoUid}/iframe`
+	};
 }
 
 /**
- * Check if Cloudflare Stream is configured
+ * Gets the list of videos associated with a Live Input
+ * This shows the active broadcast (if live) and all recordings
+ * @param liveInputId - The Live Input ID
+ * @returns Array of videos with status and playback URLs
  */
-export function isCloudflareConfigured(): boolean {
-	return !!(CLOUDFLARE_ACCOUNT_ID && CLOUDFLARE_API_TOKEN);
+export async function getLiveInputVideos(liveInputId: string): Promise<{
+	videos: Array<{
+		uid: string;
+		status: string;
+		isLive: boolean;
+		preview: string;
+		hlsUrl?: string;
+		dashUrl?: string;
+		created: string;
+	}>;
+	activeVideo?: {
+		uid: string;
+		preview: string;
+		hlsUrl?: string;
+		dashUrl?: string;
+	};
+}> {
+	console.log('🎬 [Cloudflare] Getting videos for Live Input:', liveInputId);
+
+	const response = await fetch(`${CLOUDFLARE_API_BASE}/live_inputs/${liveInputId}/videos`, {
+		method: 'GET',
+		headers: {
+			Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`
+		}
+	});
+
+	if (!response.ok) {
+		const error = await response.text();
+		console.error('❌ [Cloudflare] Failed to get Live Input videos:', error);
+		throw new Error(`Cloudflare API error: ${response.status} - ${error}`);
+	}
+
+	const data: CloudflareAPIResponse<any[]> = await response.json();
+
+	if (!data.success) {
+		throw new Error(`Cloudflare API error: ${data.errors.map((e) => e.message).join(', ')}`);
+	}
+
+	const videos = data.result.map((video) => ({
+		uid: video.uid,
+		status: video.status?.state || 'unknown',
+		isLive: video.status?.state === 'live-inprogress',
+		preview: video.preview,
+		hlsUrl: video.playback?.hls,
+		dashUrl: video.playback?.dash,
+		created: video.created
+	}));
+
+	// Find the active live video (if any)
+	const activeVideo = videos.find((v) => v.isLive);
+
+	console.log('✅ [Cloudflare] Found', videos.length, 'videos, Active:', activeVideo ? 'YES' : 'NO');
+
+	return {
+		videos,
+		activeVideo: activeVideo
+			? {
+					uid: activeVideo.uid,
+					preview: activeVideo.preview,
+					hlsUrl: activeVideo.hlsUrl,
+					dashUrl: activeVideo.dashUrl
+			  }
+			: undefined
+	};
 }

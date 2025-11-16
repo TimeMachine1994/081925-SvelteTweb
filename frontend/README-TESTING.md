@@ -1,10 +1,10 @@
-# TributeStream Testing Guide
+# Tributestream Testing Guide
 
-This document provides comprehensive information about the testing strategy and implementation for TributeStream.
+This document provides comprehensive information about the testing strategy and implementation for Tributestream.
 
 ## Testing Strategy Overview
 
-TributeStream follows a comprehensive testing pyramid approach:
+Tributestream follows a comprehensive testing pyramid approach:
 
 - **Unit Tests (70%)**: Components, utilities, server functions, business logic
 - **Integration Tests (20%)**: API endpoints, database operations, auth flows  

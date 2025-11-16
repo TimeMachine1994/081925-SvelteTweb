@@ -7,6 +7,9 @@ import type { Memorial } from '$lib/types/memorial';
 import { validateEmail } from '$lib/utils/email-validation';
 import { generateUniqueMemorialSlug } from '$lib/utils/memorial-slug';
 import { createStandardUserProfile } from '$lib/utils/user-profile';
+import { verifyRecaptcha, RECAPTCHA_ACTIONS, getScoreThreshold } from '$lib/utils/recaptcha';
+import { checkRateLimit, getClientIP, RATE_LIMITS, getBlockedTimeRemaining } from '$lib/server/rate-limiter';
+import { checkGeoLocation, getCountryName, logSuspiciousActivity, isCountryWhitelisted } from '$lib/server/geo-filter';
 
 // Helper function to generate a random password
 function generateRandomPassword(length = 12) {
@@ -23,15 +26,110 @@ function generateRandomPassword(length = 12) {
 export const actions: Actions = {
 	default: async ({ request, cookies }) => {
 		console.log('Family member registration started 👨‍👩‍👧‍👦');
+		
+		// 🛡️ LAYER 2: Rate Limiting - Check before any processing
+		const clientIP = getClientIP(request);
+		console.log(`📍 Request from IP: ${clientIP}`);
+		
+		const rateLimit = checkRateLimit(clientIP, RATE_LIMITS.MEMORIAL_REGISTRATION);
+		if (!rateLimit.allowed) {
+			const blockedTime = getBlockedTimeRemaining(clientIP);
+			console.warn(`🚫 Rate limit exceeded for IP ${clientIP}. Retry after: ${rateLimit.retryAfter}s`);
+			
+			return fail(429, { 
+				error: blockedTime 
+					? `Too many registration attempts. Your IP has been temporarily blocked for ${blockedTime}. Please try again later or contact support if you need assistance.`
+					: `Too many registration attempts. Please wait ${rateLimit.retryAfter} seconds before trying again.`,
+				field: 'rateLimit'
+			});
+		}
+		
+		console.log(`✅ Rate limit check passed. Remaining attempts: ${rateLimit.remaining}`);
+		
+		// 🛡️ LAYER 3: Geographic IP Filtering
+		const geoCheck = checkGeoLocation(request);
+		const countryDisplay = geoCheck.country ? `${getCountryName(geoCheck.country)} (${geoCheck.country})` : 'Unknown';
+		console.log(`🌍 Request from: ${countryDisplay}`);
+		
+		// Check if country is whitelisted first
+		if (geoCheck.country && isCountryWhitelisted(geoCheck.country)) {
+			console.log(`✅ Country ${geoCheck.country} is whitelisted, bypassing geo-filter`);
+		} else if (geoCheck.blocked) {
+			logSuspiciousActivity({
+				ip: clientIP,
+				country: geoCheck.country,
+				reason: `Blocked country: ${countryDisplay}`,
+				endpoint: '/register/loved-one'
+			});
+			
+			return fail(403, {
+				error: `Registration from your location is currently not available due to spam prevention measures. If you believe this is an error, please contact our support team at support@tributestream.com with your location details.`,
+				field: 'geoLocation'
+			});
+		} else if (geoCheck.suspicious) {
+			// Log suspicious but allow with warning
+			logSuspiciousActivity({
+				ip: clientIP,
+				country: geoCheck.country,
+				reason: geoCheck.reason || 'Suspicious country',
+				endpoint: '/register/loved-one'
+			});
+			console.warn(`⚠️ Suspicious location detected: ${countryDisplay} - ${geoCheck.reason}`);
+		}
+		
 		const data = await request.formData();
 		const lovedOneName = (data.get('lovedOneName') as string)?.trim();
 		const name = (data.get('name') as string)?.trim();
 		const email = (data.get('email') as string)?.trim();
 		const phone = (data.get('phone') as string)?.trim();
+		const recaptchaToken = (data.get('recaptchaToken') as string)?.trim();
+		const honeypot = (data.get('website') as string)?.trim(); // 🍯 Honeypot field
+
+		// 🛡️ LAYER 4: Honeypot Check - Bots fill this, humans don't
+		if (honeypot) {
+			console.error(`🚫 BOT DETECTED! Honeypot field filled with: "${honeypot}"`);
+			logSuspiciousActivity({
+				ip: clientIP,
+				country: geoCheck.country,
+				email: email || 'unknown',
+				reason: `Honeypot triggered: Field filled with "${honeypot}"`,
+				endpoint: '/register/loved-one'
+			});
+			
+			// Return success to fool the bot, but don't actually create anything
+			return { success: true };
+		}
 
 		if (!lovedOneName || !name || !email) {
 			return fail(400, { error: 'Please fill out all required fields.' });
 		}
+
+		// Verify reCAPTCHA token (HIGH_SECURITY threshold for memorial creation)
+		if (!recaptchaToken) {
+			console.error('❌ reCAPTCHA token missing from request');
+			return fail(400, { 
+				error: 'Security verification failed. Please refresh the page and try again.',
+				field: 'recaptcha'
+			});
+		}
+
+		const recaptchaResult = await verifyRecaptcha(
+			recaptchaToken,
+			RECAPTCHA_ACTIONS.CREATE_MEMORIAL,
+			getScoreThreshold(RECAPTCHA_ACTIONS.CREATE_MEMORIAL)
+		);
+
+		if (!recaptchaResult.success) {
+			console.error('❌ reCAPTCHA verification failed:', recaptchaResult.error);
+			console.error('Score:', recaptchaResult.score);
+			return fail(403, { 
+				error: 'Security verification failed. Your request appears suspicious. Please try again or contact support if this persists.',
+				field: 'recaptcha'
+			});
+		}
+
+		console.log(`✅ reCAPTCHA verified. Score: ${recaptchaResult.score}`);
+		// Continue with rest of validation...
 
 		// Pre-validate email before expensive operations
 		console.log('Pre-validating email...');

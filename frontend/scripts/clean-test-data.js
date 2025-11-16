@@ -49,7 +49,7 @@ async function deleteCollection(collectionName) {
 
 async function cleanTestData() {
   try {
-    console.log('🧹 Cleaning test data from TributeStream emulators...\n');
+    console.log('🧹 Cleaning test data from Tributestream emulators...\n');
     
     // Clean Firestore collections
     await deleteCollection('users');

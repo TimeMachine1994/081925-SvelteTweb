@@ -85,7 +85,7 @@ interface TimeInfo {
 interface CalculatorFormData {
   memorialId?: string;
   lovedOneName: string;           // Duplicated from Memorial
-  selectedTier: 'solo' | 'live' | 'legacy' | null;
+  selectedTier: 'record' | 'live' | 'legacy' | null;
   mainService: ServiceDetails;    // Duplicated service data
   additionalLocation: AdditionalServiceDetails; // Duplicated
   additionalDay: AdditionalServiceDetails;      // Duplicated
@@ -103,7 +103,7 @@ interface CalculatorFormData {
   memorialId: string;             // Required - references Memorial for service data
   
   // Calculator-Specific Configuration Only
-  selectedTier: 'solo' | 'live' | 'legacy' | null; // Service tier
+  selectedTier: 'record' | 'live' | 'legacy' | null; // Service tier
   addons: Addons;                 // Selected add-on services
   
   // Metadata

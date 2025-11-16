@@ -139,8 +139,12 @@ export const load = async ({ locals }: any) => {
 			recentMemorials: recentMemorials.length
 		};
 
+		// Filter incomplete memorials (priority view)
+		const incompleteMemorials = recentMemorials.filter(m => !m.isComplete);
+
 		console.log('✅ [ADMIN LOAD] Dashboard data loaded successfully:', {
 			recentMemorials: recentMemorials.length,
+			incompleteMemorials: incompleteMemorials.length,
 			allUsers: allUsers.length,
 			pendingFuneralDirectors: pendingFuneralDirectors.length,
 			approvedFuneralDirectors: approvedFuneralDirectors.length,
@@ -149,6 +153,7 @@ export const load = async ({ locals }: any) => {
 
 		return {
 			// Core admin data
+			incompleteMemorials, // New: show incomplete first
 			recentMemorials,
 			allUsers,
 			pendingFuneralDirectors,
@@ -169,6 +174,7 @@ export const load = async ({ locals }: any) => {
 
 		// Return safe fallback data to prevent 500 errors
 		return {
+			incompleteMemorials: [],
 			recentMemorials: [],
 			allUsers: [],
 			pendingFuneralDirectors: [],

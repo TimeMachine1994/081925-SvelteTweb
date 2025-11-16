@@ -108,4 +108,36 @@ export interface Memorial {
 	isDemo?: boolean;
 	demoSessionId?: string;
 	demoExpiresAt?: string;
+
+	// Payment status fields
+	isPaid?: boolean;
+	paymentStatus?: 'paid' | 'unpaid';
+	paidAt?: Timestamp | string;
+	manualPayment?: ManualPaymentInfo;
+	calculatorConfig?: CalculatorConfig;
+}
+
+export interface ManualPaymentInfo {
+	markedPaidBy: string;
+	markedPaidAt: Timestamp | string;
+	method: 'cash' | 'check' | 'venmo' | 'zelle' | 'manual';
+	notes?: string;
+}
+
+export interface CalculatorConfig {
+	status?: 'draft' | 'paid';
+	isPaid?: boolean;
+	paidAt?: Timestamp | string;
+	bookingItems?: Array<{
+		name: string;
+		price: number;
+		quantity?: number;
+		total: number;
+	}>;
+	total?: number;
+	paymentIntentId?: string;
+	checkoutSessionId?: string;
+	formData?: any;
+	lastModified?: Timestamp | string;
+	lastModifiedBy?: string;
 }

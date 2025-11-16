@@ -1,7 +1,7 @@
 # Cloudflare Stream Integration Setup
 
 ## Overview
-TributeStream uses Cloudflare Stream Live for livestreaming. When OBS connects and starts streaming, Cloudflare automatically notifies our webhook endpoint, which updates the stream status in real-time.
+Tributestream uses Cloudflare Stream Live for livestreaming. When OBS connects and starts streaming, Cloudflare automatically notifies our webhook endpoint, which updates the stream status in real-time.
 
 ## How It Works
 
@@ -69,7 +69,7 @@ The Stream Management page polls every 5 seconds to check for status changes:
 2. Click **Destinations** tab
 3. Under **Webhooks**, click **Create**
 4. Enter webhook details:
-   - **Name:** TributeStream Live Status
+   - **Name:** Tributestream Live Status
    - **URL:** `https://yourdomain.com/api/webhooks/stream-status`
 5. Click **Save and Test**
 

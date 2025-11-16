@@ -1,8 +1,8 @@
-# TributeStream Pre-Validation Manual Testing Guide
+# Tributestream Pre-Validation Manual Testing Guide
 
 ## Overview
 
-This guide provides comprehensive manual testing scenarios for the new pre-validation system implemented across all TributeStream registration endpoints.
+This guide provides comprehensive manual testing scenarios for the new pre-validation system implemented across all Tributestream registration endpoints.
 
 ## Testing Environment Setup
 

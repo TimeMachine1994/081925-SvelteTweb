@@ -68,7 +68,7 @@ setHeaders({
 3. **Locations** - 13 service locations listed
 4. **Why Tributestream** - 5 key value propositions
 5. **Complete Packages**
-   - Tributestream Legacy: $1,599 (Most Complete)
+   - Tributestream Legacy: $1,699 (Most Complete)
    - Tributestream Live: $1,299
    - Tributestream Record: $699
 6. **Add-Ons**
@@ -177,7 +177,7 @@ https://tributestream.com/pricing-breakdown
 ## 📊 Content Breakdown
 
 ### Packages:
-- **Legacy**: $1,599 - Full service with editing & USB
+- **Legacy**: $1,699 - Full service with editing & USB
 - **Live**: $1,299 - Live streaming without post-edit
 - **Record**: $699 - Recording only, uploaded within 24hrs
 

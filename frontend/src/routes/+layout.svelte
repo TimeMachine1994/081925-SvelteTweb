@@ -35,17 +35,27 @@
 		{/if}
 		
 		<DevRoleSwitcher />
-		<Navbar />
+	
+		<!-- Hide navbar in admin panel -->
+		{#if !$page.route.id?.startsWith('/admin')}
+			<Navbar />
+		{/if}
+	
 		<main
 			class="main-content"
 			class:full-width={$page.route.id?.includes('/app/calculator')}
 			class:homepage={$page.route.id === '/'}
 			class:memorial-page={$page.route.id === '/[fullSlug]'}
 			class:demo-mode={data.user?.isDemo}
+			class:admin-panel={$page.route.id?.startsWith('/admin')}
 		>
 			{@render children?.()}
 		</main>
-		<Footer />
+	
+		<!-- Hide footer in admin panel -->
+		{#if !$page.route.id?.startsWith('/admin')}
+			<Footer />
+		{/if}
 	</div>
 </RecaptchaProvider>
 
@@ -88,5 +98,11 @@
 		.main-content.demo-mode {
 			padding-top: 100px;
 		}
+	}
+
+	/* Admin panel full-width styling */
+	.main-content.admin-panel {
+		max-width: none;
+		padding: 0;
 	}
 </style>

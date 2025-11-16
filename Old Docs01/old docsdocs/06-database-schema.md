@@ -2,7 +2,7 @@
 
 ## Overview
 
-TributeStream uses Firebase Firestore as its primary database with a document-based NoSQL structure. The schema is designed for scalability, real-time updates, and efficient querying while maintaining data consistency across the memorial service platform.
+Tributestream uses Firebase Firestore as its primary database with a document-based NoSQL structure. The schema is designed for scalability, real-time updates, and efficient querying while maintaining data consistency across the memorial service platform.
 
 ## Collections Structure
 
@@ -237,7 +237,7 @@ Booking and calculator configuration data, separate from memorial content.
   // Calculator Form Data
   formData: {
     memorialId: string;           // Memorial reference
-    selectedTier: 'solo' | 'live' | 'legacy' | null; // Service tier
+    selectedTier: 'record' | 'live' | 'legacy' | null; // Service tier
     addons: {
       photography: boolean;       // Photography service
       audioVisualSupport: boolean; // A/V support
@@ -253,8 +253,8 @@ Booking and calculator configuration data, separate from memorial content.
   bookingItems: [                 // Itemized booking breakdown
     {
       id: string;                 // Item ID
-      name: string;               // "Solo Tier Service"
-      package: string;            // "Solo"
+      name: string;               // "Record Tier Service"
+      package: string;            // "Record"
       price: number;              // 299.00
       quantity: number;           // 1
       total: number;              // 299.00
@@ -750,4 +750,4 @@ const updateMemorialSummary = async (memorialId: string) => {
 
 ---
 
-*This database schema provides a comprehensive foundation for TributeStream's memorial service platform with proper relationships, indexing, and security. For API integration patterns, see [API Routes Reference](./02-api-routes.md).*
+*This database schema provides a comprehensive foundation for Tributestream's memorial service platform with proper relationships, indexing, and security. For API integration patterns, see [API Routes Reference](./02-api-routes.md).*

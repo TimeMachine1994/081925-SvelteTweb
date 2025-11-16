@@ -12,9 +12,9 @@
 
 	const tiers = [
 		{
-			name: 'Tributestream Solo',
-			alias: 'solo',
-			price: 599,
+			name: 'Tributestream Record',
+			alias: 'record',
+			price: 699,
 			features: [
 				'2 Hours of Broadcast Time',
 				'Custom Link',

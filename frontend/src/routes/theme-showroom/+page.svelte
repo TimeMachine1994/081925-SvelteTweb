@@ -29,7 +29,7 @@
   ];
   
   const comparisonTiers = [
-    { name: "DIY Solo", price: "$395", features: ["2 hr broadcast", "Private link", "Cloud archive"] },
+    { name: "DIY Record", price: "$395", features: ["2 hr broadcast", "Private link", "Cloud archive"] },
     { name: "Standard", price: "$895", featured: true, features: ["Multi-cam", "On-site tech", "Live support"] },
     { name: "Premium", price: "$1,695", features: ["3+ locations", "Wireless audio", "Custom graphics"] }
   ];
@@ -114,7 +114,7 @@
     
     <Card title="Pricing Tile" {theme}>
       <div class="text-5xl font-extrabold">$395</div>
-      <div class="opacity-80 mt-1">DIY Solo Camera Kit</div>
+      <div class="opacity-80 mt-1">DIY Record Camera Kit</div>
       <ul class="mt-4 space-y-1 text-sm opacity-90">
         <li>• 2 hours broadcast time</li>
         <li>• Share private link</li>

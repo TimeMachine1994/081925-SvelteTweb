@@ -1,6 +1,6 @@
-# LLM SYSTEM CONTEXT — TributeStream App
+# LLM SYSTEM CONTEXT — Tributestream App
 
-You are assisting with a SvelteKit-based web platform called TributeStream: a role-based memorial and livestream system for families and funeral directors.
+You are assisting with a SvelteKit-based web platform called Tributestream: a role-based memorial and livestream system for families and funeral directors.
 
 ## Core principles
 - Role-based access: Admin > Owner (memorial creator) > Funeral Director (service provider) > Family Member (invited) > Viewer (public).

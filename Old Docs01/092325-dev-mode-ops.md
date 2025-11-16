@@ -1,7 +1,7 @@
 # Dev Mode Operations Guide - September 23, 2025
 
 ## Overview
-This document outlines the DevRoleSwitcher implementation and troubleshooting for the TributeStream application's development mode functionality.
+This document outlines the DevRoleSwitcher implementation and troubleshooting for the Tributestream application's development mode functionality.
 
 ## DevRoleSwitcher Architecture
 

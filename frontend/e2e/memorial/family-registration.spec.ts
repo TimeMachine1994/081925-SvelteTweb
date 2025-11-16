@@ -7,7 +7,7 @@ test.describe('Family Registration Journey', () => {
 
   test('complete family registration flow', async ({ page }) => {
     // Start from homepage
-    await expect(page.getByText('TributeStream')).toBeVisible();
+    await expect(page.getByText('Tributestream')).toBeVisible();
     
     // Click "Create Memorial" button
     await page.getByRole('button', { name: /create memorial/i }).click();

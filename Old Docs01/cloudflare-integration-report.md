@@ -1,6 +1,6 @@
 # Cloudflare Integration Report
 
-This report details the integration of Cloudflare services within the TributeStream application. The primary use of Cloudflare is for providing robust and scalable livestreaming capabilities via **Cloudflare Stream**.
+This report details the integration of Cloudflare services within the Tributestream application. The primary use of Cloudflare is for providing robust and scalable livestreaming capabilities via **Cloudflare Stream**.
 
 ## 1. Overview
 

@@ -15,7 +15,7 @@
 </script>
 
 <svelte:head>
-	<title>Email Confirmed | TributeStream</title>
+	<title>Email Confirmed | Tributestream</title>
 	<meta name="description" content="Your email change has been confirmed successfully" />
 </svelte:head>
 

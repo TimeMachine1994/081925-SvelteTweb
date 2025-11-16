@@ -1,4 +1,4 @@
-# TributeStream V1 Scope Reduction Plan
+# Tributestream V1 Scope Reduction Plan
 
 **Date:** September 11, 2025  
 **Objective:** Simplify application to 3 core roles (admin, owner, funeral_director) and remove incomplete features for stable V1 release

@@ -1,7 +1,7 @@
 # Admin Dashboard Documentation
 
 ## Overview
-The admin dashboard provides comprehensive management capabilities for TributeStream administrators, including user management, memorial oversight, and system statistics.
+The admin dashboard provides comprehensive management capabilities for Tributestream administrators, including user management, memorial oversight, and system statistics.
 
 ## Authentication Flow
 

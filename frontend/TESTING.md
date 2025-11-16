@@ -1,8 +1,8 @@
-# TributeStream Testing Strategy
+# Tributestream Testing Strategy
 
 ## Overview
 
-This document outlines the comprehensive testing strategy for the TributeStream application. Our testing approach follows the testing pyramid methodology with unit tests at the base, integration tests in the middle, and end-to-end tests at the top.
+This document outlines the comprehensive testing strategy for the Tributestream application. Our testing approach follows the testing pyramid methodology with unit tests at the base, integration tests in the middle, and end-to-end tests at the top.
 
 ## Testing Stack
 

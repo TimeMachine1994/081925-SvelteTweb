@@ -2,7 +2,7 @@
 
 ## Overview
 
-TributeStream is designed for deployment on modern cloud platforms with support for serverless functions, static hosting, and CDN distribution. This guide covers deployment to Vercel (recommended) and other platforms.
+Tributestream is designed for deployment on modern cloud platforms with support for serverless functions, static hosting, and CDN distribution. This guide covers deployment to Vercel (recommended) and other platforms.
 
 ## Deployment Architecture
 
@@ -619,4 +619,4 @@ gcloud firestore import gs://your-backup-bucket/backups/BACKUP_TIMESTAMP
 
 ---
 
-*This deployment guide ensures TributeStream can be reliably deployed and maintained in production environments with proper security, performance, and monitoring.*
+*This deployment guide ensures Tributestream can be reliably deployed and maintained in production environments with proper security, performance, and monitoring.*

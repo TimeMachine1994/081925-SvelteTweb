@@ -2,7 +2,7 @@
 
 ## Overview
 
-TributeStream includes a comprehensive set of utility functions and helper modules that provide common functionality across the application. These utilities handle data transformation, validation, error handling, and other shared operations.
+Tributestream includes a comprehensive set of utility functions and helper modules that provide common functionality across the application. These utilities handle data transformation, validation, error handling, and other shared operations.
 
 ## Core Utility Modules
 
@@ -489,4 +489,4 @@ async function saveMemorial(data: Memorial) {
 
 ---
 
-*These utilities provide the foundation for consistent data handling, error management, and user experience across the TributeStream platform.*
+*These utilities provide the foundation for consistent data handling, error management, and user experience across the Tributestream platform.*

@@ -2,7 +2,7 @@
 
 /**
  * Defines the data structure for a BlogPost document in Firestore.
- * Comprehensive blog management for TributeStream content marketing.
+ * Comprehensive blog management for Tributestream content marketing.
  */
 export type BlogPost = {
     // Core blog information
@@ -77,7 +77,7 @@ export const BLOG_CATEGORIES = {
     'company-news': {
         label: 'Company News',
         color: '#6B7280',
-        description: 'TributeStream updates and announcements'
+        description: 'Tributestream updates and announcements'
     },
     'customer-stories': {
         label: 'Customer Stories',

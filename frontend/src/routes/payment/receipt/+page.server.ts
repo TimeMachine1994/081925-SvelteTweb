@@ -1,12 +1,7 @@
 import { adminDb } from '$lib/server/firebase';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import Stripe from 'stripe';
-import { STRIPE_SECRET_KEY } from '$env/static/private';
-
-const stripe = new Stripe(STRIPE_SECRET_KEY, {
-	apiVersion: '2024-10-28.acacia'
-});
+import { stripe } from '$lib/server/stripe';
 
 export const load: PageServerLoad = async ({ url }) => {
 	// Don't require auth - receipt page can be accessed by anyone with session_id

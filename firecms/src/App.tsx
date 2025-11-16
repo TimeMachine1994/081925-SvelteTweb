@@ -46,7 +46,7 @@ function App() {
 
         // Define admin emails - add your email here
         const adminEmails = [
-            "@tributestream.com",  // Any TributeStream email
+            "@tributestream.com",  // Any Tributestream email
             "@firecms.co",         // FireCMS emails
             "austinbryanfilm@gmail.com"  // Austin's admin email
         ];
@@ -301,7 +301,7 @@ function App() {
 
                         return <Scaffold
                             autoOpenDrawer={true}>
-                            <AppBar title={"TributeStream Admin"}/>
+                            <AppBar title={"Tributestream Admin"}/>
                             <Drawer/>
                             <NavigationRoutes/>
                             <SideDialogs/>

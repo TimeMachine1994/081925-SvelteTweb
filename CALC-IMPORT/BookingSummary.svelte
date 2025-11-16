@@ -4,7 +4,7 @@
 	import { cn, fmt, slugify } from '$lib/utils/calculator';
 
 	// Types
-	export type PackageKey = 'solo' | 'live' | 'legacy';
+	export type PackageKey = 'record' | 'live' | 'legacy';
 
 	export type AddOns = {
 		extraHours: number;

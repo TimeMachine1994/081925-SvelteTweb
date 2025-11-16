@@ -21,7 +21,7 @@
 
 	// Active tab state
 	let activeTab = $state<
-		'overview' | 'funeral-directors' | 'memorials' | 'memorial-owners' | 'create-memorial' | 'audit-logs'
+		'overview' | 'funeral-directors' | 'memorials' | 'memorial-owners' | 'create-memorial' | 'audit-logs' | 'schedule-requests'
 	>('overview');
 
 	// Memorial creation form state
@@ -77,6 +77,18 @@
 		notes: ''
 	});
 	let isTogglingPayment = $state(false);
+
+	// Edit payment notes management
+	let editNotesModal = $state<any>(null);
+	let editNotesForm = $state({ notes: '' });
+	let isUpdatingNotes = $state(false);
+
+	// Schedule edit requests state
+	let editRequests = $state<any[]>([]);
+	let editRequestsLoading = $state(false);
+	let selectedEditRequest = $state<any>(null);
+	let editRequestStatusFilter = $state<string>('');
+	let isUpdatingRequest = $state(false);
 
 	/**
 	 * Approve a funeral director - updates their status and permissions
@@ -603,6 +615,65 @@
 	}
 
 	/**
+	 * Open edit notes modal for a paid memorial
+	 */
+	function openEditNotesModal(memorial: any) {
+		console.log('📝 [ADMIN] Opening edit notes modal for:', memorial.id);
+		editNotesModal = memorial;
+		editNotesForm = {
+			notes: memorial.manualPayment?.notes || ''
+		};
+	}
+
+	/**
+	 * Close edit notes modal
+	 */
+	function closeEditNotesModal() {
+		editNotesModal = null;
+		editNotesForm = { notes: '' };
+	}
+
+	/**
+	 * Update payment notes for a paid memorial
+	 */
+	async function updatePaymentNotes() {
+		if (!editNotesModal) return;
+
+		console.log('📝 [ADMIN] Updating payment notes for:', editNotesModal.id);
+		isUpdatingNotes = true;
+
+		try {
+			const response = await fetch('/api/admin/toggle-payment-status', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					memorialId: editNotesModal.id,
+					isPaid: true,
+					paymentMethod: editNotesModal.manualPayment?.method || 'manual',
+					paymentNotes: editNotesForm.notes
+				})
+			});
+
+			const result = await response.json();
+
+			if (response.ok) {
+				console.log('✅ [ADMIN] Payment notes updated successfully');
+				await invalidateAll();
+				alert('Payment notes updated successfully!');
+				closeEditNotesModal();
+			} else {
+				console.error('❌ [ADMIN] Failed to update payment notes:', result.error);
+				alert(`Failed to update notes: ${result.error}`);
+			}
+		} catch (error) {
+			console.error('❌ [ADMIN] Error updating payment notes:', error);
+			alert('Network error occurred while updating notes');
+		} finally {
+			isUpdatingNotes = false;
+		}
+	}
+
+	/**
 	 * Toggle payment status for a memorial
 	 */
 	async function togglePaymentStatus(memorialId: string, isPaid: boolean) {
@@ -711,6 +782,108 @@
 			isTogglingPayment = false;
 		}
 	}
+
+	/**
+	 * Load schedule edit requests
+	 */
+	async function loadEditRequests() {
+		editRequestsLoading = true;
+
+		try {
+			const params = new URLSearchParams();
+			if (editRequestStatusFilter) {
+				params.append('status', editRequestStatusFilter);
+			}
+
+			const response = await fetch(`/api/admin/schedule-edit-requests?${params.toString()}`);
+			const result = await response.json();
+
+			if (response.ok) {
+				editRequests = result.requests || [];
+				console.log(`✅ [ADMIN] Loaded ${editRequests.length} edit requests`);
+			} else {
+				console.error('❌ [ADMIN] Failed to load edit requests:', result.error);
+				alert(`Failed to load edit requests: ${result.error}`);
+			}
+		} catch (error) {
+			console.error('❌ [ADMIN] Error loading edit requests:', error);
+			alert('Network error occurred while loading edit requests');
+		} finally {
+			editRequestsLoading = false;
+		}
+	}
+
+	/**
+	 * Update edit request status
+	 */
+	async function updateEditRequestStatus(requestId: string, status: string, adminNotes: string) {
+		isUpdatingRequest = true;
+
+		try {
+			const response = await fetch(`/api/admin/schedule-edit-requests/${requestId}`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ status, adminNotes })
+			});
+
+			const result = await response.json();
+
+			if (response.ok) {
+				console.log(`✅ [ADMIN] Edit request ${requestId} updated to ${status}`);
+				selectedEditRequest = null;
+				await loadEditRequests();
+				alert(`Request ${status} successfully!`);
+			} else {
+				console.error('❌ [ADMIN] Failed to update edit request:', result.error);
+				alert(`Failed to update request: ${result.error}`);
+			}
+		} catch (error) {
+			console.error('❌ [ADMIN] Error updating edit request:', error);
+			alert('Network error occurred while updating request');
+		} finally {
+			isUpdatingRequest = false;
+		}
+	}
+
+	/**
+	 * Get status badge color
+	 */
+	function getStatusBadgeClass(status: string): string {
+		switch (status) {
+			case 'pending':
+				return 'bg-yellow-100 text-yellow-800';
+			case 'approved':
+				return 'bg-green-100 text-green-800';
+			case 'denied':
+				return 'bg-red-100 text-red-800';
+			case 'completed':
+				return 'bg-gray-100 text-gray-800';
+			default:
+				return 'bg-gray-100 text-gray-800';
+		}
+	}
+
+	/**
+	 * Format date for display
+	 */
+	function formatRequestDate(dateString: string): string {
+		if (!dateString) return 'N/A';
+		const date = new Date(dateString);
+		return date.toLocaleDateString('en-US', {
+			year: 'numeric',
+			month: 'short',
+			day: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit'
+		});
+	}
+
+	// Load edit requests when tab is activated
+	$effect(() => {
+		if (activeTab === 'schedule-requests' && editRequests.length === 0) {
+			loadEditRequests();
+		}
+	});
 </script>
 
 <!-- Simplified Admin Dashboard with Tabs -->
@@ -721,13 +894,17 @@
 		<div class="md:hidden">
 			<select
 				bind:value={activeTab}
-				onchange={() => activeTab === 'audit-logs' && loadAuditLogs()}
+				onchange={() => {
+					if (activeTab === 'audit-logs') loadAuditLogs();
+					if (activeTab === 'schedule-requests') loadEditRequests();
+				}}
 				class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-white text-base font-medium focus:border-amber-400 focus:outline-none"
 			>
 				<option value="overview">📊 Overview</option>
 				<option value="funeral-directors">🏥 Funeral Directors</option>
 				<option value="memorials">💝 Memorials</option>
 				<option value="memorial-owners">👥 Memorial Owners</option>
+				<option value="schedule-requests">📝 Schedule Requests</option>
 				<option value="create-memorial">➕ Create Memorial</option>
 				<option value="audit-logs">🔍 Audit Logs</option>
 			</select>
@@ -766,6 +943,22 @@
 					: 'bg-white/10 text-white hover:bg-white/20'}"
 			>
 				👥 Memorial Owners
+			</button>
+			<button
+				onclick={() => {
+					activeTab = 'schedule-requests';
+					loadEditRequests();
+				}}
+				class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px] {activeTab === 'schedule-requests' 
+					? 'bg-white text-gray-900 shadow-lg' 
+					: 'bg-white/10 text-white hover:bg-white/20'}"
+			>
+				📝 Schedule Requests
+				{#if editRequests.filter(r => r.status === 'pending').length > 0}
+					<span class="ml-2 inline-flex items-center justify-center rounded-full bg-yellow-500 px-2 py-0.5 text-xs font-bold text-white">
+						{editRequests.filter(r => r.status === 'pending').length}
+					</span>
+				{/if}
 			</button>
 			<button
 				onclick={() => (activeTab = 'create-memorial')}
@@ -909,6 +1102,14 @@
 														>
 															✅ Paid
 														</button>
+														<button
+															onclick={() => openEditNotesModal(memorial)}
+															disabled={isUpdatingNotes}
+															class="rounded bg-blue-500 px-2 py-1 text-xs text-white w-fit hover:bg-blue-600 transition-colors"
+															title="Edit payment notes"
+														>
+															📝 Edit Notes
+														</button>
 													{:else}
 														<button
 															onclick={() => openPaymentModal(memorial)}
@@ -987,27 +1188,35 @@
 											📍 {memorial.location}
 										</p>
 										
-										<div class="mb-2">
-											{#if memorial.isPaid}
-												<button
-													onclick={() => quickMarkUnpaid(memorial)}
-													disabled={isTogglingPayment}
-													class="inline-block rounded bg-green-500 px-2 py-1 text-xs text-white hover:bg-green-600 transition-colors"
-													title="Click to mark as unpaid"
-												>
-													✅ Paid
-												</button>
-											{:else}
-												<button
-													onclick={() => openPaymentModal(memorial)}
-													disabled={isTogglingPayment}
-													class="inline-block rounded bg-amber-500 px-2 py-1 text-xs text-white hover:bg-amber-600 transition-colors"
-													title="Click to mark as paid"
-												>
-													⏳ Unpaid
-												</button>
-											{/if}
-										</div>
+										<div class="mb-2 flex gap-2">
+										{#if memorial.isPaid}
+											<button
+												onclick={() => quickMarkUnpaid(memorial)}
+												disabled={isTogglingPayment}
+												class="inline-block rounded bg-green-500 px-2 py-1 text-xs text-white hover:bg-green-600 transition-colors"
+												title="Click to mark as unpaid"
+											>
+												✅ Paid
+											</button>
+											<button
+												onclick={() => openEditNotesModal(memorial)}
+												disabled={isUpdatingNotes}
+												class="inline-block rounded bg-blue-500 px-2 py-1 text-xs text-white hover:bg-blue-600 transition-colors"
+												title="Edit payment notes"
+											>
+												📝 Edit Notes
+											</button>
+										{:else}
+											<button
+												onclick={() => openPaymentModal(memorial)}
+												disabled={isTogglingPayment}
+												class="inline-block rounded bg-amber-500 px-2 py-1 text-xs text-white hover:bg-amber-600 transition-colors"
+												title="Click to mark as paid"
+											>
+												⏳ Unpaid
+											</button>
+										{/if}
+									</div>
 										
 										<p class="text-sm text-white/70 mb-1 break-all">{memorial.creatorEmail}</p>
 									</div>
@@ -1642,6 +1851,237 @@
 		</div>
 	{/if}
 
+	<!-- Schedule Edit Requests Tab -->
+	{#if activeTab === 'schedule-requests'}
+		<div class="space-y-4 md:space-y-6">
+			<div class="flex items-center justify-between">
+				<h2 class="text-xl md:text-2xl font-bold text-white">📝 Schedule Edit Requests</h2>
+				<button
+					onclick={() => loadEditRequests()}
+					disabled={editRequestsLoading}
+					class="rounded-lg bg-white/10 px-3 py-2 text-sm text-white transition-colors hover:bg-white/20 disabled:opacity-50"
+				>
+					{editRequestsLoading ? 'Loading...' : '🔄 Refresh'}
+				</button>
+			</div>
+
+			<!-- Filters -->
+			<div class="rounded-xl border border-white/10 bg-white/5 p-4">
+				<div class="flex items-center gap-4">
+					<label class="text-sm text-white/70">Status Filter:</label>
+					<select
+						bind:value={editRequestStatusFilter}
+						onchange={() => loadEditRequests()}
+						class="rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white focus:border-amber-400 focus:outline-none"
+					>
+						<option value="">All Statuses</option>
+						<option value="pending">Pending</option>
+						<option value="approved">Approved</option>
+						<option value="denied">Denied</option>
+						<option value="completed">Completed</option>
+					</select>
+				</div>
+			</div>
+
+			<!-- Requests List -->
+			{#if editRequestsLoading}
+				<div class="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
+					<p class="text-white/70">Loading requests...</p>
+				</div>
+			{:else if editRequests.length === 0}
+				<div class="rounded-xl border border-white/10 bg-white/5 p-8 text-center">
+					<p class="text-white/70">No edit requests found</p>
+				</div>
+			{:else}
+				<div class="rounded-xl border border-white/10 bg-white/5 overflow-hidden">
+					<!-- Desktop Table -->
+					<div class="hidden md:block overflow-x-auto">
+						<table class="w-full">
+							<thead class="bg-white/5">
+								<tr>
+									<th class="px-4 py-3 text-left text-xs font-medium text-white/70">Memorial</th>
+									<th class="px-4 py-3 text-left text-xs font-medium text-white/70">Requested By</th>
+									<th class="px-4 py-3 text-left text-xs font-medium text-white/70">Date</th>
+									<th class="px-4 py-3 text-left text-xs font-medium text-white/70">Status</th>
+									<th class="px-4 py-3 text-left text-xs font-medium text-white/70">Actions</th>
+								</tr>
+							</thead>
+							<tbody>
+								{#each editRequests as request}
+									<tr class="border-t border-white/10 hover:bg-white/5">
+										<td class="px-4 py-3 text-sm text-white">
+											<div class="font-medium">{request.memorialName}</div>
+										</td>
+										<td class="px-4 py-3 text-sm text-white/70">{request.requestedByEmail}</td>
+										<td class="px-4 py-3 text-sm text-white/70">{formatRequestDate(request.createdAt)}</td>
+										<td class="px-4 py-3">
+											<span class="inline-flex rounded-full px-2 py-1 text-xs font-medium {getStatusBadgeClass(request.status)}">
+												{request.status}
+											</span>
+										</td>
+										<td class="px-4 py-3">
+											<button
+												onclick={() => (selectedEditRequest = request)}
+												class="text-sm text-amber-400 hover:text-amber-300"
+											>
+												Review
+											</button>
+										</td>
+									</tr>
+								{/each}
+							</tbody>
+						</table>
+					</div>
+
+					<!-- Mobile Cards -->
+					<div class="md:hidden space-y-3 p-3">
+						{#each editRequests as request}
+							<div class="rounded-lg border border-white/10 bg-white/5 p-4">
+								<div class="mb-2 flex items-start justify-between">
+									<div class="flex-1">
+										<h3 class="font-medium text-white">{request.memorialName}</h3>
+										<p class="text-sm text-white/70">{request.requestedByEmail}</p>
+									</div>
+									<span class="inline-flex rounded-full px-2 py-1 text-xs font-medium {getStatusBadgeClass(request.status)}">
+										{request.status}
+									</span>
+								</div>
+								<p class="mb-2 text-xs text-white/50">{formatRequestDate(request.createdAt)}</p>
+								<button
+									onclick={() => (selectedEditRequest = request)}
+									class="w-full rounded-lg bg-amber-500/20 px-3 py-2 text-sm text-amber-300 hover:bg-amber-500/30"
+								>
+									Review Request
+								</button>
+							</div>
+						{/each}
+					</div>
+				</div>
+			{/if}
+		</div>
+	{/if}
+
+	<!-- Request Detail Modal -->
+	{#if selectedEditRequest}
+		<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onclick={() => (selectedEditRequest = null)}>
+			<div class="relative w-full max-w-3xl rounded-lg bg-gray-900 p-6 shadow-xl" onclick={(e) => e.stopPropagation()}>
+				<button
+					onclick={() => (selectedEditRequest = null)}
+					class="absolute right-4 top-4 text-white/50 hover:text-white"
+				>
+					✕
+				</button>
+
+				<h2 class="mb-6 text-2xl font-bold text-white">Schedule Edit Request</h2>
+
+				<div class="space-y-6">
+					<!-- Memorial Info -->
+					<div>
+						<h3 class="mb-2 text-sm font-medium text-white/70">Memorial</h3>
+						<p class="text-white">{selectedEditRequest.memorialName}</p>
+						<a
+							href="/{selectedEditRequest.memorialId}"
+							class="text-sm text-amber-400 hover:text-amber-300"
+							target="_blank"
+						>
+							View Memorial →
+						</a>
+					</div>
+
+					<!-- Request Info -->
+					<div class="grid gap-4 sm:grid-cols-2">
+						<div>
+							<h3 class="mb-2 text-sm font-medium text-white/70">Requested By</h3>
+							<p class="text-white">{selectedEditRequest.requestedByEmail}</p>
+						</div>
+						<div>
+							<h3 class="mb-2 text-sm font-medium text-white/70">Request Date</h3>
+							<p class="text-white">{formatRequestDate(selectedEditRequest.createdAt)}</p>
+						</div>
+					</div>
+
+					<!-- Current Booking -->
+					{#if selectedEditRequest.currentConfig}
+						<div>
+							<h3 class="mb-2 text-sm font-medium text-white/70">Current Booking</h3>
+							<div class="rounded-lg border border-white/10 bg-white/5 p-4">
+								<p class="mb-2 text-white">
+									<strong>Tier:</strong>
+									{selectedEditRequest.currentConfig.tier}
+								</p>
+								<p class="text-white">
+									<strong>Total:</strong>
+									${selectedEditRequest.currentConfig.total}
+								</p>
+							</div>
+						</div>
+					{/if}
+
+					<!-- Requested Changes -->
+					<div>
+						<h3 class="mb-2 text-sm font-medium text-white/70">Requested Changes</h3>
+						<div class="rounded-lg border border-white/10 bg-white/5 p-4">
+							<p class="whitespace-pre-wrap text-white">{selectedEditRequest.requestDetails}</p>
+						</div>
+					</div>
+
+					<!-- Admin Actions -->
+					{#if selectedEditRequest.status === 'pending'}
+						<div>
+							<h3 class="mb-2 text-sm font-medium text-white/70">Admin Actions</h3>
+							<textarea
+								bind:value={selectedEditRequest.tempAdminNotes}
+								placeholder="Add notes about this request..."
+								class="mb-4 w-full rounded-lg border border-white/20 bg-white/10 p-3 text-white placeholder-white/50"
+								rows="3"
+							></textarea>
+							<div class="flex gap-3">
+								<button
+									onclick={() => updateEditRequestStatus(selectedEditRequest.id, 'approved', selectedEditRequest.tempAdminNotes || '')}
+									disabled={isUpdatingRequest}
+									class="flex-1 rounded-lg bg-green-500 px-4 py-2 text-white hover:bg-green-600 disabled:opacity-50"
+								>
+									✓ Approve
+								</button>
+								<button
+									onclick={() => updateEditRequestStatus(selectedEditRequest.id, 'denied', selectedEditRequest.tempAdminNotes || '')}
+									disabled={isUpdatingRequest}
+									class="flex-1 rounded-lg bg-red-500 px-4 py-2 text-white hover:bg-red-600 disabled:opacity-50"
+								>
+									✗ Deny
+								</button>
+								<button
+									onclick={() => updateEditRequestStatus(selectedEditRequest.id, 'completed', selectedEditRequest.tempAdminNotes || '')}
+									disabled={isUpdatingRequest}
+									class="flex-1 rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 disabled:opacity-50"
+								>
+									✓ Completed
+								</button>
+							</div>
+						</div>
+					{:else}
+						<div>
+							<h3 class="mb-2 text-sm font-medium text-white/70">Status</h3>
+							<span class="inline-flex rounded-full px-3 py-1 text-sm font-medium {getStatusBadgeClass(selectedEditRequest.status)}">
+								{selectedEditRequest.status}
+							</span>
+							{#if selectedEditRequest.reviewedBy}
+								<p class="mt-2 text-sm text-white/70">
+									Reviewed by {selectedEditRequest.reviewedByEmail} on {formatRequestDate(selectedEditRequest.reviewedAt)}
+								</p>
+							{/if}
+							{#if selectedEditRequest.adminNotes}
+								<div class="mt-3 rounded-lg border border-white/10 bg-white/5 p-3">
+									<p class="text-sm text-white">{selectedEditRequest.adminNotes}</p>
+								</div>
+							{/if}
+						</div>
+					{/if}
+				</div>
+			</div>
+		</div>
+	{/if}
+
 	<!-- Audit Logs Tab -->
 	{#if activeTab === 'audit-logs'}
 		<div class="space-y-4 md:space-y-6">
@@ -1896,8 +2336,9 @@
 							bind:value={paymentForm.notes}
 							placeholder="Add any payment details or notes..."
 							rows="3"
-							class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white placeholder-white/50 focus:border-amber-400 focus:outline-none"
+							class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white placeholder-white/50 focus:border-amber-400 focus:outline-none whitespace-pre-wrap"
 						></textarea>
+						<p class="mt-1 text-xs text-white/60">Tip: Press Enter to add line breaks</p>
 					</div>
 
 					<div class="flex gap-3 pt-2">
@@ -1916,6 +2357,59 @@
 							type="button"
 							onclick={closePaymentModal}
 							disabled={isTogglingPayment}
+							variant="secondary"
+							size="md"
+							rounded="lg"
+							class="flex-1 min-h-[44px]"
+						>
+							❌ Cancel
+						</Button>
+					</div>
+				</form>
+			</div>
+		</div>
+	{/if}
+
+	<!-- Edit Payment Notes Modal -->
+	{#if editNotesModal}
+		<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+			<div class="w-full max-w-md rounded-xl border border-white/20 bg-gradient-to-br from-slate-900 to-slate-800 p-6 shadow-2xl">
+				<h3 class="mb-4 text-xl font-bold text-white">Edit Payment Notes</h3>
+				
+				<div class="mb-4 rounded-lg border border-white/10 bg-white/5 p-3">
+					<p class="text-sm text-white/70 mb-1">Memorial:</p>
+					<p class="font-semibold text-white">{editNotesModal.lovedOneName}</p>
+					<p class="text-sm text-white/70 mt-1">Creator: {editNotesModal.creatorEmail}</p>
+				</div>
+
+				<form onsubmit={(e) => { e.preventDefault(); updatePaymentNotes(); }} class="space-y-4">
+					<div>
+						<label class="block text-sm font-medium text-white/90 mb-2">Payment Notes</label>
+						<textarea
+							bind:value={editNotesForm.notes}
+							placeholder="Update payment details or notes..."
+							rows="4"
+							class="w-full rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-white placeholder-white/50 focus:border-blue-400 focus:outline-none whitespace-pre-wrap"
+						></textarea>
+						<p class="mt-1 text-xs text-white/60">Tip: Press Enter to add line breaks</p>
+					</div>
+
+					<div class="flex gap-3 pt-2">
+						<Button
+							type="submit"
+							disabled={isUpdatingNotes}
+							loading={isUpdatingNotes}
+							variant="primary"
+							size="md"
+							rounded="lg"
+							class="flex-1 min-h-[44px]"
+						>
+							{isUpdatingNotes ? 'Updating...' : '💾 Save Notes'}
+						</Button>
+						<Button
+							type="button"
+							onclick={closeEditNotesModal}
+							disabled={isUpdatingNotes}
 							variant="secondary"
 							size="md"
 							rounded="lg"

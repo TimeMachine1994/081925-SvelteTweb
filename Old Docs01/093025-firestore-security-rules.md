@@ -1,4 +1,4 @@
-# TributeStream Firestore Security Rules Documentation
+# Tributestream Firestore Security Rules Documentation
 **Date:** September 30, 2025  
 **Purpose:** Define what determines if content is readable by unauthorized users
 

@@ -48,7 +48,7 @@ function createMemorialDocument(memorial, index) {
     
     // Standard memorial fields (with defaults for legacy)
     title: `Celebration of Life for ${memorial.lovedOnesName}`,
-    description: `A memorial service celebrating the life of ${memorial.lovedOnesName}. This is a legacy memorial imported from the previous TributeStream system.`,
+    description: `A memorial service celebrating the life of ${memorial.lovedOnesName}. This is a legacy memorial imported from the previous Tributestream system.`,
     
     // Dates (using extraction date as placeholder since original dates weren't preserved)
     createdAt: now,
@@ -107,7 +107,7 @@ function createMemorialDocument(memorial, index) {
     },
     
     // SEO and routing
-    seoTitle: `${memorial.lovedOnesName} - Memorial Service | TributeStream`,
+    seoTitle: `${memorial.lovedOnesName} - Memorial Service | Tributestream`,
     seoDescription: `Join us in celebrating the life of ${memorial.lovedOnesName}. Watch the memorial service and share memories with family and friends.`,
     
     // Tags for categorization

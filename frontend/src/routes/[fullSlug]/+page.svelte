@@ -1,11 +1,13 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import StreamPlayer from '$lib/components/StreamPlayer.svelte';
 	import SlideshowSection from '$lib/components/SlideshowSection.svelte';
+	import MemorialStreamDisplay from '$lib/components/MemorialStreamDisplay.svelte';
 	import BookingReminderBanner from '$lib/components/BookingReminderBanner.svelte';
 	import { ChatPanel, ChatToggleButton } from '$lib/components/chat';
 	import { shouldShowBookingBanner, markBannerAsSeen, debugBannerState } from '$lib/utils/bookingBanner';
 	import { onMount } from 'svelte';
+	import { Facebook, Twitter, Linkedin, Share2, X } from 'lucide-svelte';
+	import { browser } from '$app/environment';
 
 	let { data }: { data: PageData } = $props();
 
@@ -51,6 +53,77 @@
 	let showBookingBanner = $state(false);
 	let bannerVisible = $state(false);
 
+	// Social share popup state
+	let showSharePopup = $state(false);
+
+	// Get absolute URL for sharing
+	let absoluteUrl = $derived(() => {
+		if (!browser) return '';
+		return window.location.href;
+	});
+
+	// Social sharing functions
+	function openShareWindow(url) {
+		const width = 600;
+		const height = 400;
+		const left = window.innerWidth / 2 - width / 2;
+		const top = window.innerHeight / 2 - height / 2;
+		window.open(
+			url,
+			'share',
+			`width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes`
+		);
+	}
+
+	function shareOnFacebook() {
+		const url = encodeURIComponent(absoluteUrl());
+		openShareWindow(`https://www.facebook.com/sharer/sharer.php?u=${url}`);
+		showSharePopup = false;
+	}
+
+	function shareOnTwitter() {
+		const url = encodeURIComponent(absoluteUrl());
+		const text = encodeURIComponent(`Celebrating the life of ${memorial?.lovedOneName || ''}`);
+		openShareWindow(`https://twitter.com/intent/tweet?url=${url}&text=${text}&via=tributestream`);
+		showSharePopup = false;
+	}
+
+	function shareOnLinkedIn() {
+		const url = encodeURIComponent(absoluteUrl());
+		openShareWindow(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`);
+		showSharePopup = false;
+	}
+
+	async function copyLink() {
+		if (!browser) return;
+		try {
+			await navigator.clipboard.writeText(absoluteUrl());
+			alert('Link copied to clipboard!');
+			showSharePopup = false;
+		} catch (err) {
+			console.error('Failed to copy link:', err);
+		}
+	}
+
+	function toggleSharePopup() {
+		showSharePopup = !showSharePopup;
+	}
+
+	// Close popup when clicking outside
+	$effect(() => {
+		if (!browser || !showSharePopup) return;
+		
+		const handleClickOutside = (e) => {
+			const target = e.target;
+			if (!target.closest('.share-container')) {
+				showSharePopup = false;
+			}
+		};
+		
+		document.addEventListener('click', handleClickOutside);
+		return () => document.removeEventListener('click', handleClickOutside);
+	});
+
 	// Check if booking banner should be shown
 	let bannerState = $derived(() => {
 		if (!memorial || !memorial.id) return { shouldShow: false };
@@ -59,9 +132,7 @@
 
 	// Handle banner dismissal
 	function handleBannerDismiss() {
-		if (memorial?.id) {
-			markBannerAsSeen(memorial.id);
-		}
+		// View counter already incremented when banner was shown
 		bannerVisible = false;
 		showBookingBanner = false;
 	}
@@ -103,6 +174,11 @@
 				console.log('🎯 [BOOKING_BANNER] Showing booking banner');
 				showBookingBanner = true;
 				bannerVisible = true;
+				
+				// Increment view counter when banner is shown
+				if (memorial?.id) {
+					markBannerAsSeen(memorial.id);
+				}
 			}, 3000); // 3 second delay
 
 			return () => clearTimeout(timer);
@@ -116,9 +192,8 @@
 				id: memorial.id,
 				name: memorial.lovedOneName,
 				isPublic: memorial.isPublic,
-				streamCount: streams.length,
 				hasCustomHtml: hasCustomHtml,
-				layoutType: hasCustomHtml ? 'Legacy (custom HTML only)' : 'Standard (with streams)',
+				layoutType: hasCustomHtml ? 'Legacy (custom HTML only)' : 'Standard',
 				custom_html_length: (memorial as any)?.custom_html?.length || 0,
 				custom_html_preview: (memorial as any)?.custom_html ? 
 					(memorial as any).custom_html.substring(0, 100) + '...' : null,
@@ -131,6 +206,32 @@
 <svelte:head>
 	<title>{memorial?.lovedOneName ? `Celebration of Life for ${memorial.lovedOneName}` : 'Memorial'}</title>
 	<meta name="description" content={memorial?.content || 'Memorial service information'} />
+	
+	{#if memorial}
+		<!-- Open Graph / Facebook -->
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content="Tributestream" />
+		<meta property="og:title" content={`Celebration of Life for ${memorial.lovedOneName}`} />
+		<meta property="og:description" content={memorial.content || `Join us in celebrating the life of ${memorial.lovedOneName}`} />
+		<meta property="og:url" content={browser ? window.location.href : `https://tributestream.com/${memorial.fullSlug || memorial.slug}`} />
+		{#if memorial.imageUrl}
+			<meta property="og:image" content={memorial.imageUrl} />
+			<meta property="og:image:alt" content={memorial.lovedOneName} />
+			<meta property="og:image:width" content="1200" />
+			<meta property="og:image:height" content="630" />
+		{/if}
+		
+		<!-- Twitter Card -->
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:site" content="@tributestream" />
+		<meta name="twitter:creator" content="@tributestream" />
+		<meta name="twitter:title" content={`Celebration of Life for ${memorial.lovedOneName}`} />
+		<meta name="twitter:description" content={memorial.content || `Join us in celebrating the life of ${memorial.lovedOneName}`} />
+		{#if memorial.imageUrl}
+			<meta name="twitter:image" content={memorial.imageUrl} />
+			<meta name="twitter:image:alt" content={memorial.lovedOneName} />
+		{/if}
+	{/if}
 </svelte:head>
 
 <!-- Booking Reminder Banner -->
@@ -157,6 +258,39 @@
 						</h1>
 					</div>
 					
+					<!-- Share Button with Popup -->
+					<div class="share-container">
+						<button 
+							class="share-button"
+							onclick={toggleSharePopup}
+							title="Share memorial"
+							aria-label="Share memorial"
+						>
+							<Share2 size={18} />
+						</button>
+						
+						{#if showSharePopup}
+							<div class="share-popup">
+								<button onclick={shareOnFacebook} class="share-option facebook" title="Share on Facebook">
+									<Facebook size={18} />
+									<span>Facebook</span>
+								</button>
+								<button onclick={shareOnTwitter} class="share-option twitter" title="Share on X (Twitter)">
+									<Twitter size={18} />
+									<span>Twitter</span>
+								</button>
+								<button onclick={shareOnLinkedIn} class="share-option linkedin" title="Share on LinkedIn">
+									<Linkedin size={18} />
+									<span>LinkedIn</span>
+								</button>
+								<button onclick={copyLink} class="share-option copy" title="Copy link">
+									<Share2 size={18} />
+									<span>Copy Link</span>
+								</button>
+							</div>
+						{/if}
+					</div>
+					
 					<!-- Hero Slideshow Section - Outside glass box -->
 					<div class="hero-slideshow">
 						<SlideshowSection 
@@ -169,9 +303,16 @@
 						/>
 					</div>
 				</div>
-
 				<!-- Legacy Custom HTML Content Only -->
 				<div class="memorial-content-container">
+					<!-- Stream Section for Legacy Layout - Always show, component handles empty state -->
+					<div class="streaming-section">
+						<MemorialStreamDisplay 
+							streams={streams || []} 
+							memorialName={memorial.lovedOneName}
+						/>
+					</div>
+					
 					<div class="legacy-content">
 						{@html (memorial as any).custom_html}
 					</div>
@@ -187,6 +328,40 @@
 							<img src={memorial.imageUrl} alt={memorial.lovedOneName} />
 						</div>
 					{/if}
+					
+					<!-- Share Button with Popup -->
+					<div class="share-container">
+						<button 
+							class="share-button"
+							onclick={toggleSharePopup}
+							title="Share memorial"
+							aria-label="Share memorial"
+						>
+							<Share2 size={18} />
+						</button>
+						
+						{#if showSharePopup}
+							<div class="share-popup">
+								<button onclick={shareOnFacebook} class="share-option facebook" title="Share on Facebook">
+									<Facebook size={18} />
+									<span>Facebook</span>
+								</button>
+								<button onclick={shareOnTwitter} class="share-option twitter" title="Share on X (Twitter)">
+									<Twitter size={18} />
+									<span>Twitter</span>
+								</button>
+								<button onclick={shareOnLinkedIn} class="share-option linkedin" title="Share on LinkedIn">
+									<Linkedin size={18} />
+									<span>LinkedIn</span>
+								</button>
+								<button onclick={copyLink} class="share-option copy" title="Copy link">
+									<Share2 size={18} />
+									<span>Copy Link</span>
+								</button>
+							</div>
+						{/if}
+					</div>
+					
 					<div class="memorial-header-content">
 						<!-- Glass box wrapper for title and dates only -->
 						<div class="glass-box">
@@ -226,7 +401,7 @@
 
 				<!-- Body Section -->
 				<div class="memorial-body">
-					<!-- Streaming Section -->
+					<!-- Stream Section - Always show, component handles empty state -->
 					<div class="streaming-section">
 						<StreamPlayer {streams} memorialName={memorial.lovedOneName} memorialId={memorial.id} />
 						
@@ -249,6 +424,8 @@
 							/>
 						</div>
 					</div>
+					
+					<!-- Content area for future features -->
 				</div>
 			</div>
 		{/if}
@@ -517,6 +694,129 @@
 		
 		.hero-slideshow :global(.slideshows-container) {
 			max-width: 200px; /* Smaller on mobile */
+		}
+	}
+
+	/* Social Share Styles */
+	.share-container {
+		position: absolute;
+		bottom: 1.5rem;
+		right: 1.5rem;
+		z-index: 100;
+	}
+
+	.share-button {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 48px;
+		height: 48px;
+		padding: 0;
+		background: rgba(213, 186, 127, 0.95);
+		backdrop-filter: blur(10px);
+		color: white;
+		border: 2px solid rgba(255, 255, 255, 0.3);
+		border-radius: 50%;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+	}
+
+	.share-button:hover {
+		background: rgba(213, 186, 127, 1);
+		color: white;
+		transform: translateY(-2px) scale(1.05);
+		box-shadow: 0 6px 20px rgba(213, 186, 127, 0.4);
+		border-color: rgba(255, 255, 255, 0.5);
+	}
+
+	.share-popup {
+		position: absolute;
+		bottom: calc(100% + 0.5rem);
+		right: 0;
+		background: white;
+		border-radius: 8px;
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+		padding: 0.5rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		min-width: 180px;
+		animation: slideUp 0.2s ease-out;
+	}
+
+	@keyframes slideUp {
+		from {
+			opacity: 0;
+			transform: translateY(10px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.share-option {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.75rem 1rem;
+		background: white;
+		color: #374151;
+		border: none;
+		border-radius: 6px;
+		font-size: 0.875rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		text-align: left;
+		width: 100%;
+	}
+
+	.share-option:hover {
+		background: #f3f4f6;
+		transform: translateX(4px);
+	}
+
+	.share-option.facebook:hover {
+		background: #1877f2;
+		color: white;
+	}
+
+	.share-option.twitter:hover {
+		background: #000000;
+		color: white;
+	}
+
+	.share-option.linkedin:hover {
+		background: #0a66c2;
+		color: white;
+	}
+
+	.share-option.copy:hover {
+		background: #D5BA7F;
+		color: white;
+	}
+
+	/* Mobile Responsive */
+	@media (max-width: 768px) {
+		.share-container {
+			bottom: 1rem;
+			right: 1rem;
+		}
+
+		.share-button {
+			width: 44px;
+			height: 44px;
+		}
+
+		.share-popup {
+			min-width: 160px;
+		}
+
+		.share-option {
+			padding: 0.625rem 0.875rem;
+			font-size: 0.8125rem;
 		}
 	}
 </style>

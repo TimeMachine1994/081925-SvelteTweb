@@ -1,8 +1,8 @@
-# TributeStream Technical Documentation
+# Tributestream Technical Documentation
 
 ## Overview
 
-TributeStream is a comprehensive memorial service platform that enables funeral directors and families to create digital memorials with integrated livestreaming capabilities. Built with SvelteKit, TypeScript, Firebase, and Cloudflare Stream.
+Tributestream is a comprehensive memorial service platform that enables funeral directors and families to create digital memorials with integrated livestreaming capabilities. Built with SvelteKit, TypeScript, Firebase, and Cloudflare Stream.
 
 ## Documentation Structure
 
@@ -66,7 +66,7 @@ TributeStream is a comprehensive memorial service platform that enables funeral 
 
 ## Version Information
 
-This documentation reflects the current state of TributeStream as of September 2024, including:
+This documentation reflects the current state of Tributestream as of September 2024, including:
 - Svelte 5 migration with runes
 - Unified livestream system (Version 2)
 - Memorial service data model refactor

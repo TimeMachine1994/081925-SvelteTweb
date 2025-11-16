@@ -4,6 +4,8 @@
 	import { page } from '$app/stores';
 	import { Button } from '$lib/ui';
 	import { CheckCircle, Package } from 'lucide-svelte';
+	import { executeRecaptcha, RECAPTCHA_ACTIONS } from '$lib/utils/recaptcha';
+	import { dev } from '$app/environment';
 
 	console.log('🎯 Loved-One Registration form initializing');
 
@@ -18,6 +20,7 @@
 	
 	// Submission state for double-click prevention
 	let isSubmitting = $state(false);
+	let recaptchaToken = $state('');
 
 	console.log('📝 Form state initialized with runes');
 
@@ -39,8 +42,8 @@
 		}
 	});
 
-	function validateForm() {
-		console.log('🔍 Validating form...');
+	// Client-side validation function
+	function validateFormFields(): boolean {
 		const errors: string[] = [];
 
 		if (!lovedOneName.trim()) errors.push("Loved one's name is required");
@@ -54,18 +57,7 @@
 		}
 
 		validationErrors = errors;
-		console.log('✅ Validation complete. Errors:', errors.length);
 		return errors.length === 0;
-	}
-
-	function handleSubmit(event: SubmitEvent) {
-		console.log('📤 Form submission started');
-		if (!validateForm()) {
-			event.preventDefault();
-			console.log('❌ Form validation failed, preventing submission');
-		} else {
-			console.log('✅ Form validation passed, proceeding with submission');
-		}
 	}
 </script>
 
@@ -101,16 +93,71 @@
 		{/if}
 
 		<form 
-			method="POST" 
-			onsubmit={handleSubmit}
-			use:enhance={() => {
+			method="POST"
+			use:enhance={async ({ formData, cancel }) => {
+				console.log('📤 Form submission started');
+				
+				// Client-side validation first
+				if (!validateFormFields()) {
+					console.log('❌ Form validation failed');
+					cancel(); // Cancel submission
+					return;
+				}
+				
+				// Get reCAPTCHA token if not already set
+				if (!recaptchaToken) {
+					isSubmitting = true;
+					
+					// Dev mode bypass for local testing
+					if (dev) {
+						console.log('🔧 Dev mode: bypassing reCAPTCHA');
+						recaptchaToken = 'dev-bypass';
+						formData.set('recaptchaToken', 'dev-bypass');
+					} else {
+						console.log('🤖 Executing reCAPTCHA verification...');
+						
+						const token = await executeRecaptcha(RECAPTCHA_ACTIONS.CREATE_MEMORIAL);
+						
+						if (!token) {
+							console.warn('⚠️ reCAPTCHA token fetch failed');
+							isSubmitting = false;
+							cancel(); // Cancel if reCAPTCHA fails
+							validationErrors = ['Security verification failed. Please refresh and try again.'];
+							return;
+						}
+						
+						console.log('✅ reCAPTCHA token obtained');
+						recaptchaToken = token;
+						formData.set('recaptchaToken', token);
+					}
+				} else {
+					// Token already exists, add it to formData
+					console.log('✅ Using existing reCAPTCHA token');
+					formData.set('recaptchaToken', recaptchaToken);
+				}
+				
 				isSubmitting = true;
+				
 				return async ({ update }) => {
 					await update();
 					isSubmitting = false;
+					recaptchaToken = ''; // Reset token after submission
 				};
 			}}
 		>
+			<!-- 🍯 HONEYPOT FIELD - Hidden trap for bots -->
+			<div style="position: absolute; left: -9999px; opacity: 0; pointer-events: none;" aria-hidden="true">
+				<label for="website">Website (leave blank)</label>
+				<input 
+					type="text" 
+					name="website" 
+					id="website" 
+					tabindex="-1" 
+					autocomplete="off"
+					placeholder="Leave this field blank"
+				/>
+			</div>
+			
 			<section class="form-section">
 				<LiveUrlPreview bind:lovedOneName />
 			</section>
@@ -168,6 +215,8 @@
 					</div>
 				</div>
 			</section>
+
+			<!-- reCAPTCHA validation happens server-side, errors shown via form.error -->
 
 			{#if validationErrors.length > 0}
 				<div class="error-section">

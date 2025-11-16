@@ -28,6 +28,3 @@ export * from './slideshow';
 
 // Stream types
 export * from './stream';
-
-// Streaming methods types
-export * from './streaming-methods';

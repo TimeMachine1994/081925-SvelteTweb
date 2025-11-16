@@ -1,5 +1,5 @@
 /**
- * Image optimization utilities for TributeStream
+ * Image optimization utilities for Tributestream
  * Handles responsive image generation and format optimization
  */
 

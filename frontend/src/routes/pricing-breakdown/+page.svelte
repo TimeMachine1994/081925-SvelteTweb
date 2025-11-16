@@ -207,7 +207,7 @@
 						>Most Complete</span
 					>
 					<h3 class="text-lg font-semibold">Tributestream Legacy</h3>
-					<p class="mt-1 text-3xl font-semibold">$1,599</p>
+					<p class="mt-1 text-3xl font-semibold">$1,699</p>
 					<ul class="mt-4 grid gap-2 text-sm text-zinc-800">
 						<li class="flex items-start gap-2">
 							<span class="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-[#D5BA7F]"></span>
@@ -385,7 +385,7 @@
 							</thead>
 							<tbody class="align-top">
 								<tr class="border-t">
-									<td class="py-2 pr-4">Legacy ($1,599)</td>
+									<td class="py-2 pr-4">Legacy ($1,699)</td>
 									<td class="py-2 pr-4">$799.50</td>
 									<td class="py-2 pr-4">$399.75</td>
 									<td class="py-2 pr-4">as low as $266.50</td>

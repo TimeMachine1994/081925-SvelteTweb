@@ -1,6 +1,6 @@
 # SvelteKit Application Routes and Endpoints
 
-This document provides a comprehensive overview of the pages and API routes in the TributeStream SvelteKit application.
+This document provides a comprehensive overview of the pages and API routes in the Tributestream SvelteKit application.
 
 ## Pages (`+page.svelte`)
 

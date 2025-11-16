@@ -66,10 +66,19 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 				lovedOneName: memorial?.lovedOneName || 'Unnamed Memorial',
 				ownerUid: memorial?.ownerUid,
 				funeralDirectorUid: memorial?.funeralDirectorUid,
-				services: memorial?.services || null // Include services data
+				services: memorial?.services || null, // Include services data
+				isPaid: memorial?.isPaid || false, // Payment status
+				paymentStatus: memorial?.paymentStatus || 'unpaid',
+				paidAt: memorial?.paidAt || null,
+				manualPayment: memorial?.manualPayment || null,
+				fullSlug: memorial?.fullSlug || null
 			},
 			calculatorConfig: memorial?.calculatorConfig || null,
-			role: locals.user.role // Pass role to the page
+			role: locals.user.role, // Pass role to the page
+			user: {
+				email: locals.user.email,
+				uid: locals.user.uid
+			}
 		});
 	} catch (err) {
 		console.error('Error loading memorial data:', err);

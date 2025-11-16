@@ -1,13 +1,13 @@
-# TributeStream Products and Pricing Guide
+# Tributestream Products and Pricing Guide
 
 ## Overview
-TributeStream offers professional memorial service livestreaming solutions with three distinct packages designed to meet different needs and budgets. All packages include core livestreaming capabilities with optional add-ons for enhanced services.
+Tributestream offers professional memorial service livestreaming solutions with three distinct packages designed to meet different needs and budgets. All packages include core livestreaming capabilities with optional add-ons for enhanced services.
 
 ---
 
 ## Core Packages
 
-### 1. TributeStream Solo - $599
+### 1. Tributestream Record - $699
 **Perfect for families who want to handle their own livestreaming**
 
 **Included Features:**
@@ -21,7 +21,7 @@ TributeStream offers professional memorial service livestreaming solutions with 
 
 ---
 
-### 2. TributeStream Live - $1,299
+### 2. Tributestream Live - $1,299
 **Professional livestreaming with expert support**
 
 **Included Features:**
@@ -36,7 +36,7 @@ TributeStream offers professional memorial service livestreaming solutions with 
 
 ---
 
-### 3. TributeStream Legacy - $1,599
+### 3. Tributestream Legacy - $1,699
 **Complete premium package with keepsakes**
 
 **Included Features:**
@@ -93,7 +93,7 @@ TributeStream offers professional memorial service livestreaming solutions with 
 - Enhanced memorial experience
 
 ### Wooden USB Drives
-- **First Drive:** $300 (Solo/Live packages) | Included (Legacy package)
+- **First Drive:** $300 (Record/Live packages) | Included (Legacy package)
 - **Additional Drives:** $100 each
 - **Features:** Engraved wooden USB drives with service recording
 - **Maximum:** Up to 10 drives available
@@ -102,18 +102,18 @@ TributeStream offers professional memorial service livestreaming solutions with 
 
 ## Pricing Examples
 
-### Basic Solo Service (2 hours)
-- TributeStream Solo: **$599**
-- **Total: $599**
+### Basic Record Service (2 hours)
+- Tributestream Record: **$699**
+- **Total: $699**
 
 ### Professional Live Service with Extensions
-- TributeStream Live: $1,299
+- Tributestream Live: $1,299
 - Main service extension (4 hours total): $250 (2 × $125)
 - Photography add-on: $400
 - **Total: $1,949**
 
 ### Premium Legacy Service with Full Options
-- TributeStream Legacy: $1,599
+- Tributestream Legacy: $1,699
 - Additional location: $325
 - Additional day: $325
 - Live musician: $500
@@ -122,7 +122,7 @@ TributeStream offers professional memorial service livestreaming solutions with 
 - **Total: $3,149**
 
 ### Multi-Location Wedding Memorial
-- TributeStream Live: $1,299
+- Tributestream Live: $1,299
 - Additional location (3 hours): $450 ($325 base + $125 overage)
 - Photography: $400
 - **Total: $2,149**
@@ -131,9 +131,9 @@ TributeStream offers professional memorial service livestreaming solutions with 
 
 ## Package Comparison
 
-| Feature | Solo | Live | Legacy |
+| Feature | Record | Live | Legacy |
 |---------|------|------|--------|
-| Base Price | $599 | $1,299 | $1,599 |
+| Base Price | $699 | $1,299 | $1,699 |
 | Broadcast Time | 2 hours | 2 hours | 2 hours |
 | Custom Link | ✅ | ✅ | ✅ |
 | Download | ✅ | ✅ | ✅ |
@@ -166,7 +166,7 @@ TributeStream offers professional memorial service livestreaming solutions with 
 - **Download:** Complimentary service recording download
 
 ### Equipment & Support
-- **Solo Package:** Self-service kit with instructions
+- **Record Package:** Self-service kit with instructions
 - **Live/Legacy Packages:** Professional on-site technician and videographer
 - **Technical Support:** Professional troubleshooting during service
 
@@ -187,6 +187,6 @@ TributeStream offers professional memorial service livestreaming solutions with 
 
 ## Contact & Support
 
-For questions about packages, custom requirements, or technical support, please contact our team through your TributeStream portal or during the booking process.
+For questions about packages, custom requirements, or technical support, please contact our team through your Tributestream portal or during the booking process.
 
 *Last Updated: Based on current pricing calculator (September 2025)*

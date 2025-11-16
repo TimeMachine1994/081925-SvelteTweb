@@ -2,7 +2,7 @@
   "name": "tributestream-migration-scripts",
   "version": "1.0.0",
   "type": "module",
-  "description": "Migration scripts for TributeStream Firebase data",
+  "description": "Migration scripts for Tributestream Firebase data",
   "scripts": {
     "migrate-memorials": "node migrate-memorials.js",
     "clear-auth": "node clear-firebase-auth.js"

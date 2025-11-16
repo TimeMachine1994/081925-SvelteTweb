@@ -2,9 +2,13 @@ import { adminAuth, adminDb, FieldValue } from '$lib/server/firebase';
 import { error as SvelteKitError, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import type { Stream } from '$lib/types/stream';
-import { createLiveInput, isCloudflareConfigured } from '$lib/server/cloudflare-stream';
-import { setupOBSMethod, setupPhoneToOBSMethod, setupPhoneToMUXMethod } from '$lib/server/streaming-methods';
-import { isValidStreamingMethod } from '$lib/types/streaming-methods';
+
+// DEPRECATED: This endpoint uses the old OBS streaming system
+// New streams should use /api/live-streams/create instead
+// Keeping this for backward compatibility with existing integrations
+async function setupOBSStreaming(title: string) {
+	throw new Error('OBS streaming via this endpoint is deprecated. Please use /api/live-streams/create for new WHIP streams.');
+}
 
 // GET - Fetch all streams for a memorial
 export const GET: RequestHandler = async ({ locals, params }) => {
@@ -110,8 +114,7 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 		const { 
 			title, 
 			description, 
-			scheduledStartTime, 
-			streamingMethod = 'obs', // Default to OBS method
+			scheduledStartTime,
 			calculatorServiceType, 
 			calculatorServiceIndex,
 			serviceHash,
@@ -122,13 +125,6 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 		if (!title || typeof title !== 'string' || title.trim().length === 0) {
 			throw SvelteKitError(400, 'Stream title is required');
 		}
-
-		// Validate streaming method
-		if (!isValidStreamingMethod(streamingMethod)) {
-			throw SvelteKitError(400, `Invalid streaming method: ${streamingMethod}`);
-		}
-
-		console.log('🎬 [STREAMS API] Selected streaming method:', streamingMethod);
 
 		// Verify memorial exists and user has access
 		const memorialDoc = await adminDb.collection('memorials').doc(memorialId).get();
@@ -151,9 +147,8 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			throw SvelteKitError(403, 'Permission denied');
 		}
 
-		// Setup streaming method
-		console.log('🎬 [STREAMS API] Setting up streaming method:', streamingMethod);
-		let methodConfig: any = {};
+		// For scheduled streams, OBS streaming setup is deferred until the actual start time
+		// Only immediate live streams need streaming credentials right away
 		let streamKey = '';
 		let rtmpUrl = '';
 		let cloudflareInputId = '';
@@ -196,7 +191,7 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			throw SvelteKitError(500, `Failed to configure ${streamingMethod} streaming: ${error instanceof Error ? error.message : 'Unknown error'}`);
 		}
 
-		// Create stream object with method configuration (avoiding undefined values for Firestore)
+		// Create stream object (avoiding undefined values for Firestore)
 		const streamData: any = {
 			title: title.trim(),
 			description: description?.trim() || '',
@@ -205,8 +200,7 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			isVisible: true,
 			streamKey,
 			rtmpUrl,
-			streamingMethod, // NEW: Store selected method
-			methodConfigured: true, // NEW: Mark as configured
+			cloudflareInputId,
 			createdBy: userId,
 			createdAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
@@ -214,9 +208,6 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 		};
 
 		// Only add optional fields if they have values (avoid undefined)
-		if (cloudflareInputId) {
-			streamData.cloudflareInputId = cloudflareInputId;
-		}
 		if (scheduledStartTime) {
 			streamData.scheduledStartTime = scheduledStartTime;
 		}

@@ -132,5 +132,35 @@ service cloud.firestore {
                         isAdminEmail());
     }
 
+    // Schedule edit requests rules
+    match /schedule_edit_requests/{requestId} {
+      // Users can read their own requests
+      allow read: if request.auth != null && request.auth.uid == resource.data.requestedBy;
+      
+      // Users can create requests (API will validate permissions)
+      allow create: if request.auth != null;
+      
+      // Only admins can update/delete requests
+      allow update, delete: if isAdmin() || isAdminEmail();
+      
+      // Admins can read all requests
+      allow read: if isAdmin() || isAdminEmail();
+    }
+
+    // Wiki pages - Admin only
+    match /wiki_pages/{pageId} {
+      allow read, write: if isAdmin() || isAdminEmail();
+    }
+
+    // Wiki categories - Admin only
+    match /wiki_categories/{categoryId} {
+      allow read, write: if isAdmin() || isAdminEmail();
+    }
+
+    // Wiki page versions - Admin only (for future use)
+    match /wiki_page_versions/{versionId} {
+      allow read, write: if isAdmin() || isAdminEmail();
+    }
+
   }
 }

@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { Upload, X, Play, Settings, Plus, ExternalLink, ChevronUp, ChevronDown } from 'lucide-svelte';
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
-	import { SimpleSlideshowGenerator } from '$lib/utils/SimpleSlideshowGenerator';
+	import { SimpleSlideshowGenerator, type GenerationProgress } from '$lib/utils/SimpleSlideshowGenerator';
+	import { uploadVideoToFirebaseStorage, uploadPhotosToFirebaseStorage, uploadAudioToFirebaseStorage } from '$lib/utils/clientFirebaseStorage';
 	import AudioUploader from './AudioUploader.svelte';
 	import type { SlideshowAudio } from '$lib/types/slideshow';
 
@@ -29,7 +30,7 @@
 
 	let { 
 		memorialId, 
-		maxPhotos = 30, 
+		maxPhotos = 50, 
 		maxFileSize = 10 
 	}: Props = $props();
 
@@ -833,18 +834,36 @@
 				}
 			};
 
-			console.log('🎬 Starting slideshow generation with:', { photos: photos.length, settings });
+			console.log('🎬 Starting slideshow generation with:', { 
+				photos: photos.length, 
+				settings,
+				hasAudio: !!audioTrack 
+			});
 			
-			// Generate the video
-			const videoBlob = await generator.generateVideo(photos, settings, onProgress);
+			// Prepare audio parameter if audio is selected
+			const audioParam = audioTrack ? {
+				file: audioTrack.file!,
+				duration: audioTrack.duration,
+				volume: audioVolume,
+				fadeIn: audioFadeIn,
+				fadeOut: audioFadeOut
+			} : undefined;
+			
+			// Generate the video WITH AUDIO
+			const videoBlob = await generator.generateVideo(
+				photos, 
+				settings, 
+				onProgress,
+				audioParam
+			);
 			
 			// Cleanup
 			generator.dispose();
 			
 			generatedVideoBlob = videoBlob;
-			console.log('Slideshow generated successfully:', videoBlob.size, 'bytes');
+			console.log('✅ Slideshow generated successfully:', videoBlob.size, 'bytes');
 
-			// Create preview URL and show video preview (hide photos)
+			// Create preview URL and show video preview
 			if (previewVideoUrl) {
 				URL.revokeObjectURL(previewVideoUrl);
 			}
@@ -891,64 +910,126 @@
 
 	// Note: updateExistingSlideshow function removed since we no longer support edit mode
 
-	// Upload video to Firebase Storage and update/create slideshow
+	// Upload video to Firebase Storage (client-side to avoid Vercel's 4.5MB limit)
 	async function uploadToFirebase(videoBlob: Blob, photos: SlideshowPhoto[], settings: SlideshowSettings) {
-		const formData = new FormData();
-		formData.append('video', videoBlob, 'slideshow.webm');
-		formData.append('memorialId', memorialId || '');
-		formData.append('title', `Memorial Slideshow - ${new Date().toLocaleDateString()}`);
-		
-		// Send photo files directly instead of JSON
-		photos.forEach((photo, index) => {
-			// For new photos, send the file
-			if (photo.file) {
-				formData.append(`photo_${index}_file`, photo.file);
-			}
-			// Always send photo metadata
-			formData.append(`photo_${index}_id`, photo.id);
-			formData.append(`photo_${index}_caption`, photo.caption || '');
-			formData.append(`photo_${index}_duration`, photo.duration.toString());
+		try {
+			const title = `Memorial Slideshow - ${new Date().toLocaleDateString()}`;
 			
-			// For existing photos, send the stored URL and path
-			if (photo.storedUrl) {
-				formData.append(`photo_${index}_url`, photo.storedUrl);
-				formData.append(`photo_${index}_storagePath`, photo.storagePath || '');
+			// Step 1: Upload audio if present
+			let audioData = null;
+			if (audioTrack?.file) {
+				generationPhase = 'Uploading audio...';
+				generationProgress = 85;
+				
+				const audioResult = await uploadAudioToFirebaseStorage(
+					audioTrack.file,
+					memorialId || '',
+					(progress) => {
+						generationProgress = 85 + (progress * 0.03); // 85-88%
+					}
+				);
+				
+				audioData = {
+					name: audioTrack.name,
+					duration: audioTrack.duration,
+					url: audioResult.downloadURL,
+					storagePath: audioResult.storagePath
+				};
+				
+				console.log('✅ [CLIENT] Audio uploaded:', audioData);
 			}
-		});
-		
-		// Add audio file and settings if present
-		if (audioTrack?.file) {
-			formData.append('audio', audioTrack.file);
-			formData.append('audioName', audioTrack.name);
-			formData.append('audioDuration', audioTrack.duration.toString());
-			console.log('🎵 Including audio in upload:', audioTrack.name);
+			
+			// Step 2: Upload video directly to Firebase Storage from client
+			console.log('📤 [CLIENT] Uploading video to Firebase Storage...');
+			generationPhase = 'Uploading video...';
+			
+			const videoResult = await uploadVideoToFirebaseStorage(
+				videoBlob,
+				memorialId || '',
+				title,
+				(progress) => {
+					generationProgress = 88 + (progress * 0.05); // 88-93%
+				}
+			);
+			
+			console.log('✅ [CLIENT] Video uploaded:', videoResult.downloadURL);
+			
+			// Step 3: Upload photos that don't have stored URLs yet
+			generationPhase = 'Uploading photos...';
+			generationProgress = 93;
+			
+			const photosToUpload = photos
+				.filter(photo => photo.file && !photo.storedUrl)
+				.map(photo => ({
+					id: photo.id,
+					file: photo.file,
+					caption: photo.caption,
+					duration: photo.duration
+				}));
+			
+			let uploadedPhotos: any[] = [];
+			if (photosToUpload.length > 0) {
+				uploadedPhotos = await uploadPhotosToFirebaseStorage(
+					photosToUpload,
+					memorialId || ''
+				);
+				console.log(`✅ [CLIENT] Uploaded ${uploadedPhotos.length} new photos`);
+			}
+			
+			// Step 4: Build complete photos array with URLs
+			const allPhotos = photos.map(photo => {
+				// Find uploaded photo if this was newly uploaded
+				const uploaded = uploadedPhotos.find(p => p.id === photo.id);
+				
+				return {
+					id: photo.id,
+					caption: photo.caption || '',
+					duration: photo.duration || settings.photoDuration,
+					url: uploaded?.downloadURL || photo.storedUrl || photo.preview,
+					storagePath: uploaded?.storagePath || photo.storagePath || ''
+				};
+			});
+			
+			// Step 5: Send metadata to API (lightweight JSON, no files)
+			generationPhase = 'Saving slideshow metadata...';
+			generationProgress = 98;
+			
+			const settingsWithAudio = {
+				...settings,
+				audioVolume,
+				audioFadeIn,
+				audioFadeOut
+			};
+			
+			const metadata = {
+				memorialId: memorialId || '',
+				title,
+				videoUrl: videoResult.downloadURL,
+				videoStoragePath: videoResult.storagePath,
+				photos: allPhotos,
+				settings: settingsWithAudio,
+				audio: audioData // Now includes actual Firebase Storage URL
+			};
+			
+			const response = await fetch('/api/slideshow/save-metadata', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(metadata)
+			});
+			
+			if (!response.ok) {
+				const errorData = await response.json();
+				throw new Error(errorData.message || `API failed: ${response.status}`);
+			}
+			
+			const result = await response.json();
+			console.log('✅ Slideshow metadata saved successfully:', result);
+			return result;
+			
+		} catch (error) {
+			console.error('❌ Upload failed:', error);
+			throw error;
 		}
-		
-		// Add audio settings to settings object
-		const settingsWithAudio = {
-			...settings,
-			audioVolume,
-			audioFadeIn,
-			audioFadeOut
-		};
-		
-		formData.append('settings', JSON.stringify(settingsWithAudio));
-		
-		// This is always a new slideshow since we removed edit mode
-
-		const response = await fetch('/api/slideshow/upload-firebase', {
-			method: 'POST',
-			body: formData
-		});
-
-		if (!response.ok) {
-			const errorData = await response.json();
-			throw new Error(errorData.message || `Upload failed: ${response.status} ${response.statusText}`);
-		}
-
-		const result = await response.json();
-		console.log('✅ Slideshow uploaded to Firebase successfully:', result);
-		return result;
 	}
 
 	// Add slideshow to memorial (upload to Firebase)
@@ -1254,11 +1335,29 @@
 				}
 			};
 
-			console.log('🎬 Starting draft video generation with:', { photos: photos.length, settings });
-			
-			// Generate the video
-			const videoBlob = await generator.generateVideo(photos, settings, onProgress);
-			
+			console.log('🎬 Starting draft video generation with:', { 
+				photos: photos.length, 
+				settings,
+				hasAudio: !!audioTrack 
+			});
+		
+			// Prepare audio parameter if audio is selected
+			const audioParam = audioTrack ? {
+				file: audioTrack.file!,
+				duration: audioTrack.duration,
+				volume: audioVolume,
+				fadeIn: audioFadeIn,
+				fadeOut: audioFadeOut
+			} : undefined;
+		
+			// Generate the video WITH AUDIO
+			const videoBlob = await generator.generateVideo(
+				photos, 
+				settings, 
+				onProgress,
+				audioParam
+			);
+		
 			// Cleanup
 			generator.dispose();
 			
@@ -1538,7 +1637,7 @@
 						</button>
 					</div>
 					<p class="upload-limits">
-						Up to 30 photos • 10MB per file
+						Up to {maxPhotos} photos • {maxFileSize}MB per file
 					</p>
 				</div>
 			</div>
@@ -1640,6 +1739,26 @@
 		</div>
 	{/if}
 
+	<!-- Step 2.5: Background Music (Optional) - Show when photos exist and not published -->
+	{#if photos.length > 0 && (!isPublished || hasDraftChanges)}
+		<div class="workflow-step active">
+			<div class="step-header">
+				<div class="step-number">2.5</div>
+				<h3 class="step-title">Background Music (Optional)</h3>
+				{#if audioTrack}
+					<div class="step-status completed">✓ Music added</div>
+				{/if}
+			</div>
+			<AudioUploader 
+				bind:audio={audioTrack}
+				bind:volume={audioVolume}
+				bind:fadeIn={audioFadeIn}
+				bind:fadeOut={audioFadeOut}
+				maxFileSize={50}
+			/>
+		</div>
+	{/if}
+
 	<!-- Step 3: Settings & Generate (Show for new slideshows or when there are draft changes) -->
 	{#if photos.length > 0 && (!isPublished || hasDraftChanges)}
 		<div class="workflow-step active">
@@ -1725,19 +1844,6 @@
 		</div>
 	{/if}
 
-	<!-- Step 2.5: Background Music (Optional) -->
-	{#if photos.length > 0 && !showVideoPreview}
-		<div class="workflow-step active">
-			<AudioUploader 
-				bind:audio={audioTrack}
-				bind:volume={audioVolume}
-				bind:fadeIn={audioFadeIn}
-				bind:fadeOut={audioFadeOut}
-				maxFileSize={50}
-			/>
-		</div>
-	{/if}
-		
 	<!-- Step 4: Save to Memorial (When video is ready and not published, or when there are draft changes) -->
 	{#if showVideoPreview && (!isPublished || (hasDraftChanges && draftVideoBlob))}
 		<div class="workflow-step active">
@@ -1782,10 +1888,42 @@
 					<!-- Draft Actions -->
 					<button 
 						class="secondary-btn"
+						onclick={() => {
+							if (previewVideoUrl) URL.revokeObjectURL(previewVideoUrl);
+							previewVideoUrl = draftVideoUrl;
+							showVideoPreview = true;
+						}}
+					>
+						Preview Draft
+					</button>
+					
+					<button 
+						class="secondary-btn"
 						onclick={discardDraftChanges}
 					>
 						<X class="btn-icon" />
-						Discard Draft
+						Discard Changes
+					</button>
+					
+					<!-- Download button for draft video -->
+					<button 
+						class="secondary-btn"
+						onclick={() => {
+							if (!draftVideoBlob) return;
+							const url = URL.createObjectURL(draftVideoBlob);
+							const a = document.createElement('a');
+							a.href = url;
+							a.download = `memorial-slideshow-draft-${Date.now()}.webm`;
+							document.body.appendChild(a);
+							a.click();
+							document.body.removeChild(a);
+							URL.revokeObjectURL(url);
+						}}
+					>
+						<svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+						</svg>
+						Download Draft
 					</button>
 					
 					{#if memorialId}
@@ -1809,23 +1947,35 @@
 					{/if}
 				{:else if memorialId}
 					<!-- Regular Publish Action - Add to Memorial -->
-					<button 
-						class="primary-btn extra-large"
-						onclick={addToMemorial}
-						disabled={isGenerating}
-					>
-						{#if isGenerating}
-							<svg class="btn-icon animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-							</svg>
-							Adding to Memorial...
-						{:else}
+					<div class="button-group">
+						<button 
+							class="secondary-btn"
+							onclick={downloadVideo}
+						>
 							<svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
 							</svg>
-							Add to Memorial
-						{/if}
-					</button>
+							Download Video
+						</button>
+						
+						<button 
+							class="primary-btn extra-large"
+							onclick={addToMemorial}
+							disabled={isGenerating}
+						>
+							{#if isGenerating}
+								<svg class="btn-icon animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+								</svg>
+								Adding to Memorial...
+							{:else}
+								<svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+								</svg>
+								Add to Memorial
+							{/if}
+						</button>
+					</div>
 				{:else}
 					<!-- No Memorial ID - Show Warning and Download Option -->
 					<div class="no-memorial-warning">
@@ -2827,6 +2977,20 @@
 		align-items: center;
 		flex-wrap: wrap;
 		margin-top: 2rem;
+	}
+
+	.button-group {
+		display: flex;
+		gap: 1rem;
+		justify-content: center;
+		align-items: center;
+		flex-wrap: wrap;
+		width: 100%;
+	}
+
+	.button-group .secondary-btn,
+	.button-group .primary-btn {
+		flex: 0 1 auto;
 	}
 
 	/* No Memorial Warning */
