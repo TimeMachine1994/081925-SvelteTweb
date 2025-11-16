@@ -598,14 +598,14 @@
 </svelte:head>
 
 <!-- Header -->
-<section class="bg-gradient-to-br from-black via-gray-900 to-amber-900 py-16 text-white">
+<section class="bg-gradient-to-br from-blue-900 via-blue-800 to-slate-900 py-16 text-white">
 	<div class="mx-auto max-w-4xl px-4 text-center">
 		<div class="mb-6 flex items-center justify-center">
-			<Calculator class="mr-4 h-12 w-12 text-amber-400" />
+			<Calculator class="mr-4 h-12 w-12 text-blue-400" />
 			<h1
-				class="bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-4xl font-bold text-transparent"
+				class="bg-gradient-to-r from-blue-400 to-blue-300 bg-clip-text text-4xl font-bold text-transparent"
 			>
-				Tributestream Pricing Calculator
+				Tributestream Live Pricing Calculator
 			</h1>
 		</div>
 		<p class="mx-auto max-w-2xl text-xl text-gray-300">
@@ -622,10 +622,10 @@
 			<div class="space-y-8 lg:col-span-2">
 				<!-- Package Selection -->
 				<div
-					class="rounded-lg border border-amber-500/20 bg-black/80 p-6 shadow-lg backdrop-blur-sm"
+					class="rounded-lg border border-blue-500/20 bg-slate-900/80 p-6 shadow-lg backdrop-blur-sm"
 				>
 					<h2 class="mb-6 flex items-center text-2xl font-bold text-white">
-						<Star class="mr-2 h-6 w-6 text-amber-400" />
+						<Star class="mr-2 h-6 w-6 text-blue-400" />
 						Choose Your Tributestream Package
 					</h2>
 
@@ -633,16 +633,16 @@
 						{#each tiers as tier}
 							<button
 								class="rounded-lg border-2 p-4 text-left transition-all {selectedTier === tier.alias
-									? 'border-amber-400 bg-amber-400/10'
-									: 'border-gray-600 hover:border-amber-500/50'}"
+									? 'border-blue-400 bg-blue-400/10'
+									: 'border-gray-600 hover:border-blue-500/50'}"
 								onclick={() => selectTier(tier.alias)}
 							>
 								<h3 class="mb-2 text-lg font-bold text-white">{tier.name}</h3>
-								<p class="mb-3 text-2xl font-bold text-amber-400">${tier.price}</p>
+								<p class="mb-3 text-2xl font-bold text-blue-400">${tier.price}</p>
 								<ul class="space-y-1 text-sm text-gray-300">
 									{#each tier.features as feature}
 										<li class="flex items-start">
-											<span class="mr-2 text-amber-400">✓</span>
+											<span class="mr-2 text-blue-400">✓</span>
 											{feature}
 										</li>
 									{/each}
@@ -654,10 +654,10 @@
 
 				<!-- Main Service Details -->
 				<div
-					class="rounded-lg border border-amber-500/20 bg-black/80 p-6 shadow-lg backdrop-blur-sm"
+					class="rounded-lg border border-blue-500/20 bg-slate-900/80 p-6 shadow-lg backdrop-blur-sm"
 				>
 					<h2 class="mb-6 flex items-center text-2xl font-bold text-white">
-						<Calendar class="mr-2 h-6 w-6 text-amber-400" />
+						<Calendar class="mr-2 h-6 w-6 text-blue-400" />
 						Main Service Details
 					</h2>
 					<div class="space-y-4">
@@ -717,10 +717,10 @@
 
 				<!-- Service Duration -->
 				<div
-					class="rounded-lg border border-amber-500/20 bg-black/80 p-6 shadow-lg backdrop-blur-sm"
+					class="rounded-lg border border-blue-500/20 bg-slate-900/80 p-6 shadow-lg backdrop-blur-sm"
 				>
 					<h2 class="mb-6 flex items-center text-2xl font-bold text-white">
-						<Clock class="mr-2 h-6 w-6 text-amber-400" />
+						<Clock class="mr-2 h-6 w-6 text-blue-400" />
 						Service Duration
 					</h2>
 
@@ -736,11 +736,11 @@
 								max="8"
 								step="1"
 								bind:value={mainService.hours}
-								class="gold-slider w-full"
+								class="blue-slider w-full"
 							/>
 							<div class="mt-1 flex justify-between text-sm text-gray-400">
 								<span>1 hour</span>
-								<span class="font-medium text-amber-400">{mainService.hours} hours</span>
+								<span class="font-medium text-blue-400">{mainService.hours} hours</span>
 								<span>8+ hours</span>
 							</div>
 						</div>
@@ -749,10 +749,10 @@
 
 				<!-- Additional Locations & Days -->
 				<div
-					class="rounded-lg border border-amber-500/20 bg-black/80 p-6 shadow-lg backdrop-blur-sm"
+					class="rounded-lg border border-blue-500/20 bg-slate-900/80 p-6 shadow-lg backdrop-blur-sm"
 				>
 					<h2 class="mb-6 flex items-center text-2xl font-bold text-white">
-						<MapPin class="mr-2 h-6 w-6 text-amber-400" />
+						<MapPin class="mr-2 h-6 w-6 text-blue-400" />
 						Additional Services
 					</h2>
 
@@ -769,7 +769,7 @@
 								<input
 									type="checkbox"
 									bind:checked={additionalLocation.enabled}
-									class="h-5 w-5 rounded border-gray-600 bg-gray-700 text-amber-400 focus:ring-amber-500"
+									class="h-5 w-5 rounded border-gray-600 bg-gray-700 text-blue-400 focus:ring-blue-500"
 								/>
 							</label>
 
@@ -816,13 +816,13 @@
 											max="8"
 											step="1"
 											bind:value={additionalLocation.hours}
-											class="gold-slider w-full"
+											class="blue-slider w-full"
 										/>
 										<div class="mt-1 flex justify-between text-sm text-gray-400">
 											<span>1 hour</span>
-											<span class="font-medium text-amber-400"
-												>{additionalLocation.hours} hours</span
-											>
+											<span class="font-medium text-blue-400"
+											>{additionalLocation.hours} hours</span
+										>	>
 											<span>8+ hours</span>
 										</div>
 									</div>
@@ -842,7 +842,7 @@
 								<input
 									type="checkbox"
 									bind:checked={additionalDay.enabled}
-									class="h-5 w-5 rounded border-gray-600 bg-gray-700 text-amber-400 focus:ring-amber-500"
+									class="h-5 w-5 rounded border-gray-600 bg-gray-700 text-blue-400 focus:ring-blue-500"
 								/>
 							</label>
 
@@ -888,11 +888,11 @@
 											max="8"
 											step="1"
 											bind:value={additionalDay.hours}
-											class="gold-slider w-full"
+											class="blue-slider w-full"
 										/>
 										<div class="mt-1 flex justify-between text-sm text-gray-400">
 											<span>1 hour</span>
-											<span class="font-medium text-amber-400">{additionalDay.hours} hours</span>
+											<span class="font-medium text-blue-400">{additionalDay.hours} hours</span>
 											<span>8+ hours</span>
 										</div>
 									</div>
@@ -904,10 +904,10 @@
 
 				<!-- Add-ons -->
 				<div
-					class="rounded-lg border border-amber-500/20 bg-black/80 p-6 shadow-lg backdrop-blur-sm"
+					class="rounded-lg border border-blue-500/20 bg-slate-900/80 p-6 shadow-lg backdrop-blur-sm"
 				>
 					<h2 class="mb-6 flex items-center text-2xl font-bold text-white">
-						<Camera class="mr-2 h-6 w-6 text-amber-400" />
+						<Camera class="mr-2 h-6 w-6 text-blue-400" />
 						Add-on Services
 					</h2>
 
@@ -920,11 +920,11 @@
 								<p class="text-sm text-gray-400">Professional photography service</p>
 							</div>
 							<div class="flex items-center">
-								<span class="mr-4 font-bold text-amber-400">+${ADDON_PRICES.photography}</span>
+								<span class="mr-4 font-bold text-blue-400">+${ADDON_PRICES.photography}</span>
 								<input
 									type="checkbox"
 									bind:checked={addons.photography}
-									class="h-5 w-5 rounded border-gray-600 bg-gray-700 text-amber-400 focus:ring-amber-500"
+									class="h-5 w-5 rounded border-gray-600 bg-gray-700 text-blue-400 focus:ring-blue-500"
 								/>
 							</div>
 						</label>
@@ -937,13 +937,13 @@
 								<p class="text-sm text-gray-400">Professional A/V technical support</p>
 							</div>
 							<div class="flex items-center">
-								<span class="mr-4 font-bold text-amber-400"
+								<span class="mr-4 font-bold text-blue-400"
 									>+${ADDON_PRICES.audioVisualSupport}</span
 								>
 								<input
 									type="checkbox"
 									bind:checked={addons.audioVisualSupport}
-									class="h-5 w-5 rounded border-gray-600 bg-gray-700 text-amber-400 focus:ring-amber-500"
+									class="h-5 w-5 rounded border-gray-600 bg-gray-700 text-blue-400 focus:ring-blue-500"
 								/>
 							</div>
 						</label>
@@ -956,11 +956,11 @@
 								<p class="text-sm text-gray-400">Professional live musical performance</p>
 							</div>
 							<div class="flex items-center">
-								<span class="mr-4 font-bold text-amber-400">+${ADDON_PRICES.liveMusician}</span>
+								<span class="mr-4 font-bold text-blue-400">+${ADDON_PRICES.liveMusician}</span>
 								<input
 									type="checkbox"
 									bind:checked={addons.liveMusician}
-									class="h-5 w-5 rounded border-gray-600 bg-gray-700 text-amber-400 focus:ring-amber-500"
+									class="h-5 w-5 rounded border-gray-600 bg-gray-700 text-blue-400 focus:ring-blue-500"
 								/>
 							</div>
 						</label>
@@ -989,7 +989,7 @@
 									min="0"
 									max="10"
 									bind:value={addons.woodenUsbDrives}
-									class="w-20 rounded border border-gray-600 bg-gray-700 p-2 text-white focus:border-amber-500 focus:ring-amber-500"
+									class="w-20 rounded border border-gray-600 bg-gray-700 p-2 text-white focus:border-blue-500 focus:ring-blue-500"
 								/>
 							</div>
 						</div>
@@ -1000,10 +1000,10 @@
 			<!-- Price Summary -->
 			<div class="lg:col-span-1">
 				<div
-					class="sticky top-8 rounded-lg border border-amber-500/20 bg-black/80 p-6 shadow-lg backdrop-blur-sm"
+					class="sticky top-8 rounded-lg border border-blue-500/20 bg-slate-900/80 p-6 shadow-lg backdrop-blur-sm"
 				>
 					<h2 class="mb-6 flex items-center text-2xl font-bold text-white">
-						<DollarSign class="mr-2 h-6 w-6 text-amber-400" />
+						<DollarSign class="mr-2 h-6 w-6 text-blue-400" />
 						Price Breakdown
 					</h2>
 
@@ -1024,7 +1024,7 @@
 					<div class="border-t border-gray-700 pt-4">
 						<div class="flex items-center justify-between text-2xl font-bold">
 							<span class="text-white">Total</span>
-							<span class="text-amber-400">${totalPrice}</span>
+							<span class="text-blue-400">${totalPrice}</span>
 						</div>
 						<p class="mt-2 text-sm text-gray-400">One-time payment</p>
 					</div>
@@ -1032,13 +1032,13 @@
 					<div class="mt-6 space-y-3">
 						<button
 							onclick={handleBookNow}
-							class="w-full rounded-lg bg-gradient-to-r from-amber-500 to-yellow-600 px-6 py-3 font-medium text-black transition-all duration-300 hover:from-amber-600 hover:to-yellow-700 hover:shadow-lg hover:shadow-amber-500/25"
+							class="w-full rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-3 font-medium text-white transition-all duration-300 hover:from-blue-600 hover:to-blue-700 hover:shadow-lg hover:shadow-blue-500/25"
 						>
 							Book Now
 						</button>
 						<button
 							onclick={handleSaveAndPayLater}
-							class="w-full rounded-lg border border-amber-500 px-6 py-3 font-medium text-amber-400 transition-colors hover:bg-amber-500/10 hover:text-amber-300"
+							class="w-full rounded-lg border border-blue-500 px-6 py-3 font-medium text-blue-400 transition-colors hover:bg-blue-500/10 hover:text-blue-300"
 						>
 							Save and Pay Later
 						</button>
@@ -1050,7 +1050,7 @@
 </section>
 
 <style>
-	.gold-slider {
+	.blue-slider {
 		-webkit-appearance: none;
 		appearance: none;
 		height: 6px;
@@ -1059,24 +1059,24 @@
 		outline: none;
 	}
 
-	.gold-slider::-webkit-slider-thumb {
+	.blue-slider::-webkit-slider-thumb {
 		-webkit-appearance: none;
 		appearance: none;
 		width: 20px;
 		height: 20px;
-		background: linear-gradient(135deg, #f59e0b, #d97706);
+		background: linear-gradient(135deg, #3b82f6, #2563eb);
 		border-radius: 50%;
 		cursor: pointer;
-		box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+		box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 	}
 
-	.gold-slider::-moz-range-thumb {
+	.blue-slider::-moz-range-thumb {
 		width: 20px;
 		height: 20px;
-		background: linear-gradient(135deg, #f59e0b, #d97706);
+		background: linear-gradient(135deg, #3b82f6, #2563eb);
 		border-radius: 50%;
 		cursor: pointer;
 		border: none;
-		box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+		box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 	}
 </style>

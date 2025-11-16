@@ -12,7 +12,7 @@
 		'DeGusipe Funeral Home',
 		'Loahman Funeral Home',
 		'Baldwin Fairchild Funeral Home',
-		'Woodlawn Funeral Home & Memorial Park',
+		'Woodlawn Event Center',
 		'Churches',
 		'Graveside',
 		'Special Locations',
@@ -449,15 +449,15 @@
 			<p class="mt-2 text-zinc-700">Have the following ready to complete your reservation.</p>
 
 			{#if data.userMemorial}
-				<!-- CTA for logged-in users with a memorial -->
-				<div class="mt-6 rounded-2xl border bg-white p-6 shadow-sm">
-					<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-						<div>
-							<h3 class="text-lg font-semibold">Ready to Complete Your Booking?</h3>
-							<p class="mt-1 text-zinc-600">
-								Complete your booking details for <span class="font-medium">{data.userMemorial.lovedOneName}</span>
-							</p>
-						</div>
+			<!-- CTA for logged-in users with an event -->
+			<div class="mt-6 rounded-2xl border bg-white p-6 shadow-sm">
+				<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+					<div>
+						<h3 class="text-lg font-semibold">Ready to Complete Your Booking?</h3>
+						<p class="mt-1 text-zinc-600">
+							Complete your booking details for <span class="font-medium">{data.userMemorial.lovedOneName}</span>
+						</p>
+					</div>
 						<a
 							href="/{data.userEvent.fullSlug}#booking"
 							class="inline-block rounded-xl bg-blue-500 px-6 py-3 text-center font-semibold text-black hover:opacity-90 whitespace-nowrap"

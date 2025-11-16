@@ -9,12 +9,14 @@ import type { PageServerLoad, Actions } from './$types';
  * its own dedicated event creation logic.
  */
 
-export const load: PageServerLoad = async ({ url }) => {
-	// Pass through any query parameters (name, package, etc.)
-	return {
-		eventName: url.searchParams.get('name') || '',
-		selectedPackage: url.searchParams.get('package') || ''
-	};
+export const load: PageServerLoad = async ({ url, locals }) => {
+	// Direct users to the registration page immediately
+	// This avoids showing two registration forms
+	const params = new URLSearchParams();
+	if (url.searchParams.get('name')) params.set('name', url.searchParams.get('name')!);
+	if (url.searchParams.get('package')) params.set('package', url.searchParams.get('package')!);
+	
+	throw redirect(303, `/register/loved-one?${params.toString()}`);
 };
 
 export const actions: Actions = {
