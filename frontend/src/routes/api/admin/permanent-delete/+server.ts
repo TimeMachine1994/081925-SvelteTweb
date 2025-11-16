@@ -5,8 +5,7 @@
  */
 
 import { json } from '@sveltejs/kit';
-import { adminDb } from '$lib/server/firebase';
-import { storage } from '$lib/server/firebase';
+import { adminDb, adminStorage } from '$lib/server/firebase';
 
 export async function POST({ request, locals }) {
 	// Auth check
@@ -49,7 +48,7 @@ export async function POST({ request, locals }) {
 			// Delete associated files from Firebase Storage if they exist
 			if (data?.firebaseStoragePath) {
 				try {
-					await storage.bucket().file(data.firebaseStoragePath).delete();
+					await adminStorage.bucket().file(data.firebaseStoragePath).delete();
 				} catch (storageError) {
 					console.warn(`Failed to delete storage file: ${data.firebaseStoragePath}`, storageError);
 				}
@@ -69,7 +68,7 @@ export async function POST({ request, locals }) {
 					// Delete slideshow storage files
 					if (slideData.firebaseStoragePath) {
 						try {
-							await storage.bucket().file(slideData.firebaseStoragePath).delete();
+							await adminStorage.bucket().file(slideData.firebaseStoragePath).delete();
 						} catch (err) {
 							console.warn(`Failed to delete slideshow file:`, err);
 						}
