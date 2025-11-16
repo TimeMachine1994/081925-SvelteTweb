@@ -40,7 +40,9 @@
 			const response = await fetch(`/api/memorials/${memorialId}/chat?limit=50`);
 			
 			if (!response.ok) {
-				throw new Error('Failed to load messages');
+				const errorData = await response.json().catch(() => ({}));
+				console.error('[ChatPanel] API error:', { status: response.status, errorData });
+				throw new Error(errorData.message || `Server error: ${response.status}`);
 			}
 			
 			const data = await response.json();
@@ -50,7 +52,7 @@
 			setTimeout(scrollToBottom, 100);
 		} catch (err: any) {
 			console.error('[ChatPanel] Error loading messages:', err);
-			error = 'Failed to load chat messages';
+			error = err.message || 'Failed to load chat messages. Please try again.';
 		} finally {
 			isLoading = false;
 		}
