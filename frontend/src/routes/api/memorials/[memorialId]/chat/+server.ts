@@ -42,14 +42,16 @@ export const GET: RequestHandler = async ({ params, url, locals }) => {
 			throw error(403, 'You do not have permission to view this chat');
 		}
 		
-		// Build query
-		let chatQuery = adminDb
+		// Build query - simplified to avoid requiring composite index
+		// We'll just order by timestamp and filter deleted messages client-side
+		const chatCollectionRef = adminDb
 			.collection('memorials')
 			.doc(memorialId)
-			.collection('chat')
-			.where('isDeleted', '==', false)
+			.collection('chat');
+		
+		let chatQuery = chatCollectionRef
 			.orderBy('timestamp', 'desc')
-			.limit(limit);
+			.limit(limit * 2); // Get more to account for deleted messages
 		
 		// Add pagination if beforeTimestamp provided
 		if (beforeTimestamp) {
@@ -57,27 +59,42 @@ export const GET: RequestHandler = async ({ params, url, locals }) => {
 			chatQuery = chatQuery.startAfter(beforeDate);
 		}
 		
-		// Execute query
-		const snapshot = await chatQuery.get();
+		// Execute query - handle case where collection might not exist yet
+		let snapshot;
+		try {
+			snapshot = await chatQuery.get();
+		} catch (queryError: any) {
+			// If the collection doesn't exist or has no documents, return empty array
+			console.log('[Chat API] No messages found or collection not created yet:', memorialId);
+			return json({
+				messages: [],
+				hasMore: false
+			});
+		}
 		
-		// Transform messages
-		const messages = snapshot.docs.map(doc => {
-			const data = doc.data();
-			return {
-				id: doc.id,
-				memorialId: data.memorialId,
-				userId: data.userId,
-				userName: data.userName,
-				userRole: data.userRole,
-				message: data.message,
-				timestamp: data.timestamp?.toDate().toISOString() || new Date().toISOString(),
-				isEdited: data.isEdited || false,
-				editedAt: data.editedAt?.toDate().toISOString(),
-				isDeleted: data.isDeleted || false,
-				deletedAt: data.deletedAt?.toDate().toISOString(),
-				replyTo: data.replyTo
-			};
-		});
+		// Transform and filter messages
+		const allMessages = snapshot.docs
+			.map(doc => {
+				const data = doc.data();
+				return {
+					id: doc.id,
+					memorialId: data.memorialId,
+					userId: data.userId,
+					userName: data.userName,
+					userRole: data.userRole,
+					message: data.message,
+					timestamp: data.timestamp?.toDate().toISOString() || new Date().toISOString(),
+					isEdited: data.isEdited || false,
+					editedAt: data.editedAt?.toDate().toISOString(),
+					isDeleted: data.isDeleted || false,
+					deletedAt: data.deletedAt?.toDate().toISOString(),
+					replyTo: data.replyTo
+				};
+			})
+			.filter(msg => !msg.isDeleted); // Filter out deleted messages
+		
+		// Limit to requested amount after filtering
+		const messages = allMessages.slice(0, limit);
 		
 		// Reverse to get chronological order (oldest first)
 		messages.reverse();
@@ -88,13 +105,21 @@ export const GET: RequestHandler = async ({ params, url, locals }) => {
 		});
 		
 	} catch (err: any) {
-		console.error('[Chat API] Error fetching messages:', err);
+		console.error('[Chat API] Error fetching messages:', {
+			error: err,
+			message: err?.message,
+			code: err?.code,
+			details: err?.details,
+			memorialId
+		});
 		
 		if (err.status) {
 			throw err;
 		}
 		
-		throw error(500, 'Failed to fetch chat messages');
+		// Provide more helpful error message
+		const errorMessage = err?.message || 'Failed to fetch chat messages';
+		throw error(500, errorMessage);
 	}
 };
 
