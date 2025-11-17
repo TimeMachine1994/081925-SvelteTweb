@@ -2,7 +2,7 @@
 	import { Upload, X, Play, Settings, Plus, ExternalLink, ChevronUp, ChevronDown } from 'lucide-svelte';
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	import { SimpleSlideshowGenerator, type GenerationProgress } from '$lib/utils/SimpleSlideshowGenerator';
-	import { uploadPhotosToFirebaseStorage, uploadAudioToFirebaseStorage } from '$lib/utils/clientFirebaseStorage';
+	import { uploadPhotosToFirebaseStorage, uploadAudioToFirebaseStorage, uploadVideoToFirebaseStorage } from '$lib/utils/clientFirebaseStorage';
 	import AudioUploader from './AudioUploader.svelte';
 	import type { SlideshowAudio } from '$lib/types/slideshow';
 
@@ -908,10 +908,8 @@
 		}
 	}
 
-	// Note: updateExistingSlideshow function removed since we no longer support edit mode
-
-	// Upload video to Cloudflare Stream
-	async function uploadToCloudflare(videoBlob: Blob, photos: SlideshowPhoto[], settings: SlideshowSettings) {
+	// Upload video and photos to Firebase Storage (WebM approach)
+	async function uploadToFirebase(videoBlob: Blob, photos: SlideshowPhoto[], settings: SlideshowSettings) {
 		try {
 			const title = `Memorial Slideshow - ${new Date().toLocaleDateString()}`;
 			
@@ -925,7 +923,7 @@
 					audioTrack.file,
 					memorialId || '',
 					(progress) => {
-						generationProgress = 85 + (progress * 0.03); // 85-88%
+							generationProgress = 85 + (progress * 0.05); // 85-90%
 					}
 				);
 				
@@ -939,19 +937,26 @@
 				console.log('✅ [CLIENT] Audio uploaded:', audioData);
 			}
 			
-			// Step 2: Upload video to Cloudflare Stream
-			console.log('☁️ [CLIENT] Uploading video to Cloudflare Stream...');
-			generationPhase = 'Uploading to Cloudflare Stream...';
-			generationProgress = 88;
+			// Step 2: Upload WebM video to Firebase Storage
+			console.log('📤 [CLIENT] Uploading WebM video to Firebase Storage...');
+			generationPhase = 'Uploading video...';
+			generationProgress = 90;
 			
-			const cloudflareResult = await uploadVideoToCloudflareStream(videoBlob, title);
+			const videoResult = await uploadVideoToFirebaseStorage(
+				videoBlob,
+				memorialId || '',
+				title,
+				(progress) => {
+					generationProgress = 90 + (progress * 0.05); // 90-95%
+				}
+			);
 			
-			console.log('✅ [CLIENT] Video uploaded to Cloudflare:', cloudflareResult);
-			generationProgress = 93;
+			console.log('✅ [CLIENT] Video uploaded:', videoResult);
+			generationProgress = 95;
 			
 			// Step 3: Upload photos that don't have stored URLs yet
 			generationPhase = 'Uploading photos...';
-			generationProgress = 93;
+			generationProgress = 95;
 			
 			const photosToUpload = photos
 				.filter(photo => photo.file && !photo.storedUrl)
@@ -999,14 +1004,14 @@
 			const metadata = {
 				memorialId: memorialId || '',
 				title,
-				// Cloudflare Stream URLs
-				cloudflareStreamId: cloudflareResult.uid,
-				playbackUrl: cloudflareResult.playback?.hls || '',
-				cloudflarePlaybackUrl: cloudflareResult.playback?.dash || '',
-				thumbnailUrl: cloudflareResult.thumbnail || '',
+				// Firebase Storage URLs
+				firebaseStoragePath: videoResult.storagePath,
+				playbackUrl: videoResult.downloadURL,
+				isFirebaseHosted: true,
 				photos: allPhotos,
 				settings: settingsWithAudio,
-				audio: audioData
+				audio: audioData,
+				status: 'ready'
 			};
 			
 			const response = await fetch('/api/slideshow/save-metadata', {
@@ -1030,66 +1035,7 @@
 		}
 	}
 	
-	// Upload video to Cloudflare Stream via our API (server-side to avoid CORS)
-	async function uploadVideoToCloudflareStream(videoBlob: Blob, title: string) {
-		try {
-			console.log('☁️ [CLIENT] Step 1: Requesting signed upload URL...');
-			
-			// Step 1: Get signed upload URL from server
-			const urlResponse = await fetch('/api/slideshow/get-upload-url', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					title,
-					memorialId: memorialId || ''
-				})
-			});
-			
-			if (!urlResponse.ok) {
-				const errorData = await urlResponse.json().catch(() => ({ message: 'Unknown error' }));
-				console.error('Failed to get upload URL:', urlResponse.status, errorData);
-				throw new Error(errorData.message || `Failed to get upload URL: ${urlResponse.status}`);
-			}
-			
-			const { uploadURL, uid } = await urlResponse.json();
-			console.log('✅ [CLIENT] Got signed URL for video:', uid);
-			
-			// Step 2: Upload directly to Cloudflare using signed URL
-			console.log('☁️ [CLIENT] Step 2: Uploading directly to Cloudflare Stream...');
-			const formData = new FormData();
-			formData.append('file', videoBlob);
-			
-			const uploadResponse = await fetch(uploadURL, {
-				method: 'POST',
-				body: formData
-			});
-			
-			if (!uploadResponse.ok) {
-				const errorText = await uploadResponse.text();
-				console.error('Cloudflare direct upload failed:', uploadResponse.status, errorText);
-				throw new Error(`Cloudflare upload failed: ${uploadResponse.status}`);
-			}
-			
-			const uploadResult = await uploadResponse.json();
-			console.log('✅ [CLIENT] Cloudflare Stream upload successful:', uid);
-			
-			// Return expected format (Cloudflare Stream result)
-			return uploadResult.result || {
-				uid,
-				playback: {
-					hls: `https://customer-${uid}.cloudflarestream.com/${uid}/manifest/video.m3u8`,
-					dash: `https://customer-${uid}.cloudflarestream.com/${uid}/manifest/video.mpd`
-				},
-				thumbnail: `https://customer-${uid}.cloudflarestream.com/${uid}/thumbnails/thumbnail.jpg`
-			};
-			
-		} catch (error) {
-			console.error('❌ Cloudflare upload error:', error);
-			throw error;
-		}
-	}
-
-	// Add slideshow to memorial (upload to Cloudflare)
+	// Add slideshow to memorial (upload to Firebase)
 	async function addToMemorial() {
 		if (!generatedVideoBlob || !memorialId) {
 			console.warn('⚠️ Cannot add to memorial: missing video or memorial ID');
@@ -1102,8 +1048,8 @@
 			generationPhase = 'Adding to memorial...';
 			generationProgress = 95;
 
-			// uploadToCloudflare returns the parsed JSON result directly, not a Response object
-			const result = await uploadToCloudflare(generatedVideoBlob, photos, settings);
+			// uploadToFirebase returns the parsed JSON result directly, not a Response object
+			const result = await uploadToFirebase(generatedVideoBlob, photos, settings);
 
 			if (result && result.slideshowId) {
 				console.log('✅ Slideshow uploaded successfully:', result);
@@ -1234,8 +1180,8 @@
 			generationPhase = 'Saving to memorial...';
 			generationProgress = 95;
 
-			// Upload new video to Cloudflare
-			const result = await uploadToCloudflare(generatedVideoBlob, photos, settings);
+			// Upload new video to Firebase
+			const result = await uploadToFirebase(generatedVideoBlob, photos, settings);
 
 			// Fix: Check for both result.slideshowId and result.success
 			if (result.success && result.slideshowId) {
@@ -1457,8 +1403,8 @@
 			generationPhase = 'Publishing draft to memorial...';
 			generationProgress = 50;
 
-			// Upload new video to Cloudflare (this will replace the old one)
-			const result = await uploadToCloudflare(draftVideoBlob, photos, settings);
+			// Upload new video to Firebase (this will replace the old one)
+			const result = await uploadToFirebase(draftVideoBlob, photos, settings);
 
 			if (result.slideshowId) {
 				// Update published slideshow data
@@ -1520,11 +1466,30 @@
 		URL.revokeObjectURL(url);
 	}
 
-	// Future: Download from Cloudflare in preferred format
-	async function downloadFromCloudflare(format: 'webm' | 'mp4' = 'mp4') {
-		// This would use the Cloudflare Stream API to get transcoded versions
-		// Implementation would fetch the video in the requested format
-		console.log(`Downloading ${format} version from Cloudflare...`);
+	// Download WebM video from Firebase Storage
+	async function downloadFromFirebase() {
+		if (!publishedSlideshow?.playbackUrl) {
+			alert('No video available to download');
+			return;
+		}
+		
+		try {
+			const response = await fetch(publishedSlideshow.playbackUrl);
+			const blob = await response.blob();
+			const url = URL.createObjectURL(blob);
+			
+			const a = document.createElement('a');
+			a.href = url;
+			a.download = `${publishedSlideshow.title || 'memorial-slideshow'}.webm`;
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+			
+			URL.revokeObjectURL(url);
+		} catch (error) {
+			console.error('Download failed:', error);
+			alert('Failed to download video');
+		}
 	}
 
 	// Clear all photos

@@ -2,15 +2,6 @@
 	import SlideshowPlayer from './SlideshowPlayer.svelte';
 	import type { MemorialSlideshow } from '$lib/types/slideshow';
 	
-	interface SlideshowEmbed {
-		embedCode: string;
-		title: string;
-		location: string;
-		createdAt: string;
-		createdBy: string;
-		createdByEmail?: string;
-	}
-	
 	interface Props {
 		slideshows: MemorialSlideshow[];
 		memorialName: string;
@@ -18,10 +9,9 @@
 		editable?: boolean;
 		currentUserId?: string;
 		heroMode?: boolean;
-		slideshowEmbed?: SlideshowEmbed | null;
 	}
 	
-	let { slideshows, memorialName, memorialId, editable = false, currentUserId, heroMode = false, slideshowEmbed }: Props = $props();
+	let { slideshows, memorialName, memorialId, editable = false, currentUserId, heroMode = false }: Props = $props();
 	
 	// Filter and sort slideshows
 	const sortedSlideshows = $derived(() => {
@@ -35,16 +25,7 @@
 </script>
 
 <section class="slideshow-section" class:hero-mode={heroMode}>
-	{#if slideshowEmbed}
-		<!-- Slideshow Embed Override - Takes Priority -->
-		<div class="slideshows-container" class:hero-container={heroMode}>
-			<div class="slideshow-embed-container">
-				<div class="embed-wrapper">
-					{@html slideshowEmbed.embedCode}
-				</div>
-			</div>
-		</div>
-	{:else if sortedSlideshows().length > 0}
+	{#if sortedSlideshows().length > 0}
 		<div class="slideshows-container" class:hero-container={heroMode}>
 			{#each sortedSlideshows() as slideshow (slideshow.id)}
 				<SlideshowPlayer {slideshow} {editable} {currentUserId} />
@@ -200,27 +181,6 @@
 		color: #92400e;
 		background: #fffbf5;
 		transform: translateY(-1px);
-	}
-	
-	/* Slideshow Embed Styles - Clean and borderless */
-	.slideshow-embed-container {
-		width: 100%;
-	}
-	
-	.embed-wrapper {
-		position: relative;
-		width: 100%;
-		padding-bottom: 56.25%; /* 16:9 aspect ratio */
-		overflow: hidden;
-	}
-	
-	.embed-wrapper :global(iframe) {
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		border: none;
 	}
 	
 	@media (max-width: 768px) {

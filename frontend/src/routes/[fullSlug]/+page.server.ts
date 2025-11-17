@@ -78,9 +78,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			createdByUserId: memorialData.createdByUserId || null,
 			// Emergency embed override
 			emergencyEmbed: memorialData.emergencyEmbed || null,
-			
-			// Slideshow embed override
-			slideshowEmbed: memorialData.slideshowEmbed || null,
 			// Access control fields
 			ownerUid: memorialData.ownerUid || null,
 			funeralDirectorUid: memorialData.funeralDirectorUid || null,
@@ -94,18 +91,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			lovedOneName: memorial.lovedOneName,
 			fullSlug: memorial.fullSlug,
 			isPublic: memorial.isPublic,
-			hasEmergencyEmbed: !!memorial.emergencyEmbed,
-			hasSlideshowEmbed: !!memorial.slideshowEmbed
+			hasEmergencyEmbed: !!memorial.emergencyEmbed
 		});
-		
-		// Debug slideshow embed
-		if (memorial.slideshowEmbed) {
-			console.log('🎨 [MEMORIAL_PAGE] Slideshow Embed detected:', {
-				title: memorial.slideshowEmbed.title,
-				location: memorial.slideshowEmbed.location,
-				embedCodeLength: memorial.slideshowEmbed.embedCode?.length
-			});
-		}
 
 		// Load streams for this memorial
 		console.log('🎬 [MEMORIAL_PAGE] Loading streams for memorial:', memorial.id);

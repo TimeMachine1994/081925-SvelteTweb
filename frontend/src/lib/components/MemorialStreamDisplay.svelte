@@ -140,23 +140,10 @@
 	// 3. Stream has a valid Cloudflare iframe URL available (means it's streamable)
 	let categorizedLiveStreams = $derived(
 		liveStreams.filter(s => {
-			console.log('🔍 [CATEGORIZE] Checking stream:', s.id, {
-				status: s.status,
-				isVisible: s.isVisible,
-				scheduledStartTime: s.scheduledStartTime,
-				hasCloudflareId: !!(s.streamCredentials?.cloudflareInputId || s.cloudflareInputId)
-			});
-			
-			if (s.isVisible === false) {
-				console.log('❌ [CATEGORIZE] Stream hidden (isVisible=false):', s.id);
-				return false;
-			}
+			if (s.isVisible === false) return false;
 			
 			// Explicitly marked as live
-			if (s.status === 'live') {
-				console.log('✅ [CATEGORIZE] Stream is LIVE (status=live):', s.id);
-				return true;
-			}
+			if (s.status === 'live') return true;
 			
 			// Smart detection: If scheduled/ready BUT past the scheduled start time,
 			// treat as live (stream is probably broadcasting even if webhook didn't fire)
@@ -164,28 +151,17 @@
 				const scheduledTime = new Date(s.scheduledStartTime).getTime();
 				const now = currentTime.getTime();
 				
-				console.log('🕒 [CATEGORIZE] Time check:', s.id, {
-					scheduledTime: new Date(scheduledTime).toLocaleString(),
-					currentTime: new Date(now).toLocaleString(),
-					isPastScheduledTime: now >= scheduledTime
-				});
-				
 				// If we're past the scheduled time, assume it's live
-				if (now >= scheduledTime) {
-					console.log('🎥 [SMART DETECT] Treating as LIVE (past scheduled time):', s.id);
-					return true;
-				}
+				if (now >= scheduledTime) return true;
 			}
 			
 			// FALLBACK: If stream has a Cloudflare Input ID, show it as available
 			// This handles cases where scheduled time is wrong but stream is ready
 			if ((s.status === 'scheduled' || s.status === 'ready') && 
 			    (s.streamCredentials?.cloudflareInputId || s.cloudflareInputId)) {
-				console.log('📡 [SMART DETECT] Stream has Cloudflare ID - showing as available:', s.id);
 				return true;
 			}
 			
-			console.log('❌ [CATEGORIZE] Not live:', s.id);
 			return false;
 		})
 	);
@@ -198,10 +174,7 @@
 			
 			// If already in live streams, don't show in scheduled
 			const isInLiveStreams = categorizedLiveStreams.some(live => live.id === s.id);
-			if (isInLiveStreams) {
-				console.log('⏭️ [CATEGORIZE] Stream already in live section, skipping scheduled:', s.id);
-				return false;
-			}
+			if (isInLiveStreams) return false;
 			
 			// Must have a future scheduled time
 			if (s.scheduledStartTime) {
@@ -259,23 +232,6 @@
 	let hasVisibleStreams = $derived(
 		categorizedLiveStreams.length > 0 || scheduledStreams.length > 0 || recordedStreams.length > 0
 	);
-	
-	// Log stream counts for debugging
-	$effect(() => {
-		console.log('📊 [STREAM COUNTS]', {
-			live: categorizedLiveStreams.length,
-			scheduled: scheduledStreams.length,
-			recorded: recordedStreams.length,
-			total: liveStreams.length
-		});
-		
-		if (categorizedLiveStreams.length > 0) {
-			console.log('🔴 [LIVE STREAMS]:', categorizedLiveStreams.map(s => s.id));
-		}
-		if (scheduledStreams.length > 0) {
-			console.log('📅 [SCHEDULED STREAMS]:', scheduledStreams.map(s => s.id));
-		}
-	});
 </script>
 
 {#if emergencyEmbed}

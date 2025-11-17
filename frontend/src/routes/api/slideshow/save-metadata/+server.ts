@@ -4,7 +4,7 @@ import { adminDb } from '$lib/server/firebase';
 
 /**
  * Lightweight API to save slideshow metadata only
- * Video is uploaded to Cloudflare Stream, photos to Firebase Storage
+ * Video and photos are uploaded to Firebase Storage
  * This avoids Vercel's 4.5MB serverless function body limit
  */
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -20,20 +20,21 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	const userRole = locals.user.role;
 
 	try {
-		const { memorialId, title, cloudflareStreamId, playbackUrl, cloudflarePlaybackUrl, thumbnailUrl, photos, settings, audio } = await request.json();
+		const { memorialId, title, firebaseStoragePath, playbackUrl, thumbnailUrl, photos, settings, audio, status, isFirebaseHosted } = await request.json();
 
 		console.log('💾 [METADATA API] Metadata received:', {
 			memorialId,
 			title,
-			cloudflareStreamId,
+			firebaseStoragePath,
 			playbackUrl: playbackUrl?.substring(0, 50) + '...',
 			photoCount: photos?.length,
-			hasAudio: !!audio
+			hasAudio: !!audio,
+			isFirebaseHosted
 		});
 
 		// Validate required fields
-		if (!cloudflareStreamId || !playbackUrl || !memorialId || !photos) {
-			return error(400, 'Missing required fields: cloudflareStreamId, playbackUrl, memorialId, photos');
+		if (!firebaseStoragePath || !playbackUrl || !memorialId || !photos) {
+			return error(400, 'Missing required fields: firebaseStoragePath, playbackUrl, memorialId, photos');
 		}
 
 		// Verify memorial exists and user has permission
@@ -107,10 +108,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			id: slideshowId,
 			title: title || 'Memorial Slideshow',
 			memorialId,
-			// Cloudflare Stream URLs
-			cloudflareStreamId,
-			playbackUrl, // HLS URL
-			cloudflarePlaybackUrl, // Direct MP4 URL
+			// Firebase Storage URLs
+			firebaseStoragePath,
+			playbackUrl, // Firebase Storage WebM video URL
 			thumbnailUrl: thumbnailUrl || null,
 			photos: Array.isArray(photos) ? photos.map((photo: any) => ({
 				id: photo.id || '',
@@ -126,10 +126,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				aspectRatio: '16:9'
 			},
 			audio: audio || null,
-			// Set to 'processing' initially - Cloudflare needs time to transcode
-			// Will be updated to 'ready' via webhook when transcoding completes
-			status: isUpdate ? existingData.status : 'processing',
-			isCloudflareHosted: true,
+			// WebM videos are immediately ready (no transcoding needed)
+			status: status || 'ready',
+			isFirebaseHosted: isFirebaseHosted !== false, // Default to true
 			createdBy: existingData.createdBy || userId || '',
 			createdAt: existingData.createdAt || new Date().toISOString(),
 			updatedAt: new Date().toISOString()
@@ -161,7 +160,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			success: true,
 			slideshowId,
 			downloadURL: playbackUrl,
-			cloudflareStreamId,
+			firebaseStoragePath,
 			thumbnailUrl,
 			message: `Slideshow ${isUpdate ? 'updated' : 'created'} successfully`
 		});

@@ -53,15 +53,8 @@
 	onMount(() => {
 		console.log('🎨 [MEMORIAL PAGE] Client-side data loaded:', {
 			memorialId: memorial?.id,
-			hasEmergencyEmbed: !!memorial?.emergencyEmbed,
-			hasSlideshowEmbed: !!memorial?.slideshowEmbed,
-			slideshowEmbedLocation: memorial?.slideshowEmbed?.location,
-			slideshowEmbedTitle: memorial?.slideshowEmbed?.title
+			hasEmergencyEmbed: !!memorial?.emergencyEmbed
 		});
-		
-		if (memorial?.slideshowEmbed) {
-			console.log('🎨 [MEMORIAL PAGE] Slideshow embed will display in:', memorial.slideshowEmbed.location);
-		}
 	});
 
 	// Booking banner state
@@ -315,7 +308,6 @@
 							editable={canEditSlideshows()}
 							currentUserId={user?.uid}
 							heroMode={true}
-							slideshowEmbed={memorial.slideshowEmbed?.location === 'header' ? memorial.slideshowEmbed : null}
 						/>
 					</div>
 				</div>
@@ -330,20 +322,17 @@
 						/>
 					</div>
 					
-					<!-- Body Slideshow Section - Show if location is 'body' -->
-					{#if memorial.slideshowEmbed?.location === 'body'}
-						<div class="body-slideshow-section">
-							<SlideshowSection 
-								{slideshows} 
-								memorialName={memorial.lovedOneName || 'Unknown'}
-								memorialId={memorial.id}
-								editable={canEditSlideshows()}
-								currentUserId={user?.uid}
-								heroMode={false}
-								slideshowEmbed={memorial.slideshowEmbed}
-							/>
-						</div>
-					{/if}
+					<!-- Body Slideshow Section -->
+					<div class="body-slideshow-section">
+						<SlideshowSection 
+							{slideshows} 
+							memorialName={memorial.lovedOneName || 'Unknown'}
+							memorialId={memorial.id}
+							editable={canEditSlideshows()}
+							currentUserId={user?.uid}
+							heroMode={false}
+						/>
+					</div>
 					
 					<div class="legacy-content">
 						{@html (memorial as any).custom_html}
@@ -426,7 +415,6 @@
 							editable={canEditSlideshows()}
 							currentUserId={user?.uid}
 							heroMode={true}
-							slideshowEmbed={memorial.slideshowEmbed?.location === 'header' ? memorial.slideshowEmbed : null}
 						/>
 					</div>
 					</div>
@@ -462,20 +450,17 @@
 						</div>
 					</div>
 					
-					<!-- Body Slideshow Section - Show if location is 'body' -->
-					{#if memorial.slideshowEmbed?.location === 'body'}
-						<div class="body-slideshow-section">
-							<SlideshowSection 
-								{slideshows} 
-								memorialName={memorial.lovedOneName || 'Unknown'}
-								memorialId={memorial.id}
-								editable={canEditSlideshows()}
-								currentUserId={user?.uid}
-								heroMode={false}
-								slideshowEmbed={memorial.slideshowEmbed}
-							/>
-						</div>
-					{/if}
+					<!-- Body Slideshow Section -->
+					<div class="body-slideshow-section">
+						<SlideshowSection 
+							{slideshows} 
+							memorialName={memorial.lovedOneName || 'Unknown'}
+							memorialId={memorial.id}
+							editable={canEditSlideshows()}
+							currentUserId={user?.uid}
+							heroMode={false}
+						/>
+					</div>
 					
 					<!-- Content area for future features -->
 				</div>

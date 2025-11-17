@@ -39,31 +39,35 @@
 	let isPlaying = $state(autoplay);
 	let slideInterval: ReturnType<typeof setInterval> | null = null;
 	
-	// Cloudflare Stream video source
+	// Firebase Storage video source
 	const videoSrc = $derived(() => {
-		return slideshow.playbackUrl; // Cloudflare HLS URL
+		return slideshow.playbackUrl; // Firebase Storage URL for WebM video
 	});
 	
 	const posterImage = $derived(() => slideshow.thumbnailUrl || '');
 	
-	// Download MP4 from Cloudflare
+	// Download WebM video from Firebase Storage
 	async function downloadSlideshow() {
-		if (!slideshow.cloudflareStreamId) {
+		if (!slideshow.playbackUrl) {
 			alert('Download not available for this slideshow');
 			return;
 		}
 		
 		try {
-			// Use direct playback URL or construct download link
-			const downloadUrl = slideshow.cloudflarePlaybackUrl || slideshow.playbackUrl;
+			// Fetch the video and create a download link
+			const response = await fetch(slideshow.playbackUrl);
+			const blob = await response.blob();
+			const url = URL.createObjectURL(blob);
 			
 			const a = document.createElement('a');
-			a.href = downloadUrl;
-			a.download = `${slideshow.title || 'memorial-slideshow'}.mp4`;
-			a.target = '_blank';
+			a.href = url;
+			a.download = `${slideshow.title || 'memorial-slideshow'}.webm`;
 			document.body.appendChild(a);
 			a.click();
 			document.body.removeChild(a);
+			
+			// Clean up the object URL
+			URL.revokeObjectURL(url);
 		} catch (error) {
 			console.error('Download failed:', error);
 			alert('Failed to download slideshow. Please try again.');
@@ -117,7 +121,7 @@
 </script>
 
 {#if slideshow.status === 'ready' && videoSrc()}
-	<!-- Cloudflare Stream Video Player -->
+	<!-- Firebase Storage WebM Video Player -->
 	<div class="slideshow-player" class:editable={canEditThisSlideshow()}>
 		<div class="player-actions">
 			{#if canEditThisSlideshow()}
@@ -144,7 +148,7 @@
 				{controls}
 				{autoplay}
 				poster={posterImage()}
-				class="cloudflare-player"
+				class="webm-player"
 				preload="metadata"
 			>
 				<track kind="captions" src="" srclang="en" label="English" />
@@ -240,7 +244,7 @@
 		overflow: hidden;
 	}
 	
-	.cloudflare-player {
+	.webm-player {
 		width: 100%;
 		height: 100%;
 		border: none;
