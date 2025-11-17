@@ -3,7 +3,6 @@
 	import SlideshowSection from '$lib/components/SlideshowSection.svelte';
 	import MemorialStreamDisplay from '$lib/components/MemorialStreamDisplay.svelte';
 	import BookingReminderBanner from '$lib/components/BookingReminderBanner.svelte';
-	import { ChatPanel, ChatToggleButton } from '$lib/components/chat';
 	import { shouldShowBookingBanner, markBannerAsSeen, debugBannerState } from '$lib/utils/bookingBanner';
 	import { onMount } from 'svelte';
 	import { Facebook, Twitter, Linkedin, Share2, X } from 'lucide-svelte';
@@ -28,26 +27,6 @@
 		);
 	});
 	
-	// Determine if user is memorial owner (for chat moderation)
-	let isMemorialOwner = $derived(() => {
-		if (!user || !memorial) return false;
-		return (
-			user.role === 'admin' ||
-			memorial.ownerUid === user.uid
-		);
-	});
-	
-	// Chat state
-	let isChatOpen = $state(false);
-	let unreadChatCount = $state(0);
-	
-	function toggleChat() {
-		isChatOpen = !isChatOpen;
-		// Reset unread count when opening chat
-		if (isChatOpen) {
-			unreadChatCount = 0;
-		}
-	}
 	
 	// Debug logging for embed data
 	onMount(() => {
@@ -322,18 +301,6 @@
 						/>
 					</div>
 					
-					<!-- Body Slideshow Section -->
-					<div class="body-slideshow-section">
-						<SlideshowSection 
-							{slideshows} 
-							memorialName={memorial.lovedOneName || 'Unknown'}
-							memorialId={memorial.id}
-							editable={canEditSlideshows()}
-							currentUserId={user?.uid}
-							heroMode={false}
-						/>
-					</div>
-					
 					<div class="legacy-content">
 						{@html (memorial as any).custom_html}
 					</div>
@@ -428,37 +395,6 @@
 							streams={streams || []} 
 							memorialName={memorial.lovedOneName}
 							emergencyEmbed={memorial.emergencyEmbed}
-						/>
-						
-						<!-- Chat Section -->
-						<div class="chat-section">
-							<ChatToggleButton
-								isOpen={isChatOpen}
-								unreadCount={unreadChatCount}
-								isAuthenticated={!!user}
-								onclick={toggleChat}
-							/>
-							
-							<ChatPanel
-								memorialId={memorial.id}
-								memorialName={memorial.lovedOneName}
-								currentUserId={user?.uid}
-								isMemorialOwner={isMemorialOwner()}
-								isOpen={isChatOpen}
-								onClose={() => isChatOpen = false}
-							/>
-						</div>
-					</div>
-					
-					<!-- Body Slideshow Section -->
-					<div class="body-slideshow-section">
-						<SlideshowSection 
-							{slideshows} 
-							memorialName={memorial.lovedOneName || 'Unknown'}
-							memorialId={memorial.id}
-							editable={canEditSlideshows()}
-							currentUserId={user?.uid}
-							heroMode={false}
 						/>
 					</div>
 					
@@ -624,10 +560,6 @@
 		font-style: italic;
 	}
 	
-	.chat-section {
-		margin-top: 2rem;
-		margin-bottom: 2rem;
-	}
 
 	.loading {
 		text-align: center;
@@ -734,25 +666,6 @@
 		}
 	}
 	
-	/* Body Slideshow Section - Full width in content area */
-	.body-slideshow-section {
-		margin: 2rem 0;
-		padding: 0 1rem;
-		max-width: 1200px;
-		margin-left: auto;
-		margin-right: auto;
-	}
-	
-	.body-slideshow-section :global(.slideshow-section) {
-		margin: 0;
-	}
-	
-	@media (max-width: 768px) {
-		.body-slideshow-section {
-			margin: 1.5rem 0;
-			padding: 0 0.5rem;
-		}
-	}
 
 	/* Social Share Styles */
 	.share-container {
