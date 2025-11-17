@@ -162,11 +162,6 @@
 			return;
 		}
 
-		if (!embedTitle.trim()) {
-			alert('Please enter a title for this embed');
-			return;
-		}
-
 		isCreatingEmbed = true;
 
 		try {
@@ -175,7 +170,7 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					embedCode: embedCode.trim(),
-					title: embedTitle.trim()
+					title: embedTitle.trim() || 'Emergency Embed'
 				})
 			});
 
@@ -226,8 +221,8 @@
 	
 	// Slideshow embed functions
 	async function handleCreateSlideshowEmbed() {
-		if (!slideshowEmbedCode.trim() || !slideshowEmbedTitle.trim()) {
-			alert('Please fill in all required fields');
+		if (!slideshowEmbedCode.trim()) {
+			alert('Please enter an embed code or iframe URL');
 			return;
 		}
 		
@@ -239,7 +234,7 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					embedCode: slideshowEmbedCode,
-					title: slideshowEmbedTitle,
+					title: slideshowEmbedTitle.trim() || 'Slideshow Embed',
 					location: slideshowEmbedLocation
 				})
 			});
@@ -363,7 +358,7 @@
 				<p class="info-text">Use this to quickly embed an external stream (Vimeo, YouTube, etc.) that will appear immediately on the memorial page.</p>
 				
 				<div class="form-group">
-					<label for="embed-title">Title *</label>
+					<label for="embed-title">Title (optional)</label>
 					<input
 						id="embed-title"
 						type="text"
@@ -518,7 +513,7 @@ https://player.vimeo.com/video/123456789'
 				<p class="info-text">Use this to quickly embed an external slideshow (Google Slides, etc.) that will replace the normal slideshow.</p>
 				
 				<div class="form-group">
-					<label for="slideshow-embed-title">Title *</label>
+					<label for="slideshow-embed-title">Title (optional)</label>
 					<input
 						id="slideshow-embed-title"
 						type="text"
@@ -691,16 +686,16 @@ https://docs.google.com/presentation/d/e/.../embed?start=true&loop=true'
 	.stream-form h3 { margin: 0 0 1rem 0; font-size: 1.125rem; color: #2d3748; }
 	
 	/* Emergency embed form */
-	.emergency-form { background: #fff5f5; border: 2px solid #fc8181; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 1rem; }
-	.emergency-form h3 { margin: 0 0 0.5rem 0; font-size: 1.125rem; color: #c53030; }
-	.info-text { color: #742a2a; font-size: 0.875rem; margin-bottom: 1rem; }
+	.emergency-form { background: #f7fafc; border: 1px solid #cbd5e0; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 1rem; }
+	.emergency-form h3 { margin: 0 0 0.5rem 0; font-size: 1.125rem; color: #2d3748; }
+	.info-text { color: #4a5568; font-size: 0.875rem; margin-bottom: 1rem; }
 	.warning-box { background: #fed7d7; border: 1px solid #fc8181; border-radius: 0.375rem; padding: 0.75rem; margin-top: 1rem; margin-bottom: 1rem; color: #742a2a; font-size: 0.875rem; }
 	
 	/* Active emergency embed display */
-	.emergency-embed-active { background: #fff5f5; border: 2px solid #fc8181; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem; }
+	.emergency-embed-active { background: #f7fafc; border: 1px solid #cbd5e0; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem; }
 	.emergency-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
-	.emergency-header h3 { margin: 0; font-size: 1rem; color: #c53030; }
-	.emergency-embed-active p { margin: 0.5rem 0; font-size: 0.875rem; color: #742a2a; }
+	.emergency-header h3 { margin: 0; font-size: 1rem; color: #2d3748; }
+	.emergency-embed-active p { margin: 0.5rem 0; font-size: 0.875rem; color: #4a5568; }
 	.embed-preview { font-family: monospace; font-size: 0.75rem; background: white; padding: 0.5rem; border-radius: 0.25rem; word-break: break-all; }
 	.warning-text { font-weight: 600; color: #c53030; margin-top: 0.75rem; }
 	
