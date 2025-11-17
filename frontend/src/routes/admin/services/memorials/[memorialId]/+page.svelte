@@ -46,6 +46,9 @@
 	let slideshowEmbedTitle = $state('');
 	let slideshowEmbedLocation = $state('header'); // 'header' or 'body'
 	let isCreatingSlideshowEmbed = $state(false);
+	
+	// Edit slideshow embed modal
+	let showEditSlideshowModal = $state(false);
 
 	async function handleDelete() {
 		const confirmMessage = `Are you sure you want to delete "${memorial.lovedOneName}"?\n\nThis will mark it as deleted and hide it from the admin list.`;
@@ -262,6 +265,14 @@
 		slideshowEmbedCode = '';
 		slideshowEmbedTitle = '';
 		slideshowEmbedLocation = 'header';
+	}
+	
+	function openEditSlideshowModal() {
+		showEditSlideshowModal = true;
+	}
+	
+	function closeEditSlideshowModal() {
+		showEditSlideshowModal = false;
 	}
 	
 	async function handleRemoveSlideshowEmbed() {
@@ -485,9 +496,14 @@ https://player.vimeo.com/video/123456789'
 			<div class="emergency-embed-active">
 				<div class="emergency-header">
 					<h3>🎨 Active Slideshow Embed</h3>
-					<button class="danger-btn-small" onclick={handleRemoveSlideshowEmbed}>
-						🗑️ Remove
-					</button>
+					<div class="button-group">
+						<button class="edit-btn-small" onclick={openEditSlideshowModal}>
+							✏️ View/Edit
+						</button>
+						<button class="danger-btn-small" onclick={handleRemoveSlideshowEmbed}>
+							🗑️ Remove
+						</button>
+					</div>
 				</div>
 				<p><strong>Title:</strong> {memorial.slideshowEmbed.title}</p>
 				<p><strong>Location:</strong> {memorial.slideshowEmbed.location === 'header' ? 'Header' : 'Body'}</p>
@@ -601,6 +617,41 @@ https://docs.google.com/presentation/d/e/.../embed?start=true&loop=true'
 		</div>
 	</div>
 </AdminLayout>
+
+<!-- Edit Slideshow Embed Modal -->
+{#if showEditSlideshowModal && memorial.slideshowEmbed}
+	<div class="modal-overlay" onclick={closeEditSlideshowModal}>
+		<div class="modal-content" onclick={(e) => e.stopPropagation()}>
+			<div class="modal-header">
+				<h3>🎨 Slideshow Embed Details</h3>
+				<button class="close-btn" onclick={closeEditSlideshowModal}>✖</button>
+			</div>
+			
+			<div class="modal-body">
+				<div class="info-section">
+					<p><strong>Title:</strong> {memorial.slideshowEmbed.title}</p>
+					<p><strong>Location:</strong> {memorial.slideshowEmbed.location === 'header' ? 'Header (Hero section)' : 'Body (Below streams)'}</p>
+					<p><strong>Created:</strong> {formatDate(memorial.slideshowEmbed.createdAt)}</p>
+				</div>
+				
+				<div class="code-section">
+					<label><strong>Full Embed Code:</strong></label>
+					<textarea 
+						readonly 
+						class="code-textarea"
+						value={memorial.slideshowEmbed.embedCode}
+						onclick={(e) => e.target.select()}
+					></textarea>
+					<p class="help-text">Click the code to select all, then copy (Ctrl+C / Cmd+C)</p>
+				</div>
+			</div>
+			
+			<div class="modal-footer">
+				<button class="secondary-btn" onclick={closeEditSlideshowModal}>Close</button>
+			</div>
+		</div>
+	</div>
+{/if}
 
 <style>
 	.header-actions { display: flex; justify-content: space-between; margin-bottom: 1.5rem; }
@@ -791,5 +842,161 @@ https://docs.google.com/presentation/d/e/.../embed?start=true&loop=true'
 	.form-group select:disabled {
 		background: #edf2f7;
 		cursor: not-allowed;
+	}
+	
+	/* Edit button */
+	button.edit-btn-small {
+		background: #3182ce;
+		color: white;
+		border-color: #3182ce;
+		padding: 0.375rem 0.75rem;
+		font-size: 0.875rem;
+	}
+	
+	button.edit-btn-small:hover {
+		background: #2c5282;
+	}
+	
+	/* Modal styles */
+	.modal-overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(0, 0, 0, 0.6);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 9999;
+		padding: 1rem;
+	}
+	
+	.modal-content {
+		background: white;
+		border-radius: 0.5rem;
+		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+		max-width: 700px;
+		width: 100%;
+		max-height: 90vh;
+		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+	}
+	
+	.modal-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 1.5rem;
+		border-bottom: 1px solid #e2e8f0;
+	}
+	
+	.modal-header h3 {
+		margin: 0;
+		font-size: 1.25rem;
+		color: #2d3748;
+	}
+	
+	.close-btn {
+		background: none;
+		border: none;
+		font-size: 1.5rem;
+		color: #718096;
+		cursor: pointer;
+		padding: 0.25rem 0.5rem;
+		line-height: 1;
+		transition: color 0.2s;
+	}
+	
+	.close-btn:hover {
+		color: #2d3748;
+		background: none;
+	}
+	
+	.modal-body {
+		padding: 1.5rem;
+		overflow-y: auto;
+		flex: 1;
+	}
+	
+	.info-section {
+		background: #f7fafc;
+		border: 1px solid #e2e8f0;
+		border-radius: 0.375rem;
+		padding: 1rem;
+		margin-bottom: 1.5rem;
+	}
+	
+	.info-section p {
+		margin: 0.5rem 0;
+		font-size: 0.875rem;
+		color: #2d3748;
+	}
+	
+	.info-section p:first-child {
+		margin-top: 0;
+	}
+	
+	.info-section p:last-child {
+		margin-bottom: 0;
+	}
+	
+	.code-section {
+		margin-top: 1.5rem;
+	}
+	
+	.code-section label {
+		display: block;
+		margin-bottom: 0.5rem;
+		font-size: 0.875rem;
+		color: #4a5568;
+	}
+	
+	.code-textarea {
+		width: 100%;
+		min-height: 200px;
+		padding: 0.75rem;
+		border: 1px solid #cbd5e0;
+		border-radius: 0.375rem;
+		font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+		font-size: 0.8125rem;
+		line-height: 1.5;
+		background: #f7fafc;
+		color: #2d3748;
+		resize: vertical;
+	}
+	
+	.code-textarea:focus {
+		outline: none;
+		border-color: #3182ce;
+		box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+		background: white;
+	}
+	
+	.help-text {
+		margin: 0.5rem 0 0 0;
+		font-size: 0.75rem;
+		color: #718096;
+		font-style: italic;
+	}
+	
+	.modal-footer {
+		padding: 1rem 1.5rem;
+		border-top: 1px solid #e2e8f0;
+		display: flex;
+		justify-content: flex-end;
+		gap: 0.75rem;
+	}
+	
+	button.secondary-btn {
+		background: #718096;
+		color: white;
+		border-color: #718096;
+		padding: 0.5rem 1.5rem;
+	}
+	
+	button.secondary-btn:hover {
+		background: #4a5568;
 	}
 </style>

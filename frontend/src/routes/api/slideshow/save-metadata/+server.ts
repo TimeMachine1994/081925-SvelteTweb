@@ -126,7 +126,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				aspectRatio: '16:9'
 			},
 			audio: audio || null,
-			status: 'ready',
+			// Set to 'processing' initially - Cloudflare needs time to transcode
+			// Will be updated to 'ready' via webhook when transcoding completes
+			status: isUpdate ? existingData.status : 'processing',
 			isCloudflareHosted: true,
 			createdBy: existingData.createdBy || userId || '',
 			createdAt: existingData.createdAt || new Date().toISOString(),

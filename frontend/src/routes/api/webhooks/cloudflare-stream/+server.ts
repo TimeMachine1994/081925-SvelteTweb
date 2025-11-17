@@ -153,8 +153,56 @@ export const POST: RequestHandler = async ({ request }) => {
 			return json({ error: 'Missing identifier' }, { status: 400 });
 		}
 
-		console.log('🔍 [CLOUDFLARE WEBHOOK] Searching for stream with ID:', searchId, 'State:', state);
+		console.log('🔍 [CLOUDFLARE WEBHOOK] Searching for stream or slideshow with ID:', searchId, 'State:', state);
 
+		// Check if this is a slideshow video (has type in meta)
+		const isSlideshowVideo = meta?.type === 'memorial-slideshow';
+		
+		if (isSlideshowVideo) {
+			console.log('🎬 [CLOUDFLARE WEBHOOK] Detected slideshow video');
+			
+			// Find slideshow by Cloudflare Stream ID
+			const memorialsSnapshot = await adminDb.collectionGroup('slideshows')
+				.where('cloudflareStreamId', '==', videoUid)
+				.limit(1)
+				.get();
+			
+			if (memorialsSnapshot.empty) {
+				console.log('❌ [CLOUDFLARE WEBHOOK] Slideshow not found for video UID:', videoUid);
+				return json({ error: 'Slideshow not found' }, { status: 404 });
+			}
+			
+			const slideshowDoc = memorialsSnapshot.docs[0];
+			const slideshowData = slideshowDoc.data();
+			
+			console.log('✅ [CLOUDFLARE WEBHOOK] Found slideshow:', slideshowDoc.id, 'Current status:', slideshowData.status);
+			
+			// Update slideshow status based on Cloudflare state
+			let updates: any = {
+				updatedAt: new Date().toISOString()
+			};
+			
+			if (state === 'ready') {
+				updates.status = 'ready';
+				console.log('✅ [CLOUDFLARE WEBHOOK] Slideshow transcoding complete - setting to ready');
+			} else if (state === 'error') {
+				updates.status = 'error';
+				updates.errorMessage = meta?.errorMessage || payload.status?.errorReasonText || 'Transcoding failed';
+				console.log('❌ [CLOUDFLARE WEBHOOK] Slideshow transcoding error:', updates.errorMessage);
+			}
+			
+			// Update slideshow document
+			await slideshowDoc.ref.update(updates);
+			console.log('💾 [CLOUDFLARE WEBHOOK] Slideshow updated:', slideshowDoc.id);
+			
+			return json({
+				success: true,
+				slideshowId: slideshowDoc.id,
+				status: updates.status
+			});
+		}
+
+		// Handle livestream webhooks (existing logic)
 		// Find stream by Cloudflare Input ID (check both new and legacy fields)
 		const newFieldQuery = adminDb
 			.collection('streams')

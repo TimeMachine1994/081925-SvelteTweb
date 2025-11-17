@@ -166,6 +166,15 @@
 			</div>
 		{/if}
 	</div>
+{:else if slideshow.status === 'processing'}
+	<div class="slideshow-processing">
+		<div class="processing-content">
+			<div class="spinner"></div>
+			<h4>Processing Slideshow</h4>
+			<p>Your slideshow "{slideshow.title}" is being transcoded to MP4/HLS format.</p>
+			<p class="processing-note">This usually takes 1-5 minutes. The page will automatically update when ready.</p>
+		</div>
+	</div>
 {:else if slideshow.status === 'error'}
 	<div class="slideshow-error">
 		<div class="error-content">
@@ -413,6 +422,12 @@
 		color: #6b7280;
 		margin: 0 0 1rem 0;
 		line-height: 1.5;
+	}
+	
+	.processing-note {
+		font-size: 0.875rem;
+		color: #9ca3af;
+		margin: 0.5rem 0 0 0 !important;
 	}
 	
 	.processing-meta {
