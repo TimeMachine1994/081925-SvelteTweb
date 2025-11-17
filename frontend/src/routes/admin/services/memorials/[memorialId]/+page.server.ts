@@ -142,6 +142,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			// Livestream legacy field (mostly replaced by streams collection)
 			livestream: memorialData.livestream || null,
 			
+			// Emergency embed override
+			emergencyEmbed: memorialData.emergencyEmbed || null,
+			
 			// Calculator/Payment - properly cleaned
 			calculatorConfig: cleanCalculatorConfig(memorialData.calculatorConfig),
 			isPaid: memorialData.isPaid || memorialData.calculatorConfig?.isPaid || false,

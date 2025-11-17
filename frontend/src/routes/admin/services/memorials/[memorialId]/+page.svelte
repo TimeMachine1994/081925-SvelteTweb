@@ -34,6 +34,12 @@
 	let streamTime = $state('');
 	let isCreatingStream = $state(false);
 
+	// Emergency embed state
+	let showEmergencyEmbed = $state(false);
+	let embedCode = $state('');
+	let embedTitle = $state('');
+	let isCreatingEmbed = $state(false);
+
 	async function handleDelete() {
 		const confirmMessage = `Are you sure you want to delete "${memorial.lovedOneName}"?\n\nThis will mark it as deleted and hide it from the admin list.`;
 		
@@ -139,6 +145,72 @@
 			alert('An error occurred while deleting the livestream.');
 		}
 	}
+
+	async function handleCreateEmergencyEmbed() {
+		if (!embedCode.trim()) {
+			alert('Please enter an embed code or iframe URL');
+			return;
+		}
+
+		if (!embedTitle.trim()) {
+			alert('Please enter a title for this embed');
+			return;
+		}
+
+		isCreatingEmbed = true;
+
+		try {
+			const response = await fetch(`/api/memorials/${memorial.id}/emergency-embed`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					embedCode: embedCode.trim(),
+					title: embedTitle.trim()
+				})
+			});
+
+			if (response.ok) {
+				alert('Emergency embed created successfully! It will appear on the memorial page.');
+				location.reload();
+			} else {
+				const error = await response.json();
+				alert(`Failed to create embed: ${error.message || 'Unknown error'}`);
+			}
+		} catch (error) {
+			console.error('Error creating emergency embed:', error);
+			alert('An error occurred while creating the embed.');
+		} finally {
+			isCreatingEmbed = false;
+		}
+	}
+
+	function cancelEmbedForm() {
+		showEmergencyEmbed = false;
+		embedCode = '';
+		embedTitle = '';
+	}
+
+	async function handleRemoveEmergencyEmbed() {
+		if (!confirm('Remove the emergency embed override?')) {
+			return;
+		}
+
+		try {
+			const response = await fetch(`/api/memorials/${memorial.id}/emergency-embed`, {
+				method: 'DELETE'
+			});
+
+			if (response.ok) {
+				alert('Emergency embed removed successfully');
+				location.reload();
+			} else {
+				alert('Failed to remove emergency embed');
+			}
+		} catch (error) {
+			console.error('Error removing emergency embed:', error);
+			alert('An error occurred while removing the embed.');
+		}
+	}
 </script>
 
 <AdminLayout title="Memorial Details" subtitle="View and manage all aspects of this memorial">
@@ -174,10 +246,82 @@
 	<div class="card">
 		<div class="section-header">
 			<h2>📹 Livestreams ({streams.length})</h2>
-			<button class="create-btn" onclick={() => showStreamForm = !showStreamForm}>
-				{showStreamForm ? '✖ Cancel' : '➕ Create Livestream'}
-			</button>
+			<div class="button-group">
+				<button class="create-btn" onclick={() => showStreamForm = !showStreamForm}>
+					{showStreamForm ? '✖ Cancel' : '➕ Create Livestream'}
+				</button>
+				<button class="emergency-btn" onclick={() => showEmergencyEmbed = !showEmergencyEmbed}>
+					{showEmergencyEmbed ? '✖ Cancel' : '🚨 Create Emergency Embed'}
+				</button>
+			</div>
 		</div>
+
+		{#if memorial.emergencyEmbed}
+			<div class="emergency-embed-active">
+				<div class="emergency-header">
+					<h3>🚨 Active Emergency Embed</h3>
+					<button class="danger-btn-small" onclick={handleRemoveEmergencyEmbed}>
+						🗑️ Remove
+					</button>
+				</div>
+				<p><strong>Title:</strong> {memorial.emergencyEmbed.title}</p>
+				<p class="embed-preview"><strong>Embed Code:</strong> {memorial.emergencyEmbed.embedCode.substring(0, 100)}...</p>
+				<p class="warning-text">⚠️ This embed is currently showing on the memorial page and overriding normal streams.</p>
+			</div>
+		{/if}
+
+		{#if showEmergencyEmbed}
+			<div class="emergency-form">
+				<h3>🚨 Emergency Embed Override</h3>
+				<p class="info-text">Use this to quickly embed an external stream (Vimeo, YouTube, etc.) that will appear immediately on the memorial page.</p>
+				
+				<div class="form-group">
+					<label for="embed-title">Title *</label>
+					<input
+						id="embed-title"
+						type="text"
+						bind:value={embedTitle}
+						placeholder="e.g., Memorial Service Live Stream"
+						disabled={isCreatingEmbed}
+					/>
+				</div>
+
+				<div class="form-group">
+					<label for="embed-code">Embed Code or iframe URL *</label>
+					<textarea
+						id="embed-code"
+						bind:value={embedCode}
+						placeholder='Paste full iframe embed code or just the URL. Examples:
+<iframe src="https://vimeo.com/..." ...></iframe>
+or
+https://player.vimeo.com/video/123456789'
+						rows="6"
+						disabled={isCreatingEmbed}
+					></textarea>
+				</div>
+
+				<div class="warning-box">
+					<strong>⚠️ Warning:</strong> This will override normal streams and display immediately on the memorial page.
+					Use for emergency situations only.
+				</div>
+
+				<div class="form-actions">
+					<button 
+						class="emergency-btn" 
+						onclick={handleCreateEmergencyEmbed}
+						disabled={isCreatingEmbed}
+					>
+						{isCreatingEmbed ? '⏳ Creating...' : '🚨 Activate Emergency Embed'}
+					</button>
+					<button 
+						onclick={cancelEmbedForm}
+						disabled={isCreatingEmbed}
+					>
+						Cancel
+					</button>
+				</div>
+			</div>
+		{/if}
 
 		{#if showStreamForm}
 			<div class="stream-form">
@@ -303,19 +447,41 @@
 	button.create-btn:hover { background: #2c5282; }
 	button.primary-btn { background: #3182ce; color: white; border-color: #3182ce; font-weight: 600; }
 	button.primary-btn:hover { background: #2c5282; }
+	button.emergency-btn { background: #e53e3e; color: white; border-color: #e53e3e; font-weight: 600; }
+	button.emergency-btn:hover { background: #c53030; }
+	button.danger-btn-small { background: #e53e3e; color: white; border-color: #e53e3e; padding: 0.375rem 0.75rem; font-size: 0.875rem; }
+	button.danger-btn-small:hover { background: #c53030; }
 
 	/* Section header */
 	.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+	.button-group { display: flex; gap: 0.5rem; }
 
 	/* Stream form */
 	.stream-form { background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 1rem; }
 	.stream-form h3 { margin: 0 0 1rem 0; font-size: 1.125rem; color: #2d3748; }
+	
+	/* Emergency embed form */
+	.emergency-form { background: #fff5f5; border: 2px solid #fc8181; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 1rem; }
+	.emergency-form h3 { margin: 0 0 0.5rem 0; font-size: 1.125rem; color: #c53030; }
+	.info-text { color: #742a2a; font-size: 0.875rem; margin-bottom: 1rem; }
+	.warning-box { background: #fed7d7; border: 1px solid #fc8181; border-radius: 0.375rem; padding: 0.75rem; margin-top: 1rem; margin-bottom: 1rem; color: #742a2a; font-size: 0.875rem; }
+	
+	/* Active emergency embed display */
+	.emergency-embed-active { background: #fff5f5; border: 2px solid #fc8181; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem; }
+	.emergency-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+	.emergency-header h3 { margin: 0; font-size: 1rem; color: #c53030; }
+	.emergency-embed-active p { margin: 0.5rem 0; font-size: 0.875rem; color: #742a2a; }
+	.embed-preview { font-family: monospace; font-size: 0.75rem; background: white; padding: 0.5rem; border-radius: 0.25rem; word-break: break-all; }
+	.warning-text { font-weight: 600; color: #c53030; margin-top: 0.75rem; }
 	
 	.form-group { margin-bottom: 1rem; }
 	.form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #4a5568; font-size: 0.875rem; }
 	.form-group input { width: 100%; padding: 0.625rem; border: 1px solid #cbd5e0; border-radius: 0.375rem; font-size: 0.875rem; }
 	.form-group input:focus { outline: none; border-color: #3182ce; box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1); }
 	.form-group input:disabled { background: #edf2f7; cursor: not-allowed; }
+	.form-group textarea { width: 100%; padding: 0.625rem; border: 1px solid #cbd5e0; border-radius: 0.375rem; font-size: 0.875rem; font-family: monospace; resize: vertical; }
+	.form-group textarea:focus { outline: none; border-color: #3182ce; box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1); }
+	.form-group textarea:disabled { background: #edf2f7; cursor: not-allowed; }
 	
 	.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 	

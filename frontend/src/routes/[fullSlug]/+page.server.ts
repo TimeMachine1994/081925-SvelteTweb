@@ -76,6 +76,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			custom_html: memorialData.custom_html || null,
 			hasCustomHtml: hasCustomHtml,
 			createdByUserId: memorialData.createdByUserId || null,
+			// Emergency embed override
+			emergencyEmbed: memorialData.emergencyEmbed || null,
 			// Access control fields
 			ownerUid: memorialData.ownerUid || null,
 			funeralDirectorUid: memorialData.funeralDirectorUid || null,

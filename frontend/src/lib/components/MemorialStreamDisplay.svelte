@@ -31,12 +31,21 @@
 		liveEndedAt?: string;
 	}
 	
+	interface EmergencyEmbed {
+		embedCode: string;
+		title: string;
+		createdAt: string;
+		createdBy: string;
+		createdByEmail?: string;
+	}
+	
 	interface Props {
 		streams: Stream[];
 		memorialName: string;
+		emergencyEmbed?: EmergencyEmbed | null;
 	}
 	
-	let { streams, memorialName }: Props = $props();
+	let { streams, memorialName, emergencyEmbed }: Props = $props();
 	
 	// Real-time stream updates - this will be updated by Firestore listeners
 	let liveStreams = $state<Stream[]>(streams || []);
@@ -269,7 +278,22 @@
 	});
 </script>
 
-{#if hasVisibleStreams}
+{#if emergencyEmbed}
+	<!-- Emergency Embed Override - Takes Priority -->
+	<div class="memorial-streams">
+		<div class="stream-section emergency-section">
+			<h2 class="stream-section-title">
+				<span class="emergency-indicator">🚨</span>
+				{emergencyEmbed.title}
+			</h2>
+			<div class="stream-item">
+				<div class="emergency-embed-container">
+					{@html emergencyEmbed.embedCode}
+				</div>
+			</div>
+		</div>
+	</div>
+{:else if hasVisibleStreams}
 	<div class="memorial-streams">
 		<!-- Live Streams -->
 		{#if categorizedLiveStreams.length > 0}
@@ -580,6 +604,52 @@
 		color: #D5BA7F;
 		font-style: italic;
 		margin-top: 1rem;
+	}
+	
+	/* Emergency Embed Styles */
+	.emergency-section {
+		border: 2px solid #ef4444;
+		border-radius: 12px;
+		padding: 1.5rem;
+		background: rgba(239, 68, 68, 0.05);
+	}
+	
+	.emergency-indicator {
+		font-size: 1.2rem;
+		animation: emergencyPulse 2s ease-in-out infinite;
+	}
+	
+	@keyframes emergencyPulse {
+		0%, 100% { opacity: 1; transform: scale(1); }
+		50% { opacity: 0.7; transform: scale(1.1); }
+	}
+	
+	.emergency-embed-container {
+		position: relative;
+		width: 100%;
+		padding-bottom: 56.25%; /* 16:9 aspect ratio */
+		background: #000;
+		border-radius: 8px;
+		overflow: hidden;
+		box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3);
+	}
+	
+	.emergency-embed-container :global(iframe) {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		border: none;
+	}
+	
+	.emergency-embed-container :global(video) {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
 	}
 	
 	/* Stock Player Styles - Match scheduled video layer */

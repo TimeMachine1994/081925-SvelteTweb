@@ -301,22 +301,6 @@
 							currentUserId={user?.uid}
 							heroMode={true}
 						/>
-					</div>
-				</div>
-				<!-- Legacy Custom HTML Content Only -->
-				<div class="memorial-content-container">
-					<!-- Stream Section for Legacy Layout - Always show, component handles empty state -->
-					<div class="streaming-section">
-						<MemorialStreamDisplay 
-							streams={streams || []} 
-							memorialName={memorial.lovedOneName}
-						/>
-					</div>
-					
-					<div class="legacy-content">
-						{@html (memorial as any).custom_html}
-					</div>
-				</div>
 			</div>
 		{:else}
 			<!-- Standard Memorial Layout -->
@@ -406,6 +390,7 @@
 						<MemorialStreamDisplay 
 							streams={streams || []} 
 							memorialName={memorial.lovedOneName}
+							emergencyEmbed={memorial.emergencyEmbed}
 						/>
 						
 						<!-- Chat Section -->
