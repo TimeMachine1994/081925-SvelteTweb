@@ -560,12 +560,30 @@ https://docs.google.com/presentation/d/e/.../embed?start=true&loop=true'
 			</div>
 		{/if}
 		
-		{#each slideshows as slideshow}
-			<div class="item">
-				<h3>{slideshow.title}</h3>
-				<p>{slideshow.photos?.length || 0} photos • Status: {slideshow.status}</p>
-			</div>
-		{/each}
+		{#if slideshows.length === 0 && !memorial.slideshowEmbed}
+			<p class="empty-message">No slideshows yet. Create one to commemorate {memorial.lovedOneName}.</p>
+		{/if}
+		
+		<div class="slideshows-list">
+			{#each slideshows as slideshow}
+				<a 
+					href="/slideshow-generator?memorialId={memorial.id}&slideshowId={slideshow.id}" 
+					class="slideshow-item"
+					title="Click to edit slideshow"
+				>
+					<div class="slideshow-info">
+						<h3>{slideshow.title}</h3>
+						<p>{slideshow.photos?.length || 0} photos • Status: {slideshow.status}</p>
+						{#if slideshow.musicTrackTitle}
+							<p class="music-info">🎵 {slideshow.musicTrackTitle}</p>
+						{/if}
+					</div>
+					<div class="slideshow-actions">
+						<span class="edit-icon">✏️ Edit</span>
+					</div>
+				</a>
+			{/each}
+		</div>
 	</div>
 
 	<div class="card">
@@ -685,5 +703,93 @@ https://docs.google.com/presentation/d/e/.../embed?start=true&loop=true'
 	
 	.delete-stream-btn:active { 
 		transform: translateY(0); 
+	}
+	
+	/* Slideshows list */
+	.slideshows-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		margin-top: 1rem;
+	}
+	
+	.slideshow-item {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 1rem;
+		border: 2px solid #e2e8f0;
+		border-radius: 0.5rem;
+		background: white;
+		text-decoration: none;
+		color: inherit;
+		transition: all 0.2s;
+		cursor: pointer;
+	}
+	
+	.slideshow-item:hover {
+		border-color: #D5BA7F;
+		background: #fffbf5;
+		transform: translateX(4px);
+		box-shadow: 0 2px 8px rgba(213, 186, 127, 0.2);
+	}
+	
+	.slideshow-info {
+		flex: 1;
+	}
+	
+	.slideshow-info h3 {
+		margin: 0 0 0.25rem 0;
+		font-size: 1rem;
+		color: #2d3748;
+	}
+	
+	.slideshow-info p {
+		margin: 0.25rem 0;
+		font-size: 0.875rem;
+		color: #718096;
+	}
+	
+	.music-info {
+		color: #D5BA7F;
+		font-weight: 500;
+	}
+	
+	.slideshow-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+	
+	.edit-icon {
+		color: #3182ce;
+		font-size: 0.875rem;
+		font-weight: 600;
+		white-space: nowrap;
+	}
+	
+	.slideshow-item:hover .edit-icon {
+		color: #2c5282;
+	}
+	
+	.form-group select {
+		width: 100%;
+		padding: 0.625rem;
+		border: 1px solid #cbd5e0;
+		border-radius: 0.375rem;
+		font-size: 0.875rem;
+		background: white;
+		cursor: pointer;
+	}
+	
+	.form-group select:focus {
+		outline: none;
+		border-color: #3182ce;
+		box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+	}
+	
+	.form-group select:disabled {
+		background: #edf2f7;
+		cursor: not-allowed;
 	}
 </style>
