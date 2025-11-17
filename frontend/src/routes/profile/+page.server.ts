@@ -182,14 +182,16 @@ export const actions: Actions = {
 		const userDoc = await adminDb.collection('users').doc(locals.user.uid).get();
 		const userData = userDoc.data();
 
-		if (userData?.memorialCount > 0 && !userData?.hasPaidForMemorial) {
-			// Get the first memorial to redirect user to payment
-			const memorialsSnap = await adminDb
-				.collection('memorials')
-				.where('ownerUid', '==', locals.user.uid)
-				.limit(1)
-				.get();
-			
+		// Query actual memorials to verify they exist (more reliable than memorialCount)
+		const memorialsSnap = await adminDb
+			.collection('memorials')
+			.where('ownerUid', '==', locals.user.uid)
+			.get();
+		
+		const actualMemorialCount = memorialsSnap.size;
+		
+		// Block creation if user has actual memorials and hasn't paid
+		if (actualMemorialCount > 0 && !userData?.hasPaidForMemorial) {
 			const firstMemorialId = memorialsSnap.docs[0]?.id;
 			
 			return fail(400, {
@@ -197,6 +199,21 @@ export const actions: Actions = {
 				needsPayment: true,
 				memorialId: firstMemorialId
 			});
+		}
+		
+		// Sync memorialCount if it's out of sync with actual memorials
+		if (userData && userData.memorialCount !== actualMemorialCount) {
+			console.log(`[PROFILE] Syncing memorialCount: ${userData.memorialCount} -> ${actualMemorialCount}`);
+			await adminDb
+				.collection('users')
+				.doc(locals.user.uid)
+				.set(
+					{
+						memorialCount: actualMemorialCount,
+						updatedAt: new Date().toISOString()
+					},
+					{ merge: true }
+				);
 		}
 
 		const lovedOneName = data.get('lovedOneName')?.toString().trim();
