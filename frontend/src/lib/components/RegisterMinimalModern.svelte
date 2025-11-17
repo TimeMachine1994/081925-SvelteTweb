@@ -95,10 +95,9 @@
 					progress = 80;
 					
 					// Use SvelteKit navigation to session page
-					// Funeral directors go to complete their profile, owners go directly to profile
-					const redirectUrl = selectedRole === 'owner' 
-						? `/auth/session?token=${result.data.customToken}&redirect=profile`
-						: `/auth/session?token=${result.data.customToken}&redirect=register/funeral-director`;
+					// Both owners and funeral directors go to their profile page after registration
+					// Their profile page will show role-specific features and options
+					const redirectUrl = `/auth/session?token=${result.data.customToken}&redirect=profile`;
 					
 					currentStep = 'Redirecting...';
 					progress = 100;
