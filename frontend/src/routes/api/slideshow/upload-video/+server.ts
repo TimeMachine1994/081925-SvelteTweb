@@ -2,6 +2,12 @@ import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN } from '$env/static/private';
 
+// Configure this route to use Edge runtime for large file uploads
+export const config = {
+	runtime: 'edge',
+	regions: ['iad1'] // Use region close to your users
+};
+
 /**
  * Upload slideshow video to Cloudflare Stream (server-side to avoid CORS)
  */
