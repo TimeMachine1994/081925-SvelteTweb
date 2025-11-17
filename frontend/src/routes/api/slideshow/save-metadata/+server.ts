@@ -4,15 +4,16 @@ import { adminDb } from '$lib/server/firebase';
 
 /**
  * Lightweight API to save slideshow metadata only
- * Video and photos are uploaded directly to Firebase Storage from client
+ * Video is uploaded to Cloudflare Stream, photos to Firebase Storage
  * This avoids Vercel's 4.5MB serverless function body limit
  */
 export const POST: RequestHandler = async ({ request, locals }) => {
 	console.log('💾 [METADATA API] Save request received');
 
+	// Authentication check
 	if (!locals.user) {
 		console.log('🔒 [METADATA API] No authenticated user');
-		throw error(401, 'Authentication required');
+		return error(401, 'Authentication required');
 	}
 
 	const userId = locals.user.uid;
@@ -30,8 +31,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			hasAudio: !!audio
 		});
 
+		// Validate required fields
 		if (!cloudflareStreamId || !playbackUrl || !memorialId || !photos) {
-			throw error(400, 'Missing required fields: cloudflareStreamId, playbackUrl, memorialId, photos');
+			return error(400, 'Missing required fields: cloudflareStreamId, playbackUrl, memorialId, photos');
 		}
 
 		// Verify memorial exists and user has permission
@@ -40,10 +42,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		if (!memorialDoc.exists) {
 			console.log('💾 [METADATA API] Memorial not found:', memorialId);
-			throw error(404, 'Memorial not found');
+			return error(404, 'Memorial not found');
 		}
 
 		const memorialData = memorialDoc.data();
+		
+		// Check user permissions
 		const hasPermission = 
 			userRole === 'admin' ||
 			memorialData?.ownerUid === userId ||
@@ -51,7 +55,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		if (!hasPermission) {
 			console.log('💾 [METADATA API] Insufficient permissions for user:', userId);
-			throw error(403, 'Insufficient permissions');
+			return error(403, 'Insufficient permissions');
 		}
 
 		// Check for existing slideshow to overwrite
@@ -160,14 +164,16 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			message: `Slideshow ${isUpdate ? 'updated' : 'created'} successfully`
 		});
 
-	} catch (err: any) {
+	} catch (err) {
 		console.error('💾 [METADATA API] Error:', err);
 		
-		if (err.status) {
-			throw err; // Re-throw SvelteKit errors
+		// Re-throw SvelteKit errors
+		if (err && typeof err === 'object' && 'status' in err) {
+			throw err;
 		}
 		
-		throw error(500, `Failed to save slideshow: ${err.message}`);
+		const message = err instanceof Error ? err.message : 'Unknown error';
+		return error(500, `Failed to save slideshow: ${message}`);
 	}
 };
 

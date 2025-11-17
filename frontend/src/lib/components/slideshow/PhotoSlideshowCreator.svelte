@@ -5,10 +5,6 @@
 	import { uploadPhotosToFirebaseStorage, uploadAudioToFirebaseStorage } from '$lib/utils/clientFirebaseStorage';
 	import AudioUploader from './AudioUploader.svelte';
 	import type { SlideshowAudio } from '$lib/types/slideshow';
-	
-	// Cloudflare Stream configuration
-	const CLOUDFLARE_ACCOUNT_ID = import.meta.env.PUBLIC_CLOUDFLARE_ACCOUNT_ID;
-	const CLOUDFLARE_API_TOKEN = import.meta.env.PUBLIC_CLOUDFLARE_API_TOKEN;
 
 	interface SlideshowPhoto {
 		id: string;
@@ -1034,51 +1030,36 @@
 		}
 	}
 	
-	// Upload video to Cloudflare Stream API
+	// Upload video to Cloudflare Stream via our API (server-side to avoid CORS)
 	async function uploadVideoToCloudflareStream(videoBlob: Blob, title: string) {
 		try {
-			console.log('☁️ Uploading to Cloudflare Stream API...');
+			console.log('☁️ Uploading to Cloudflare Stream via API...');
 			
 			const formData = new FormData();
-			formData.append('file', videoBlob, 'slideshow.webm');
+			formData.append('video', videoBlob, 'slideshow.webm');
+			formData.append('title', title);
+			formData.append('memorialId', memorialId || '');
 			
-			// Add metadata
-			const metadata = {
-				name: title,
-				meta: {
-					type: 'memorial-slideshow',
-					memorialId: memorialId || '',
-					created: new Date().toISOString()
-				}
-			};
-			formData.append('meta', JSON.stringify(metadata));
-			
-			const response = await fetch(
-				`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/stream`,
-				{
-					method: 'POST',
-					headers: {
-						'Authorization': `Bearer ${CLOUDFLARE_API_TOKEN}`,
-					},
-					body: formData
-				}
-			);
+			const response = await fetch('/api/slideshow/upload-video', {
+				method: 'POST',
+				body: formData
+			});
 			
 			if (!response.ok) {
-				const errorText = await response.text();
-				console.error('Cloudflare Stream upload failed:', response.status, errorText);
-				throw new Error(`Cloudflare upload failed: ${response.status} ${response.statusText}`);
+				const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+				console.error('Cloudflare Stream upload failed:', response.status, errorData);
+				throw new Error(errorData.message || `Upload failed: ${response.status} ${response.statusText}`);
 			}
 			
 			const result = await response.json();
 			
-			if (!result.success) {
-				console.error('Cloudflare Stream API error:', result.errors);
-				throw new Error(`Cloudflare API error: ${result.errors?.[0]?.message || 'Unknown error'}`);
+			if (!result.success || !result.cloudflareResult) {
+				console.error('Cloudflare Stream API error:', result);
+				throw new Error('Failed to get Cloudflare result');
 			}
 			
-			console.log('✅ Cloudflare Stream upload successful:', result.result.uid);
-			return result.result;
+			console.log('✅ Cloudflare Stream upload successful:', result.cloudflareResult.uid);
+			return result.cloudflareResult;
 			
 		} catch (error) {
 			console.error('❌ Cloudflare upload error:', error);
