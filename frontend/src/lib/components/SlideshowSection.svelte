@@ -39,7 +39,6 @@
 		<!-- Slideshow Embed Override - Takes Priority -->
 		<div class="slideshows-container" class:hero-container={heroMode}>
 			<div class="slideshow-embed-container">
-				<h3 class="slideshow-embed-title">{slideshowEmbed.title}</h3>
 				<div class="embed-wrapper">
 					{@html slideshowEmbed.embedCode}
 				</div>
@@ -203,28 +202,15 @@
 		transform: translateY(-1px);
 	}
 	
-	/* Slideshow Embed Styles */
+	/* Slideshow Embed Styles - Clean and borderless */
 	.slideshow-embed-container {
-		background: white;
-		border-radius: 12px;
-		padding: 1.5rem;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-	}
-	
-	.slideshow-embed-title {
-		font-size: 1.25rem;
-		font-weight: 600;
-		color: #1f2937;
-		margin: 0 0 1rem 0;
-		text-align: center;
+		width: 100%;
 	}
 	
 	.embed-wrapper {
 		position: relative;
 		width: 100%;
 		padding-bottom: 56.25%; /* 16:9 aspect ratio */
-		background: #000;
-		border-radius: 8px;
 		overflow: hidden;
 	}
 	
@@ -235,16 +221,6 @@
 		width: 100%;
 		height: 100%;
 		border: none;
-	}
-	
-	/* Hero mode adjustments for embed */
-	.slideshow-section.hero-mode .slideshow-embed-container {
-		padding: 1rem;
-	}
-	
-	.slideshow-section.hero-mode .slideshow-embed-title {
-		font-size: 1rem;
-		margin-bottom: 0.75rem;
 	}
 	
 	@media (max-width: 768px) {
@@ -259,14 +235,6 @@
 		
 		.slideshows-container.hero-container {
 			max-width: 200px; /* Smaller on mobile */
-		}
-		
-		.slideshow-embed-container {
-			padding: 1rem;
-		}
-		
-		.slideshow-embed-title {
-			font-size: 1.1rem;
 		}
 	}
 </style>
