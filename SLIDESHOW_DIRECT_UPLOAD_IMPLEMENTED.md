@@ -7,7 +7,7 @@
 ---
 
 ## Solution Implemented
-
+ 
 **Direct Upload to Cloudflare with Signed URLs** - Client uploads directly to Cloudflare, bypassing the server's 4.5MB limit.
 
 ---
