@@ -13,9 +13,9 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 	try {
 		const { embedCode, title, location } = await request.json();
 
-		// Validation
-		if (!embedCode || !title) {
-			throw svelteError(400, 'Missing required fields: embedCode and title');
+		// Validation - only embedCode is required
+		if (!embedCode || !embedCode.trim()) {
+			throw svelteError(400, 'Missing required field: embedCode');
 		}
 
 		if (!location || !['header', 'body'].includes(location)) {
@@ -28,10 +28,10 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			processedEmbedCode = `<iframe src="${processedEmbedCode}" frameborder="0" allowfullscreen></iframe>`;
 		}
 
-		// Create slideshow embed object
+		// Create slideshow embed object - title is optional
 		const slideshowEmbed = {
 			embedCode: processedEmbedCode,
-			title: title.trim(),
+			title: (title && title.trim()) || 'Slideshow Embed',
 			location: location,
 			createdAt: new Date().toISOString(),
 			createdBy: locals.user.uid,

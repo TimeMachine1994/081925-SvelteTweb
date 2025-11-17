@@ -281,13 +281,9 @@
 {#if emergencyEmbed}
 	<!-- Emergency Embed Override - Takes Priority -->
 	<div class="memorial-streams">
-		<div class="stream-section emergency-section">
-			<h2 class="stream-section-title">
-				<span class="emergency-indicator">🚨</span>
-				{emergencyEmbed.title}
-			</h2>
+		<div class="stream-section">
 			<div class="stream-item">
-				<div class="emergency-embed-container">
+				<div class="embed-container">
 					{@html emergencyEmbed.embedCode}
 				</div>
 			</div>
@@ -606,35 +602,17 @@
 		margin-top: 1rem;
 	}
 	
-	/* Emergency Embed Styles */
-	.emergency-section {
-		border: 2px solid #ef4444;
-		border-radius: 12px;
-		padding: 1.5rem;
-		background: rgba(239, 68, 68, 0.05);
-	}
-	
-	.emergency-indicator {
-		font-size: 1.2rem;
-		animation: emergencyPulse 2s ease-in-out infinite;
-	}
-	
-	@keyframes emergencyPulse {
-		0%, 100% { opacity: 1; transform: scale(1); }
-		50% { opacity: 0.7; transform: scale(1.1); }
-	}
-	
-	.emergency-embed-container {
+	/* Embed Container - Clean and normal styling */
+	.embed-container {
 		position: relative;
 		width: 100%;
 		padding-bottom: 56.25%; /* 16:9 aspect ratio */
 		background: #000;
 		border-radius: 8px;
 		overflow: hidden;
-		box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3);
 	}
 	
-	.emergency-embed-container :global(iframe) {
+	.embed-container :global(iframe) {
 		position: absolute;
 		top: 0;
 		left: 0;
@@ -643,7 +621,7 @@
 		border: none;
 	}
 	
-	.emergency-embed-container :global(video) {
+	.embed-container :global(video) {
 		position: absolute;
 		top: 0;
 		left: 0;

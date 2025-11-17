@@ -22,8 +22,9 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 	try {
 		const { embedCode, title } = await request.json();
 
-		if (!embedCode || !title) {
-			throw svelteError(400, 'Embed code and title are required');
+		// Only embedCode is required, title is optional
+		if (!embedCode || !embedCode.trim()) {
+			throw svelteError(400, 'Embed code is required');
 		}
 
 		// Get memorial document
@@ -42,10 +43,10 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			sanitizedEmbedCode = `<iframe src="${sanitizedEmbedCode}" width="100%" height="100%" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
 		}
 
-		// Create emergency embed object
+		// Create emergency embed object - title is optional
 		const emergencyEmbed = {
 			embedCode: sanitizedEmbedCode,
-			title: title.trim(),
+			title: (title && title.trim()) || 'Emergency Embed',
 			createdAt: new Date().toISOString(),
 			createdBy: locals.user.uid,
 			createdByEmail: locals.user.email
