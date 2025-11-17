@@ -79,6 +79,53 @@ service cloud.firestore {
         allow update: if false; // No updates allowed.
       }
 
+      // Chat messages subcollection
+      match /chat/{chatId} {
+        // Helper function to get memorial data
+        function getMemorial() {
+          return get(/databases/$(database)/documents/memorials/$(memorialId)).data;
+        }
+        
+        // Helper function to check if user can access memorial
+        function canAccessMemorial() {
+          let memorial = getMemorial();
+          return memorial.isPublic == true || 
+                 request.auth.uid == memorial.creatorUid ||
+                 request.auth.uid == memorial.ownerUid ||
+                 memorial.funeralDirectorUid == request.auth.uid;
+        }
+        
+        // Helper function to check if user is memorial owner
+        function isMemorialOwner() {
+          let memorial = getMemorial();
+          return request.auth.uid == memorial.ownerUid || 
+                 request.auth.uid == memorial.creatorUid ||
+                 memorial.funeralDirectorUid == request.auth.uid;
+        }
+        
+        // Read: Anyone can read non-deleted messages if they can access the memorial
+        allow read: if request.auth != null && 
+                       canAccessMemorial() && 
+                       resource.data.isDeleted == false;
+        
+        // Create: Authenticated users can create messages if memorial is accessible
+        allow create: if request.auth != null && 
+                         canAccessMemorial() &&
+                         request.resource.data.userId == request.auth.uid &&
+                         request.resource.data.isDeleted == false;
+        
+        // Update: Users can edit their own messages (not mark as deleted)
+        allow update: if request.auth != null && 
+                         resource.data.userId == request.auth.uid &&
+                         request.resource.data.userId == request.auth.uid &&
+                         request.resource.data.isDeleted == false;
+        
+        // Delete (soft delete): Users can delete own messages, memorial owners can delete any
+        allow update: if request.auth != null && 
+                         (resource.data.userId == request.auth.uid || isMemorialOwner() || isAdmin()) &&
+                         request.resource.data.isDeleted == true;
+      }
+
     }
 
     // Blog collection rules - for FireCMS admin access
