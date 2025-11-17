@@ -300,6 +300,7 @@
 							editable={canEditSlideshows()}
 							currentUserId={user?.uid}
 							heroMode={true}
+							slideshowEmbed={memorial.slideshowEmbed?.location === 'header' ? memorial.slideshowEmbed : null}
 						/>
 					</div>
 				</div>
@@ -387,16 +388,17 @@
 						</div>
 						
 						<!-- Hero Slideshow Section - Outside glass box but inside header content -->
-						<div class="hero-slideshow">
-							<SlideshowSection 
-								{slideshows} 
-								memorialName={memorial.lovedOneName || 'Unknown'}
-								memorialId={memorial.id}
-								editable={canEditSlideshows()}
-								currentUserId={user?.uid}
-								heroMode={true}
-							/>
-						</div>
+					<div class="hero-slideshow">
+						<SlideshowSection 
+							{slideshows} 
+							memorialName={memorial.lovedOneName || 'Unknown'}
+							memorialId={memorial.id}
+							editable={canEditSlideshows()}
+							currentUserId={user?.uid}
+							heroMode={true}
+							slideshowEmbed={memorial.slideshowEmbed?.location === 'header' ? memorial.slideshowEmbed : null}
+						/>
+					</div>
 					</div>
 				</div>
 

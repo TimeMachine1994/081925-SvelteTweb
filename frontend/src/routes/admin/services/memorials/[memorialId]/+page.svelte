@@ -39,6 +39,13 @@
 	let embedCode = $state('');
 	let embedTitle = $state('');
 	let isCreatingEmbed = $state(false);
+	
+	// Slideshow embed state
+	let showSlideshowEmbed = $state(false);
+	let slideshowEmbedCode = $state('');
+	let slideshowEmbedTitle = $state('');
+	let slideshowEmbedLocation = $state('header'); // 'header' or 'body'
+	let isCreatingSlideshowEmbed = $state(false);
 
 	async function handleDelete() {
 		const confirmMessage = `Are you sure you want to delete "${memorial.lovedOneName}"?\n\nThis will mark it as deleted and hide it from the admin list.`;
@@ -191,24 +198,93 @@
 	}
 
 	async function handleRemoveEmergencyEmbed() {
-		if (!confirm('Remove the emergency embed override?')) {
+		if (!confirm('Are you sure you want to remove the emergency embed? Normal streams will be displayed again.')) {
 			return;
 		}
-
+		
 		try {
 			const response = await fetch(`/api/memorials/${memorial.id}/emergency-embed`, {
 				method: 'DELETE'
 			});
-
-			if (response.ok) {
-				alert('Emergency embed removed successfully');
-				location.reload();
-			} else {
-				alert('Failed to remove emergency embed');
+			
+			if (!response.ok) {
+				const error = await response.json();
+				alert(`Error: ${error.message}`);
+				return;
 			}
+			
+			alert('Emergency embed removed successfully!');
+			window.location.reload();
 		} catch (error) {
-			console.error('Error removing emergency embed:', error);
-			alert('An error occurred while removing the embed.');
+			console.error('Error removing embed:', error);
+			alert('Failed to remove emergency embed. Please try again.');
+		}
+	}
+	
+	// Slideshow embed functions
+	async function handleCreateSlideshowEmbed() {
+		if (!slideshowEmbedCode.trim() || !slideshowEmbedTitle.trim()) {
+			alert('Please fill in all required fields');
+			return;
+		}
+		
+		isCreatingSlideshowEmbed = true;
+		
+		try {
+			const response = await fetch(`/api/memorials/${memorial.id}/slideshow-embed`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					embedCode: slideshowEmbedCode,
+					title: slideshowEmbedTitle,
+					location: slideshowEmbedLocation
+				})
+			});
+			
+			if (!response.ok) {
+				const error = await response.json();
+				alert(`Error: ${error.message}`);
+				return;
+			}
+			
+			alert('Slideshow embed activated successfully!');
+			window.location.reload();
+		} catch (error) {
+			console.error('Error creating slideshow embed:', error);
+			alert('Failed to create slideshow embed. Please try again.');
+		} finally {
+			isCreatingSlideshowEmbed = false;
+		}
+	}
+	
+	function cancelSlideshowEmbedForm() {
+		showSlideshowEmbed = false;
+		slideshowEmbedCode = '';
+		slideshowEmbedTitle = '';
+		slideshowEmbedLocation = 'header';
+	}
+	
+	async function handleRemoveSlideshowEmbed() {
+		if (!confirm('Are you sure you want to remove the slideshow embed? Normal slideshows will be displayed again.')) {
+			return;
+		}
+		
+		try {
+			const response = await fetch(`/api/memorials/${memorial.id}/slideshow-embed`, {
+				method: 'DELETE'
+			});
+			
+			if (!response.ok) {
+				const error = await response.json();
+				alert(`Error: ${error.message}`);
+				return;
+			}
+			
+			alert('Slideshow embed removed successfully!');
+			window.location.reload();
+		} catch (error) {
+			console.error('Error removing slideshow embed:', error);
+			alert('Failed to remove slideshow embed. Please try again.');
 		}
 	}
 </script>
@@ -398,7 +474,92 @@ https://player.vimeo.com/video/123456789'
 	</div>
 
 	<div class="card">
-		<h2>🖼️ Slideshows ({slideshows.length})</h2>
+		<div class="section-header">
+			<h2>🖼️ Slideshows ({slideshows.length})</h2>
+			<button class="emergency-btn" onclick={() => showSlideshowEmbed = !showSlideshowEmbed}>
+				{showSlideshowEmbed ? '✖ Cancel' : '🎨 Create Slideshow Embed'}
+			</button>
+		</div>
+		
+		{#if memorial.slideshowEmbed}
+			<div class="emergency-embed-active">
+				<div class="emergency-header">
+					<h3>🎨 Active Slideshow Embed</h3>
+					<button class="danger-btn-small" onclick={handleRemoveSlideshowEmbed}>
+						🗑️ Remove
+					</button>
+				</div>
+				<p><strong>Title:</strong> {memorial.slideshowEmbed.title}</p>
+				<p><strong>Location:</strong> {memorial.slideshowEmbed.location === 'header' ? 'Header' : 'Body'}</p>
+				<p class="embed-preview"><strong>Embed Code:</strong> {memorial.slideshowEmbed.embedCode.substring(0, 100)}...</p>
+				<p class="warning-text">⚠️ This embed is currently showing on the memorial page and overriding normal slideshows.</p>
+			</div>
+		{/if}
+		
+		{#if showSlideshowEmbed}
+			<div class="emergency-form">
+				<h3>🎨 Slideshow Embed Override</h3>
+				<p class="info-text">Use this to quickly embed an external slideshow (Google Slides, etc.) that will replace the normal slideshow.</p>
+				
+				<div class="form-group">
+					<label for="slideshow-embed-title">Title *</label>
+					<input
+						id="slideshow-embed-title"
+						type="text"
+						bind:value={slideshowEmbedTitle}
+						placeholder="e.g., Memorial Photo Slideshow"
+						disabled={isCreatingSlideshowEmbed}
+					/>
+				</div>
+
+				<div class="form-group">
+					<label for="slideshow-embed-location">Display Location *</label>
+					<select
+						id="slideshow-embed-location"
+						bind:value={slideshowEmbedLocation}
+						disabled={isCreatingSlideshowEmbed}
+					>
+						<option value="header">Header (Hero section)</option>
+						<option value="body">Body (Below streams)</option>
+					</select>
+				</div>
+
+				<div class="form-group">
+					<label for="slideshow-embed-code">Embed Code or iframe URL *</label>
+					<textarea
+						id="slideshow-embed-code"
+						bind:value={slideshowEmbedCode}
+						placeholder='Paste full iframe embed code or just the URL. Examples:
+<iframe src="https://docs.google.com/presentation/..." ...></iframe>
+or
+https://docs.google.com/presentation/d/e/.../embed?start=true&loop=true'
+						rows="6"
+						disabled={isCreatingSlideshowEmbed}
+					></textarea>
+				</div>
+
+				<div class="warning-box">
+					<strong>⚠️ Warning:</strong> This will override normal slideshows and display immediately on the memorial page.
+				</div>
+
+				<div class="form-actions">
+					<button 
+						class="emergency-btn" 
+						onclick={handleCreateSlideshowEmbed}
+						disabled={isCreatingSlideshowEmbed}
+					>
+						{isCreatingSlideshowEmbed ? '⏳ Creating...' : '🎨 Activate Slideshow Embed'}
+					</button>
+					<button 
+						onclick={cancelSlideshowEmbedForm}
+						disabled={isCreatingSlideshowEmbed}
+					>
+						Cancel
+					</button>
+				</div>
+			</div>
+		{/if}
+		
 		{#each slideshows as slideshow}
 			<div class="item">
 				<h3>{slideshow.title}</h3>
