@@ -93,8 +93,19 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			id: memorial.id,
 			lovedOneName: memorial.lovedOneName,
 			fullSlug: memorial.fullSlug,
-			isPublic: memorial.isPublic
+			isPublic: memorial.isPublic,
+			hasEmergencyEmbed: !!memorial.emergencyEmbed,
+			hasSlideshowEmbed: !!memorial.slideshowEmbed
 		});
+		
+		// Debug slideshow embed
+		if (memorial.slideshowEmbed) {
+			console.log('🎨 [MEMORIAL_PAGE] Slideshow Embed detected:', {
+				title: memorial.slideshowEmbed.title,
+				location: memorial.slideshowEmbed.location,
+				embedCodeLength: memorial.slideshowEmbed.embedCode?.length
+			});
+		}
 
 		// Load streams for this memorial
 		console.log('🎬 [MEMORIAL_PAGE] Loading streams for memorial:', memorial.id);

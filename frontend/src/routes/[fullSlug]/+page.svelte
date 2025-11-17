@@ -48,6 +48,21 @@
 			unreadChatCount = 0;
 		}
 	}
+	
+	// Debug logging for embed data
+	onMount(() => {
+		console.log('🎨 [MEMORIAL PAGE] Client-side data loaded:', {
+			memorialId: memorial?.id,
+			hasEmergencyEmbed: !!memorial?.emergencyEmbed,
+			hasSlideshowEmbed: !!memorial?.slideshowEmbed,
+			slideshowEmbedLocation: memorial?.slideshowEmbed?.location,
+			slideshowEmbedTitle: memorial?.slideshowEmbed?.title
+		});
+		
+		if (memorial?.slideshowEmbed) {
+			console.log('🎨 [MEMORIAL PAGE] Slideshow embed will display in:', memorial.slideshowEmbed.location);
+		}
+	});
 
 	// Booking banner state
 	let showBookingBanner = $state(false);
