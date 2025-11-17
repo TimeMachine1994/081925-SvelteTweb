@@ -46,34 +46,6 @@
 	
 	const posterImage = $derived(() => slideshow.thumbnailUrl || '');
 	
-	// Download WebM video from Firebase Storage
-	async function downloadSlideshow() {
-		if (!slideshow.playbackUrl) {
-			alert('Download not available for this slideshow');
-			return;
-		}
-		
-		try {
-			// Fetch the video and create a download link
-			const response = await fetch(slideshow.playbackUrl);
-			const blob = await response.blob();
-			const url = URL.createObjectURL(blob);
-			
-			const a = document.createElement('a');
-			a.href = url;
-			a.download = `${slideshow.title || 'memorial-slideshow'}.webm`;
-			document.body.appendChild(a);
-			a.click();
-			document.body.removeChild(a);
-			
-			// Clean up the object URL
-			URL.revokeObjectURL(url);
-		} catch (error) {
-			console.error('Download failed:', error);
-			alert('Failed to download slideshow. Please try again.');
-		}
-	}
-	
 	// Local slideshow functions
 	function nextSlide() {
 		currentSlide = (currentSlide + 1) % slideshow.photos.length;
@@ -133,13 +105,6 @@
 					✏️ Edit
 				</button>
 			{/if}
-			<button 
-				class="action-btn download-btn"
-				onclick={downloadSlideshow}
-				title="Download MP4"
-			>
-				⬇️ Download
-			</button>
 		</div>
 		
 		<div class="video-container">
@@ -224,15 +189,6 @@
 	.action-btn:hover {
 		background: rgba(213, 186, 127, 1);
 		transform: scale(1.05);
-	}
-	
-	.download-btn {
-		background: rgba(59, 130, 246, 0.9);
-		color: white;
-	}
-	
-	.download-btn:hover {
-		background: rgba(59, 130, 246, 1);
 	}
 	
 	.video-container {
