@@ -301,6 +301,23 @@
 							currentUserId={user?.uid}
 							heroMode={true}
 						/>
+					</div>
+				</div>
+				<!-- Legacy Custom HTML Content Only -->
+				<div class="memorial-content-container">
+					<!-- Stream Section for Legacy Layout - Always show, component handles empty state -->
+					<div class="streaming-section">
+						<MemorialStreamDisplay 
+							streams={streams || []} 
+							memorialName={memorial.lovedOneName}
+							emergencyEmbed={memorial.emergencyEmbed}
+						/>
+					</div>
+					
+					<div class="legacy-content">
+						{@html (memorial as any).custom_html}
+					</div>
+				</div>
 			</div>
 		{:else}
 			<!-- Standard Memorial Layout -->
@@ -425,6 +442,9 @@
 </div>
 
 <style>
+	/* Import Fanwood font - MUST BE FIRST */
+	@import url('https://fonts.googleapis.com/css2?family=Fanwood+Text:ital,wght@0,400;1,400&display=swap');
+
 	/* Memorial Page Styles */
 	.memorial-page {
 		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -609,9 +629,6 @@
 		max-width: 800px;
 		margin: 0 auto;
 	}
-
-	/* Import Fanwood font */
-	@import url('https://fonts.googleapis.com/css2?family=Fanwood+Text:ital,wght@0,400;1,400&display=swap');
 
 	/* Banner integration styles */
 	.memorial-page.banner-active {
