@@ -19,18 +19,19 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	const userRole = locals.user.role;
 
 	try {
-		const { memorialId, title, videoUrl, videoStoragePath, photos, settings, audio } = await request.json();
+		const { memorialId, title, cloudflareStreamId, playbackUrl, cloudflarePlaybackUrl, thumbnailUrl, photos, settings, audio } = await request.json();
 
 		console.log('💾 [METADATA API] Metadata received:', {
 			memorialId,
 			title,
-			videoUrl: videoUrl?.substring(0, 50) + '...',
+			cloudflareStreamId,
+			playbackUrl: playbackUrl?.substring(0, 50) + '...',
 			photoCount: photos?.length,
 			hasAudio: !!audio
 		});
 
-		if (!videoUrl || !memorialId || !photos) {
-			throw error(400, 'Missing required fields: videoUrl, memorialId, photos');
+		if (!cloudflareStreamId || !playbackUrl || !memorialId || !photos) {
+			throw error(400, 'Missing required fields: cloudflareStreamId, playbackUrl, memorialId, photos');
 		}
 
 		// Verify memorial exists and user has permission
@@ -102,9 +103,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			id: slideshowId,
 			title: title || 'Memorial Slideshow',
 			memorialId,
-			firebaseStoragePath: videoStoragePath,
-			playbackUrl: videoUrl,
-			thumbnailUrl: null,
+			// Cloudflare Stream URLs
+			cloudflareStreamId,
+			playbackUrl, // HLS URL
+			cloudflarePlaybackUrl, // Direct MP4 URL
+			thumbnailUrl: thumbnailUrl || null,
 			photos: Array.isArray(photos) ? photos.map((photo: any) => ({
 				id: photo.id || '',
 				caption: photo.caption || '',
@@ -120,8 +123,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			},
 			audio: audio || null,
 			status: 'ready',
-			isFirebaseHosted: true,
-			isCloudflareHosted: false,
+			isCloudflareHosted: true,
 			createdBy: existingData.createdBy || userId || '',
 			createdAt: existingData.createdAt || new Date().toISOString(),
 			updatedAt: new Date().toISOString()
@@ -152,7 +154,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return json({
 			success: true,
 			slideshowId,
-			downloadURL: videoUrl,
+			downloadURL: playbackUrl,
+			cloudflareStreamId,
+			thumbnailUrl,
 			message: `Slideshow ${isUpdate ? 'updated' : 'created'} successfully`
 		});
 

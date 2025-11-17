@@ -315,6 +315,21 @@
 						/>
 					</div>
 					
+					<!-- Body Slideshow Section - Show if location is 'body' -->
+					{#if memorial.slideshowEmbed?.location === 'body'}
+						<div class="body-slideshow-section">
+							<SlideshowSection 
+								{slideshows} 
+								memorialName={memorial.lovedOneName || 'Unknown'}
+								memorialId={memorial.id}
+								editable={canEditSlideshows()}
+								currentUserId={user?.uid}
+								heroMode={false}
+								slideshowEmbed={memorial.slideshowEmbed}
+							/>
+						</div>
+					{/if}
+					
 					<div class="legacy-content">
 						{@html (memorial as any).custom_html}
 					</div>
@@ -431,6 +446,21 @@
 							/>
 						</div>
 					</div>
+					
+					<!-- Body Slideshow Section - Show if location is 'body' -->
+					{#if memorial.slideshowEmbed?.location === 'body'}
+						<div class="body-slideshow-section">
+							<SlideshowSection 
+								{slideshows} 
+								memorialName={memorial.lovedOneName || 'Unknown'}
+								memorialId={memorial.id}
+								editable={canEditSlideshows()}
+								currentUserId={user?.uid}
+								heroMode={false}
+								slideshowEmbed={memorial.slideshowEmbed}
+							/>
+						</div>
+					{/if}
 					
 					<!-- Content area for future features -->
 				</div>
@@ -701,6 +731,26 @@
 		
 		.hero-slideshow :global(.slideshows-container) {
 			max-width: 200px; /* Smaller on mobile */
+		}
+	}
+	
+	/* Body Slideshow Section - Full width in content area */
+	.body-slideshow-section {
+		margin: 2rem 0;
+		padding: 0 1rem;
+		max-width: 1200px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+	
+	.body-slideshow-section :global(.slideshow-section) {
+		margin: 0;
+	}
+	
+	@media (max-width: 768px) {
+		.body-slideshow-section {
+			margin: 1.5rem 0;
+			padding: 0 0.5rem;
 		}
 	}
 

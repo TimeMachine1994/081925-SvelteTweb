@@ -39,12 +39,36 @@
 	let isPlaying = $state(autoplay);
 	let slideInterval: ReturnType<typeof setInterval> | null = null;
 	
-	// Firebase Storage video source (always available for new slideshows)
+	// Cloudflare Stream video source
 	const videoSrc = $derived(() => {
-		return slideshow.playbackUrl; // Firebase Storage direct URL
+		return slideshow.playbackUrl; // Cloudflare HLS URL
 	});
 	
 	const posterImage = $derived(() => slideshow.thumbnailUrl || '');
+	
+	// Download MP4 from Cloudflare
+	async function downloadSlideshow() {
+		if (!slideshow.cloudflareStreamId) {
+			alert('Download not available for this slideshow');
+			return;
+		}
+		
+		try {
+			// Use direct playback URL or construct download link
+			const downloadUrl = slideshow.cloudflarePlaybackUrl || slideshow.playbackUrl;
+			
+			const a = document.createElement('a');
+			a.href = downloadUrl;
+			a.download = `${slideshow.title || 'memorial-slideshow'}.mp4`;
+			a.target = '_blank';
+			document.body.appendChild(a);
+			a.click();
+			document.body.removeChild(a);
+		} catch (error) {
+			console.error('Download failed:', error);
+			alert('Failed to download slideshow. Please try again.');
+		}
+	}
 	
 	// Local slideshow functions
 	function nextSlide() {
@@ -93,17 +117,26 @@
 </script>
 
 {#if slideshow.status === 'ready' && videoSrc()}
-	<!-- Firebase Storage Video Player -->
+	<!-- Cloudflare Stream Video Player -->
 	<div class="slideshow-player" class:editable={canEditThisSlideshow()}>
-		{#if canEditThisSlideshow()}
+		<div class="player-actions">
+			{#if canEditThisSlideshow()}
+				<button 
+					class="action-btn edit-btn"
+					onclick={handleSlideshowEdit}
+					title="Click to edit slideshow"
+				>
+					✏️ Edit
+				</button>
+			{/if}
 			<button 
-				class="edit-overlay"
-				onclick={handleSlideshowEdit}
-				title="Click to edit slideshow"
+				class="action-btn download-btn"
+				onclick={downloadSlideshow}
+				title="Download MP4"
 			>
-				✏️ Edit Slideshow
+				⬇️ Download
 			</button>
-		{/if}
+		</div>
 		
 		<div class="video-container">
 			<video
@@ -111,7 +144,7 @@
 				{controls}
 				{autoplay}
 				poster={posterImage()}
-				class="firebase-player"
+				class="cloudflare-player"
 				preload="metadata"
 			>
 				<track kind="captions" src="" srclang="en" label="English" />
@@ -151,28 +184,19 @@
 		margin-bottom: 2rem;
 		border: 1px solid #1f2937;
 		transition: all 0.3s ease;
-	}
-	
-	.slideshow-player.editable {
-		cursor: pointer;
 		position: relative;
 	}
 	
-	.slideshow-player.editable:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-		border-color: #D5BA7F;
-	}
-	
-	.slideshow-player.editable:focus {
-		outline: 2px solid #D5BA7F;
-		outline-offset: 2px;
-	}
-	
-	.edit-overlay {
+	.player-actions {
 		position: absolute;
 		top: 1rem;
 		left: 1rem;
+		display: flex;
+		gap: 0.5rem;
+		z-index: 10;
+	}
+	
+	.action-btn {
 		background: rgba(213, 186, 127, 0.9);
 		color: #0a0a1a;
 		padding: 0.5rem 0.75rem;
@@ -181,13 +205,21 @@
 		font-weight: 500;
 		border: none;
 		cursor: pointer;
-		z-index: 10;
 		transition: all 0.3s ease;
 	}
 	
-	.edit-overlay:hover {
+	.action-btn:hover {
 		background: rgba(213, 186, 127, 1);
 		transform: scale(1.05);
+	}
+	
+	.download-btn {
+		background: rgba(59, 130, 246, 0.9);
+		color: white;
+	}
+	
+	.download-btn:hover {
+		background: rgba(59, 130, 246, 1);
 	}
 	
 	.video-container {
@@ -199,7 +231,7 @@
 		overflow: hidden;
 	}
 	
-	.firebase-player {
+	.cloudflare-player {
 		width: 100%;
 		height: 100%;
 		border: none;

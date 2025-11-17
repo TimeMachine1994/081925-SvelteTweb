@@ -2,9 +2,13 @@
 	import { Upload, X, Play, Settings, Plus, ExternalLink, ChevronUp, ChevronDown } from 'lucide-svelte';
 	import { createEventDispatcher, onDestroy, onMount } from 'svelte';
 	import { SimpleSlideshowGenerator, type GenerationProgress } from '$lib/utils/SimpleSlideshowGenerator';
-	import { uploadVideoToFirebaseStorage, uploadPhotosToFirebaseStorage, uploadAudioToFirebaseStorage } from '$lib/utils/clientFirebaseStorage';
+	import { uploadPhotosToFirebaseStorage, uploadAudioToFirebaseStorage } from '$lib/utils/clientFirebaseStorage';
 	import AudioUploader from './AudioUploader.svelte';
 	import type { SlideshowAudio } from '$lib/types/slideshow';
+	
+	// Cloudflare Stream configuration
+	const CLOUDFLARE_ACCOUNT_ID = import.meta.env.PUBLIC_CLOUDFLARE_ACCOUNT_ID;
+	const CLOUDFLARE_API_TOKEN = import.meta.env.PUBLIC_CLOUDFLARE_API_TOKEN;
 
 	interface SlideshowPhoto {
 		id: string;
@@ -910,8 +914,8 @@
 
 	// Note: updateExistingSlideshow function removed since we no longer support edit mode
 
-	// Upload video to Firebase Storage (client-side to avoid Vercel's 4.5MB limit)
-	async function uploadToFirebase(videoBlob: Blob, photos: SlideshowPhoto[], settings: SlideshowSettings) {
+	// Upload video to Cloudflare Stream
+	async function uploadToCloudflare(videoBlob: Blob, photos: SlideshowPhoto[], settings: SlideshowSettings) {
 		try {
 			const title = `Memorial Slideshow - ${new Date().toLocaleDateString()}`;
 			
@@ -939,20 +943,15 @@
 				console.log('✅ [CLIENT] Audio uploaded:', audioData);
 			}
 			
-			// Step 2: Upload video directly to Firebase Storage from client
-			console.log('📤 [CLIENT] Uploading video to Firebase Storage...');
-			generationPhase = 'Uploading video...';
+			// Step 2: Upload video to Cloudflare Stream
+			console.log('☁️ [CLIENT] Uploading video to Cloudflare Stream...');
+			generationPhase = 'Uploading to Cloudflare Stream...';
+			generationProgress = 88;
 			
-			const videoResult = await uploadVideoToFirebaseStorage(
-				videoBlob,
-				memorialId || '',
-				title,
-				(progress) => {
-					generationProgress = 88 + (progress * 0.05); // 88-93%
-				}
-			);
+			const cloudflareResult = await uploadVideoToCloudflareStream(videoBlob, title);
 			
-			console.log('✅ [CLIENT] Video uploaded:', videoResult.downloadURL);
+			console.log('✅ [CLIENT] Video uploaded to Cloudflare:', cloudflareResult);
+			generationProgress = 93;
 			
 			// Step 3: Upload photos that don't have stored URLs yet
 			generationPhase = 'Uploading photos...';
@@ -1004,11 +1003,14 @@
 			const metadata = {
 				memorialId: memorialId || '',
 				title,
-				videoUrl: videoResult.downloadURL,
-				videoStoragePath: videoResult.storagePath,
+				// Cloudflare Stream URLs
+				cloudflareStreamId: cloudflareResult.uid,
+				playbackUrl: cloudflareResult.playback?.hls || '',
+				cloudflarePlaybackUrl: cloudflareResult.playback?.dash || '',
+				thumbnailUrl: cloudflareResult.thumbnail || '',
 				photos: allPhotos,
 				settings: settingsWithAudio,
-				audio: audioData // Now includes actual Firebase Storage URL
+				audio: audioData
 			};
 			
 			const response = await fetch('/api/slideshow/save-metadata', {
@@ -1031,8 +1033,60 @@
 			throw error;
 		}
 	}
+	
+	// Upload video to Cloudflare Stream API
+	async function uploadVideoToCloudflareStream(videoBlob: Blob, title: string) {
+		try {
+			console.log('☁️ Uploading to Cloudflare Stream API...');
+			
+			const formData = new FormData();
+			formData.append('file', videoBlob, 'slideshow.webm');
+			
+			// Add metadata
+			const metadata = {
+				name: title,
+				meta: {
+					type: 'memorial-slideshow',
+					memorialId: memorialId || '',
+					created: new Date().toISOString()
+				}
+			};
+			formData.append('meta', JSON.stringify(metadata));
+			
+			const response = await fetch(
+				`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/stream`,
+				{
+					method: 'POST',
+					headers: {
+						'Authorization': `Bearer ${CLOUDFLARE_API_TOKEN}`,
+					},
+					body: formData
+				}
+			);
+			
+			if (!response.ok) {
+				const errorText = await response.text();
+				console.error('Cloudflare Stream upload failed:', response.status, errorText);
+				throw new Error(`Cloudflare upload failed: ${response.status} ${response.statusText}`);
+			}
+			
+			const result = await response.json();
+			
+			if (!result.success) {
+				console.error('Cloudflare Stream API error:', result.errors);
+				throw new Error(`Cloudflare API error: ${result.errors?.[0]?.message || 'Unknown error'}`);
+			}
+			
+			console.log('✅ Cloudflare Stream upload successful:', result.result.uid);
+			return result.result;
+			
+		} catch (error) {
+			console.error('❌ Cloudflare upload error:', error);
+			throw error;
+		}
+	}
 
-	// Add slideshow to memorial (upload to Firebase)
+	// Add slideshow to memorial (upload to Cloudflare)
 	async function addToMemorial() {
 		if (!generatedVideoBlob || !memorialId) {
 			console.warn('⚠️ Cannot add to memorial: missing video or memorial ID');
@@ -1045,8 +1099,8 @@
 			generationPhase = 'Adding to memorial...';
 			generationProgress = 95;
 
-			// uploadToFirebase returns the parsed JSON result directly, not a Response object
-			const result = await uploadToFirebase(generatedVideoBlob, photos, settings);
+			// uploadToCloudflare returns the parsed JSON result directly, not a Response object
+			const result = await uploadToCloudflare(generatedVideoBlob, photos, settings);
 
 			if (result && result.slideshowId) {
 				console.log('✅ Slideshow uploaded successfully:', result);
@@ -1177,8 +1231,8 @@
 			generationPhase = 'Saving to memorial...';
 			generationProgress = 95;
 
-			// Upload new video to Firebase
-			const result = await uploadToFirebase(generatedVideoBlob, photos, settings);
+			// Upload new video to Cloudflare
+			const result = await uploadToCloudflare(generatedVideoBlob, photos, settings);
 
 			// Fix: Check for both result.slideshowId and result.success
 			if (result.success && result.slideshowId) {
@@ -1400,8 +1454,8 @@
 			generationPhase = 'Publishing draft to memorial...';
 			generationProgress = 50;
 
-			// Upload new video to Firebase (this will replace the old one)
-			const result = await uploadToFirebase(draftVideoBlob, photos, settings);
+			// Upload new video to Cloudflare (this will replace the old one)
+			const result = await uploadToCloudflare(draftVideoBlob, photos, settings);
 
 			if (result.slideshowId) {
 				// Update published slideshow data
