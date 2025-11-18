@@ -49,6 +49,8 @@
 		}
 
 		try {
+			console.log('🗑️ [DELETE] Attempting to delete memorial:', memorial.id);
+			
 			const response = await fetch('/api/admin/bulk-actions', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -59,15 +61,28 @@
 				})
 			});
 
+			const result = await response.json();
+			console.log('🗑️ [DELETE] Response:', result);
+
 			if (response.ok) {
-				alert('Memorial deleted successfully');
-				goto('/admin/services/memorials');
+				if (result.success && result.success.length > 0) {
+					alert('Memorial deleted successfully');
+					goto('/admin/services/memorials');
+				} else if (result.failed && result.failed.length > 0) {
+					const errorMsg = result.failed[0]?.error || 'Unknown error';
+					console.error('❌ [DELETE] Failed:', errorMsg);
+					alert(`Failed to delete memorial: ${errorMsg}`);
+				} else {
+					alert('Failed to delete memorial. Please try again.');
+				}
 			} else {
-				alert('Failed to delete memorial. Please try again.');
+				const errorMsg = result.error || 'Unknown error';
+				console.error('❌ [DELETE] Server error:', errorMsg);
+				alert(`Failed to delete memorial: ${errorMsg}`);
 			}
 		} catch (error) {
-			console.error('Error deleting memorial:', error);
-			alert('An error occurred while deleting the memorial.');
+			console.error('❌ [DELETE] Exception:', error);
+			alert('An error occurred while deleting the memorial. Check the console for details.');
 		}
 	}
 

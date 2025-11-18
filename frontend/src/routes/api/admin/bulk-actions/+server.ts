@@ -10,17 +10,28 @@ import { adminDb } from '$lib/server/firebase';
 import { hasPermission } from '$lib/admin/permissions';
 
 export async function POST({ request, locals }) {
+	console.log('🔧 [BULK ACTION] Request received');
+	
 	// Auth check
 	if (!locals.user || locals.user.role !== 'admin') {
+		console.log('🚫 [BULK ACTION] Unauthorized access attempt');
 		return json({ error: 'Unauthorized' }, { status: 401 });
 	}
 
 	const { action, ids, resourceType, params } = await request.json();
+	console.log('🔧 [BULK ACTION] Processing:', { action, resourceType, ids: ids.length });
 
 	// Validate inputs
 	if (!action || !ids || !Array.isArray(ids) || ids.length === 0) {
 		return json({ error: 'Invalid request' }, { status: 400 });
 	}
+
+	// Set default adminRole if not present (for backwards compatibility)
+	const userWithRole: any = {
+		...locals.user,
+		email: locals.user.email || '',
+		adminRole: (locals.user as any).adminRole || 'super_admin'
+	};
 
 	// Check permissions
 	const actionMap: Record<string, string> = {
@@ -33,7 +44,7 @@ export async function POST({ request, locals }) {
 	};
 
 	const requiredAction = actionMap[action] || 'update';
-	if (!hasPermission(locals.user, resourceType, requiredAction)) {
+	if (!hasPermission(userWithRole, resourceType, requiredAction)) {
 		return json({ error: 'Permission denied' }, { status: 403 });
 	}
 
@@ -46,21 +57,29 @@ export async function POST({ request, locals }) {
 	// Process each ID
 	for (const id of ids) {
 		try {
-			await performAction(action, id, resourceType, params, locals.user);
+			await performAction(action, id, resourceType, params, userWithRole);
 			results.success.push(id);
 		} catch (error: any) {
+			console.error(`❌ [BULK ACTION] Failed to ${action} ${resourceType} ${id}:`, error);
 			results.failed.push({ id, error: error.message });
 		}
 	}
 
 	// Log audit event
 	await adminDb.collection('admin_audit_logs').add({
-		adminId: locals.user.uid,
+		adminId: userWithRole.uid,
 		action: `bulk_${action}`,
 		resourceType,
 		resourceIds: ids,
 		results,
 		timestamp: new Date()
+	});
+
+	console.log('✅ [BULK ACTION] Completed:', {
+		action,
+		resourceType,
+		success: results.success.length,
+		failed: results.failed.length
 	});
 
 	return json(results);
@@ -108,11 +127,13 @@ async function performAction(
 
 		case 'delete':
 			// Soft delete
+			console.log(`🗑️ [BULK ACTION] Deleting ${resourceType} ${id}`);
 			await adminDb.collection(collection).doc(id).update({
 				isDeleted: true,
 				deletedAt: new Date(),
 				deletedBy: user.uid
 			});
+			console.log(`✅ [BULK ACTION] Successfully deleted ${resourceType} ${id}`);
 			break;
 
 		case 'makeVisible':
