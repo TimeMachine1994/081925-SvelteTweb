@@ -292,16 +292,10 @@
 				</div>
 				<!-- Legacy Custom HTML Content Only -->
 				<div class="memorial-content-container">
-					<!-- Stream Section for Legacy Layout - Always show, component handles empty state -->
-					<div class="streaming-section">
-						<MemorialStreamDisplay 
-							streams={streams || []} 
-							memorialName={memorial.lovedOneName}
-							emergencyEmbed={memorial.emergencyEmbed}
-						/>
-					</div>
-					
 					<div class="legacy-content">
+						{#if memorial.emergencyEmbed}
+							{@html memorial.emergencyEmbed}
+						{/if}
 						{@html (memorial as any).custom_html}
 					</div>
 				</div>
