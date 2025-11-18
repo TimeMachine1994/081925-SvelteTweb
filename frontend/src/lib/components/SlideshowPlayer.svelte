@@ -92,7 +92,30 @@
 	});
 </script>
 
-{#if slideshow.status === 'ready' && videoSrc()}
+{#if slideshow.embedCode}
+	<!-- Custom Embed Code - Takes Priority -->
+	<div class="slideshow-player embed-mode" class:editable={canEditThisSlideshow()}>
+		<div class="player-actions">
+			{#if canEditThisSlideshow()}
+				<button 
+					class="action-btn edit-btn"
+					onclick={handleSlideshowEdit}
+					title="Click to edit slideshow"
+				>
+					✏️ Edit
+				</button>
+			{/if}
+		</div>
+		
+		<div class="embed-container">
+			{@html slideshow.embedCode}
+		</div>
+		
+		<div class="embed-badge">
+			<span>📺 Custom Embed</span>
+		</div>
+	</div>
+{:else if slideshow.status === 'ready' && videoSrc()}
 	<!-- Firebase Storage WebM Video Player -->
 	<div class="slideshow-player" class:editable={canEditThisSlideshow()}>
 		<div class="player-actions">
@@ -189,6 +212,44 @@
 	.action-btn:hover {
 		background: rgba(213, 186, 127, 1);
 		transform: scale(1.05);
+	}
+	
+	.embed-container {
+		position: relative;
+		width: 100%;
+		min-height: 400px;
+		background: #000;
+		border-radius: 16px;
+		overflow: hidden;
+	}
+	
+	.embed-container :global(iframe) {
+		width: 100%;
+		height: 100%;
+		min-height: 400px;
+		border: none;
+		display: block;
+	}
+	
+	.embed-badge {
+		position: absolute;
+		bottom: 1rem;
+		right: 1rem;
+		background: rgba(139, 92, 246, 0.9);
+		color: white;
+		padding: 0.5rem 1rem;
+		border-radius: 6px;
+		font-size: 0.875rem;
+		font-weight: 500;
+		z-index: 10;
+		backdrop-filter: blur(10px);
+		border: 1px solid rgba(255, 255, 255, 0.2);
+	}
+	
+	.embed-badge span {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
 	}
 	
 	.video-container {

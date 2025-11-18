@@ -10,6 +10,7 @@ export interface MemorialSlideshow {
 	photos: SlideshowPhoto[];
 	settings: SlideshowSettings;
 	audio?: SlideshowAudio; // Optional background audio
+	embedCode?: string | null; // Custom embed code (iframe, etc.) - overrides generated slideshow
 	createdBy: string;
 	createdAt: string;
 	updatedAt: string;

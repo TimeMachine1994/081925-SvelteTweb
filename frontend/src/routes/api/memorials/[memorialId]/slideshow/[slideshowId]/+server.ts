@@ -40,3 +40,52 @@ export const GET: RequestHandler = async ({ params }) => {
 		throw error(500, 'Failed to fetch slideshow');
 	}
 };
+
+/**
+ * PATCH /api/memorials/[memorialId]/slideshow/[slideshowId]
+ * Update slideshow embedCode field
+ */
+export const PATCH: RequestHandler = async ({ params, request, locals }) => {
+	const { memorialId, slideshowId } = params;
+	
+	// Check authentication
+	if (!locals.user) {
+		throw error(401, 'Unauthorized');
+	}
+	
+	console.log('🎬 [SLIDESHOW API] PATCH - Updating slideshow:', slideshowId);
+	
+	try {
+		const body = await request.json();
+		const { embedCode } = body;
+		
+		// Validate embedCode (allow null to remove it)
+		if (embedCode !== null && typeof embedCode !== 'string') {
+			throw error(400, 'Invalid embedCode value');
+		}
+		
+		const slideshowRef = adminDb
+			.collection('memorials')
+			.doc(memorialId)
+			.collection('slideshows')
+			.doc(slideshowId);
+		
+		// Update only the embedCode field
+		await slideshowRef.update({
+			embedCode: embedCode || null,
+			updatedAt: new Date().toISOString()
+		});
+		
+		console.log('✅ [SLIDESHOW API] Successfully updated embedCode');
+		
+		return json({ 
+			success: true,
+			embedCode: embedCode || null
+		});
+		
+	} catch (err: any) {
+		console.error('❌ [SLIDESHOW API] Error updating slideshow:', err);
+		if (err.status) throw err;
+		throw error(500, 'Failed to update slideshow');
+	}
+};
