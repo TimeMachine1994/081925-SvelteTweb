@@ -7,6 +7,7 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 <script lang="ts">
 	import AdminLayout from '$lib/components/admin/AdminLayout.svelte';
 	import DataGrid from '$lib/components/admin/DataGrid.svelte';
+	import BulkActionBar from '$lib/components/admin/BulkActionBar.svelte';
 	import FilterBuilder from '$lib/components/admin/FilterBuilder.svelte';
 	import { can } from '$lib/stores/adminUser';
 	import { goto } from '$app/navigation';
@@ -203,6 +204,19 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 		<button type="submit">Search</button>
 	</form>
 
+	<!-- Bulk Actions Bar -->
+	{#if selectedMemorials.size > 0}
+		<BulkActionBar
+			selectedCount={selectedMemorials.size}
+			resourceType="memorial"
+			onAction={(action) => handleBulkAction(action, Array.from(selectedMemorials))}
+			onClear={() => {
+				selectedMemorials.clear();
+				selectedMemorials = selectedMemorials;
+			}}
+		/>
+	{/if}
+
 	{#if showFilters}
 		<div class="filters-panel">
 			<FilterBuilder
@@ -222,8 +236,7 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 		{columns}
 		data={data.memorials}
 		selectable={$can('memorial', 'update')}
-		selectedMemorials={selectedMemorials}
-		onBulkAction={handleBulkAction}
+		bind:selectedRows={selectedMemorials}
 		onRowClick={handleRowClick}
 		resourceType="memorial"
 	/>
