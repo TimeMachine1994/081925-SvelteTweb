@@ -245,7 +245,6 @@
 						<div class="space-y-3">
 							<label 
 								class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors {selectedRole === 'owner' ? 'border-[#D5BA7F] bg-[#D5BA7F]/5' : 'border-gray-300'}"
-								onclick={() => selectedRole = 'owner'}
 							>
 								<input
 									type="radio"
@@ -269,7 +268,6 @@
 							
 							<label 
 								class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors {selectedRole === 'funeral_director' ? 'border-[#D5BA7F] bg-[#D5BA7F]/5' : 'border-gray-300'}"
-								onclick={() => selectedRole = 'funeral_director'}
 							>
 								<input
 									type="radio"

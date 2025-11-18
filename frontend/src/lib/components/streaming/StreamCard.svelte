@@ -294,6 +294,7 @@
 				<p class="mt-1 text-xs text-gray-500">
 					Created {new Date(stream.createdAt).toLocaleDateString()}
 				</p>
+				</div>
 			</div>
 
 			{#if canManage}
