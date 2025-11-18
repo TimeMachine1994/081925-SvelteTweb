@@ -4,7 +4,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
 
-	let { stream, canManage, memorialId }: { stream: Stream; canManage: boolean; memorialId: string } = $props();
+	let { stream, canManage, memorialId, selectable = false, isSelected = false, onToggleSelect, memorialName }: { stream: Stream; canManage: boolean; memorialId: string; selectable?: boolean; isSelected?: boolean; onToggleSelect?: (id: string) => void; memorialName?: string } = $props();
 
 	let loading = $state(false);
 	let copiedWhip = $state(false);
@@ -245,14 +245,26 @@
 </script>
 
 <div
-	class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg transition-all duration-300 hover:shadow-xl"
+	class="overflow-hidden rounded-2xl border transition-all duration-300 hover:shadow-xl {isSelected ? 'border-blue-500 shadow-xl bg-blue-50' : 'border-gray-200 bg-white shadow-lg'}"
 >
 	<!-- Header -->
 	<div class="border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white px-6 py-4">
 		<div class="flex items-start justify-between">
-			<div class="flex-1">
-				<div class="flex items-center gap-3">
-					<h2 class="text-xl font-semibold text-gray-900">{stream.title}</h2>
+			<div class="flex items-start gap-3 flex-1">
+				{#if selectable}
+					<input
+						type="checkbox"
+						checked={isSelected}
+						onclick={(e) => {
+							e.stopPropagation();
+							onToggleSelect?.(stream.id);
+						}}
+						class="mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+					/>
+				{/if}
+				<div class="flex-1">
+					<div class="flex items-center gap-3">
+						<h2 class="text-xl font-semibold text-gray-900">{stream.title}</h2>
 					<span class="rounded-full px-3 py-1 text-xs font-medium {statusColor}">
 						{stream.status.toUpperCase()}
 					</span>
@@ -261,7 +273,16 @@
 							ARMED: {getArmTypeLabel(stream.armStatus.armType!)}
 						</span>
 					{/if}
-				</div>
+					</div>
+					{#if memorialName}
+						<a
+							href="/admin/services/memorials/{memorialId}"
+							class="mt-1 text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
+							onclick={(e) => e.stopPropagation()}
+						>
+							🕊️ {memorialName}
+						</a>
+					{/if}
 				{#if stream.description}
 					<p class="mt-1 text-sm text-gray-600">{stream.description}</p>
 				{/if}

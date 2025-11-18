@@ -3,11 +3,14 @@ import { adminDb } from '$lib/server/firebase';
 import { error as SvelteKitError } from '@sveltejs/kit';
 import type { Stream } from '$lib/types/stream';
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: PageServerLoad = async ({ locals, url }) => {
 	// Check if user is admin
 	if (!locals.user || locals.user.role !== 'admin') {
 		throw SvelteKitError(403, 'Admin access required');
 	}
+
+	// Get search query
+	const searchQuery = (url.searchParams.get('q') || '').trim().toLowerCase();
 
 	// Fetch all streams across all memorials
 	const streamsSnapshot = await adminDb
@@ -63,8 +66,26 @@ export const load: PageServerLoad = async ({ locals }) => {
 		memorialName: memorialNames[stream.memorialId] || 'Unknown Memorial'
 	}));
 
+	// Filter by search query if provided
+	const filteredStreams = searchQuery
+		? streamsWithMemorials.filter(stream => {
+			const haystack = [
+				stream.title,
+				stream.memorialName,
+				stream.status,
+				stream.description
+			]
+				.filter(Boolean)
+				.join(' ')
+				.toLowerCase();
+
+			return haystack.includes(searchQuery);
+		})
+		: streamsWithMemorials;
+
 	return {
-		streams: streamsWithMemorials,
+		streams: filteredStreams,
+		searchQuery,
 		canManage: true // Admins can always manage
 	};
 };
