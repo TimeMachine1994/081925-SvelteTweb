@@ -9,6 +9,7 @@ export const load = async ({ locals, url }: any) => {
 
 	// Get query params
 	const limit = parseInt(url.searchParams.get('limit') || '50');
+	const searchQuery = (url.searchParams.get('q') || '').trim().toLowerCase();
 
 	// Load all memorials to get their slideshows
 	const memorialsSnapshot = await adminDb.collection('memorials').limit(100).get();
@@ -77,7 +78,24 @@ export const load = async ({ locals, url }: any) => {
 		return bTime - aTime;
 	});
 
+	// Filter by search query if provided
+	const filteredSlideshows = searchQuery
+		? slideshows.filter(slideshow => {
+			const haystack = [
+				slideshow.memorialName,
+				slideshow.createdByEmail,
+				slideshow.status
+			]
+				.filter(Boolean)
+				.join(' ')
+				.toLowerCase();
+
+			return haystack.includes(searchQuery);
+		})
+		: slideshows;
+
 	return {
-		slideshows: slideshows.slice(0, limit)
+		slideshows: filteredSlideshows.slice(0, limit),
+		searchQuery
 	};
 };
