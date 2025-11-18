@@ -28,8 +28,11 @@
 
 	let showAdvanced = $state(false);
 	let showDeleteConfirm = $state(false);
+	let showSuccessModal = $state(false);
 	let loading = $state(false);
 	let deleteLoading = $state(false);
+	let uploadingImage = $state(false);
+	let uploadingAvatar = $state(false);
 	let error = $state('');
 	let successMessage = $state('');
 
@@ -67,16 +70,77 @@
 	// Show form response messages
 	$effect(() => {
 		if (form?.success) {
+			showSuccessModal = true;
 			successMessage = form.message || 'Changes saved successfully';
 			error = '';
 			setTimeout(() => {
-				successMessage = '';
-			}, 3000);
+				showSuccessModal = false;
+			}, 2500);
 		} else if (form?.error) {
 			error = form.error;
 			successMessage = '';
 		}
 	});
+
+	// Handle image upload to Firebase Storage
+	async function uploadImage(file: File, type: 'featured' | 'avatar'): Promise<string> {
+		const formData = new FormData();
+		formData.append('file', file);
+		formData.append('path', `blog-${type}`);
+
+		const response = await fetch('/api/upload-image', {
+			method: 'POST',
+			body: formData
+		});
+
+		if (!response.ok) {
+			const errorData = await response.json();
+			throw new Error(errorData.error || 'Failed to upload image');
+		}
+
+		const data = await response.json();
+		return data.url;
+	}
+
+	// Handle featured image upload
+	async function handleFeaturedImageUpload(event: Event) {
+		const input = event.target as HTMLInputElement;
+		const file = input.files?.[0];
+		if (!file) return;
+
+		try {
+			uploadingImage = true;
+			error = '';
+			const url = await uploadImage(file, 'featured');
+			formData.featuredImage = url;
+			successMessage = 'Featured image uploaded successfully';
+			setTimeout(() => (successMessage = ''), 2000);
+		} catch (err) {
+			error = err instanceof Error ? err.message : 'Failed to upload image';
+		} finally {
+			uploadingImage = false;
+		}
+	}
+
+	// Handle author avatar upload
+	async function handleAvatarUpload(event: Event) {
+		const input = event.target as HTMLInputElement;
+		const file = input.files?.[0];
+		if (!file) return;
+
+		try {
+			uploadingAvatar = true;
+			error = '';
+			const url = await uploadImage(file, 'avatar');
+			formData.authorAvatar = url;
+			successMessage = 'Author avatar uploaded successfully';
+			setTimeout(() => (successMessage = ''), 2000);
+		} catch (err) {
+			error = err instanceof Error ? err.message : 'Failed to upload avatar';
+		} finally {
+			uploadingAvatar = false;
+		}
+	}
 </script>
 
 <AdminLayout
@@ -283,28 +347,72 @@
 						placeholder="Brief author biography"
 					></textarea>
 				</div>
+
+				<div class="form-group">
+					<label for="authorAvatar">Author Avatar</label>
+					<div class="file-upload-container">
+						<input
+							type="file"
+							id="authorAvatarFile"
+							accept="image/*"
+							onchange={handleAvatarUpload}
+							disabled={uploadingAvatar}
+							class="file-input"
+						/>
+						<label for="authorAvatarFile" class="file-upload-label">
+							{uploadingAvatar ? '⏳ Uploading...' : '📁 Choose Avatar Image'}
+						</label>
+						{#if formData.authorAvatar}
+							<div class="current-image">
+								<img src={formData.authorAvatar} alt="Author avatar" class="avatar-preview" />
+								<button
+									type="button"
+									class="remove-image"
+									onclick={() => (formData.authorAvatar = '')}
+								>
+									✕
+								</button>
+							</div>
+						{/if}
+					</div>
+					<input type="hidden" name="authorAvatar" value={formData.authorAvatar} />
+					<div class="field-hint">Recommended: Square image, 200x200px minimum</div>
+				</div>
 			</div>
 
 			<div class="form-section">
 				<h3 class="section-title">Featured Image</h3>
 
 				<div class="form-group">
-					<label for="featuredImage">Image URL</label>
-					<input
-						type="url"
-						id="featuredImage"
-						name="featuredImage"
-						bind:value={formData.featuredImage}
-						placeholder="https://example.com/image.jpg"
-					/>
-					<div class="field-hint">Upload images to Firebase Storage or use external URL</div>
-				</div>
-
-				{#if formData.featuredImage}
-					<div class="image-preview">
-						<img src={formData.featuredImage} alt="Featured" />
+					<label for="featuredImage">Upload Featured Image</label>
+					<div class="file-upload-container">
+						<input
+							type="file"
+							id="featuredImageFile"
+							accept="image/*"
+							onchange={handleFeaturedImageUpload}
+							disabled={uploadingImage}
+							class="file-input"
+						/>
+						<label for="featuredImageFile" class="file-upload-label">
+							{uploadingImage ? '⏳ Uploading...' : '📁 Choose Featured Image'}
+						</label>
+						{#if formData.featuredImage}
+							<div class="current-image">
+								<img src={formData.featuredImage} alt="Featured" class="featured-preview" />
+								<button
+									type="button"
+									class="remove-image"
+									onclick={() => (formData.featuredImage = '')}
+								>
+									✕ Remove
+								</button>
+							</div>
+						{/if}
 					</div>
-				{/if}
+					<input type="hidden" name="featuredImage" value={formData.featuredImage} />
+					<div class="field-hint">Recommended: 1200x630px for best display</div>
+				</div>
 
 				<div class="form-group">
 					<label for="featuredImageAlt">Alt Text</label>
@@ -401,6 +509,16 @@
 							</button>
 						</form>
 					</div>
+				</div>
+			</div>
+		{/if}
+
+		{#if showSuccessModal}
+			<div class="success-modal-overlay">
+				<div class="success-modal-content">
+					<div class="success-icon-large">✅</div>
+					<h3>Changes Saved!</h3>
+					<p>Your blog post has been updated successfully.</p>
 				</div>
 			</div>
 		{/if}
@@ -706,6 +824,157 @@
 		display: flex;
 		justify-content: flex-end;
 		gap: 1rem;
+	}
+
+	/* File Upload Styles */
+	.file-upload-container {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.file-input {
+		display: none;
+	}
+
+	.file-upload-label {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1.5rem;
+		background: #f3f4f6;
+		border: 2px dashed #d1d5db;
+		border-radius: 8px;
+		color: #374151;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.15s;
+		text-align: center;
+	}
+
+	.file-upload-label:hover {
+		background: #e5e7eb;
+		border-color: #d5ba7f;
+	}
+
+	.current-image {
+		position: relative;
+		display: inline-block;
+		margin-top: 0.5rem;
+	}
+
+	.featured-preview {
+		max-width: 100%;
+		max-height: 400px;
+		border-radius: 8px;
+		border: 1px solid #e5e7eb;
+		display: block;
+	}
+
+	.avatar-preview {
+		width: 150px;
+		height: 150px;
+		border-radius: 50%;
+		object-fit: cover;
+		border: 2px solid #e5e7eb;
+		display: block;
+	}
+
+	.remove-image {
+		position: absolute;
+		top: 0.5rem;
+		right: 0.5rem;
+		background: rgba(220, 38, 38, 0.9);
+		color: white;
+		border: none;
+		border-radius: 6px;
+		padding: 0.375rem 0.75rem;
+		font-size: 0.875rem;
+		cursor: pointer;
+		transition: all 0.15s;
+		font-weight: 500;
+	}
+
+	.remove-image:hover {
+		background: rgba(185, 28, 28, 0.9);
+	}
+
+	/* Success Modal */
+	.success-modal-overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(0, 0, 0, 0.3);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 2000;
+		animation: fadeIn 0.2s ease-out;
+	}
+
+	.success-modal-content {
+		background: white;
+		border-radius: 16px;
+		padding: 2.5rem 3rem;
+		max-width: 400px;
+		width: 90%;
+		box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+		text-align: center;
+		animation: slideUp 0.3s ease-out;
+	}
+
+	.success-icon-large {
+		font-size: 4rem;
+		margin-bottom: 1rem;
+		animation: scaleIn 0.4s ease-out;
+	}
+
+	.success-modal-content h3 {
+		margin: 0 0 0.75rem 0;
+		font-size: 1.5rem;
+		color: #059669;
+		font-weight: 600;
+	}
+
+	.success-modal-content p {
+		margin: 0;
+		color: #6b7280;
+		font-size: 1rem;
+		line-height: 1.6;
+	}
+
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+
+	@keyframes slideUp {
+		from {
+			transform: translateY(20px);
+			opacity: 0;
+		}
+		to {
+			transform: translateY(0);
+			opacity: 1;
+		}
+	}
+
+	@keyframes scaleIn {
+		from {
+			transform: scale(0.5);
+			opacity: 0;
+		}
+		to {
+			transform: scale(1);
+			opacity: 1;
+		}
 	}
 
 	@media (max-width: 768px) {
