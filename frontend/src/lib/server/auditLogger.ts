@@ -39,6 +39,14 @@ export type AuditAction =
 	| 'funeral_director_rejected'
 	| 'admin_memorial_created'
 	| 'system_config_changed'
+	// Admin deletion actions (soft delete system)
+	| 'admin_memorial_soft_deleted'
+	| 'admin_memorial_delete_error'
+	| 'admin_user_deleted'
+	| 'admin_user_delete_error'
+	| 'stream_soft_deleted'
+	| 'resource_restored'
+	| 'resource_permanent_delete'
 	// API actions
 	| 'api_access_denied'
 	| 'api_error';

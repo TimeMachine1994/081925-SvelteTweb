@@ -68,29 +68,22 @@ export const DELETE: RequestHandler = async ({ locals, params }) => {
 			createdBy: streamData.createdBy
 		});
 
-		// Delete the stream from Firestore
-		await streamDoc.ref.delete();
-		console.log('✅ [STREAM DELETE] Stream deleted successfully:', streamId);
+		// SOFT DELETE: Mark as deleted instead of permanently removing
+		await streamDoc.ref.update({
+			isDeleted: true,
+			deletedAt: new Date(),
+			deletedBy: userId
+		});
+		console.log('✅ [STREAM DELETE] Stream soft-deleted successfully:', streamId);
+		console.log('ℹ️ [STREAM DELETE] Stream will be permanently deleted after 30 days');
 
-		// Optional: Clean up related Cloudflare resources if they exist
-		// This is a best-effort cleanup - don't fail if cleanup fails
-		if (streamData.streamCredentials?.cloudflareInputId) {
-			try {
-				const cloudflareInputId = streamData.streamCredentials.cloudflareInputId;
-				console.log('🧹 [STREAM DELETE] Attempting Cloudflare cleanup for input:', cloudflareInputId);
-				
-				// TODO: Add Cloudflare Live Input deletion API call here
-				// For now, we'll just log it
-				console.log('⚠️ [STREAM DELETE] Cloudflare cleanup not implemented - input may remain:', cloudflareInputId);
-			} catch (cleanupError: any) {
-				console.warn('⚠️ [STREAM DELETE] Cloudflare cleanup failed (non-fatal):', cleanupError.message);
-			}
-		}
+		// NOTE: Cloudflare cleanup will happen during permanent deletion
+		// This preserves the ability to restore streams within 30 days
 
 		// Optional: Create audit log for deletion
 		try {
 			await adminDb.collection('auditLogs').add({
-				action: 'stream_deleted',
+				action: 'stream_soft_deleted',
 				resourceType: 'stream',
 				resourceId: streamId,
 				memorialId,
@@ -101,7 +94,9 @@ export const DELETE: RequestHandler = async ({ locals, params }) => {
 				details: {
 					streamTitle: streamData.title,
 					streamStatus: streamData.status,
-					memorialName: memorial.lovedOneName
+					memorialName: memorial.lovedOneName,
+					deletionType: 'soft',
+					recoverableUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
 				}
 			});
 			console.log('📋 [STREAM DELETE] Audit log created');
@@ -111,9 +106,11 @@ export const DELETE: RequestHandler = async ({ locals, params }) => {
 
 		return json({
 			success: true,
-			message: 'Stream deleted successfully',
+			message: 'Stream marked as deleted (recoverable for 30 days)',
 			streamId,
-			deletedAt: new Date().toISOString()
+			deletedAt: new Date().toISOString(),
+			isSoftDelete: true,
+			recoverableUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
 		});
 	} catch (error: any) {
 		console.error('❌ [STREAM DELETE] Error deleting stream:', error);

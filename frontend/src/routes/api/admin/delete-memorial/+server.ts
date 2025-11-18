@@ -31,15 +31,20 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 
 		const memorialData = memorialDoc.data();
 
-		// Delete the memorial document
-		await adminDb.collection('memorials').doc(memorialId).delete();
+		// SOFT DELETE: Mark as deleted instead of permanently removing
+		await adminDb.collection('memorials').doc(memorialId).update({
+			isDeleted: true,
+			deletedAt: new Date(),
+			deletedBy: locals.user.uid
+		});
 
-		console.log('✅ [ADMIN API] Memorial deleted successfully');
+		console.log('✅ [ADMIN API] Memorial soft-deleted successfully');
+		console.log('ℹ️ [ADMIN API] Memorial will be permanently deleted after 30 days');
 
 		// Log the deletion
 		await logAuditEvent({
 			uid: locals.user.uid,
-			action: 'admin_memorial_deleted',
+			action: 'admin_memorial_soft_deleted',
 			userEmail: locals.user.email,
 			userRole: locals.user.role as 'admin' | 'owner' | 'funeral_director',
 			resourceType: 'memorial',
@@ -47,7 +52,9 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 			details: {
 				lovedOneName: memorialData?.lovedOneName,
 				creatorEmail: memorialData?.creatorEmail,
-				deletedBy: locals.user.email
+				deletedBy: locals.user.email,
+				deletionType: 'soft',
+				recoverableUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
 			},
 			success: true,
 			ipAddress: getClientAddress(),
@@ -56,8 +63,10 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 
 		return json({
 			success: true,
-			message: 'Memorial deleted successfully',
-			memorialId
+			message: 'Memorial marked as deleted (recoverable for 30 days)',
+			memorialId,
+			isSoftDelete: true,
+			recoverableUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
 		});
 	} catch (error: any) {
 		console.error('❌ [ADMIN API] Error deleting memorial:', error);

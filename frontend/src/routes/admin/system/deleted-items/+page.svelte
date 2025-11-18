@@ -78,31 +78,58 @@ Recovery system for soft-deleted items
 	// Actions
 	async function handleBulkAction(action: string, ids: string[]) {
 		if (action === 'restore') {
-			if (confirm(`Restore ${ids.length} item(s)?`)) {
-				const response = await fetch('/api/admin/restore-deleted', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ ids })
-				});
+			if (confirm(`Restore ${ids.length} item(s)?\n\nThis will make them visible again in the admin panel.`)) {
+				try {
+					const response = await fetch('/api/admin/restore-deleted', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ ids })
+					});
 
-				if (response.ok) {
-					location.reload();
+					if (response.ok) {
+						const result = await response.json();
+						if (result.results.failed.length > 0) {
+							alert(`Restore completed:\n✅ ${result.results.success.length} succeeded\n❌ ${result.results.failed.length} failed`);
+						} else {
+							alert(`Successfully restored ${result.results.success.length} item(s)`);
+						}
+						location.reload();
+					} else {
+						const error = await response.json();
+						alert(`Restore failed: ${error.error || 'Unknown error'}`);
+					}
+				} catch (error: any) {
+					alert(`Restore error: ${error.message}`);
 				}
 			}
 		} else if (action === 'permanent_delete') {
+			const itemText = ids.length === 1 ? 'item' : 'items';
 			if (
 				confirm(
-					`PERMANENTLY delete ${ids.length} item(s)? This action CANNOT be undone!`
+					`⚠️ PERMANENT DELETION WARNING ⚠️\n\nYou are about to PERMANENTLY delete ${ids.length} ${itemText}.\n\nThis action CANNOT be undone!\n\nDeleted items will be:\n• Removed from Firestore forever\n• Cloudflare resources deleted (streams)\n• Firebase Auth accounts deleted (users)\n\nAre you absolutely sure?`
 				)
 			) {
-				const response = await fetch('/api/admin/permanent-delete', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ ids })
-				});
+				try {
+					const response = await fetch('/api/admin/permanent-delete', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ ids })
+					});
 
-				if (response.ok) {
-					location.reload();
+					if (response.ok) {
+						const result = await response.json();
+						if (result.results.failed.length > 0) {
+							alert(`Deletion completed:\n✅ ${result.results.success.length} succeeded\n❌ ${result.results.failed.length} failed`);
+						} else {
+							alert(`Permanently deleted ${result.results.success.length} item(s)`);
+						}
+						location.reload();
+					} else {
+						const error = await response.json();
+						alert(`Deletion failed: ${error.error || 'Unknown error'}`);
+					}
+				} catch (error: any) {
+					alert(`Deletion error: ${error.message}`);
 				}
 			}
 		}
@@ -125,7 +152,22 @@ Recovery system for soft-deleted items
 		{
 			label: 'Cleanup Expired',
 			icon: '🧹',
-			onclick: () => console.log('Cleanup items past 30 days')
+			onclick: async () => {
+				if (confirm('Permanently delete all items older than 30 days?\n\nThis action CANNOT be undone!')) {
+					const response = await fetch('/api/admin/cleanup-expired', {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' }
+					});
+					
+					if (response.ok) {
+						const result = await response.json();
+						alert(`Cleaned up ${result.deletedCount} expired items:\n\n${JSON.stringify(result.deletedByCollection, null, 2)}`);
+						location.reload();
+					} else {
+						alert('Cleanup failed. Please try again.');
+					}
+				}
+			}
 		}
 	]}
 >

@@ -10,7 +10,7 @@ export const load = async ({ locals, url }: any) => {
 	const limit = parseInt(url.searchParams.get('limit') || '50');
 
 	// Load deleted items from various collections
-	const collections = ['memorials', 'streams', 'users', 'blog'];
+	const collections = ['memorials', 'streams', 'users', 'blog', 'slideshows'];
 
 	const deletedItems: any[] = [];
 	const now = new Date();
@@ -21,15 +21,24 @@ export const load = async ({ locals, url }: any) => {
 
 	for (const collectionName of collections) {
 		try {
+			// Query for all soft-deleted items (simplified to avoid needing composite index)
+			// We'll filter by date client-side
 			const snapshot = await adminDb
 				.collection(collectionName)
 				.where('isDeleted', '==', true)
-				.where('deletedAt', '>', thirtyDaysAgo)
 				.limit(limit)
 				.get();
 
 			for (const doc of snapshot.docs) {
 				const data = doc.data();
+
+				// Calculate deletion date
+				const deletedAt = data.deletedAt?.toDate() || now;
+				
+				// Skip items older than 30 days (client-side filter)
+				if (deletedAt < thirtyDaysAgo) {
+					continue;
+				}
 
 				// Get user email if not cached
 				if (data.deletedBy && !userMap.has(data.deletedBy)) {
@@ -44,7 +53,6 @@ export const load = async ({ locals, url }: any) => {
 				}
 
 				// Calculate days until permanent deletion
-				const deletedAt = data.deletedAt?.toDate() || now;
 				const expiresAt = new Date(deletedAt.getTime() + 30 * 24 * 60 * 60 * 1000);
 				const daysUntilPermanent = Math.ceil(
 					(expiresAt.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)
@@ -60,10 +68,12 @@ export const load = async ({ locals, url }: any) => {
 					name = data.displayName || data.email || 'Unknown User';
 				} else if (collectionName === 'blog') {
 					name = data.title || 'Unknown Post';
+				} else if (collectionName === 'slideshows') {
+					name = data.title || 'Unknown Slideshow';
 				}
 
 				deletedItems.push({
-					id: doc.id,
+					id: `${collectionName}:${doc.id}`, // Format: "collection:id" for API endpoints
 					collectionName,
 					resourceType: collectionName === 'blog' ? 'blog_post' : collectionName.slice(0, -1),
 					name,

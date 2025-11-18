@@ -35,19 +35,20 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 			console.log('⚠️ [ADMIN API] User not found in Firebase Auth, continuing with Firestore deletion');
 		}
 
-		// Delete from Firestore
+		// SOFT DELETE: Mark as deleted in Firestore instead of permanently removing
 		if (userDoc.exists) {
-			await adminDb.collection('users').doc(userId).delete();
-			console.log('✅ [ADMIN API] User deleted from Firestore');
+			await adminDb.collection('users').doc(userId).update({
+				isDeleted: true,
+				deletedAt: new Date(),
+				deletedBy: locals.user.uid
+			});
+			console.log('✅ [ADMIN API] User soft-deleted in Firestore');
 		}
 
-		// Delete from Firebase Auth
-		if (authUserData) {
-			await adminAuth.deleteUser(userId);
-			console.log('✅ [ADMIN API] User deleted from Firebase Auth');
-		}
-
-		console.log('✅ [ADMIN API] User deleted successfully');
+		// NOTE: Firebase Auth deletion will happen during permanent deletion
+		// This preserves the ability to restore users within 30 days
+		console.log('✅ [ADMIN API] User soft-deleted successfully');
+		console.log('ℹ️ [ADMIN API] User will be permanently deleted after 30 days');
 
 		// Log the deletion
 		await logAuditEvent({
@@ -60,7 +61,9 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 			details: {
 				deletedUserEmail: userData?.email || authUserData?.email,
 				deletedUserName: userData?.displayName || authUserData?.displayName,
-				deletedBy: locals.user.email
+				deletedBy: locals.user.email,
+				deletionType: 'soft',
+				recoverableUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
 			},
 			success: true,
 			ipAddress: getClientAddress(),
@@ -69,8 +72,10 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 
 		return json({
 			success: true,
-			message: 'User deleted successfully',
-			userId
+			message: 'User marked as deleted (recoverable for 30 days)',
+			userId,
+			isSoftDelete: true,
+			recoverableUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
 		});
 	} catch (error: any) {
 		console.error('❌ [ADMIN API] Error deleting user:', error);

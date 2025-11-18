@@ -140,8 +140,11 @@ function getCollectionName(resourceType: string): string {
 	const map: Record<string, string> = {
 		memorial: 'memorials',
 		stream: 'streams',
+		slideshow: 'slideshows',
 		user: 'users',
-		funeral_director: 'funeral_directors'
+		funeral_director: 'funeral_directors',
+		blog_post: 'blog',
+		deleted_item: 'deleted_items' // For deleted items operations
 	};
 
 	return map[resourceType] || resourceType;
