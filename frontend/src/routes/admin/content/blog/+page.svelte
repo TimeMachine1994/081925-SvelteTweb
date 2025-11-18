@@ -100,7 +100,51 @@ Manage blog posts and articles
 
 	// Actions
 	async function handleBulkAction(action: string, ids: string[]) {
+		if (!ids.length) return;
+
 		console.log('Bulk action on blog posts:', action, ids);
+
+		try {
+			if (action === 'delete') {
+				if (!confirm(`Delete ${ids.length} blog post(s)?`)) return;
+
+				for (const id of ids) {
+					await fetch('/api/admin/blog', {
+						method: 'DELETE',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ id })
+					});
+				}
+
+				alert('Blog posts deleted successfully');
+				location.reload();
+			} else if (action === 'publish') {
+				for (const id of ids) {
+					await fetch('/api/admin/blog', {
+						method: 'PUT',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ id, status: 'published' })
+					});
+				}
+
+				alert('Blog posts published successfully');
+				location.reload();
+			} else if (action === 'draft') {
+				for (const id of ids) {
+					await fetch('/api/admin/blog', {
+						method: 'PUT',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ id, status: 'draft' })
+					});
+				}
+
+				alert('Blog posts moved to draft');
+				location.reload();
+			}
+		} catch (error) {
+			console.error('Bulk action failed:', error);
+			alert('Bulk action failed');
+		}
 	}
 
 	function handleRowClick(post: any) {
@@ -197,9 +241,9 @@ Manage blog posts and articles
 		selectable={$can('blog_post', 'update')}
 		selectedMemorials={selectedPosts}
 		onBulkAction={handleBulkAction}
+		onRowClick={handleRowClick}
 		resourceType="blog_post"
 	/>
-	<!-- onRowClick disabled until detail pages are created -->
 </AdminLayout>
 
 <style>

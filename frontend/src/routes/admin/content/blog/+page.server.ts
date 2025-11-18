@@ -16,8 +16,10 @@ export const load = async ({ locals, url }: any) => {
 	let query = adminDb.collection('blog').orderBy(sortBy, sortDir as any).limit(limit);
 
 	const snapshot = await query.get();
+	console.log('📝 [BLOG LIST] Found', snapshot.docs.length, 'blog posts');
 
 	const posts = snapshot.docs.map((doc) => {
+		console.log('📝 [BLOG LIST] Post ID:', doc.id, 'Title:', doc.data().title);
 		const data = doc.data();
 
 		return {
@@ -35,6 +37,8 @@ export const load = async ({ locals, url }: any) => {
 			updatedAt: data.updatedAt?.toDate?.()?.toISOString() || null
 		};
 	});
+
+	console.log('✅ [BLOG LIST] Loaded blog posts with IDs:', posts.map(p => p.id).join(', '));
 
 	// Calculate stats
 	const stats = {
