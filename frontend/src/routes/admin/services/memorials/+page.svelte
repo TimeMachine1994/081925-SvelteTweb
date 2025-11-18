@@ -16,6 +16,47 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 	// State
 	let selectedMemorials = $state<Set<string>>(new Set());
 	let showFilters = $state(false);
+	let search = $state<string>(data.searchQuery || '');
+
+	async function togglePayment(row: any) {
+		const action = row.isPaid ? 'markUnpaid' : 'markPaid';
+
+		const response = await fetch('/api/admin/bulk-actions', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				action,
+				ids: [row.id],
+				resourceType: 'memorial'
+			})
+		});
+
+		if (response.ok) {
+			location.reload();
+		} else {
+			alert('Failed to update payment status. Please try again.');
+		}
+	}
+
+	async function toggleVisibility(row: any) {
+		const action = row.isPublic ? 'makePrivate' : 'makePublic';
+
+		const response = await fetch('/api/admin/bulk-actions', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				action,
+				ids: [row.id],
+				resourceType: 'memorial'
+			})
+		});
+
+		if (response.ok) {
+			location.reload();
+		} else {
+			alert('Failed to update visibility. Please try again.');
+		}
+	}
 
 	// Column configuration
 	const columns = [
@@ -40,6 +81,7 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 			field: 'isPaid',
 			width: 120,
 			formatter: (val: boolean) => (val ? '✅ Paid' : '❌ Unpaid'),
+			onClick: togglePayment,
 			sortable: true
 		},
 		{
@@ -47,7 +89,8 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 			label: 'Visibility',
 			field: 'isPublic',
 			width: 100,
-			formatter: (val: boolean) => (val ? '🌐 Public' : '🔒 Private')
+			formatter: (val: boolean) => (val ? '🌐 Public' : '🔒 Private'),
+			onClick: toggleVisibility
 		},
 		{
 			id: 'createdAt',
@@ -75,7 +118,9 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 			formatter: (val: string) => {
 				if (!val) return '-';
 				const date = new Date(val);
-				return date.toLocaleDateString();
+				const datePart = date.toLocaleDateString();
+				const timePart = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+				return `${datePart} ${timePart}`;
 			}
 		}
 	];
@@ -143,6 +188,21 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 			: []
 	]}
 >
+	<!-- Search Bar -->
+	<form class="search-bar" method="GET">
+		<input
+			type="text"
+			name="q"
+			placeholder="Search by name, slug, owner, location..."
+			value={search}
+			oninput={(event) => {
+				const target = event.currentTarget as HTMLInputElement;
+				search = target.value;
+			}}
+		/>
+		<button type="submit">Search</button>
+	</form>
+
 	{#if showFilters}
 		<div class="filters-panel">
 			<FilterBuilder
@@ -170,6 +230,36 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 </AdminLayout>
 
 <style>
+	.search-bar {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
+	}
+
+	.search-bar input[type='text'] {
+		flex: 1;
+		padding: 0.5rem 0.75rem;
+		border-radius: 0.375rem;
+		border: 1px solid #e2e8f0;
+		font-size: 0.9375rem;
+	}
+
+	.search-bar button[type='submit'] {
+		padding: 0.5rem 1rem;
+		border-radius: 0.375rem;
+		border: 1px solid #cbd5e0;
+		background: #edf2f7;
+		font-size: 0.9375rem;
+		cursor: pointer;
+		transition: background 0.15s ease, border-color 0.15s ease;
+	}
+
+	.search-bar button[type='submit']:hover {
+		background: #e2e8f0;
+		border-color: #a0aec0;
+	}
+
 	.filters-panel {
 		background: white;
 		border: 1px solid #e2e8f0;

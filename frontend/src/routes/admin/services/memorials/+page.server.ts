@@ -12,6 +12,7 @@ export const load = async ({ locals, url }: any) => {
 	const limit = parseInt(url.searchParams.get('limit') || '50');
 	const sortBy = url.searchParams.get('sortBy') || 'createdAt';
 	const sortDir = url.searchParams.get('sortDir') || 'desc';
+	const searchQuery = (url.searchParams.get('q') || '').trim().toLowerCase();
 
 	// Load memorials (we'll filter deleted ones client-side since not all docs have isDeleted field)
 	let snapshot;
@@ -25,7 +26,7 @@ export const load = async ({ locals, url }: any) => {
 		snapshot = await query.get();
 	}
 
-	const memorials = snapshot.docs
+	const rawMemorials = snapshot.docs
 		.filter((doc) => {
 			const data = doc.data();
 			// Client-side filter for deleted memorials (in case fallback query loaded them)
@@ -34,7 +35,7 @@ export const load = async ({ locals, url }: any) => {
 		.map((doc) => {
 			const data = doc.data();
 			
-			// Extract scheduled start time
+			// Extract scheduled start time (main service)
 			let scheduledStartTime = null;
 			if (
 				data.services?.main?.time?.date &&
@@ -44,8 +45,29 @@ export const load = async ({ locals, url }: any) => {
 				scheduledStartTime = `${data.services.main.time.date}T${data.services.main.time.time}`;
 			}
 
-			// Extract location
-			const location = data.services?.main?.location?.name || 'Not specified';
+			// Extract location summary
+			const mainLocationName = data.services?.main?.location?.name as string | undefined;
+			const additionalServices = Array.isArray(data.services?.additional)
+				? data.services.additional
+				: [];
+			const additionalLocationNames = additionalServices
+				.map((service: any) => service?.location?.name as string | undefined)
+				.filter((name): name is string => Boolean(name));
+
+			let location: string;
+			if (mainLocationName) {
+				location = mainLocationName;
+				if (additionalLocationNames.length > 0) {
+					location += ` (+${additionalLocationNames.length} more)`;
+				}
+			} else if (additionalLocationNames.length > 0) {
+				location = additionalLocationNames[0];
+				if (additionalLocationNames.length > 1) {
+					location += ` (+${additionalLocationNames.length - 1} more)`;
+				}
+			} else {
+				location = 'Not specified';
+			}
 
 			// Payment status
 			const isPaid = data.isPaid || data.calculatorConfig?.isPaid || false;
@@ -66,8 +88,27 @@ export const load = async ({ locals, url }: any) => {
 			};
 		});
 
+	// In-memory search across key fields (memorial + owner) for now
+	const memorials = searchQuery
+		? rawMemorials.filter((memorial) => {
+			const haystack = [
+				memorial.lovedOneName,
+				memorial.fullSlug,
+				memorial.creatorEmail,
+				memorial.creatorName,
+				memorial.location
+			]
+				.filter(Boolean)
+				.join(' ')
+				.toLowerCase();
+
+			return haystack.includes(searchQuery);
+		})
+		: rawMemorials;
+
 	return {
 		memorials,
+		searchQuery,
 		pagination: {
 			page,
 			limit,

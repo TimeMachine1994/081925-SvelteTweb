@@ -22,6 +22,7 @@ Based on ADMIN_REFACTOR_2_DATA_OPERATIONS.md
 		resizable?: boolean;
 		pinned?: 'left' | 'right' | false;
 		formatter?: (value: any, row: any) => string;
+		onClick?: (row: any) => void;
 		align?: 'left' | 'center' | 'right';
 	}
 
@@ -195,12 +196,30 @@ Based on ADMIN_REFACTOR_2_DATA_OPERATIONS.md
 						{#each columns as column}
 							<td
 								class="body-cell"
+								class:clickable-cell={!!column.onClick}
 								style="text-align: {column.align || 'left'}"
 							>
-								{#if column.formatter}
-									{column.formatter(row[column.field], row)}
+								{#if column.onClick}
+									<button
+										class="cell-button"
+										type="button"
+										onclick={(event) => {
+											event.stopPropagation();
+											column.onClick?.(row);
+										}}
+									>
+										{#if column.formatter}
+											{column.formatter(row[column.field], row)}
+										{:else}
+											{row[column.field] ?? '-'}
+										{/if}
+									</button>
 								{:else}
-									{row[column.field] ?? '-'}
+									{#if column.formatter}
+										{column.formatter(row[column.field], row)}
+									{:else}
+										{row[column.field] ?? '-'}
+									{/if}
 								{/if}
 							</td>
 						{/each}
@@ -322,6 +341,28 @@ Based on ADMIN_REFACTOR_2_DATA_OPERATIONS.md
 		font-size: 0.875rem;
 		color: #2d3748;
 		border-right: 1px solid #f7fafc;
+	}
+
+	.body-cell.clickable-cell {
+		padding: 0;
+	}
+
+	.cell-button {
+		width: 100%;
+		padding: 0.5rem 1rem;
+		margin: 0;
+		background: none;
+		border: none;
+		text-align: inherit;
+		font: inherit;
+		color: inherit;
+		cursor: pointer;
+		border-radius: 999px;
+		transition: background-color 0.15s ease, color 0.15s ease;
+	}
+
+	.cell-button:hover {
+		background-color: #edf2f7;
 	}
 
 	.body-cell:last-child {
