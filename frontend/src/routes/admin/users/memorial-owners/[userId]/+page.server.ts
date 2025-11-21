@@ -1,6 +1,42 @@
 import { redirect, error } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
 
+// Helper to safely serialize Firestore data
+function safeSerialize(data: any): any {
+	if (!data) return data;
+	
+	const serialized: any = {};
+	for (const [key, value] of Object.entries(data)) {
+		// Skip undefined values
+		if (value === undefined) continue;
+		
+		// Handle Firestore Timestamps
+		if (value && typeof value === 'object' && 'toDate' in value && typeof value.toDate === 'function') {
+			serialized[key] = value.toDate().toISOString();
+			continue;
+		}
+		
+		// Handle arrays
+		if (Array.isArray(value)) {
+			serialized[key] = value.map(item => 
+				typeof item === 'object' && item !== null ? safeSerialize(item) : item
+			);
+			continue;
+		}
+		
+		// Handle nested objects
+		if (value && typeof value === 'object' && value.constructor === Object) {
+			serialized[key] = safeSerialize(value);
+			continue;
+		}
+		
+		// Handle primitives
+		serialized[key] = value;
+	}
+	
+	return serialized;
+}
+
 export const load = async ({ locals, params }: any) => {
 	// Auth check
 	if (!locals.user || locals.user.role !== 'admin') {
@@ -8,14 +44,18 @@ export const load = async ({ locals, params }: any) => {
 	}
 
 	const { userId } = params;
+	console.log('🔍 [USER DETAIL] Loading user:', userId);
 
 	try {
 		// 1. Get main user profile
+		console.log('📝 [USER DETAIL] Fetching user document...');
 		const userDoc = await adminDb.collection('users').doc(userId).get();
 		if (!userDoc.exists) {
+			console.log('❌ [USER DETAIL] User not found');
 			throw error(404, 'User not found');
 		}
 		const userData = userDoc.data();
+		console.log('✅ [USER DETAIL] User data loaded:', userData?.email);
 
 		// 2. Get funeral director profile (if applicable)
 		let funeralDirectorData = null;
@@ -169,21 +209,30 @@ export const load = async ({ locals, params }: any) => {
 		// 10. Get follower count (memorials user follows) - simplified
 		let followedMemorialsCount = 0;
 
-		return {
+		console.log('✅ [USER DETAIL] All data loaded, serializing response...');
+		
+		// Safely serialize all data before returning
+		const serializedUser = safeSerialize(userData);
+		const serializedFuneralDirector = funeralDirectorData ? safeSerialize(funeralDirectorData) : null;
+		const serializedMemorials = memorials.map(m => safeSerialize(m));
+		const serializedStreams = streams.map(s => safeSerialize(s));
+		const serializedSlideshows = slideshows.map(s => safeSerialize(s));
+		const serializedInvitations = invitations.map(i => safeSerialize(i));
+		const serializedScheduleRequests = scheduleRequests.map(r => safeSerialize(r));
+		const serializedAdminActions = adminActions.map(a => safeSerialize(a));
+
+		const result = {
 			user: {
 				id: userId,
-				...userData,
-				createdAt: userData?.createdAt?.toDate?.()?.toISOString() || null,
-				updatedAt: userData?.updatedAt?.toDate?.()?.toISOString() || null,
-				lastLoginAt: userData?.lastLoginAt?.toDate?.()?.toISOString() || null
+				...serializedUser
 			},
-			funeralDirector: funeralDirectorData,
-			memorials,
-			streams,
-			slideshows,
-			invitations,
-			scheduleRequests,
-			adminActions,
+			funeralDirector: serializedFuneralDirector,
+			memorials: serializedMemorials,
+			streams: serializedStreams,
+			slideshows: serializedSlideshows,
+			invitations: serializedInvitations,
+			scheduleRequests: serializedScheduleRequests,
+			adminActions: serializedAdminActions,
 			stats: {
 				memorialCount: memorials.length,
 				streamCount: streams.length,
@@ -194,8 +243,12 @@ export const load = async ({ locals, params }: any) => {
 				followedMemorialsCount
 			}
 		};
-	} catch (err) {
-		console.error('Error loading user detail:', err);
-		throw error(500, 'Failed to load user details');
+
+		console.log('✅ [USER DETAIL] Response serialized successfully');
+		return result;
+	} catch (err: any) {
+		console.error('❌ [USER DETAIL] Error loading user detail:', err);
+		console.error('❌ [USER DETAIL] Error stack:', err?.stack);
+		throw error(500, `Failed to load user details: ${err?.message || 'Unknown error'}`);
 	}
 };
