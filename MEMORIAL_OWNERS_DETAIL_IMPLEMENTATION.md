@@ -114,6 +114,19 @@ Memorial Owners List → Click Row → User Detail Page → Back Button → Memo
 - `src/routes/admin/users/memorial-owners/+page.svelte`
   - Enabled onRowClick handler
   - Added CSS for clickable styling
+- `src/routes/admin/users/memorial-owners/[userId]/+page.server.ts`
+  - Added comprehensive error handling with try-catch blocks
+  - Added TypeScript type annotations
+  - Removed expensive follower count query
+- `src/routes/admin/services/memorials/+page.svelte`
+  - Added `viewUserDetails` function
+  - Made owner email column clickable
+  - Fixed `selectedRows` → `selectedMemorials` binding
+- `src/routes/admin/services/memorials/[memorialId]/+page.svelte`
+  - Made creator email clickable
+  - Added CSS for owner-link button styling
+- `src/routes/admin/services/memorials/[memorialId]/+page.server.ts`
+  - Added `ownerUid` to memorial data object
 
 ## Technical Implementation Details
 
@@ -161,6 +174,38 @@ Memorial Owners List → Click Row → User Detail Page → Back Button → Memo
 - Build error exists for unrelated Cloudflare environment variables in slideshow upload endpoint (pre-existing issue)
 - No pagination for large data sets (all records loaded at once)
 - Edit/Suspend user buttons are placeholders (functionality not implemented)
+
+## Bug Fixes (Latest Update):
+
+### Fixed 500 Error on User Detail Page
+**Problem**: Page crashed when loading users with missing collections or empty data
+
+**Solution**:
+- Added individual try-catch blocks around each data query
+- Queries that fail now gracefully return empty arrays
+- Removed expensive follower count query that was causing timeouts
+- Added explicit type annotations (`:any[]`) to satisfy TypeScript
+
+**Result**: Page loads successfully even for users with no memorials or incomplete data
+
+### Added User Profile Links from Memorial Pages
+
+**Memorial List Page** (`/admin/services/memorials`):
+- Made "Owner" column clickable
+- Clicking owner email navigates to user detail page
+- Uses `ownerUid` field to find correct user
+
+**Memorial Detail Page** (`/admin/services/memorials/[memorialId]`):
+- Made creator email clickable button
+- Added `ownerUid` to server-side memorial data
+- Styled as gold link matching admin design system
+- Conditional rendering: only clickable if `ownerUid` exists
+
+**Navigation Flow**:
+```
+Memorial List → Click Owner Email → User Detail Page
+Memorial Detail → Click Creator Email → User Detail Page
+```
 
 ## Deployment Notes:
 - Requires admin authentication

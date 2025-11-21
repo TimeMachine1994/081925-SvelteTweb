@@ -818,4 +818,24 @@ https://player.vimeo.com/video/123456789'
 	button.secondary-btn:hover {
 		background: #4a5568;
 	}
+
+	/* Clickable owner link styling */
+	button.owner-link {
+		background: none;
+		border: none;
+		color: #d5ba7f;
+		text-decoration: none;
+		cursor: pointer;
+		font: inherit;
+		padding: 0;
+		margin: 0;
+		transition: all 0.2s ease;
+		font-weight: 600;
+	}
+
+	button.owner-link:hover {
+		text-decoration: underline;
+		color: #c4a76e;
+		background: none;
+	}
 </style>
