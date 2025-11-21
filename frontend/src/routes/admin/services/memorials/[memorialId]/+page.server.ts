@@ -120,6 +120,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			lovedOneName: memorialData.lovedOneName || 'Unknown',
 			fullSlug: memorialData.fullSlug || '',
 			createdBy: memorialData.createdBy || '',
+			ownerUid: memorialData.ownerUid || '',
 			creatorEmail: memorialData.creatorEmail || '',
 			creatorName: memorialData.creatorName || '',
 			createdAt: convertTimestamp(memorialData.createdAt),

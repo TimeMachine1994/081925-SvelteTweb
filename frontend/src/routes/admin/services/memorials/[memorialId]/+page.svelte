@@ -238,7 +238,20 @@
 	<div class="card">
 		<h1>💝 {memorial.lovedOneName}</h1>
 		<p>{publicUrl}</p>
-		<p>Created by {memorial.creatorEmail} • {formatDate(memorial.createdAt)}</p>
+		<p>
+			Created by 
+			{#if memorial.ownerUid}
+				<button 
+					class="owner-link" 
+					onclick={() => goto(`/admin/users/memorial-owners/${memorial.ownerUid}`)}
+				>
+					{memorial.creatorEmail}
+				</button>
+			{:else}
+				{memorial.creatorEmail}
+			{/if}
+			 • {formatDate(memorial.createdAt)}
+		</p>
 		<div class="badges">
 			<span class:complete={memorial.isComplete}>{memorial.isComplete ? '✅ Complete' : '⚠️ Incomplete'}</span>
 			<span class:paid={memorial.isPaid}>{memorial.isPaid ? '✅ Paid' : `❌ Unpaid ($${memorial.totalPrice})`}</span>

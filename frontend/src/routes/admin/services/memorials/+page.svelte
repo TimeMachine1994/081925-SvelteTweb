@@ -59,6 +59,13 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 		}
 	}
 
+	// Navigate to user detail page
+	function viewUserDetails(row: any) {
+		if (row.ownerUid) {
+			goto(`/admin/users/memorial-owners/${row.ownerUid}`);
+		}
+	}
+
 	// Column configuration
 	const columns = [
 		{
@@ -74,7 +81,9 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 			label: 'Owner',
 			field: 'creatorEmail',
 			width: 200,
-			sortable: true
+			sortable: true,
+			onClick: viewUserDetails,
+			formatter: (val: string) => val || 'Unknown'
 		},
 		{
 			id: 'isPaid',
@@ -236,7 +245,7 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 		{columns}
 		data={data.memorials}
 		selectable={$can('memorial', 'update')}
-		bind:selectedRows={selectedMemorials}
+		bind:selectedMemorials={selectedMemorials}
 		onRowClick={handleRowClick}
 		resourceType="memorial"
 	/>

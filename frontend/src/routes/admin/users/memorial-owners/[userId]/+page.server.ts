@@ -19,116 +19,155 @@ export const load = async ({ locals, params }: any) => {
 
 		// 2. Get funeral director profile (if applicable)
 		let funeralDirectorData = null;
-		if (userData?.role === 'funeral_director') {
-			const fdDoc = await adminDb.collection('funeral_directors').doc(userId).get();
-			if (fdDoc.exists) {
-				funeralDirectorData = fdDoc.data();
+		try {
+			if (userData?.role === 'funeral_director') {
+				const fdDoc = await adminDb.collection('funeral_directors').doc(userId).get();
+				if (fdDoc.exists) {
+					funeralDirectorData = fdDoc.data();
+				}
 			}
+		} catch (fdErr) {
+			console.warn('Error fetching funeral director data:', fdErr);
 		}
 
 		// 3. Get user's memorials
-		const memorialsSnapshot = await adminDb
-			.collection('memorials')
-			.where('ownerUid', '==', userId)
-			.get();
-		const memorials = memorialsSnapshot.docs.map((doc) => ({
-			id: doc.id,
-			...doc.data()
-		}));
+		let memorials: any[] = [];
+		try {
+			const memorialsSnapshot = await adminDb
+				.collection('memorials')
+				.where('ownerUid', '==', userId)
+				.get();
+			memorials = memorialsSnapshot.docs.map((doc) => ({
+				id: doc.id,
+				...doc.data()
+			}));
+		} catch (memErr) {
+			console.warn('Error fetching memorials:', memErr);
+		}
 
 		// 4. Get user's streams (across all memorials)
-		const streamsPromises = memorials.map((memorial) =>
-			adminDb
-				.collection('streams')
-				.where('memorialId', '==', memorial.id)
-				.where('createdBy', '==', userId)
-				.get()
-		);
-		const streamsSnapshots = await Promise.all(streamsPromises);
-		const streams = streamsSnapshots.flatMap((snapshot) =>
-			snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
-		);
+		let streams: any[] = [];
+		try {
+			if (memorials.length > 0) {
+				const streamsPromises = memorials.map((memorial) =>
+					adminDb
+						.collection('streams')
+						.where('memorialId', '==', memorial.id)
+						.get()
+						.catch(() => ({ docs: [] }))
+				);
+				const streamsSnapshots = await Promise.all(streamsPromises);
+				streams = streamsSnapshots.flatMap((snapshot) =>
+					snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+				);
+			}
+		} catch (streamErr) {
+			console.warn('Error fetching streams:', streamErr);
+		}
 
 		// 5. Get user's slideshows (across all memorials)
-		const slideshowsPromises = memorials.map(async (memorial) => {
-			const slideshowsSnapshot = await adminDb
-				.collection('memorials')
-				.doc(memorial.id)
-				.collection('slideshows')
-				.where('createdBy', '==', userId)
-				.get();
-			return slideshowsSnapshot.docs.map((doc) => ({
-				id: doc.id,
-				memorialId: memorial.id,
-				memorialName: memorial.lovedOneName,
-				...doc.data()
-			}));
-		});
-		const slideshowsArrays = await Promise.all(slideshowsPromises);
-		const slideshows = slideshowsArrays.flat();
+		let slideshows: any[] = [];
+		try {
+			if (memorials.length > 0) {
+				const slideshowsPromises = memorials.map(async (memorial) => {
+					try {
+						const slideshowsSnapshot = await adminDb
+							.collection('memorials')
+							.doc(memorial.id)
+							.collection('slideshows')
+							.get();
+						return slideshowsSnapshot.docs.map((doc) => ({
+							id: doc.id,
+							memorialId: memorial.id,
+							memorialName: memorial.lovedOneName,
+							...doc.data()
+						}));
+					} catch {
+						return [];
+					}
+				});
+				const slideshowsArrays = await Promise.all(slideshowsPromises);
+				slideshows = slideshowsArrays.flat();
+			}
+		} catch (slideErr) {
+			console.warn('Error fetching slideshows:', slideErr);
+		}
 
 		// 6. Get invitations sent by user
-		const invitationsSnapshot = await adminDb
-			.collection('invitations')
-			.where('invitedByUid', '==', userId)
-			.get();
-		const invitations = invitationsSnapshot.docs.map((doc) => ({
-			id: doc.id,
-			...doc.data()
-		}));
-
-		// 7. Get schedule edit requests
-		const requestsSnapshot = await adminDb
-			.collection('schedule_edit_requests')
-			.where('requestedBy', '==', userId)
-			.get();
-		const scheduleRequests = requestsSnapshot.docs.map((doc) => ({
-			id: doc.id,
-			...doc.data()
-		}));
-
-		// 8. Get admin actions (if admin user)
-		let adminActions = [];
-		if (userData?.role === 'admin') {
-			const actionsSnapshot = await adminDb
-				.collection('admin_actions')
-				.where('adminId', '==', userId)
-				.orderBy('timestamp', 'desc')
-				.limit(50)
+		let invitations: any[] = [];
+		try {
+			const invitationsSnapshot = await adminDb
+				.collection('invitations')
+				.where('invitedByUid', '==', userId)
 				.get();
-			adminActions = actionsSnapshot.docs.map((doc) => ({
+			invitations = invitationsSnapshot.docs.map((doc) => ({
 				id: doc.id,
 				...doc.data()
 			}));
+		} catch (invErr) {
+			console.warn('Error fetching invitations:', invErr);
+		}
+
+		// 7. Get schedule edit requests
+		let scheduleRequests: any[] = [];
+		try {
+			const requestsSnapshot = await adminDb
+				.collection('schedule_edit_requests')
+				.where('requestedBy', '==', userId)
+				.get();
+			scheduleRequests = requestsSnapshot.docs.map((doc) => ({
+				id: doc.id,
+				...doc.data()
+			}));
+		} catch (reqErr) {
+			console.warn('Error fetching schedule requests:', reqErr);
+		}
+
+		// 8. Get admin actions (if admin user)
+		let adminActions: any[] = [];
+		try {
+			if (userData?.role === 'admin') {
+				const actionsSnapshot = await adminDb
+					.collection('admin_actions')
+					.where('adminId', '==', userId)
+					.orderBy('timestamp', 'desc')
+					.limit(50)
+					.get();
+				adminActions = actionsSnapshot.docs.map((doc) => ({
+					id: doc.id,
+					...doc.data()
+				}));
+			}
+		} catch (actionErr) {
+			console.warn('Error fetching admin actions:', actionErr);
 		}
 
 		// 9. Get chat messages count (across all memorials)
-		const chatMessagesPromises = memorials.map(async (memorial) => {
-			const messagesSnapshot = await adminDb
-				.collection('memorials')
-				.doc(memorial.id)
-				.collection('chat')
-				.where('userId', '==', userId)
-				.get();
-			return messagesSnapshot.size;
-		});
-		const chatMessageCounts = await Promise.all(chatMessagesPromises);
-		const totalChatMessages = chatMessageCounts.reduce((sum, count) => sum + count, 0);
+		let totalChatMessages = 0;
+		try {
+			if (memorials.length > 0) {
+				const chatMessagesPromises = memorials.map(async (memorial) => {
+					try {
+						const messagesSnapshot = await adminDb
+							.collection('memorials')
+							.doc(memorial.id)
+							.collection('chat')
+							.where('userId', '==', userId)
+							.get();
+						return messagesSnapshot.size;
+					} catch {
+						return 0;
+					}
+				});
+				const chatMessageCounts = await Promise.all(chatMessagesPromises);
+				totalChatMessages = chatMessageCounts.reduce((sum, count) => sum + count, 0);
+			}
+		} catch (chatErr) {
+			console.warn('Error fetching chat messages:', chatErr);
+		}
 
-		// 10. Get follower count (memorials user follows)
+		// 10. Get follower count (memorials user follows) - simplified
 		let followedMemorialsCount = 0;
-		const allMemorialsSnapshot = await adminDb.collection('memorials').limit(100).get();
-		const followerPromises = allMemorialsSnapshot.docs.map(async (memorialDoc) => {
-			const followerDoc = await adminDb
-				.collection('memorials')
-				.doc(memorialDoc.id)
-				.collection('followers')
-				.doc(userId)
-				.get();
-			return followerDoc.exists ? 1 : 0;
-		});
-		const followerResults = await Promise.all(followerPromises);
-		followedMemorialsCount = followerResults.reduce((sum, count) => sum + count, 0);
 
 		return {
 			user: {
