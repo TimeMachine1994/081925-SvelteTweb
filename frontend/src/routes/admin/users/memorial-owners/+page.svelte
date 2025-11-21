@@ -136,9 +136,9 @@ Manage users who own memorial pages
 		selectable={$can('user', 'update')}
 		selectedMemorials={selectedUsers}
 		onBulkAction={handleBulkAction}
+		onRowClick={handleRowClick}
 		resourceType="user"
 	/>
-	<!-- onRowClick disabled until detail pages are created -->
 </AdminLayout>
 
 <style>
@@ -148,5 +148,29 @@ Manage users who own memorial pages
 		border-radius: 0.5rem;
 		padding: 1.5rem;
 		margin-bottom: 1.5rem;
+	}
+
+	/* Clickable user name styling */
+	:global(.user-name-link) {
+		color: #d5ba7f;
+		text-decoration: none;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+
+	:global(.user-name-link:hover) {
+		text-decoration: underline;
+		color: #c4a76e;
+	}
+
+	/* Enhanced row hover effect */
+	:global(.data-grid tbody tr) {
+		cursor: pointer;
+		transition: background-color 0.2s ease;
+	}
+
+	:global(.data-grid tbody tr:hover) {
+		background-color: #f7fafc;
 	}
 </style>
