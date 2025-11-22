@@ -134,7 +134,7 @@ Manage users who own memorial pages
 		{columns}
 		data={data.users}
 		selectable={$can('user', 'update')}
-		selectedMemorials={selectedUsers}
+		bind:selectedMemorials={selectedUsers}
 		onBulkAction={handleBulkAction}
 		onRowClick={handleRowClick}
 		resourceType="user"
