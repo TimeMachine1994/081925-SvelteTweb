@@ -1,29 +1,13 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { getTheme } from '$lib/design-tokens/minimal-modern-theme';
-	import { Button, Input, Card, Stats, FAQ, Comparison, Steps, Timeline, VideoPlayer } from '$lib/components/minimal-modern';
-	import OptimizedImage from '$lib/components/OptimizedImage.svelte';
-	import { OPTIMIZED_VIDEO_POSTERS, getResponsivePoster } from '$lib/utils/optimizedPosters';
-	import { Star, Shield, Users, Play, Search, Phone, Clock, Pause, Volume2, Maximize, CheckCircle, Globe } from 'lucide-svelte';
+	import { Button, Input, Card, FAQ, Steps, Timeline } from '$lib/components/minimal-modern';
+	import { Star, Shield, Users, Play, Search, Phone, Clock, CheckCircle, Globe } from 'lucide-svelte';
 
 	let eventName = $state('');
 	let searchQuery = $state('');
 	let activeTab = $state('hosts');
 	let currentStep = $state(0);
-	
-	// Hero video player state
-	let heroVideo: HTMLVideoElement;
-	let heroIsPlaying = $state(false);
-	let heroCurrentTime = $state(0);
-	let heroDuration = $state(0);
-	let heroVolume = $state(1);
-
-	// About Us video player state (existing)
-	let video: HTMLVideoElement = $state();
-	let isPlaying = $state(false);
-	let currentTime = $state(0);
-	let duration = $state(0);
-	let volume = $state(1);
 
 	const theme = getTheme('minimal');
 
@@ -131,96 +115,6 @@
 		document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' });
 	}
 
-	// Hero video player functions
-	function heroTogglePlay() {
-		if (!heroVideo) return;
-		if (heroVideo.paused) {
-			heroVideo.play();
-			heroIsPlaying = true;
-		} else {
-			heroVideo.pause();
-			heroIsPlaying = false;
-		}
-	}
-
-	function heroHandleTimeUpdate() {
-		if (!heroVideo) return;
-		heroCurrentTime = heroVideo.currentTime;
-	}
-
-	function heroHandleLoadedMetadata() {
-		if (!heroVideo) return;
-		heroDuration = heroVideo.duration;
-	}
-
-	function heroHandleSeek(event: Event) {
-		if (!heroVideo) return;
-		const target = event.target as HTMLInputElement;
-		const time = (parseFloat(target.value) / 100) * heroDuration;
-		heroVideo.currentTime = time;
-		heroCurrentTime = time;
-	}
-
-	function heroHandleVolumeChange(event: Event) {
-		if (!heroVideo) return;
-		const target = event.target as HTMLInputElement;
-		heroVolume = parseFloat(target.value) / 100;
-		heroVideo.volume = heroVolume;
-	}
-
-	function heroToggleFullscreen() {
-		if (!heroVideo || !heroVideo.requestFullscreen) return;
-		heroVideo.requestFullscreen();
-	}
-
-	// About Us video player functions (existing)
-	function togglePlay() {
-		if (!video) return;
-		if (video.paused) {
-			video.play();
-			isPlaying = true;
-		} else {
-			video.pause();
-			isPlaying = false;
-		}
-	}
-
-	function handleTimeUpdate() {
-		if (!video) return;
-		currentTime = video.currentTime;
-	}
-
-	function handleLoadedMetadata() {
-		if (!video) return;
-		duration = video.duration;
-	}
-
-	function handleSeek(event: Event) {
-		if (!video) return;
-		const target = event.target as HTMLInputElement;
-		const time = (parseFloat(target.value) / 100) * duration;
-		video.currentTime = time;
-		currentTime = time;
-	}
-
-	function handleVolumeChange(event: Event) {
-		if (!video) return;
-		const target = event.target as HTMLInputElement;
-		volume = parseFloat(target.value) / 100;
-		video.volume = volume;
-	}
-
-	function toggleFullscreen() {
-		if (!video || !video.requestFullscreen) return;
-		video.requestFullscreen();
-	}
-
-	function formatTime(seconds: number): string {
-		const mins = Math.floor(seconds / 60);
-		const secs = Math.floor(seconds % 60);
-		return `${mins}:${secs.toString().padStart(2, '0')}`;
-	}
-
 	function handlePackageSelection(packageName: string) {
 		console.log('📦 Package selected:', packageName);
 		const params = new URLSearchParams();
@@ -238,21 +132,8 @@
 </svelte:head>
 
 <div class="bg-white text-gray-900" style="font-family: {theme.font.body}">
-	<!-- Hero Section with Stacked Layout -->
-	<section class="relative min-h-[90vh] flex flex-col bg-black">
-		<!-- Video Background -->
-		<video
-			class="absolute inset-0 w-full h-full object-cover"
-			autoplay
-			muted
-			loop
-			playsinline
-		>
-			<source src="https://firebasestorage.googleapis.com/v0/b/fir-tweb.firebasestorage.app/o/tributestream_advertisment%20(720p)%20(1).mp4?alt=media&token=301d3835-f64a-4ba3-8619-343600cb1117" type="video/mp4">
-		</video>
-		
-		<!-- Dark overlay for text readability -->
-		<div class="absolute inset-0 bg-black/50"></div>
+	<!-- Hero Section with Gradient Background -->
+	<section class="relative min-h-[90vh] flex flex-col" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 30%, #60a5fa 50%, #d4af37 70%, #fbbf24 100%);">
 		
 		<!-- Stacked Content Container -->
 		<div class="relative z-10 flex flex-col min-h-[80vh]">
@@ -271,7 +152,7 @@
 					<!-- Dual CTA Clusters -->
 					<div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
 						<!-- Event Hosts CTA Cluster -->
-						<div class="text-center">
+						<div class="text-center" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #d4af37 100%); padding: 2rem; border-radius: 0.75rem; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
 							<h3 class="text-2xl font-semibold text-white mb-4">For Event Hosts</h3>
 							<div class="space-y-3">
 								<div class="flex gap-2">
@@ -303,7 +184,7 @@
 						</div>
 
 						<!-- Event Planners CTA Cluster -->
-						<div class="text-center">
+						<div class="text-center" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #d4af37 100%); padding: 2rem; border-radius: 0.75rem; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
 							<h3 class="text-2xl font-semibold text-white mb-4">For Event Planners</h3>
 							<div class="space-y-3">
 								<Button theme="minimal" onclick={handleBookDemo} class="w-full bg-slate-900 text-white hover:bg-slate-800 flex items-center justify-center">
@@ -314,109 +195,6 @@
 									How it works
 								</Button>
 							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<!-- Middle: Demo Video - Own row -->
-			<div class="px-6 py-8">
-				<div class="w-full max-w-md mx-auto">
-					<div class="relative rounded-lg overflow-hidden shadow-2xl bg-black/20 backdrop-blur-sm border border-white/10">
-						<video
-							bind:this={heroVideo}
-							class="w-full aspect-video object-cover scale-110"
-							ontimeupdate={heroHandleTimeUpdate}
-							onloadedmetadata={heroHandleLoadedMetadata}
-							onplay={() => heroIsPlaying = true}
-							onpause={() => heroIsPlaying = false}
-							preload="metadata"
-						>
-							<source src="https://firebasestorage.googleapis.com/v0/b/fir-tweb.firebasestorage.app/o/tributestream_advertisment%20(720p)%20(1).mp4?alt=media&token=301d3835-f64a-4ba3-8619-343600cb1117" type="video/mp4">
-							<track kind="captions" src="" srclang="en" label="English captions" default>
-							Your browser does not support the video tag.
-						</video>
-
-					<!-- Play Button Overlay - Only visible when paused -->
-					{#if !heroIsPlaying}
-						<div class="absolute inset-0 flex items-center justify-center">
-							<button
-								onclick={heroTogglePlay}
-								class="w-16 h-16 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-lg z-20"
-								aria-label="Play video"
-							>
-								<Play class="w-6 h-6 text-black ml-0.5" />
-							</button>
-						</div>
-					{/if}
-
-					<!-- Custom Video Controls - Show pause on hover when playing -->
-					<div class="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300 bg-black/20 group">
-						{#if heroIsPlaying}
-							<button
-								onclick={heroTogglePlay}
-								class="w-16 h-16 rounded-full bg-blue-500/90 hover:bg-blue-500 flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-lg"
-								aria-label="Pause video"
-							>
-								<Pause class="w-6 h-6 text-black ml-0" />
-							</button>
-						{/if}
-					</div>
-
-					<!-- Progress Bar and Controls -->
-					<div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 opacity-0 hover:opacity-100 transition-opacity duration-300">
-						<div class="flex items-center gap-2 text-white text-sm">
-							<!-- Play/Pause Button -->
-							<button
-								onclick={heroTogglePlay}
-								class="w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
-								aria-label={heroIsPlaying ? 'Pause' : 'Play'}
-							>
-								{#if heroIsPlaying}
-									<Pause class="w-3 h-3" />
-								{:else}
-									<Play class="w-3 h-3 ml-0.5" />
-								{/if}
-							</button>
-
-							<!-- Time Display -->
-							<span class="text-xs font-medium">
-								{formatTime(heroCurrentTime)} / {formatTime(heroDuration)}
-							</span>
-
-							<!-- Progress Bar -->
-							<div class="flex-1 mx-2">
-								<input
-									type="range"
-									min="0"
-									max="100"
-									value={heroDuration ? (heroCurrentTime / heroDuration) * 100 : 0}
-									onchange={heroHandleSeek}
-									class="w-full h-1 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
-								/>
-							</div>
-
-							<!-- Volume Control -->
-							<div class="flex items-center gap-1">
-								<Volume2 class="w-4 h-4" />
-								<input
-									type="range"
-									min="0"
-									max="100"
-									value={heroVolume * 100}
-									onchange={heroHandleVolumeChange}
-									class="w-16 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
-								/>
-							</div>
-
-							<!-- Fullscreen Button -->
-							<button
-								onclick={heroToggleFullscreen}
-								class="w-6 h-6 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
-								aria-label="Fullscreen"
-							>
-								<Maximize class="w-3 h-3" />
-							</button>
 						</div>
 					</div>
 				</div>
@@ -564,134 +342,33 @@
 		</div>
 	</section>
 
-	<!-- Product Proof -->
+	<!-- Professional Streaming Technology -->
 	<section class="py-16 bg-white">
-		<div class="max-w-6xl mx-auto px-6">
-			<div class="grid md:grid-cols-2 gap-12 items-center">
-				<div>
-					<div class="video-player-custom rounded-lg overflow-hidden shadow-lg bg-black relative">
-						<!-- Video Element -->
-						<video 
-							bind:this={video}
-							class="w-full aspect-video"
-							preload="metadata"
-							poster="https://firebasestorage.googleapis.com/v0/b/fir-tweb.firebasestorage.app/o/image_assets%2Fthumb%20for%20homevid%20002.png?alt=media&token=b5a29196-eceb-44cf-8e65-1b135d6b03ad"
-							ontimeupdate={handleTimeUpdate}
-							onloadedmetadata={handleLoadedMetadata}
-							onplay={() => isPlaying = true}
-							onpause={() => isPlaying = false}
-							onloadstart={() => console.log('About Us video loading started')}
-							oncanplay={() => console.log('About Us video can play')}
-							onerror={(e) => console.error('About Us video error:', e)}
-						>
-							<source src="https://firebasestorage.googleapis.com/v0/b/fir-tweb.firebasestorage.app/o/tributestream_-_about_us%20(1080p).mp4?alt=media&token=54cb483c-aa04-4b60-8f3d-15a3085a365a" type="video/mp4">
-							<track kind="captions" src="" srclang="en" label="English captions" default>
-							Your browser does not support the video tag.
-						</video>
-
-						<!-- Play Button Overlay for Thumbnail -->
-						{#if !isPlaying && video && video.paused}
-							<div class="absolute inset-0 flex items-center justify-center bg-black/10">
-								<button
-									onclick={togglePlay}
-									class="w-20 h-20 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition-all duration-200 hover:scale-110 shadow-lg"
-									aria-label="Play video"
-								>
-									<Play class="w-8 h-8 text-black ml-1" />
-								</button>
-							</div>
-						{/if}
-						
-						<!-- Custom Control Bar -->
-						<div class="bg-gradient-to-r from-[#3B82F6] to-[#2563EB] p-4 border-t border-[#B59A5F]">
-							<div class="flex items-center space-x-4">
-								<!-- Play/Pause Button -->
-								<button 
-									onclick={togglePlay}
-									class="flex items-center justify-center w-12 h-12 bg-black text-blue-500 rounded-full hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl"
-								>
-									{#if isPlaying}
-										<Pause class="h-6 w-6" />
-									{:else}
-										<Play class="h-6 w-6 ml-0.5" />
-									{/if}
-								</button>
-								
-								<!-- Progress Bar -->
-								<div class="flex-1 flex items-center space-x-3">
-									<span class="text-black text-sm font-bold min-w-[45px] tabular-nums">
-										{formatTime(currentTime)}
-									</span>
-									<div class="flex-1 relative">
-										<input
-											type="range"
-											min="0"
-											max="100"
-											value={duration ? (currentTime / duration) * 100 : 0}
-											oninput={handleSeek}
-											class="w-full progress-slider"
-										/>
-									</div>
-									<span class="text-black text-sm font-bold min-w-[45px] tabular-nums">
-										{formatTime(duration)}
-									</span>
-								</div>
-								
-								<!-- Volume Control -->
-								<div class="flex items-center space-x-2">
-									<Volume2 class="h-5 w-5 text-black" />
-									<div class="w-24">
-										<input
-											type="range"
-											min="0"
-											max="100"
-											value={volume * 100}
-											oninput={handleVolumeChange}
-											class="w-full volume-slider"
-										/>
-									</div>
-								</div>
-								
-								<!-- Fullscreen Button -->
-								<button 
-									onclick={toggleFullscreen}
-									class="flex items-center justify-center w-10 h-10 text-black hover:bg-black/10 rounded-lg transition-colors"
-								>
-									<Maximize class="h-5 w-5" />
-								</button>
-							</div>
-						</div>
+		<div class="max-w-4xl mx-auto px-6 text-center">
+			<h3 class="text-3xl font-bold text-slate-900 mb-8">Professional Streaming Technology</h3>
+			<ul class="space-y-6">
+				<li class="flex items-start gap-4">
+					<Shield class="h-6 w-6 text-blue-500 mt-0.5 flex-shrink-0" />
+					<div class="text-left">
+						<strong class="text-lg">Reliability:</strong>
+						<p class="text-slate-600">99.9% uptime with automatic failover systems</p>
 					</div>
-					
-					<!-- AI Generation Attribution -->
-					<div class="text-center mt-4">
-						<p class="text-sm text-slate-500 italic">This Ad was made with AI Generation.</p>
+				</li>
+				<li class="flex items-start gap-4">
+					<Users class="h-6 w-6 text-blue-500 mt-0.5 flex-shrink-0" />
+					<div class="text-left">
+						<strong class="text-lg">Custom links:</strong>
+						<p class="text-slate-600">Unique, custom links allow easy access for your invited guests</p>
 					</div>
-				</div>
-				<div>
-					<h3 class="text-2xl font-bold text-slate-900 mb-6">Professional Streaming Technology</h3>
-					<ul class="space-y-4">
-						<li class="flex items-start gap-3">
-							<Shield class="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
-							<div>
-								<strong>Reliability:</strong> 99.9% uptime with automatic failover systems
-							</div>
-						</li>
-						<li class="flex items-start gap-3">
-							<Users class="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
-							<div>
-								<strong>Custom links:</strong> Unique, custom links allow easy access for your invited guests
-							</div>
-						</li>
-						<li class="flex items-start gap-3">
-							<Play class="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
-							<div>
-								<strong>Downloadable archive:</strong> High-quality recording available within 24 hours
-							</div>
-						</li>
-					</ul>
-				</div>
-			</div>
+				</li>
+				<li class="flex items-start gap-4">
+					<Play class="h-6 w-6 text-blue-500 mt-0.5 flex-shrink-0" />
+					<div class="text-left">
+						<strong class="text-lg">Downloadable archive:</strong>
+						<p class="text-slate-600">High-quality recording available within 24 hours</p>
+					</div>
+				</li>
+			</ul>
 		</div>
 	</section>
 
