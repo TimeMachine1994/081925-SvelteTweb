@@ -2,11 +2,11 @@
 	import { X, Send, AlertCircle } from 'lucide-svelte';
 
 	let {
-		memorial,
+		event,
 		onClose,
 		onSubmit
 	}: {
-		memorial: any;
+		event: any;
 		onClose: () => void;
 		onSubmit: (details: string) => Promise<void>;
 	} = $props();
@@ -70,7 +70,7 @@
 					Request Schedule Changes
 				</h2>
 				<p class="mt-1 text-sm text-gray-600">
-					Memorial: <strong>{memorial.lovedOneName}</strong>
+					Event: <strong>{event.lovedOneName}</strong>
 				</p>
 			</div>
 			<button

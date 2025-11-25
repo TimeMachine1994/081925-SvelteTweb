@@ -79,7 +79,7 @@
 					
 					if (data.fullSlug) {
 						redirectPath = `/${data.fullSlug}`;
-						console.log('🔄 Redirecting to memorial:', data.fullSlug);
+						console.log('🔄 Redirecting to event:', data.fullSlug);
 					} else if (data.redirect) {
 						redirectPath = `/${data.redirect}`;
 						console.log('🔄 Redirecting to:', data.redirect);

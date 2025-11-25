@@ -18,23 +18,23 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 		const { memorialId } = await request.json();
 
 		if (!memorialId) {
-			return json({ error: 'Memorial ID is required' }, { status: 400 });
+			return json({ error: 'Event ID is required' }, { status: 400 });
 		}
 
-		console.log('🗑️ [ADMIN API] Deleting memorial:', memorialId);
+		console.log('🗑️ [ADMIN API] Deleting event:', memorialId);
 
-		// Get memorial data before deletion for audit log
+		// Get event data before deletion for audit log
 		const memorialDoc = await adminDb.collection('memorials').doc(memorialId).get();
 		if (!memorialDoc.exists) {
-			return json({ error: 'Memorial not found' }, { status: 404 });
+			return json({ error: 'Event not found' }, { status: 404 });
 		}
 
 		const memorialData = memorialDoc.data();
 
-		// Delete the memorial document
+		// Delete the event document
 		await adminDb.collection('memorials').doc(memorialId).delete();
 
-		console.log('✅ [ADMIN API] Memorial deleted successfully');
+		console.log('✅ [ADMIN API] Event deleted successfully');
 
 		// Log the deletion
 		await logAuditEvent({
@@ -42,7 +42,7 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 			action: 'admin_memorial_deleted',
 			userEmail: locals.user.email,
 			userRole: locals.user.role as 'admin' | 'owner' | 'funeral_director',
-			resourceType: 'memorial',
+			resourceType: 'event',
 			resourceId: memorialId,
 			details: {
 				lovedOneName: memorialData?.lovedOneName,
@@ -56,11 +56,11 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 
 		return json({
 			success: true,
-			message: 'Memorial deleted successfully',
+			message: 'Event deleted successfully',
 			memorialId
 		});
 	} catch (error: any) {
-		console.error('❌ [ADMIN API] Error deleting memorial:', error);
+		console.error('❌ [ADMIN API] Error deleting event:', error);
 
 		// Log the error
 		await logAuditEvent({
@@ -68,7 +68,7 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 			action: 'admin_memorial_delete_error',
 			userEmail: locals.user?.email || 'unknown',
 			userRole: locals.user?.role as 'admin' | 'owner' | 'funeral_director' || 'admin',
-			resourceType: 'memorial',
+			resourceType: 'event',
 			resourceId: 'unknown',
 			details: { error: error.message },
 			success: false,
@@ -78,7 +78,7 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 
 		return json(
 			{
-				error: 'Failed to delete memorial',
+				error: 'Failed to delete event',
 				details: error.message
 			},
 			{ status: 500 }

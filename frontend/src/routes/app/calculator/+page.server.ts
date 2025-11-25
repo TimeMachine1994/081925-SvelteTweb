@@ -1,13 +1,13 @@
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import type { PageServerLoad, Actions } from './$types';
-import type { Memorial } from '$lib/types/memorial';
+import type { Event } from '$lib/types/event';
 import { fail, json, redirect } from '@sveltejs/kit';
 import { stripe } from '$lib/server/stripe';
 import type { LivestreamConfig } from '$lib/types/livestream';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
 	const db = getFirestore();
-	let memorial: Memorial | null = null;
+	let event: Event | null = null;
 	let config: LivestreamConfig | null = null;
 
 	const memorialId = url.searchParams.get('memorialId');
@@ -29,12 +29,12 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			}
 		}
 
-		// Then, load the memorial data
+		// Then, load the event data
 		const memorialRef = db.collection('memorials').doc(memorialId);
 		const memorialSnap = await memorialRef.get();
 
 		if (memorialSnap.exists) {
-			console.log('✅ Found memorial for user:', memorialSnap.id);
+			console.log('✅ Found event for user:', memorialSnap.id);
 			const memorialData = memorialSnap.data();
 			if (memorialData) {
 				// Convert Firestore Timestamps to serializable format
@@ -44,18 +44,18 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 				if (memorialData.updatedAt && typeof memorialData.updatedAt.toDate === 'function') {
 					(memorialData.updatedAt as any) = memorialData.updatedAt.toDate().toISOString();
 				}
-				console.log('📊 Memorial data loaded:', {
+				console.log('📊 Event data loaded:', {
 					id: memorialSnap.id,
 					lovedOneName: memorialData.lovedOneName,
 					hasServices: !!memorialData.services,
 					services: memorialData.services
 				});
-				memorial = { ...(memorialData as Omit<Memorial, 'id'>), id: memorialSnap.id };
+				event = { ...(memorialData as Omit<Event, 'id'>), id: memorialSnap.id };
 			}
 		}
 	}
 
-	return { memorial, config };
+	return { event, config };
 };
 
 export const actions: Actions = {

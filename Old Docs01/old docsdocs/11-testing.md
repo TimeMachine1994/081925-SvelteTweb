@@ -2,7 +2,7 @@
 
 ## Overview
 
-Tributestream employs a comprehensive testing strategy covering unit tests, integration tests, and end-to-end tests to ensure reliability and maintainability of the memorial service platform.
+Tributestream employs a comprehensive testing strategy covering unit tests, integration tests, and end-to-end tests to ensure reliability and maintainability of the event service platform.
 
 ## Testing Architecture
 
@@ -115,7 +115,7 @@ import Calculator from './Calculator.svelte';
 
 describe('Calculator Component', () => {
   const mockProps = {
-    memorialId: 'test-memorial-id',
+    memorialId: 'test-event-id',
     services: {
       main: {
         location: { name: 'Test Location', address: '123 Main St', isUnknown: false },
@@ -178,7 +178,7 @@ describe('MemorialAccessVerifier', () => {
   };
 
   const mockMemorial = {
-    id: 'memorial-123',
+    id: 'event-123',
     ownerUid: 'user-123',
     funeralDirectorUid: null,
     isPublic: false
@@ -187,24 +187,24 @@ describe('MemorialAccessVerifier', () => {
   it('grants admin access to admins', async () => {
     const adminUser = { ...mockUser, role: 'admin' as const, isAdmin: true };
     
-    const result = await MemorialAccessVerifier.checkViewAccess('memorial-123', adminUser);
+    const result = await MemorialAccessVerifier.checkViewAccess('event-123', adminUser);
     
     expect(result.hasAccess).toBe(true);
     expect(result.accessLevel).toBe('admin');
     expect(result.reason).toBe('Admin privileges');
   });
 
-  it('grants owner access to memorial owners', async () => {
+  it('grants owner access to event owners', async () => {
     vi.mocked(getDoc).mockResolvedValue({
       exists: () => true,
       data: () => mockMemorial
     });
 
-    const result = await MemorialAccessVerifier.checkViewAccess('memorial-123', mockUser);
+    const result = await MemorialAccessVerifier.checkViewAccess('event-123', mockUser);
     
     expect(result.hasAccess).toBe(true);
     expect(result.accessLevel).toBe('admin');
-    expect(result.reason).toBe('Memorial owner');
+    expect(result.reason).toBe('Event owner');
   });
 
   it('denies access to unauthorized users', async () => {
@@ -215,7 +215,7 @@ describe('MemorialAccessVerifier', () => {
       data: () => mockMemorial
     });
 
-    const result = await MemorialAccessVerifier.checkViewAccess('memorial-123', unauthorizedUser);
+    const result = await MemorialAccessVerifier.checkViewAccess('event-123', unauthorizedUser);
     
     expect(result.hasAccess).toBe(false);
     expect(result.accessLevel).toBe('none');
@@ -239,7 +239,7 @@ describe('useAutoSave', () => {
     global.fetch = mockFetch;
 
     const onSave = vi.fn();
-    const autoSave = useAutoSave('memorial-123', { delay: 100, onSave });
+    const autoSave = useAutoSave('event-123', { delay: 100, onSave });
 
     const testData = {
       services: { main: { location: { name: 'Test' } } },
@@ -252,7 +252,7 @@ describe('useAutoSave', () => {
     await new Promise(resolve => setTimeout(resolve, 150));
 
     expect(mockFetch).toHaveBeenCalledWith(
-      '/api/memorials/memorial-123/schedule/auto-save',
+      '/api/memorials/event-123/schedule/auto-save',
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({
@@ -273,17 +273,17 @@ describe('useAutoSave', () => {
 ### API Endpoint Testing
 
 ```typescript
-// tests/api/memorial-api.test.ts
+// tests/api/event-api.test.ts
 import { describe, it, expect, beforeEach } from 'vitest';
 import { POST } from '../src/routes/api/memorials/+server';
 
-describe('Memorial API', () => {
+describe('Event API', () => {
   beforeEach(() => {
     // Setup test database state
     vi.clearAllMocks();
   });
 
-  it('creates memorial with valid data', async () => {
+  it('creates event with valid data', async () => {
     const request = new Request('http://localhost/api/memorials', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -292,7 +292,7 @@ describe('Memorial API', () => {
         creatorEmail: 'family@example.com',
         services: {
           main: {
-            location: { name: 'Memorial Chapel', address: '123 Main St', isUnknown: false },
+            location: { name: 'Event Chapel', address: '123 Main St', isUnknown: false },
             time: { date: '2024-12-01', time: '14:00', isUnknown: false },
             hours: 2
           },
@@ -306,8 +306,8 @@ describe('Memorial API', () => {
 
     expect(response.status).toBe(200);
     expect(result.success).toBe(true);
-    expect(result.memorial.lovedOneName).toBe('John Doe');
-    expect(result.memorial.services.main.location.name).toBe('Memorial Chapel');
+    expect(result.event.lovedOneName).toBe('John Doe');
+    expect(result.event.services.main.location.name).toBe('Event Chapel');
   });
 
   it('validates required fields', async () => {
@@ -337,9 +337,9 @@ import { describe, it, expect } from 'vitest';
 import { convertMemorialToScheduledServices } from '$lib/server/scheduledServicesUtils';
 
 describe('Livestream Integration', () => {
-  it('converts memorial services to scheduled services format', () => {
-    const memorial = {
-      id: 'memorial-123',
+  it('converts event services to scheduled services format', () => {
+    const event = {
+      id: 'event-123',
       lovedOneName: 'John Doe',
       services: {
         main: {
@@ -365,11 +365,11 @@ describe('Livestream Integration', () => {
       }
     };
 
-    const scheduledServices = convertMemorialToScheduledServices(memorial);
+    const scheduledServices = convertMemorialToScheduledServices(event);
 
     expect(scheduledServices).toHaveLength(2);
     expect(scheduledServices[0].id).toBe('main_main');
-    expect(scheduledServices[0].title).toBe('John Doe Memorial Service');
+    expect(scheduledServices[0].title).toBe('John Doe Event Service');
     expect(scheduledServices[0].status).toBe('live');
     expect(scheduledServices[0].cloudflareId).toBe('cf-123');
     
@@ -378,8 +378,8 @@ describe('Livestream Integration', () => {
   });
 
   it('handles visibility controls correctly', () => {
-    const memorial = {
-      id: 'memorial-123',
+    const event = {
+      id: 'event-123',
       lovedOneName: 'John Doe',
       services: { main: { /* service data */ } },
       customStreams: {
@@ -388,7 +388,7 @@ describe('Livestream Integration', () => {
       }
     };
 
-    const scheduledServices = convertMemorialToScheduledServices(memorial);
+    const scheduledServices = convertMemorialToScheduledServices(event);
     const visibleServices = scheduledServices.filter(s => s.isVisible !== false);
 
     expect(visibleServices).toHaveLength(1);
@@ -442,45 +442,45 @@ export default defineConfig({
 
 ### E2E Test Examples
 
-#### Memorial Creation Workflow
+#### Event Creation Workflow
 
 ```typescript
-// e2e/memorial-creation.spec.ts
+// e2e/event-creation.spec.ts
 import { test, expect } from '@playwright/test';
 
-test.describe('Memorial Creation', () => {
-  test('complete family registration and memorial creation', async ({ page }) => {
+test.describe('Event Creation', () => {
+  test('complete family registration and event creation', async ({ page }) => {
     // Navigate to family registration
     await page.goto('/register/family');
     
     // Fill out registration form
-    await page.fill('[data-testid="loved-one-name"]', 'John Doe');
+    await page.fill('[data-testid="new-event-and-account-name"]', 'John Doe');
     await page.fill('[data-testid="creator-name"]', 'Jane Doe');
     await page.fill('[data-testid="creator-email"]', 'jane@example.com');
     await page.fill('[data-testid="creator-password"]', 'password123');
     
     // Fill service details
-    await page.fill('[data-testid="service-location"]', 'Memorial Chapel');
+    await page.fill('[data-testid="service-location"]', 'Event Chapel');
     await page.fill('[data-testid="service-date"]', '2024-12-01');
     await page.fill('[data-testid="service-time"]', '14:00');
     
     // Submit form
-    await page.click('[data-testid="create-memorial"]');
+    await page.click('[data-testid="create-event"]');
     
-    // Verify redirect to memorial page
-    await expect(page).toHaveURL(/\/memorial\/[\w-]+$/);
+    // Verify redirect to event page
+    await expect(page).toHaveURL(/\/event\/[\w-]+$/);
     await expect(page.locator('h1')).toContainText('John Doe');
-    await expect(page.locator('[data-testid="service-location"]')).toContainText('Memorial Chapel');
+    await expect(page.locator('[data-testid="service-location"]')).toContainText('Event Chapel');
   });
 
   test('validates required fields', async ({ page }) => {
     await page.goto('/register/family');
     
     // Try to submit without required fields
-    await page.click('[data-testid="create-memorial"]');
+    await page.click('[data-testid="create-event"]');
     
     // Check for validation errors
-    await expect(page.locator('[data-testid="error-loved-one-name"]')).toBeVisible();
+    await expect(page.locator('[data-testid="error-new-event-and-account-name"]')).toBeVisible();
     await expect(page.locator('[data-testid="error-creator-email"]')).toBeVisible();
   });
 });
@@ -502,12 +502,12 @@ test.describe('Livestream Management', () => {
   });
 
   test('create and start livestream', async ({ page }) => {
-    // Navigate to memorial livestream control
-    await page.goto('/memorial/test-memorial-id/livestream');
+    // Navigate to event livestream control
+    await page.goto('/event/test-event-id/livestream');
     
     // Create new stream
     await page.click('[data-testid="create-stream"]');
-    await page.fill('[data-testid="stream-title"]', 'Memorial Service');
+    await page.fill('[data-testid="stream-title"]', 'Event Service');
     await page.click('[data-testid="confirm-create"]');
     
     // Start stream
@@ -520,7 +520,7 @@ test.describe('Livestream Management', () => {
   });
 
   test('toggle stream visibility', async ({ page }) => {
-    await page.goto('/memorial/test-memorial-id/livestream');
+    await page.goto('/event/test-event-id/livestream');
     
     // Toggle visibility
     const visibilityToggle = page.locator('[data-testid="visibility-toggle"]');
@@ -529,13 +529,13 @@ test.describe('Livestream Management', () => {
     // Verify status change
     await expect(page.locator('[data-testid="visibility-status"]')).toContainText('Hidden');
     
-    // Check memorial page doesn't show hidden stream
-    await page.goto('/memorial-slug');
+    // Check event page doesn't show hidden stream
+    await page.goto('/event-slug');
     await expect(page.locator('[data-testid="live-streams"]')).not.toBeVisible();
   });
 
   test('archive management', async ({ page }) => {
-    await page.goto('/memorial/test-memorial-id/livestream');
+    await page.goto('/event/test-event-id/livestream');
     
     // View archive section
     const archiveSection = page.locator('[data-testid="archive-section"]');
@@ -559,7 +559,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Payment Flow', () => {
   test('complete booking and payment', async ({ page }) => {
     // Navigate to schedule page
-    await page.goto('/memorial/test-memorial-id/schedule');
+    await page.goto('/event/test-event-id/schedule');
     
     // Configure service
     await page.fill('[data-testid="service-hours"]', '2');
@@ -592,7 +592,7 @@ test.describe('Payment Flow', () => {
 ### Test Fixtures
 
 ```typescript
-// tests/fixtures/memorial-data.ts
+// tests/fixtures/event-data.ts
 export const mockMemorialData = {
   basic: {
     lovedOneName: 'John Doe',
@@ -600,7 +600,7 @@ export const mockMemorialData = {
     creatorEmail: 'jane@example.com',
     services: {
       main: {
-        location: { name: 'Memorial Chapel', address: '123 Main St', isUnknown: false },
+        location: { name: 'Event Chapel', address: '123 Main St', isUnknown: false },
         time: { date: '2024-12-01', time: '14:00', isUnknown: false },
         hours: 2
       },
@@ -608,10 +608,10 @@ export const mockMemorialData = {
     }
   },
   withAdditionalServices: {
-    // Memorial with multiple services
+    // Event with multiple services
   },
   withLivestream: {
-    // Memorial with active livestream
+    // Event with active livestream
   }
 };
 
@@ -668,7 +668,7 @@ export const setupFirebaseMocks = () => {
   mockFirestore.getDocs.mockResolvedValue({
     docs: [
       {
-        id: 'memorial-1',
+        id: 'event-1',
         data: () => mockMemorialData.basic
       }
     ]

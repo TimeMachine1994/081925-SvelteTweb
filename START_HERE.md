@@ -22,7 +22,7 @@ curl -X POST http://localhost:5173/api/webhooks/test-live \
   -H "Content-Type: application/json" \
   -d '{"streamId": "YOUR_CLOUDFLARE_INPUT_ID", "action": "go-live"}'
 
-# 4. Open memorial page in browser - should update automatically!
+# 4. Open event page in browser - should update automatically!
 ```
 
 **See detailed testing**: `QUICK_TEST_COMMANDS.md`
@@ -64,7 +64,7 @@ Webhook updates Firestore: status = 'live'
   ↓ (100ms)
 Firestore listener fires in browser
   ↓
-Memorial page automatically updates
+Event page automatically updates
   ↓
 User sees live stream! 🎉
 ```
@@ -84,7 +84,7 @@ curl -X POST http://localhost:5173/api/webhooks/test-live \
   -H "Content-Type: application/json" \
   -d "{\"streamId\": \"$CF_INPUT_ID\", \"action\": \"go-live\"}"
 
-# Open memorial page - should show live stream!
+# Open event page - should show live stream!
 ```
 
 ---
@@ -160,10 +160,10 @@ Verify webhook endpoint is working.
 - Make sure you're using `cloudflareInputId`, not Firestore document ID
 - Check Firestore: `streams/{id}/streamCredentials/cloudflareInputId`
 
-### Problem: Memorial page doesn't update
+### Problem: Event page doesn't update
 - Check browser console for: `✅ [REALTIME] Firestore listeners setup`
 - Hard refresh the page (Ctrl+Shift+R)
-- Verify you're on the correct memorial page
+- Verify you're on the correct event page
 
 ### Problem: Status endpoint shows errors
 - Run: `curl http://localhost:5173/api/streams/YOUR_STREAM_ID/status`
@@ -181,7 +181,7 @@ Test these in order:
 - [ ] Webhook endpoint responds: `curl http://localhost:5173/api/webhooks/cloudflare-stream`
 - [ ] Status endpoint works: `curl http://localhost:5173/api/streams/{id}/status`
 - [ ] Test "go-live" updates stream status
-- [ ] Memorial page updates automatically (no refresh)
+- [ ] Event page updates automatically (no refresh)
 - [ ] Browser console shows Firestore listener messages
 - [ ] Test "end-stream" marks stream as completed
 

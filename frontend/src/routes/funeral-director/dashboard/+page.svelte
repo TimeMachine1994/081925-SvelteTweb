@@ -168,7 +168,7 @@
 								name="street"
 								bind:value={formData.street}
 								class="w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-3 backdrop-blur-sm transition-all focus:border-transparent focus:ring-2 focus:ring-amber-500"
-								placeholder="123 Memorial Drive"
+								placeholder="123 Event Drive"
 							/>
 						</div>
 

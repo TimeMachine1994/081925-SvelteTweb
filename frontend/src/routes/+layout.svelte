@@ -45,7 +45,7 @@
 			class="main-content"
 			class:full-width={$page.route.id?.includes('/app/calculator')}
 			class:homepage={$page.route.id === '/'}
-			class:memorial-page={$page.route.id === '/[fullSlug]'}
+			class:event-page={$page.route.id === '/[fullSlug]'}
 			class:demo-mode={data.user?.isDemo}
 			class:admin-panel={$page.route.id?.startsWith('/admin')}
 		>
@@ -83,7 +83,7 @@
 		padding: 0;
 	}
 
-	.main-content.memorial-page {
+	.main-content.event-page {
 		max-width: none;
 		padding: 0;
 	}

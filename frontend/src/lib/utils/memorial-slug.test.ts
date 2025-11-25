@@ -19,9 +19,9 @@ import {
 	generateTimestampSlug,
 	isValidSlugFormat,
 	validateCustomSlug
-} from './memorial-slug';
+} from './event-slug';
 
-describe('Memorial Slug Utilities', () => {
+describe('Event Slug Utilities', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 		
@@ -171,9 +171,9 @@ describe('Memorial Slug Utilities', () => {
 		});
 
 		it('should handle special characters', () => {
-			const result = validateCustomSlug('José\'s Memorial!');
+			const result = validateCustomSlug('José\'s Event!');
 			expect(result.isValid).toBe(true);
-			expect(result.cleanedSlug).toBe('joss-memorial');
+			expect(result.cleanedSlug).toBe('joss-event');
 		});
 	});
 });

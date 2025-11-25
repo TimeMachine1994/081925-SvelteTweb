@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Memorial Calculator Flow', () => {
+test.describe('Event Calculator Flow', () => {
   test.beforeEach(async ({ page }) => {
     // Login as owner first
     await page.goto('/login');
@@ -8,8 +8,8 @@ test.describe('Memorial Calculator Flow', () => {
     await page.getByLabel(/password/i).fill('test123');
     await page.getByRole('button', { name: /sign in/i }).click();
     
-    // Navigate to calculator (assuming memorial exists)
-    await page.goto('/memorials/test-memorial/calculator');
+    // Navigate to calculator (assuming event exists)
+    await page.goto('/memorials/test-event/calculator');
   });
 
   test('completes full calculator flow', async ({ page }) => {
@@ -17,7 +17,7 @@ test.describe('Memorial Calculator Flow', () => {
     await expect(page.getByText(/service details/i)).toBeVisible();
     
     // Fill service location
-    await page.getByLabel(/location name/i).fill('Memorial Chapel');
+    await page.getByLabel(/location name/i).fill('Event Chapel');
     await page.getByLabel(/address/i).fill('123 Main St, City, State 12345');
     
     // Fill service date and time
@@ -48,7 +48,7 @@ test.describe('Memorial Calculator Flow', () => {
     await expect(page.getByText(/summary/i)).toBeVisible();
     
     // Verify details are correct
-    await expect(page.getByText(/memorial chapel/i)).toBeVisible();
+    await expect(page.getByText(/event chapel/i)).toBeVisible();
     await expect(page.getByText(/june 15, 2024/i)).toBeVisible();
     await expect(page.getByText(/2:00 pm/i)).toBeVisible();
     await expect(page.getByText(/standard package/i)).toBeVisible();
@@ -88,7 +88,7 @@ test.describe('Memorial Calculator Flow', () => {
   });
 
   test('handles unknown time option', async ({ page }) => {
-    await page.getByLabel(/location name/i).fill('Memorial Chapel');
+    await page.getByLabel(/location name/i).fill('Event Chapel');
     
     // Select "Time TBD" option
     await page.getByLabel(/time is unknown/i).check();
@@ -105,7 +105,7 @@ test.describe('Memorial Calculator Flow', () => {
 
   test('adds additional services', async ({ page }) => {
     // Fill main service details
-    await page.getByLabel(/location name/i).fill('Memorial Chapel');
+    await page.getByLabel(/location name/i).fill('Event Chapel');
     await page.getByLabel(/service date/i).fill('2024-06-15');
     await page.getByLabel(/service time/i).fill('14:00');
     
@@ -124,13 +124,13 @@ test.describe('Memorial Calculator Flow', () => {
     await page.getByRole('button', { name: /next/i }).click();
     
     // Summary should show both services
-    await expect(page.getByText(/memorial chapel/i)).toBeVisible();
+    await expect(page.getByText(/event chapel/i)).toBeVisible();
     await expect(page.getByText(/reception hall/i)).toBeVisible();
   });
 
   test('removes additional services', async ({ page }) => {
     // Fill main service and add additional
-    await page.getByLabel(/location name/i).fill('Memorial Chapel');
+    await page.getByLabel(/location name/i).fill('Event Chapel');
     await page.getByLabel(/service date/i).fill('2024-06-15');
     await page.getByLabel(/service time/i).fill('14:00');
     
@@ -205,7 +205,7 @@ test.describe('Memorial Calculator Flow', () => {
 
   test('auto-saves form progress', async ({ page }) => {
     // Fill some details
-    await page.getByLabel(/location name/i).fill('Memorial Chapel');
+    await page.getByLabel(/location name/i).fill('Event Chapel');
     await page.getByLabel(/service date/i).fill('2024-06-15');
     
     // Wait for auto-save
@@ -215,7 +215,7 @@ test.describe('Memorial Calculator Flow', () => {
     await page.reload();
     
     // Data should be restored
-    await expect(page.getByLabel(/location name/i)).toHaveValue('Memorial Chapel');
+    await expect(page.getByLabel(/location name/i)).toHaveValue('Event Chapel');
     await expect(page.getByLabel(/service date/i)).toHaveValue('2024-06-15');
   });
 
@@ -231,7 +231,7 @@ test.describe('Memorial Calculator Flow', () => {
     await expect(page.getByText(/service details/i)).toBeVisible();
     
     // Data should be preserved
-    await expect(page.getByLabel(/location name/i)).toHaveValue('Memorial Chapel');
+    await expect(page.getByLabel(/location name/i)).toHaveValue('Event Chapel');
   });
 
   test('shows step progress indicator', async ({ page }) => {
@@ -272,7 +272,7 @@ test.describe('Memorial Calculator Flow', () => {
 
   // Helper function
   async function fillServiceDetails(page: any) {
-    await page.getByLabel(/location name/i).fill('Memorial Chapel');
+    await page.getByLabel(/location name/i).fill('Event Chapel');
     await page.getByLabel(/address/i).fill('123 Main St');
     await page.getByLabel(/service date/i).fill('2024-06-15');
     await page.getByLabel(/service time/i).fill('14:00');

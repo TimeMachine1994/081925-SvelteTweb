@@ -21,7 +21,7 @@ This phase focused on adding essential management actions to the dashboard to ma
 
 | Task | Status |
 | :--- | :--- |
-| Add "Create New Memorial" button | ✅ Completed |
+| Add "Create New Event" button | ✅ Completed |
 | Add "Actions" column to memorials table | ✅ Completed |
 | Add "Edit" & "Create/Manage Livestream" buttons | ✅ Completed |
 

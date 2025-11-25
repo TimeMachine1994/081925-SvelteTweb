@@ -34,8 +34,8 @@ The Minimal Modern theme provides:
 - `Toast` - Notification messages
 
 ### Tributestream Specific Components
-- `MemorialCard` - Memorial display cards with live status
-- `ServiceSchedule` - Timeline for memorial service events
+- `MemorialCard` - Event display cards with live status
+- `ServiceSchedule` - Timeline for event service events
 - `CondolenceForm` - Form for submitting condolences and memories
 - `StreamStatus` - Live stream status indicator with viewer count
 
@@ -48,9 +48,9 @@ import { Button, Card, Input } from '$lib/components/minimal-modern';
 
 ### 2. Use in Templates
 ```svelte
-<Card title="Memorial Creation" theme="minimal">
+<Card title="Event Creation" theme="minimal">
   <Input theme="minimal" placeholder="Loved one's name" bind:value={name} />
-  <Button theme="minimal">Create Memorial</Button>
+  <Button theme="minimal">Create Event</Button>
 </Card>
 ```
 
@@ -70,29 +70,29 @@ import { Button, Card, Input } from '$lib/components/minimal-modern';
 
 ## 🎯 Integration Examples
 
-### Example 1: Memorial Card Component
+### Example 1: Event Card Component
 ```svelte
 <script lang="ts">
   import { Card, Button, Badge } from '$lib/components/minimal-modern';
-  import type { Memorial } from '$lib/types';
+  import type { Event } from '$lib/types';
   
   interface Props {
-    memorial: Memorial;
+    event: Event;
   }
   
-  let { memorial }: Props = $props();
+  let { event }: Props = $props();
 </script>
 
-<Card title={memorial.name} theme="minimal">
+<Card title={event.name} theme="minimal">
   <div class="space-y-3">
-    <p class="text-sm opacity-80">{memorial.dates}</p>
+    <p class="text-sm opacity-80">{event.dates}</p>
     <div class="flex gap-2">
       <Badge theme="minimal">Private</Badge>
-      {#if memorial.isLive}
+      {#if event.isLive}
         <Badge theme="minimal">Live</Badge>
       {/if}
     </div>
-    <Button theme="minimal">View Memorial</Button>
+    <Button theme="minimal">View Event</Button>
   </div>
 </Card>
 ```
@@ -104,7 +104,7 @@ import { Button, Card, Input } from '$lib/components/minimal-modern';
   
   const events = [
     { time: "10:00 AM", title: "Visitation", detail: "Family receiving guests" },
-    { time: "11:00 AM", title: "Service", detail: "Memorial service begins" },
+    { time: "11:00 AM", title: "Service", detail: "Event service begins" },
     { time: "12:00 PM", title: "Reception", detail: "Light refreshments" }
   ];
 </script>
@@ -137,13 +137,13 @@ import { Button, Card, Input } from '$lib/components/minimal-modern';
 <Comparison theme="minimal" tiers={packages} />
 ```
 
-### Example 4: Memorial Card
+### Example 4: Event Card
 ```svelte
 <script lang="ts">
   import { MemorialCard } from '$lib/components/minimal-modern';
   
-  const memorial = {
-    id: 'memorial-123',
+  const event = {
+    id: 'event-123',
     name: 'Maria Elena Cruz',
     dates: '1946 – 2025',
     description: 'A gentle soul who touched many lives...',
@@ -155,7 +155,7 @@ import { Button, Card, Input } from '$lib/components/minimal-modern';
   };
 </script>
 
-<MemorialCard theme="minimal" {memorial} onView={handleView} onShare={handleShare} />
+<MemorialCard theme="minimal" {event} onView={handleView} onShare={handleShare} />
 ```
 
 ### Example 5: Stream Status
@@ -191,7 +191,7 @@ import { Button, Card, Input } from '$lib/components/minimal-modern';
     },
     {
       id: 'service',
-      title: 'Memorial Service',
+      title: 'Event Service',
       time: '11:00 AM',
       duration: '45 minutes',
       location: 'Main Sanctuary',

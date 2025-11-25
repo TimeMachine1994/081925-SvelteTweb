@@ -27,12 +27,12 @@ export const GET: RequestHandler = async ({ url }) => {
 
 		// Optional server-side filtering if query provided
 		if (query.length >= 2) {
-			memorials = memorials.filter(memorial => {
+			memorials = memorials.filter(event => {
 				const searchableText = [
-					memorial.lovedOneName,
-					memorial.creatorName,
-					memorial.birthDate,
-					memorial.deathDate
+					event.lovedOneName,
+					event.creatorName,
+					event.birthDate,
+					event.deathDate
 				].filter(Boolean).join(' ').toLowerCase();
 				
 				return searchableText.includes(query);

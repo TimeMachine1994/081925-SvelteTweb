@@ -238,7 +238,7 @@ type Props = {
 
 #### Page Components
 - `routes/+page.svelte` (Homepage)
-- `routes/[fullSlug]/+page.svelte` (Memorial pages)
+- `routes/[fullSlug]/+page.svelte` (Event pages)
 - `routes/admin/+page.svelte`
 - `routes/app/calculator/+page.svelte`
 - `routes/contact/+page.svelte`
@@ -320,7 +320,7 @@ src/lib/components/
 │   ├── StreamHeader.svelte (extracted)
 │   ├── StreamCredentials.svelte (extracted)
 │   └── StreamActions.svelte (extracted)
-├── memorial/
+├── event/
 │   ├── MemorialCard.svelte
 │   └── MemorialHeader.svelte
 └── auth/

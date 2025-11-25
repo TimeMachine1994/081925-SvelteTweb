@@ -48,8 +48,8 @@ test.describe('Role-Based Portal System', () => {
     
     // Check for owner-specific elements
     await expect(page.locator('text=Owner Portal')).toBeVisible();
-    await expect(page.locator('text=Memorial Management')).toBeVisible();
-    await expect(page.locator('text=Create Memorial')).toBeVisible();
+    await expect(page.locator('text=Event Management')).toBeVisible();
+    await expect(page.locator('text=Create Event')).toBeVisible();
     await expect(page.locator('text=Manage Invitations')).toBeVisible();
   });
 
@@ -98,7 +98,7 @@ test.describe('Role-Based Portal System', () => {
     await expect(page.locator('text=Funeral Director Portal')).toBeVisible();
     await expect(page.locator('text=Assigned Memorials')).toBeVisible();
     await expect(page.locator('text=Livestream Management')).toBeVisible();
-    await expect(page.locator('text=Create Memorial')).toBeVisible();
+    await expect(page.locator('text=Create Event')).toBeVisible();
   });
 
   test('Portal navigation works correctly', async ({ page }) => {
@@ -124,7 +124,7 @@ test.describe('Role-Based Portal System', () => {
     await page.click('button[type="submit"]');
     
     // Try to access owner-specific functionality
-    await page.goto('/my-portal/tributes/test-memorial/edit');
+    await page.goto('/my-portal/tributes/test-event/edit');
     
     // Should show error or redirect
     await expect(page.locator('text=Access Denied')).toBeVisible().catch(() => {

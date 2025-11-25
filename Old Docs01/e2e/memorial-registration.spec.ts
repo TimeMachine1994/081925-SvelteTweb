@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Memorial Registration Flow', () => {
+test.describe('Event Registration Flow', () => {
 	let testEmail: string;
 	let testLovedOneName: string;
 	let testUserName: string;
@@ -24,12 +24,12 @@ test.describe('Memorial Registration Flow', () => {
 		await page.waitForTimeout(3000); // Give emulators time to connect
 	});
 
-	test('should complete full memorial registration flow', async ({ page }) => {
+	test('should complete full event registration flow', async ({ page }) => {
 		console.log(`Testing with email: ${testEmail}, loved one: ${testLovedOneName}`);
 
 		// Step 1: Navigate to registration page
-		await page.goto('/register/loved-one', { waitUntil: 'networkidle' });
-		await expect(page.locator('h1.form-title')).toContainText('Create a Memorial');
+		await page.goto('/register/new-event-and-account', { waitUntil: 'networkidle' });
+		await expect(page.locator('h1.form-title')).toContainText('Create a Event');
 
 		// Step 2: Fill out the registration form using correct input names
 		await page.fill('input[name="lovedOneName"]', testLovedOneName);
@@ -52,7 +52,7 @@ test.describe('Memorial Registration Flow', () => {
 			// Step 5: Wait for authentication to complete
 			console.log('Waiting for authentication to complete...');
 			
-			// Wait for either success (redirect to memorial) or failure (error message)
+			// Wait for either success (redirect to event) or failure (error message)
 			await Promise.race([
 				page.waitForURL('**/tributes/**', { timeout: 25000 }),
 				page.waitForSelector('p[style*="color: red"]', { timeout: 25000 })
@@ -70,18 +70,18 @@ test.describe('Memorial Registration Flow', () => {
 				console.log('Expected Firebase emulator issue:', errorText);
 				expect(errorText).toBeTruthy(); // Just verify error exists
 			} else {
-				// Success case - should be redirected to memorial page
+				// Success case - should be redirected to event page
 				console.log('Success! Redirected to:', currentUrl);
 				expect(currentUrl).toMatch(/tributes/);
 				
-				// Verify memorial page loaded
+				// Verify event page loaded
 				await expect(page.locator('h1')).toContainText(testLovedOneName);
 			}
 		} catch (error) {
 			console.log('Registration flow error:', error);
 			// Check if we're still on the registration page with an error
 			const currentUrl = page.url();
-			if (currentUrl.includes('/register/loved-one')) {
+			if (currentUrl.includes('/register/new-event-and-account')) {
 				// Look for form errors
 				const formError = await page.locator('.error-message, .form-message.error-message').textContent();
 				if (formError) {
@@ -97,7 +97,7 @@ test.describe('Memorial Registration Flow', () => {
 	});
 
 	test('should handle form validation errors', async ({ page }) => {
-		await page.goto('/register/loved-one', { waitUntil: 'networkidle' });
+		await page.goto('/register/new-event-and-account', { waitUntil: 'networkidle' });
 
 		// Try to submit empty form
 		await page.click('button[type="submit"]');
@@ -122,13 +122,13 @@ test.describe('Memorial Registration Flow', () => {
 			// If no client-side validation UI, check that form didn't submit
 			// (should still be on the same page)
 			const currentUrl = page.url();
-			expect(currentUrl).toContain('/register/loved-one');
+			expect(currentUrl).toContain('/register/new-event-and-account');
 			console.log('Client-side validation prevented submission but no error UI shown');
 		}
 	});
 
 	test('should generate proper slug from loved one name', async ({ page }) => {
-		await page.goto('/register/loved-one', { waitUntil: 'networkidle' });
+		await page.goto('/register/new-event-and-account', { waitUntil: 'networkidle' });
 
 		// Fill in loved one name
 		await page.fill('input[name="lovedOneName"]', testLovedOneName);
@@ -147,7 +147,7 @@ test.describe('Memorial Registration Flow', () => {
 	});
 
 	test('should show loading state during submission', async ({ page }) => {
-		await page.goto('/register/loved-one', { waitUntil: 'networkidle' });
+		await page.goto('/register/new-event-and-account', { waitUntil: 'networkidle' });
 
 		// Fill out form with correct field names
 		await page.fill('input[name="lovedOneName"]', testLovedOneName);
@@ -176,7 +176,7 @@ test.describe('Memorial Registration Flow', () => {
 
 	test('should handle duplicate email registration', async ({ page }) => {
 		// First registration
-		await page.goto('/register/loved-one', { waitUntil: 'networkidle' });
+		await page.goto('/register/new-event-and-account', { waitUntil: 'networkidle' });
 		await page.fill('input[name="lovedOneName"]', testLovedOneName);
 		await page.fill('input[name="name"]', testUserName); // Changed from "yourName" to "name"
 		await page.fill('input[name="email"]', testEmail);
@@ -192,8 +192,8 @@ test.describe('Memorial Registration Flow', () => {
 		}
 		
 		// Go back and try to register with same email
-		await page.goto('/register/loved-one', { waitUntil: 'networkidle' });
-		await page.fill('input[name="lovedOneName"]', 'Another Memorial');
+		await page.goto('/register/new-event-and-account', { waitUntil: 'networkidle' });
+		await page.fill('input[name="lovedOneName"]', 'Another Event');
 		await page.fill('input[name="name"]', 'Another User'); // Changed from "yourName" to "name"
 		await page.fill('input[name="email"]', testEmail); // Same email
 		await page.fill('input[name="phone"]', '555-9999');
@@ -225,7 +225,7 @@ test.describe('Memorial Registration Flow', () => {
 			consoleLogs.push(`${msg.type()}: ${msg.text()}`);
 		});
 
-		await page.goto('/register/loved-one', { waitUntil: 'networkidle' });
+		await page.goto('/register/new-event-and-account', { waitUntil: 'networkidle' });
 		await page.fill('input[name="lovedOneName"]', testLovedOneName);
 		await page.fill('input[name="name"]', testUserName); // Changed from "yourName" to "name"
 		await page.fill('input[name="email"]', testEmail);
@@ -240,7 +240,7 @@ test.describe('Memorial Registration Flow', () => {
 			log.includes('Firebase') || 
 			log.includes('registration') || 
 			log.includes('auth') ||
-			log.includes('memorial') ||
+			log.includes('event') ||
 			log.includes('🔥') ||
 			log.includes('🎯') ||
 			log.includes('✅') ||

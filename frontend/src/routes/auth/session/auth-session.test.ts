@@ -44,7 +44,7 @@ describe('Auth Session Page', () => {
 	it('should display loading state initially', () => {
 		const mockData = {
 			token: 'mock-custom-token',
-			slug: 'test-memorial',
+			slug: 'test-event',
 			error: null
 		};
 
@@ -71,7 +71,7 @@ describe('Auth Session Page', () => {
 	it('should process custom token and redirect on successful authentication', async () => {
 		const mockData = {
 			token: 'mock-custom-token-12345',
-			slug: 'test-memorial',
+			slug: 'test-event',
 			error: null
 		};
 
@@ -84,7 +84,7 @@ describe('Auth Session Page', () => {
 
 		const mockIdToken = 'mock-id-token-67890';
 		const mockSessionResponse = {
-			redirectTo: '/tributes/test-memorial'
+			redirectTo: '/tributes/test-event'
 		};
 
 		mockSignInWithCustomToken.mockResolvedValue(mockUserCredential);
@@ -112,13 +112,13 @@ describe('Auth Session Page', () => {
 				},
 				body: JSON.stringify({
 					idToken: mockIdToken,
-					slug: 'test-memorial'
+					slug: 'test-event'
 				})
 			});
 		});
 
 		await waitFor(() => {
-			expect(window.location.href).toBe('/tributes/test-memorial');
+			expect(window.location.href).toBe('/tributes/test-event');
 		});
 	});
 

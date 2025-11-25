@@ -65,7 +65,7 @@ npx playwright test livestream
 - ✅ **Multi-Service Streams Integration** (9/9 tests)
 
 #### **Core Business Logic**:
-- ✅ Memorial Access & Permissions
+- ✅ Event Access & Permissions
 - ✅ Audit Logging System
 - ✅ Calculator Logic
 - ✅ User Authentication
@@ -84,7 +84,7 @@ npx playwright test livestream
 
 #### **Scheduled Services Utils**:
 ```javascript
-✅ convertMemorialToScheduledServices() - Memorial data conversion
+✅ convertMemorialToScheduledServices() - Event data conversion
 ✅ generateStreamCredentials() - Unique stream key generation  
 ✅ validateServiceTime() - Time validation logic
 ✅ formatServiceTime() - Display formatting
@@ -104,7 +104,7 @@ npx playwright test livestream
 
 #### **Data Structure Validation**:
 ```javascript
-✅ Memorial.services to scheduled services conversion
+✅ Event.services to scheduled services conversion
 ✅ Additional services processing (enabled only)
 ✅ Custom streams integration
 ✅ Stream credentials generation
@@ -119,18 +119,18 @@ npx playwright test livestream
 
 #### **Backend Functionality**:
 - ✅ **API Endpoints**: All new endpoints tested and working
-- ✅ **Data Conversion**: Memorial.services → scheduled services
+- ✅ **Data Conversion**: Event.services → scheduled services
 - ✅ **Visibility Management**: Database updates and filtering
 - ✅ **Stream Management**: Credentials, status, metadata
 
 #### **Frontend Functionality**:
 - ✅ **Control Center**: Visibility toggles, service cards, status indicators
-- ✅ **Memorial Page**: Multi-stream display, live/recorded sections
+- ✅ **Event Page**: Multi-stream display, live/recorded sections
 - ✅ **User Experience**: Professional UI, responsive design
 - ✅ **State Management**: Svelte 5 runes, reactive updates
 
 #### **Integration Points**:
-- ✅ **Memorial Page Server**: Loads and filters visible services
+- ✅ **Event Page Server**: Loads and filters visible services
 - ✅ **LivestreamPlayer**: Displays multiple streams per service
 - ✅ **API Integration**: Real-time visibility updates
 - ✅ **Cloudflare Integration**: Stream players, recording URLs
@@ -148,14 +148,14 @@ test('Funeral director toggles service visibility', async ({ page }) => {
   // Verify all services displayed
   // Click visibility toggle
   // Verify UI updates
-  // Check memorial page reflects changes
+  // Check event page reflects changes
 });
 ```
 
-#### **2. Memorial Page Multi-Stream Display**
+#### **2. Event Page Multi-Stream Display**
 ```javascript
-test('Memorial page shows multiple streams correctly', async ({ page }) => {
-  // Navigate to memorial page
+test('Event page shows multiple streams correctly', async ({ page }) => {
+  // Navigate to event page
   // Verify live services section
   // Verify recorded services section  
   // Verify hidden services not displayed
@@ -183,7 +183,7 @@ npm run dev  # Starts server on localhost:5175
 ```
 
 #### **Test Data Setup**:
-- Mock memorial with multiple services
+- Mock event with multiple services
 - Mock Cloudflare stream responses
 - Mock Firebase authentication
 - Test user accounts for different roles

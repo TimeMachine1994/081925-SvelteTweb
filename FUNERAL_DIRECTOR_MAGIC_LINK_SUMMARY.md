@@ -11,7 +11,7 @@ Magic link system has been added to the **Funeral Director Registration Email** 
 ### 1. Backend Code Updates
 
 #### **File:** `/routes/register/funeral-director/+page.server.ts`
-- ✅ Generates Firebase custom token with memorial context
+- ✅ Generates Firebase custom token with event context
 - ✅ Creates magic link to calculator: `{baseUrl}/auth/session?token={token}&redirect=schedule/{memorialId}`
 - ✅ Passes `calculatorMagicLink` to email function
 
@@ -25,7 +25,7 @@ Magic link system has been added to the **Funeral Director Registration Email** 
 ```handlebars
 {{familyName}}              - Family contact name
 {{lovedOneName}}            - Deceased person's name
-{{memorialUrl}}             - Memorial page URL (normal link)
+{{memorialUrl}}             - Event page URL (normal link)
 {{email}}                   - User's email
 {{password}}                - Generated password (if new user)
 {{additionalNotes}}         - Director's notes
@@ -36,8 +36,8 @@ Magic link system has been added to the **Funeral Director Registration Email** 
 
 #### **What Changed in Template:**
 
-1. **"View Memorial Page" Button** - Stays as normal link ✅
-2. **Social Share Buttons** - Added below memorial button ✅
+1. **"View Event Page" Button** - Stays as normal link ✅
+2. **Social Share Buttons** - Added below event button ✅
    - 📘 Facebook
    - 𝕏 X (Twitter)
    - 🦋 Bluesky
@@ -52,9 +52,9 @@ Magic link system has been added to the **Funeral Director Registration Email** 
 ### For Family Members:
 
 ```
-1. Funeral Director creates memorial
+1. Funeral Director creates event
 2. Family receives email
-3. Can view memorial (normal link)
+3. Can view event (normal link)
 4. Can share on social media (5 platforms)
 5. Click "Complete Service Booking" → Magic Link
    ↓
@@ -67,8 +67,8 @@ Magic link system has been added to the **Funeral Director Registration Email** 
 ```
 ┌─────────────────────────────────────┐
 │  Sympathy Message                   │
-│  Memorial URL Box                   │
-│  [View Memorial Page] Button        │ ← Normal link
+│  Event URL Box                   │
+│  [View Event Page] Button        │ ← Normal link
 │  [Share: FB|X|Bluesky|Threads|Copy] │ ← NEW social buttons
 │  Account Info (email/password)      │
 │  Additional Notes (if any)          │
@@ -89,21 +89,21 @@ https://www.facebook.com/sharer/sharer.php?u={{memorialUrl}}
 
 **X (Twitter):**
 ```
-https://twitter.com/intent/tweet?url={{memorialUrl}}&text=Memorial%20for%20{{lovedOneName}}
+https://twitter.com/intent/tweet?url={{memorialUrl}}&text=Event%20for%20{{lovedOneName}}
 ```
 
 **Bluesky:**
 ```
-https://bsky.app/intent/compose?text=Memorial%20for%20{{lovedOneName}}%20{{memorialUrl}}
+https://bsky.app/intent/compose?text=Event%20for%20{{lovedOneName}}%20{{memorialUrl}}
 ```
 
 **Threads:**
 ```
-https://www.threads.net/intent/post?text=Memorial%20for%20{{lovedOneName}}%20{{memorialUrl}}
+https://www.threads.net/intent/post?text=Event%20for%20{{lovedOneName}}%20{{memorialUrl}}
 ```
 
 **Copy Link:**
-- Displays memorial URL in code block for easy copying
+- Displays event URL in code block for easy copying
 
 ---
 
@@ -194,7 +194,7 @@ PUBLIC_BASE_URL=http://localhost:5173
 ## Testing Checklist
 
 ### Development Testing:
-- [ ] Create memorial via funeral director form
+- [ ] Create event via funeral director form
 - [ ] Check console logs for magic link generation
 - [ ] Verify email sent (if SendGrid configured)
 - [ ] Test magic link authentication flow
@@ -204,7 +204,7 @@ PUBLIC_BASE_URL=http://localhost:5173
 ### Production Testing:
 - [ ] Update SendGrid template
 - [ ] Test with real email address
-- [ ] Click "View Memorial Page" (normal link)
+- [ ] Click "View Event Page" (normal link)
 - [ ] Test all social share buttons
 - [ ] Click "Complete Service Booking" (magic link)
 - [ ] Verify auto-authentication
@@ -233,7 +233,7 @@ PUBLIC_BASE_URL=http://localhost:5173
 - Check browser console for errors
 
 ### Social Share Buttons Not Working:
-- Verify memorial URL is public and accessible
+- Verify event URL is public and accessible
 - Test URLs in browser before sharing
 - Check URL encoding in share links
 

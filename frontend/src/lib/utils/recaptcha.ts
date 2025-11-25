@@ -9,7 +9,7 @@ const PUBLIC_RECAPTCHA_SITE_KEY = env.PUBLIC_RECAPTCHA_SITE_KEY;
 
 // reCAPTCHA v3 score thresholds
 export const RECAPTCHA_THRESHOLDS = {
-	HIGH_SECURITY: 0.7,    // For registration, memorial creation
+	HIGH_SECURITY: 0.7,    // For registration, event creation
 	MEDIUM_SECURITY: 0.5,  // For contact forms, demo booking
 	LOW_SECURITY: 0.3      // For search, newsletter signup
 } as const;

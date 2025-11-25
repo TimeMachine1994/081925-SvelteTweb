@@ -9,7 +9,7 @@ export interface AuditEvent {
 	userEmail: string;
 	userRole: 'admin' | 'owner' | 'funeral_director';
 	action: AuditAction;
-	resourceType: 'memorial' | 'user' | 'schedule' | 'payment' | 'system';
+	resourceType: 'event' | 'user' | 'schedule' | 'payment' | 'system';
 	resourceId: string;
 	details: Record<string, any>;
 	ipAddress?: string;
@@ -19,7 +19,7 @@ export interface AuditEvent {
 }
 
 export type AuditAction =
-	// Memorial actions
+	// Event actions
 	| 'memorial_created'
 	| 'memorial_updated'
 	| 'memorial_deleted'
@@ -111,7 +111,7 @@ export function extractUserContext(
 }
 
 /**
- * Convenience function for logging memorial actions
+ * Convenience function for logging event actions
  */
 export async function logMemorialAction(
 	userContext: ReturnType<typeof extractUserContext>,
@@ -129,7 +129,7 @@ export async function logMemorialAction(
 	await logAuditEvent({
 		...userContext,
 		action,
-		resourceType: 'memorial',
+		resourceType: 'event',
 		resourceId: memorialId,
 		details,
 		success,

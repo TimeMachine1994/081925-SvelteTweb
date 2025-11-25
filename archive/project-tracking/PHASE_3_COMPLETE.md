@@ -90,7 +90,7 @@ Step-by-step guide at bottom:
                 │
                 ↓
         ┌───────────────┐
-        │  Memorial     │
+        │  Event     │
         │  Viewers      │
         └───────────────┘
 ```
@@ -107,7 +107,7 @@ Step-by-step guide at bottom:
    - Professional RTMP from OBS
    - Mixed scene with overlays, graphics, etc.
    - Recorded by Cloudflare
-   - Broadcast to memorial viewers
+   - Broadcast to event viewers
 
 ---
 
@@ -286,15 +286,15 @@ User creates stream → Sees method selection → Clicks "📱➡️💻 Phone t
 
 ## 💡 Use Cases
 
-### **1. Funeral Home Memorial Service**
-- Phone on tripod filming casket/memorial
+### **1. Funeral Home Event Service**
+- Phone on tripod filming casket/event
 - OBS on laptop with funeral home logo overlay
 - Lower third with service information
 - Professional broadcast quality
 
 ### **2. Remote Family Speaker**
 - Phone camera for family member speaking
-- OBS adds memorial photos as background
+- OBS adds event photos as background
 - Name/relation text overlay
 - Seamless integration with other sources
 

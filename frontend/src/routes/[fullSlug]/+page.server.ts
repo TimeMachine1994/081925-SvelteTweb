@@ -5,37 +5,37 @@ import type { PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const { fullSlug } = params;
 
-	console.log('🏠 [MEMORIAL_PAGE] Loading memorial page for slug:', fullSlug);
+	console.log('🏠 [MEMORIAL_PAGE] Loading event page for slug:', fullSlug);
 
-	// Filter out non-memorial requests (service workers, assets, etc.)
+	// Filter out non-event requests (service workers, assets, etc.)
 	if (fullSlug.includes('.') || fullSlug.startsWith('_') || fullSlug === 'favicon.ico') {
-		console.log('🏠 [MEMORIAL_PAGE] Skipping non-memorial request:', fullSlug);
-		throw error(404, 'Not a memorial page');
+		console.log('🏠 [MEMORIAL_PAGE] Skipping non-event request:', fullSlug);
+		throw error(404, 'Not a event page');
 	}
 
 	try {
-		// Find memorial by fullSlug only - no legacy slug fallback
+		// Find event by fullSlug only - no legacy slug fallback
 		console.log('🏠 [MEMORIAL_PAGE] Querying memorials collection for fullSlug:', fullSlug);
 		const memorialsRef = adminDb.collection('memorials');
 		const snapshot = await memorialsRef.where('fullSlug', '==', fullSlug).limit(1).get();
 		
-		console.log('🏠 [MEMORIAL_PAGE] Memorial query completed, found docs:', snapshot.docs.length);
+		console.log('🏠 [MEMORIAL_PAGE] Event query completed, found docs:', snapshot.docs.length);
 
 		if (snapshot.empty) {
-			console.log('🏠 [MEMORIAL_PAGE] No memorial found for fullSlug:', fullSlug);
-			throw error(404, 'Memorial not found');
+			console.log('🏠 [MEMORIAL_PAGE] No event found for fullSlug:', fullSlug);
+			throw error(404, 'Event not found');
 		}
 
 		const memorialDoc = snapshot.docs[0];
 		const memorialData = memorialDoc.data();
-		console.log('🏠 [MEMORIAL_PAGE] Memorial data keys:', Object.keys(memorialData));
+		console.log('🏠 [MEMORIAL_PAGE] Event data keys:', Object.keys(memorialData));
 
 		// Simplified legacy detection - just check for valid custom_html content
 		const hasCustomHtml = !!(memorialData.custom_html && 
 			typeof memorialData.custom_html === 'string' && 
 			memorialData.custom_html.trim().length > 0);
 		
-		console.log('🏠 [MEMORIAL_PAGE] Memorial type:', hasCustomHtml ? 'Legacy (custom_html)' : 'Standard');
+		console.log('🏠 [MEMORIAL_PAGE] Event type:', hasCustomHtml ? 'Legacy (custom_html)' : 'Standard');
 		console.log('🏠 [MEMORIAL_PAGE] Has custom_html:', !!memorialData.custom_html);
 		console.log('🏠 [MEMORIAL_PAGE] Custom HTML length:', memorialData.custom_html?.length || 0);
 
@@ -52,8 +52,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			}
 		};
 
-		// Create memorial object with proper serialization (no Firestore objects)
-		const memorial = {
+		// Create event object with proper serialization (no Firestore objects)
+		const event = {
 			id: memorialDoc.id,
 			lovedOneName: memorialData.lovedOneName || '',
 			fullSlug: memorialData.fullSlug || fullSlug,
@@ -84,20 +84,20 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			updatedAt: convertTimestamp(memorialData.updatedAt)
 		};
 
-		console.log('🏠 [MEMORIAL_PAGE] Memorial found:', {
-			id: memorial.id,
-			lovedOneName: memorial.lovedOneName,
-			fullSlug: memorial.fullSlug,
-			isPublic: memorial.isPublic
+		console.log('🏠 [MEMORIAL_PAGE] Event found:', {
+			id: event.id,
+			lovedOneName: event.lovedOneName,
+			fullSlug: event.fullSlug,
+			isPublic: event.isPublic
 		});
 
-		// Load streams for this memorial
-		console.log('🎬 [MEMORIAL_PAGE] Loading streams for memorial:', memorial.id);
+		// Load streams for this event
+		console.log('🎬 [MEMORIAL_PAGE] Loading streams for event:', event.id);
 		let streams = [];
 		try {
 			const streamsSnapshot = await adminDb
 				.collection('streams')
-				.where('memorialId', '==', memorial.id)
+				.where('memorialId', '==', event.id)
 				.get();
 			
 			streams = streamsSnapshot.docs
@@ -137,13 +137,13 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			streams = [];
 		}
 
-		// Load slideshows for this memorial
-		console.log('📸 [MEMORIAL_PAGE] Loading slideshows for memorial:', memorial.id);
+		// Load slideshows for this event
+		console.log('📸 [MEMORIAL_PAGE] Loading slideshows for event:', event.id);
 		let slideshows = [];
 		try {
 			const slideshowsSnapshot = await adminDb
 				.collection('memorials')
-				.doc(memorial.id)
+				.doc(event.id)
 				.collection('slideshows')
 				.orderBy('createdAt', 'desc')
 				.get();
@@ -158,8 +158,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 				});
 				return {
 					id: doc.id,
-					title: data.title || 'Memorial Slideshow',
-					memorialId: data.memorialId || memorial.id,
+					title: data.title || 'Event Slideshow',
+					memorialId: data.memorialId || event.id,
 					cloudflareStreamId: data.cloudflareStreamId || null,
 					firebaseStoragePath: data.firebaseStoragePath || null,
 					embedUrl: data.embedUrl || null,
@@ -188,17 +188,17 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			slideshows = [];
 		}
 
-		// Check if user has permission to view private memorial content
+		// Check if user has permission to view private event content
 		const userId = locals.user?.uid;
 		const userRole = locals.user?.role;
 		const hasPermission = 
-			memorial.isPublic === true || 
+			event.isPublic === true || 
 			userRole === 'admin' ||
 			memorialData.ownerUid === userId ||
 			memorialData.funeralDirectorUid === userId;
 
 		console.log('🔒 [MEMORIAL_PAGE] Permission check:', {
-			isPublic: memorial.isPublic,
+			isPublic: event.isPublic,
 			userId: userId || 'anonymous',
 			userRole: userRole || 'none',
 			hasPermission
@@ -206,20 +206,20 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 		// Security check: Only show full content to authorized users
 		if (!hasPermission) {
-			console.log('🔒 [MEMORIAL_PAGE] Memorial is private and user lacks permission, returning basic info only');
+			console.log('🔒 [MEMORIAL_PAGE] Event is private and user lacks permission, returning basic info only');
 			return {
-				memorial: {
-					id: memorial.id,
-					lovedOneName: memorial.lovedOneName,
-					fullSlug: memorial.fullSlug,
-					content: memorial.content,
+				event: {
+					id: event.id,
+					lovedOneName: event.lovedOneName,
+					fullSlug: event.fullSlug,
+					content: event.content,
 					isPublic: false,
 					services: null,
-					imageUrl: memorial.imageUrl,
-					birthDate: memorial.birthDate,
-					deathDate: memorial.deathDate,
-					createdAt: memorial.createdAt,
-					updatedAt: memorial.updatedAt,
+					imageUrl: event.imageUrl,
+					birthDate: event.birthDate,
+					deathDate: event.deathDate,
+					createdAt: event.createdAt,
+					updatedAt: event.updatedAt,
 					ownerUid: null, // Don't expose for unauthorized users
 					funeralDirectorUid: null // Don't expose for unauthorized users
 				},
@@ -228,9 +228,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			};
 		}
 
-		// Return full memorial data, streams, and slideshows for authorized users
+		// Return full event data, streams, and slideshows for authorized users
 		return {
-			memorial,
+			event,
 			streams,
 			slideshows,
 			user: locals.user ? {
@@ -240,7 +240,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			} : null
 		};
 	} catch (err: any) {
-		console.error('🏠 [MEMORIAL_PAGE] Error loading memorial:', err);
+		console.error('🏠 [MEMORIAL_PAGE] Error loading event:', err);
 		console.error('🏠 [MEMORIAL_PAGE] Error details:', {
 			message: err?.message,
 			code: err?.code,
@@ -255,7 +255,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			console.error('🏠 [MEMORIAL_PAGE] Firebase unavailable - connection issue');
 			throw error(500, 'Database temporarily unavailable');
 		} else {
-			throw error(500, `Failed to load memorial: ${err?.message || 'Unknown error'}`);
+			throw error(500, `Failed to load event: ${err?.message || 'Unknown error'}`);
 		}
 	}
 };

@@ -9,15 +9,15 @@ Replace the "scheduled stream" placeholder with live stream playback when a stre
 ### Components Involved
 
 1. **`[fullSlug]/+page.server.ts`** - Server-side data loader
-2. **`[fullSlug]/+page.svelte`** - Main memorial page template
+2. **`[fullSlug]/+page.svelte`** - Main event page template
 3. **`MemorialStreamDisplay.svelte`** - Stream display component for public viewers
 
 ### Current Flow
 
 ```
-Memorial Page Load
+Event Page Load
     ↓
-Server loads memorial + streams (static data)
+Server loads event + streams (static data)
     ↓
 MemorialStreamDisplay categorizes streams:
     - status === 'live' → Show in "Live Now" section
@@ -379,7 +379,7 @@ interface Stream {
 ```
 1. Page Load - Server Side ([fullSlug]/+page.server.ts)
    ↓
-   Fetch memorial + streams from Firestore
+   Fetch event + streams from Firestore
    ↓
    For each stream: Check actual live status via getLiveInputVideos()
    ↓
@@ -511,7 +511,7 @@ document.addEventListener('visibilitychange', () => {
 ### Manual Testing
 
 - [ ] **Before Stream Starts**
-  - Load memorial page with scheduled stream
+  - Load event page with scheduled stream
   - Verify countdown timer displays correctly
   - Verify "Upcoming Service" section shows
 
@@ -604,7 +604,7 @@ document.addEventListener('visibilitychange', () => {
 
 ## 📝 Summary
 
-This refactor transforms the fullSlug memorial page from a **static, refresh-based experience** to a **dynamic, real-time experience** that automatically detects when streams go live and seamlessly transitions viewers from countdown to live playback.
+This refactor transforms the fullSlug event page from a **static, refresh-based experience** to a **dynamic, real-time experience** that automatically detects when streams go live and seamlessly transitions viewers from countdown to live playback.
 
 **Key Benefits:**
 - 🚀 No manual page refreshes required

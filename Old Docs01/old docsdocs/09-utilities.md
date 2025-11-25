@@ -10,32 +10,32 @@ Tributestream includes a comprehensive set of utility functions and helper modul
 
 **Location:** `/lib/server/scheduledServicesUtils.ts`
 
-Handles conversion between Memorial service data and livestream system formats.
+Handles conversion between Event service data and livestream system formats.
 
 #### Key Functions
 
 ```typescript
-// Convert Memorial.services to scheduled services format
-export function convertMemorialToScheduledServices(memorial: Memorial): any[] {
+// Convert Event.services to scheduled services format
+export function convertMemorialToScheduledServices(event: Event): any[] {
   const services: any[] = [];
   
   // Add main service
-  if (memorial.services.main) {
+  if (event.services.main) {
     const mainService = {
       id: 'main_main',
-      title: `${memorial.lovedOneName} Memorial Service`,
+      title: `${event.lovedOneName} Event Service`,
       status: 'scheduled',
-      location: memorial.services.main.location,
-      time: memorial.services.main.time,
-      hours: memorial.services.main.hours || 1,
+      location: event.services.main.location,
+      time: event.services.main.time,
+      hours: event.services.main.hours || 1,
       isVisible: true
     };
     services.push(mainService);
   }
   
   // Add additional services
-  if (memorial.services.additional) {
-    memorial.services.additional.forEach((service, index) => {
+  if (event.services.additional) {
+    event.services.additional.forEach((service, index) => {
       if (service.enabled) {
         services.push({
           id: `additional_${index}`,
@@ -79,7 +79,7 @@ export function filterVisibleServices(services: any[]): any[] {
 }
 ```
 
-### 2. Memorial Access Utilities
+### 2. Event Access Utilities
 
 **Location:** `/lib/utils/memorialAccess.ts`
 
@@ -96,15 +96,15 @@ export class MemorialAccessVerifier {
       return { hasAccess: true, accessLevel: 'admin', reason: 'Admin privileges' };
     }
     
-    const memorial = await getMemorialDocument(memorialId);
+    const event = await getMemorialDocument(memorialId);
     
     // Owner access
-    if (memorial.ownerUid === user.uid) {
-      return { hasAccess: true, accessLevel: 'admin', reason: 'Memorial owner' };
+    if (event.ownerUid === user.uid) {
+      return { hasAccess: true, accessLevel: 'admin', reason: 'Event owner' };
     }
     
     // Funeral director access
-    if (user.role === 'funeral_director' && memorial.funeralDirectorUid === user.uid) {
+    if (user.role === 'funeral_director' && event.funeralDirectorUid === user.uid) {
       return { hasAccess: true, accessLevel: 'edit', reason: 'Assigned funeral director' };
     }
     
@@ -264,19 +264,19 @@ export function validateServiceTime(time: any): boolean {
   return !!(time.date && time.time);
 }
 
-// Validate memorial data structure
-export function validateMemorialData(memorial: Partial<Memorial>): ValidationResult {
+// Validate event data structure
+export function validateMemorialData(event: Partial<Event>): ValidationResult {
   const errors: string[] = [];
   
-  if (!memorial.lovedOneName?.trim()) {
+  if (!event.lovedOneName?.trim()) {
     errors.push('Loved one name is required');
   }
   
-  if (!memorial.services?.main) {
+  if (!event.services?.main) {
     errors.push('Main service information is required');
   }
   
-  if (memorial.services?.main && !validateServiceTime(memorial.services.main.time)) {
+  if (event.services?.main && !validateServiceTime(event.services.main.time)) {
     errors.push('Main service time is invalid');
   }
   
@@ -411,7 +411,7 @@ export function generateSlug(text: string): string {
     .replace(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
 }
 
-// Generate full memorial slug
+// Generate full event slug
 export function generateFullSlug(lovedOneName: string, funeralHomeName?: string): string {
   const nameSlug = generateSlug(lovedOneName);
   
@@ -465,7 +465,7 @@ export function validateSlug(slug: string): boolean {
 ```typescript
 import { handleError, ErrorCodes } from '$lib/utils/errorHandler';
 
-async function saveMemorial(data: Memorial) {
+async function saveMemorial(data: Event) {
   try {
     const response = await fetch('/api/memorials', {
       method: 'POST',

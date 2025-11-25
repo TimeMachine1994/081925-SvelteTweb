@@ -12,7 +12,7 @@
 2. [StreamStatus Type](#streamstatus-type)
 3. [Component Props](#component-props)
 4. [Cloudflare Data Models](#cloudflare-data-models)
-5. [Memorial Integration](#memorial-integration)
+5. [Event Integration](#event-integration)
 6. [Example Data Structures](#example-data-structures)
 
 ---
@@ -31,7 +31,7 @@ export interface Stream {
   id: string;                    // Firestore document ID
   title: string;                 // Display title (required)
   description?: string;          // Optional description
-  memorialId: string;            // Parent memorial ID (required)
+  memorialId: string;            // Parent event ID (required)
   status: StreamStatus;          // Current stream state
   isVisible: boolean;            // Public visibility flag
 
@@ -114,7 +114,7 @@ export interface Stream {
 |-------|----------|---------|---------|
 | `id` | ✅ | All | Firestore document ID |
 | `title` | ✅ | StreamHeader | Display name |
-| `memorialId` | ✅ | All | Parent memorial reference |
+| `memorialId` | ✅ | All | Parent event reference |
 | `status` | ✅ | StreamHeader, Polling | Current state |
 | `isVisible` | ✅ | StreamActions | Public/hidden |
 | `cloudflareInputId` | ❌ | BrowserStreamer, Credentials | Live input reference |
@@ -412,11 +412,11 @@ interface CloudflareRecording {
 
 ---
 
-## Memorial Integration
+## Event Integration
 
-### Memorial Service Structure
+### Event Service Structure
 
-**Location:** `frontend/src/lib/types/memorial.ts`
+**Location:** `frontend/src/lib/types/event.ts`
 
 ```typescript
 interface ServiceDetails {
@@ -457,7 +457,7 @@ interface TimeInfo {
   calculatorServiceType: 'main',
   calculatorServiceIndex: null,
   serviceHash: 'abc123...',
-  // Generated from memorial.services.main
+  // Generated from event.services.main
 }
 
 // Example: Additional location stream
@@ -465,7 +465,7 @@ interface TimeInfo {
   calculatorServiceType: 'location',
   calculatorServiceIndex: 0,
   serviceHash: 'def456...',
-  // Generated from memorial.services.additional[0]
+  // Generated from event.services.additional[0]
 }
 ```
 
@@ -479,7 +479,7 @@ interface TimeInfo {
 {
   "id": "stream_abc123",
   "title": "Celebration of Life Service",
-  "description": "Memorial service for John Doe",
+  "description": "Event service for John Doe",
   "memorialId": "memorial_xyz789",
   "status": "scheduled",
   "isVisible": true,
@@ -583,5 +583,5 @@ Continue to component details:
 
 **Related Files:**
 - [Stream Type Definition](./frontend/src/lib/types/stream.ts)
-- [Memorial Type Definition](./frontend/src/lib/types/memorial.ts)
+- [Event Type Definition](./frontend/src/lib/types/event.ts)
 - [Cloudflare Stream Integration](./frontend/src/lib/server/cloudflare-stream.ts)

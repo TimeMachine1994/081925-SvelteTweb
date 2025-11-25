@@ -21,7 +21,7 @@ OwnerPortal.svelte (Refactored)
 ```
 
 #### Utility Functions
-- `frontend/src/lib/utils/payment.ts` - Payment status logic and memorial utilities
+- `frontend/src/lib/utils/payment.ts` - Payment status logic and event utilities
 
 ### 🎨 UI Design System
 
@@ -33,7 +33,7 @@ OwnerPortal.svelte (Refactored)
 - **Cards**: Gray backgrounds with proper shadows
 
 #### Typography
-- **Headings**: `text-xl font-semibold` for memorial titles
+- **Headings**: `text-xl font-semibold` for event titles
 - **Labels**: `text-sm font-medium text-gray-700`
 - **Body**: `text-sm text-gray-900`
 - **Status badges**: `text-sm font-medium`
@@ -67,7 +67,7 @@ interface Props {
 #### PayNowButton.svelte
 ```typescript
 interface Props {
-  memorial: Memorial;
+  event: Event;
   variant?: 'primary' | 'secondary';
 }
 ```
@@ -75,7 +75,7 @@ interface Props {
 #### MemorialSelector.svelte
 ```typescript
 interface Props {
-  memorials: Memorial[];
+  memorials: Event[];
   selectedMemorialId: string;
   onSelectionChange: (memorialId: string) => void;
 }
@@ -84,21 +84,21 @@ interface Props {
 #### MemorialCard.svelte
 ```typescript
 interface Props {
-  memorial: Memorial;
+  event: Event;
 }
 ```
 
 #### ActionButtons.svelte
 ```typescript
 interface Props {
-  memorial: Memorial;
+  event: Event;
 }
 ```
 
 #### LivestreamScheduleTable.svelte
 ```typescript
 interface Props {
-  memorial: Memorial;
+  event: Event;
 }
 ```
 
@@ -107,20 +107,20 @@ interface Props {
 #### Breakpoints
 - **Mobile**: Default stacked layout
 - **sm (640px)**: 2x2 action button grid
-- **lg (1024px)**: 4-column action button grid, side-by-side memorial card layout
+- **lg (1024px)**: 4-column action button grid, side-by-side event card layout
 
 #### Grid Systems
 - **Action Buttons**: `grid-cols-2 lg:grid-cols-4`
-- **Memorial Card**: `grid-cols-1 lg:grid-cols-2`
+- **Event Card**: `grid-cols-1 lg:grid-cols-2`
 - **Container**: `max-w-6xl mx-auto px-4`
 
 ### 🔄 State Management
 
-#### Memorial Selection
+#### Event Selection
 ```typescript
 let selectedMemorialId = $state('');
 
-// Auto-select latest memorial
+// Auto-select latest event
 $effect(() => {
   if (memorials.length > 0 && !selectedMemorialId) {
     const defaultMemorial = getDefaultMemorial(memorials);
@@ -138,8 +138,8 @@ const selectedMemorial = $derived(() => {
 });
 
 const paymentStatus = $derived(() => {
-  const memorial = selectedMemorial();
-  return memorial ? getPaymentStatus(memorial) : 'none';
+  const event = selectedMemorial();
+  return event ? getPaymentStatus(event) : 'none';
 });
 ```
 
@@ -157,7 +157,7 @@ const paymentStatus = $derived(() => {
 - **Invite Others** → Modal/flow (placeholder)
 
 #### Data Sources
-- **Memorial Data** → `memorials` collection
+- **Event Data** → `memorials` collection
 - **Payment Status** → `livestreamConfigurations` collection
 - **Invitations** → `invitations` collection
 
@@ -168,10 +168,10 @@ const paymentStatus = $derived(() => {
 - Warning banners for incomplete payments
 - Contextual Pay Now buttons
 
-#### ✅ Memorial Management
-- Automatic selection of latest memorial
+#### ✅ Event Management
+- Automatic selection of latest event
 - Dropdown selector for multiple memorials
-- Comprehensive memorial information display
+- Comprehensive event information display
 
 #### ✅ Action Interface
 - Modern button grid with icons
@@ -201,7 +201,7 @@ livestreamConfig = {
 };
 ```
 
-#### Additional Memorial Fields
+#### Additional Event Fields
 - Added all service coordination fields from master tech doc
 - Enhanced logging for payment status tracking
 - Improved error handling and debugging
@@ -230,7 +230,7 @@ livestreamConfig = {
 - Verify UI updates correctly
 - Check button visibility logic
 
-#### Memorial Selection
+#### Event Selection
 - Test with 0, 1, and multiple memorials
 - Verify default selection logic
 - Test dropdown functionality
@@ -245,7 +245,7 @@ livestreamConfig = {
 #### Potential Improvements
 1. **Real-time Payment Updates** - WebSocket integration for live status updates
 2. **Enhanced Schedule Management** - Drag-and-drop schedule editing
-3. **Bulk Actions** - Multi-memorial management
+3. **Bulk Actions** - Multi-event management
 4. **Advanced Filtering** - Search and filter memorials
 5. **Analytics Dashboard** - Payment and engagement metrics
 

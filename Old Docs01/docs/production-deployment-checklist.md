@@ -39,12 +39,12 @@
 - [ ] **Data Protection**
   - [ ] Firestore security rules prevent unauthorized access
   - [ ] Photo uploads restricted by role permissions
-  - [ ] Memorial access controlled by ownership/invitation
+  - [ ] Event access controlled by ownership/invitation
   - [ ] PII data properly protected and encrypted
 
 #### ✅ Performance Optimization
 - [ ] **Caching Strategy**
-  - [ ] Memorial data cached with 10-minute TTL
+  - [ ] Event data cached with 10-minute TTL
   - [ ] User session data cached with 5-minute TTL
   - [ ] Static assets cached with long-term headers
   - [ ] CDN configured for global content delivery
@@ -142,7 +142,7 @@ curl -f https://yourdomain.com/api/health
 - [ ] **Functional Verification**
   - [ ] User registration and login working
   - [ ] All four portals accessible
-  - [ ] Memorial creation and management
+  - [ ] Event creation and management
   - [ ] Invitation system functional
   - [ ] Photo uploads working
   - [ ] Livestream controls operational

@@ -43,21 +43,21 @@
 			</div>
 		{:else}
 			<div class="memorials-list">
-				{#each (data.incompleteMemorials || []) as memorial}
-					<a href="/admin/services/memorials/{memorial.id}" class="memorial-row incomplete">
-						<div class="memorial-info">
-							<div class="memorial-name">{memorial.lovedOneName}</div>
-							<div class="memorial-meta">
-								<span class="memorial-owner">👤 {memorial.creatorEmail}</span>
-								<span class="memorial-date">
-									📅 {new Date(memorial.createdAt).toLocaleDateString()}
+				{#each (data.incompleteMemorials || []) as event}
+					<a href="/admin/services/memorials/{event.id}" class="event-row incomplete">
+						<div class="event-info">
+							<div class="event-name">{event.lovedOneName}</div>
+							<div class="event-meta">
+								<span class="event-owner">👤 {event.creatorEmail}</span>
+								<span class="event-date">
+									📅 {new Date(event.createdAt).toLocaleDateString()}
 								</span>
 							</div>
 						</div>
-						<div class="memorial-badges">
+						<div class="event-badges">
 							<span class="status-badge incomplete">⚠️ Incomplete</span>
-							<span class="status-badge" class:paid={memorial.isPaid}>
-								{memorial.isPaid ? '✅ Paid' : '❌ Unpaid'}
+							<span class="status-badge" class:paid={event.isPaid}>
+								{event.isPaid ? '✅ Paid' : '❌ Unpaid'}
 							</span>
 						</div>
 					</a>
@@ -80,7 +80,7 @@
 				<span class="action-label">Manage Streams</span>
 			</button>
 
-			<button class="action-card" onclick={() => goto('/admin/users/memorial-owners')}>
+			<button class="action-card" onclick={() => goto('/admin/users/event-owners')}>
 				<span class="action-icon">👥</span>
 				<span class="action-label">Manage Users</span>
 			</button>
@@ -148,7 +148,7 @@
 		gap: 0.75rem;
 	}
 
-	.memorial-row {
+	.event-row {
 		padding: 1rem;
 		border: 1px solid #e2e8f0;
 		border-radius: 0.375rem;
@@ -160,33 +160,33 @@
 		color: inherit;
 	}
 
-	.memorial-row.incomplete {
+	.event-row.incomplete {
 		border-left: 4px solid #f59e0b;
 		background: #fffbeb;
 	}
 
-	.memorial-row:hover {
+	.event-row:hover {
 		background: #f7fafc;
 		border-color: #cbd5e0;
 		transform: translateX(4px);
 	}
 
-	.memorial-row.incomplete:hover {
+	.event-row.incomplete:hover {
 		background: #fef3c7;
 	}
 
-	.memorial-info {
+	.event-info {
 		flex: 1;
 	}
 
-	.memorial-name {
+	.event-name {
 		font-weight: 600;
 		color: #2d3748;
 		margin-bottom: 0.375rem;
 		font-size: 1rem;
 	}
 
-	.memorial-meta {
+	.event-meta {
 		display: flex;
 		align-items: center;
 		gap: 1rem;
@@ -194,7 +194,7 @@
 		color: #718096;
 	}
 
-	.memorial-badges {
+	.event-badges {
 		display: flex;
 		gap: 0.5rem;
 		align-items: center;
@@ -274,11 +274,11 @@
 		text-align: center;
 	}
 
-	.memorial-owner {
+	.event-owner {
 		color: #718096;
 	}
 
-	.memorial-date {
+	.event-date {
 		color: #718096;
 	}
 </style>

@@ -79,7 +79,7 @@
 				};
 			case 'owner':
 				return {
-					title: 'Memorial Owner',
+					title: 'Event Owner',
 					icon: Crown,
 					gradient: 'from-amber-500 via-orange-500 to-red-500',
 					bgGradient: 'from-amber-50 to-orange-50',
@@ -98,18 +98,18 @@
 
 	const roleInfo = getRoleInfo(userRole);
 
-	function openScheduleModal(memorial: any) {
-		selectedMemorial = memorial;
+	function openScheduleModal(event: any) {
+		selectedMemorial = event;
 		// Pre-fill with existing data if available
-		scheduleForm.serviceDate = memorial.serviceDate
-			? new Date(memorial.serviceDate).toISOString().split('T')[0]
+		scheduleForm.serviceDate = event.serviceDate
+			? new Date(event.serviceDate).toISOString().split('T')[0]
 			: '';
-		scheduleForm.serviceTime = memorial.serviceTime || '';
-		scheduleForm.duration = memorial.duration || 2;
-		scheduleForm.location.name = memorial.location?.name || '';
-		scheduleForm.location.address = memorial.location?.address || '';
-		scheduleForm.location.isUnknown = memorial.location?.isUnknown || false;
-		scheduleForm.timeIsUnknown = memorial.timeIsUnknown || false;
+		scheduleForm.serviceTime = event.serviceTime || '';
+		scheduleForm.duration = event.duration || 2;
+		scheduleForm.location.name = event.location?.name || '';
+		scheduleForm.location.address = event.location?.address || '';
+		scheduleForm.location.isUnknown = event.location?.isUnknown || false;
+		scheduleForm.timeIsUnknown = event.timeIsUnknown || false;
 		showScheduleModal = true;
 	}
 
@@ -270,7 +270,7 @@
 
 						{#if data.memorials && data.memorials.length > 0}
 							<div class="grid gap-4">
-								{#each data.memorials as memorial, index}
+								{#each data.memorials as event, index}
 									<div
 										class="group rounded-2xl border border-white/30 bg-gradient-to-r from-white/80 to-white/60 p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl {mounted
 											? 'animate-fade-in-up'
@@ -283,19 +283,19 @@
 													class="h-12 w-12 rounded-full bg-gradient-to-r {roleInfo.gradient} flex items-center justify-center shadow-lg"
 												>
 													<span class="text-lg font-bold text-white">
-														{memorial.lovedOneName?.charAt(0) || memorial.title?.charAt(0) || 'M'}
+														{event.lovedOneName?.charAt(0) || event.title?.charAt(0) || 'M'}
 													</span>
 												</div>
 												<div>
 													<h3
 														class="font-bold text-gray-900 group-hover:text-{roleInfo.accentColor}-600 transition-colors"
 													>
-														{memorial.lovedOneName || memorial.title}
+														{event.lovedOneName || event.title}
 													</h3>
 													<div class="flex items-center space-x-4 text-sm text-gray-500">
 														<span class="flex items-center">
 															<Calendar class="mr-1 h-4 w-4" />
-															{new Date(memorial.createdAt).toLocaleDateString()}
+															{new Date(event.createdAt).toLocaleDateString()}
 														</span>
 													</div>
 												</div>
@@ -304,7 +304,7 @@
 												class="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2 opacity-100 sm:opacity-0 transition-opacity sm:group-hover:opacity-100"
 											>
 												<a
-													href={`/${memorial.fullSlug}`}
+													href={`/${event.fullSlug}`}
 													target="_blank"
 													class="flex items-center justify-center rounded-xl bg-green-600 px-4 py-3 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg min-h-[44px]"
 												>
@@ -313,7 +313,7 @@
 												</a>
 												{#if userRole === 'owner'}
 													<a
-														href={`/slideshow-generator?memorialId=${memorial.id}`}
+														href={`/slideshow-generator?memorialId=${event.id}`}
 														class="flex items-center justify-center rounded-xl bg-blue-600 px-4 py-3 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg min-h-[44px]"
 													>
 														<Camera class="mr-1 h-3 w-3" />
@@ -321,7 +321,7 @@
 													</a>
 												{/if}
 												<a
-													href={`/schedule/${memorial.id}`}
+													href={`/schedule/${event.id}`}
 													class="flex items-center justify-center rounded-xl bg-amber-600 px-4 py-3 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg min-h-[44px]"
 												>
 													<Clock class="mr-1 h-3 w-3" />
@@ -329,7 +329,7 @@
 												</a>
 												{#if userRole === 'funeral_director' || userRole === 'admin'}
 													<a
-														href={`/memorials/${memorial.id}/streams`}
+														href={`/memorials/${event.id}/streams`}
 														class="flex items-center justify-center rounded-xl bg-purple-600 px-4 py-3 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg min-h-[44px]"
 													>
 														<Play class="mr-1 h-3 w-3" />
@@ -347,14 +347,14 @@
 									class="mx-auto h-24 w-24 rounded-full bg-gradient-to-r {roleInfo.gradient} mb-4 animate-spin"
 								></div>
 								<h3 class="mb-2 text-xl font-semibold text-gray-900">No memorials yet</h3>
-								<p class="mb-6 text-gray-500">Create your first memorial to get started</p>
+								<p class="mb-6 text-gray-500">Create your first event to get started</p>
 								{#if userRole === 'funeral_director'}
 									<a
 										href="/register/funeral-director"
 										class="inline-flex items-center rounded-xl bg-gradient-to-r px-6 py-3 {roleInfo.gradient} font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
 									>
 										<Heart class="mr-2 h-4 w-4" />
-										Create Memorial
+										Create Event
 									</a>
 								{:else if userRole === 'owner'}
 									<div class="space-y-4">
@@ -366,7 +366,7 @@
 											rounded="lg"
 										>
 											<Heart class="w-4 h-4 mr-2" />
-											Create Memorial
+											Create Event
 										</Button>
 										
 										<!-- Debug Test Button -->
@@ -383,19 +383,19 @@
 									</div>
 								{:else}
 									<p class="text-gray-500">
-										Please contact your funeral director to create a new memorial.
+										Please contact your funeral director to create a new event.
 									</p>
 								{/if}
 							</div>
 						{/if}
 
-						<!-- Create Memorial Button for Owners with existing memorials -->
+						<!-- Create Event Button for Owners with existing memorials -->
 						{#if userRole === 'owner' && data.memorials && data.memorials.length > 0}
 							<div class="mt-6 text-center">
 								{#if data.profile?.memorialCount > 0 && !data.profile?.hasPaidForMemorial}
 									<div class="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
 										<p class="text-sm text-amber-800">
-											<strong>Payment Required:</strong> Please complete payment for your existing memorial
+											<strong>Payment Required:</strong> Please complete payment for your existing event
 											before creating a new one.
 										</p>
 										<a href="/schedule/{data.memorials?.[0]?.id}" class="inline-block">
@@ -419,7 +419,7 @@
 										class="flex items-center justify-center gap-2 whitespace-nowrap"
 									>
 										<Heart class="h-4 w-4 flex-shrink-0" />
-										<span>Create Another Memorial</span>
+										<span>Create Another Event</span>
 									</Button>
 								{/if}
 							</div>
@@ -530,7 +530,7 @@
 					<p class="font-semibold text-gray-900">
 						{selectedMemorial.lovedOneName || selectedMemorial.title}
 					</p>
-					<p class="text-sm text-gray-600">Memorial Service Schedule</p>
+					<p class="text-sm text-gray-600">Event Service Schedule</p>
 				</div>
 
 				<form
@@ -695,7 +695,7 @@
 	</div>
 {/if}
 
-<!-- Create Memorial Modal -->
+<!-- Create Event Modal -->
 {#if showCreateMemorialModal}
 	<div class="bg-opacity-50 fixed inset-0 z-50 h-full w-full overflow-y-auto bg-gray-600">
 		<div
@@ -705,7 +705,7 @@
 				<div class="mb-6 flex items-center justify-between">
 					<h3 class="flex items-center text-xl font-bold text-gray-900">
 						<Heart class="mr-3 h-6 w-6 text-amber-600" />
-						Create Memorial
+						Create Event
 					</h3>
 					<button
 						onclick={() => (showCreateMemorialModal = false)}
@@ -778,7 +778,7 @@
 							class="w-full rounded-xl border border-gray-200 bg-white/70 px-4 py-3 backdrop-blur-sm transition-all focus:border-transparent focus:ring-2 focus:ring-amber-500"
 						/>
 						<p class="mt-2 text-xs text-gray-500">
-							This will be the main name displayed on the memorial page.
+							This will be the main name displayed on the event page.
 						</p>
 					</div>
 
@@ -791,7 +791,7 @@
 									target="_blank"
 									class="mt-2 inline-flex items-center text-sm font-medium text-green-700 hover:text-green-800"
 								>
-									View Memorial →
+									View Event →
 								</a>
 							{/if}
 						</div>
@@ -800,10 +800,10 @@
 					<div class="rounded-xl border border-blue-200 bg-blue-50 p-4">
 						<h4 class="mb-2 font-semibold text-blue-900">What happens next?</h4>
 						<ul class="space-y-1 text-sm text-blue-800">
-							<li>• Your memorial will be created and immediately accessible</li>
+							<li>• Your event will be created and immediately accessible</li>
 							<li>• You can customize it with photos, stories, and service details</li>
 							<li>• You'll get a unique URL to share with family and friends</li>
-							<li>• You can only create one memorial until payment is completed</li>
+							<li>• You can only create one event until payment is completed</li>
 						</ul>
 					</div>
 
@@ -828,7 +828,7 @@
 							{#if isCreatingMemorial}
 								Creating...
 							{:else}
-								Create Memorial
+								Create Event
 							{/if}
 						</Button>
 					</div>
@@ -874,10 +874,10 @@
 							</div>
 						</div>
 						<h4 class="mb-3 text-center text-lg font-semibold text-gray-900">
-							Finish Setting Up Your First Memorial
+							Finish Setting Up Your First Event
 						</h4>
 						<p class="text-center text-gray-700">
-							Before you can create another memorial, please complete the checkout process for your first memorial.
+							Before you can create another event, please complete the checkout process for your first event.
 						</p>
 					</div>
 
@@ -885,7 +885,7 @@
 						<h4 class="mb-2 font-semibold text-blue-900">What you'll do next:</h4>
 						<ul class="space-y-1 text-sm text-blue-800">
 							<li>• Review your service details and schedule</li>
-							<li>• Choose your memorial package</li>
+							<li>• Choose your event package</li>
 							<li>• Complete the checkout process</li>
 							<li>• Then you can create additional memorials</li>
 						</ul>

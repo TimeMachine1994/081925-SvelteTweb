@@ -76,10 +76,10 @@ async function updateFirebaseDirectly() {
     
     console.log('✅ Stream updated successfully!');
     
-    // Also update memorial archive
+    // Also update event archive
     const memorialId = currentData.memorialId;
     if (memorialId) {
-      console.log('📝 Updating memorial archive for:', memorialId);
+      console.log('📝 Updating event archive for:', memorialId);
       
       const archiveEntry = {
         id: recordingSession.sessionId,
@@ -103,10 +103,10 @@ async function updateFirebaseDirectly() {
         updatedAt: admin.firestore.Timestamp.now()
       });
       
-      console.log('✅ Memorial archive updated!');
+      console.log('✅ Event archive updated!');
     }
     
-    console.log('🎉 All updates complete! The recording should now appear on the memorial page.');
+    console.log('🎉 All updates complete! The recording should now appear on the event page.');
     
   } catch (error) {
     console.error('❌ Error updating Firebase:', error.message);

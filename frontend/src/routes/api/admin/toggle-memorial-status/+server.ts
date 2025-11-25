@@ -18,7 +18,7 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 		const { memorialIds, isComplete } = await request.json();
 
 		if (!memorialIds || !Array.isArray(memorialIds) || memorialIds.length === 0) {
-			return json({ error: 'Memorial IDs array is required' }, { status: 400 });
+			return json({ error: 'Event IDs array is required' }, { status: 400 });
 		}
 
 		if (typeof isComplete !== 'boolean') {
@@ -34,7 +34,7 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 		for (const memorialId of memorialIds) {
 			const memorialRef = adminDb.collection('memorials').doc(memorialId);
 			
-			// Get memorial data for audit logging
+			// Get event data for audit logging
 			const memorialDoc = await memorialRef.get();
 			if (memorialDoc.exists) {
 				const memorialData = memorialDoc.data();
@@ -55,19 +55,19 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 		// Commit the batch
 		await batch.commit();
 
-		// Log audit events for each memorial
+		// Log audit events for each event
 		try {
-			for (const memorial of updatedMemorials) {
+			for (const event of updatedMemorials) {
 				await logAuditEvent({
 					action: 'memorial_status_toggle',
-					resourceType: 'memorial',
-					resourceId: memorial.id,
+					resourceType: 'event',
+					resourceId: event.id,
 					userId: locals.user.uid,
 					userEmail: locals.user.email || 'unknown',
 					ipAddress: getClientAddress(),
 					details: {
-						lovedOneName: memorial.lovedOneName,
-						previousStatus: memorial.previousStatus,
+						lovedOneName: event.lovedOneName,
+						previousStatus: event.previousStatus,
 						newStatus: isComplete,
 						batchOperation: true,
 						totalMemorials: memorialIds.length
@@ -89,9 +89,9 @@ export const POST: RequestHandler = async ({ request, locals, getClientAddress }
 		});
 
 	} catch (error: any) {
-		console.error('❌ [ADMIN API] Error toggling memorial status:', error);
+		console.error('❌ [ADMIN API] Error toggling event status:', error);
 		return json({
-			error: error.message || 'Failed to toggle memorial status',
+			error: error.message || 'Failed to toggle event status',
 			code: error.code
 		}, { status: 500 });
 	}

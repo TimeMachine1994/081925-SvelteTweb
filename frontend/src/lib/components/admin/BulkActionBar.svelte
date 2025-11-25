@@ -20,7 +20,7 @@ Based on ADMIN_REFACTOR_2_DATA_OPERATIONS.md
 	// Define actions based on resource type
 	const actions = $derived.by(() => {
 		switch (resourceType) {
-			case 'memorial':
+			case 'event':
 				return [
 					{ id: 'markPaid', label: 'Mark Paid', icon: '✅', variant: 'primary' },
 					{ id: 'makePublic', label: 'Make Public', icon: '🌐', variant: 'secondary' },

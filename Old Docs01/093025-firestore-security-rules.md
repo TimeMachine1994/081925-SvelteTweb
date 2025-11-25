@@ -4,7 +4,7 @@
 
 ## Overview
 
-Firestore security rules determine what data can be accessed by different types of users. This document explains how our security model works for public memorial pages and stream visibility.
+Firestore security rules determine what data can be accessed by different types of users. This document explains how our security model works for public event pages and stream visibility.
 
 ## Security Architecture
 
@@ -20,9 +20,9 @@ Firestore security rules determine what data can be accessed by different types 
    - Used in browser JavaScript/Svelte components
    - User authentication determines permissions
 
-## Memorial Page Public Access Rules
+## Event Page Public Access Rules
 
-### **Memorial Collection (`/memorials/{memorialId}`)**
+### **Event Collection (`/memorials/{memorialId}`)**
 
 ```javascript
 allow read: if isAdmin() || 
@@ -32,10 +32,10 @@ allow read: if isAdmin() ||
 ```
 
 **Public Access Criteria:**
-- ✅ **Memorial.isPublic == true** → Anyone can read (no authentication required)
-- ✅ **Memorial owner** → Can always read their memorial
+- ✅ **Event.isPublic == true** → Anyone can read (no authentication required)
+- ✅ **Event owner** → Can always read their event
 - ✅ **Funeral director** → Can read memorials they manage
-- ✅ **Admins** → Can read any memorial
+- ✅ **Admins** → Can read any event
 
 ### **Streams Collection (`/streams/{streamId}`) - NEW RULES**
 
@@ -48,14 +48,14 @@ allow read: if resource.data.isVisible == true &&
 
 **Public Stream Access Criteria:**
 - ✅ **Stream.isVisible == true** AND
-- ✅ **Associated memorial is public** AND  
-- ✅ **Stream has memorialId** (is associated with a memorial)
+- ✅ **Associated event is public** AND  
+- ✅ **Stream has memorialId** (is associated with a event)
 
-## Security Layers for Public Memorial Pages
+## Security Layers for Public Event Pages
 
-### **Layer 1: Memorial Visibility**
+### **Layer 1: Event Visibility**
 ```javascript
-Memorial.isPublic == true  // Memorial must be public
+Event.isPublic == true  // Event must be public
 ```
 
 ### **Layer 2: Stream Visibility**  
@@ -80,7 +80,7 @@ return false; // Hide other statuses
    ```typescript
    // Uses Admin SDK - bypasses security rules
    const streamsQuery = adminDb.collection('streams')
-     .where('memorialId', '==', memorial.id)
+     .where('memorialId', '==', event.id)
      .where('isVisible', '!=', false);
    ```
 
@@ -113,7 +113,7 @@ return false; // Hide other statuses
 
 2. **Permission Validation**
    ```typescript
-   // Check if user can manage this memorial's streams
+   // Check if user can manage this event's streams
    const canAccess = await canAccessMemorialStreams(memorialId, locals.user);
    ```
 
@@ -128,24 +128,24 @@ return false; // Hide other statuses
 ### **Helper Functions in Firestore Rules**
 
 ```javascript
-// Check if user can manage the memorial
+// Check if user can manage the event
 function canManageMemorial(memorialId) {
-  let memorial = get(/databases/$(database)/documents/memorials/$(memorialId)).data;
+  let event = get(/databases/$(database)/documents/memorials/$(memorialId)).data;
   return isAdmin() ||
-         (request.auth != null && request.auth.uid == memorial.ownerUid) ||
-         (request.auth != null && request.auth.uid == memorial.funeralDirectorUid);
+         (request.auth != null && request.auth.uid == event.ownerUid) ||
+         (request.auth != null && request.auth.uid == event.funeralDirectorUid);
 }
 
-// Check if memorial is public
+// Check if event is public
 function isMemorialPublic(memorialId) {
-  let memorial = get(/databases/$(database)/documents/memorials/$(memorialId)).data;
-  return memorial.isPublic == true;
+  let event = get(/databases/$(database)/documents/memorials/$(memorialId)).data;
+  return event.isPublic == true;
 }
 ```
 
 ## Public Access Decision Matrix
 
-| User Type | Memorial.isPublic | Stream.isVisible | Stream.status | Can View? |
+| User Type | Event.isPublic | Stream.isVisible | Stream.status | Can View? |
 |-----------|------------------|------------------|---------------|-----------|
 | **Guest** | ✅ true | ✅ true | live | ✅ Yes |
 | **Guest** | ✅ true | ✅ true | scheduled | ✅ Yes |
@@ -158,8 +158,8 @@ function isMemorialPublic(memorialId) {
 
 ## Implementation Recommendations
 
-### **For Public Memorial Pages**
-1. **Always check Memorial.isPublic** before showing any content
+### **For Public Event Pages**
+1. **Always check Event.isPublic** before showing any content
 2. **Filter streams by isVisible** for public viewers
 3. **Apply status filtering** to show appropriate streams
 4. **Use server-side queries** for better performance and security
@@ -171,15 +171,15 @@ function isMemorialPublic(memorialId) {
 4. **Log access attempts** for security monitoring
 
 ### **For Future Features**
-1. **Follow the same pattern**: Memorial.isPublic + Feature.isVisible
+1. **Follow the same pattern**: Event.isPublic + Feature.isVisible
 2. **Add application-level filtering** for appropriate content
 3. **Document security decisions** in this file
 4. **Test with unauthenticated users** to verify public access
 
 ## Security Testing Checklist
 
-- [ ] Unauthenticated users can view public memorial pages
-- [ ] Unauthenticated users cannot view private memorial pages  
+- [ ] Unauthenticated users can view public event pages
+- [ ] Unauthenticated users cannot view private event pages  
 - [ ] Public users only see visible streams from public memorials
 - [ ] Hidden streams don't appear on public pages
 - [ ] Management interfaces require authentication

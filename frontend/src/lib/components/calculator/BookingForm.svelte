@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { CalculatorFormData, Addons } from '$lib/types/livestream';
-	import type { ServiceDetails } from '$lib/types/memorial';
+	import type { ServiceDetails } from '$lib/types/event';
 	import Button from '$lib/ui/primitives/Button.svelte';
 
 	// New props structure - direct services and calculator data

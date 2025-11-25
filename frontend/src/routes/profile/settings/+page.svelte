@@ -52,7 +52,7 @@
 				};
 			case 'owner':
 				return {
-					title: 'Memorial Owner',
+					title: 'Event Owner',
 					gradient: 'from-amber-500 via-orange-500 to-red-500',
 					bgGradient: 'from-amber-50 to-orange-50',
 					accentColor: 'amber'

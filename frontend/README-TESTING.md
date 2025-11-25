@@ -22,7 +22,7 @@ frontend/
 │   └── fixtures/               # Test data & mocks
 ├── e2e/                        # End-to-end tests
 │   ├── auth/                   # Authentication flows
-│   ├── memorial/               # Memorial management
+│   ├── event/               # Event management
 │   ├── streaming/              # Stream management
 │   └── admin/                  # Admin portal
 └── test-utils/                 # Shared testing utilities
@@ -85,7 +85,7 @@ npm run test:clean
 ### Test Accounts
 The following test accounts are available:
 
-- `owner@test.com` (password: test123) - Memorial owner
+- `owner@test.com` (password: test123) - Event owner
 - `director@test.com` (password: test123) - Funeral director
 - `admin@test.com` (password: test123) - Admin user
 - `viewer@test.com` (password: test123) - Viewer role
@@ -97,7 +97,7 @@ Use the test factories in `test-utils/factories.ts` for consistent test data:
 import { createTestUser, createTestMemorial } from '$test-utils/factories';
 
 const user = createTestUser({ role: 'owner' });
-const memorial = createTestMemorial({ ownerUid: user.uid });
+const event = createTestMemorial({ ownerUid: user.uid });
 ```
 
 ### Test Fixtures
@@ -154,12 +154,12 @@ describe('AuthenticatedComponent', () => {
 import { describe, it, expect, vi } from 'vitest';
 import { setupTestEnvironment } from '$test-utils/test-helpers';
 
-describe('Memorial API', () => {
+describe('Event API', () => {
   beforeEach(() => {
     setupTestEnvironment();
   });
 
-  it('creates memorial successfully', async () => {
+  it('creates event successfully', async () => {
     const response = await fetch('/api/memorials', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -193,7 +193,7 @@ describe('Database Operations', () => {
 ```typescript
 import { test, expect } from '@playwright/test';
 
-test('user can login and create memorial', async ({ page }) => {
+test('user can login and create event', async ({ page }) => {
   await page.goto('/login');
   
   await page.getByLabel(/email/i).fill('owner@test.com');
@@ -202,7 +202,7 @@ test('user can login and create memorial', async ({ page }) => {
   
   await expect(page).toHaveURL(/\/profile/);
   
-  await page.getByRole('button', { name: /create memorial/i }).click();
+  await page.getByRole('button', { name: /create event/i }).click();
   // ... rest of test
 });
 ```

@@ -41,16 +41,16 @@ This phase focuses on building the specific, limited portal experiences for thes
 | :--- | :--- |
 | **`family_member` Portal** | |
 | 3.1: Update `/my-portal` `load` function for `family_member` role | 🔲 Pending |
-| 3.2: Implement memorial list in `FamilyMemberPortal.svelte` | 🔲 Pending |
+| 3.2: Implement event list in `FamilyMemberPortal.svelte` | 🔲 Pending |
 | 3.3: Ensure "Add Photos" is the only available action | 🔲 Pending |
 | **`viewer` Portal & Follow Feature** | |
 | 3.4: Update `/my-portal` `load` function for `viewer` role | 🔲 Pending |
 | 3.5: Implement followed memorials list in `ViewerPortal.svelte` | 🔲 Pending |
-| 3.6: Add "Follow" button to public memorial page (`/tributes/[fullSlug]`) | 🔲 Pending |
+| 3.6: Add "Follow" button to public event page (`/tributes/[fullSlug]`) | 🔲 Pending |
 
 ## Phase 4: `funeral_director` Portal Implementation
 
-This phase focuses on building the funeral director portal with registration, memorial management, and livestreaming capabilities.
+This phase focuses on building the funeral director portal with registration, event management, and livestreaming capabilities.
 
 | Task | Status |
 | :--- | :--- |
@@ -58,9 +58,9 @@ This phase focuses on building the funeral director portal with registration, me
 | 4.1: Implement funeral director login system | 🔲 Pending |
 | 4.2: Create enhanced registration form for owners (funeral director version) | 🔲 Pending |
 | 4.3: Implement auto-prefill of funeral director info from account | 🔲 Pending |
-| 4.4: Add automatic memorial page creation and redirect functionality | 🔲 Pending |
+| 4.4: Add automatic event page creation and redirect functionality | 🔲 Pending |
 | **Funeral Director Portal Features** | |
 | 4.5: Build funeral director portal dashboard | 🔲 Pending |
-| 4.6: Implement memorial content viewing and editing capabilities | 🔲 Pending |
+| 4.6: Implement event content viewing and editing capabilities | 🔲 Pending |
 | 4.7: Add photo management functionality for funeral directors | 🔲 Pending |
 | 4.8: Implement livestream initiation and management from backend | 🔲 Pending |

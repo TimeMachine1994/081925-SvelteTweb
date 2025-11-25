@@ -57,7 +57,7 @@ export interface DemoSession {
 
 **Modify:**
 - `frontend/src/lib/types/user.ts`
-- `frontend/src/lib/types/memorial.ts`
+- `frontend/src/lib/types/event.ts`
 - `frontend/src/lib/types/stream.ts`
 
 **Add to each:**
@@ -233,7 +233,7 @@ async function createDemoUsers(sessionId: string) {
 - [ ] Duration notice
 
 **Scenarios:**
-1. **First Memorial Service** - Funeral Director
+1. **First Event Service** - Funeral Director
 2. **Managing Multiple Services** - Funeral Director
 3. **Legacy Celebration** - Owner
 4. **Viewer Experience** - Viewer
@@ -325,7 +325,7 @@ export const DEMO_TEMPLATES: Record<string, DemoTemplate> = {
 - [ ] Create 4 scenario templates
 - [ ] Add realistic names and data
 - [ ] Include sample photos/videos
-- [ ] Add memorial details
+- [ ] Add event details
 
 ---
 
@@ -355,7 +355,7 @@ export async function seedSlideshow(
 ```
 
 **Implementation:**
-1. [ ] Create memorial document with demo flags
+1. [ ] Create event document with demo flags
 2. [ ] Upload demo images to Firebase Storage
 3. [ ] Create stream with mock Cloudflare data
 4. [ ] Create slideshow with sample photos
@@ -389,8 +389,8 @@ if (template) {
 ### 2.4 Create Demo Assets (4 hours)
 
 **Assets Needed:**
-- [ ] 20 sample memorial photos (diverse, professional)
-- [ ] 4 memorial background images
+- [ ] 20 sample event photos (diverse, professional)
+- [ ] 4 event background images
 - [ ] Sample slideshow photos (10 per template)
 - [ ] Mock video thumbnails
 - [ ] Demo funeral home logos
@@ -403,7 +403,7 @@ if (template) {
 
 ---
 
-### 2.5 Scenario 1: First Memorial Service (2 hours)
+### 2.5 Scenario 1: First Event Service (2 hours)
 
 **Template:** Empty slate with guidance
 
@@ -413,11 +413,11 @@ if (template) {
 - Tutorial prompts
 
 **Guided Actions:**
-1. Create first memorial
+1. Create first event
 2. Add loved one's information
 3. Schedule livestream
 4. Upload slideshow
-5. Publish memorial
+5. Publish event
 
 **Entry Point:** Funeral Director portal with empty state
 
@@ -448,31 +448,31 @@ if (template) {
 
 ### 2.7 Scenario 3: Legacy Celebration (3 hours)
 
-**Template:** Rich memorial page
+**Template:** Rich event page
 
 **Pre-populated Data:**
-- Complete memorial for "Robert Johnson"
+- Complete event for "Robert Johnson"
 - Beautiful slideshow (15 photos)
 - 12 condolence messages
 - 1 completed stream recording
-- Memorial guestbook entries
+- Event guestbook entries
 
 **Highlights:**
 - Photo slideshow
 - Condolence wall
 - Stream recording playback
-- Memorial customization options
+- Event customization options
 
-**Entry Point:** Owner profile with memorial
+**Entry Point:** Owner profile with event
 
 ---
 
 ### 2.8 Scenario 4: Viewer Experience (2 hours)
 
-**Template:** Public memorial view
+**Template:** Public event view
 
 **Pre-populated Data:**
-- Public memorial page
+- Public event page
 - Live stream in progress (mock)
 - Active chat/condolences
 - Photo slideshow playing
@@ -482,9 +482,9 @@ if (template) {
 - Stream viewing
 - Leave condolence
 - View photos
-- Share memorial
+- Share event
 
-**Entry Point:** Public memorial page
+**Entry Point:** Public event page
 
 ---
 
@@ -501,7 +501,7 @@ if (template) {
 - [ ] Fun loading messages
 
 **Messages:**
-- "Creating realistic memorial data..."
+- "Creating realistic event data..."
 - "Uploading sample photos..."
 - "Setting up livestreams..."
 - "Almost ready..."
@@ -615,8 +615,8 @@ export function previousStep(): void
 **Usage:**
 ```svelte
 <DemoTooltip 
-  target="#create-memorial-btn" 
-  content="Click here to create your first memorial"
+  target="#create-event-btn" 
+  content="Click here to create your first event"
   position="bottom"
   showOnce={true}
 />
@@ -636,10 +636,10 @@ export function previousStep(): void
 - [ ] Persistent state
 
 **Checklist Items (Funeral Director):**
-- [ ] Create your first memorial
+- [ ] Create your first event
 - [ ] Schedule a livestream
 - [ ] Upload a slideshow
-- [ ] Customize memorial page
+- [ ] Customize event page
 - [ ] View analytics
 
 **UI:**
@@ -656,7 +656,7 @@ export function previousStep(): void
 **Steps:**
 1. Welcome message
 2. Dashboard overview
-3. Create memorial button
+3. Create event button
 4. Stream management
 5. Analytics panel
 6. Settings
@@ -669,12 +669,12 @@ export function previousStep(): void
 
 ---
 
-### 3.7 Implement Memorial Creation Tour (2 hours)
+### 3.7 Implement Event Creation Tour (2 hours)
 
-**Tour:** "Creating Your First Memorial"
+**Tour:** "Creating Your First Event"
 
 **Steps:**
-1. Memorial form overview
+1. Event form overview
 2. Required fields
 3. Photo upload
 4. Privacy settings
@@ -707,7 +707,7 @@ export function previousStep(): void
 **Create:** `frontend/src/lib/components/demo/SuccessCelebration.svelte`
 
 **Triggers:**
-- First memorial created
+- First event created
 - First stream scheduled
 - Slideshow completed
 - 5 actions completed
@@ -737,7 +737,7 @@ npm install canvas-confetti
 - [ ] Keyboard shortcuts display
 
 **Examples:**
-- Pulse on "Create Memorial" button
+- Pulse on "Create Event" button
 - "💡 Pro Tip" callouts
 - Keyboard shortcut hints
 - Feature discovery prompts

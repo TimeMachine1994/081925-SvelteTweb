@@ -24,7 +24,7 @@ async function checkStreams() {
 			console.log(`Stream ID: ${doc.id}`);
 			console.log(`  Title: ${data.title || 'N/A'}`);
 			console.log(`  Status: ${data.status || 'N/A'}`);
-			console.log(`  Memorial ID: ${data.memorialId || 'N/A'}`);
+			console.log(`  Event ID: ${data.memorialId || 'N/A'}`);
 			console.log(`  Cloudflare Input ID: ${data.cloudflareInputId || 'N/A'}`);
 			console.log(`  Created: ${data.createdAt || 'N/A'}`);
 			console.log('');

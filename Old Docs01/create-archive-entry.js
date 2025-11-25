@@ -1,4 +1,4 @@
-// Create missing archive entry by directly updating the memorial
+// Create missing archive entry by directly updating the event
 // This bypasses the normal livestream stop process
 
 async function createArchiveEntry() {
@@ -12,8 +12,8 @@ async function createArchiveEntry() {
     
     const archiveEntry = {
         id: `manual_${Date.now()}`,
-        title: "Austin Sanchesgsgsgsgz Memorial Service",
-        description: "Memorial service recording",
+        title: "Austin Sanchesgsgsgsgz Event Service",
+        description: "Event service recording",
         cloudflareId: cloudflareId,
         playbackUrl: `https://cloudflarestream.com/${cloudflareId}/iframe`,
         recordingPlaybackUrl: "",
@@ -32,7 +32,7 @@ async function createArchiveEntry() {
     console.log("📝 Archive entry to create:", archiveEntry);
     
     try {
-        // We'll use the schedule endpoint to update the memorial
+        // We'll use the schedule endpoint to update the event
         // since it has database write access
         const response = await fetch(`/api/memorials/${memorialId}/schedule/auto-save`, {
             method: 'POST',
@@ -49,7 +49,7 @@ async function createArchiveEntry() {
         
         if (response.ok) {
             const result = await response.json();
-            console.log("✅ Memorial updated:", result);
+            console.log("✅ Event updated:", result);
             
             // Now check for the recording
             console.log("🔄 Checking for recording...");

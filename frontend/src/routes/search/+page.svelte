@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getTheme } from '$lib/design-tokens/minimal-modern-theme';
 	import { Input, Card, Badge, Button } from '$lib/components/minimal-modern';
-	import type { Memorial } from '$lib/types/memorial';
+	import type { Event } from '$lib/types/event';
 
 	// Props using SvelteKit 5 syntax
 	let { data } = $props();
@@ -9,7 +9,7 @@
 
 	// State using SvelteKit 5 runes
 	let searchQuery = $state(query);
-	let searchResults = $state<Memorial[]>([]);
+	let searchResults = $state<Event[]>([]);
 	let isSearching = $state(false);
 	const theme = getTheme('minimal');
 
@@ -36,21 +36,21 @@
 
 		// Enhanced client-side search across multiple fields
 		const query = searchTerm.toLowerCase().trim();
-		const filtered = memorials.filter((memorial: Memorial) => {
+		const filtered = memorials.filter((event: Event) => {
 			// Search across name, creator, and dates
 			const searchableText = [
-				memorial.lovedOneName,
-				memorial.creatorName,
-				memorial.birthDate,
-				memorial.deathDate
+				event.lovedOneName,
+				event.creatorName,
+				event.birthDate,
+				event.deathDate
 			].filter(Boolean).join(' ').toLowerCase();
 			
 			const matches = searchableText.includes(query);
-			if (matches) console.log('✅ Match:', memorial.lovedOneName);
+			if (matches) console.log('✅ Match:', event.lovedOneName);
 			return matches;
 		});
 
-		searchResults = filtered.sort((a: Memorial, b: Memorial) => {
+		searchResults = filtered.sort((a: Event, b: Event) => {
 			// Sort by relevance: exact name matches first, then partial matches
 			const aName = a.lovedOneName?.toLowerCase() || '';
 			const bName = b.lovedOneName?.toLowerCase() || '';
@@ -105,24 +105,24 @@
 				</div>
 			{:else if searchResults.length > 0}
 				<div class="mb-4 text-sm text-gray-600">
-					Found {searchResults.length} memorial{searchResults.length === 1 ? '' : 's'}
+					Found {searchResults.length} event{searchResults.length === 1 ? '' : 's'}
 				</div>
 				<ul class="space-y-4">
-					{#each searchResults as memorial}
+					{#each searchResults as event}
 						<li>
 							<a
-								href="/{memorial.fullSlug}"
+								href="/{event.fullSlug}"
 								class="block rounded-lg border p-4 hover:bg-gray-100 transition-colors"
 							>
-								<h2 class="text-xl font-bold text-gray-900">{memorial.lovedOneName}</h2>
-								{#if memorial.birthDate && memorial.deathDate}
+								<h2 class="text-xl font-bold text-gray-900">{event.lovedOneName}</h2>
+								{#if event.birthDate && event.deathDate}
 									<p class="text-gray-600 mt-1">
-										{memorial.birthDate} - {memorial.deathDate}
+										{event.birthDate} - {event.deathDate}
 									</p>
 								{/if}
-								{#if memorial.creatorName}
+								{#if event.creatorName}
 									<p class="text-gray-500 text-sm mt-2">
-										Created by {memorial.creatorName}
+										Created by {event.creatorName}
 									</p>
 								{/if}
 							</a>

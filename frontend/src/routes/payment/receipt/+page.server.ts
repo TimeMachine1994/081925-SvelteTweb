@@ -21,22 +21,22 @@ export const load: PageServerLoad = async ({ url }) => {
 
 		console.log('✅ [RECEIPT] Stripe session retrieved');
 
-		// Get memorial data
+		// Get event data
 		const memorialId = session.metadata?.memorialId;
 		if (!memorialId) {
-			throw error(400, 'Missing memorial ID in session metadata');
+			throw error(400, 'Missing event ID in session metadata');
 		}
 
 		const memorialDoc = await adminDb.collection('memorials').doc(memorialId).get();
 
 		if (!memorialDoc.exists) {
-			throw error(404, 'Memorial not found');
+			throw error(404, 'Event not found');
 		}
 
-		const memorial = memorialDoc.data();
-		const config = memorial?.calculatorConfig;
+		const event = memorialDoc.data();
+		const config = event?.calculatorConfig;
 
-		console.log('✅ [RECEIPT] Memorial data retrieved');
+		console.log('✅ [RECEIPT] Event data retrieved');
 
 		// Build receipt data matching existing component structure
 		const receiptData = {
@@ -62,9 +62,9 @@ export const load: PageServerLoad = async ({ url }) => {
 				items: config?.bookingItems || [],
 				total: config?.total || (session.amount_total ? session.amount_total / 100 : 0)
 			},
-			memorial: {
+			event: {
 				id: memorialId,
-				lovedOneName: memorial?.lovedOneName || session.metadata?.lovedOneName || ''
+				lovedOneName: event?.lovedOneName || session.metadata?.lovedOneName || ''
 			}
 		};
 

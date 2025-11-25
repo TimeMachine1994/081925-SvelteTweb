@@ -17,7 +17,7 @@ This document outlines a comprehensive refactor plan to unify the schedule/calcu
 
 2. **Data Structure Incompatibility**
    - Different schemas between schedule and calculator
-   - Missing memorial context in schedule page
+   - Missing event context in schedule page
    - Broken save/restore flow
 
 3. **Payment Integration Gaps**
@@ -39,7 +39,7 @@ This document outlines a comprehensive refactor plan to unify the schedule/calcu
 **Target Schema:**
 ```typescript
 interface UnifiedCalculatorData {
-  // Memorial context
+  // Event context
   memorialId: string;
   lovedOneName: string;
   
@@ -89,7 +89,7 @@ interface UnifiedCalculatorData {
 **Collection: `memorials/{memorialId}`**
 ```javascript
 {
-  // Existing memorial fields...
+  // Existing event fields...
   
   // Unified calculator data
   calculatorConfig: {
@@ -119,7 +119,7 @@ interface UnifiedCalculatorData {
 - [ ] `src/routes/api/memorials/[memorialId]/schedule/auto-save/+server.ts` - Update endpoints
 
 **Priority 2 - UI Components:**
-- [ ] `src/routes/schedule/+page.svelte` - Remove localStorage, add memorial context
+- [ ] `src/routes/schedule/+page.svelte` - Remove localStorage, add event context
 - [ ] `src/lib/components/calculator/Calculator.svelte` - Align with unified schema
 - [ ] `src/lib/components/calculator/BookingForm.svelte` - Update form fields
 
@@ -127,12 +127,12 @@ interface UnifiedCalculatorData {
 
 ## Phase 2: Schedule Page Refactor
 
-### 2.1 Add Memorial Context
+### 2.1 Add Event Context
 
 **New Route Structure:**
 ```
-/schedule/{memorialId} - Memorial-specific calculator
-/schedule/new - New memorial creation flow
+/schedule/{memorialId} - Event-specific calculator
+/schedule/new - New event creation flow
 ```
 
 ### 2.2 Remove localStorage Dependencies
@@ -164,9 +164,9 @@ const autoSave = memorialId ? useAutoSave({
 
 ### 2.4 Files to Create/Modify
 
-- [ ] `src/routes/schedule/[memorialId]/+page.svelte` - New memorial-specific route
+- [ ] `src/routes/schedule/[memorialId]/+page.svelte` - New event-specific route
 - [ ] `src/routes/schedule/[memorialId]/+page.server.ts` - Server-side data loading
-- [ ] `src/routes/schedule/new/+page.svelte` - New memorial creation
+- [ ] `src/routes/schedule/new/+page.svelte` - New event creation
 - [ ] Update existing `/schedule/+page.svelte` to redirect appropriately
 
 ---
@@ -261,7 +261,7 @@ export const POST: RequestHandler = async ({ request }) => {
 async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
   const memorialId = paymentIntent.metadata.memorialId;
   
-  // Update memorial status
+  // Update event status
   await adminDb.collection('memorials').doc(memorialId).update({
     'calculatorConfig.status': 'paid',
     'paymentHistory': FieldValue.arrayUnion({
@@ -325,7 +325,7 @@ export function generateConfirmationEmail(data: {
         <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif;">
           <h1>Service Confirmation</h1>
           <p>Dear ${data.customerName},</p>
-          <p>Thank you for choosing Tributestream for ${data.lovedOneName}'s memorial service.</p>
+          <p>Thank you for choosing Tributestream for ${data.lovedOneName}'s event service.</p>
           
           <div style="background: #f5f5f5; padding: 20px; margin: 20px 0;">
             <h3>Service Details</h3>
@@ -397,8 +397,8 @@ export async function sendConfirmationEmail(
 ### 5.1 End-to-End User Flow Tests
 
 **Test Scenarios:**
-1. **New Memorial Creation**
-   - Create memorial → Configure service → Save draft → Return later → Data persists
+1. **New Event Creation**
+   - Create event → Configure service → Save draft → Return later → Data persists
 
 2. **Payment Processing**
    - Configure service → Proceed to payment → Complete payment → Receive confirmation
@@ -466,7 +466,7 @@ FIREBASE_ADMIN_SDK_KEY=...
 
 ### Week 1: Foundation
 - [ ] Phase 1.1-1.2: Data structure standardization
-- [ ] Phase 2.1-2.2: Schedule page memorial context
+- [ ] Phase 2.1-2.2: Schedule page event context
 
 ### Week 2: Core Functionality
 - [ ] Phase 2.3-2.4: Auto-save integration

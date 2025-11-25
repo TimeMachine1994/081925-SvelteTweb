@@ -29,14 +29,14 @@
 			const result = await response.json();
 
 			if (response.ok && result.success) {
-				// Redirect to the memorial-specific calculator
+				// Redirect to the event-specific calculator
 				goto(`/schedule/${result.memorialId}`);
 			} else {
-				alert(`Failed to create memorial: ${result.error || 'Unknown error'}`);
+				alert(`Failed to create event: ${result.error || 'Unknown error'}`);
 			}
 		} catch (error) {
-			console.error('Error creating memorial:', error);
-			alert('Failed to create memorial. Please try again.');
+			console.error('Error creating event:', error);
+			alert('Failed to create event. Please try again.');
 		} finally {
 			isCreating = false;
 		}
@@ -50,10 +50,10 @@
 </script>
 
 <svelte:head>
-	<title>Create New Memorial - Tributestream</title>
+	<title>Create New Event - Tributestream</title>
 	<meta
 		name="description"
-		content="Create a new memorial service and configure your livestream package."
+		content="Create a new event service and configure your livestream package."
 	/>
 </svelte:head>
 
@@ -65,11 +65,11 @@
 			<h1
 				class="bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-4xl font-bold text-transparent"
 			>
-				Create New Memorial Service
+				Create New Event Service
 			</h1>
 		</div>
 		<p class="mx-auto max-w-2xl text-xl text-gray-300">
-			Start by creating a memorial service, then configure your livestream package
+			Start by creating a event service, then configure your livestream package
 		</p>
 	</div>
 </section>
@@ -84,19 +84,19 @@
 				>
 					<User class="h-8 w-8 text-amber-400" />
 				</div>
-				<h2 class="mb-2 text-2xl font-bold text-white">Memorial Information</h2>
+				<h2 class="mb-2 text-2xl font-bold text-white">Event Information</h2>
 				<p class="text-gray-400">
-					Let's start with the basic information for your memorial service
+					Let's start with the basic information for your event service
 				</p>
 			</div>
 
 			<div class="space-y-6">
 				<div>
-					<label for="loved-one-name" class="mb-2 block text-sm font-medium text-gray-300">
+					<label for="new-event-and-account-name" class="mb-2 block text-sm font-medium text-gray-300">
 						Name of your loved one *
 					</label>
 					<input
-						id="loved-one-name"
+						id="new-event-and-account-name"
 						type="text"
 						bind:value={lovedOneName}
 						onkeypress={handleKeyPress}
@@ -105,7 +105,7 @@
 						disabled={isCreating}
 					/>
 					<p class="mt-1 text-xs text-gray-500">
-						This will be used throughout your memorial service configuration
+						This will be used throughout your event service configuration
 					</p>
 				</div>
 
@@ -117,7 +117,7 @@
 					<ul class="space-y-2 text-sm text-gray-300">
 						<li class="flex items-start">
 							<span class="mr-2 text-amber-400">1.</span>
-							We'll create your memorial service profile
+							We'll create your event service profile
 						</li>
 						<li class="flex items-start">
 							<span class="mr-2 text-amber-400">2.</span>
@@ -145,10 +145,10 @@
 								<div
 									class="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-black border-t-transparent"
 								></div>
-								Creating Memorial...
+								Creating Event...
 							</div>
 						{:else}
-							Create Memorial & Continue
+							Create Event & Continue
 						{/if}
 					</button>
 

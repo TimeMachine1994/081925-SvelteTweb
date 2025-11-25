@@ -9,7 +9,7 @@
 		BookingItem,
 		LivestreamConfig
 	} from '$lib/types/livestream';
-	import type { Memorial } from '$lib/types/memorial';
+	import type { Event } from '$lib/types/event';
 	import { onMount } from 'svelte';
 	import { auth } from '$lib/firebase';
 	import { useAutoSave } from '$lib/composables/useAutoSave';
@@ -21,7 +21,7 @@
 		data
 	}: {
 		memorialId: string | null;
-		data: { memorial: Memorial | null; config: LivestreamConfig | null };
+		data: { event: Event | null; config: LivestreamConfig | null };
 	} = $props();
 
 	let currentStep = $state<'booking' | 'payment' | 'payNow'>('booking');
@@ -33,7 +33,7 @@
 	let autoSaveEnabled = $state(false);
 	let showAutoSaveStatus = $state(false);
 
-	// Memorial services data (authoritative source)
+	// Event services data (authoritative source)
 	let services = $state({
 		main: {
 			location: { name: '', address: '', isUnknown: false },
@@ -65,10 +65,10 @@
 		calculatorData.selectedTier = selectedTier;
 	});
 
-	// Memorial context data
-	let lovedOneName = $state(data.memorial?.lovedOneName || '');
-	let funeralDirectorName = $state(data.memorial?.funeralDirectorName || '');
-	let funeralHome = $state(data.memorial?.funeralHome || '');
+	// Event context data
+	let lovedOneName = $state(data.event?.lovedOneName || '');
+	let funeralDirectorName = $state(data.event?.funeralDirectorName || '');
+	let funeralHome = $state(data.event?.funeralHome || '');
 
 	// Initialize auto-save when memorialId is available
 	const autoSave = memorialId
@@ -88,24 +88,24 @@
 
 	onMount(async () => {
 		// Load existing data if available
-		if (data.memorial) {
-			// Load memorial metadata
-			lovedOneName = data.memorial.lovedOneName || '';
-			funeralDirectorName = data.memorial.funeralDirectorName || '';
-			funeralHome = data.memorial.funeralHome || '';
+		if (data.event) {
+			// Load event metadata
+			lovedOneName = data.event.lovedOneName || '';
+			funeralDirectorName = data.event.funeralDirectorName || '';
+			funeralHome = data.event.funeralHome || '';
 
 			// Load existing calculator config if available
-			if (data.memorial.calculatorConfig) {
-				calculatorData = data.memorial.calculatorConfig;
-				if (data.memorial.calculatorConfig.selectedTier) {
-					selectedTier = data.memorial.calculatorConfig.selectedTier;
+			if (data.event.calculatorConfig) {
+				calculatorData = data.event.calculatorConfig;
+				if (data.event.calculatorConfig.selectedTier) {
+					selectedTier = data.event.calculatorConfig.selectedTier;
 				}
 			}
 
 			// Load services data
-			if (data.memorial.services) {
-				services.main = data.memorial.services.main;
-				services.additional = data.memorial.services.additional || [];
+			if (data.event.services) {
+				services.main = data.event.services.main;
+				services.additional = data.event.services.additional || [];
 			}
 
 			// Try to load auto-saved data
@@ -342,8 +342,8 @@
 	async function createStreamsFromScheduleLocal() {
 		console.log('🎬 [CALCULATOR] ========== STREAM CREATION STARTED ==========');
 		console.log('🎬 [CALCULATOR] createStreamsFromSchedule called', { memorialId });
-		console.log('🎬 [CALCULATOR] Memorial data available:', !!data?.memorial);
-		console.log('🎬 [CALCULATOR] Memorial name:', data?.memorial?.lovedOneName);
+		console.log('🎬 [CALCULATOR] Event data available:', !!data?.event);
+		console.log('🎬 [CALCULATOR] Event name:', data?.event?.lovedOneName);
 		
 		if (!memorialId) {
 			console.log('❌ [CALCULATOR] No memorialId, skipping stream creation');
@@ -368,7 +368,7 @@
 					selectedTier,
 					addons: calculatorData.addons
 				},
-				memorialName: data?.memorial?.lovedOneName
+				memorialName: data?.event?.lovedOneName
 			};
 
 			console.log('🔍 [CALCULATOR] Stream creation data being sent:', JSON.stringify(streamCreationData, null, 2));

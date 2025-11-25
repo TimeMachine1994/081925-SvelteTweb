@@ -143,12 +143,12 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 							console.log(`[DEMO_CLEANUP]     Deleted slideshow: ${slideshowDoc.id}`);
 						}
 
-						// Delete memorial document
+						// Delete event document
 						await memorialDoc.ref.delete();
 						result.memorialsDeleted++;
-						console.log(`[DEMO_CLEANUP]   Deleted memorial: ${memorialId}`);
+						console.log(`[DEMO_CLEANUP]   Deleted event: ${memorialId}`);
 					} catch (memorialErr: any) {
-						const errMsg = `Failed to delete memorial ${memorialId}: ${memorialErr.message}`;
+						const errMsg = `Failed to delete event ${memorialId}: ${memorialErr.message}`;
 						console.error(`[DEMO_CLEANUP]   ❌ ${errMsg}`);
 						result.errors.push(errMsg);
 					}

@@ -13,7 +13,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 
 		if (!memorialId || !action) {
-			return json({ error: 'Memorial ID and action are required' }, { status: 400 });
+			return json({ error: 'Event ID and action are required' }, { status: 400 });
 		}
 
 		if (action !== 'follow' && action !== 'unfollow') {
@@ -33,7 +33,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			});
 		}
 
-		// Update memorial's followers count
+		// Update event's followers count
 		const memorialRef = adminDb.collection('memorials').doc(memorialId);
 
 		if (action === 'follow') {
@@ -52,10 +52,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			success: true,
 			action,
 			message:
-				action === 'follow' ? 'Memorial followed successfully' : 'Memorial unfollowed successfully'
+				action === 'follow' ? 'Event followed successfully' : 'Event unfollowed successfully'
 		});
 	} catch (error) {
-		console.error('Memorial follow/unfollow error:', error);
+		console.error('Event follow/unfollow error:', error);
 		return json({ error: 'Failed to update follow status' }, { status: 500 });
 	}
 };

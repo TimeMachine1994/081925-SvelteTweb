@@ -1,7 +1,7 @@
 # Tributestream Products and Pricing Guide
 
 ## Overview
-Tributestream offers professional memorial service livestreaming solutions with three distinct packages designed to meet different needs and budgets. All packages include core livestreaming capabilities with optional add-ons for enhanced services.
+Tributestream offers professional event service livestreaming solutions with three distinct packages designed to meet different needs and budgets. All packages include core livestreaming capabilities with optional add-ons for enhanced services.
 
 ---
 
@@ -71,14 +71,14 @@ Tributestream offers professional memorial service livestreaming solutions with 
 - **Additional Day Fee:** $325 base fee
 - **Includes:** 2 hours of broadcast time on second day
 - **Overage Rate:** $125/hour beyond included 2 hours
-- **Use Cases:** Viewing day + funeral day, multiple memorial events
+- **Use Cases:** Viewing day + funeral day, multiple event events
 
 ---
 
 ## Professional Add-On Services
 
 ### Photography - $400
-- Professional photography coverage of the memorial service
+- Professional photography coverage of the event service
 - High-quality digital images
 - Professional photographer on-site
 
@@ -90,7 +90,7 @@ Tributestream offers professional memorial service livestreaming solutions with 
 ### Live Musician - $500
 - Professional live musical performance
 - Coordinated with livestream audio
-- Enhanced memorial experience
+- Enhanced event experience
 
 ### Wooden USB Drives
 - **First Drive:** $300 (Record/Live packages) | Included (Legacy package)
@@ -121,7 +121,7 @@ Tributestream offers professional memorial service livestreaming solutions with 
 - 2 additional USB drives: $200 (2 × $100)
 - **Total: $3,149**
 
-### Multi-Location Wedding Memorial
+### Multi-Location Wedding Event
 - Tributestream Live: $1,299
 - Additional location (3 hours): $450 ($325 base + $125 overage)
 - Photography: $400

@@ -192,7 +192,7 @@ To test with actual streams from your database:
 The live status polling is integrated into:
 
 - Stream management pages (`/memorials/[id]/streams`)
-- Public memorial pages (`/[fullSlug]`)
+- Public event pages (`/[fullSlug]`)
 - Stream cards and status indicators
 
 ### Webhook Integration

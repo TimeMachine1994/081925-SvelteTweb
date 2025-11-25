@@ -32,7 +32,7 @@ const testAccounts = [
 			companyName: 'Smith & Sons Funeral Home',
 			phone: '(555) 123-4567',
 			address: {
-				street: '123 Memorial Drive',
+				street: '123 Event Drive',
 				city: 'Orlando',
 				state: 'FL',
 				zipCode: '32801'
@@ -88,12 +88,12 @@ async function createTestAccounts() {
 
 async function createTestMemorial() {
 	try {
-		console.log('Creating test memorial...');
+		console.log('Creating test event...');
 
-		// Sign in as owner to create memorial
+		// Sign in as owner to create event
 		const ownerCredential = await signInWithEmailAndPassword(auth, 'owner@test.com', 'test123');
 
-		// Create a test memorial
+		// Create a test event
 		const memorialData = {
 			lovedOneName: 'Robert Johnson',
 			dateOfBirth: '1945-03-15',
@@ -104,7 +104,7 @@ async function createTestMemorial() {
 				date: '2024-09-15',
 				time: '2:00 PM',
 				location: 'Smith & Sons Funeral Home',
-				address: '123 Memorial Drive, Orlando, FL 32801'
+				address: '123 Event Drive, Orlando, FL 32801'
 			},
 			createdBy: ownerCredential.user.uid,
 			createdAt: new Date().toISOString(),
@@ -115,11 +115,11 @@ async function createTestMemorial() {
 		};
 
 		const memorialRef = await addDoc(collection(db, 'memorials'), memorialData);
-		console.log('✅ Created test memorial:', memorialRef.id);
+		console.log('✅ Created test event:', memorialRef.id);
 
 		return memorialRef.id;
 	} catch (error) {
-		console.error('❌ Error creating test memorial:', error);
+		console.error('❌ Error creating test event:', error);
 	}
 }
 
@@ -127,7 +127,7 @@ async function main() {
 	try {
 		await createTestAccounts();
 		await createTestMemorial();
-		console.log('\n🎉 Test accounts and memorial created successfully!');
+		console.log('\n🎉 Test accounts and event created successfully!');
 		console.log('\nTest Accounts:');
 		testAccounts.forEach((account) => {
 			console.log(`${account.role}: ${account.email} / ${account.password}`);

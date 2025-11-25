@@ -241,7 +241,7 @@ livestream: {
 
 **Actions**:
 - Send "stream live" notifications
-- Update memorial page
+- Update event page
 - Log event to analytics
 
 ### 3. Stream Active
@@ -264,7 +264,7 @@ livestream: {
 ```
 
 **Actions**:
-- Update memorial page
+- Update event page
 - Start processing recording
 - Send "recording available" notification
 
@@ -424,7 +424,7 @@ await adminDb.collection('stream_analytics').add({
 
 ## Related Documentation
 
-- [[Memorial Creation Flow]] - Setting up livestreams
+- [[Event Creation Flow]] - Setting up livestreams
 - [[Mux Webhook Implementation]] - Handling Mux events
 - [[Email Notifications]] - Stream status alerts
 - [[Admin Dashboard]] - Managing streams

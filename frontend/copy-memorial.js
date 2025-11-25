@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
-// Copy memorial from source Firebase project to destination project
+// Copy event from source Firebase project to destination project
 import { initializeApp, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-console.log('🔄 Memorial Copy Tool');
+console.log('🔄 Event Copy Tool');
 console.log('This will copy memorials from source project to destination project');
 
 // You'll need to provide the source project credentials
@@ -57,25 +57,25 @@ async function copyMemorial() {
         const sourceDb = getFirestore(sourceApp);
         const destDb = getFirestore(destApp);
         
-        console.log('\n🔍 Searching for Janet Pusey memorial in source project...');
+        console.log('\n🔍 Searching for Janet Pusey event in source project...');
         
-        // Find Janet Pusey memorial in source
+        // Find Janet Pusey event in source
         const sourceQuery = await sourceDb.collection('memorials')
             .where('lovedOneName', '==', 'Janet Pusey')
             .get();
             
         if (sourceQuery.empty) {
-            console.log('❌ No Janet Pusey memorial found in source project');
+            console.log('❌ No Janet Pusey event found in source project');
             return;
         }
         
-        console.log(`✅ Found ${sourceQuery.docs.length} Janet Pusey memorial(s) in source`);
+        console.log(`✅ Found ${sourceQuery.docs.length} Janet Pusey event(s) in source`);
         
-        // Copy each memorial
+        // Copy each event
         for (const doc of sourceQuery.docs) {
             const data = doc.data();
             
-            console.log(`\n📋 Copying memorial: ${data.lovedOneName}`);
+            console.log(`\n📋 Copying event: ${data.lovedOneName}`);
             console.log(`   Source ID: ${doc.id}`);
             console.log(`   FullSlug: ${data.fullSlug}`);
             
@@ -85,7 +85,7 @@ async function copyMemorial() {
                 .get();
                 
             if (!existingQuery.empty) {
-                console.log('⚠️  Memorial already exists in destination, skipping...');
+                console.log('⚠️  Event already exists in destination, skipping...');
                 continue;
             }
             
@@ -100,15 +100,15 @@ async function copyMemorial() {
             
             // Add to destination
             const newDocRef = await destDb.collection('memorials').add(cleanData);
-            console.log(`✅ Memorial copied successfully!`);
+            console.log(`✅ Event copied successfully!`);
             console.log(`   New ID: ${newDocRef.id}`);
             console.log(`   URL: http://localhost:5173/${data.fullSlug}`);
         }
         
-        console.log('\n🎉 Memorial copy completed!');
+        console.log('\n🎉 Event copy completed!');
         
     } catch (error) {
-        console.error('❌ Error copying memorial:', error);
+        console.error('❌ Error copying event:', error);
         throw error;
     }
 }
@@ -125,7 +125,7 @@ async function createLegacyMemorials() {
 		
 		const destDb = getFirestore(destApp);
 		
-		// Legacy memorial data with Vimeo embeds
+		// Legacy event data with Vimeo embeds
 		const legacyMemorials = [
 			{
 				lovedOneName: 'Janet Pusey',
@@ -153,9 +153,9 @@ async function createLegacyMemorials() {
 				fullSlug: 'celebration-of-life-for-robert-thompson',
 				createdByUserId: 'MIGRATION_SCRIPT',
 				creatorEmail: 'migration@tributestream.com',
-				custom_html: '<div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/987654321?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="Memorial Service for Robert Thompson"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>',
+				custom_html: '<div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/987654321?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="Event Service for Robert Thompson"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>',
 				directorFullName: 'Director Smith',
-				funeralHomeName: 'Thompson Memorial Services',
+				funeralHomeName: 'Thompson Event Services',
 				isPublic: true,
 				memorialDate: null,
 				memorialLocationAddress: null,
@@ -175,7 +175,7 @@ async function createLegacyMemorials() {
 				creatorEmail: 'migration@tributestream.com',
 				custom_html: '<div style="padding:56.25% 0 0 0;position:relative;"><iframe src="https://player.vimeo.com/video/123789456?badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write" style="position:absolute;top:0;left:0;width:100%;height:100%;" title="In Memory of Maria Rodriguez"></iframe></div><script src="https://player.vimeo.com/api/player.js"></script>',
 				directorFullName: 'Director Garcia',
-				funeralHomeName: 'Sacred Heart Memorial Chapel',
+				funeralHomeName: 'Sacred Heart Event Chapel',
 				isPublic: true,
 				memorialDate: null,
 				memorialLocationAddress: null,
@@ -206,7 +206,7 @@ async function createLegacyMemorials() {
 				continue;
 			}
 			
-			// Create the memorial
+			// Create the event
 			const newDocRef = await destDb.collection('memorials').add(memorialData);
 			console.log(`   ✅ Created successfully!`);
 			console.log(`      Document ID: ${newDocRef.id}`);
@@ -216,20 +216,20 @@ async function createLegacyMemorials() {
 			importedCount++;
 		}
 		
-		console.log('\n🎉 Legacy memorial import completed!');
+		console.log('\n🎉 Legacy event import completed!');
 		console.log(`📊 Results:`);
 		console.log(`   ✅ Imported: ${importedCount} legacy memorials`);
 		console.log(`   ⚠️  Skipped: ${skippedCount} memorials (already existed)`);
 		
-		console.log('\n🌐 Legacy Memorial URLs with Vimeo Embeds:');
-		for (const memorial of legacyMemorials) {
-			console.log(`   - http://localhost:5173/${memorial.fullSlug} (${memorial.lovedOneName})`);
+		console.log('\n🌐 Legacy Event URLs with Vimeo Embeds:');
+		for (const event of legacyMemorials) {
+			console.log(`   - http://localhost:5173/${event.fullSlug} (${event.lovedOneName})`);
 		}
 		
 		console.log('\n🎬 Features:');
 		console.log('   • Custom HTML with responsive Vimeo embeds');
 		console.log('   • Migration script attribution');
-		console.log('   • Legacy memorial page rendering');
+		console.log('   • Legacy event page rendering');
 		console.log('   • Public access for testing');
 		
 	} catch (error) {
@@ -238,10 +238,10 @@ async function createLegacyMemorials() {
 	}
 }
 
-// Manual memorial creation option (if you don't want to set up source project)
+// Manual event creation option (if you don't want to set up source project)
 async function createJanetPuseyManually() {
     try {
-        console.log('\n🛠️  Creating Janet Pusey memorial manually...');
+        console.log('\n🛠️  Creating Janet Pusey event manually...');
         
         const destApp = initializeApp({
             credential: cert(DEST_PROJECT_CONFIG.serviceAccount),
@@ -250,7 +250,7 @@ async function createJanetPuseyManually() {
         
         const destDb = getFirestore(destApp);
         
-        // Janet Pusey memorial data (based on what you showed me)
+        // Janet Pusey event data (based on what you showed me)
         const janetPuseyData = {
             lovedOneName: 'Janet Pusey',
             slug: 'janet-pusey',
@@ -275,18 +275,18 @@ async function createJanetPuseyManually() {
             .get();
             
         if (!existingQuery.empty) {
-            console.log('⚠️  Janet Pusey memorial already exists in destination');
+            console.log('⚠️  Janet Pusey event already exists in destination');
             return;
         }
         
-        // Create the memorial
+        // Create the event
         const newDocRef = await destDb.collection('memorials').add(janetPuseyData);
-        console.log('✅ Janet Pusey memorial created successfully!');
+        console.log('✅ Janet Pusey event created successfully!');
         console.log(`   Document ID: ${newDocRef.id}`);
         console.log(`   URL: http://localhost:5173/celebration-of-life-for-janet-pusey`);
         
     } catch (error) {
-        console.error('❌ Error creating memorial manually:', error);
+        console.error('❌ Error creating event manually:', error);
         throw error;
     }
 }
@@ -296,7 +296,7 @@ const args = process.argv.slice(2);
 if (args.includes('--legacy')) {
     createLegacyMemorials()
         .then(() => {
-            console.log('\n🎉 Legacy memorial import completed!');
+            console.log('\n🎉 Legacy event import completed!');
             process.exit(0);
         })
         .catch((error) => {
@@ -316,9 +316,9 @@ if (args.includes('--legacy')) {
 } else {
     console.log('\n📝 Instructions:');
     console.log('1. Configure SOURCE_PROJECT_CONFIG in this script with your source project credentials');
-    console.log('2. Run: node copy-memorial.js');
+    console.log('2. Run: node copy-event.js');
     console.log('\nOR for legacy memorials with Vimeo embeds:');
-    console.log('   Run: node copy-memorial.js --legacy');
+    console.log('   Run: node copy-event.js --legacy');
     console.log('\nOR for quick manual creation:');
-    console.log('   Run: node copy-memorial.js --manual');
+    console.log('   Run: node copy-event.js --manual');
 }

@@ -154,7 +154,7 @@ The calculator integrates with Firebase Authentication to provide a personalized
 -   On component mount, a `useEffect` hook checks if a user is logged in.
 -   If authenticated, the application fetches data from two Firestore collections:
     1.  The `users` collection, to get contact information.
-    2.  The `memorials` collection, to get the most recent memorial details created by that user.
+    2.  The `memorials` collection, to get the most recent event details created by that user.
 -   This data is then used to pre-fill relevant fields in the form, such as the loved one's name, service date, and location, saving the user time and effort.
 
 ### Saving Configuration:

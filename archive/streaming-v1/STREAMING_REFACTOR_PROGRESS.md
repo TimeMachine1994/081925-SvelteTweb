@@ -144,7 +144,7 @@
    - Browser source shows live phone camera
    - User arranges scene with other sources
 6. **User starts OBS streaming:**
-   - Final mixed output streams to memorial
+   - Final mixed output streams to event
    - Both streams can have independent live indicators
 
 ### 3.4 Integration Complete ✅

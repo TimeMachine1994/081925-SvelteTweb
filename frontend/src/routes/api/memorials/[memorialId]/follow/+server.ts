@@ -3,9 +3,9 @@ import type { RequestHandler } from './$types';
 import { adminDb } from '$lib/server/firebase';
 import { Timestamp } from 'firebase-admin/firestore';
 
-// Follow a memorial
+// Follow a event
 export const POST: RequestHandler = async ({ locals, params }) => {
-	console.log('➕ Received request to follow memorial...');
+	console.log('➕ Received request to follow event...');
 
 	if (!locals.user) {
 		console.error('🚫 Unauthorized: User not logged in.');
@@ -27,17 +27,17 @@ export const POST: RequestHandler = async ({ locals, params }) => {
 			followedAt: Timestamp.now()
 		});
 
-		console.log(`✅ User ${uid} is now following memorial ${memorialId}.`);
+		console.log(`✅ User ${uid} is now following event ${memorialId}.`);
 		return json({ success: true, status: 'followed' }, { status: 201 });
 	} catch (err) {
 		console.error('🔥 An unexpected error occurred:', err);
-		throw error(500, 'An unexpected error occurred while following the memorial.');
+		throw error(500, 'An unexpected error occurred while following the event.');
 	}
 };
 
-// Unfollow a memorial
+// Unfollow a event
 export const DELETE: RequestHandler = async ({ locals, params }) => {
-	console.log('➖ Received request to unfollow memorial...');
+	console.log('➖ Received request to unfollow event...');
 
 	if (!locals.user) {
 		console.error('🚫 Unauthorized: User not logged in.');
@@ -56,10 +56,10 @@ export const DELETE: RequestHandler = async ({ locals, params }) => {
 
 		await followerRef.delete();
 
-		console.log(`✅ User ${uid} has unfollowed memorial ${memorialId}.`);
+		console.log(`✅ User ${uid} has unfollowed event ${memorialId}.`);
 		return json({ success: true, status: 'unfollowed' });
 	} catch (err) {
 		console.error('🔥 An unexpected error occurred:', err);
-		throw error(500, 'An unexpected error occurred while unfollowing the memorial.');
+		throw error(500, 'An unexpected error occurred while unfollowing the event.');
 	}
 };

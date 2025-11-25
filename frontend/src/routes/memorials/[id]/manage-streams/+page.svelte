@@ -5,11 +5,11 @@
 
 	export let data: PageData;
 
-	const { memorial, streams, canManage } = data;
+	const { event, streams, canManage } = data;
 </script>
 
 <svelte:head>
-	<title>Manage Streams - {memorial?.lovedOneName || 'Memorial'} | TributeStream</title>
+	<title>Manage Streams - {event?.lovedOneName || 'Event'} | TributeStream</title>
 </svelte:head>
 
 <div class="min-h-screen bg-gray-50 py-8">
@@ -20,13 +20,13 @@
 				<div>
 					<h1 class="text-3xl font-bold text-gray-900">Stream Management</h1>
 					<p class="mt-2 text-gray-600">
-						Managing streams for <span class="font-semibold">{memorial?.lovedOneName}</span>
+						Managing streams for <span class="font-semibold">{event?.lovedOneName}</span>
 					</p>
 				</div>
 
 				{#if canManage}
 					<a
-						href="/memorials/{memorial?.id}/schedule"
+						href="/memorials/{event?.id}/schedule"
 						class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
 					>
 						<Plus class="h-5 w-5" />
@@ -43,14 +43,14 @@
 				<h3 class="mt-4 text-lg font-semibold text-gray-900">No Streams Yet</h3>
 				<p class="mt-2 text-gray-600">
 					{#if canManage}
-						Get started by creating a new livestream for this memorial.
+						Get started by creating a new livestream for this event.
 					{:else}
 						Streams will appear here once they are scheduled.
 					{/if}
 				</p>
 				{#if canManage}
 					<a
-						href="/memorials/{memorial?.id}/schedule"
+						href="/memorials/{event?.id}/schedule"
 						class="mt-6 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-white transition-colors hover:bg-blue-700"
 					>
 						<Plus class="h-5 w-5" />
@@ -61,7 +61,7 @@
 		{:else}
 			<div class="space-y-6">
 				{#each streams as stream (stream.id)}
-					<StreamCard {stream} {canManage} memorialId={memorial?.id || ''} />
+					<StreamCard {stream} {canManage} memorialId={event?.id || ''} />
 				{/each}
 			</div>
 		{/if}
@@ -74,7 +74,7 @@
 					<li>• <strong>Arm streams</strong> before they go live to generate streaming credentials</li>
 					<li>• <strong>Mobile Input:</strong> For browser-based streaming from phones/tablets</li>
 					<li>• <strong>Stream Key:</strong> For professional OBS/encoder streaming</li>
-					<li>• Streams automatically appear on the memorial page when they go live</li>
+					<li>• Streams automatically appear on the event page when they go live</li>
 				</ul>
 			</div>
 		{/if}

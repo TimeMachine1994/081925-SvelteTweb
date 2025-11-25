@@ -2,7 +2,7 @@
 
 ## **🏗️ Architecture Overview**
 
-The Full Slug page (`/[fullSlug]/`) serves as Tributestream's primary memorial viewing interface, implementing a sophisticated system for loading and displaying memorial content with integrated live streaming capabilities.
+The Full Slug page (`/[fullSlug]/`) serves as Tributestream's primary event viewing interface, implementing a sophisticated system for loading and displaying event content with integrated live streaming capabilities.
 
 ---
 
@@ -10,7 +10,7 @@ The Full Slug page (`/[fullSlug]/`) serves as Tributestream's primary memorial v
 
 ### **1. Memorials Collection**
 ```typescript
-interface Memorial {
+interface Event {
   // Core Identity
   lovedOneName: string;
   slug: string;           // Legacy field
@@ -117,10 +117,10 @@ interface Stream {
 
 ## **🔌 API Routes Architecture**
 
-### **Core Memorial APIs**
+### **Core Event APIs**
 
 #### **`/api/memorials/[id]/+server.ts`**
-- **Purpose**: Basic memorial metadata retrieval
+- **Purpose**: Basic event metadata retrieval
 - **Security**: No authentication required (public data only)
 - **Returns**: Essential fields (`id`, `lovedOneName`, `fullSlug`, `isPublic`)
 
@@ -153,19 +153,19 @@ interface Stream {
 
 ## **🔄 Data Flow & Integration Patterns**
 
-### **1. Memorial Loading Flow**
+### **1. Event Loading Flow**
 ```
 URL: /celebration-of-life-for-john
     ↓
 +page.server.ts
     ↓
-Filter Non-Memorial Requests
+Filter Non-Event Requests
     ↓
 Query: fullSlug == URL
     ↓
-Memorial Found? → No → Fallback: slug == URL
+Event Found? → No → Fallback: slug == URL
     ↓                      ↓
-   Yes                Legacy Memorial?
+   Yes                Legacy Event?
     ↓                      ↓
 Load Structured Data ← No  Yes → Load custom_html
     ↓
@@ -178,21 +178,21 @@ Serialize & Return
 
 ### **2. Stream Integration Pattern**
 ```
-Memorial Page → StreamPlayer Component → API Polling: /memorials/[id]/streams
+Event Page → StreamPlayer Component → API Polling: /memorials/[id]/streams
                                               ↓
 Live Status Check → Cloudflare API → Update Stream Status → Real-time UI Updates
 ```
 
 ### **3. Security & Access Control**
 ```typescript
-// Memorial Access Logic
+// Event Access Logic
 const hasPermission = 
   locals.user.role === 'admin' ||
-  memorial.ownerUid === userId ||
-  memorial.funeralDirectorUid === userId;
+  event.ownerUid === userId ||
+  event.funeralDirectorUid === userId;
 
 // Privacy Controls
-if (memorial.isPublic !== true) {
+if (event.isPublic !== true) {
   return limitedData; // No streams, minimal info
 }
 ```
@@ -203,7 +203,7 @@ if (memorial.isPublic !== true) {
 
 ### **1. Backward Compatibility**
 - **Dual Slug System**: Supports both legacy `slug` and modern `fullSlug`
-- **Legacy Memorial Detection**: Handles migrated custom HTML content
+- **Legacy Event Detection**: Handles migrated custom HTML content
 - **Field Name Flexibility**: Multiple Cloudflare field naming conventions
 
 ### **2. Robust Error Handling**
@@ -212,13 +212,13 @@ if (memorial.isPublic !== true) {
 - **Firebase Error Mapping**: Specific error codes with user-friendly messages
 
 ### **3. Performance Optimizations**
-- **Efficient Queries**: Single memorial lookup with `.limit(1)`
+- **Efficient Queries**: Single event lookup with `.limit(1)`
 - **Stream Filtering**: Database-level visibility filtering
 - **Smart Polling**: Tab visibility-aware updates in `StreamPlayer`
 
 ### **4. Security Implementation**
 - **Role-Based Access**: Owner/Funeral Director/Admin permissions
-- **Privacy Controls**: Public/private memorial access
+- **Privacy Controls**: Public/private event access
 - **Data Sanitization**: Firestore timestamp serialization
 
 ---
@@ -228,9 +228,9 @@ if (memorial.isPublic !== true) {
 ### **1. Caching Strategy**
 **Current State**: No client-side caching
 **Recommendation**: Implement SWR or React Query patterns for:
-- Memorial metadata caching
+- Event metadata caching
 - Stream status caching with TTL
-- Offline-first memorial viewing
+- Offline-first event viewing
 
 ### **2. SEO & Discoverability**
 **Current State**: Basic meta tags only
@@ -238,12 +238,12 @@ if (memorial.isPublic !== true) {
 - JSON-LD structured data markup
 - Open Graph tags for social sharing
 - Sitemap generation for public memorials
-- Memorial RSS feeds
+- Event RSS feeds
 
 ### **3. Analytics & Monitoring**
 **Current State**: Limited stream analytics
 **Recommendations**:
-- Memorial page view tracking
+- Event page view tracking
 - User engagement metrics
 - Performance monitoring (Core Web Vitals)
 - Error tracking and alerting
@@ -262,7 +262,7 @@ if (memorial.isPublic !== true) {
 ### **5. API Design Patterns**
 **Current Issues**:
 - **Inconsistent Responses**: Mixed success/error formats
-- **Over-fetching**: Full memorial data when only metadata needed
+- **Over-fetching**: Full event data when only metadata needed
 - **Rate Limiting**: No API throttling implemented
 
 **Recommendations**:
@@ -275,7 +275,7 @@ if (memorial.isPublic !== true) {
 ## **🚀 Recommended Next Steps**
 
 ### **Priority 1: Schema Standardization**
-1. **Memorial Data Model Cleanup**
+1. **Event Data Model Cleanup**
    - Remove legacy fields (`memorialDate`, `memorialTime`, etc.)
    - Standardize service structure across all memorials
    - Implement proper TypeScript validation
@@ -286,9 +286,9 @@ if (memorial.isPublic !== true) {
    - Remove deprecated playback fields
 
 ### **Priority 2: Performance & Caching**
-1. **Implement Memorial Caching**
+1. **Implement Event Caching**
    - Redis cache for frequently accessed memorials
-   - CDN integration for static memorial content
+   - CDN integration for static event content
    - Browser caching headers optimization
 
 2. **Stream Status Optimization**
@@ -298,27 +298,27 @@ if (memorial.isPublic !== true) {
 
 ### **Priority 3: Enhanced Security**
 1. **Access Control Refinement**
-   - Implement memorial-level permissions
+   - Implement event-level permissions
    - Add viewer role restrictions
-   - Audit trail for memorial access
+   - Audit trail for event access
 
 2. **Data Validation**
    - Server-side schema validation
    - Input sanitization for user content
-   - Rate limiting on memorial creation
+   - Rate limiting on event creation
 
 ---
 
 ## **📈 Technical Debt Assessment**
 
 ### **High Priority Issues**
-- **Legacy Memorial Migration**: 40+ memorials still using `custom_html`
+- **Legacy Event Migration**: 40+ memorials still using `custom_html`
 - **Inconsistent Error Handling**: Mixed error response formats across APIs
 - **Missing Indexes**: Firestore queries without proper indexing
 
 ### **Medium Priority Issues**
 - **TypeScript Coverage**: Several `any` types in stream handling
-- **Test Coverage**: Limited integration tests for memorial loading
+- **Test Coverage**: Limited integration tests for event loading
 - **Documentation**: API endpoints lack OpenAPI specifications
 
 ### **Low Priority Issues**
@@ -330,7 +330,7 @@ if (memorial.isPublic !== true) {
 
 ## **🎯 Conclusion**
 
-The Full Slug page architecture demonstrates solid engineering principles with robust error handling, security controls, and backward compatibility. The system successfully handles complex memorial and streaming data while maintaining performance and user experience.
+The Full Slug page architecture demonstrates solid engineering principles with robust error handling, security controls, and backward compatibility. The system successfully handles complex event and streaming data while maintaining performance and user experience.
 
 **Key Strengths:**
 - Comprehensive data model supporting legacy and modern memorials
@@ -344,15 +344,15 @@ The Full Slug page architecture demonstrates solid engineering principles with r
 - Enhanced SEO and analytics capabilities
 - API design consistency and documentation
 
-The architecture provides a solid foundation for scaling Tributestream's memorial platform while supporting the complex requirements of funeral directors, families, and streaming workflows.
+The architecture provides a solid foundation for scaling Tributestream's event platform while supporting the complex requirements of funeral directors, families, and streaming workflows.
 
 ---
 
 ## **📋 Implementation Checklist**
 
 ### **Immediate Actions (Next Sprint)**
-- [ ] Audit and document all legacy memorial fields
-- [ ] Implement basic memorial caching with Redis
+- [ ] Audit and document all legacy event fields
+- [ ] Implement basic event caching with Redis
 - [ ] Add comprehensive error logging to Full Slug page
 - [ ] Create API response standardization guide
 
@@ -360,12 +360,12 @@ The architecture provides a solid foundation for scaling Tributestream's memoria
 - [ ] Migrate remaining legacy memorials to structured format
 - [ ] Implement WebSocket connections for real-time stream updates
 - [ ] Add comprehensive SEO meta tags and structured data
-- [ ] Create integration tests for memorial loading flows
+- [ ] Create integration tests for event loading flows
 
 ### **Long Term (Next Quarter)**
 - [ ] Implement GraphQL API layer
 - [ ] Add comprehensive analytics and monitoring
-- [ ] Create memorial sitemap generation
+- [ ] Create event sitemap generation
 - [ ] Implement advanced caching strategies
 
 ---

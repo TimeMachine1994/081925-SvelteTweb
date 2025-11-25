@@ -79,7 +79,7 @@ This is a comprehensive 4-part plan to refactor the Tributestream admin dashboar
 - SOPs and runbook system
 
 **Workflows:**
-- Memorial review (Draft → Pending → Approved → Live)
+- Event review (Draft → Pending → Approved → Live)
 - Schedule edit requests (Pending → Approved → Completed)
 - Payment investigations
 - Support ticket management
@@ -117,7 +117,7 @@ This is a comprehensive 4-part plan to refactor the Tributestream admin dashboar
 ## 📊 Firestore Collections Mapping
 
 ### Services Domain
-- **memorials** - Memorial management with payment tracking
+- **memorials** - Event management with payment tracking
 - **streams** - Livestream oversight and recording management
 - **memorials/{id}/slideshows** - Photo slideshow library
 - **memorials/{id}/followers** - Follower tracking

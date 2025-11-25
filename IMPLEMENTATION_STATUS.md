@@ -13,7 +13,7 @@
 
 #### API Endpoints
 - ✅ `frontend/src/routes/api/live-streams/create/+server.ts` - Create session
-- ✅ `frontend/src/routes/api/live-streams/memorial/[memorialId]/+server.ts` - List streams
+- ✅ `frontend/src/routes/api/live-streams/event/[memorialId]/+server.ts` - List streams
 - ✅ `frontend/src/routes/api/live-streams/[id]/stop/+server.ts` - Stop stream
 - ✅ `frontend/src/routes/api/live-streams/[id]/visibility/+server.ts` - Update visibility
 - ✅ `frontend/src/routes/api/webhooks/mux/+server.ts` - Enhanced webhook handler
@@ -65,7 +65,7 @@ MUX_WEBHOOK_SECRET=your_mux_webhook_secret
 4. Returns WHIP URL for broadcasting
 
 ### Stream Management
-- View all streams for a memorial
+- View all streams for a event
 - Role-based permissions (admin/funeral_director)
 - Status badges (ready/live/completed/error)
 - Visibility controls (public/hidden/archived)
@@ -150,7 +150,7 @@ MUX_WEBHOOK_SECRET=your_mux_webhook_secret
 }
 ```
 
-### GET /api/live-streams/memorial/:memorialId
+### GET /api/live-streams/event/:memorialId
 **Response**:
 ```json
 {

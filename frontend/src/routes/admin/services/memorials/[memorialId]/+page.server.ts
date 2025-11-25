@@ -3,9 +3,9 @@ import { adminDb } from '$lib/server/firebase';
 import type { PageServerLoad } from './$types';
 
 /**
- * Memorial Detail Page Server Load
- * Loads comprehensive data for a single memorial including:
- * - Memorial document
+ * Event Detail Page Server Load
+ * Loads comprehensive data for a single event including:
+ * - Event document
  * - Associated streams
  * - Slideshows (subcollection)
  * - Followers count
@@ -13,7 +13,7 @@ import type { PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const { memorialId } = params;
 
-	console.log('🏛️ [MEMORIAL DETAIL] Loading memorial:', memorialId);
+	console.log('🏛️ [MEMORIAL DETAIL] Loading event:', memorialId);
 
 	// Check authentication
 	if (!locals.user || locals.user.role !== 'admin') {
@@ -30,16 +30,16 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			adminDb.collection('memorials').doc(memorialId).collection('followers').get()
 		]);
 
-		// Check if memorial exists
+		// Check if event exists
 		if (!memorialDoc.exists) {
-			console.log('❌ [MEMORIAL DETAIL] Memorial not found:', memorialId);
-			throw error(404, 'Memorial not found');
+			console.log('❌ [MEMORIAL DETAIL] Event not found:', memorialId);
+			throw error(404, 'Event not found');
 		}
 
 		const memorialData = memorialDoc.data();
 		if (!memorialData) {
-			console.log('❌ [MEMORIAL DETAIL] Memorial data is empty:', memorialId);
-			throw error(404, 'Memorial data not found');
+			console.log('❌ [MEMORIAL DETAIL] Event data is empty:', memorialId);
+			throw error(404, 'Event data not found');
 		}
 
 		// Helper function to convert any timestamp format to ISO string
@@ -114,8 +114,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			return cleaned;
 		};
 
-		// Process memorial data
-		const memorial = {
+		// Process event data
+		const event = {
 			id: memorialDoc.id,
 			lovedOneName: memorialData.lovedOneName || 'Unknown',
 			fullSlug: memorialData.fullSlug || '',
@@ -236,7 +236,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		});
 
 		return {
-			memorial,
+			event,
 			streams,
 			slideshows,
 			followerCount,
@@ -246,7 +246,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			}
 		};
 	} catch (err: any) {
-		console.error('💥 [MEMORIAL DETAIL] Error loading memorial:', {
+		console.error('💥 [MEMORIAL DETAIL] Error loading event:', {
 			error: err.message,
 			stack: err.stack,
 			memorialId
@@ -258,6 +258,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		}
 
 		// Otherwise return generic error
-		throw error(500, `Failed to load memorial: ${err.message}`);
+		throw error(500, `Failed to load event: ${err.message}`);
 	}
 };

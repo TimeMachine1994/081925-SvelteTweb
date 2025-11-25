@@ -1,13 +1,13 @@
-# Firebase Memorial Migration Script
+# Firebase Event Migration Script
 
-This script migrates all memorial data from the source Firebase project (`tributestream-lemhr`) to the destination project (`fir-tweb`).
+This script migrates all event data from the source Firebase project (`tributestream-lemhr`) to the destination project (`fir-tweb`).
 
 ## What Gets Migrated
 
 - **Users collection** - All user accounts and profiles
-- **Memorials collection** - All memorial documents
-- **Streams subcollection** - All streams for each memorial
-- **Slideshows subcollection** - All slideshows for each memorial
+- **Memorials collection** - All event documents
+- **Streams subcollection** - All streams for each event
+- **Slideshows subcollection** - All slideshows for each event
 
 ## Prerequisites
 
@@ -67,8 +67,8 @@ npm run migrate-memorials
 - Preserves user IDs and all profile data
 
 ### Phase 2: Memorials
-- Migrates all memorial documents from `memorials` collection
-- For each memorial, also migrates:
+- Migrates all event documents from `memorials` collection
+- For each event, also migrates:
   - **Streams subcollection** (all stream configurations)
   - **Slideshows subcollection** (all slideshow data)
 
@@ -80,7 +80,7 @@ npm run migrate-memorials
 ## Output Example
 
 ```
-🚀 Starting Firebase memorial migration...
+🚀 Starting Firebase event migration...
 Source: tributestream-lemhr
 Destination: fir-tweb
 
@@ -89,12 +89,12 @@ Found 25 users to migrate
 ✅ Committed batch of 25 users
 👥 User migration complete: 25/25 successful
 
-🏛️  Starting memorial migration...
+🏛️  Starting event migration...
 Found 150 memorials to migrate
-  📁 Migrating 3 streams for memorial abc123
-  📁 Migrating 1 slideshows for memorial abc123
+  📁 Migrating 3 streams for event abc123
+  📁 Migrating 1 slideshows for event abc123
 ✅ Committed batch of 150 memorials
-🏛️  Memorial migration complete: 150/150 successful
+🏛️  Event migration complete: 150/150 successful
 
 📊 MIGRATION SUMMARY
 ==================

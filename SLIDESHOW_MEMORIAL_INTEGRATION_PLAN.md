@@ -1,4 +1,4 @@
-# 🎬 Slideshow Memorial Integration Plan
+# 🎬 Slideshow Event Integration Plan
 ## WebM + Cloudflare Stream Implementation
 
 ### 📋 **Current State Analysis**
@@ -11,7 +11,7 @@
 - Firestore slideshow metadata storage
 
 #### 🎯 **Integration Goal**
-Display slideshows on memorial pages below livestreams without breaking existing stream logic.
+Display slideshows on event pages below livestreams without breaking existing stream logic.
 
 ---
 
@@ -23,16 +23,16 @@ Display slideshows on memorial pages below livestreams without breaking existing
 **File**: `src/routes/[fullSlug]/+page.server.ts`
 
 ```typescript
-// Add slideshow loading to existing memorial data fetch
+// Add slideshow loading to existing event data fetch
 export const load: PageServerLoad = async ({ params, locals }) => {
-  // ... existing memorial and streams loading ...
+  // ... existing event and streams loading ...
   
-  // Load slideshows for this memorial
+  // Load slideshows for this event
   let slideshows = [];
   try {
     const slideshowsSnapshot = await adminDb
       .collection('memorials')
-      .doc(memorial.id)
+      .doc(event.id)
       .collection('slideshows')
       .where('status', 'in', ['processing', 'ready'])
       .orderBy('createdAt', 'desc')
@@ -49,7 +49,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
   }
 
   return {
-    memorial,
+    event,
     streams: validStreams,
     slideshows, // Add to return data
     user: locals.user
@@ -348,9 +348,9 @@ interface MemorialSlideshow {
 </style>
 ```
 
-### **Phase 3: Memorial Page Integration**
+### **Phase 3: Event Page Integration**
 
-#### 3.1 Update Memorial Page Template
+#### 3.1 Update Event Page Template
 **File**: `src/routes/[fullSlug]/+page.svelte`
 
 ```svelte
@@ -362,27 +362,27 @@ interface MemorialSlideshow {
   let { data } = $props();
   
   // Existing derived states
-  let memorial = $derived(data.memorial);
+  let event = $derived(data.event);
   let streams = $derived(data.streams || []);
   let slideshows = $derived(data.slideshows || []); // NEW
   
   // ... existing logic
 </script>
 
-<!-- Existing memorial header and content -->
+<!-- Existing event header and content -->
 
 <!-- Existing StreamPlayer Section -->
 {#if streams.length > 0}
   <section class="streams-section">
     <!-- Existing stream content -->
-    <StreamPlayer {streams} {memorial} />
+    <StreamPlayer {streams} {event} />
   </section>
 {/if}
 
 <!-- NEW: Slideshow Section -->
 <SlideshowSection 
   {slideshows} 
-  memorialName={memorial.lovedOneName || memorial.title} 
+  memorialName={event.lovedOneName || event.title} 
 />
 
 <!-- Existing footer and other content -->
@@ -491,7 +491,7 @@ export const POST: RequestHandler = async ({ request }) => {
 ## 🎯 **Success Metrics**
 
 - ✅ Existing stream functionality unchanged
-- ✅ Slideshows display correctly on memorial pages
+- ✅ Slideshows display correctly on event pages
 - ✅ Cloudflare Stream integration working
 - ✅ Mobile responsive design
 - ✅ Fast loading times
@@ -504,9 +504,9 @@ export const POST: RequestHandler = async ({ request }) => {
 1. **Create slideshow types** (`src/lib/types/slideshow.ts`)
 2. **Build SlideshowPlayer component**
 3. **Build SlideshowSection component** 
-4. **Update memorial page server load**
-5. **Integrate into memorial page template**
-6. **Test with existing memorial pages**
+4. **Update event page server load**
+5. **Integrate into event page template**
+6. **Test with existing event pages**
 7. **Deploy and validate**
 
-This plan ensures a smooth integration without breaking existing functionality while providing a beautiful slideshow experience for memorial visitors! 🎬✨
+This plan ensures a smooth integration without breaking existing functionality while providing a beautiful slideshow experience for event visitors! 🎬✨

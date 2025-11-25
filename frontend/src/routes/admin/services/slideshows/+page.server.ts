@@ -17,7 +17,7 @@ export const load = async ({ locals, url }: any) => {
 	const memorialMap = new Map();
 	const userMap = new Map();
 
-	// Collect memorial info
+	// Collect event info
 	memorialsSnapshot.docs.forEach((doc) => {
 		const data = doc.data();
 		memorialMap.set(doc.id, {
@@ -26,7 +26,7 @@ export const load = async ({ locals, url }: any) => {
 		});
 	});
 
-	// Load slideshows from each memorial
+	// Load slideshows from each event
 	for (const memorialDoc of memorialsSnapshot.docs) {
 		const slideshowsSnapshot = await adminDb
 			.collection('memorials')
@@ -38,7 +38,7 @@ export const load = async ({ locals, url }: any) => {
 
 		for (const slideshowDoc of slideshowsSnapshot.docs) {
 			const data = slideshowDoc.data();
-			const memorial = memorialMap.get(memorialDoc.id);
+			const event = memorialMap.get(memorialDoc.id);
 
 			// Get user email if not cached
 			if (data.createdBy && !userMap.has(data.createdBy)) {
@@ -55,8 +55,8 @@ export const load = async ({ locals, url }: any) => {
 			slideshows.push({
 				id: slideshowDoc.id,
 				memorialId: memorialDoc.id,
-				memorialName: memorial?.name || 'Unknown',
-				memorialSlug: memorial?.slug || '',
+				memorialName: event?.name || 'Unknown',
+				memorialSlug: event?.slug || '',
 				title: data.title || 'Untitled Slideshow',
 				photoCount: data.photos?.length || 0,
 				status: data.status || 'draft',

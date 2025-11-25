@@ -34,7 +34,7 @@ export interface AdminAction {
 	id: string;
 	adminId: string;
 	action: 'user_created' | 'user_suspended' | 'user_deleted' | 'role_changed';
-	targetType: 'user' | 'memorial' | 'application';
+	targetType: 'user' | 'event' | 'application';
 	targetId: string;
 	details: Record<string, any>;
 	timestamp: Date;

@@ -13,7 +13,7 @@
 		isLoading = true;
 
 		try {
-			const response = await fetch('/api/memorial/follow', {
+			const response = await fetch('/api/event/follow', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -59,6 +59,6 @@
 			<Heart class="h-4 w-4" />
 		{/if}
 
-		{following ? 'Unfollow' : 'Follow Memorial'}
+		{following ? 'Unfollow' : 'Follow Event'}
 	</button>
 {/if}

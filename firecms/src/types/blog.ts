@@ -23,7 +23,7 @@ export type BlogPost = {
     featuredImageAlt?: string;
     
     // Categorization
-    category: 'memorial-planning' | 'grief-support' | 'technology' | 'funeral-industry' | 'livestreaming' | 'company-news' | 'customer-stories';
+    category: 'event-planning' | 'grief-support' | 'technology' | 'funeral-industry' | 'livestreaming' | 'company-news' | 'customer-stories';
     tags?: string[];
     
     // Publishing controls
@@ -49,10 +49,10 @@ export type BlogPost = {
  * Blog category configuration for UI display
  */
 export const BLOG_CATEGORIES = {
-    'memorial-planning': {
-        label: 'Memorial Planning',
+    'event-planning': {
+        label: 'Event Planning',
         color: '#D5BA7F',
-        description: 'Planning and organizing memorial services'
+        description: 'Planning and organizing event services'
     },
     'grief-support': {
         label: 'Grief Support',

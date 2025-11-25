@@ -1,4 +1,4 @@
-# Memorial Creation Flow
+# Event Creation Flow
 
 ## Overview
 
@@ -7,31 +7,31 @@ Tributestream memorials follow a multi-step creation process from initial setup 
 ## Creation Methods
 
 ### 1. Direct User Creation
-**Entry Point**: `/create-memorial` → redirects to `/onboarding`
+**Entry Point**: `/create-event` → redirects to `/onboarding`
 
 **Flow**:
 1. User signs up / logs in
-2. Memorial setup form
+2. Event setup form
 3. Service details configuration
 4. Payment/calculator (optional)
-5. Memorial goes live
+5. Event goes live
 
 ### 2. Funeral Director Assisted
 **Entry Point**: Funeral director creates on behalf of family
 
 **Flow**:
 1. FD logs in via magic link
-2. Creates memorial with client details
+2. Creates event with client details
 3. Sends invitation to family
 4. Family claims ownership
 5. Family completes setup
 
-## Memorial Data Model
+## Event Data Model
 
 ### Core Fields
 
 ```typescript
-interface Memorial {
+interface Event {
   // Identity
   fullSlug: string;              // unique URL identifier (e.g., "john-smith-2024")
   lovedOneName: string;          // deceased person's name
@@ -44,7 +44,7 @@ interface Memorial {
   // Service Information
   services: {
     main: {
-      type: 'funeral' | 'celebration' | 'memorial' | 'other';
+      type: 'funeral' | 'celebration' | 'event' | 'other';
       time: {
         date: string;            // YYYY-MM-DD
         time: string;            // HH:MM
@@ -83,9 +83,9 @@ interface Memorial {
 
 ## Step-by-Step Flow
 
-### Step 1: Initial Memorial Setup
+### Step 1: Initial Event Setup
 
-**Route**: `/onboarding` or `/create-memorial`
+**Route**: `/onboarding` or `/create-event`
 
 **Required Information**:
 - Loved one's name
@@ -94,7 +94,7 @@ interface Memorial {
 
 **Backend Action**:
 ```typescript
-const memorial = {
+const event = {
   lovedOneName,
   fullSlug: generateSlug(lovedOneName),
   createdBy: user.uid,
@@ -106,15 +106,15 @@ const memorial = {
   updatedAt: now
 };
 
-await adminDb.collection('memorials').add(memorial);
+await adminDb.collection('memorials').add(event);
 ```
 
 ### Step 2: Service Details
 
-**Route**: `/memorial/[fullSlug]/edit`
+**Route**: `/event/[fullSlug]/edit`
 
 **Configuration**:
-- Service type (funeral, celebration, memorial)
+- Service type (funeral, celebration, event)
 - Date and time (or mark as "TBD")
 - Location (name and address)
 - Service description
@@ -150,7 +150,7 @@ Each follows same structure as main service.
 
 ### Step 4: Livestream Setup
 
-**Route**: `/memorial/[fullSlug]/livestream`
+**Route**: `/event/[fullSlug]/livestream`
 
 **Options**:
 
@@ -184,7 +184,7 @@ await adminDb.collection('memorials').doc(memorialId).update({
 
 ### Step 5: Photo Slideshow (Optional)
 
-**Route**: `/memorial/[fullSlug]/slideshow`
+**Route**: `/event/[fullSlug]/slideshow`
 
 **Features**:
 - Upload photos
@@ -200,7 +200,7 @@ await adminDb.collection('memorials').doc(memorialId).update({
 
 ### Step 6: Calculator & Payment
 
-**Route**: `/memorial/[fullSlug]/calculator`
+**Route**: `/event/[fullSlug]/calculator`
 
 **Services Available**:
 - Livestream service
@@ -236,7 +236,7 @@ await adminDb.collection('memorials').doc(memorialId).update({
 });
 ```
 
-Memorial now visible at: `tributestream.com/memorial/[fullSlug]`
+Event now visible at: `tributestream.com/event/[fullSlug]`
 
 ## Slug Generation
 
@@ -261,31 +261,31 @@ If slug exists, append number:
 ## Edit vs View Modes
 
 ### View Mode
-**Route**: `/memorial/[fullSlug]`
-- Public-facing memorial page
-- Shows all memorial details
+**Route**: `/event/[fullSlug]`
+- Public-facing event page
+- Shows all event details
 - Livestream player (when active)
 - Photo slideshow
 - Guestbook
 
 ### Edit Mode
-**Route**: `/memorial/[fullSlug]/edit`
+**Route**: `/event/[fullSlug]/edit`
 - Owner/admin only
-- Edit all memorial details
+- Edit all event details
 - Manage services
 - Configure livestream
 - Upload photos
 
 **Access Check**:
 ```typescript
-if (memorial.createdBy !== locals.user.uid && locals.user.role !== 'admin') {
+if (event.createdBy !== locals.user.uid && locals.user.role !== 'admin') {
   throw error(403, 'Unauthorized');
 }
 ```
 
 ## Email Notifications
 
-### Memorial Created
+### Event Created
 Sent to creator:
 - Confirmation email
 - Setup instructions
@@ -312,7 +312,7 @@ Sent 1 hour before:
 Admins can:
 - View all memorials
 - Filter by status (draft, pending payment, live)
-- Edit any memorial
+- Edit any event
 - Delete memorials
 - View analytics
 - Troubleshoot issues
@@ -329,7 +329,7 @@ Admins can:
 - Stream key valid?
 - Network connectivity?
 
-### Memorial Not Public
+### Event Not Public
 **Check**:
 - `isPublic: true` set?
 - `isComplete: true` set?
@@ -344,11 +344,11 @@ Admins can:
 ## Related Files
 
 - `src/routes/onboarding/+page.svelte` - Initial setup
-- `src/routes/memorial/[fullSlug]/+page.svelte` - View page
-- `src/routes/memorial/[fullSlug]/edit/+page.svelte` - Edit page
-- `src/routes/memorial/[fullSlug]/livestream/+page.svelte` - Stream setup
+- `src/routes/event/[fullSlug]/+page.svelte` - View page
+- `src/routes/event/[fullSlug]/edit/+page.svelte` - Edit page
+- `src/routes/event/[fullSlug]/livestream/+page.svelte` - Stream setup
 - `src/routes/api/mux/+server.ts` - Mux API integration
-- `src/lib/types/memorial.ts` - TypeScript types
+- `src/lib/types/event.ts` - TypeScript types
 
 ## Next Steps
 

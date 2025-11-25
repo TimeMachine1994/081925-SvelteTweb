@@ -19,7 +19,7 @@
 - ✅ `lib/components/Navbar.svelte` - Navigation completely updated
   - Brand: "Tributestream Live"
   - Navigation: "For Hosts", "For Event Planners"
-  - CTA: "Create Event" (was "Create Memorial")
+  - CTA: "Create Event" (was "Create Event")
   - All gold (#D5BA7F) → blue colors
   - Mobile menu updated
 
@@ -29,7 +29,7 @@
 - ✅ Navigation terminology (Navbar.svelte)
   - "For Families" → "For Hosts"
   - "For Funeral Directors" → "For Event Planners"
-  - "Create Memorial" → "Create Event"
+  - "Create Event" → "Create Event"
 - ✅ Footer component transformed
   - Event planner language
   - Blue color scheme
@@ -63,8 +63,8 @@
 - ✅ All new pages use blue theme and event terminology
 
 ### Remaining:
-- ⏳ Update existing `/register/loved-one` to be event-focused
-- ⏳ Create dedicated event data model (currently uses memorial model)
+- ⏳ Update existing `/register/new-event-and-account` to be event-focused
+- ⏳ Create dedicated event data model (currently uses event model)
 
 ## ⏳ Phase 4: UI/UX Components (PENDING)
 
@@ -84,7 +84,7 @@
 - Completed: 255 instances (100%+ with script)
 
 ### Terminology Updates:
-- Files with funeral/memorial terms: 102+ files
+- Files with funeral/event terms: 102+ files
 - Total term instances: ~1,914
 - Completed: ~150+ instances (~8%)
 - High-impact pages: Homepage, Navbar, Footer complete
@@ -109,10 +109,10 @@
 
 **Session Date:** Current
 **Work Completed:**
-- Transformed core design system from memorial gold to celebration blue
+- Transformed core design system from event gold to celebration blue
 - Updated all theme files and CSS variables
 - Created and ran bulk color replacement script (255 replacements across 46 files)
-- Completely transformed homepage content from funeral/memorial to events/celebrations
+- Completely transformed homepage content from funeral/event to events/celebrations
 - Updated navigation and footer components
 - Renamed key variables and functions (lovedOneName → eventName, etc.)
 - Updated testimonials to reflect event focus (weddings, birthdays, anniversaries)
@@ -135,16 +135,16 @@
 - Pages: /pricing-breakdown/+page.svelte, /book-demo/+page.svelte (venue/event planner focus)
 - Event Detail: /[fullSlug]/+page.svelte (meta tags, share text, headers updated to "Celebrating")
 - Contact: /contact/+page.svelte (FAQ updated to event language)
-- Registration: /register/loved-one/+page.svelte (blue theme, event terminology)
+- Registration: /register/new-event-and-account/+page.svelte (blue theme, event terminology)
 - Registration: /register/funeral-director/+page.svelte (event planner focus, blue theme)
 
 **Total Updates:**
 - 12+ major component/page files updated
-- 200+ funeral/memorial references → event/celebration language
+- 200+ funeral/event references → event/celebration language
 - Complete blue theme applied across all updated files
 
 **Next Session Priority:**
-- `/[fullSlug]` - Main event detail page (102 memorial references)
+- `/[fullSlug]` - Main event detail page (102 event references)
 - `/schedule` pages - Booking/schedule flow
 - Registration flows - funeral-director, funeral-home pages
 - Remaining portals - FuneralDirectorPortal, ViewerPortal, AdminPortal

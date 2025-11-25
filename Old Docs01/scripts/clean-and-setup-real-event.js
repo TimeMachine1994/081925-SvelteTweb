@@ -38,7 +38,7 @@ async function cleanAndSetupRealEvent() {
     
     const now = new Date();
     const realEvent = {
-      title: 'Memorial Service for Margaret Thompson',
+      title: 'Event Service for Margaret Thompson',
       description: 'A celebration of life for Margaret Thompson, beloved mother and grandmother',
       
       // No current live stream (event is ready for streaming)
@@ -58,7 +58,7 @@ async function cleanAndSetupRealEvent() {
       
       // Realistic ownership & timestamps
       createdBy: 'funeral-director-123',
-      memorialId: 'memorial-margaret-thompson',
+      memorialId: 'event-margaret-thompson',
       createdAt: now,
       updatedAt: now
     };

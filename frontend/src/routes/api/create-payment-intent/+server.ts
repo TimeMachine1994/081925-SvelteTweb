@@ -20,23 +20,23 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		console.log('💳 Creating payment intent:', { amount, memorialId, uid: locals.user.uid });
 
-		// Verify memorial exists and user has permission
+		// Verify event exists and user has permission
 		const memorialRef = adminDb.collection('memorials').doc(memorialId);
 		const memorialDoc = await memorialRef.get();
 
 		if (!memorialDoc.exists) {
-			return json({ error: 'Memorial not found' }, { status: 404 });
+			return json({ error: 'Event not found' }, { status: 404 });
 		}
 
-		const memorial = memorialDoc.data();
+		const event = memorialDoc.data();
 		const userRole = locals.user.role;
 		const uid = locals.user.uid;
 
-		// Check if user owns this memorial
-		const isOwner = memorial.ownerUid === locals.user.uid;
+		// Check if user owns this event
+		const isOwner = event.ownerUid === locals.user.uid;
 
 		const hasPermission =
-			userRole === 'admin' || memorial?.ownerUid === uid || memorial?.funeralDirectorUid === uid;
+			userRole === 'admin' || event?.ownerUid === uid || event?.funeralDirectorUid === uid;
 
 		if (!hasPermission) {
 			return json({ error: 'Insufficient permissions' }, { status: 403 });
@@ -62,12 +62,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				memorialId,
 				uid: locals.user.uid,
 				customerEmail: customerInfo?.email || locals.user.email || '',
-				lovedOneName: memorial?.lovedOneName || ''
+				lovedOneName: event?.lovedOneName || ''
 			},
 			customer_email: customerInfo?.email || locals.user.email || ''
 		});
 
-		// Save checkout session info to memorial
+		// Save checkout session info to event
 		await memorialRef.update({
 			'calculatorConfig.status': 'pending_payment',
 			'calculatorConfig.checkoutSessionId': session.id,

@@ -66,12 +66,12 @@ A demo session is a **temporary, isolated environment** where:
 
 **Instant Access (< 60 seconds to value)**
 - Magic link authentication for demo sessions
-- Pre-populated with realistic memorial data
+- Pre-populated with realistic event data
 - No credit card required
 - Guided tour starts immediately
 
 **Curated Demo Data**
-- Fictional but realistic memorial examples
+- Fictional but realistic event examples
 - Pre-configured streams and slideshows
 - Sample funeral home profiles
 - Templates for common services
@@ -165,13 +165,13 @@ A demo session is a **temporary, isolated environment** where:
 **1. Funeral Director Workflow**
 - **Pre-loaded Data**: 
   - Johnson Funeral Home profile
-  - 3 active memorial services
+  - 3 active event services
   - 2 completed services with recordings
   - Sample pricing calculator data
 - **Guided Tour**:
-  - Create new memorial service
+  - Create new event service
   - Schedule livestream
-  - Generate memorial link
+  - Generate event link
   - View analytics dashboard
 - **Key Features Highlighted**:
   - Multi-location streaming
@@ -181,18 +181,18 @@ A demo session is a **temporary, isolated environment** where:
 
 **2. Family Owner Workflow**
 - **Pre-loaded Data**:
-  - Memorial for "Robert Johnson" (loved one)
+  - Event for "Robert Johnson" (loved one)
   - Pre-uploaded slideshow photos
   - Sample condolence messages
-  - Scheduled memorial service
+  - Scheduled event service
 - **Guided Tour**:
-  - View memorial page
+  - View event page
   - Upload photos for slideshow
   - Invite family members
-  - Customize memorial settings
+  - Customize event settings
 - **Key Features Highlighted**:
   - Photo slideshow creation
-  - Memorial customization
+  - Event customization
   - Family collaboration
   - Memory preservation
 
@@ -215,7 +215,7 @@ A demo session is a **temporary, isolated environment** where:
 
 **4. Viewer/Guest Workflow**
 - **Pre-loaded Data**:
-  - Public memorial page
+  - Public event page
   - Live stream in progress
   - Photo slideshow
   - Condolence wall
@@ -223,7 +223,7 @@ A demo session is a **temporary, isolated environment** where:
   - Watch live stream
   - Leave condolence
   - View slideshow
-  - Share memorial
+  - Share event
 - **Key Features Highlighted**:
   - Streaming quality
   - Interactive features
@@ -260,18 +260,18 @@ interface DemoScenario {
 
 **Available Scenarios:**
 
-1. **"First Memorial Service"** (Funeral Director)
+1. **"First Event Service"** (Funeral Director)
    - Empty slate with guided setup
    - Walk through entire service creation
    - Highlight value at each step
 
 2. **"Managing Multiple Services"** (Funeral Director)
-   - 5 concurrent memorial services
+   - 5 concurrent event services
    - Demonstrate scalability
    - Show multi-stream management
 
 3. **"Legacy Celebration"** (Family Owner)
-   - Rich memorial with slideshow
+   - Rich event with slideshow
    - Active condolence wall
    - Completed livestream recording
 
@@ -290,7 +290,7 @@ interface DemoScenario {
 ### Phase 1: Foundation (Week 1)
 
 #### 1.1 Data Model Setup
-- Add demo fields to User, Memorial, Stream interfaces
+- Add demo fields to User, Event, Stream interfaces
 - Create `demoSessions` Firestore collection
 - Update Firebase security rules for demo data
 
@@ -371,8 +371,8 @@ interface CTAConfiguration {
   urgency: 'low' | 'medium' | 'high';
   
   // Examples:
-  // - After 30 minutes: "Create your real memorial - 20% off today"
-  // - After creating 2nd memorial: "Upgrade to manage unlimited memorials"
+  // - After 30 minutes: "Create your real event - 20% off today"
+  // - After creating 2nd event: "Upgrade to manage unlimited memorials"
   // - When adding 3rd stream: "Premium: Unlimited concurrent streams"
 }
 ```
@@ -416,7 +416,7 @@ async function migrateToProduction(demoSessionId: string, userId: string) {
 
 **Migration Options:**
 - **Free**: Start fresh, keep learnings
-- **Starter**: Import 1 memorial structure
+- **Starter**: Import 1 event structure
 - **Pro**: Full import of all demo data
 
 #### 3.5.3 Instrumentation & Analytics
@@ -439,7 +439,7 @@ const DEMO_EVENTS = {
   SESSION_ENDED: 'demo:session:ended',
   
   // Feature engagement
-  MEMORIAL_CREATED: 'demo:memorial:created',
+  MEMORIAL_CREATED: 'demo:event:created',
   STREAM_SCHEDULED: 'demo:stream:scheduled',
   SLIDESHOW_GENERATED: 'demo:slideshow:generated',
   
@@ -550,10 +550,10 @@ interface User {
 }
 ```
 
-### Enhanced Memorial Model
+### Enhanced Event Model
 
 ```typescript
-interface Memorial {
+interface Event {
   // ... existing fields ...
   
   // Demo mode fields
@@ -579,7 +579,7 @@ Landing Page → "Try Demo" Button → Select Workflow → Instant Access
 1. Click "Try Free Demo"
 2. Choose scenario:
    - "I'm a funeral director"
-   - "I'm planning a memorial"
+   - "I'm planning a event"
    - "I'm attending a service"
 3. Magic link sent (optional email)
 4. Instant demo environment
@@ -649,7 +649,7 @@ interface ChecklistStep {
   id: string;
   title: string;
   description: string;
-  action: string; // "Create memorial", "Upload photos", etc.
+  action: string; // "Create event", "Upload photos", etc.
   optional: boolean;
   estimatedTime: string; // "2 minutes"
   reward?: string; // "Unlock advanced features"
@@ -657,10 +657,10 @@ interface ChecklistStep {
 ```
 
 **Example: Funeral Director Checklist**
-- ✅ Create your first memorial service
+- ✅ Create your first event service
 - ✅ Schedule a livestream
 - ⏳ Upload a photo slideshow (optional)
-- ⏳ Customize memorial page
+- ⏳ Customize event page
 - ⏳ View analytics dashboard
 
 **Completion Rewards:**
@@ -695,7 +695,7 @@ interface Tooltip {
 4. **Success moments**: Celebrate accomplishments
 
 **Example Tooltips:**
-- "🎉 Great job! Your first memorial is live. Now let's add a slideshow."
+- "🎉 Great job! Your first event is live. Now let's add a slideshow."
 - "💡 Pro Tip: Upload photos in bulk to save time"
 - "⭐ Premium Feature: Schedule unlimited concurrent streams"
 
@@ -746,7 +746,7 @@ interface TourStep {
 #### Success Milestones & Celebrations
 
 **Trigger celebrations on:**
-- First memorial created → Confetti animation
+- First event created → Confetti animation
 - Stream scheduled → Success modal with next steps
 - Slideshow generated → Video preview with share option
 - 5 actions completed → "You're a pro!" badge
@@ -928,8 +928,8 @@ async function cleanupDemoSession(sessionId: string): Promise<CleanupResult> {
     
     // 3. Delete memorials
     const memorials = await getMemorialsForSession(sessionId);
-    for (const memorial of memorials) {
-      await deleteMemorial(memorial.id);
+    for (const event of memorials) {
+      await deleteMemorial(event.id);
       results.memorials++;
     }
     
@@ -1004,8 +1004,8 @@ export const scheduledCleanup = functions.pubsub
 
 2. **Resource Limits**
    - Max memorials per session: 10
-   - Max streams per memorial: 5
-   - Max slideshows per memorial: 3
+   - Max streams per event: 5
+   - Max slideshows per event: 3
 
 3. **Automatic Cleanup**
    - Sessions cannot be extended beyond 6 hours total
@@ -1088,7 +1088,7 @@ interface SalesDemoDashboard {
 
 **AI-Powered Demonstrations:**
 
-1. **Smart Memorial Suggestions**
+1. **Smart Event Suggestions**
    ```
    "Based on the service type, we recommend these customizations..."
    ```
@@ -1106,7 +1106,7 @@ interface SalesDemoDashboard {
 
 3. **Analytics Insights**
    ```
-   "Your memorial has been viewed 247 times from 15 countries"
+   "Your event has been viewed 247 times from 15 countries"
    ```
    - Real-time stats
    - Geographic distribution
@@ -1114,7 +1114,7 @@ interface SalesDemoDashboard {
 
 4. **Voice-Guided Setup**
    ```
-   "Tell me about your loved one..." → Auto-fills memorial details
+   "Tell me about your loved one..." → Auto-fills event details
    ```
    - Speech-to-text
    - Smart field mapping
@@ -1156,7 +1156,7 @@ interface SalesDemoDashboard {
 **2. Social Proof**
 - "Join 500+ funeral homes"
 - Show testimonials in demo
-- Real-time activity: "Sarah just created a memorial"
+- Real-time activity: "Sarah just created a event"
 
 **3. Authority**
 - Industry certifications
@@ -1285,7 +1285,7 @@ interface SalesDemoDashboard {
 
 1. **Demo Scenarios**
    - Pre-loaded demo data for specific use cases
-   - "Memorial Planning Demo"
+   - "Event Planning Demo"
    - "Live Streaming Demo"
    - "Slideshow Creation Demo"
 

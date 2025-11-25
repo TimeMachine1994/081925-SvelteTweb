@@ -33,13 +33,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			throw error(400, 'Missing required fields: videoUrl, memorialId, photos');
 		}
 
-		// Verify memorial exists and user has permission
+		// Verify event exists and user has permission
 		const memorialRef = adminDb.collection('memorials').doc(memorialId);
 		const memorialDoc = await memorialRef.get();
 
 		if (!memorialDoc.exists) {
-			console.log('💾 [METADATA API] Memorial not found:', memorialId);
-			throw error(404, 'Memorial not found');
+			console.log('💾 [METADATA API] Event not found:', memorialId);
+			throw error(404, 'Event not found');
 		}
 
 		const memorialData = memorialDoc.data();
@@ -100,7 +100,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		// Build slideshow document
 		const slideshowDoc = {
 			id: slideshowId,
-			title: title || 'Memorial Slideshow',
+			title: title || 'Event Slideshow',
 			memorialId,
 			firebaseStoragePath: videoStoragePath,
 			playbackUrl: videoUrl,
@@ -141,7 +141,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			
 		await slideshowRef.set(cleanSlideshowDoc);
 
-		// Update memorial to indicate it has slideshows
+		// Update event to indicate it has slideshows
 		await memorialRef.update({
 			hasSlideshow: true,
 			updatedAt: new Date().toISOString()

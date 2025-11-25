@@ -2,14 +2,14 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { verifyMemorialAccess, hasPhotoUploadPermission } from './memorialAccess';
 import type { User } from 'firebase/auth';
 
-describe('Memorial Access Verification', () => {
+describe('Event Access Verification', () => {
 	const mockUser: Partial<User> = {
 		uid: 'test-user-123',
 		email: 'test@example.com'
 	};
 
 	const mockMemorial = {
-		id: 'memorial-123',
+		id: 'event-123',
 		ownerUid: 'test-user-123', // V1: Updated field name
 		funeralDirectorUid: 'fd-789' // V1: Updated field name
 	};
@@ -54,7 +54,7 @@ describe('Memorial Access Verification', () => {
 				customClaims: { role: 'funeral_director' }
 			};
 
-			// Mock memorial where user is funeral director
+			// Mock event where user is funeral director
 			const fdMemorial = {
 				...mockMemorial,
 				funeralDirectorUid: mockUser.uid
@@ -66,14 +66,14 @@ describe('Memorial Access Verification', () => {
 			expect(result.accessLevel).toBe('admin');
 		});
 
-		it('should allow admin access to any memorial', async () => {
+		it('should allow admin access to any event', async () => {
 			const adminUser = {
 				...mockUser,
 				uid: 'different-user-456', // Different UID to test admin override
 				customClaims: { role: 'admin', admin: true }
 			};
 
-			// Mock the memorial with V1 field structure
+			// Mock the event with V1 field structure
 			const v1Memorial = {
 				...mockMemorial,
 				ownerUid: 'test-user-123',

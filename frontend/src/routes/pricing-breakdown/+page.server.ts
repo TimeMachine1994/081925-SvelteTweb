@@ -10,7 +10,7 @@ export const load: PageServerLoad = async ({ locals, setHeaders }) => {
 
 	let userMemorial = null;
 
-	// Check if user is logged in and has a memorial
+	// Check if user is logged in and has a event
 	if (locals.user) {
 		try {
 			const memorialsSnapshot = await adminDb
@@ -20,14 +20,14 @@ export const load: PageServerLoad = async ({ locals, setHeaders }) => {
 				.get();
 
 			if (!memorialsSnapshot.empty) {
-				const memorial = memorialsSnapshot.docs[0].data();
+				const event = memorialsSnapshot.docs[0].data();
 				userMemorial = {
-					fullSlug: memorial.fullSlug || memorial.slug,
-					lovedOneName: memorial.lovedOneName
+					fullSlug: event.fullSlug || event.slug,
+					lovedOneName: event.lovedOneName
 				};
 			}
 		} catch (error) {
-			console.error('Error fetching user memorial:', error);
+			console.error('Error fetching user event:', error);
 		}
 	}
 

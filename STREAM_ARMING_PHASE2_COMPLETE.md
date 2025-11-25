@@ -42,9 +42,9 @@
 - Returns status and update confirmation
 - Gets recording playback URL when stream completes
 
-**Usage:** Called automatically by memorial pages every 10 seconds
+**Usage:** Called automatically by event pages every 10 seconds
 
-### 4. Automatic Status Polling in Memorial Pages ✅
+### 4. Automatic Status Polling in Event Pages ✅
 **File:** `lib/components/MemorialStreamDisplay.svelte`
 
 **Enhanced with:**
@@ -83,7 +83,7 @@
 
 ---
 
-## Complete OBS → Memorial Page Flow
+## Complete OBS → Event Page Flow
 
 ### User Journey
 
@@ -123,9 +123,9 @@ Stream status updates: scheduled/ready → live
 Stream document updated in Firestore
 ```
 
-#### 5. **Memorial Page Auto-Updates**
+#### 5. **Event Page Auto-Updates**
 ```
-Memorial page polls every 10 seconds
+Event page polls every 10 seconds
 ↓
 Detects status change to 'live'
 ↓
@@ -148,7 +148,7 @@ Status updates: live → completed
 ↓
 Playback URL retrieved from Cloudflare
 ↓
-Recording available on memorial page
+Recording available on event page
 ```
 
 ---
@@ -172,7 +172,7 @@ Recording available on memorial page
 ### Data Flow
 
 ```
-OBS/Browser → Cloudflare Stream → Webhook/Poll → Firestore → Memorial Page
+OBS/Browser → Cloudflare Stream → Webhook/Poll → Firestore → Event Page
                                            ↓
                                     Status Updated
                                     Playback URL Set
@@ -256,8 +256,8 @@ OBS/Browser → Cloudflare Stream → Webhook/Poll → Firestore → Memorial Pa
 
 **Create and Arm Stream:**
 ```bash
-# Navigate to memorial streams page
-https://your-domain.com/memorials/[memorial-id]/manage-streams
+# Navigate to event streams page
+https://your-domain.com/memorials/[event-id]/manage-streams
 
 # Arm with Stream Key
 # Copy credentials
@@ -275,7 +275,7 @@ Key: <stream-key>
 ```
 1. Click "Start Streaming" in OBS
 2. Wait 10-30 seconds
-3. Check memorial page - should show live stream
+3. Check event page - should show live stream
 ```
 
 ---
@@ -304,7 +304,7 @@ GET /api/streams/[streamId]/check-status
 💾 [CHECK STATUS] Stream updated: live
 ```
 
-**Memorial page:**
+**Event page:**
 ```
 🔄 Stream status updated, reloading...
 ```
@@ -316,7 +316,7 @@ GET /api/streams/[streamId]/check-status
 ✅ **Stream Arming** - All three types (Mobile Input, Mobile Streaming, Stream Key)  
 ✅ **RTMP Streaming** - OBS can stream using Stream Key  
 ✅ **Status Detection** - Webhooks + polling detect when stream goes live  
-✅ **Auto Page Updates** - Memorial page reloads when status changes  
+✅ **Auto Page Updates** - Event page reloads when status changes  
 ✅ **Countdown → Live Transition** - Seamless switch from countdown to player  
 ✅ **Recording Playback** - Completed streams show recording  
 ✅ **Edit Start Time** - Can modify schedule anytime  
@@ -373,10 +373,10 @@ GET /api/streams/[streamId]/check-status
 - [x] Webhook endpoint receives Cloudflare notifications
 - [x] Status polling checks stream status
 - [x] Stream status updates from scheduled → live
-- [x] Memorial page auto-reloads when stream goes live
+- [x] Event page auto-reloads when stream goes live
 - [x] Countdown switches to live player
 - [x] RTMP credentials work in OBS
-- [x] Stream appears on memorial page when live
+- [x] Stream appears on event page when live
 - [x] Recording available after stream ends
 - [x] Edit start time works
 - [x] Playback URLs populate correctly
@@ -396,9 +396,9 @@ GET /api/streams/[streamId]/check-status
 **Phase 2 is complete.** The stream arming system now fully supports:
 - Stream Key (OBS/RTMP) streaming
 - Automatic status detection via webhooks and polling
-- Seamless memorial page updates
+- Seamless event page updates
 - Countdown to live stream transitions
 - Recording playback after streams end
 - Full schedule management
 
-**The complete OBS → Memorial Page flow is working!**
+**The complete OBS → Event Page flow is working!**

@@ -88,7 +88,7 @@ async function addTestRecordings() {
       console.log(`   - ${r.title} (${Math.floor(r.duration/60)}:${(r.duration%60).toString().padStart(2,'0')})`);
     });
     
-    console.log('\n🎬 Now visit the memorial page to see multiple recordings!');
+    console.log('\n🎬 Now visit the event page to see multiple recordings!');
     console.log('   URL: http://localhost:5174/celebration-of-life-for-test2');
     
   } catch (error) {

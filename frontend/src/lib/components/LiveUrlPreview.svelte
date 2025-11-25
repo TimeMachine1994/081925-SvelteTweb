@@ -49,9 +49,9 @@
 
 <div class="live-url-preview">
 	<div class="preview-header">
-		<h3>🔗 Live Memorial URL Preview</h3>
+		<h3>🔗 Live Event URL Preview</h3>
 		<p class="preview-description">
-			This is how your memorial page URL will look. It updates automatically as you type the loved
+			This is how your event page URL will look. It updates automatically as you type the loved
 			one's name.
 		</p>
 	</div>
@@ -71,8 +71,8 @@
 			</div>
 			<div class="url-info">
 				<p class="url-note">
-					✨ This URL will be automatically generated when you create the memorial. Family and
-					friends can use this link to visit the memorial page.
+					✨ This URL will be automatically generated when you create the event. Family and
+					friends can use this link to visit the event page.
 				</p>
 			</div>
 		</div>

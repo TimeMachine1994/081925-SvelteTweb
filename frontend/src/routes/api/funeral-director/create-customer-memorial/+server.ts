@@ -27,7 +27,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		const formData = await request.json();
 
-		// Generate memorial title and slug
+		// Generate event title and slug
 		const title = `In Memory of ${formData.lovedOne.firstName} ${formData.lovedOne.lastName}`;
 		const baseSlug = `${formData.lovedOne.firstName}-${formData.lovedOne.lastName}`
 			.toLowerCase()
@@ -59,8 +59,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			return json({ error: 'Failed to create customer account' }, { status: 500 });
 		}
 
-		// Create memorial document
-		const memorial = {
+		// Create event document
+		const event = {
 			title,
 			slug: baseSlug,
 			fullSlug,
@@ -107,12 +107,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				licenseNumber: funeralDirector.licenseNumber
 			},
 
-			// Memorial settings
-			description: formData.memorial.customMessage || '',
-			isPublic: formData.memorial.isPublic,
-			allowComments: formData.memorial.allowComments,
-			allowPhotos: formData.memorial.allowPhotos,
-			allowTributes: formData.memorial.allowTributes,
+			// Event settings
+			description: formData.event.customMessage || '',
+			isPublic: formData.event.isPublic,
+			allowComments: formData.event.allowComments,
+			allowPhotos: formData.event.allowPhotos,
+			allowTributes: formData.event.allowTributes,
 
 			// Permissions
 			permissions: {
@@ -124,15 +124,15 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			updatedAt: Timestamp.now(),
 			createdBy: locals.user.uid,
 			createdByRole: 'funeral_director',
-			creatorUid: customerUser.uid, // Memorial owner for existing logic
+			creatorUid: customerUser.uid, // Event owner for existing logic
 
 			// Status
 			status: 'active'
 		};
 
-		// Create memorial document
+		// Create event document
 		const memorialRef = adminDb.collection('memorials').doc();
-		await memorialRef.set(memorial);
+		await memorialRef.set(event);
 
 		// Create user profile document for customer
 		await adminDb
@@ -151,7 +151,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				createdBy: locals.user.uid,
 				createdByRole: 'funeral_director',
 
-				// Memorial association
+				// Event association
 				primaryMemorialId: memorialRef.id,
 				memorialIds: [memorialRef.id]
 			});
@@ -176,10 +176,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			fullSlug: fullSlug,
 			customerEmail: formData.customer.email,
 			customerUserId: customerUser.uid,
-			message: 'Memorial created successfully and customer account set up'
+			message: 'Event created successfully and customer account set up'
 		});
 	} catch (error) {
-		console.error('Error creating customer memorial:', error);
+		console.error('Error creating customer event:', error);
 		return json({ error: 'Internal server error' }, { status: 500 });
 	}
 };

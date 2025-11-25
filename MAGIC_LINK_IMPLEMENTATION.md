@@ -1,13 +1,13 @@
-# Magic Link Implementation for Admin Memorial Creation
+# Magic Link Implementation for Admin Event Creation
 
 ## Overview
-When admins create a memorial, the system now generates a **magic link** that allows family members to access their loved one's memorial page with **one-click authentication** - no password entry required.
+When admins create a event, the system now generates a **magic link** that allows family members to access their loved one's event page with **one-click authentication** - no password entry required.
 
 ## What Was Implemented
 
 ### 1. Backend Changes
 
-#### Admin Create Memorial API (`/api/admin/create-memorial/+server.ts`)
+#### Admin Create Event API (`/api/admin/create-event/+server.ts`)
 - Generates Firebase custom token with user context (role, email, memorial_id)
 - Creates magic link URL: `{baseUrl}/auth/session?token={customToken}&fullSlug={fullSlug}`
 - Passes magic link to email function
@@ -22,20 +22,20 @@ When admins create a memorial, the system now generates a **magic link** that al
 1. 📧 Family receives email with password
 2. 🔑 Navigate to login page
 3. ⌨️ Type email + password
-4. 🧭 Navigate to memorial page
-5. ✅ Finally view memorial
+4. 🧭 Navigate to event page
+5. ✅ Finally view event
 
 #### After (Magic Link):
 1. 📧 Family receives email with magic link button
-2. 🎯 **One click** → Auto-authenticated + Lands on memorial page
-3. ✅ Immediately view/edit memorial
+2. 🎯 **One click** → Auto-authenticated + Lands on event page
+3. ✅ Immediately view/edit event
 
 ### 3. Security Features
 
-- ✅ **Custom tokens** tied to specific user and memorial
+- ✅ **Custom tokens** tied to specific user and event
 - ✅ **Single use** - token consumed after authentication
 - ✅ **Expires** - Firebase custom tokens expire after 1 hour
-- ✅ **Secure** - Token includes user role and memorial context
+- ✅ **Secure** - Token includes user role and event context
 - ✅ **Fallback** - Manual login credentials still provided in email
 
 ## SendGrid Template Updates Required
@@ -48,8 +48,8 @@ When admins create a memorial, the system now generates a **magic link** that al
 {{password}}           - Generated password (backup)
 {{magicLink}}          - One-click authentication URL
 {{hasMagicLink}}       - Boolean flag (true if magicLink exists)
-{{memorialUrl}}        - Direct memorial page URL
-{{memorialSlug}}       - Memorial slug (without domain)
+{{memorialUrl}}        - Direct event page URL
+{{memorialSlug}}       - Event slug (without domain)
 {{currentYear}}        - Current year
 ```
 
@@ -57,9 +57,9 @@ When admins create a memorial, the system now generates a **magic link** that al
 
 ```html
 <!-- Hero Section -->
-<h1>Memorial Page Created for {{lovedOneName}}</h1>
+<h1>Event Page Created for {{lovedOneName}}</h1>
 <p>Hello {{ownerName}},</p>
-<p>Your memorial page for {{lovedOneName}} is ready.</p>
+<p>Your event page for {{lovedOneName}} is ready.</p>
 
 <!-- Primary CTA: Magic Link -->
 {{#if hasMagicLink}}
@@ -73,7 +73,7 @@ When admins create a memorial, the system now generates a **magic link** that al
             display: inline-block;
             font-weight: 600; 
             font-size: 18px;">
-    🕊️ View Memorial Page
+    🕊️ View Event Page
   </a>
 </div>
 
@@ -115,7 +115,7 @@ When admins create a memorial, the system now generates a **magic link** that al
 <div style="margin: 30px 0;">
   <h3>What You Can Do:</h3>
   <ul style="line-height: 1.8;">
-    <li>✏️ Edit memorial content and photos</li>
+    <li>✏️ Edit event content and photos</li>
     <li>📅 Schedule service times</li>
     <li>🎥 Set up livestreaming</li>
     <li>📸 Create photo slideshows</li>
@@ -127,7 +127,7 @@ When admins create a memorial, the system now generates a **magic link** that al
 <!-- Footer -->
 <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e5e5;">
   <p style="color: #666; font-size: 14px;">
-    Memorial URL: 
+    Event URL: 
     <a href="{{memorialUrl}}" style="color: #D5BA7F;">
       {{memorialUrl}}
     </a>
@@ -166,8 +166,8 @@ PUBLIC_BASE_URL=http://localhost:5173
 # 1. Set environment variable
 PUBLIC_BASE_URL=http://localhost:5173
 
-# 2. Create memorial via admin portal
-POST /api/admin/create-memorial
+# 2. Create event via admin portal
+POST /api/admin/create-event
 {
   "lovedOneName": "Test User",
   "creatorEmail": "test@example.com",
@@ -175,19 +175,19 @@ POST /api/admin/create-memorial
 }
 
 # 3. Check console logs for magic link generation
-# Look for: "🔗 [ADMIN API] Magic link created for memorial page"
+# Look for: "🔗 [ADMIN API] Magic link created for event page"
 
 # 4. Check email (if SendGrid configured)
 # Or copy magic link from logs and test directly
 ```
 
 ### Production Testing:
-1. Create test memorial via admin portal
+1. Create test event via admin portal
 2. Use real email address
 3. Check email delivery
 4. Click magic link button
 5. Verify auto-authentication works
-6. Verify landing on correct memorial page
+6. Verify landing on correct event page
 7. Verify user has owner permissions
 
 ## Technical Details
@@ -202,8 +202,8 @@ https://tributestream.com/auth/session?token={FIREBASE_CUSTOM_TOKEN}&fullSlug={M
 2. Loads `/auth/session` page with token + fullSlug params
 3. Client-side exchanges custom token for Firebase ID token
 4. Creates session cookie via `/api/session`
-5. Redirects to memorial page at `/{fullSlug}`
-6. User authenticated as memorial owner
+5. Redirects to event page at `/{fullSlug}`
+6. User authenticated as event owner
 
 ### Token Properties:
 - **Type**: Firebase Custom Token

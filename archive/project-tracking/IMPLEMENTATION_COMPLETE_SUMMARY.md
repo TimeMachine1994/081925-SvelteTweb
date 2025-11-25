@@ -8,14 +8,14 @@ Successfully implemented a comprehensive pre-validation system for Tributestream
 
 ### **Phase 1: Core Utilities (100% Complete)**
 - ✅ **Email Validation Utility** (`email-validation.ts`)
-- ✅ **Memorial Slug Utility** (`memorial-slug.ts`) 
+- ✅ **Event Slug Utility** (`event-slug.ts`) 
 - ✅ **User Profile Utility** (`user-profile.ts`)
 
 ### **Phase 2: Backend Integration (100% Complete)**
 - ✅ **Main Registration** (`/register`) - 3 actions updated
-- ✅ **Loved One Registration** (`/register/loved-one`)
+- ✅ **Loved One Registration** (`/register/new-event-and-account`)
 - ✅ **Funeral Director Registration** (`/register/funeral-director`)
-- ✅ **Profile Memorial Creation** (`/profile`)
+- ✅ **Profile Event Creation** (`/profile`)
 - ✅ **Quick Family API** (`/api/funeral-director/quick-register-family`)
 - ✅ **Funeral Director Profile API** (`/api/funeral-director/register`)
 
@@ -65,7 +65,7 @@ User submits → Email validation FAILS → Error (0.5 seconds)
 
 ### **Unified Data Structures**
 - **User Profiles**: Same structure across all registration paths
-- **Memorial Slugs**: Guaranteed uniqueness with collision handling
+- **Event Slugs**: Guaranteed uniqueness with collision handling
 - **API Responses**: Consistent JSON format with field targeting
 
 ## 📁 **FILES CREATED/MODIFIED**
@@ -73,14 +73,14 @@ User submits → Email validation FAILS → Error (0.5 seconds)
 ### **New Utility Files**
 ```
 ✅ src/lib/utils/email-validation.ts (185 lines)
-✅ src/lib/utils/memorial-slug.ts (156 lines)  
+✅ src/lib/utils/event-slug.ts (156 lines)  
 ✅ src/lib/utils/user-profile.ts (203 lines)
 ```
 
 ### **Updated Registration Endpoints**
 ```
 ✅ src/routes/register/+page.server.ts (285 lines)
-✅ src/routes/register/loved-one/+page.server.ts (171 lines)
+✅ src/routes/register/new-event-and-account/+page.server.ts (171 lines)
 ✅ src/routes/register/funeral-director/+page.server.ts (317 lines)
 ✅ src/routes/profile/+page.server.ts (252 lines)
 ✅ src/routes/api/funeral-director/quick-register-family/+server.ts (165 lines)
@@ -90,13 +90,13 @@ User submits → Email validation FAILS → Error (0.5 seconds)
 ### **Updated Frontend Forms**
 ```
 ✅ src/lib/components/RegisterMinimalModern.svelte (Enhanced error handling)
-✅ src/routes/register/loved-one/+page.svelte (Field-specific errors)
+✅ src/routes/register/new-event-and-account/+page.svelte (Field-specific errors)
 ```
 
 ### **Test Files**
 ```
 ✅ src/lib/utils/email-validation.test.ts (156 test cases)
-✅ src/lib/utils/memorial-slug.test.ts (89 test cases)
+✅ src/lib/utils/event-slug.test.ts (89 test cases)
 ✅ src/lib/utils/user-profile.test.ts (134 test cases)
 ✅ src/lib/utils/integration.test.ts (End-to-end scenarios)
 ```
@@ -116,7 +116,7 @@ User submits → Email validation FAILS → Error (0.5 seconds)
 3. **Error Response** (standardized): Field-specific error targeting
 4. **Performance** (optimized): 500ms average response time
 
-### **Memorial Slug Generation**
+### **Event Slug Generation**
 1. **Base Generation**: Clean, SEO-friendly slug from name
 2. **Uniqueness Check**: Firestore collision detection
 3. **Counter System**: Automatic numbering for duplicates
@@ -132,9 +132,9 @@ User submits → Email validation FAILS → Error (0.5 seconds)
 
 ### **Registration Endpoints Covered**
 - ✅ **Main Registration** (Owner, Viewer, Admin)
-- ✅ **Loved One Registration** (Family memorial creation)
+- ✅ **Loved One Registration** (Family event creation)
 - ✅ **Funeral Director Registration** (Professional + family)
-- ✅ **Profile Memorial Creation** (Existing owners)
+- ✅ **Profile Event Creation** (Existing owners)
 - ✅ **API Endpoints** (Quick registration, profile creation)
 
 ### **Validation Types Implemented**
@@ -142,14 +142,14 @@ User submits → Email validation FAILS → Error (0.5 seconds)
 - ✅ **Email Existence** (Firebase Auth checking)
 - ✅ **Phone Format** (International format support)
 - ✅ **Required Fields** (Role-specific requirements)
-- ✅ **Memorial Slugs** (Uniqueness guarantees)
+- ✅ **Event Slugs** (Uniqueness guarantees)
 - ✅ **User Data** (Comprehensive profile validation)
 
 ## 🧪 **TESTING COVERAGE**
 
 ### **Unit Tests (45+ Test Cases)**
 - **Email Validation**: Format, existence, error handling
-- **Memorial Slugs**: Generation, uniqueness, collision handling
+- **Event Slugs**: Generation, uniqueness, collision handling
 - **User Profiles**: Creation, validation, updates
 
 ### **Integration Tests (15+ Scenarios)**
@@ -267,7 +267,7 @@ User submits → Email validation FAILS → Error (0.5 seconds)
 | Component | Status | Test Coverage | Documentation |
 |-----------|--------|---------------|---------------|
 | Email Validation | ✅ Complete | ✅ 15 tests | ✅ API docs |
-| Memorial Slugs | ✅ Complete | ✅ 12 tests | ✅ API docs |
+| Event Slugs | ✅ Complete | ✅ 12 tests | ✅ API docs |
 | User Profiles | ✅ Complete | ✅ 18 tests | ✅ API docs |
 | Registration Forms | ✅ Complete | ✅ Manual tests | ✅ Testing guide |
 | API Endpoints | ✅ Complete | ✅ Integration tests | ✅ API docs |

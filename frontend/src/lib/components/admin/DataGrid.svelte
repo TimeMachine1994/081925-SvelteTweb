@@ -30,7 +30,7 @@ Based on ADMIN_REFACTOR_2_DATA_OPERATIONS.md
 		data = [],
 		selectable = false,
 		selectedMemorials = $bindable(new Set()),
-		resourceType = 'memorial',
+		resourceType = 'event',
 		onRowClick,
 		onBulkAction
 	}: {

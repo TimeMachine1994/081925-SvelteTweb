@@ -4,7 +4,7 @@ This report details the integration of Cloudflare services within the Tributestr
 
 ## 1. Overview
 
-Cloudflare Stream is used to manage the entire lifecycle of a livestream associated with a memorial. This includes:
+Cloudflare Stream is used to manage the entire lifecycle of a livestream associated with a event. This includes:
 - Creating unique livestream inputs for each broadcast.
 - Providing RTMP credentials for streaming software (e.g., OBS, Streamlabs).
 - Automatically recording streams.
@@ -31,7 +31,7 @@ The following API endpoints are responsible for managing livestreams:
 
 ### `POST /api/memorials/[memorialId]/livestream`
 - **File:** `frontend/src/routes/api/memorials/[memorialId]/livestream/+server.ts`
-- **Description:** Starts a new livestream for a specific memorial.
+- **Description:** Starts a new livestream for a specific event.
 - **Workflow:**
   1. Verifies user permissions (user must be an owner or funeral director).
   2. Sends a `POST` request to the Cloudflare API (`/client/v4/accounts/{ACCOUNT_ID}/stream/live_inputs`) to create a new live input.
@@ -41,7 +41,7 @@ The following API endpoints are responsible for managing livestreams:
 
 ### `DELETE /api/memorials/[memorialId]/livestream`
 - **File:** `frontend/src/routes/api/memorials/[memorialId]/livestream/+server.ts`
-- **Description:** Stops the currently active livestream for a memorial.
+- **Description:** Stops the currently active livestream for a event.
 - **Workflow:**
   1. Verifies user permissions.
   2. Updates the `livestreams` document in Firestore to set the status to `ended`.
@@ -50,7 +50,7 @@ The following API endpoints are responsible for managing livestreams:
 
 ### `GET /api/memorials/[memorialId]/livestream`
 - **File:** `frontend/src/routes/api/memorials/[memorialId]/livestream/+server.ts`
-- **Description:** Retrieves the current status and details of the livestream for a memorial.
+- **Description:** Retrieves the current status and details of the livestream for a event.
 - **Returns:** An object containing `isActive`, `playbackUrl`, and user permissions (`canStart`, `canStop`).
 
 ### `POST /api/memorials/[memorialId]/stream/mobile`
@@ -58,7 +58,7 @@ The following API endpoints are responsible for managing livestreams:
 - **Description:** Generates or retrieves a unique stream key for mobile streaming.
 - **Workflow:**
   1. Verifies user permissions.
-  2. If a `mobileStreamKey` doesn't already exist for the memorial, it generates a new one.
+  2. If a `mobileStreamKey` doesn't already exist for the event, it generates a new one.
   3. Returns the stream key and a simulated Cloudflare stream data object.
 
 ## 4. Frontend Pages
@@ -73,18 +73,18 @@ The following API endpoints are responsible for managing livestreams:
 
 ### `tributes/[fullSlug]`
 - **File:** `frontend/src/routes/tributes/[fullSlug]/+page.svelte`
-- **Description:** This is the public-facing memorial page where viewers watch the livestream.
+- **Description:** This is the public-facing event page where viewers watch the livestream.
 - **Features:**
   - When a livestream is active, it displays an embedded iframe player pointing to the Cloudflare playback URL (`livestream.playbackUrl`).
 
 ## 5. Data Structure
 
-The `memorial` document in Firestore contains a `livestream` object with the following fields to manage the Cloudflare integration:
+The `event` document in Firestore contains a `livestream` object with the following fields to manage the Cloudflare integration:
 
 ```typescript
-// From frontend/src/lib/types/memorial.ts
+// From frontend/src/lib/types/event.ts
 
-export interface Memorial {
+export interface Event {
   // ... other fields
   livestream?: {
     isActive: boolean;

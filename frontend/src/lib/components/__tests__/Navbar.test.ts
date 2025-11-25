@@ -22,7 +22,7 @@ describe('Navbar Component', () => {
     render(Navbar);
     
     expect(screen.getByText(/sign in/i)).toBeInTheDocument();
-    expect(screen.getByText(/create memorial/i)).toBeInTheDocument();
+    expect(screen.getByText(/create event/i)).toBeInTheDocument();
   });
 
   it('shows owner-specific navigation when logged in as owner', () => {
@@ -180,7 +180,7 @@ describe('Navbar Component', () => {
   it('shows notification badge when user has notifications', () => {
     const user = createTestUser({ 
       role: 'funeral_director',
-      notifications: [{ id: '1', message: 'New memorial created' }]
+      notifications: [{ id: '1', message: 'New event created' }]
     });
     mockUserContext(user);
     

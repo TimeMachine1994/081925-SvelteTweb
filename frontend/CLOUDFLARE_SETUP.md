@@ -93,7 +93,7 @@ const rtmpUrl = 'rtmp://live.tributestream.com/live'; // Doesn't exist!
 ```javascript
 // ✅ New way - real Cloudflare credentials
 const cloudflareInput = await createLiveInput({
-	name: `${memorial.lovedOneName} - ${title}`,
+	name: `${event.lovedOneName} - ${title}`,
 	recording: true,
 	recordingTimeout: 30
 });

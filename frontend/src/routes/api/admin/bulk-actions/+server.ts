@@ -138,7 +138,7 @@ async function performAction(
 
 function getCollectionName(resourceType: string): string {
 	const map: Record<string, string> = {
-		memorial: 'memorials',
+		event: 'memorials',
 		stream: 'streams',
 		user: 'users',
 		funeral_director: 'funeral_directors'

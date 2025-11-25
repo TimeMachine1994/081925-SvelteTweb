@@ -50,8 +50,8 @@ export const ADMIN_NAV: NavDomain[] = [
 				label: 'Memorials',
 				href: '/admin/services/memorials',
 				icon: '💝',
-				description: 'All memorial pages',
-				requiredPermission: { resource: 'memorial', action: 'read' }
+				description: 'All event pages',
+				requiredPermission: { resource: 'event', action: 'read' }
 			},
 			{
 				id: 'streams',
@@ -67,7 +67,7 @@ export const ADMIN_NAV: NavDomain[] = [
 				href: '/admin/services/slideshows',
 				icon: '🖼️',
 				description: 'Photo slideshow library',
-				requiredPermission: { resource: 'memorial', action: 'read' }
+				requiredPermission: { resource: 'event', action: 'read' }
 			},
 			{
 				id: 'schedule-requests',
@@ -75,7 +75,7 @@ export const ADMIN_NAV: NavDomain[] = [
 				href: '/admin/services/schedule-requests',
 				icon: '📅',
 				description: 'Schedule edit requests',
-				requiredPermission: { resource: 'memorial', action: 'read' }
+				requiredPermission: { resource: 'event', action: 'read' }
 			}
 		]
 	},
@@ -85,9 +85,9 @@ export const ADMIN_NAV: NavDomain[] = [
 		icon: '👥',
 		items: [
 			{
-				id: 'memorial-owners',
-				label: 'Memorial Owners',
-				href: '/admin/users/memorial-owners',
+				id: 'event-owners',
+				label: 'Event Owners',
+				href: '/admin/users/event-owners',
 				icon: '👤',
 				description: 'Family and individual users',
 				requiredPermission: { resource: 'user', action: 'read' }

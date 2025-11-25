@@ -107,7 +107,7 @@ Next, we'll define the schema for the `memorials` collection, which is the core 
     // firecms/src/collections/memorials.tsx
 
     import { buildCollection, buildProperty } from "@firecms/core";
-    import { Memorial } from "../types/memorial.ts"; // We will create this type definition next
+    import { Event } from "../types/event.ts"; // We will create this type definition next
 
     console.log("Initializing Memorials Collection Schema");
 
@@ -115,13 +115,13 @@ Next, we'll define the schema for the `memorials` collection, which is the core 
      * This is the schema definition for the 'memorials' collection in Firestore.
      * It includes fields for tribute details, photo uploads, and creator information.
      */
-    export const memorialsCollection = buildCollection<Memorial>({
+    export const memorialsCollection = buildCollection<Event>({
         id: "memorials",
         name: "Memorials",
         path: "memorials",
         description: "Memorials and tributes created by users",
         properties: {
-            // The main title of the memorial
+            // The main title of the event
             title: buildProperty({
                 dataType: "string",
                 name: "Title",
@@ -133,12 +133,12 @@ Next, we'll define the schema for the `memorials` collection, which is the core 
                 name: "Description",
                 markdown: true,
             }),
-            // The UID of the user who created the memorial
+            // The UID of the user who created the event
             creatorUid: buildProperty({
                 dataType: "string",
                 name: "Creator UID",
                 readOnly: true,
-                description: "The Firebase UID of the user who created this memorial."
+                description: "The Firebase UID of the user who created this event."
             }),
             // An array of public URLs for photos stored in Firebase Storage
             photos: buildProperty({
@@ -147,12 +147,12 @@ Next, we'll define the schema for the `memorials` collection, which is the core 
                 of: {
                     dataType: "string",
                     storage: {
-                        storagePath: "memorial-photos",
+                        storagePath: "event-photos",
                         acceptedFiles: ["image/*"],
                         maxSize: 1024 * 1024 * 5 // 5 MB
                     }
                 },
-                description: "Upload photos for the memorial gallery."
+                description: "Upload photos for the event gallery."
             }),
             // Timestamps for creation and updates
             createdAt: buildProperty({
@@ -171,15 +171,15 @@ Next, we'll define the schema for the `memorials` collection, which is the core 
     });
     ```
 
-3.  **Create the Type Definition:** Add a `memorial.ts` file to the `firecms/src/types/` directory.
+3.  **Create the Type Definition:** Add a `event.ts` file to the `firecms/src/types/` directory.
 
     ```typescript
-    // firecms/src/types/memorial.ts
+    // firecms/src/types/event.ts
 
     /**
-     * Defines the data structure for a Memorial document in Firestore.
+     * Defines the data structure for a Event document in Firestore.
      */
-    export type Memorial = {
+    export type Event = {
         title: string;
         description: string;
         creatorUid: string;
@@ -225,7 +225,7 @@ Now, we need to tell the main FireCMS component to use our new collection schema
 4.  **Verify Navigation:** You should now see "Users" and "Memorials" in the side navigation menu instead of "Demo collection".
 5.  **Test CRUD Operations:**
     *   Navigate to the "Memorials" collection.
-    *   Create a new memorial entry, fill out the fields, and upload an image.
+    *   Create a new event entry, fill out the fields, and upload an image.
     *   Verify the new entry appears in the list.
     *   Edit the entry.
     *   Delete the entry.
@@ -235,4 +235,4 @@ Now, we need to tell the main FireCMS component to use our new collection schema
 
 ## 5. Conclusion
 
-By following these steps, you will have successfully integrated your core application collections into FireCMS. This provides a secure and efficient way for administrators to manage user data and memorial tributes. You can now proceed to create schemas for any other collections your application requires.
+By following these steps, you will have successfully integrated your core application collections into FireCMS. This provides a secure and efficient way for administrators to manage user data and event tributes. You can now proceed to create schemas for any other collections your application requires.

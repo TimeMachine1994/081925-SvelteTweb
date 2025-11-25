@@ -68,7 +68,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				});
 		}
 
-		const memorial = {
+		const event = {
 			lovedOneName: formData.lovedOneName,
 			slug: baseSlug,
 			fullSlug: fullSlug,
@@ -102,7 +102,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		};
 
 		const memorialRef = adminDb.collection('memorials').doc();
-		await memorialRef.set(memorial);
+		await memorialRef.set(event);
 
 		const memorialId = memorialRef.id;
 
@@ -110,7 +110,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			await adminDb.collection('admin_actions').add({
 				action: 'create_memorial',
 				targetId: memorialId,
-				targetType: 'memorial',
+				targetType: 'event',
 				performedBy: locals.user.uid,
 				performedByEmail: locals.user.email,
 				timestamp: Timestamp.now(),
@@ -135,10 +135,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					memorial_id: memorialId
 				});
 
-				// Create magic link URL that goes directly to their memorial page
+				// Create magic link URL that goes directly to their event page
 				const baseUrl = process.env.PUBLIC_BASE_URL || 'https://tributestream.com';
 				const magicLink = `${baseUrl}/auth/session?token=${customToken}&fullSlug=${fullSlug}`;
-				console.log('🔗 [ADMIN API] Magic link created for memorial page:', fullSlug);
+				console.log('🔗 [ADMIN API] Magic link created for event page:', fullSlug);
 
 				await sendEnhancedRegistrationEmail({
 					email: formData.creatorEmail,
@@ -159,7 +159,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		return json({
 			success: true,
-			message: 'Memorial created successfully',
+			message: 'Event created successfully',
 			memorialId,
 			fullSlug,
 			userUid,
@@ -167,7 +167,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			memorialUrl: `/${fullSlug}`
 		});
 	} catch (error: any) {
-		console.error('💥 [ADMIN API] Error creating memorial:', {
+		console.error('💥 [ADMIN API] Error creating event:', {
 			error: error.message,
 			stack: error.stack,
 			user: locals.user?.email
@@ -175,7 +175,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		return json(
 			{
-				error: 'Internal server error occurred while creating memorial'
+				error: 'Internal server error occurred while creating event'
 			},
 			{ status: 500 }
 		);

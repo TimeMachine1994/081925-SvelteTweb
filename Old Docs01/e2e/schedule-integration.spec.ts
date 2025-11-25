@@ -15,13 +15,13 @@ test.describe('Schedule Integration Tests', () => {
     await page.goto('/profile');
     
     // Verify memorials are loaded
-    await expect(page.locator('[data-testid="memorial-card"]')).toBeVisible();
+    await expect(page.locator('[data-testid="event-card"]')).toBeVisible();
     
-    // Click schedule button on first memorial
+    // Click schedule button on first event
     const scheduleButton = page.locator('[data-testid="schedule-button"]').first();
     await scheduleButton.click();
     
-    // Should navigate to schedule page with memorial ID
+    // Should navigate to schedule page with event ID
     await page.waitForURL(/\/schedule\?memorialId=/);
     
     // Verify schedule page loads correctly
@@ -30,8 +30,8 @@ test.describe('Schedule Integration Tests', () => {
   });
 
   test('Complete schedule configuration flow', async ({ page }) => {
-    // Navigate to schedule page with memorial ID
-    await page.goto('/schedule?memorialId=test-memorial-123');
+    // Navigate to schedule page with event ID
+    await page.goto('/schedule?memorialId=test-event-123');
     
     // Wait for page to load
     await expect(page.locator('text=Choose Your Package')).toBeVisible();
@@ -64,7 +64,7 @@ test.describe('Schedule Integration Tests', () => {
   });
 
   test('Book Now payment flow', async ({ page }) => {
-    await page.goto('/schedule?memorialId=test-memorial-123');
+    await page.goto('/schedule?memorialId=test-event-123');
     
     // Configure basic package
     await page.click('text=Tributestream Record');
@@ -85,7 +85,7 @@ test.describe('Schedule Integration Tests', () => {
   });
 
   test('Save and Pay Later functionality', async ({ page }) => {
-    await page.goto('/schedule?memorialId=test-memorial-123');
+    await page.goto('/schedule?memorialId=test-event-123');
     
     // Configure package
     await page.click('text=Tributestream Live');
@@ -103,18 +103,18 @@ test.describe('Schedule Integration Tests', () => {
     await expect(page.locator('[data-testid="funeral-director-name"]')).toHaveValue('Jane Doe');
   });
 
-  test('Error handling for invalid memorial ID', async ({ page }) => {
-    // Navigate with invalid memorial ID
+  test('Error handling for invalid event ID', async ({ page }) => {
+    // Navigate with invalid event ID
     await page.goto('/schedule?memorialId=invalid-id');
     
     // Should redirect to profile or show error
     await page.waitForURL('/profile');
-    await expect(page.locator('text=Memorial not found')).toBeVisible();
+    await expect(page.locator('text=Event not found')).toBeVisible();
   });
 
   test('Permission-based access control', async ({ page }) => {
     // Test as viewer role (should not have schedule access)
-    await page.goto('/schedule?memorialId=restricted-memorial');
+    await page.goto('/schedule?memorialId=restricted-event');
     
     // Should redirect or show permission error
     await expect(page.locator('text=Insufficient permissions')).toBeVisible();
@@ -122,7 +122,7 @@ test.describe('Schedule Integration Tests', () => {
 
   test('Responsive design on mobile', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 }); // iPhone SE
-    await page.goto('/schedule?memorialId=test-memorial-123');
+    await page.goto('/schedule?memorialId=test-event-123');
     
     // Verify mobile layout
     await expect(page.locator('[data-testid="mobile-tier-selector"]')).toBeVisible();
@@ -136,7 +136,7 @@ test.describe('Schedule Integration Tests', () => {
 
 test.describe('Calculator Edge Cases', () => {
   test('USB drive pricing edge cases', async ({ page }) => {
-    await page.goto('/schedule?memorialId=test-memorial-123');
+    await page.goto('/schedule?memorialId=test-event-123');
     
     // Test Legacy tier with USB drives (1 included)
     await page.click('text=Tributestream Legacy');
@@ -153,7 +153,7 @@ test.describe('Calculator Edge Cases', () => {
   });
 
   test('Maximum hour limits', async ({ page }) => {
-    await page.goto('/schedule?memorialId=test-memorial-123');
+    await page.goto('/schedule?memorialId=test-event-123');
     
     // Test extreme hour values
     await page.fill('[data-testid="main-service-hours"]', '24');
@@ -164,7 +164,7 @@ test.describe('Calculator Edge Cases', () => {
   });
 
   test('Zero and negative value handling', async ({ page }) => {
-    await page.goto('/schedule?memorialId=test-memorial-123');
+    await page.goto('/schedule?memorialId=test-event-123');
     
     // Test zero hours (should default to minimum)
     await page.fill('[data-testid="main-service-hours"]', '0');

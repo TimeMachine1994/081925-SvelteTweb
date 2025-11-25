@@ -8,14 +8,14 @@
 
 ## Executive Summary
 
-Tributestream is a **well-architected SvelteKit application** for memorial livestreaming services with **solid foundations** but several **critical technical debt areas** that need immediate attention. The codebase shows evidence of **rapid evolution** and **multiple refactoring phases**, resulting in some inconsistencies that impact maintainability.
+Tributestream is a **well-architected SvelteKit application** for event livestreaming services with **solid foundations** but several **critical technical debt areas** that need immediate attention. The codebase shows evidence of **rapid evolution** and **multiple refactoring phases**, resulting in some inconsistencies that impact maintainability.
 
 **Overall Grade: B+ (Good with Important Issues to Address)**
 
 ### Key Findings
 - ✅ **Strong Architecture**: Modern SvelteKit + TypeScript + Firebase + Cloudflare Stream
 - ✅ **Good Security**: Proper authentication and role-based access control
-- ✅ **Comprehensive Features**: Complete memorial management and livestream functionality
+- ✅ **Comprehensive Features**: Complete event management and livestream functionality
 - ⚠️ **Critical Issues**: Missing type definitions causing runtime failures
 - ⚠️ **Technical Debt**: Data model inconsistencies and import path problems
 - ⚠️ **Migration Incomplete**: Ongoing Svelte 5 and data model transitions
@@ -48,7 +48,7 @@ frontend/src/
 
 ### **Critical Issues**
 - **Missing Type Definitions**: `$lib/types/livestream.ts` referenced throughout but doesn't exist
-- **Inconsistent Data Models**: Memorial.services vs legacy fields causing confusion
+- **Inconsistent Data Models**: Event.services vs legacy fields causing confusion
 - **Mixed Import Patterns**: Some components import from non-existent paths
 
 ---
@@ -58,7 +58,7 @@ frontend/src/
 ### **Current State**
 ```typescript
 // ✅ Well-defined core types
-interface Memorial {
+interface Event {
   services: {
     main: ServiceDetails;
     additional: AdditionalServiceDetails[];
@@ -91,9 +91,9 @@ interface FuneralDirector {
 3. **Inconsistent Naming**: `ownerUid` vs `createdByUserId` patterns mixed throughout
 
 ### **Data Flow Analysis**
-- **Memorial.services**: ✅ Authoritative for service details
+- **Event.services**: ✅ Authoritative for service details
 - **LivestreamConfig**: ⚠️ Referenced but types missing
-- **Calculator Data**: ⚠️ Mixed with memorial data, needs separation
+- **Calculator Data**: ⚠️ Mixed with event data, needs separation
 
 ### **Recommendations**
 - **Create missing `livestream.ts` types file immediately**
@@ -134,8 +134,8 @@ while (retryCount < maxRetries) {
 // ✅ Consistent permission checking pattern
 const hasPermission = 
   userRole === 'admin' ||
-  memorial?.ownerUid === userId ||
-  memorial?.funeralDirectorUid === userId;
+  event?.ownerUid === userId ||
+  event?.funeralDirectorUid === userId;
 ```
 
 ### **Areas for Improvement**
@@ -155,7 +155,7 @@ const hasPermission =
 
 ### **API Endpoint Coverage**
 ```
-✅ Memorial Management: Complete CRUD operations
+✅ Event Management: Complete CRUD operations
 ✅ Schedule Management: Auto-save and update functionality  
 ✅ Authentication: Session management and role switching
 ✅ Admin Functions: User management and audit logs
@@ -170,13 +170,13 @@ import type { CalculatorFormData } from '$lib/types/livestream'; // File doesn't
 // ✅ Good: Proper permission checking
 const hasPermission = 
   userRole === 'admin' ||
-  memorial?.ownerUid === userId ||
-  memorial?.funeralDirectorUid === userId;
+  event?.ownerUid === userId ||
+  event?.funeralDirectorUid === userId;
 
 // ✅ Good: Comprehensive error handling
 if (!hasPermission) {
-  console.log('❌ User lacks permission to edit memorial:', {
-    userRole, userId, ownerUid: memorial?.ownerUid
+  console.log('❌ User lacks permission to edit event:', {
+    userRole, userId, ownerUid: event?.ownerUid
   });
   return json({ error: 'Insufficient permissions' }, { status: 403 });
 }
@@ -368,8 +368,8 @@ export interface LivestreamConfig {
 
 #### 2. **Data Model Inconsistency**
 ```typescript
-// Current problematic state in Memorial interface:
-interface Memorial {
+// Current problematic state in Event interface:
+interface Event {
   // ✅ New structure (preferred)
   services: {
     main: ServiceDetails;
@@ -451,7 +451,7 @@ $effect(() => {
    - Verify build passes without errors
 
 #### **Week 2: Data Model Consolidation**
-3. **Complete Memorial.services migration**
+3. **Complete Event.services migration**
    - Update all components to use new structure exclusively
    - Create migration utilities for existing data
    - Remove deprecated fields after verification
@@ -516,7 +516,7 @@ $effect(() => {
 ### **Strengths**
 - ✅ **Solid architectural foundation** with modern technology choices
 - ✅ **Good security practices** with proper authentication and authorization
-- ✅ **Comprehensive feature set** covering all memorial service needs
+- ✅ **Comprehensive feature set** covering all event service needs
 - ✅ **Well-organized codebase** with clear separation of concerns
 - ✅ **Good testing coverage** for core functionality
 
@@ -536,7 +536,7 @@ $effect(() => {
 
 **✅ Ready for Production:**
 - Authentication system
-- Core memorial management
+- Core event management
 - Admin dashboard functionality
 - Basic API security
 - Payment processing
@@ -567,7 +567,7 @@ The livestream functionality appears to be the most complex and critical compone
 
 1. **Create `src/lib/types/livestream.ts`** with all missing type definitions
 2. **Audit and fix all import path issues** throughout the codebase
-3. **Complete the Memorial.services data model migration**
+3. **Complete the Event.services data model migration**
 4. **Standardize Svelte 5 patterns** across all components
 5. **Implement comprehensive error boundaries**
 6. **Add production monitoring and logging**

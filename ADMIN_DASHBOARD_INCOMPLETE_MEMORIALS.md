@@ -56,11 +56,11 @@ return {
 │  ⚠️ Incomplete Memorials        [5 pending]     │
 ├─────────────────────────────────────────────────┤
 │  ┌───────────────────────────────────────────┐ │
-│  │ John Doe Memorial              ⚠️ Incomplete│ │
+│  │ John Doe Event              ⚠️ Incomplete│ │
 │  │ 👤 user@example.com  📅 11/12/2025  ✅ Paid│ │
 │  └───────────────────────────────────────────┘ │
 │  ┌───────────────────────────────────────────┐ │
-│  │ Jane Smith Memorial            ⚠️ Incomplete│ │
+│  │ Jane Smith Event            ⚠️ Incomplete│ │
 │  │ 👤 another@email.com 📅 11/11/2025 ❌ Unpaid│ │
 │  └───────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────┘
@@ -77,7 +77,7 @@ return {
 
 ## 🎨 Design Features
 
-### Incomplete Memorial Cards
+### Incomplete Event Cards
 - **Left Border:** Amber/orange accent (4px thick)
 - **Background:** Light amber (#fffbeb) 
 - **Hover Effect:** Slightly darker amber + slide right animation
@@ -101,7 +101,7 @@ All memorials are complete! Great job.
 
 ## 📊 Data Structure
 
-### Incomplete Memorial Object
+### Incomplete Event Object
 ```typescript
 {
   id: string;
@@ -126,7 +126,7 @@ All memorials are complete! Great job.
    - Who created them
    - When they were created
    - Payment status
-4. **Clicks on memorial** → Redirects to memorials management page
+4. **Clicks on event** → Redirects to memorials management page
 5. **Uses Quick Actions** → Navigate to specific admin sections
 
 ---
@@ -185,8 +185,8 @@ All memorials are complete! Great job.
 - TypeScript lint warnings about `PageData` properties are expected - they resolve at runtime
 - Server already loads `isComplete` field from Firestore
 - Quick Actions section unchanged - still provides fast navigation
-- Clicking memorial rows redirects to `/admin/services/memorials` (list view)
-- Future enhancement: Deep link to specific memorial detail pages once created
+- Clicking event rows redirects to `/admin/services/memorials` (list view)
+- Future enhancement: Deep link to specific event detail pages once created
 
 ---
 

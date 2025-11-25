@@ -1,12 +1,12 @@
 <script lang="ts">
-	import type { Memorial } from '$lib/types/memorial';
+	import type { Event } from '$lib/types/event';
 	import { Heart, Eye, Calendar, Users, Search, Plus } from 'lucide-svelte';
 
-	let { memorials }: { memorials: Memorial[] } = $props();
+	let { memorials }: { memorials: Event[] } = $props();
 
 	console.log('👀 ViewerPortal rendering with', memorials.length, 'followed memorials');
 
-	// Unfollow memorial function
+	// Unfollow event function
 	async function unfollowMemorial(memorialId: string) {
 		try {
 			const response = await fetch(`/api/memorials/${memorialId}/follow`, {
@@ -17,10 +17,10 @@
 				// Refresh the page to update the list
 				window.location.reload();
 			} else {
-				console.error('Failed to unfollow memorial');
+				console.error('Failed to unfollow event');
 			}
 		} catch (error) {
-			console.error('Error unfollowing memorial:', error);
+			console.error('Error unfollowing event:', error);
 		}
 	}
 </script>
@@ -122,7 +122,7 @@
 
 		{#if memorials && memorials.length > 0}
 			<div class="grid gap-4">
-				{#each memorials as memorial}
+				{#each memorials as event}
 					<div
 						class="rounded-xl border border-gray-200 bg-white p-6 shadow-lg transition-all duration-300 hover:shadow-xl"
 					>
@@ -132,21 +132,21 @@
 									class="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-pink-500 to-rose-500 shadow-lg"
 								>
 									<span class="text-lg font-bold text-white">
-										{memorial.lovedOneName?.charAt(0) || 'M'}
+										{event.lovedOneName?.charAt(0) || 'M'}
 									</span>
 								</div>
 								<div>
-									<h3 class="text-lg font-semibold text-gray-900">{memorial.lovedOneName}</h3>
+									<h3 class="text-lg font-semibold text-gray-900">{event.lovedOneName}</h3>
 									<div class="flex items-center space-x-4 text-sm text-gray-500">
 										<span class="flex items-center">
 											<Calendar class="mr-1 h-4 w-4" />
-											{memorial.serviceDate
-												? new Date(memorial.serviceDate).toLocaleDateString()
+											{event.serviceDate
+												? new Date(event.serviceDate).toLocaleDateString()
 												: 'Date TBD'}
 										</span>
 										<span class="flex items-center">
 											<Users class="mr-1 h-4 w-4" />
-											{memorial.followerCount || 0} followers
+											{event.followerCount || 0} followers
 										</span>
 									</div>
 								</div>
@@ -154,7 +154,7 @@
 
 							<div class="flex space-x-2">
 								<a
-									href="/{memorial.fullSlug}"
+									href="/{event.fullSlug}"
 									class="flex items-center space-x-1 rounded-lg bg-pink-600 px-4 py-2 text-white transition-colors hover:bg-pink-700"
 								>
 									<Eye class="h-4 w-4" />
@@ -162,34 +162,34 @@
 								</a>
 
 								<button
-									onclick={() => unfollowMemorial(memorial.id)}
+									onclick={() => unfollowMemorial(event.id)}
 									class="rounded-lg bg-gray-600 px-4 py-2 text-white transition-colors hover:bg-gray-700"
-									title="Unfollow memorial"
+									title="Unfollow event"
 								>
 									Following
 								</button>
 							</div>
 						</div>
 
-						<!-- Memorial Preview -->
+						<!-- Event Preview -->
 						<div class="mt-4 border-t border-gray-100 pt-4">
 							<div class="grid grid-cols-1 gap-4 text-sm md:grid-cols-3">
 								<div>
 									<span class="text-gray-500">Service Location:</span>
 									<p class="font-medium text-gray-900">
-										{memorial.location?.name || 'Location TBD'}
+										{event.location?.name || 'Location TBD'}
 									</p>
 								</div>
 								<div>
 									<span class="text-gray-500">Service Time:</span>
 									<p class="font-medium text-gray-900">
-										{memorial.serviceTime || 'Time TBD'}
+										{event.serviceTime || 'Time TBD'}
 									</p>
 								</div>
 								<div>
 									<span class="text-gray-500">Duration:</span>
 									<p class="font-medium text-gray-900">
-										{memorial.duration ? `${memorial.duration} hours` : 'TBD'}
+										{event.duration ? `${event.duration} hours` : 'TBD'}
 									</p>
 								</div>
 							</div>

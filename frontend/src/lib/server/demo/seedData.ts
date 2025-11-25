@@ -27,7 +27,7 @@ function generateSlug(fullName: string): string {
 }
 
 /**
- * Seed a memorial for a demo session
+ * Seed a event for a demo session
  */
 export async function seedDemoMemorial(
 	template: DemoMemorialTemplate,
@@ -92,12 +92,12 @@ export async function seedDemoMemorial(
 
 	await adminDb.collection('memorials').doc(memorialId).set(memorialData);
 	
-	console.log(`[DEMO_SEED] Created memorial: ${template.fullName} (${memorialId})`);
+	console.log(`[DEMO_SEED] Created event: ${template.fullName} (${memorialId})`);
 	return memorialId;
 }
 
 /**
- * Seed streams for a demo memorial
+ * Seed streams for a demo event
  */
 export async function seedDemoStreams(
 	memorialId: string,
@@ -178,7 +178,7 @@ export async function seedDemoStreams(
 }
 
 /**
- * Seed condolences for a demo memorial
+ * Seed condolences for a demo event
  */
 export async function seedDemoCondolences(
 	memorialId: string,
@@ -221,12 +221,12 @@ export async function seedDemoCondolences(
 		count++;
 	}
 
-	// Update memorial condolence count
+	// Update event condolence count
 	await adminDb.collection('memorials').doc(memorialId).update({
 		condolenceCount: count
 	});
 
-	console.log(`[DEMO_SEED] Created ${count} condolences for memorial ${memorialId}`);
+	console.log(`[DEMO_SEED] Created ${count} condolences for event ${memorialId}`);
 	return count;
 }
 
@@ -245,15 +245,15 @@ export async function seedDemoScenario(
 		throw new Error(`Unknown demo scenario: ${scenario}`);
 	}
 
-	// 1. Create memorial
+	// 1. Create event
 	const memorialId = await seedDemoMemorial(
-		scenarioData.memorial,
+		scenarioData.event,
 		sessionId,
 		ownerId
 	);
 
-	const memorial = await adminDb.collection('memorials').doc(memorialId).get();
-	const slug = memorial.data()?.fullSlug;
+	const event = await adminDb.collection('memorials').doc(memorialId).get();
+	const slug = event.data()?.fullSlug;
 
 	// 2. Create streams
 	if (scenarioData.streams && scenarioData.streams.length > 0) {
@@ -278,8 +278,8 @@ export async function seedDemoScenario(
 	// For now, we'll skip slideshow creation as they require actual image assets
 
 	console.log(`[DEMO_SEED] ✅ Completed data seeding for ${scenario}`);
-	console.log(`[DEMO_SEED] Memorial ID: ${memorialId}`);
-	console.log(`[DEMO_SEED] Memorial Slug: ${slug}`);
+	console.log(`[DEMO_SEED] Event ID: ${memorialId}`);
+	console.log(`[DEMO_SEED] Event Slug: ${slug}`);
 
 	return { memorialId, slug };
 }
@@ -323,7 +323,7 @@ export async function cleanupDemoData(sessionId: string): Promise<void> {
 			await condolenceDoc.ref.delete();
 		}
 
-		// Delete memorial
+		// Delete event
 		await memorialDoc.ref.delete();
 	}
 

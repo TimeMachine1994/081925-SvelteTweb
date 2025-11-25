@@ -57,7 +57,7 @@ View all administrative actions and system events
 			width: 120,
 			formatter: (val: string) => {
 				const resourceMap: Record<string, string> = {
-					memorial: '💝 Memorial',
+					event: '💝 Event',
 					stream: '📹 Stream',
 					user: '👤 User',
 					funeral_director: '🏥 Director',
@@ -132,7 +132,7 @@ View all administrative actions and system events
 						label: 'Resource Type',
 						type: 'enum',
 						options: [
-							{ value: 'memorial', label: 'Memorial' },
+							{ value: 'event', label: 'Event' },
 							{ value: 'stream', label: 'Stream' },
 							{ value: 'user', label: 'User' },
 							{ value: 'funeral_director', label: 'Funeral Director' },

@@ -65,7 +65,7 @@ const testUsers = [
 
 const testMemorials = [
   {
-    id: 'test-memorial',
+    id: 'test-event',
     lovedOneName: 'John Doe',
     slug: 'celebration-of-life-for-john-doe',
     fullSlug: 'celebration-of-life-for-john-doe',
@@ -74,7 +74,7 @@ const testMemorials = [
     creatorName: 'Test Owner',
     services: {
       main: {
-        location: { name: 'Memorial Chapel', address: '123 Main St', isUnknown: false },
+        location: { name: 'Event Chapel', address: '123 Main St', isUnknown: false },
         time: { date: '2024-06-15', time: '14:00', isUnknown: false },
         hours: 2
       },
@@ -144,7 +144,7 @@ async function createTestUsers() {
         testFuneralDirectors[0].uid = uid;
       }
       
-      // Set owner UID for memorial
+      // Set owner UID for event
       if (user.role === 'owner') {
         testMemorials[0].ownerUid = uid;
       }
@@ -162,12 +162,12 @@ async function createTestUsers() {
 async function createTestMemorials() {
   console.log('Creating test memorials...');
   
-  for (const memorial of testMemorials) {
+  for (const event of testMemorials) {
     try {
-      await setDoc(doc(db, 'memorials', memorial.id), memorial);
-      console.log(`✓ Created memorial: ${memorial.lovedOneName}`);
+      await setDoc(doc(db, 'memorials', event.id), event);
+      console.log(`✓ Created event: ${event.lovedOneName}`);
     } catch (error) {
-      console.error(`Error creating memorial ${memorial.lovedOneName}:`, error);
+      console.error(`Error creating event ${event.lovedOneName}:`, error);
     }
   }
 }

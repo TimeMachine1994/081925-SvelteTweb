@@ -20,8 +20,8 @@ export * from './invitation';
 // Livestream types
 export * from './livestream';
 
-// Memorial types
-export * from './memorial';
+// Event types
+export * from './event';
 
 // Slideshow types
 export * from './slideshow';

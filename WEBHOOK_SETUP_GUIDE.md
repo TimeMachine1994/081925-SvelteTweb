@@ -118,7 +118,7 @@ curl -X POST https://yourdomain.com/api/webhooks/test-live \
    💾 [CLOUDFLARE WEBHOOK] Stream updated: xyz123 Status: live
    ```
 
-4. **Check memorial page** - should update automatically to show live stream
+4. **Check event page** - should update automatically to show live stream
 
 ---
 
@@ -151,7 +151,7 @@ Look for:
 ```
 
 **Check 4: Test Firestore listeners**
-Open browser console on memorial page:
+Open browser console on event page:
 ```
 🔄 [REALTIME] Stream updated: abc123 { status: 'live', liveWatchUrl: '...' }
 ```
@@ -203,7 +203,7 @@ firebase firestore:query streams --where status==live
 ```
 
 ### Client-Side
-Open browser console on memorial page:
+Open browser console on event page:
 ```javascript
 // Should see:
 ✅ [REALTIME] Firestore listeners setup for N streams
@@ -235,7 +235,7 @@ When properly configured:
 2. ✅ User starts OBS/streaming software
 3. ✅ Within 1-2 seconds: Webhook received
 4. ✅ Firestore updated (status: 'live')
-5. ✅ Memorial page auto-updates (no refresh needed)
+5. ✅ Event page auto-updates (no refresh needed)
 6. ✅ Video player shows live stream
 7. ✅ "LIVE NOW" indicator appears
 8. ✅ When stream ends: Auto-updates to 'completed'

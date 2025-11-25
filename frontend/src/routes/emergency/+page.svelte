@@ -6,9 +6,9 @@
 	const theme = getTheme('minimal');
 
 	const emergencyScenarios = [
-		"Live streaming has stopped during a memorial service",
+		"Live streaming has stopped during a event service",
 		"Audio or video quality issues during the service",
-		"Families cannot access the memorial stream",
+		"Families cannot access the event stream",
 		"Technical equipment failure on-site",
 		"Network connectivity problems affecting the broadcast",
 		"Any urgent technical issue during a scheduled service"
@@ -17,7 +17,7 @@
 
 <svelte:head>
 	<title>Emergency Support Line - Tributestream</title>
-	<meta name="description" content="Get immediate technical support during memorial services. Our emergency line provides urgent assistance when you need it most." />
+	<meta name="description" content="Get immediate technical support during event services. Our emergency line provides urgent assistance when you need it most." />
 </svelte:head>
 
 <div class="{theme.root} min-h-screen" style="font-family: {theme.font.body}">
@@ -33,7 +33,7 @@
 				Emergency Support Line
 			</h1>
 			<p class="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
-				When technical issues arise during a memorial service, we're here to help immediately. Our emergency line provides urgent support when every moment matters.
+				When technical issues arise during a event service, we're here to help immediately. Our emergency line provides urgent support when every moment matters.
 			</p>
 		</div>
 	</section>
@@ -72,7 +72,7 @@
 			<!-- When to Use Emergency Line -->
 			<Card title="When to Use the Emergency Line" theme="minimal" class="p-8">
 				<p class="text-slate-600 mb-6">
-					The emergency line is specifically for urgent technical issues that occur during scheduled memorial services. Use this line when:
+					The emergency line is specifically for urgent technical issues that occur during scheduled event services. Use this line when:
 				</p>
 				<ul class="space-y-3">
 					{#each emergencyScenarios as scenario}
@@ -114,7 +114,7 @@
 						</div>
 						<div>
 							<h4 class="font-semibold text-slate-900 mb-2">Expert Support</h4>
-							<p class="text-slate-600">Our technicians are experienced with memorial service requirements and can quickly diagnose and resolve technical issues.</p>
+							<p class="text-slate-600">Our technicians are experienced with event service requirements and can quickly diagnose and resolve technical issues.</p>
 						</div>
 					</div>
 

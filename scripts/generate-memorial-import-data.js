@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 /**
- * Generate Memorial Import Data Script
+ * Generate Event Import Data Script
  * 
- * This script generates the memorial data structure that would be imported
+ * This script generates the event data structure that would be imported
  * into Firebase, without actually connecting to Firebase. This allows you
  * to review the data structure before importing.
  */
@@ -17,38 +17,38 @@ import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Load the legacy memorial data
+// Load the legacy event data
 const legacyDataPath = path.join(__dirname, '../LEGACY_MEMORIAL_VIMEO_DATA_WITH_SLUGS.json');
 const legacyData = JSON.parse(fs.readFileSync(legacyDataPath, 'utf8'));
 
 /**
- * Generate a unique memorial ID (mock)
+ * Generate a unique event ID (mock)
  */
 function generateMemorialId() {
   return 'memorial_' + Math.random().toString(36).substr(2, 9);
 }
 
 /**
- * Create a memorial document structure compatible with the existing system
+ * Create a event document structure compatible with the existing system
  */
-function createMemorialDocument(memorial, index) {
+function createMemorialDocument(event, index) {
   const memorialId = generateMemorialId();
   const now = new Date().toISOString();
   
   return {
     id: memorialId,
-    // Basic memorial information
-    lovedOnesName: memorial.lovedOnesName,
-    fullSlug: memorial.fullSlug,
+    // Basic event information
+    lovedOnesName: event.lovedOnesName,
+    fullSlug: event.fullSlug,
     
-    // Legacy memorial specific fields
+    // Legacy event specific fields
     isLegacy: true,
     legacySource: 'wordpress_sql_extraction',
-    legacyVimeoEmbed: memorial.custom_url,
+    legacyVimeoEmbed: event.custom_url,
     
-    // Standard memorial fields (with defaults for legacy)
-    title: `Celebration of Life for ${memorial.lovedOnesName}`,
-    description: `A memorial service celebrating the life of ${memorial.lovedOnesName}. This is a legacy memorial imported from the previous Tributestream system.`,
+    // Standard event fields (with defaults for legacy)
+    title: `Celebration of Life for ${event.lovedOnesName}`,
+    description: `A event service celebrating the life of ${event.lovedOnesName}. This is a legacy event imported from the previous Tributestream system.`,
     
     // Dates (using extraction date as placeholder since original dates weren't preserved)
     createdAt: now,
@@ -63,13 +63,13 @@ function createMemorialDocument(memorial, index) {
     ownerId: 'legacy-import', // Placeholder - needs manual assignment
     ownerEmail: 'legacy@tributestream.com', // Placeholder
     
-    // Memorial type and status
+    // Event type and status
     type: 'legacy',
     status: 'active',
     
     // Location (placeholder for legacy)
     location: {
-      name: 'Legacy Memorial Location',
+      name: 'Legacy Event Location',
       address: '',
       city: '',
       state: '',
@@ -89,7 +89,7 @@ function createMemorialDocument(memorial, index) {
       totalLegacyMemorials: legacyData.memorials.length
     },
     
-    // Memorial features
+    // Event features
     features: {
       hasPhotos: false, // Unknown for legacy
       hasVideos: true,
@@ -107,25 +107,25 @@ function createMemorialDocument(memorial, index) {
     },
     
     // SEO and routing
-    seoTitle: `${memorial.lovedOnesName} - Memorial Service | Tributestream`,
-    seoDescription: `Join us in celebrating the life of ${memorial.lovedOnesName}. Watch the memorial service and share memories with family and friends.`,
+    seoTitle: `${event.lovedOnesName} - Event Service | Tributestream`,
+    seoDescription: `Join us in celebrating the life of ${event.lovedOnesName}. Watch the event service and share memories with family and friends.`,
     
     // Tags for categorization
-    tags: ['legacy', 'vimeo', 'memorial-service', 'celebration-of-life']
+    tags: ['legacy', 'vimeo', 'event-service', 'celebration-of-life']
   };
 }
 
 /**
- * Generate all memorial documents
+ * Generate all event documents
  */
 function generateMemorialDocuments() {
-  console.log('🚀 Generating memorial import data...');
+  console.log('🚀 Generating event import data...');
   console.log(`📊 Total memorials to process: ${legacyData.memorials.length}`);
   console.log('');
   
-  const memorialDocuments = legacyData.memorials.map((memorial, index) => {
-    const doc = createMemorialDocument(memorial, index);
-    console.log(`✅ Generated: ${memorial.lovedOnesName} (${memorial.fullSlug})`);
+  const memorialDocuments = legacyData.memorials.map((event, index) => {
+    const doc = createMemorialDocument(event, index);
+    console.log(`✅ Generated: ${event.lovedOnesName} (${event.fullSlug})`);
     return doc;
   });
   
@@ -136,7 +136,7 @@ function generateMemorialDocuments() {
       totalMemorials: memorialDocuments.length,
       generatedAt: new Date().toISOString(),
       source: 'legacy_vimeo_extraction',
-      description: 'Memorial documents ready for Firebase import'
+      description: 'Event documents ready for Firebase import'
     },
     memorials: memorialDocuments
   };
@@ -150,16 +150,16 @@ function generateMemorialDocuments() {
   
   // Show sample document structure
   console.log('');
-  console.log('📋 Sample memorial document structure:');
+  console.log('📋 Sample event document structure:');
   console.log(JSON.stringify(memorialDocuments[0], null, 2));
   
   console.log('');
   console.log('🔗 Next steps:');
-  console.log('   1. Review the generated memorial documents');
+  console.log('   1. Review the generated event documents');
   console.log('   2. Set up Firebase credentials for actual import');
   console.log('   3. Run the Firebase import script with proper authentication');
   console.log('   4. Assign proper owner IDs to imported memorials');
-  console.log('   5. Update service dates with actual memorial dates');
+  console.log('   5. Update service dates with actual event dates');
   
   return memorialDocuments;
 }

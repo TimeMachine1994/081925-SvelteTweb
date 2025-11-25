@@ -270,8 +270,8 @@
 	line-height: 1.5;
 }
 
-/* Memorial Cards */
-.memorial-card {
+/* Event Cards */
+.event-card {
 	background: var(--theme-glass-bg);
 	border-radius: 16px;
 	overflow: hidden;
@@ -280,37 +280,37 @@
 	transition: all 0.3s ease;
 }
 
-.memorial-card:hover {
+.event-card:hover {
 	transform: translateY(-4px);
 	box-shadow: 0 12px 40px var(--theme-shadow);
 }
 
-.memorial-card-image {
+.event-card-image {
 	width: 100%;
 	height: 12rem;
 	object-fit: cover;
 	background: var(--role-bg-gradient, linear-gradient(135deg, var(--gray-200), var(--gray-300)));
 }
 
-.memorial-card-content {
+.event-card-content {
 	padding: 1.5rem;
 }
 
-.memorial-card-title {
+.event-card-title {
 	font-size: 1.25rem;
 	font-weight: 600;
 	margin-bottom: 0.5rem;
 	color: var(--theme-foreground);
 }
 
-.memorial-card-meta {
+.event-card-meta {
 	color: var(--theme-foreground);
 	opacity: 0.6;
 	font-size: 0.875rem;
 	margin-bottom: 1rem;
 }
 
-.memorial-card-actions {
+.event-card-actions {
 	display: flex;
 	gap: 0.5rem;
 	flex-wrap: wrap;

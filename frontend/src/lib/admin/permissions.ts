@@ -6,7 +6,7 @@
  */
 
 export interface Permission {
-	resource: 'memorial' | 'stream' | 'user' | 'funeral_director' | 'blog' | 'audit_log' | 'system' | '*';
+	resource: 'event' | 'stream' | 'user' | 'funeral_director' | 'blog' | 'audit_log' | 'system' | '*';
 	action: 'read' | 'create' | 'update' | 'delete' | 'approve' | 'export' | '*';
 	scope?: 'own' | 'team' | 'all';
 	conditions?: PermissionCondition[];
@@ -53,7 +53,7 @@ export const ADMIN_ROLES: Record<string, Role> = {
 		name: 'Content Administrator',
 		description: 'Manage memorials, streams, blog, and users',
 		permissions: [
-			{ resource: 'memorial', action: '*', scope: 'all' },
+			{ resource: 'event', action: '*', scope: 'all' },
 			{ resource: 'stream', action: '*', scope: 'all' },
 			{ resource: 'blog', action: '*', scope: 'all' },
 			{ resource: 'user', action: 'read', scope: 'all' },
@@ -70,9 +70,9 @@ export const ADMIN_ROLES: Record<string, Role> = {
 		name: 'Financial Administrator',
 		description: 'Payment management and financial reporting',
 		permissions: [
-			{ resource: 'memorial', action: 'read', scope: 'all' },
+			{ resource: 'event', action: 'read', scope: 'all' },
 			{ 
-				resource: 'memorial', 
+				resource: 'event', 
 				action: 'update', 
 				scope: 'all',
 				conditions: [
@@ -90,9 +90,9 @@ export const ADMIN_ROLES: Record<string, Role> = {
 		name: 'Customer Support',
 		description: 'Limited editing for customer support tasks',
 		permissions: [
-			{ resource: 'memorial', action: 'read', scope: 'all' },
+			{ resource: 'event', action: 'read', scope: 'all' },
 			{ 
-				resource: 'memorial', 
+				resource: 'event', 
 				action: 'update', 
 				scope: 'all',
 				conditions: [
@@ -162,7 +162,7 @@ function evaluateCondition(condition: PermissionCondition, target: any): boolean
  * Check if user has permission for a specific action on a resource
  * 
  * @param user - Admin user with role information
- * @param resource - Resource type (memorial, stream, user, etc.)
+ * @param resource - Resource type (event, stream, user, etc.)
  * @param action - Action to perform (read, create, update, delete, etc.)
  * @param target - Optional target resource for condition checking
  * @returns true if user has permission, false otherwise

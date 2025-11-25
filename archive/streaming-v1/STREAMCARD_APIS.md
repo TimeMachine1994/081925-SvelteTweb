@@ -28,7 +28,7 @@
 ```json
 {
   "title": "Celebration of Life Service",
-  "description": "Memorial service for John Doe",
+  "description": "Event service for John Doe",
   "scheduledStartTime": "2025-11-01T14:00:00.000Z",
   "calculatorServiceType": "main",
   "calculatorServiceIndex": null
@@ -61,11 +61,11 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
   const userId = locals.user?.uid;
 
   // 1. Authorization check
-  const memorial = await adminDb.collection('memorials').doc(memorialId).get();
+  const event = await adminDb.collection('memorials').doc(memorialId).get();
   const hasPermission = 
     locals.user?.role === 'admin' ||
-    memorial.data()?.ownerUid === userId ||
-    memorial.data()?.funeralDirectorUid === userId;
+    event.data()?.ownerUid === userId ||
+    event.data()?.funeralDirectorUid === userId;
 
   if (!hasPermission) {
     throw error(403, 'Permission denied');
@@ -107,7 +107,7 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
   // 5. Save to Firestore
   await adminDb.collection('streams').doc(streamId).set(streamData);
 
-  // 6. Sync back to memorial calculator if linked
+  // 6. Sync back to event calculator if linked
   if (calculatorServiceType) {
     await syncStreamToCalculator(memorialId, streamId, calculatorServiceType, calculatorServiceIndex);
   }
@@ -525,7 +525,7 @@ export const POST: RequestHandler = async ({ params }) => {
 **Endpoint:** `POST /api/streams/playback/[streamId]/whep`
 
 #### Purpose
-Get WHEP URL for WebRTC playback on memorial pages.
+Get WHEP URL for WebRTC playback on event pages.
 
 #### Response
 ```json
@@ -793,5 +793,5 @@ setInterval(async () => {
 
 **Related Files:**
 - [Stream API Routes](./frontend/src/routes/api/streams/)
-- [Memorial Stream Routes](./frontend/src/routes/api/memorials/[memorialId]/streams/)
+- [Event Stream Routes](./frontend/src/routes/api/memorials/[memorialId]/streams/)
 - [Cloudflare Integration](./frontend/src/lib/server/cloudflare-stream.ts)

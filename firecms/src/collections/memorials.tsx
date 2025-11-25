@@ -1,7 +1,7 @@
 // firecms/src/collections/memorials.tsx
 
 import { buildCollection, buildProperty } from "@firecms/core";
-import { Memorial } from "../types/memorial";
+import { Event } from "../types/event";
 
 console.log("🏗️ Initializing Enhanced Memorials Collection Schema");
 
@@ -9,7 +9,7 @@ console.log("🏗️ Initializing Enhanced Memorials Collection Schema");
  * Enhanced schema definition for the 'memorials' collection in Firestore.
  * Updated for Phase 1 refactoring with comprehensive funeral service coordination fields.
  */
-export const memorialsCollection = buildCollection<Memorial>({
+export const memorialsCollection = buildCollection<Event>({
     id: "memorials",
     name: "Memorials",
     path: "memorials",
@@ -48,9 +48,9 @@ export const memorialsCollection = buildCollection<Memorial>({
         // === CORE MEMORIAL INFORMATION ===
         id: buildProperty({
             dataType: "string",
-            name: "Memorial ID",
+            name: "Event ID",
             readOnly: true,
-            description: "Unique identifier for the memorial"
+            description: "Unique identifier for the event"
         }),
         lovedOneName: buildProperty({
             dataType: "string",
@@ -68,7 +68,7 @@ export const memorialsCollection = buildCollection<Memorial>({
             dataType: "string",
             name: "Full URL Slug",
             validation: { required: true },
-            description: "Complete URL path for the memorial"
+            description: "Complete URL path for the event"
         }),
         
         // === CREATOR INFORMATION ===
@@ -76,19 +76,19 @@ export const memorialsCollection = buildCollection<Memorial>({
             dataType: "string",
             name: "Creator User ID",
             readOnly: true,
-            description: "Firebase UID of the user who created this memorial"
+            description: "Firebase UID of the user who created this event"
         }),
         creatorEmail: buildProperty({
             dataType: "string",
             name: "Creator Email",
             validation: { required: true },
-            description: "Email address of the memorial creator"
+            description: "Email address of the event creator"
         }),
         creatorName: buildProperty({
             dataType: "string",
             name: "Creator Name",
             validation: { required: true },
-            description: "Full name of the memorial creator"
+            description: "Full name of the event creator"
         }),
         
         // === FUNERAL DIRECTOR & SERVICE INFORMATION ===
@@ -111,23 +111,23 @@ export const memorialsCollection = buildCollection<Memorial>({
         // === MEMORIAL SERVICE DETAILS ===
         memorialDate: buildProperty({
             dataType: "string",
-            name: "Memorial Date",
-            description: "Date of the memorial service (YYYY-MM-DD format)"
+            name: "Event Date",
+            description: "Date of the event service (YYYY-MM-DD format)"
         }),
         memorialTime: buildProperty({
             dataType: "string",
-            name: "Memorial Time",
-            description: "Time of the memorial service"
+            name: "Event Time",
+            description: "Time of the event service"
         }),
         memorialLocationName: buildProperty({
             dataType: "string",
-            name: "Memorial Location Name",
-            description: "Name of the memorial service location"
+            name: "Event Location Name",
+            description: "Name of the event service location"
         }),
         memorialLocationAddress: buildProperty({
             dataType: "string",
-            name: "Memorial Location Address",
-            description: "Full address of the memorial service location"
+            name: "Event Location Address",
+            description: "Full address of the event service location"
         }),
         
         // === NEW PHASE 1 FIELDS: FAMILY CONTACT INFORMATION ===
@@ -161,27 +161,27 @@ export const memorialsCollection = buildCollection<Memorial>({
             dataType: "string",
             name: "Additional Notes",
             multiline: true,
-            description: "Any additional notes or special instructions for the memorial service"
+            description: "Any additional notes or special instructions for the event service"
         }),
         
         // === CONTENT AND VISIBILITY ===
         isPublic: buildProperty({
             dataType: "boolean",
-            name: "Public Memorial",
-            description: "Whether this memorial is publicly accessible",
+            name: "Public Event",
+            description: "Whether this event is publicly accessible",
             defaultValue: true
         }),
         content: buildProperty({
             dataType: "string",
-            name: "Memorial Content",
+            name: "Event Content",
             markdown: true,
-            description: "Main content/story for the memorial page"
+            description: "Main content/story for the event page"
         }),
         custom_html: buildProperty({
             dataType: "string",
             name: "Custom HTML",
             multiline: true,
-            description: "Custom HTML content for the memorial page"
+            description: "Custom HTML content for the event page"
         }),
         
         // === PERSONAL INFORMATION ===
@@ -189,11 +189,11 @@ export const memorialsCollection = buildCollection<Memorial>({
             dataType: "string",
             name: "Profile Image URL",
             storage: {
-                storagePath: "memorial-profiles",
+                storagePath: "event-profiles",
                 acceptedFiles: ["image/*"],
                 maxSize: 1024 * 1024 * 5 // 5 MB
             },
-            description: "Main profile image for the memorial"
+            description: "Main profile image for the event"
         }),
         birthDate: buildProperty({
             dataType: "string",
@@ -213,12 +213,12 @@ export const memorialsCollection = buildCollection<Memorial>({
             of: {
                 dataType: "string",
                 storage: {
-                    storagePath: "memorial-photos",
+                    storagePath: "event-photos",
                     acceptedFiles: ["image/*"],
                     maxSize: 1024 * 1024 * 5 // 5 MB
                 }
             },
-            description: "Photo gallery for the memorial"
+            description: "Photo gallery for the event"
         }),
         
         // === LIVESTREAM CONFIGURATION ===

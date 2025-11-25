@@ -29,7 +29,7 @@ async function createTestEventInEmulator() {
     
     const now = new Date();
     const testEvent = {
-      title: 'Memorial Service for John Doe',
+      title: 'Event Service for John Doe',
       description: 'A celebration of life for our beloved John Doe (Emulator Version)',
       
       // No current live stream
@@ -45,9 +45,9 @@ async function createTestEventInEmulator() {
       recordedVideos: [
         {
           id: 'emulator-video-1',
-          title: 'Memorial Service - Part 1',
+          title: 'Event Service - Part 1',
           description: 'Opening ceremony and eulogies',
-          thumbnailUrl: 'https://via.placeholder.com/640x360?text=Memorial+Part+1',
+          thumbnailUrl: 'https://via.placeholder.com/640x360?text=Event+Part+1',
           playbackUrl: 'https://customer-dyz4fsbg86xy3krn.cloudflarestream.com/emulator-video-1/manifest/video.m3u8',
           duration: 1800, // 30 minutes
           recordedAt: new Date(now.getTime() - 86400000), // Yesterday
@@ -58,9 +58,9 @@ async function createTestEventInEmulator() {
         },
         {
           id: 'emulator-video-2',
-          title: 'Memorial Service - Part 2',
+          title: 'Event Service - Part 2',
           description: 'Closing remarks and final farewell',
-          thumbnailUrl: 'https://via.placeholder.com/640x360?text=Memorial+Part+2',
+          thumbnailUrl: 'https://via.placeholder.com/640x360?text=Event+Part+2',
           playbackUrl: 'https://customer-dyz4fsbg86xy3krn.cloudflarestream.com/emulator-video-2/manifest/video.m3u8',
           duration: 1200, // 20 minutes
           recordedAt: new Date(now.getTime() - 43200000), // 12 hours ago
@@ -79,7 +79,7 @@ async function createTestEventInEmulator() {
       
       // Ownership & timestamps
       createdBy: 'emulator-user',
-      memorialId: 'emulator-memorial-123',
+      memorialId: 'emulator-event-123',
       createdAt: now,
       updatedAt: now
     };

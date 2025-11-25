@@ -150,7 +150,7 @@
 		const labels: Record<string, string> = {
 			admin: 'Admin',
 			funeral_director: 'Funeral Director',
-			owner: 'Memorial Owner',
+			owner: 'Event Owner',
 			viewer: 'Viewer'
 		};
 		return labels[role] || role;
@@ -193,7 +193,7 @@
 					onclick={() => switchRole('owner')}
 					class:active={currentRole === 'owner'}
 					disabled={switching || currentRole === 'owner'}
-					title="Switch to Memorial Owner"
+					title="Switch to Event Owner"
 				>
 					❤️ Owner
 				</button>

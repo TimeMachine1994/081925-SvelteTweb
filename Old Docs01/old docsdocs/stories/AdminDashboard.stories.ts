@@ -5,7 +5,7 @@ import AdminDashboard from '../routes/admin/+page.svelte';
 const mockMemorials = [
 	{
 		id: 'memorial1',
-		title: 'John Doe Memorial',
+		title: 'John Doe Event',
 		description: 'In loving memory of John Doe',
 		ownerUid: 'user1',
 		createdAt: '2024-01-15T10:30:00.000Z',
@@ -28,7 +28,7 @@ const mockMemorials = [
 	},
 	{
 		id: 'memorial2',
-		title: 'Jane Smith Memorial Service',
+		title: 'Jane Smith Event Service',
 		description: 'Celebrating the life of Jane Smith',
 		ownerUid: 'user2',
 		createdAt: '2024-01-10T09:15:00.000Z',
@@ -137,9 +137,9 @@ export const LargeDataset: Story = {
 		data: {
 			user: mockAdminUser,
 			memorials: Array.from({ length: 50 }, (_, i) => ({
-				id: `memorial${i + 1}`,
-				title: `Memorial ${i + 1}`,
-				description: `Description for memorial ${i + 1}`,
+				id: `event${i + 1}`,
+				title: `Event ${i + 1}`,
+				description: `Description for event ${i + 1}`,
 				ownerUid: `user${i + 1}`,
 				createdAt: new Date(2024, 0, i + 1).toISOString(),
 				updatedAt: new Date(2024, 0, i + 2).toISOString(),

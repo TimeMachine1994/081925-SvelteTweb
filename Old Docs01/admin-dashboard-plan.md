@@ -17,11 +17,11 @@ graph TD
     B -- No --> D["Render Role-based Portal (Owner, Viewer, etc.)"];
 
     subgraph "AdminPortal Component"
-        E["'Create New Memorial' Button"] --> F["/my-portal/tributes/new"];
-        G["Memorials Table (displays ALL memorials)"] --> H["Memorial Row"];
+        E["'Create New Event' Button"] --> F["/my-portal/tributes/new"];
+        G["Memorials Table (displays ALL memorials)"] --> H["Event Row"];
     end
 
-    subgraph "Actions per Memorial Row"
+    subgraph "Actions per Event Row"
         H --> I["Edit Details / Photos"];
         H --> J["Create / Manage Livestream"];
         H --> K["Manage Embeds"];
@@ -37,7 +37,7 @@ graph TD
 -   **`/my-portal/+page.svelte`**: Will be updated to conditionally render the new `<AdminPortal>` component if the logged-in user is an admin.
 -   **`/my-portal/+page.server.ts`**: The `load` function will be enhanced to fetch all memorials and all users from Firestore when the user is an admin.
 -   **`AdminPortal.svelte` (New Component)**: A new component will be created at `frontend/src/lib/components/portals/AdminPortal.svelte`. It will feature a table-based UI for displaying and managing all memorials.
--   **New API Endpoint**: A new endpoint at `/api/memorials/[memorialId]/assign` will be created to handle the reassignment of memorial ownership.
+-   **New API Endpoint**: A new endpoint at `/api/memorials/[memorialId]/assign` will be created to handle the reassignment of event ownership.
 
 ## 2. Phased Implementation Plan
 
@@ -56,7 +56,7 @@ The focus of this phase is to build the basic structure of the admin dashboard a
 
 This phase involves adding the primary management actions to the dashboard.
 
--   **[ ] Task 2.1:** Add a "Create New Memorial" button to the `AdminPortal` that links to the existing `/my-portal/tributes/new` page.
+-   **[ ] Task 2.1:** Add a "Create New Event" button to the `AdminPortal` that links to the existing `/my-portal/tributes/new` page.
 -   **[ ] Task 2.2:** Add an "Actions" column to the memorials table.
 -   **[ ] Task 2.3:** Add "Edit" and "Create Livestream" buttons to each row in the table, linking to the respective existing pages (`.../[memorialId]/edit`, `.../[memorialId]/livestream/new`).
 
@@ -66,7 +66,7 @@ The final phase will introduce more complex features like user reassignment and 
 
 -   **[ ] Task 3.1:** Create the new `POST /api/memorials/[memorialId]/assign` server endpoint.
 -   **[ ] Task 3.2:** Update the `load` function in `/my-portal/+page.server.ts` to fetch all users for admins.
--   **[ ] Task 3.3:** Implement the UI for reassigning a memorial's owner within the `AdminPortal` (e.g., a button that opens a modal with a user selection dropdown).
+-   **[ ] Task 3.3:** Implement the UI for reassigning a event's owner within the `AdminPortal` (e.g., a button that opens a modal with a user selection dropdown).
 -   **[ ] Task 3.4:** Design and implement the UI and backend logic for managing embeds.
 
 This plan provides a clear roadmap for developing the Admin Dashboard.

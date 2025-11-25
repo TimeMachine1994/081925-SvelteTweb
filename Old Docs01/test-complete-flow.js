@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 /**
- * Complete flow test for Memorial Service Data Model
- * Tests funeral director registration, memorial creation, and component integration
+ * Complete flow test for Event Service Data Model
+ * Tests funeral director registration, event creation, and component integration
  */
 
 import admin from 'firebase-admin';
@@ -26,15 +26,15 @@ const db = admin.firestore();
 const auth = admin.auth();
 
 async function testCompleteFlow() {
-  console.log('\n🚀 Testing Complete Memorial Service Flow\n');
+  console.log('\n🚀 Testing Complete Event Service Flow\n');
 
   try {
     // 1. Test funeral director registration form data structure
-    console.log('1. Testing funeral director memorial creation...');
+    console.log('1. Testing funeral director event creation...');
     const fdMemorialId = await testFuneralDirectorMemorialCreation();
     
-    // 2. Test family memorial creation
-    console.log('\n2. Testing family memorial creation...');
+    // 2. Test family event creation
+    console.log('\n2. Testing family event creation...');
     const familyMemorialId = await testFamilyMemorialCreation();
     
     // 3. Test API endpoints with new structure
@@ -59,7 +59,7 @@ async function testCompleteFlow() {
 }
 
 async function testFuneralDirectorMemorialCreation() {
-  console.log('   Creating memorial via funeral director flow...');
+  console.log('   Creating event via funeral director flow...');
   
   // Simulate the data structure created by the updated funeral director registration
   const memorialData = {
@@ -76,7 +76,7 @@ async function testFuneralDirectorMemorialCreation() {
       main: {
         location: {
           name: 'Peaceful Gardens Chapel',
-          address: '456 Serenity Lane, Memorial City, MC 67890',
+          address: '456 Serenity Lane, Event City, MC 67890',
           isUnknown: false
         },
         time: {
@@ -107,21 +107,21 @@ async function testFuneralDirectorMemorialCreation() {
     },
     
     isPublic: true,
-    content: 'Memorial created via funeral director registration',
+    content: 'Event created via funeral director registration',
     custom_html: null,
     createdAt: new Date(),
     updatedAt: new Date()
   };
 
   const memorialRef = await db.collection('memorials').add(memorialData);
-  console.log(`   ✅ Created FD memorial: ${memorialRef.id}`);
+  console.log(`   ✅ Created FD event: ${memorialRef.id}`);
   
   // Verify structure
   const doc = await memorialRef.get();
   const data = doc.data();
   
   if (!data.services || !data.services.main || !Array.isArray(data.services.additional)) {
-    throw new Error('Invalid services structure in FD memorial');
+    throw new Error('Invalid services structure in FD event');
   }
   
   console.log('   ✅ Services structure validated');
@@ -132,7 +132,7 @@ async function testFuneralDirectorMemorialCreation() {
 }
 
 async function testFamilyMemorialCreation() {
-  console.log('   Creating memorial via family registration flow...');
+  console.log('   Creating event via family registration flow...');
   
   // Simulate the data structure created by family registration
   const memorialData = {
@@ -171,21 +171,21 @@ async function testFamilyMemorialCreation() {
     },
     
     isPublic: true,
-    content: 'Memorial created via family registration',
+    content: 'Event created via family registration',
     custom_html: null,
     createdAt: new Date(),
     updatedAt: new Date()
   };
 
   const memorialRef = await db.collection('memorials').add(memorialData);
-  console.log(`   ✅ Created family memorial: ${memorialRef.id}`);
+  console.log(`   ✅ Created family event: ${memorialRef.id}`);
   
   // Verify structure
   const doc = await memorialRef.get();
   const data = doc.data();
   
   if (!data.services || !data.services.main || !Array.isArray(data.services.additional)) {
-    throw new Error('Invalid services structure in family memorial');
+    throw new Error('Invalid services structure in family event');
   }
   
   console.log('   ✅ Services structure validated');
@@ -198,7 +198,7 @@ async function testFamilyMemorialCreation() {
 async function testAPIEndpoints(memorialId) {
   console.log('   Testing schedule API endpoints...');
   
-  // Test updating memorial services via schedule API
+  // Test updating event services via schedule API
   const updateData = {
     services: {
       main: {
@@ -242,13 +242,13 @@ async function testAPIEndpoints(memorialId) {
     }
   };
 
-  // Update the memorial
+  // Update the event
   await db.collection('memorials').doc(memorialId).update({
     services: updateData.services,
     updatedAt: new Date()
   });
   
-  console.log('   ✅ Memorial services updated successfully');
+  console.log('   ✅ Event services updated successfully');
   
   // Verify the update
   const updatedDoc = await db.collection('memorials').doc(memorialId).get();
@@ -266,10 +266,10 @@ async function testAPIEndpoints(memorialId) {
 async function testDataMigrationCompatibility() {
   console.log('   Testing backward compatibility...');
   
-  // Create a memorial with old structure to test migration
+  // Create a event with old structure to test migration
   const oldStructureMemorial = {
-    lovedOneName: 'Legacy Test Memorial',
-    slug: 'legacy-test-memorial',
+    lovedOneName: 'Legacy Test Event',
+    slug: 'legacy-test-event',
     ownerUid: 'test-legacy-owner',
     
     // Old structure fields
@@ -284,7 +284,7 @@ async function testDataMigrationCompatibility() {
   };
 
   const legacyRef = await db.collection('memorials').add(oldStructureMemorial);
-  console.log(`   ✅ Created legacy memorial: ${legacyRef.id}`);
+  console.log(`   ✅ Created legacy event: ${legacyRef.id}`);
   
   // Test migration logic (simulate what migration script would do)
   const legacyDoc = await legacyRef.get();
@@ -313,16 +313,16 @@ async function testDataMigrationCompatibility() {
     updatedAt: new Date()
   });
   
-  console.log('   ✅ Legacy memorial migrated successfully');
+  console.log('   ✅ Legacy event migrated successfully');
   console.log(`   📍 Migrated location: ${migratedServices.main.location.name}`);
 }
 
 function testComponentCompatibility() {
   console.log('   Testing Calculator/Schedule component data flow...');
   
-  // Simulate memorial data as it would be loaded in components
+  // Simulate event data as it would be loaded in components
   const memorialData = {
-    lovedOneName: 'Component Test Memorial',
+    lovedOneName: 'Component Test Event',
     services: {
       main: {
         location: { name: 'Test Chapel', address: '123 Test St', isUnknown: false },
@@ -343,7 +343,7 @@ function testComponentCompatibility() {
   // Test Calculator component data transformation
   const services = memorialData.services;
   const calculatorData = {
-    memorialId: 'test-memorial-id',
+    memorialId: 'test-event-id',
     selectedTier: 'record',
     addons: {
       photography: false,
@@ -395,7 +395,7 @@ function testComponentCompatibility() {
 // Run the complete flow test
 testCompleteFlow()
   .then(() => {
-    console.log('🎉 All systems ready! Memorial Service Data Model refactor complete.');
+    console.log('🎉 All systems ready! Event Service Data Model refactor complete.');
     process.exit(0);
   })
   .catch((error) => {

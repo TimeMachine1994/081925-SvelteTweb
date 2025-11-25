@@ -4,7 +4,7 @@ import type { PageServerLoad, Actions } from './$types';
 /**
  * Create Event Page Server
  * 
- * NOTE: This currently redirects to the existing memorial registration system
+ * NOTE: This currently redirects to the existing event registration system
  * with event-focused parameters. In the future, this can be expanded to have
  * its own dedicated event creation logic.
  */
@@ -16,7 +16,7 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 	if (url.searchParams.get('name')) params.set('name', url.searchParams.get('name')!);
 	if (url.searchParams.get('package')) params.set('package', url.searchParams.get('package')!);
 	
-	throw redirect(303, `/register/loved-one?${params.toString()}`);
+	throw redirect(303, `/register/new-event-and-account?${params.toString()}`);
 };
 
 export const actions: Actions = {
@@ -36,9 +36,9 @@ export const actions: Actions = {
 		if (eventName) params.set('name', eventName);
 		if (selectedPackage) params.set('package', selectedPackage);
 		
-		// For now, redirect to the existing loved-one registration
+		// For now, redirect to the existing new-event-and-account registration
 		// In the future, this can create events in a separate collection
 		// TODO: Create dedicated event collection and registration flow
-		throw redirect(303, `/register/loved-one?${params.toString()}`);
+		throw redirect(303, `/register/new-event-and-account?${params.toString()}`);
 	}
 };

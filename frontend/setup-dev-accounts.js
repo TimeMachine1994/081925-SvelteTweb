@@ -105,7 +105,7 @@ async function createTestAccounts() {
 						email: account.email,
 						phone: '(555) 123-4567',
 						address: {
-							street: '123 Memorial Drive',
+							street: '123 Event Drive',
 							city: 'Orlando',
 							state: 'FL',
 							zipCode: '32801'
@@ -142,7 +142,7 @@ async function createTestAccounts() {
 									email: account.email,
 									phone: '(555) 123-4567',
 									address: {
-										street: '123 Memorial Drive',
+										street: '123 Event Drive',
 										city: 'Orlando',
 										state: 'FL',
 										zipCode: '32801'

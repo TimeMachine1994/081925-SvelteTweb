@@ -67,7 +67,7 @@ describe('StripeCheckout Component', () => {
       render(StripeCheckout, {
         props: {
           amount: 299,
-          memorialId: 'memorial-123',
+          memorialId: 'event-123',
           lovedOneName: 'John Doe'
         }
       });
@@ -79,7 +79,7 @@ describe('StripeCheckout Component', () => {
       render(StripeCheckout, {
         props: {
           amount: 299,
-          memorialId: 'memorial-123',
+          memorialId: 'event-123',
           lovedOneName: 'John Doe'
         }
       });
@@ -100,7 +100,7 @@ describe('StripeCheckout Component', () => {
       render(StripeCheckout, {
         props: {
           amount: 299,
-          memorialId: 'memorial-123',
+          memorialId: 'event-123',
           lovedOneName: 'John Doe'
         }
       });
@@ -123,7 +123,7 @@ describe('StripeCheckout Component', () => {
       render(StripeCheckout, {
         props: {
           amount: 299,
-          memorialId: 'memorial-123',
+          memorialId: 'event-123',
           lovedOneName: 'John Doe'
         }
       });
@@ -145,7 +145,7 @@ describe('StripeCheckout Component', () => {
       render(StripeCheckout, {
         props: {
           amount: 299,
-          memorialId: 'memorial-123',
+          memorialId: 'event-123',
           lovedOneName: 'John Doe'
         }
       });
@@ -164,7 +164,7 @@ describe('StripeCheckout Component', () => {
       render(StripeCheckout, {
         props: {
           amount: 299,
-          memorialId: 'memorial-123',
+          memorialId: 'event-123',
           lovedOneName: 'John Doe'
         }
       });
@@ -188,7 +188,7 @@ describe('StripeCheckout Component', () => {
       render(StripeCheckout, {
         props: {
           amount: 299,
-          memorialId: 'memorial-123',
+          memorialId: 'event-123',
           lovedOneName: 'John Doe'
         }
       });
@@ -201,7 +201,7 @@ describe('StripeCheckout Component', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amount: 299,
-          memorialId: 'memorial-123',
+          memorialId: 'event-123',
           lovedOneName: 'John Doe'
         })
       });
@@ -213,7 +213,7 @@ describe('StripeCheckout Component', () => {
       render(StripeCheckout, {
         props: {
           amount: 299,
-          memorialId: 'memorial-123',
+          memorialId: 'event-123',
           lovedOneName: 'John Doe'
         }
       });
@@ -239,7 +239,7 @@ describe('StripeCheckout Component', () => {
       render(StripeCheckout, {
         props: {
           amount: 299,
-          memorialId: 'memorial-123',
+          memorialId: 'event-123',
           lovedOneName: 'John Doe'
         }
       });
@@ -257,7 +257,7 @@ describe('StripeCheckout Component', () => {
       render(StripeCheckout, {
         props: {
           amount: 299,
-          memorialId: 'memorial-123',
+          memorialId: 'event-123',
           lovedOneName: 'John Doe'
         }
       });
@@ -273,7 +273,7 @@ describe('StripeCheckout Component', () => {
       render(StripeCheckout, {
         props: {
           amount: 299,
-          memorialId: 'memorial-123',
+          memorialId: 'event-123',
           lovedOneName: 'John Doe'
         }
       });
@@ -306,7 +306,7 @@ describe('StripeCheckout Component', () => {
       render(StripeCheckout, {
         props: {
           amount: 299,
-          memorialId: 'memorial-123',
+          memorialId: 'event-123',
           lovedOneName: 'John Doe'
         }
       });
@@ -323,7 +323,7 @@ describe('StripeCheckout Component', () => {
         }
       });
 
-      expect(mockWindowLocation.href).toBe('/app/checkout/success?memorialId=memorial-123');
+      expect(mockWindowLocation.href).toBe('/app/checkout/success?memorialId=event-123');
     });
 
     it('shows processing state during payment', async () => {
@@ -333,7 +333,7 @@ describe('StripeCheckout Component', () => {
       render(StripeCheckout, {
         props: {
           amount: 299,
-          memorialId: 'memorial-123',
+          memorialId: 'event-123',
           lovedOneName: 'John Doe'
         }
       });
@@ -359,7 +359,7 @@ describe('StripeCheckout Component', () => {
       render(StripeCheckout, {
         props: {
           amount: 299,
-          memorialId: 'memorial-123',
+          memorialId: 'event-123',
           lovedOneName: 'John Doe'
         }
       });
@@ -388,7 +388,7 @@ describe('StripeCheckout Component', () => {
       render(StripeCheckout, {
         props: {
           amount: 299,
-          memorialId: 'memorial-123',
+          memorialId: 'event-123',
           lovedOneName: 'John Doe'
         }
       });
@@ -414,7 +414,7 @@ describe('StripeCheckout Component', () => {
       render(StripeCheckout, {
         props: {
           amount: 299,
-          memorialId: 'memorial-123',
+          memorialId: 'event-123',
           lovedOneName: 'John Doe'
         }
       });
@@ -433,7 +433,7 @@ describe('StripeCheckout Component', () => {
       render(StripeCheckout, {
         props: {
           amount: 299,
-          memorialId: 'memorial-123',
+          memorialId: 'event-123',
           lovedOneName: 'John Doe'
         }
       });
@@ -462,7 +462,7 @@ describe('StripeCheckout Component', () => {
       render(StripeCheckout, {
         props: {
           amount: 299,
-          memorialId: 'memorial-123',
+          memorialId: 'event-123',
           lovedOneName: 'John Doe'
         }
       });
@@ -487,7 +487,7 @@ describe('StripeCheckout Component', () => {
       render(StripeCheckout, {
         props: {
           amount: 299,
-          memorialId: 'memorial-123',
+          memorialId: 'event-123',
           lovedOneName: 'John Doe'
         }
       });
@@ -511,7 +511,7 @@ describe('StripeCheckout Component', () => {
       render(StripeCheckout, {
         props: {
           amount: 299,
-          memorialId: 'memorial-123',
+          memorialId: 'event-123',
           lovedOneName: 'John Doe'
         }
       });
@@ -528,7 +528,7 @@ describe('StripeCheckout Component', () => {
       render(StripeCheckout, {
         props: {
           amount: 299,
-          memorialId: 'memorial-123',
+          memorialId: 'event-123',
           lovedOneName: 'John Doe'
         }
       });
@@ -552,7 +552,7 @@ describe('StripeCheckout Component', () => {
       render(StripeCheckout, {
         props: {
           amount: 299,
-          memorialId: 'memorial-123',
+          memorialId: 'event-123',
           lovedOneName: 'John Doe'
         }
       });

@@ -34,7 +34,7 @@ describe('Calculator Component', () => {
 
   it('renders calculator steps', () => {
     render(Calculator, {
-      props: { memorial: mockMemorial }
+      props: { event: mockMemorial }
     });
     
     expect(screen.getByText(/service details/i)).toBeInTheDocument();
@@ -44,7 +44,7 @@ describe('Calculator Component', () => {
 
   it('starts on service details step', () => {
     render(Calculator, {
-      props: { memorial: mockMemorial }
+      props: { event: mockMemorial }
     });
     
     expect(screen.getByText(/when and where will the service be held/i)).toBeInTheDocument();
@@ -53,7 +53,7 @@ describe('Calculator Component', () => {
 
   it('validates service details before proceeding', async () => {
     render(Calculator, {
-      props: { memorial: mockMemorial }
+      props: { event: mockMemorial }
     });
     
     const nextButton = screen.getByRole('button', { name: /next/i });
@@ -66,13 +66,13 @@ describe('Calculator Component', () => {
 
   it('navigates to tier selection after valid service details', async () => {
     render(Calculator, {
-      props: { memorial: mockMemorial }
+      props: { event: mockMemorial }
     });
     
     // Fill out service details
     const locationInput = screen.getByLabelText(/location name/i);
     await fireEvent.input(locationInput, {
-      target: { value: 'Memorial Chapel' }
+      target: { value: 'Event Chapel' }
     });
     
     const dateInput = screen.getByLabelText(/service date/i);
@@ -95,7 +95,7 @@ describe('Calculator Component', () => {
 
   it('displays tier options correctly', async () => {
     render(Calculator, {
-      props: { memorial: mockMemorial }
+      props: { event: mockMemorial }
     });
     
     // Navigate to tier selection
@@ -112,7 +112,7 @@ describe('Calculator Component', () => {
 
   it('selects tier and updates pricing', async () => {
     render(Calculator, {
-      props: { memorial: mockMemorial }
+      props: { event: mockMemorial }
     });
     
     await fillServiceDetails();
@@ -133,14 +133,14 @@ describe('Calculator Component', () => {
 
   it('shows summary with all details', async () => {
     render(Calculator, {
-      props: { memorial: mockMemorial }
+      props: { event: mockMemorial }
     });
     
     await fillServiceDetails();
     await selectTier('premium');
     
     // Check summary details
-    expect(screen.getByText(/memorial chapel/i)).toBeInTheDocument();
+    expect(screen.getByText(/event chapel/i)).toBeInTheDocument();
     expect(screen.getByText(/january 15, 2024/i)).toBeInTheDocument();
     expect(screen.getByText(/2:00 pm/i)).toBeInTheDocument();
     expect(screen.getByText(/premium package/i)).toBeInTheDocument();
@@ -149,7 +149,7 @@ describe('Calculator Component', () => {
 
   it('saves and pays later', async () => {
     render(Calculator, {
-      props: { memorial: mockMemorial }
+      props: { event: mockMemorial }
     });
     
     await fillServiceDetails();
@@ -164,7 +164,7 @@ describe('Calculator Component', () => {
         expect.objectContaining({
           services: expect.objectContaining({
             main: expect.objectContaining({
-              location: { name: 'Memorial Chapel', address: '', isUnknown: false }
+              location: { name: 'Event Chapel', address: '', isUnknown: false }
             })
           }),
           calculatorConfig: expect.objectContaining({
@@ -178,7 +178,7 @@ describe('Calculator Component', () => {
 
   it('proceeds to payment', async () => {
     render(Calculator, {
-      props: { memorial: mockMemorial }
+      props: { event: mockMemorial }
     });
     
     await fillServiceDetails();
@@ -197,7 +197,7 @@ describe('Calculator Component', () => {
 
   it('handles additional services', async () => {
     render(Calculator, {
-      props: { memorial: mockMemorial }
+      props: { event: mockMemorial }
     });
     
     await fillServiceDetails();
@@ -219,7 +219,7 @@ describe('Calculator Component', () => {
 
   it('auto-saves form data', async () => {
     render(Calculator, {
-      props: { memorial: mockMemorial }
+      props: { event: mockMemorial }
     });
     
     const locationInput = screen.getByLabelText(/location name/i);
@@ -248,7 +248,7 @@ describe('Calculator Component', () => {
     localStorage.setItem(`calculator-${mockMemorial.id}`, JSON.stringify(savedData));
     
     render(Calculator, {
-      props: { memorial: mockMemorial }
+      props: { event: mockMemorial }
     });
     
     expect(screen.getByDisplayValue('Saved Location')).toBeInTheDocument();
@@ -259,7 +259,7 @@ describe('Calculator Component', () => {
   async function fillServiceDetails() {
     const locationInput = screen.getByLabelText(/location name/i);
     await fireEvent.input(locationInput, {
-      target: { value: 'Memorial Chapel' }
+      target: { value: 'Event Chapel' }
     });
     
     const dateInput = screen.getByLabelText(/service date/i);

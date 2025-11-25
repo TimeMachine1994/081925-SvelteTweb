@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-console.log('🧪 Adding test memorial data to Algolia...');
+console.log('🧪 Adding test event data to Algolia...');
 
 const algoliaClient = algoliasearch(
 	process.env.PUBLIC_ALGOLIA_APP_ID,
@@ -12,28 +12,28 @@ const algoliaClient = algoliasearch(
 
 const testMemorials = [
 	{
-		objectID: 'memorial-1',
+		objectID: 'event-1',
 		lovedOneName: 'John Smith',
 		slug: 'john-smith',
 		fullSlug: 'tributes/john-smith',
 		createdAt: '2024-01-15T10:00:00Z'
 	},
 	{
-		objectID: 'memorial-2',
+		objectID: 'event-2',
 		lovedOneName: 'Mary Johnson',
 		slug: 'mary-johnson',
 		fullSlug: 'tributes/mary-johnson',
 		createdAt: '2024-02-20T14:30:00Z'
 	},
 	{
-		objectID: 'memorial-3',
+		objectID: 'event-3',
 		lovedOneName: 'Robert Williams',
 		slug: 'robert-williams',
 		fullSlug: 'tributes/robert-williams',
 		createdAt: '2024-03-10T09:15:00Z'
 	},
 	{
-		objectID: 'memorial-4',
+		objectID: 'event-4',
 		lovedOneName: 'Sarah Davis',
 		slug: 'sarah-davis',
 		fullSlug: 'tributes/sarah-davis',
@@ -45,12 +45,12 @@ async function addTestMemorials() {
 	try {
 		console.log(`📝 Adding ${testMemorials.length} test memorials...`);
 		
-		for (const memorial of testMemorials) {
+		for (const event of testMemorials) {
 			await algoliaClient.saveObject({
 				indexName: 'memorials',
-				body: memorial
+				body: event
 			});
-			console.log(`✅ Added: ${memorial.lovedOneName}`);
+			console.log(`✅ Added: ${event.lovedOneName}`);
 		}
 		
 		console.log('🎉 All test memorials added successfully!');

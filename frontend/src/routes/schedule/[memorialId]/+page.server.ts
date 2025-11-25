@@ -28,17 +28,17 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	}
 
 	try {
-		// Get memorial data
+		// Get event data
 		const memorialDoc = await adminDb.collection('memorials').doc(memorialId).get();
 
 		if (!memorialDoc.exists) {
-			throw error(404, 'Memorial not found');
+			throw error(404, 'Event not found');
 		}
 
-		const memorial = memorialDoc.data();
+		const event = memorialDoc.data();
 
-		if (!memorial) {
-			throw error(404, 'Memorial data not found');
+		if (!event) {
+			throw error(404, 'Event data not found');
 		}
 
 		// Check permissions
@@ -47,33 +47,33 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 		console.log('🛡️ Permission Check:');
 		console.log(`   - User ID: ${userId}, Role: ${userRole}`);
-		console.log(`   - Memorial Owner UID: ${memorial.ownerUid || 'undefined'}`);
-		console.log(`   - Memorial FD UID: ${memorial.funeralDirectorUid || 'undefined'}`);
+		console.log(`   - Event Owner UID: ${event.ownerUid || 'undefined'}`);
+		console.log(`   - Event FD UID: ${event.funeralDirectorUid || 'undefined'}`);
 
 		const hasPermission =
 			userRole === 'admin' ||
-			memorial.ownerUid === userId ||
-			memorial.funeralDirectorUid === userId;
+			event.ownerUid === userId ||
+			event.funeralDirectorUid === userId;
 
 		if (!hasPermission) {
-			throw error(403, 'Insufficient permissions to access this memorial');
+			throw error(403, 'Insufficient permissions to access this event');
 		}
 
-		// Return memorial data and any existing calculator config
+		// Return event data and any existing calculator config
 		return sanitizeData({
-			memorial: {
+			event: {
 				id: memorialId,
-				lovedOneName: memorial?.lovedOneName || 'Unnamed Memorial',
-				ownerUid: memorial?.ownerUid,
-				funeralDirectorUid: memorial?.funeralDirectorUid,
-				services: memorial?.services || null, // Include services data
-				isPaid: memorial?.isPaid || false, // Payment status
-				paymentStatus: memorial?.paymentStatus || 'unpaid',
-				paidAt: memorial?.paidAt || null,
-				manualPayment: memorial?.manualPayment || null,
-				fullSlug: memorial?.fullSlug || null
+				lovedOneName: event?.lovedOneName || 'Unnamed Event',
+				ownerUid: event?.ownerUid,
+				funeralDirectorUid: event?.funeralDirectorUid,
+				services: event?.services || null, // Include services data
+				isPaid: event?.isPaid || false, // Payment status
+				paymentStatus: event?.paymentStatus || 'unpaid',
+				paidAt: event?.paidAt || null,
+				manualPayment: event?.manualPayment || null,
+				fullSlug: event?.fullSlug || null
 			},
-			calculatorConfig: memorial?.calculatorConfig || null,
+			calculatorConfig: event?.calculatorConfig || null,
 			role: locals.user.role, // Pass role to the page
 			user: {
 				email: locals.user.email,
@@ -81,10 +81,10 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			}
 		});
 	} catch (err) {
-		console.error('Error loading memorial data:', err);
+		console.error('Error loading event data:', err);
 		if (err instanceof Error && 'status' in err) {
 			throw err;
 		}
-		throw error(500, 'Failed to load memorial data');
+		throw error(500, 'Failed to load event data');
 	}
 };

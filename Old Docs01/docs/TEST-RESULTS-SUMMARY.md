@@ -21,8 +21,8 @@ This is an **excellent pass rate** for a complex system with multiple integratio
 **File**: `src/tests/integration/scheduled-services-integration.test.ts`
 - **Status**: ✅ **12/12 tests passing**
 - **Coverage**:
-  - ✅ Memorial.services structure validation
-  - ✅ Service conversion logic (Memorial → Scheduled Services)
+  - ✅ Event.services structure validation
+  - ✅ Service conversion logic (Event → Scheduled Services)
   - ✅ Stream credential generation
   - ✅ Service sorting by date/time
   - ✅ Status transitions (scheduled → live → completed)
@@ -34,7 +34,7 @@ This is an **excellent pass rate** for a complex system with multiple integratio
 **File**: `src/tests/integration/routing-fixes.test.ts`
 - **Status**: ✅ **13/13 tests passing**
 - **Coverage**:
-  - ✅ Memorial URL generation without `/tributes/`
+  - ✅ Event URL generation without `/tributes/`
   - ✅ Portal navigation to correct endpoints
   - ✅ API response URL formatting
   - ✅ Livestream dashboard navigation
@@ -46,7 +46,7 @@ This is an **excellent pass rate** for a complex system with multiple integratio
 ## 🔧 **CORE BUSINESS LOGIC TESTS - PASSING**
 
 ### **Passing Test Categories**:
-- ✅ **Memorial Access & Permissions** (memorialMiddleware.test.ts)
+- ✅ **Event Access & Permissions** (memorialMiddleware.test.ts)
 - ✅ **Audit Logging System** (auditLogger.test.ts)
 - ✅ **Calculator Logic** (Calculator.test.ts)
 - ✅ **Schedule Page Functionality** (page.test.ts)
@@ -90,7 +90,7 @@ This is an **excellent pass rate** for a complex system with multiple integratio
 ### **✅ WORKING PERFECTLY**
 1. **Scheduled Services System**
    - Service creation, management, status updates
-   - Memorial.services data structure
+   - Event.services data structure
    - Frontend state management with Svelte 5 runes
 
 2. **Livestream Archive System**
@@ -100,13 +100,13 @@ This is an **excellent pass rate** for a complex system with multiple integratio
    - Archive player with multiple states
 
 3. **Routing System**
-   - Memorial pages at `/{fullSlug}` (root level)
+   - Event pages at `/{fullSlug}` (root level)
    - Portal navigation to `/profile`
    - Email links and API responses
    - No more `/tributes/` 404 errors
 
 4. **Core Business Logic**
-   - Memorial creation and management
+   - Event creation and management
    - User authentication and permissions
    - Calculator and pricing logic
    - Schedule auto-save functionality

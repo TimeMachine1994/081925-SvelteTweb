@@ -1,5 +1,5 @@
 # Bulk Color Replacement Script for Tributestream Live Rebrand
-# Replaces memorial gold (#D5BA7F) with celebration blue (#3B82F6)
+# Replaces event gold (#D5BA7F) with celebration blue (#3B82F6)
 
 Write-Host "🎨 Tributestream Live - Bulk Color Replacement Script" -ForegroundColor Cyan
 Write-Host "================================================" -ForegroundColor Cyan

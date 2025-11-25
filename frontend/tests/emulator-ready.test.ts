@@ -16,8 +16,8 @@ describe('Firebase Emulator Integration Ready', () => {
 	it('should validate test configuration', () => {
 		// Basic test to confirm testing infrastructure works
 		const testData = {
-			memorial: {
-				name: 'Test Memorial',
+			event: {
+				name: 'Test Event',
 				isPublic: false,
 				createdAt: new Date()
 			},
@@ -27,9 +27,9 @@ describe('Firebase Emulator Integration Ready', () => {
 			}
 		};
 
-		expect(testData.memorial.name).toBe('Test Memorial');
+		expect(testData.event.name).toBe('Test Event');
 		expect(testData.user.role).toBe('owner');
-		expect(testData.memorial.createdAt).toBeInstanceOf(Date);
+		expect(testData.event.createdAt).toBeInstanceOf(Date);
 	});
 
 	it('should be ready for Firebase integration tests', () => {

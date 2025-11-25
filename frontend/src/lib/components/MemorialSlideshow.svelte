@@ -70,7 +70,7 @@
 	});
 </script>
 
-<div class="memorial-slideshow">
+<div class="event-slideshow">
 	<div class="slideshow-header">
 		<h3 class="slideshow-title">{slideshow.title}</h3>
 		<div class="slideshow-meta">
@@ -138,7 +138,7 @@
 </div>
 
 <style>
-	.memorial-slideshow {
+	.event-slideshow {
 		background: white;
 		border-radius: 16px;
 		padding: 2rem;
@@ -313,7 +313,7 @@
 	
 	/* Responsive Design */
 	@media (max-width: 768px) {
-		.memorial-slideshow {
+		.event-slideshow {
 			padding: 1rem;
 		}
 		

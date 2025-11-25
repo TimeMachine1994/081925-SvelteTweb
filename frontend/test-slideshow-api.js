@@ -8,8 +8,8 @@ async function testSlideshowAPI() {
   console.log('🔍 Testing Slideshow API...\n');
   
   try {
-    // Test 1: Test a known memorial ID (you'll need to replace this)
-    const testMemorialId = 'test-memorial-id'; // Replace with actual memorial ID
+    // Test 1: Test a known event ID (you'll need to replace this)
+    const testMemorialId = 'test-event-id'; // Replace with actual event ID
     
     console.log(`📋 Test 1: GET /api/memorials/${testMemorialId}/slideshow`);
     
@@ -85,17 +85,17 @@ async function testSlideshowAPI() {
   }
 }
 
-// Test with different memorial IDs
+// Test with different event IDs
 async function testMultipleMemorials() {
   const testIds = [
-    'test-memorial-id',
-    'memorial-123',
-    'sample-memorial',
-    // Add actual memorial IDs from your database here
+    'test-event-id',
+    'event-123',
+    'sample-event',
+    // Add actual event IDs from your database here
   ];
   
   for (const memorialId of testIds) {
-    console.log(`\n🔍 Testing Memorial ID: ${memorialId}`);
+    console.log(`\n🔍 Testing Event ID: ${memorialId}`);
     console.log('='.repeat(50));
     
     try {
@@ -119,9 +119,9 @@ async function testMultipleMemorials() {
 // Run the tests
 console.log('🚀 Starting Slideshow API Tests...\n');
 
-// First test with a specific memorial ID
+// First test with a specific event ID
 testSlideshowAPI().then(() => {
-  console.log('\n🔍 Testing multiple memorial IDs...');
+  console.log('\n🔍 Testing multiple event IDs...');
   return testMultipleMemorials();
 }).then(() => {
   console.log('\n✅ Tests completed!');

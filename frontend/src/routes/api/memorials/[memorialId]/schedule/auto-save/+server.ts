@@ -5,7 +5,7 @@ import type { CalculatorFormData, CalculatorConfig } from '$lib/types/livestream
 import { Timestamp } from 'firebase-admin/firestore';
 
 export const POST: RequestHandler = async ({ request, params, locals }) => {
-	console.log('💾 Auto-save schedule API called for memorial:', params.memorialId);
+	console.log('💾 Auto-save schedule API called for event:', params.memorialId);
 
 	try {
 		// Check authentication
@@ -16,7 +16,7 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 
 		const { memorialId } = params;
 		if (!memorialId) {
-			return json({ error: 'Memorial ID is required' }, { status: 400 });
+			return json({ error: 'Event ID is required' }, { status: 400 });
 		}
 
 		// Parse request body
@@ -33,31 +33,31 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 			hasCalculatorData: !!calculatorData
 		});
 
-		// Verify user has permission to edit this memorial
+		// Verify user has permission to edit this event
 		const memorialRef = adminDb.collection('memorials').doc(memorialId);
 		const memorialDoc = await memorialRef.get();
 
 		if (!memorialDoc.exists) {
-			console.log('❌ Memorial not found:', memorialId);
-			return json({ error: 'Memorial not found' }, { status: 404 });
+			console.log('❌ Event not found:', memorialId);
+			return json({ error: 'Event not found' }, { status: 404 });
 		}
 
-		const memorial = memorialDoc.data();
+		const event = memorialDoc.data();
 		const userRole = locals.user.role;
 		const userId = locals.user.uid;
 
 		// Check permissions (V1: simplified roles)
 		const hasPermission =
 			userRole === 'admin' ||
-			memorial?.ownerUid === userId ||
-			memorial?.funeralDirectorUid === userId;
+			event?.ownerUid === userId ||
+			event?.funeralDirectorUid === userId;
 
 		if (!hasPermission) {
-			console.log('❌ User lacks permission to edit memorial:', {
+			console.log('❌ User lacks permission to edit event:', {
 				userRole,
 				userId,
-				ownerUid: memorial?.ownerUid,
-				funeralDirectorUid: memorial?.funeralDirectorUid
+				ownerUid: event?.ownerUid,
+				funeralDirectorUid: event?.funeralDirectorUid
 			});
 			return json({ error: 'Insufficient permissions' }, { status: 403 });
 		}
@@ -68,7 +68,7 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 			lastModifiedBy: userId
 		};
 
-		// Update Memorial.services if provided
+		// Update Event.services if provided
 		if (services) {
 			updateData['services.main'] = services.main;
 			updateData['services.additional'] = services.additional || [];
@@ -97,10 +97,10 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 			updateData.calculatorConfig = calculatorConfig;
 		}
 
-		// Save to memorial
+		// Save to event
 		await memorialRef.update(updateData);
 
-		console.log('✅ Schedule auto-saved successfully for memorial:', memorialId);
+		console.log('✅ Schedule auto-saved successfully for event:', memorialId);
 
 		return json({
 			success: true,
@@ -120,7 +120,7 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 };
 
 export const GET: RequestHandler = async ({ params, locals }) => {
-	console.log('📖 Get auto-saved schedule for memorial:', params.memorialId);
+	console.log('📖 Get auto-saved schedule for event:', params.memorialId);
 
 	try {
 		// Check authentication
@@ -130,37 +130,37 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 
 		const { memorialId } = params;
 		if (!memorialId) {
-			return json({ error: 'Memorial ID is required' }, { status: 400 });
+			return json({ error: 'Event ID is required' }, { status: 400 });
 		}
 
-		// Get memorial and check permissions
+		// Get event and check permissions
 		const memorialRef = adminDb.collection('memorials').doc(memorialId);
 		const memorialDoc = await memorialRef.get();
 
 		if (!memorialDoc.exists) {
-			return json({ error: 'Memorial not found' }, { status: 404 });
+			return json({ error: 'Event not found' }, { status: 404 });
 		}
 
-		const memorial = memorialDoc.data();
+		const event = memorialDoc.data();
 		const userRole = locals.user.role;
 		const userId = locals.user.uid;
 
 		// Check permissions (V1: simplified roles)
 		const hasPermission =
 			userRole === 'admin' ||
-			memorial?.ownerUid === userId ||
-			memorial?.funeralDirectorUid === userId;
+			event?.ownerUid === userId ||
+			event?.funeralDirectorUid === userId;
 
 		if (!hasPermission) {
 			return json({ error: 'Insufficient permissions' }, { status: 403 });
 		}
 
 		// Return services and calculator config data
-		const services = memorial?.services;
-		const calculatorConfig = memorial?.calculatorConfig;
+		const services = event?.services;
+		const calculatorConfig = event?.calculatorConfig;
 
 		if (services || (calculatorConfig && calculatorConfig.autoSave)) {
-			console.log('✅ Auto-saved schedule found for memorial:', memorialId);
+			console.log('✅ Auto-saved schedule found for event:', memorialId);
 			return json({
 				success: true,
 				services: services || null,
@@ -169,7 +169,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 				calculatorConfig: calculatorConfig || null
 			});
 		} else {
-			console.log('ℹ️ No auto-saved schedule found for memorial:', memorialId);
+			console.log('ℹ️ No auto-saved schedule found for event:', memorialId);
 			return json({
 				success: true,
 				hasAutoSave: false

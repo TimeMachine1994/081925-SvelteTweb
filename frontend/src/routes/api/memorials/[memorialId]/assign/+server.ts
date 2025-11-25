@@ -3,7 +3,7 @@ import type { RequestHandler } from './$types';
 import { adminDb } from '$lib/server/firebase';
 
 export const POST: RequestHandler = async ({ locals, request, params }) => {
-	console.log('Memorial ownership reassignment request received 🚚');
+	console.log('Event ownership reassignment request received 🚚');
 
 	// 1. Verify user is an admin
 	if (!locals.user?.admin) {
@@ -13,14 +13,14 @@ export const POST: RequestHandler = async ({ locals, request, params }) => {
 
 	const { memorialId } = params;
 	if (!memorialId) {
-		console.error('🚫 Memorial ID is missing from parameters');
-		error(400, 'Bad Request: Memorial ID is required.');
+		console.error('🚫 Event ID is missing from parameters');
+		error(400, 'Bad Request: Event ID is required.');
 	}
 
 	try {
 		// 2. Expect a JSON body with newOwnerUid
 		const { newOwnerUid } = await request.json();
-		console.log(`Received request to assign memorial ${memorialId} to new owner ${newOwnerUid} 👨‍💼`);
+		console.log(`Received request to assign event ${memorialId} to new owner ${newOwnerUid} 👨‍💼`);
 
 		// 3. Validate newOwnerUid is present
 		if (!newOwnerUid) {
@@ -31,19 +31,19 @@ export const POST: RequestHandler = async ({ locals, request, params }) => {
 		// 4. Update the creatorUid field in Firestore
 		const memorialRef = adminDb.collection('memorials').doc(memorialId);
 
-		console.log(`Updating memorial ${memorialId} in Firestore... 📝`);
+		console.log(`Updating event ${memorialId} in Firestore... 📝`);
 		await memorialRef.update({
 			creatorUid: newOwnerUid
 		});
-		console.log(`✅ Successfully updated memorial ${memorialId}`);
+		console.log(`✅ Successfully updated event ${memorialId}`);
 
 		// 5. Return a successful JSON response
 		return json({
 			success: true,
-			message: `Memorial ownership successfully reassigned to ${newOwnerUid}.`
+			message: `Event ownership successfully reassigned to ${newOwnerUid}.`
 		});
 	} catch (e) {
-		console.error('🔥 An error occurred during memorial ownership reassignment:', e);
-		error(500, 'Internal Server Error: Could not reassign memorial ownership.');
+		console.error('🔥 An error occurred during event ownership reassignment:', e);
+		error(500, 'Internal Server Error: Could not reassign event ownership.');
 	}
 };

@@ -27,7 +27,7 @@
 	let videoResolution = $state('1920x1080');
 	let videoFormat = $state('webm');
 	
-	// Memorial integration states
+	// Event integration states
 	let availableMemorials: any[] = $state([]);
 	let selectedMemorial = $state('');
 	let isEmbedding = $state(false);
@@ -360,7 +360,7 @@
 		alert('Embed code copied to clipboard!');
 	}
 	
-	// Memorial integration functions
+	// Event integration functions
 	async function fetchUserMemorials() {
 		try {
 			const response = await fetch('/api/user/memorials');
@@ -409,7 +409,7 @@
 					videoQuality: 'medium',
 					aspectRatio: '16:9'
 				},
-				status: 'local_only', // Set status so it appears on memorial pages
+				status: 'local_only', // Set status so it appears on event pages
 				createdAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString()
 			};
@@ -425,12 +425,12 @@
 			if (response.ok) {
 				const message = isEditMode 
 					? 'Slideshow successfully updated!' 
-					: 'Slideshow successfully embedded in memorial page!';
+					: 'Slideshow successfully embedded in event page!';
 				alert(message);
 				
-				// Navigate back to memorial page
+				// Navigate back to event page
 				if (selectedMemorial) {
-					window.location.href = `/memorial/${selectedMemorial}`;
+					window.location.href = `/event/${selectedMemorial}`;
 				} else {
 					// Reset form if not editing
 					if (!isEditMode) {
@@ -575,14 +575,14 @@
 			</div>
 		</div>
 
-		<!-- Memorial Integration Section -->
-		<div class="memorial-section">
-			<h3 class="memorial-title">
+		<!-- Event Integration Section -->
+		<div class="event-section">
+			<h3 class="event-title">
 				<Heart class="w-5 h-5" />
-				Add to Memorial Page
+				Add to Event Page
 			</h3>
-			<div class="memorial-grid">
-				<div class="memorial-settings">
+			<div class="event-grid">
+				<div class="event-settings">
 					<div class="setting-item">
 						<label for="slideshow-title">Slideshow Title</label>
 						<input 
@@ -590,31 +590,31 @@
 							type="text" 
 							bind:value={slideshowTitle}
 							placeholder="Enter slideshow title"
-							class="memorial-input"
+							class="event-input"
 						/>
 					</div>
 					<div class="setting-item">
-						<label for="memorial-select">Select Memorial</label>
-						<select id="memorial-select" bind:value={selectedMemorial} class="memorial-select">
-							<option value="">Choose a memorial...</option>
-							{#each availableMemorials as memorial}
-								<option value={memorial.id}>{memorial.lovedOneName}</option>
+						<label for="event-select">Select Event</label>
+						<select id="event-select" bind:value={selectedMemorial} class="event-select">
+							<option value="">Choose a event...</option>
+							{#each availableMemorials as event}
+								<option value={event.id}>{event.lovedOneName}</option>
 							{/each}
 						</select>
 					</div>
 				</div>
 				
-				<div class="memorial-actions">
+				<div class="event-actions">
 					<button 
 						onclick={embedInMemorial} 
-						class="memorial-btn primary"
+						class="event-btn primary"
 						disabled={isEmbedding || photos.length === 0 || !selectedMemorial}
 					>
 						<Heart class="w-5 h-5" />
 						{#if isEmbedding}
 							{isEditMode ? 'Updating...' : 'Embedding...'}
 						{:else}
-							{isEditMode ? 'Update Slideshow' : 'Embed in Memorial'}
+							{isEditMode ? 'Update Slideshow' : 'Embed in Event'}
 						{/if}
 					</button>
 				</div>
@@ -622,7 +622,7 @@
 			
 			{#if availableMemorials.length === 0}
 				<div class="no-memorials">
-					<p>No memorials found. <a href="/memorials/create" class="memorial-link">Create a memorial</a> to add slideshows.</p>
+					<p>No memorials found. <a href="/memorials/create" class="event-link">Create a event</a> to add slideshows.</p>
 				</div>
 			{/if}
 		</div>
@@ -944,8 +944,8 @@
 		border: 1px solid #e5e7eb;
 	}
 
-	/* Memorial Section */
-	.memorial-section {
+	/* Event Section */
+	.event-section {
 		background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
 		border-radius: 16px;
 		padding: 2rem;
@@ -953,7 +953,7 @@
 		color: white;
 	}
 
-	.memorial-title {
+	.event-title {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
@@ -963,21 +963,21 @@
 		color: white;
 	}
 
-	.memorial-grid {
+	.event-grid {
 		display: grid;
 		grid-template-columns: 1fr auto;
 		gap: 2rem;
 		align-items: end;
 	}
 
-	.memorial-settings {
+	.event-settings {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 		gap: 1rem;
 	}
 
-	.memorial-input,
-	.memorial-select {
+	.event-input,
+	.event-select {
 		width: 100%;
 		padding: 0.75rem;
 		border: 1px solid rgba(255, 255, 255, 0.3);
@@ -987,28 +987,28 @@
 		backdrop-filter: blur(10px);
 	}
 
-	.memorial-input::placeholder {
+	.event-input::placeholder {
 		color: rgba(255, 255, 255, 0.7);
 	}
 
-	.memorial-input:focus,
-	.memorial-select:focus {
+	.event-input:focus,
+	.event-select:focus {
 		outline: none;
 		border-color: rgba(255, 255, 255, 0.6);
 		background: rgba(255, 255, 255, 0.2);
 	}
 
-	.memorial-select option {
+	.event-select option {
 		background: #1f2937;
 		color: white;
 	}
 
-	.memorial-actions {
+	.event-actions {
 		display: flex;
 		gap: 1rem;
 	}
 
-	.memorial-btn {
+	.event-btn {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
@@ -1021,18 +1021,18 @@
 		white-space: nowrap;
 	}
 
-	.memorial-btn.primary {
+	.event-btn.primary {
 		background: rgba(255, 255, 255, 0.9);
 		color: #f5576c;
 	}
 
-	.memorial-btn.primary:hover:not(:disabled) {
+	.event-btn.primary:hover:not(:disabled) {
 		background: white;
 		transform: translateY(-2px);
 		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 	}
 
-	.memorial-btn:disabled {
+	.event-btn:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
 		transform: none;
@@ -1046,13 +1046,13 @@
 		text-align: center;
 	}
 
-	.memorial-link {
+	.event-link {
 		color: white;
 		text-decoration: underline;
 		font-weight: 600;
 	}
 
-	.memorial-link:hover {
+	.event-link:hover {
 		color: rgba(255, 255, 255, 0.8);
 	}
 

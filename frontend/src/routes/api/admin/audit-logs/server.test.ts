@@ -22,8 +22,8 @@ vi.mock('$lib/server/firebase', () => ({
 								userEmail: 'test@example.com',
 								userRole: 'owner',
 								timestamp: new Date(),
-								resourceType: 'memorial',
-								resourceId: 'memorial-123'
+								resourceType: 'event',
+								resourceId: 'event-123'
 							})
 						}
 					]
@@ -108,11 +108,11 @@ describe('Audit Logs API', () => {
 	});
 
 	it('should apply resource type filter', async () => {
-		const mockEvent = createMockRequest({ resourceType: 'memorial' });
+		const mockEvent = createMockRequest({ resourceType: 'event' });
 
 		await GET(mockEvent as any);
 
-		expect(mockWhere).toHaveBeenCalledWith('resourceType', '==', 'memorial');
+		expect(mockWhere).toHaveBeenCalledWith('resourceType', '==', 'event');
 	});
 
 	it('should apply date range filters', async () => {

@@ -43,7 +43,7 @@ export const GET: RequestHandler = async ({ url }) => {
 					{
 						author_name: "Rev. Johnson",
 						rating: 5,
-						text: "Professional setup, flawless streaming. Highly recommend for any memorial service.",
+						text: "Professional setup, flawless streaming. Highly recommend for any event service.",
 						relative_time_description: "3 months ago",
 						profile_photo_url: "",
 						time: Date.now() - 7776000000 // 3 months ago
@@ -111,7 +111,7 @@ export const GET: RequestHandler = async ({ url }) => {
 				{
 					author_name: "Rev. Johnson",
 					rating: 5,
-					text: "Professional setup, flawless streaming. Highly recommend for any memorial service.",
+					text: "Professional setup, flawless streaming. Highly recommend for any event service.",
 					relative_time_description: "3 months ago",
 					profile_photo_url: "",
 					time: Date.now() - 7776000000

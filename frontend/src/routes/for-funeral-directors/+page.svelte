@@ -14,13 +14,13 @@
 		},
 		{ 
 			icon: Users, 
-			title: "Memorial Creation & Management", 
-			description: "Create beautiful memorial pages for families with digital guestbooks, photo galleries, slideshow creation, and easy-to-use management interface." 
+			title: "Event Creation & Management", 
+			description: "Create beautiful event pages for families with digital guestbooks, photo galleries, slideshow creation, and easy-to-use management interface." 
 		},
 		{ 
 			icon: Shield, 
 			title: "Your Brand Featured", 
-			description: "Your funeral home's name and branding prominently displayed on each memorial page, reinforcing your value (coming soon). " 
+			description: "Your funeral home's name and branding prominently displayed on each event page, reinforcing your value (coming soon). " 
 		}
 	];
 
@@ -62,7 +62,7 @@
 	<title>For Funeral Directors - Tributestream</title>
 	<meta
 		name="description"
-		content="Elevate your services with Tributestream. Offer beautiful, seamless memorial livestreams and digital guestbooks for the families you serve."
+		content="Elevate your services with Tributestream. Offer beautiful, seamless event livestreams and digital guestbooks for the families you serve."
 	/>
 </svelte:head>
 
@@ -78,7 +78,7 @@
 				Create Beautiful Memorials for Your Families
 			</h1>
 			<p class="text-lg md:text-xl {theme.hero.sub} max-w-2xl mx-auto mb-10">
-				Register your individual director account to create memorial pages, manage livestreams, and help families build lasting digital tributes with photos, videos, and slideshows.
+				Register your individual director account to create event pages, manage livestreams, and help families build lasting digital tributes with photos, videos, and slideshows.
 			</p>
 			<div class="flex flex-col sm:flex-row gap-4 justify-center">
 				<Button theme="minimal" onclick={handleBookDemo} class="bg-blue-500 text-black hover:bg-[#2563EB] flex items-center justify-center">
@@ -101,7 +101,7 @@
 					Why Create Your Director Account?
 				</h2>
 				<p class="text-lg text-slate-600 max-w-2xl mx-auto">
-					Get your own dashboard to create memorials for families, track their progress, and provide comprehensive digital memorial services.
+					Get your own dashboard to create memorials for families, track their progress, and provide comprehensive digital event services.
 				</p>
 			</div>
 			<div class="grid md:grid-cols-3 gap-8">
@@ -154,7 +154,7 @@
 						</div>
 						<div class="flex items-center space-x-3">
 							<Phone class="h-5 w-5 text-blue-500" />
-							<span class="text-slate-700">Track memorial progress & analytics</span>
+							<span class="text-slate-700">Track event progress & analytics</span>
 						</div>
 					</div>
 				</Card>

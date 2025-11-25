@@ -39,22 +39,22 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		const memorialData: FuneralDirectorMemorialRequest = await request.json();
 
-		// Generate memorial title if not provided
+		// Generate event title if not provided
 		const title =
-			memorialData.memorial.title ||
+			memorialData.event.title ||
 			`In Memory of ${memorialData.deceased.firstName} ${memorialData.deceased.lastName}`;
 
 		// Generate slug
 		const baseSlug =
-			memorialData.memorial.customSlug ||
+			memorialData.event.customSlug ||
 			`${memorialData.deceased.firstName}-${memorialData.deceased.lastName}`
 				.toLowerCase()
 				.replace(/[^a-z0-9]/g, '-')
 				.replace(/-+/g, '-')
 				.replace(/^-|-$/g, '');
 
-		// Create memorial document
-		const memorial = {
+		// Create event document
+		const event = {
 			title,
 			slug: baseSlug,
 			fullSlug: `${baseSlug}-${Date.now()}`, // Ensure uniqueness
@@ -110,12 +110,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			// Owner information (will be created as user)
 			ownerInfo: memorialData.owner,
 
-			// Memorial settings
-			description: memorialData.memorial.description || '',
-			isPublic: memorialData.memorial.isPublic,
-			allowComments: memorialData.memorial.allowComments,
-			allowPhotos: memorialData.memorial.allowPhotos,
-			allowTributes: memorialData.memorial.allowTributes,
+			// Event settings
+			description: memorialData.event.description || '',
+			isPublic: memorialData.event.isPublic,
+			allowComments: memorialData.event.allowComments,
+			allowPhotos: memorialData.event.allowPhotos,
+			allowTributes: memorialData.event.allowTributes,
 
 			// Additional options
 			options: memorialData.options,
@@ -159,12 +159,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				createdByFuneralDirector: locals.user.uid
 			});
 
-		// Add ownerUid to the memorial data
-		memorial.ownerUid = userRecord.uid;
+		// Add ownerUid to the event data
+		event.ownerUid = userRecord.uid;
 
-		// Create memorial document
+		// Create event document
 		const memorialRef = adminDb.collection('memorials').doc();
-		await memorialRef.set(memorial);
+		await memorialRef.set(event);
 
 		// Send registration email to the owner
 		try {
@@ -172,7 +172,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				email: ownerData.email,
 				password: password,
 				lovedOneName: `${memorialData.deceased.firstName} ${memorialData.deceased.lastName}`,
-				tributeUrl: `https://tributestream.com/${memorial.fullSlug}`,
+				tributeUrl: `https://tributestream.com/${event.fullSlug}`,
 				familyContactName: `${ownerData.firstName} ${ownerData.lastName}`,
 				familyContactEmail: ownerData.email,
 				familyContactPhone: ownerData.phone,
@@ -188,11 +188,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return json({
 			success: true,
 			memorialId: memorialRef.id,
-			fullSlug: memorial.fullSlug,
-			message: 'Memorial created successfully'
+			fullSlug: event.fullSlug,
+			message: 'Event created successfully'
 		});
 	} catch (error) {
-		console.error('Error creating memorial:', error);
+		console.error('Error creating event:', error);
 		return json({ error: 'Internal server error' }, { status: 500 });
 	}
 };

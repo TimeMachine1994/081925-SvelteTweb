@@ -2,7 +2,7 @@
 
 **GOAL**: Migrate all production components from `/api/livestreamMVPTwo/` to unified `/api/streams/` and remove MVP Two system entirely.
 
-**TARGET**: Memorial-specific stream management at `http://localhost:5173/memorials/[memorialId]/streams`
+**TARGET**: Event-specific stream management at `http://localhost:5173/memorials/[memorialId]/streams`
 
 ---
 
@@ -54,7 +54,7 @@
 ### **Task 3.1: Migrate LivestreamControl.svelte**
 - [ ] **File**: `/lib/components/LivestreamControl.svelte`
 - [ ] **Change**: `fetch('/api/livestreamMVPTwo/streams')` → `fetch('/api/streams?memorialId=${memorialId}')`
-- [ ] **Update**: Remove client-side memorial filtering (use API filter)
+- [ ] **Update**: Remove client-side event filtering (use API filter)
 - [ ] **Test**: Verify stream loading works with unified API
 
 ### **Task 3.2: Migrate MemorialStreamDisplay.svelte**
@@ -104,7 +104,7 @@
 ## 🧪 **Phase 5: Testing & Validation**
 
 ### **Task 5.1: End-to-End Testing**
-- [ ] **Test**: Memorial stream management at `/memorials/[id]/streams`
+- [ ] **Test**: Event stream management at `/memorials/[id]/streams`
 - [ ] **Test**: Stream creation, start, stop workflow
 - [ ] **Test**: Recording sync and playback URL fixing
 - [ ] **Test**: Public stream viewing on custom page
@@ -118,7 +118,7 @@
 
 ### **Task 5.3: Performance Testing**
 - [ ] **Test**: Stream loading performance with unified API
-- [ ] **Test**: Memorial-specific filtering performance
+- [ ] **Test**: Event-specific filtering performance
 - [ ] **Test**: Public stream discovery performance
 
 ---
@@ -127,7 +127,7 @@
 
 - [ ] All production components use `/api/streams/` exclusively
 - [ ] No references to `/api/livestreamMVPTwo/` in production code
-- [ ] Memorial stream management works at `/memorials/[id]/streams`
+- [ ] Event stream management works at `/memorials/[id]/streams`
 - [ ] All MVP Two functionality preserved in unified system
 - [ ] `mvp_two_streams` collection no longer receives new data
 - [ ] Clean, single-source-of-truth architecture achieved

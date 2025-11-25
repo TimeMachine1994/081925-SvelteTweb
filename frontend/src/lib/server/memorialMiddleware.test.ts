@@ -21,9 +21,9 @@ vi.mock('$lib/firebase', () => ({
 	auth: {}
 }));
 
-describe('Memorial Middleware', () => {
+describe('Event Middleware', () => {
 	const mockEvent = {
-		params: { memorialId: 'memorial-123' },
+		params: { memorialId: 'event-123' },
 		locals: {
 			user: {
 				uid: 'user-123',
@@ -31,7 +31,7 @@ describe('Memorial Middleware', () => {
 				role: 'owner'
 			}
 		},
-		url: new URL('http://localhost:3000/my-portal/tributes/memorial-123/edit')
+		url: new URL('http://localhost:3000/my-portal/tributes/event-123/edit')
 	} as RequestEvent;
 
 	beforeEach(() => {
@@ -44,7 +44,7 @@ describe('Memorial Middleware', () => {
 			vi.mocked(MemorialAccessVerifier.checkViewAccess).mockResolvedValue({
 				hasAccess: true,
 				accessLevel: 'admin',
-				reason: 'User is memorial owner'
+				reason: 'User is event owner'
 			});
 
 			const result = await verifyMemorialPermissions(mockEvent);
@@ -85,9 +85,9 @@ describe('Memorial Middleware', () => {
 
 	describe('createMemorialRequest', () => {
 		it('should create request object with user data', () => {
-			const result = createMemorialRequest('memorial-123', mockEvent.locals);
+			const result = createMemorialRequest('event-123', mockEvent.locals);
 
-			expect(result.memorialId).toBe('memorial-123');
+			expect(result.memorialId).toBe('event-123');
 			expect(result.user.uid).toBe('user-123');
 			expect(result.user.role).toBe('owner');
 		});

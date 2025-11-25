@@ -32,27 +32,27 @@ async function getMemorialsFromFirebase() {
 			return [];
 		}
 		
-		// Convert Firebase document format to our memorial format
+		// Convert Firebase document format to our event format
 		const memorials = data.documents.map(doc => {
 			const id = doc.name.split('/').pop(); // Extract ID from document path
 			const fields = doc.fields || {};
 			
 			// Convert Firebase field format to regular object
-			const memorial = { id };
+			const event = { id };
 			for (const [key, value] of Object.entries(fields)) {
 				if (value.stringValue !== undefined) {
-					memorial[key] = value.stringValue;
+					event[key] = value.stringValue;
 				} else if (value.timestampValue !== undefined) {
-					memorial[key] = value.timestampValue;
+					event[key] = value.timestampValue;
 				} else if (value.integerValue !== undefined) {
-					memorial[key] = parseInt(value.integerValue);
+					event[key] = parseInt(value.integerValue);
 				} else if (value.booleanValue !== undefined) {
-					memorial[key] = value.booleanValue;
+					event[key] = value.booleanValue;
 				}
 				// Add other field types as needed
 			}
 			
-			return memorial;
+			return event;
 		});
 		
 		console.log(`✅ Found ${memorials.length} memorials in Firebase`);
@@ -64,18 +64,18 @@ async function getMemorialsFromFirebase() {
 	}
 }
 
-async function indexMemorial(memorial) {
-	if (!memorial.id) {
-		console.warn('⚠️ Skipping memorial without ID:', memorial);
+async function indexMemorial(event) {
+	if (!event.id) {
+		console.warn('⚠️ Skipping event without ID:', event);
 		return;
 	}
 
 	const record = {
-		objectID: memorial.id,
-		lovedOneName: memorial.lovedOneName || 'Unknown',
-		slug: memorial.slug || memorial.id,
-		fullSlug: memorial.fullSlug || `tributes/${memorial.slug || memorial.id}`,
-		createdAt: memorial.createdAt || new Date().toISOString(),
+		objectID: event.id,
+		lovedOneName: event.lovedOneName || 'Unknown',
+		slug: event.slug || event.id,
+		fullSlug: event.fullSlug || `tributes/${event.slug || event.id}`,
+		createdAt: event.createdAt || new Date().toISOString(),
 	};
 
 	try {
@@ -83,14 +83,14 @@ async function indexMemorial(memorial) {
 			indexName: 'memorials',
 			body: record
 		});
-		console.log(`✅ Indexed: ${record.lovedOneName} (${memorial.id})`);
+		console.log(`✅ Indexed: ${record.lovedOneName} (${event.id})`);
 	} catch (error) {
-		console.error(`❌ Error indexing memorial ${memorial.id}:`, error);
+		console.error(`❌ Error indexing event ${event.id}:`, error);
 	}
 }
 
 async function indexAllMemorials() {
-	console.log('🚀 Starting Firebase memorial indexing...');
+	console.log('🚀 Starting Firebase event indexing...');
 	
 	const memorials = await getMemorialsFromFirebase();
 	
@@ -101,8 +101,8 @@ async function indexAllMemorials() {
 	
 	console.log(`📋 Indexing ${memorials.length} memorials to Algolia...`);
 	
-	for (const memorial of memorials) {
-		await indexMemorial(memorial);
+	for (const event of memorials) {
+		await indexMemorial(event);
 	}
 	
 	console.log('🎉 Finished indexing all memorials!');

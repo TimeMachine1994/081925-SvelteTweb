@@ -23,14 +23,14 @@ This document covers collections related to administration, auditing, security, 
 ```
 
 **Example Actions:**
-- `create_memorial` - Admin creates memorial
+- `create_memorial` - Admin creates event
 - `funeral_director_auto_approved` - FD account auto-approved
 - `suspend_user` - Admin suspends user account
-- `toggle_payment_status` - Admin marks memorial as paid/unpaid
+- `toggle_payment_status` - Admin marks event as paid/unpaid
 
 **Used In:**
 - `/register/funeral-home/+page.server.ts` - Log auto-approval of funeral directors
-- `/api/admin/create-memorial/+server.ts` - Log memorial creation by admin
+- `/api/admin/create-event/+server.ts` - Log event creation by admin
 
 **Key Operations:**
 - Simple action logging without detailed context
@@ -94,7 +94,7 @@ This document covers collections related to administration, auditing, security, 
 **Example Actions:**
 - `mark_paid` / `mark_unpaid` - Payment status changes
 - `schedule_edit_request_updated` - Edit request approved/denied
-- `memorial_created` - New memorial created
+- `memorial_created` - New event created
 - `stream_started` - Stream went live
 
 **Used In:**
@@ -119,7 +119,7 @@ This document covers collections related to administration, auditing, security, 
 
 ### 4. `schedule_edit_requests`
 
-**Purpose:** Workflow for memorial owners to request schedule changes after payment.
+**Purpose:** Workflow for event owners to request schedule changes after payment.
 
 **Structure:**
 ```typescript
@@ -170,10 +170,10 @@ This document covers collections related to administration, auditing, security, 
 **Key Operations:**
 
 1. **Request Submission**
-   - Memorial owners submit change requests
+   - Event owners submit change requests
    - Includes original schedule and desired changes
    - Reason field explains why changes needed
-   - Rate limited to 1 request per memorial per 24 hours
+   - Rate limited to 1 request per event per 24 hours
 
 2. **Admin Review Workflow**
    - Admins see all pending requests
@@ -185,7 +185,7 @@ This document covers collections related to administration, auditing, security, 
    - `pending` - Awaiting admin review
    - `approved` - Admin approved, ready to apply changes
    - `denied` - Admin rejected the request
-   - `completed` - Changes have been applied to memorial
+   - `completed` - Changes have been applied to event
 
 4. **Audit Integration**
    - All status changes logged to `audit_logs`
@@ -306,8 +306,8 @@ This document covers collections related to administration, auditing, security, 
   lastRoleSwitch?: Timestamp;
   
   // Demo Data References
-  memorialId?: string;              // Created demo memorial
-  memorialSlug?: string;            // Memorial URL slug
+  memorialId?: string;              // Created demo event
+  memorialSlug?: string;            // Event URL slug
   
   // Session Metadata
   metadata?: {
@@ -335,7 +335,7 @@ This document covers collections related to administration, auditing, security, 
    - Creates 4 pre-authenticated demo users (one per role)
    - Generates custom tokens for instant login
    - Sets 2-hour expiry (configurable)
-   - Creates demo memorial with sample data
+   - Creates demo event with sample data
    - All entities tagged with `isDemo: true` and `demoSessionId`
 
 2. **Role Switching**
@@ -345,7 +345,7 @@ This document covers collections related to administration, auditing, security, 
    - No logout/login required
 
 3. **Demo Data Seeding**
-   - Pre-populates memorial with realistic data
+   - Pre-populates event with realistic data
    - Creates sample streams and slideshows
    - Uses demo templates for consistency
    - All data auto-expires with session
@@ -378,7 +378,7 @@ All entities created during demo have these fields:
 
 **Used In Collections:**
 - `users` - Demo user accounts
-- `memorials` - Demo memorial pages
+- `memorials` - Demo event pages
 - `streams` - Demo livestreams
 - `memorials/{id}/slideshows` - Demo slideshows
 - `funeral_directors` - Demo FD profiles

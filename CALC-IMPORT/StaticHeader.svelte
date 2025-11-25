@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import type { Memorial } from '$lib/types/memorial';
+	import type { Event } from '$lib/types/event';
 
-	let { memorial } = $props<{ memorial: Memorial | null }>();
+	let { event } = $props<{ event: Event | null }>();
 
-	const fullSlug = memorial ? `${memorial.vanitySlug}/${memorial.shortId}` : '';
+	const fullSlug = event ? `${event.vanitySlug}/${event.shortId}` : '';
 	const tributeUrl = `${$page.url.origin}/tributes/${fullSlug}`;
 
 	async function copyLink() {
@@ -22,8 +22,8 @@
 		if (navigator.share) {
 			navigator
 				.share({
-					title: `Tribute for ${memorial?.lovedOneName}`,
-					text: `Join us in remembering ${memorial?.lovedOneName}.`,
+					title: `Tribute for ${event?.lovedOneName}`,
+					text: `Join us in remembering ${event?.lovedOneName}.`,
 					url: tributeUrl
 				})
 				.catch((error) => console.log('Error sharing', error));
@@ -34,13 +34,13 @@
 	}
 
 	function editLink() {
-		if (memorial) {
-			goto(`/my-portal/tributes/${memorial.id}/edit`);
+		if (event) {
+			goto(`/my-portal/tributes/${event.id}/edit`);
 		}
 	}
 </script>
 
-{#if memorial}
+{#if event}
 	<div class="card p-4 mb-8">
 		<div class="flex flex-wrap justify-between items-center gap-4">
 			<div class="flex-1 min-w-[250px]">

@@ -1,7 +1,7 @@
 <!--
 MEMORIAL OWNERS ADMIN PAGE
 
-Manage users who own memorial pages
+Manage users who own event pages
 -->
 <script lang="ts">
 	import AdminLayout from '$lib/components/admin/AdminLayout.svelte';
@@ -95,13 +95,13 @@ Manage users who own memorial pages
 	}
 
 	function handleRowClick(user: any) {
-		goto(`/admin/users/memorial-owners/${user.id}`);
+		goto(`/admin/users/event-owners/${user.id}`);
 	}
 </script>
 
 <AdminLayout
-	title="Memorial Owners"
-	subtitle="Manage users who created memorial pages"
+	title="Event Owners"
+	subtitle="Manage users who created event pages"
 	actions={[
 		{
 			label: 'Filters',

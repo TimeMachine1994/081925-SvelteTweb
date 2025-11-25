@@ -43,7 +43,7 @@ export const load = async ({ locals }: any) => {
 ```typescript
 {
   // Recent Memorials (last 50)
-  recentMemorials: Memorial[];
+  recentMemorials: Event[];
   
   // All Users (last 100)
   allUsers: User[];
@@ -70,9 +70,9 @@ export const load = async ({ locals }: any) => {
 
 ### Features
 
-#### 1. Memorial Management
+#### 1. Event Management
 **Display**:
-- Memorial name
+- Event name
 - Creator
 - Created date
 - Status (draft, pending payment, live)
@@ -81,9 +81,9 @@ export const load = async ({ locals }: any) => {
 - Payment status
 
 **Actions**:
-- View memorial
-- Edit memorial
-- Delete memorial
+- View event
+- Edit event
+- Delete event
 - View livestream status
 
 **Filtering**:
@@ -149,7 +149,7 @@ await adminAuth.setCustomUserClaims(uid, {});
 - Pending approvals
 
 **Recent Activity**:
-- Latest memorial creations
+- Latest event creations
 - Recent user signups
 - Stream starts/stops
 - Payment completions
@@ -159,7 +159,7 @@ await adminAuth.setCustomUserClaims(uid, {});
 Enhanced version with additional features:
 
 ### Additional Data
-- Comprehensive memorial analytics
+- Comprehensive event analytics
 - Revenue tracking
 - Stream uptime metrics
 - User growth charts
@@ -298,18 +298,18 @@ const recentActivity = await adminDb
   .get();
 ```
 
-### 4. Troubleshooting Memorial Issues
+### 4. Troubleshooting Event Issues
 
-**Check Memorial Data**:
+**Check Event Data**:
 ```typescript
-const memorial = await adminDb
+const event = await adminDb
   .collection('memorials')
   .doc(memorialId)
   .get();
 
-console.log('Memorial Data:', memorial.data());
-console.log('Livestream Status:', memorial.data().livestream);
-console.log('Payment Status:', memorial.data().calculatorConfig);
+console.log('Event Data:', event.data());
+console.log('Livestream Status:', event.data().livestream);
+console.log('Payment Status:', event.data().calculatorConfig);
 ```
 
 **Common Fixes**:
@@ -496,7 +496,7 @@ Use Cloud Functions for heavy operations:
 
 - [[Authentication Flow]] - Admin role setup
 - [[Firestore Data Models]] - Database schema
-- [[Memorial Creation Flow]] - Understanding memorial data
+- [[Event Creation Flow]] - Understanding event data
 - [[Livestream Integration]] - Managing streams
 
 ## External Tools

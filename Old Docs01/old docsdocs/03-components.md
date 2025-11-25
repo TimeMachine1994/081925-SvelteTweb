@@ -112,30 +112,30 @@ Administrative dashboard for system management.
 Professional interface for funeral directors.
 
 **Features:**
-- Memorial management dashboard
-- Client memorial creation
+- Event management dashboard
+- Client event creation
 - Livestream control access
 - Business profile management
 - Analytics and reporting
 
 ##### OwnerPortal.svelte
-Family member interface for memorial owners.
+Family member interface for event owners.
 
 **Features:**
-- Memorial content management
+- Event content management
 - Photo and video uploads
 - Livestream scheduling
 - Family member invitations
-- Memorial sharing tools
+- Event sharing tools
 
 ##### ViewerPortal.svelte
-Public interface for memorial visitors.
+Public interface for event visitors.
 
 **Features:**
-- Memorial browsing
+- Event browsing
 - Follow/unfollow functionality
 - Comment and tribute posting
-- Memorial search
+- Event search
 - Social sharing
 
 ---
@@ -146,7 +146,7 @@ Public interface for memorial visitors.
 Main livestream management interface.
 
 **Props:**
-- `memorialId: string` - Memorial identifier
+- `memorialId: string` - Event identifier
 - `user: User` - Current user
 
 **Features:**
@@ -180,10 +180,10 @@ Comprehensive stream management with analytics.
 ---
 
 #### LivestreamPlayer.svelte
-Video player component for memorial pages.
+Video player component for event pages.
 
 **Props:**
-- `memorialId: string` - Memorial identifier
+- `memorialId: string` - Event identifier
 - `scheduledServices?: ScheduledService[]` - Service information
 
 **Features:**
@@ -218,7 +218,7 @@ Archive management interface for completed streams.
 Multi-player component for displaying archived streams.
 
 **Props:**
-- `memorialId: string` - Memorial identifier
+- `memorialId: string` - Event identifier
 - `canManage?: boolean` - Management permissions
 
 **Features:**
@@ -237,7 +237,7 @@ Unified video player with multiple format support.
 
 **Props:**
 - `stream: Stream` - Stream data
-- `memorial?: Memorial` - Memorial context
+- `event?: Event` - Event context
 
 **Features:**
 - HLS/DASH playback support
@@ -293,7 +293,7 @@ Located in `/lib/components/calculator/`:
 Main pricing calculator with tier selection.
 
 **Props:**
-- `memorial: Memorial` - Memorial data
+- `event: Event` - Event data
 - `initialData?: CalculatorFormData` - Pre-filled data
 
 **Features:**
@@ -377,14 +377,14 @@ Stripe payment integration component.
 Located in `/lib/components/ui/`:
 
 #### MemorialCard.svelte
-Memorial display card for listings.
+Event display card for listings.
 
 **Props:**
-- `memorial: Memorial` - Memorial data
+- `event: Event` - Event data
 - `showActions?: boolean` - Action buttons
 
 **Features:**
-- Memorial preview
+- Event preview
 - Service information
 - Action buttons (edit, view, delete)
 - Responsive layout
@@ -531,7 +531,7 @@ import Calculator from './Calculator.svelte';
 
 describe('Calculator', () => {
   it('renders tier selection', () => {
-    render(Calculator, { memorial: mockMemorial });
+    render(Calculator, { event: mockMemorial });
     expect(screen.getByText('Select Service Tier')).toBeInTheDocument();
   });
 });

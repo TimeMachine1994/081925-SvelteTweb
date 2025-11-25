@@ -8,14 +8,14 @@ This document covers subcollections, content management, commerce, and maintenan
 
 ### 1. `memorials/{memorialId}/slideshows`
 
-**Purpose:** Store photo slideshow videos and metadata as subcollections under each memorial.
+**Purpose:** Store photo slideshow videos and metadata as subcollections under each event.
 
 **Structure:**
 ```typescript
 {
   id: string;                       // Document ID
   title: string;
-  memorialId: string;               // Parent memorial ID
+  memorialId: string;               // Parent event ID
   
   // Firebase Storage (Primary Storage)
   firebaseStoragePath: string;      // Storage path: slideshows/{memorialId}/{timestamp}-{title}.webm
@@ -70,7 +70,7 @@ This document covers subcollections, content management, commerce, and maintenan
 ```
 
 **Used In:**
-- `/[fullSlug]/+page.server.ts` - Load slideshows for memorial display
+- `/[fullSlug]/+page.server.ts` - Load slideshows for event display
 - `/api/memorials/[memorialId]/slideshow/+server.ts` - Slideshow CRUD operations
 - `/api/slideshow/upload-firebase/+server.ts` - Upload slideshow video and photos
 - `/api/slideshow/save-metadata/+server.ts` - Save slideshow metadata
@@ -83,7 +83,7 @@ This document covers subcollections, content management, commerce, and maintenan
    - Client-side video generation using Canvas API
    - Video uploaded to Firebase Storage
    - Metadata saved to Firestore subcollection
-   - Single slideshow per memorial (auto-overwrites)
+   - Single slideshow per event (auto-overwrites)
 
 2. **Photo Storage**
    - Individual photos stored: `slideshows/{memorialId}/photos/{timestamp}-{photoId}.jpg`
@@ -104,7 +104,7 @@ This document covers subcollections, content management, commerce, and maintenan
 
 **Important Notes:**
 - Subcollection structure: `memorials/{memorialId}/slideshows/{slideshowId}`
-- Only one active slideshow per memorial (overwrites on new creation)
+- Only one active slideshow per event (overwrites on new creation)
 - Status 'unpublished' for draft/editing mode (future feature)
 - Legacy Cloudflare Stream support removed
 
@@ -112,7 +112,7 @@ This document covers subcollections, content management, commerce, and maintenan
 
 ### 2. `memorials/{memorialId}/followers`
 
-**Purpose:** Track users following a memorial for updates and notifications.
+**Purpose:** Track users following a event for updates and notifications.
 
 **Structure:**
 ```typescript
@@ -129,24 +129,24 @@ This document covers subcollections, content management, commerce, and maintenan
 
 **Key Operations:**
 
-1. **Follow Memorial**
+1. **Follow Event**
    - POST to follow endpoint
    - Creates document in followers subcollection
-   - Increments `followerCount` on parent memorial
+   - Increments `followerCount` on parent event
 
-2. **Unfollow Memorial**
+2. **Unfollow Event**
    - DELETE to follow endpoint
    - Removes document from subcollection
-   - Decrements `followerCount` on parent memorial
+   - Decrements `followerCount` on parent event
 
 3. **Future Features**
-   - Email notifications for memorial updates
+   - Email notifications for event updates
    - New photo/video alerts
    - Service schedule changes
-   - Memorial content updates
+   - Event content updates
 
 **Important Notes:**
-- Follower count denormalized to parent memorial for performance
+- Follower count denormalized to parent event for performance
 - Enables future notification system
 - Currently supports follow/unfollow only
 
@@ -173,7 +173,7 @@ This document covers subcollections, content management, commerce, and maintenan
   scheduledFor?: Timestamp;
   
   // Categorization
-  category: 'memorial-planning' | 'grief-support' | 'technology' | 
+  category: 'event-planning' | 'grief-support' | 'technology' | 
             'funeral-industry' | 'livestreaming' | 'company-news' | 
             'customer-stories';
   tags?: string[];
@@ -246,7 +246,7 @@ This document covers subcollections, content management, commerce, and maintenan
 **Current Status:** Referenced but not fully implemented. Payment data currently stored in:
 - `memorials.calculatorConfig` - Calculator state and payment intent
 - `memorials.paymentHistory[]` - Array of payment attempts
-- Webhook updates memorial document directly
+- Webhook updates event document directly
 
 **Planned Structure:**
 ```typescript
@@ -293,7 +293,7 @@ This document covers subcollections, content management, commerce, and maintenan
 **Important Notes:**
 - Currently a placeholder collection
 - Payment processing works via Stripe webhooks
-- Purchase data stored in memorial documents
+- Purchase data stored in event documents
 - Future refactor will centralize purchase data here
 
 ---
@@ -344,13 +344,13 @@ This document covers subcollections, content management, commerce, and maintenan
 
 **Core Collections (4):**
 1. `users` - User accounts and profiles
-2. `memorials` - Memorial pages
+2. `memorials` - Event pages
 3. `streams` - Livestreams and recordings
 4. `funeral_directors` - Professional profiles
 
 **Subcollections (2):**
 5. `memorials/{id}/slideshows` - Photo slideshows
-6. `memorials/{id}/followers` - Memorial followers
+6. `memorials/{id}/followers` - Event followers
 
 **Admin & Audit (4):**
 7. `admin_actions` - Basic admin logging
@@ -615,7 +615,7 @@ firebase deploy --only firestore:indexes
 
 **Critical Collections:**
 - `users` - User accounts
-- `memorials` - Memorial content
+- `memorials` - Event content
 - `streams` - Stream configurations
 - `funeral_directors` - Professional data
 - `blog` - Content marketing
@@ -650,12 +650,12 @@ gcloud firestore export gs://tributestream-backups/$(date +%Y-%m-%d)/
 **Public Read:**
 - `memorials` (where `isPublic == true`)
 - `blog` (where `status == 'published'`)
-- `memorials/{id}/slideshows` (inherits memorial access)
+- `memorials/{id}/slideshows` (inherits event access)
 
 **Authenticated User Read:**
 - `users/{uid}` - Own document only
 - `memorials` (where `ownerUid == uid` OR `funeralDirectorUid == uid`)
-- `streams` (based on parent memorial access)
+- `streams` (based on parent event access)
 - `funeral_directors/{uid}` - Own document only
 - `schedule_edit_requests` (where `requestedBy == uid` OR admin)
 
@@ -693,14 +693,14 @@ const memorials = await adminDb
   .limit(20)
   .get();
 
-// Get memorial by slug (needs index)
-const memorial = await adminDb
+// Get event by slug (needs index)
+const event = await adminDb
   .collection('memorials')
   .where('fullSlug', '==', slug)
   .limit(1)
   .get();
 
-// Get memorial's streams (needs index)
+// Get event's streams (needs index)
 const streams = await adminDb
   .collection('streams')
   .where('memorialId', '==', memorialId)

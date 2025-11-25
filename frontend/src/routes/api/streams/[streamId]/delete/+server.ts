@@ -7,7 +7,7 @@ import type { RequestHandler } from './$types';
  * 
  * Delete a livestream
  * 
- * Authorization: Admin, memorial owner, or funeral director
+ * Authorization: Admin, event owner, or funeral director
  */
 export const DELETE: RequestHandler = async ({ locals, params }) => {
 	console.log('🗑️ [STREAM DELETE] DELETE request for stream:', params.streamId);
@@ -38,25 +38,25 @@ export const DELETE: RequestHandler = async ({ locals, params }) => {
 		const streamData = streamDoc.data()!;
 		const memorialId = streamData.memorialId;
 
-		// Get memorial to check permissions
+		// Get event to check permissions
 		const memorialDoc = await adminDb.collection('memorials').doc(memorialId).get();
 
 		if (!memorialDoc.exists) {
-			console.log('❌ [STREAM DELETE] Memorial not found:', memorialId);
-			throw SvelteKitError(404, 'Memorial not found');
+			console.log('❌ [STREAM DELETE] Event not found:', memorialId);
+			throw SvelteKitError(404, 'Event not found');
 		}
 
-		const memorial = memorialDoc.data()!;
+		const event = memorialDoc.data()!;
 
 		// Check permissions
 		const hasPermission =
 			userRole === 'admin' ||
-			memorial.ownerUid === userId ||
-			memorial.funeralDirectorUid === userId;
+			event.ownerUid === userId ||
+			event.funeralDirectorUid === userId;
 
 		if (!hasPermission) {
 			console.log('❌ [STREAM DELETE] User lacks permission:', userId);
-			throw SvelteKitError(403, 'Permission denied. Only admins, memorial owners, and funeral directors can delete streams.');
+			throw SvelteKitError(403, 'Permission denied. Only admins, event owners, and funeral directors can delete streams.');
 		}
 
 		// Log stream details before deletion
@@ -101,7 +101,7 @@ export const DELETE: RequestHandler = async ({ locals, params }) => {
 				details: {
 					streamTitle: streamData.title,
 					streamStatus: streamData.status,
-					memorialName: memorial.lovedOneName
+					memorialName: event.lovedOneName
 				}
 			});
 			console.log('📋 [STREAM DELETE] Audit log created');

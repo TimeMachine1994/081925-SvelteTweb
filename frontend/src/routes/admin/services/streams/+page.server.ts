@@ -44,7 +44,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		};
 	});
 
-	// Fetch memorial names for each stream
+	// Fetch event names for each stream
 	const memorialIds = [...new Set(streams.map(s => s.memorialId))];
 	const memorialDocs = await Promise.all(
 		memorialIds.map(id => adminDb.collection('memorials').doc(id).get())
@@ -57,10 +57,10 @@ export const load: PageServerLoad = async ({ locals }) => {
 		}
 	});
 
-	// Add memorial names to streams
+	// Add event names to streams
 	const streamsWithMemorials = streams.map(stream => ({
 		...stream,
-		memorialName: memorialNames[stream.memorialId] || 'Unknown Memorial'
+		memorialName: memorialNames[stream.memorialId] || 'Unknown Event'
 	}));
 
 	return {

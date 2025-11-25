@@ -8,7 +8,7 @@ This document serves as the single source of truth for the technical design of t
 
 ### 1.2. Project Overview
 
-Tributestream is a specialized online platform designed to help users create, manage, and share memorial services and tributes for their loved ones. The migration to SvelteKit aims to improve performance, simplify the codebase, and enhance the developer experience.
+Tributestream is a specialized online platform designed to help users create, manage, and share event services and tributes for their loved ones. The migration to SvelteKit aims to improve performance, simplify the codebase, and enhance the developer experience.
 
 ## 2. Architecture
 
@@ -37,7 +37,7 @@ The application will continue to use Firestore as its primary database. The exis
 -   **Data Duplication:** To improve performance, some data may be duplicated (e.g., adding `creatorDisplayName` to the `memorials` collection).
 -   **Collection Consolidation:** The `userEventConfigurations`, `eventConfigs`, and `privateNotes` collections may be consolidated to simplify queries.
 -   **Indexing Review:** Firestore indexes will be reviewed and optimized for SvelteKit's data fetching patterns.
--   **Memorial Photos:** A `photos` field (array of strings) has been added to the `memorials` collection. This array stores the public download URLs for each image uploaded to a specific memorial, linking the Firestore document to the files in Firebase Storage.
+-   **Event Photos:** A `photos` field (array of strings) has been added to the `memorials` collection. This array stores the public download URLs for each image uploaded to a specific event, linking the Firestore document to the files in Firebase Storage.
 -   **User Roles:** A `role` field (string) has been added to the `users` collection to support role-based access control. This field is managed via FireCMS and corresponds to a custom claim on the user's Firebase Auth token.
 
 ## 4. Authentication and Authorization
@@ -53,7 +53,7 @@ User authentication and authorization will be managed using Firebase Auth, with 
 Backend interactions will be handled by a combination of SvelteKit server endpoints and Firebase Cloud Functions.
 
 -   **SvelteKit Endpoints:** Existing Next.js API routes for admin functionality, login, and search will be re-implemented as SvelteKit `+server.ts` endpoints.
-    -   A new endpoint at `/my-portal/tributes/[memorialId]/upload` handles photo uploads. It accepts `multipart/form-data`, validates user ownership of the memorial, uploads the file to a structured path in Firebase Storage, and updates the corresponding memorial document in Firestore with the new photo's URL.
+    -   A new endpoint at `/my-portal/tributes/[memorialId]/upload` handles photo uploads. It accepts `multipart/form-data`, validates user ownership of the event, uploads the file to a structured path in Firebase Storage, and updates the corresponding event document in Firestore with the new photo's URL.
     -   New endpoints at `/api/set-admin-claim` and `/api/set-role-claim` have been created to allow administrators to manage user permissions via Firebase custom claims.
 -   **Cloud Functions:** Existing callable Cloud Functions for creating memorials, saving calculator configurations, and processing payments will be maintained.
 
@@ -191,7 +191,7 @@ This table outlines the intended abilities for each role. The initial implementa
 | 3 | Update Server Auth Hook | ✅ Completed | The server hook now reads the `role` custom claim and adds it to `event.locals.user`. |
 | 4 | Implement Role-Based UI | ✅ Completed | The `/my-portal` page now renders a different placeholder view for each user role. |
 | 5 | Implement Admin Preview | 🔲 Pending | Add functionality for admins to preview the portal as different roles. |
-| 6 | Secure "Create Memorial" | 🔲 Pending | Restrict access to the "Create Memorial" page to the `owner` role only. |
+| 6 | Secure "Create Event" | 🔲 Pending | Restrict access to the "Create Event" page to the `owner` role only. |
 
 #### Step 1: Update Data Model & FireCMS
 
@@ -239,7 +239,7 @@ This phase focused on adding essential management actions to the dashboard to ma
 
 | Task | Status |
 | :--- | :--- |
-| Add "Create New Memorial" button | ✅ Completed |
+| Add "Create New Event" button | ✅ Completed |
 | Add "Actions" column to memorials table | ✅ Completed |
 | Add "Edit" & "Create/Manage Livestream" buttons | ✅ Completed |
 
@@ -276,15 +276,15 @@ Location: /frontend/src/routes/profile/
 Component: frontend/src/lib/components/Profile.svelte
 Public Tribute Page
 
-Description: The public-facing page that displays a memorial tribute to visitors.
+Description: The public-facing page that displays a event tribute to visitors.
 Location: /frontend/src/routes/tributes/[fullSlug]/
 Multi-Step Registration
 
 Description: A specialized registration flow with distinct paths for 'Funeral Directors' and 'Loved Ones'.
-Location: /frontend/src/routes/register/funeral-director/ and /frontend/src/routes/register/loved-one/
+Location: /frontend/src/routes/register/funeral-director/ and /frontend/src/routes/register/new-event-and-account/
 Livestream Management
 
-Description: A user-facing page for creating and managing new livestreams associated with a memorial.
+Description: A user-facing page for creating and managing new livestreams associated with a event.
 Location: /frontend/src/routes/my-portal/tributes/[memorialId]/livestream/new/
 Theme Showcase Pages
 
@@ -296,15 +296,15 @@ Create Livestream
 Endpoint: POST /api/livestream/create
 Description: Creates a new livestream session.
 Location: frontend/src/routes/api/livestream/create/+server.ts
-Follow Memorial
+Follow Event
 
 Endpoint: POST /api/memorials/[memorialId]/follow
-Description: Allows a user to follow a specific memorial.
+Description: Allows a user to follow a specific event.
 Location: frontend/src/routes/api/memorials/[memorialId]/follow/+server.ts
-Invite to Memorial
+Invite to Event
 
 Endpoint: POST /api/memorials/[memorialId]/invite
-Description: Enables sending invitations for a memorial to other users.
+Description: Enables sending invitations for a event to other users.
 Location: frontend/src/routes/api/memorials/[memorialId]/invite/+server.ts
 User Logout
 

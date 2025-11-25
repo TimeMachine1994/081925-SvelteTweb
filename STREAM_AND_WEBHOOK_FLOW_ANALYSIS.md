@@ -14,7 +14,7 @@
 ```javascript
 // Stream is created with EMPTY credentials
 const streamData = {
-  title: "Memorial Service",
+  title: "Event Service",
   memorialId: "abc123",
   status: scheduledStartTime ? 'scheduled' : 'ready',  // ← Sets status
   isVisible: true,
@@ -113,7 +113,7 @@ await streamDoc.ref.update({
   "uid": "eb222fcca08eeb1ae84c981ebe8aeeb6",
   "status": "connected",
   "meta": {
-    "name": "Memorial Service Stream"
+    "name": "Event Service Stream"
   },
   "created": "2024-11-13T12:00:00Z",
   "modified": "2024-11-13T12:05:00Z"
@@ -196,7 +196,7 @@ await streamDoc.ref.update(updates);
        └─> NO streaming capability yet
 
 2. Admin views stream in admin dashboard
-   └─> Sees: [🔵 SCHEDULED] Memorial Service
+   └─> Sees: [🔵 SCHEDULED] Event Service
    └─> Sees: "Arm Stream" section (purple box)
    └─> Dropdown: Mobile Input / Mobile Streaming / Stream Key
 
@@ -316,7 +316,7 @@ curl -X PUT \
 ```javascript
 // Option 1: Don't set scheduledStartTime
 const streamData = {
-  title: "Memorial Service",
+  title: "Event Service",
   memorialId,
   status: 'ready',  // ← No scheduledStartTime means 'ready'
   // scheduledStartTime: undefined

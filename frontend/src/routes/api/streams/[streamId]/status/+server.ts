@@ -102,7 +102,7 @@ function getRecommendations(analysis: any): string[] {
 	}
 	
 	if (analysis.isVisible === false) {
-		recommendations.push('👁️ Stream is hidden (isVisible=false) - it won\'t appear on memorial page');
+		recommendations.push('👁️ Stream is hidden (isVisible=false) - it won\'t appear on event page');
 	}
 	
 	if (analysis.status === 'scheduled' && analysis.scheduledTimeReadable) {
@@ -115,13 +115,13 @@ function getRecommendations(analysis: any): string[] {
 	
 	if (!recommendations.length) {
 		if (analysis.wouldBeShownAsLive) {
-			recommendations.push('✅ Stream should be showing as LIVE on memorial page');
+			recommendations.push('✅ Stream should be showing as LIVE on event page');
 		} else if (analysis.wouldBeShownAsScheduled) {
-			recommendations.push('✅ Stream should be showing as SCHEDULED on memorial page');
+			recommendations.push('✅ Stream should be showing as SCHEDULED on event page');
 		} else if (analysis.wouldBeShownAsRecorded) {
-			recommendations.push('✅ Stream should be showing as RECORDED on memorial page');
+			recommendations.push('✅ Stream should be showing as RECORDED on event page');
 		} else {
-			recommendations.push('❓ Stream may not be visible on memorial page');
+			recommendations.push('❓ Stream may not be visible on event page');
 		}
 	}
 	

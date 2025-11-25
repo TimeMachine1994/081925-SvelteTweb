@@ -10,20 +10,20 @@
 
 	let { data }: { data: PageData } = $props();
 
-	// Extract memorial, streams, and slideshows data from server load
-	let memorial = $derived(data.memorial);
+	// Extract event, streams, and slideshows data from server load
+	let event = $derived(data.event);
 	let streams = $derived((data.streams || []) as any);
 	let slideshows = $derived((data.slideshows || []) as any);
 	let user = $derived(data.user);
 	
 	// Determine if user can edit slideshows
 	let canEditSlideshows = $derived(() => {
-		if (!user || !memorial) return false;
+		if (!user || !event) return false;
 		
 		return (
 			user.role === 'admin' ||
-			memorial.ownerUid === user.uid ||
-			memorial.funeralDirectorUid === user.uid
+			event.ownerUid === user.uid ||
+			event.funeralDirectorUid === user.uid
 		);
 	});
 
@@ -61,7 +61,7 @@
 
 	function shareOnTwitter() {
 		const url = encodeURIComponent(absoluteUrl());
-		const text = encodeURIComponent(`Join us for ${memorial?.lovedOneName || ''}`);
+		const text = encodeURIComponent(`Join us for ${event?.lovedOneName || ''}`);
 		openShareWindow(`https://twitter.com/intent/tweet?url=${url}&text=${text}&via=tributestream`);
 		showSharePopup = false;
 	}
@@ -104,8 +104,8 @@
 
 	// Check if booking banner should be shown
 	let bannerState = $derived(() => {
-		if (!memorial || !memorial.id) return { shouldShow: false };
-		return shouldShowBookingBanner(memorial.id, user, memorial);
+		if (!event || !event.id) return { shouldShow: false };
+		return shouldShowBookingBanner(event.id, user, event);
 	});
 
 	// Handle banner dismissal
@@ -137,15 +137,15 @@
 	}
 
 	// Simplified: Use hasCustomHtml flag from server
-	let hasCustomHtml = $derived((memorial as any)?.hasCustomHtml || false);
+	let hasCustomHtml = $derived((event as any)?.hasCustomHtml || false);
 
 	// Show booking banner after delay if conditions are met
 	$effect(() => {
 		const currentBannerState = bannerState();
 		if (currentBannerState.shouldShow && !showBookingBanner) {
 			console.log('🎯 [BOOKING_BANNER] Scheduling banner display in 3 seconds...');
-			if (memorial?.id) {
-				debugBannerState(memorial.id);
+			if (event?.id) {
+				debugBannerState(event.id);
 			}
 			
 			const timer = setTimeout(() => {
@@ -154,8 +154,8 @@
 				bannerVisible = true;
 				
 				// Increment view counter when banner is shown
-				if (memorial?.id) {
-					markBannerAsSeen(memorial.id);
+				if (event?.id) {
+					markBannerAsSeen(event.id);
 				}
 			}, 3000); // 3 second delay
 
@@ -163,18 +163,18 @@
 		}
 	});
 
-	// Log memorial data for debugging
+	// Log event data for debugging
 	$effect(() => {
-		if (memorial) {
-			console.log('🏠 [MEMORIAL_PAGE] Memorial loaded:', {
-				id: memorial.id,
-				name: memorial.lovedOneName,
-				isPublic: memorial.isPublic,
+		if (event) {
+			console.log('🏠 [MEMORIAL_PAGE] Event loaded:', {
+				id: event.id,
+				name: event.lovedOneName,
+				isPublic: event.isPublic,
 				hasCustomHtml: hasCustomHtml,
 				layoutType: hasCustomHtml ? 'Legacy (custom HTML only)' : 'Standard',
-				custom_html_length: (memorial as any)?.custom_html?.length || 0,
-				custom_html_preview: (memorial as any)?.custom_html ? 
-					(memorial as any).custom_html.substring(0, 100) + '...' : null,
+				custom_html_length: (event as any)?.custom_html?.length || 0,
+				custom_html_preview: (event as any)?.custom_html ? 
+					(event as any).custom_html.substring(0, 100) + '...' : null,
 				bannerState: bannerState()
 			});
 		}
@@ -182,19 +182,19 @@
 </script>
 
 <svelte:head>
-	<title>{memorial?.lovedOneName ? `${memorial.lovedOneName} | Tributestream Live` : 'Event'}</title>
-	<meta name="description" content={memorial?.content || 'Livestream event information'} />
+	<title>{event?.lovedOneName ? `${event.lovedOneName} | Tributestream Live` : 'Event'}</title>
+	<meta name="description" content={event?.content || 'Livestream event information'} />
 	
-	{#if memorial}
+	{#if event}
 		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content="website" />
 		<meta property="og:site_name" content="Tributestream Live" />
-		<meta property="og:title" content={`${memorial.lovedOneName} | Tributestream Live`} />
-		<meta property="og:description" content={memorial.content || `Join us for ${memorial.lovedOneName}'s celebration`} />
-		<meta property="og:url" content={browser ? window.location.href : `https://tributestream.com/${memorial.fullSlug || memorial.slug}`} />
-		{#if memorial.imageUrl}
-			<meta property="og:image" content={memorial.imageUrl} />
-			<meta property="og:image:alt" content={memorial.lovedOneName} />
+		<meta property="og:title" content={`${event.lovedOneName} | Tributestream Live`} />
+		<meta property="og:description" content={event.content || `Join us for ${event.lovedOneName}'s celebration`} />
+		<meta property="og:url" content={browser ? window.location.href : `https://tributestream.com/${event.fullSlug || event.slug}`} />
+		{#if event.imageUrl}
+			<meta property="og:image" content={event.imageUrl} />
+			<meta property="og:image:alt" content={event.lovedOneName} />
 			<meta property="og:image:width" content="1200" />
 			<meta property="og:image:height" content="630" />
 		{/if}
@@ -203,36 +203,36 @@
 		<meta name="twitter:card" content="summary_large_image" />
 		<meta name="twitter:site" content="@tributestream" />
 		<meta name="twitter:creator" content="@tributestream" />
-		<meta name="twitter:title" content={`${memorial.lovedOneName} | Tributestream Live`} />
-		<meta name="twitter:description" content={memorial.content || `Join us for ${memorial.lovedOneName}'s celebration`} />
-		{#if memorial.imageUrl}
-			<meta name="twitter:image" content={memorial.imageUrl} />
-			<meta name="twitter:image:alt" content={memorial.lovedOneName} />
+		<meta name="twitter:title" content={`${event.lovedOneName} | Tributestream Live`} />
+		<meta name="twitter:description" content={event.content || `Join us for ${event.lovedOneName}'s celebration`} />
+		{#if event.imageUrl}
+			<meta name="twitter:image" content={event.imageUrl} />
+			<meta name="twitter:image:alt" content={event.lovedOneName} />
 		{/if}
 	{/if}
 </svelte:head>
 
 <!-- Booking Reminder Banner -->
-{#if showBookingBanner && memorial}
+{#if showBookingBanner && event}
 	<BookingReminderBanner 
-		memorialId={memorial.id}
-		memorialName={memorial.lovedOneName}
+		memorialId={event.id}
+		memorialName={event.lovedOneName}
 		onDismiss={handleBannerDismiss}
 		visible={bannerVisible}
 	/>
 {/if}
 
-<div class="memorial-page {showBookingBanner ? 'banner-active' : ''}">
-	{#if memorial}
-		{#if hasCustomHtml && (memorial as any).custom_html}
-			<!-- Legacy Memorial Layout with Custom HTML -->
-			<div class="legacy-memorial">
-				<div class="memorial-header">
+<div class="event-page {showBookingBanner ? 'banner-active' : ''}">
+	{#if event}
+		{#if hasCustomHtml && (event as any).custom_html}
+			<!-- Legacy Event Layout with Custom HTML -->
+			<div class="legacy-event">
+				<div class="event-header">
 					<!-- Glass box wrapper for title only -->
 					<div class="glass-box">
-						<h1 class="memorial-title">
+						<h1 class="event-title">
 							<span class="celebration-prefix">Celebrating</span>
-							<span class="loved-one-name">{memorial.lovedOneName}</span>
+							<span class="new-event-and-account-name">{event.lovedOneName}</span>
 						</h1>
 					</div>
 					
@@ -241,8 +241,8 @@
 						<button 
 							class="share-button"
 							onclick={toggleSharePopup}
-							title="Share memorial"
-							aria-label="Share memorial"
+							title="Share event"
+							aria-label="Share event"
 						>
 							<Share2 size={18} />
 						</button>
@@ -273,8 +273,8 @@
 					<div class="hero-slideshow">
 						<SlideshowSection 
 							{slideshows} 
-							memorialName={memorial.lovedOneName || 'Unknown'}
-							memorialId={memorial.id}
+							memorialName={event.lovedOneName || 'Unknown'}
+							memorialId={event.id}
 							editable={canEditSlideshows()}
 							currentUserId={user?.uid}
 							heroMode={true}
@@ -282,28 +282,28 @@
 					</div>
 				</div>
 				<!-- Legacy Custom HTML Content Only -->
-				<div class="memorial-content-container">
+				<div class="event-content-container">
 					<!-- Stream Section for Legacy Layout - Always show, component handles empty state -->
 					<div class="streaming-section">
 						<MemorialStreamDisplay 
 							streams={streams || []} 
-							memorialName={memorial.lovedOneName}
+							memorialName={event.lovedOneName}
 						/>
 					</div>
 					
 					<div class="legacy-content">
-						{@html (memorial as any).custom_html}
+						{@html (event as any).custom_html}
 					</div>
 				</div>
 			</div>
 		{:else}
-			<!-- Standard Memorial Layout -->
-			<div class="memorial-layout">
+			<!-- Standard Event Layout -->
+			<div class="event-layout">
 				<!-- Header Section -->
-				<div class="memorial-header">
-					{#if memorial.imageUrl}
-						<div class="memorial-image">
-							<img src={memorial.imageUrl} alt={memorial.lovedOneName} />
+				<div class="event-header">
+					{#if event.imageUrl}
+						<div class="event-image">
+							<img src={event.imageUrl} alt={event.lovedOneName} />
 						</div>
 					{/if}
 					
@@ -312,8 +312,8 @@
 						<button 
 							class="share-button"
 							onclick={toggleSharePopup}
-							title="Share memorial"
-							aria-label="Share memorial"
+							title="Share event"
+							aria-label="Share event"
 						>
 							<Share2 size={18} />
 						</button>
@@ -340,24 +340,24 @@
 						{/if}
 					</div>
 					
-					<div class="memorial-header-content">
+					<div class="event-header-content">
 						<!-- Glass box wrapper for title and dates only -->
 						<div class="glass-box">
-							<h1 class="memorial-title">
+							<h1 class="event-title">
 								<span class="celebration-prefix">Celebrating</span>
-								<span class="loved-one-name">{memorial.lovedOneName}</span>
+								<span class="new-event-and-account-name">{event.lovedOneName}</span>
 							</h1>
 							
-							{#if memorial.birthDate || memorial.deathDate}
+							{#if event.birthDate || event.deathDate}
 								<div class="dates">
-									{#if memorial.birthDate}
-										<span>{formatDate(memorial.birthDate)}</span>
+									{#if event.birthDate}
+										<span>{formatDate(event.birthDate)}</span>
 									{/if}
-									{#if memorial.birthDate && memorial.deathDate}
+									{#if event.birthDate && event.deathDate}
 										<span> - </span>
 									{/if}
-									{#if memorial.deathDate}
-										<span>{formatDate(memorial.deathDate)}</span>
+									{#if event.deathDate}
+										<span>{formatDate(event.deathDate)}</span>
 									{/if}
 								</div>
 							{/if}
@@ -367,8 +367,8 @@
 						<div class="hero-slideshow">
 							<SlideshowSection 
 								{slideshows} 
-								memorialName={memorial.lovedOneName || 'Unknown'}
-								memorialId={memorial.id}
+								memorialName={event.lovedOneName || 'Unknown'}
+								memorialId={event.id}
 								editable={canEditSlideshows()}
 								currentUserId={user?.uid}
 								heroMode={true}
@@ -378,12 +378,12 @@
 				</div>
 
 				<!-- Body Section -->
-				<div class="memorial-body">
+				<div class="event-body">
 					<!-- Stream Section - Always show, component handles empty state -->
 					<div class="streaming-section">
 						<MemorialStreamDisplay 
 							streams={streams || []} 
-							memorialName={memorial.lovedOneName}
+							memorialName={event.lovedOneName}
 						/>
 					</div>
 					
@@ -393,14 +393,14 @@
 		{/if}
 	{:else}
 		<div class="loading">
-			<p>Loading memorial information...</p>
+			<p>Loading event information...</p>
 		</div>
 	{/if}
 </div>
 
 <style>
-	/* Memorial Page Styles */
-	.memorial-page {
+	/* Event Page Styles */
+	.event-page {
 		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 		background-color: #0a0a1a;
 		min-height: 100vh;
@@ -409,14 +409,14 @@
 		width: calc(100% + 40px);
 	}
 
-	.memorial-content-container {
+	.event-content-container {
 		max-width: 1200px;
 		margin: 0 auto;
 		padding: 3rem 2rem 0 2rem;
 		color: #e0e0e0;
 	}
 
-	.memorial-header {
+	.event-header {
 		text-align: center;
 		margin: 0;
 		padding: 4rem 2rem;
@@ -436,7 +436,7 @@
 		justify-content: center;
 	}
 
-	.memorial-header::before {
+	.event-header::before {
 		content: '';
 		position: absolute;
 		top: 0;
@@ -447,12 +447,12 @@
 		z-index: 1;
 	}
 
-	.memorial-header > * {
+	.event-header > * {
 		position: relative;
 		z-index: 2;
 	}
 
-	.memorial-header-content {
+	.event-header-content {
 		position: relative;
 		z-index: 2;
 		text-align: center;
@@ -469,7 +469,7 @@
 		backdrop-filter: blur(10px);
 	}
 
-	.memorial-title {
+	.event-title {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -491,7 +491,7 @@
 		font-weight: 300;
 	}
 
-	.loved-one-name {
+	.new-event-and-account-name {
 		font-family: 'Fanwood Text', serif;
 		font-style: italic;
 		font-weight: inherit;
@@ -506,13 +506,13 @@
 		text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
 	}
 
-	.memorial-layout {
+	.event-layout {
 		display: flex;
 		flex-direction: column;
 		min-height: 100vh;
 	}
 
-	.memorial-body {
+	.event-body {
 		flex: 1;
 		padding: 3rem 2rem;
 		background: #0a0a1a;
@@ -521,7 +521,7 @@
 		gap: 2rem;
 	}
 
-	.memorial-description {
+	.event-description {
 		max-width: 800px;
 		margin: 0 auto;
 		font-size: 1.1rem;
@@ -552,12 +552,12 @@
 		font-style: italic;
 	}
 
-	/* Legacy Memorial Styles */
-	.legacy-memorial {
+	/* Legacy Event Styles */
+	.legacy-event {
 		margin-bottom: 0;
 	}
 
-	.legacy-memorial .memorial-content-container {
+	.legacy-event .event-content-container {
 		padding-bottom: 0;
 	}
 
@@ -582,32 +582,32 @@
 	@import url('https://fonts.googleapis.com/css2?family=Fanwood+Text:ital,wght@0,400;1,400&display=swap');
 
 	/* Banner integration styles */
-	.memorial-page.banner-active {
+	.event-page.banner-active {
 		padding-top: 80px; /* Space for banner */
 		transition: padding-top 0.3s ease-out;
 	}
 
 	/* Responsive Design */
 	@media (max-width: 768px) {
-		.memorial-content-container {
+		.event-content-container {
 			padding: 2rem 1rem 0 1rem;
 		}
 
-		.memorial-header {
+		.event-header {
 			padding: 3rem 1rem;
 			height: 50vh;
 			min-height: 400px;
 		}
 
-		.memorial-title {
+		.event-title {
 			font-size: 2rem;
 		}
 
-		.memorial-header-content {
+		.event-header-content {
 			padding: 1.5rem;
 		}
 
-		.memorial-body {
+		.event-body {
 			padding: 2rem 1rem;
 		}
 
@@ -632,13 +632,13 @@
 	}
 	
 	/* Float nicely outside the glass box */
-	.memorial-header .hero-slideshow {
+	.event-header .hero-slideshow {
 		position: relative;
 		z-index: 10; /* Above background elements */
 	}
 	
-	/* Spacing handled by flex gap in memorial-header-content */
-	.memorial-header-content .hero-slideshow {
+	/* Spacing handled by flex gap in event-header-content */
+	.event-header-content .hero-slideshow {
 		margin: 0;
 	}
 	

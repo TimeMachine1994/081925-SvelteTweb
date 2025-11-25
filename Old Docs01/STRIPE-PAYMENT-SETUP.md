@@ -139,7 +139,7 @@ const booking = await db.bookings.create({
 - **Payment Verification**: Only lock after confirmed payment
 - **Database Integration**: Ready for booking record creation
 - **Time Slot Management**: Framework for availability management
-- **Status Updates**: Memorial status updates after payment
+- **Status Updates**: Event status updates after payment
 
 ## Security Features
 

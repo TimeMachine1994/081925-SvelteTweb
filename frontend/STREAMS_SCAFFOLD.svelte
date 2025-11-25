@@ -19,8 +19,8 @@
 	let pollingInterval: NodeJS.Timeout | null = null;
 
 	// Data from server
-	const memorial = data.memorial;
-	const memorialId = memorial.id;
+	const event = data.event;
+	const memorialId = event.id;
 	const user = data.user;
 
 	// Permission check
@@ -217,7 +217,7 @@
 </script>
 
 <svelte:head>
-	<title>Stream Management - {memorial.lovedOneName}</title>
+	<title>Stream Management - {event.lovedOneName}</title>
 </svelte:head>
 
 <div class="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-8">
@@ -228,7 +228,7 @@
 			<div class="flex items-center justify-between">
 				<div>
 					<h1 class="text-3xl font-bold text-gray-900">Stream Management</h1>
-					<p class="text-gray-600">{memorial.lovedOneName}</p>
+					<p class="text-gray-600">{event.lovedOneName}</p>
 				</div>
 				
 				{#if canCreateStreams}

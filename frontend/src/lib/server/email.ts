@@ -30,7 +30,7 @@ export interface EnhancedRegistrationEmailData {
 	memorialUrl: string;
 	ownerName: string;
 	password: string; // Add password for the enhanced email
-	magicLink?: string; // Optional magic link for one-click access to memorial page
+	magicLink?: string; // Optional magic link for one-click access to event page
 }
 
 export interface InvitationEmailData {

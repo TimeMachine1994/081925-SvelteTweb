@@ -1,25 +1,25 @@
 # Tributestream Schedule System Refactor - Complete Implementation
 
 ## Overview
-Successfully refactored and unified the Tributestream memorial service scheduling and pricing calculator system. The system now uses Firestore as the single source of truth, implements real Stripe payment processing, and includes comprehensive email notifications.
+Successfully refactored and unified the Tributestream event service scheduling and pricing calculator system. The system now uses Firestore as the single source of truth, implements real Stripe payment processing, and includes comprehensive email notifications.
 
 ## Key Accomplishments
 
 ### Phase 1: Data Structure Unification ✅
-- **Updated Type Definitions**: Enhanced `CalculatorFormData` and `LivestreamConfig` interfaces with memorial context
+- **Updated Type Definitions**: Enhanced `CalculatorFormData` and `LivestreamConfig` interfaces with event context
 - **Firestore Integration**: Unified data storage under `memorials` collection with `calculatorConfig` structure
 - **Auto-Save Enhancement**: Improved `useAutoSave` composable for seamless Firestore integration
 
-### Phase 2: Memorial-Specific Routes ✅
-- **Route Structure**: Created `/schedule/[memorialId]` for memorial-specific scheduling
-- **New Memorial Creation**: Added `/schedule/new` route for creating new memorials
-- **Legacy Route Cleanup**: Refactored `/schedule` to redirect to appropriate memorial routes
+### Phase 2: Event-Specific Routes ✅
+- **Route Structure**: Created `/schedule/[memorialId]` for event-specific scheduling
+- **New Event Creation**: Added `/schedule/new` route for creating new memorials
+- **Legacy Route Cleanup**: Refactored `/schedule` to redirect to appropriate event routes
 - **Data Persistence**: Removed localStorage dependency, replaced with Firestore auto-save
 
 ### Phase 3: Real Payment Processing ✅
 - **Stripe Integration**: Implemented real payment intent creation with proper authentication
 - **Webhook Handling**: Complete Stripe webhook processing for payment success, failure, and action required
-- **Firestore Updates**: Payment status tracking in memorial documents with history
+- **Firestore Updates**: Payment status tracking in event documents with history
 
 ### Phase 4: Email Service Implementation ✅
 - **Resend Integration**: Professional email service with HTML templates
@@ -38,9 +38,9 @@ User Input → Auto-Save (Firestore) → Payment Intent → Stripe Processing �
 #### Core Components
 - `src/lib/types/livestream.ts` - Updated type definitions
 - `src/lib/composables/useAutoSave.ts` - Enhanced auto-save functionality
-- `src/routes/schedule/[memorialId]/+page.svelte` - Memorial-specific schedule page
+- `src/routes/schedule/[memorialId]/+page.svelte` - Event-specific schedule page
 - `src/routes/schedule/[memorialId]/+page.server.ts` - Server-side data loading
-- `src/routes/schedule/new/+page.svelte` - New memorial creation
+- `src/routes/schedule/new/+page.svelte` - New event creation
 
 #### API Endpoints
 - `src/routes/api/create-payment-intent/+server.ts` - Stripe payment intent creation
@@ -88,29 +88,29 @@ PUBLIC_BASE_URL=http://localhost:5173
 
 ## Security Features
 - **Authentication Required**: All API endpoints require user authentication
-- **Permission Checks**: Memorial access based on user roles (admin, owner, funeral director, family member)
+- **Permission Checks**: Event access based on user roles (admin, owner, funeral director, family member)
 - **Webhook Verification**: Stripe webhook signature validation
 - **Data Validation**: Input validation on all endpoints
 
 ## User Flow
 
-### New Memorial Creation
+### New Event Creation
 1. User visits `/schedule/new`
 2. Enters loved one's name
-3. System creates memorial in Firestore
+3. System creates event in Firestore
 4. Redirects to `/schedule/[memorialId]`
 
 ### Schedule Configuration
-1. User configures service details on memorial-specific page
+1. User configures service details on event-specific page
 2. Auto-save triggers on form changes (2-second debounce)
 3. Data saved to Firestore under `memorials/[id]/calculatorConfig`
 4. User can save and return later or proceed to payment
 
 ### Payment Processing
 1. User clicks "Pay Now" - creates Stripe payment intent
-2. Payment intent saved to memorial's `paymentHistory`
+2. Payment intent saved to event's `paymentHistory`
 3. User completes payment on Stripe-hosted page
-4. Webhook updates memorial status and sends confirmation email
+4. Webhook updates event status and sends confirmation email
 
 ### Email Notifications
 - **Success**: Confirmation email with payment details and next steps
@@ -120,10 +120,10 @@ PUBLIC_BASE_URL=http://localhost:5173
 ## Testing Checklist
 
 ### Manual Testing Steps
-1. **Memorial Creation**
+1. **Event Creation**
    - [ ] Visit `/schedule/new`
-   - [ ] Create new memorial
-   - [ ] Verify redirect to memorial-specific page
+   - [ ] Create new event
+   - [ ] Verify redirect to event-specific page
 
 2. **Auto-Save Functionality**
    - [ ] Modify form fields
@@ -161,7 +161,7 @@ PUBLIC_BASE_URL=http://localhost:5173
    - Configure DNS records for email authentication
 
 4. **Firestore Security Rules**
-   - Ensure proper security rules for memorial access
+   - Ensure proper security rules for event access
    - Test permission enforcement
 
 ## Monitoring and Maintenance
@@ -181,7 +181,7 @@ PUBLIC_BASE_URL=http://localhost:5173
 ## Future Enhancements
 
 ### Potential Improvements
-1. **Real-time Collaboration**: Multiple users editing same memorial
+1. **Real-time Collaboration**: Multiple users editing same event
 2. **Payment Retry Logic**: Automatic retry for failed payments
 3. **Email Templates**: More sophisticated email template system
 4. **Analytics Dashboard**: Payment and booking analytics
@@ -190,10 +190,10 @@ PUBLIC_BASE_URL=http://localhost:5173
 ## Support and Troubleshooting
 
 ### Common Issues
-1. **Auto-save not working**: Check authentication and memorial permissions
+1. **Auto-save not working**: Check authentication and event permissions
 2. **Payment failures**: Verify Stripe configuration and webhook setup
 3. **Email not sending**: Check Resend API key and domain verification
-4. **Permission errors**: Verify user role and memorial access rights
+4. **Permission errors**: Verify user role and event access rights
 
 ### Debug Commands
 ```bash
@@ -210,7 +210,7 @@ curl -X POST http://localhost:5173/api/send-confirmation-email \
 
 The Tributestream schedule system has been successfully refactored to provide:
 - ✅ Unified data storage with Firestore
-- ✅ Memorial-specific routing and context
+- ✅ Event-specific routing and context
 - ✅ Real Stripe payment processing
 - ✅ Comprehensive email notifications
 - ✅ Auto-save functionality

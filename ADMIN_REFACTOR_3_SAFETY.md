@@ -13,7 +13,7 @@ This document covers RBAC/ABAC permissions, destructive action guards, undo syst
 ```typescript
 // lib/admin/permissions.ts
 interface Permission {
-  resource: 'memorial' | 'stream' | 'user' | 'funeral_director' | 'blog' | 'audit_log' | 'system';
+  resource: 'event' | 'stream' | 'user' | 'funeral_director' | 'blog' | 'audit_log' | 'system';
   action: 'read' | 'create' | 'update' | 'delete' | 'approve' | 'export';
   scope?: 'own' | 'team' | 'all';
   conditions?: PermissionCondition[];
@@ -40,8 +40,8 @@ const ADMIN_ROLES: Record<string, Role> = {
     id: 'content_admin',
     name: 'Content Administrator',
     permissions: [
-      { resource: 'memorial', action: 'read', scope: 'all' },
-      { resource: 'memorial', action: 'update', scope: 'all' },
+      { resource: 'event', action: 'read', scope: 'all' },
+      { resource: 'event', action: 'update', scope: 'all' },
       { resource: 'stream', action: 'read', scope: 'all' },
       { resource: 'stream', action: 'update', scope: 'all' },
       { resource: 'blog', action: '*', scope: 'all' },
@@ -53,8 +53,8 @@ const ADMIN_ROLES: Record<string, Role> = {
     id: 'customer_support',
     name: 'Customer Support',
     permissions: [
-      { resource: 'memorial', action: 'read', scope: 'all' },
-      { resource: 'memorial', action: 'update', scope: 'all', conditions: [
+      { resource: 'event', action: 'read', scope: 'all' },
+      { resource: 'event', action: 'update', scope: 'all', conditions: [
         { field: 'isPaid', operator: 'eq', value: false } // Can only edit unpaid
       ]},
       { resource: 'user', action: 'read', scope: 'all' },
@@ -70,8 +70,8 @@ const ADMIN_ROLES: Record<string, Role> = {
     id: 'financial_admin',
     name: 'Financial Administrator',
     permissions: [
-      { resource: 'memorial', action: 'read', scope: 'all' },
-      { resource: 'memorial', action: 'update', scope: 'all', conditions: [
+      { resource: 'event', action: 'read', scope: 'all' },
+      { resource: 'event', action: 'update', scope: 'all', conditions: [
         { field: 'action', operator: 'in', value: ['markPaid', 'markUnpaid'] }
       ]},
       { resource: 'audit_log', action: 'read', scope: 'all' },
@@ -155,11 +155,11 @@ function evaluateCondition(condition: PermissionCondition, target: any): boolean
 </script>
 
 <!-- Guard individual actions -->
-{#if hasPermission($adminUser, 'memorial', 'update', memorial)}
+{#if hasPermission($adminUser, 'event', 'update', event)}
   <Button onclick={editMemorial}>Edit</Button>
 {/if}
 
-{#if hasPermission($adminUser, 'memorial', 'delete', memorial)}
+{#if hasPermission($adminUser, 'event', 'delete', event)}
   <Button variant="danger" onclick={deleteMemorial}>Delete</Button>
 {/if}
 
@@ -172,10 +172,10 @@ function evaluateCondition(condition: PermissionCondition, target: any): boolean
 
 <!-- Show disabled state for no permission -->
 <Button 
-  disabled={!hasPermission($adminUser, 'memorial', 'approve')}
+  disabled={!hasPermission($adminUser, 'event', 'approve')}
   onclick={approveMemorial}
 >
-  Approve Memorial
+  Approve Event
 </Button>
 ```
 
@@ -378,16 +378,16 @@ interface ConfirmationConfig {
 
 ### Usage Examples
 
-**Delete Memorial (High Impact):**
+**Delete Event (High Impact):**
 ```svelte
 <script>
-  async function deleteMemorial(memorial) {
-    const impact = await fetchDeletionImpact(memorial.id);
+  async function deleteMemorial(event) {
+    const impact = await fetchDeletionImpact(event.id);
     
     const confirmed = await showConfirmation({
-      title: 'Delete Memorial',
-      message: `Are you sure you want to permanently delete the memorial for ${memorial.lovedOneName}?`,
-      actionLabel: 'Delete Memorial',
+      title: 'Delete Event',
+      message: `Are you sure you want to permanently delete the event for ${event.lovedOneName}?`,
+      actionLabel: 'Delete Event',
       variant: 'danger',
       requireReAuth: true,
       showImpact: true,
@@ -399,11 +399,11 @@ interface ConfirmationConfig {
           { type: 'followers', count: impact.followerCount }
         ]
       },
-      confirmationText: memorial.lovedOneName
+      confirmationText: event.lovedOneName
     });
     
     if (confirmed) {
-      await performDelete(memorial.id);
+      await performDelete(event.id);
     }
   }
 </script>
@@ -412,9 +412,9 @@ interface ConfirmationConfig {
 **Mark Unpaid (Medium Impact):**
 ```svelte
 <script>
-  async function markUnpaid(memorial) {
+  async function markUnpaid(event) {
     const confirmed = await showConfirmation({
-      title: 'Mark Memorial Unpaid',
+      title: 'Mark Event Unpaid',
       message: `This will change payment status and may affect the family's access. Continue?`,
       actionLabel: 'Mark Unpaid',
       variant: 'warning',
@@ -422,7 +422,7 @@ interface ConfirmationConfig {
     });
     
     if (confirmed) {
-      await updatePaymentStatus(memorial.id, false);
+      await updatePaymentStatus(event.id, false);
     }
   }
 </script>
@@ -435,8 +435,8 @@ interface ConfirmationConfig {
 ### Soft Delete Implementation
 
 ```typescript
-// Add to memorial interface
-interface Memorial {
+// Add to event interface
+interface Event {
   // ... existing fields
   deletedAt?: Date;
   deletedBy?: string;
@@ -456,7 +456,7 @@ async function softDeleteMemorial(memorialId: string, reason: string, userId: st
   // Log to audit
   await logAuditEvent({
     action: 'soft_delete',
-    resourceType: 'memorial',
+    resourceType: 'event',
     resourceId: memorialId,
     userId,
     details: { reason }
@@ -472,16 +472,16 @@ async function softDeleteMemorial(memorialId: string, reason: string, userId: st
 <script>
   import { toast } from '$lib/stores/toast';
   
-  async function deleteMemorialWithUndo(memorial) {
-    const result = await softDeleteMemorial(memorial.id, 'Admin deletion', user.uid);
+  async function deleteMemorialWithUndo(event) {
+    const result = await softDeleteMemorial(event.id, 'Admin deletion', user.uid);
     
     toast.show({
-      message: `Memorial for ${memorial.lovedOneName} deleted`,
+      message: `Event for ${event.lovedOneName} deleted`,
       action: {
         label: 'Undo',
         onclick: async () => {
-          await restoreMemorial(memorial.id);
-          toast.show({ message: 'Memorial restored', variant: 'success' });
+          await restoreMemorial(event.id);
+          toast.show({ message: 'Event restored', variant: 'success' });
         }
       },
       duration: 10000, // 10 second undo window
@@ -515,7 +515,7 @@ async function softDeleteMemorial(memorialId: string, reason: string, userId: st
   async function permanentDelete(id) {
     const confirmed = await showConfirmation({
       title: 'Permanent Deletion',
-      message: 'This action cannot be undone. The memorial will be permanently deleted.',
+      message: 'This action cannot be undone. The event will be permanently deleted.',
       actionLabel: 'Permanently Delete',
       variant: 'danger',
       requireReAuth: true
@@ -584,23 +584,23 @@ export async function POST({ request }) {
 }
 
 async function simulateAction(action: string, id: string, params: any) {
-  const memorial = await getMemorial(id);
+  const event = await getMemorial(id);
   
   switch (action) {
     case 'markPaid':
       return {
-        before: { isPaid: memorial.isPaid },
+        before: { isPaid: event.isPaid },
         after: { isPaid: true },
-        hasWarnings: memorial.isPaid === true,
-        warnings: memorial.isPaid ? ['Already marked as paid'] : []
+        hasWarnings: event.isPaid === true,
+        warnings: event.isPaid ? ['Already marked as paid'] : []
       };
       
     case 'makePublic':
       return {
-        before: { isPublic: memorial.isPublic },
+        before: { isPublic: event.isPublic },
         after: { isPublic: true },
-        hasWarnings: !memorial.isComplete,
-        warnings: !memorial.isComplete ? ['Memorial is incomplete'] : []
+        hasWarnings: !event.isComplete,
+        warnings: !event.isComplete ? ['Event is incomplete'] : []
       };
   }
 }

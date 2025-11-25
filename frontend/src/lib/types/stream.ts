@@ -32,7 +32,7 @@ export interface Stream {
 	status: StreamStatus;
 	visibility?: StreamVisibility;
 	
-	// Memorial association
+	// Event association
 	memorialId: string;
 	
 	// Scheduling

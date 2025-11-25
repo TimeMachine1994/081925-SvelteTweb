@@ -93,7 +93,7 @@ curl -X POST \
   -H "Content-Type: application/json" \
   -d '{
     "meta": {
-      "name": "Memorial Service - John Doe"
+      "name": "Event Service - John Doe"
     },
     "recording": {
       "mode": "automatic",
@@ -216,7 +216,7 @@ Stream Management UI
 
 2. **Stream Key Security**
    - Stream keys are displayed as password fields in UI
-   - Only accessible to memorial owners and funeral directors
+   - Only accessible to event owners and funeral directors
    - Should be rotated if compromised
 
 3. **Rate Limiting**

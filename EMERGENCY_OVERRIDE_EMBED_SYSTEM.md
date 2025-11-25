@@ -2,7 +2,7 @@
 
 ## Overview
 
-A fail-safe "panic button" system that allows administrators to replace the complex streaming infrastructure with a simple embed code (Vimeo, YouTube, etc.) for day-of emergencies. The override is completely invisible to memorial viewers.
+A fail-safe "panic button" system that allows administrators to replace the complex streaming infrastructure with a simple embed code (Vimeo, YouTube, etc.) for day-of emergencies. The override is completely invisible to event viewers.
 
 ## Implementation Date
 October 30, 2025
@@ -10,7 +10,7 @@ October 30, 2025
 ## Key Features
 
 ### 1. **Invisible to Public**
-- Memorial page viewers see a working player with no indication of override
+- Event page viewers see a working player with no indication of override
 - No badges, warnings, or visual differences from normal streaming
 - Professional, seamless experience for families and guests
 
@@ -46,7 +46,7 @@ interface Stream {
 #### Override Active Indicator
 When `overrideActive: true`, shows a prominent amber banner:
 - 🚨 "Override Active" heading
-- Explanation: "Memorial page is showing custom embed instead of Cloudflare stream"
+- Explanation: "Event page is showing custom embed instead of Cloudflare stream"
 - Displays internal note if provided
 
 #### Emergency Override Section
@@ -59,7 +59,7 @@ Collapsible `<details>` element with amber theme:
    - Resizable textarea
 
 2. **Activate Override** - Checkbox toggle
-   - Clear label: "Activate Override (replaces normal player on memorial page)"
+   - Clear label: "Activate Override (replaces normal player on event page)"
    
 3. **Internal Note** - Text input
    - Placeholder: "Why override is being used (viewers won't see this)"
@@ -70,7 +70,7 @@ Collapsible `<details>` element with amber theme:
    - Shows loading state
    - Reloads page on success
 
-### Memorial Page (`/[fullSlug]`)
+### Event Page (`/[fullSlug]`)
 
 **Rendering Priority:**
 1. **Check for override** - If `overrideActive === true` and `overrideEmbedCode` exists
@@ -130,7 +130,7 @@ Collapsible `<details>` element with amber theme:
    - Page reloads with changes applied
 
 6. **Verify**
-   - Visit memorial page
+   - Visit event page
    - Confirm Vimeo player is showing
    - Viewers see no indication of override
 
@@ -142,7 +142,7 @@ Collapsible `<details>` element with amber theme:
    - Keeps embed code saved for reference
 
 2. **System Returns to Normal**
-   - Memorial page shows Cloudflare stream again
+   - Event page shows Cloudflare stream again
    - Override code remains in database for future use
 
 ## Code Files Modified
@@ -228,7 +228,7 @@ Collapsible `<details>` element with amber theme:
 
 ### Before Event
 - [ ] Test with sample Vimeo embed
-- [ ] Verify memorial page shows embed correctly
+- [ ] Verify event page shows embed correctly
 - [ ] Confirm no visual indicators on public page
 - [ ] Test toggle off/on functionality
 - [ ] Verify note field saves properly
@@ -237,7 +237,7 @@ Collapsible `<details>` element with amber theme:
 - [ ] Paste live stream embed code
 - [ ] Activate override
 - [ ] Save changes
-- [ ] Refresh memorial page
+- [ ] Refresh event page
 - [ ] Confirm viewers can see stream
 
 ### After Event
@@ -296,7 +296,7 @@ const sanitizedEmbed = sanitizeHtml(overrideEmbedCode, {
 4. Paste embed code
 5. Check "Activate Override"
 6. Save
-7. Refresh memorial page to verify
+7. Refresh event page to verify
 
 ### For Administrators
 **Monitoring:**
@@ -315,6 +315,6 @@ const sanitizedEmbed = sanitizeHtml(overrideEmbedCode, {
 
 ## Summary
 
-The Emergency Override Embed System provides a reliable "eject button" for the streaming infrastructure. When the complex Cloudflare/RTMP system encounters issues, administrators can instantly switch to a simple embed code without any disruption visible to memorial viewers. This ensures that families always have a working stream, regardless of technical difficulties.
+The Emergency Override Embed System provides a reliable "eject button" for the streaming infrastructure. When the complex Cloudflare/RTMP system encounters issues, administrators can instantly switch to a simple embed code without any disruption visible to event viewers. This ensures that families always have a working stream, regardless of technical difficulties.
 
 **Key Principle:** "Transparent to users, visible to operators."

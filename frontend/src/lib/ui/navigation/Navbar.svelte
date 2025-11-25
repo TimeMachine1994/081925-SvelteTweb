@@ -28,7 +28,7 @@
 	let {
 		brand = { text: 'Tributestream', href: '/' },
 		navigationItems = [
-			{ label: 'Create Memorial', href: '/register/loved-one' },
+			{ label: 'Create Event', href: '/register/new-event-and-account' },
 			{ label: 'For Families', href: '/for-families' },
 			{ label: 'For Funeral Directors', href: '/for-funeral-directors' },
 			{ label: 'Contact Us', href: '/contact' }

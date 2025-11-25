@@ -16,8 +16,8 @@ async function createMissingArchiveEntry() {
             },
             body: JSON.stringify({
                 id: `manual_${Date.now()}`,
-                title: "Austin Sanchesgsgsgsgz Memorial Service",
-                description: "Memorial service recording",
+                title: "Austin Sanchesgsgsgsgz Event Service",
+                description: "Event service recording",
                 cloudflareId: cloudflareId,
                 playbackUrl: `https://cloudflarestream.com/${cloudflareId}/iframe`,
                 recordingPlaybackUrl: "",

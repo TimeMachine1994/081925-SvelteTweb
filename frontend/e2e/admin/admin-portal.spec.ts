@@ -84,12 +84,12 @@ test.describe('Admin Portal Flow', () => {
     await expect(page.getByText(/memorials created/i)).toBeVisible();
   });
 
-  test('manages memorial listings', async ({ page }) => {
+  test('manages event listings', async ({ page }) => {
     await page.getByRole('tab', { name: /memorials/i }).click();
     
-    await expect(page.getByText(/memorial management/i)).toBeVisible();
+    await expect(page.getByText(/event management/i)).toBeVisible();
     
-    // Should show memorial table
+    // Should show event table
     await expect(page.getByRole('table')).toBeVisible();
     await expect(page.getByText(/loved one/i)).toBeVisible();
     await expect(page.getByText(/owner/i)).toBeVisible();
@@ -97,20 +97,20 @@ test.describe('Admin Portal Flow', () => {
     await expect(page.getByText(/created/i)).toBeVisible();
   });
 
-  test('creates memorial from admin panel', async ({ page }) => {
-    await page.getByRole('tab', { name: /create memorial/i }).click();
+  test('creates event from admin panel', async ({ page }) => {
+    await page.getByRole('tab', { name: /create event/i }).click();
     
-    await expect(page.getByText(/create new memorial/i)).toBeVisible();
+    await expect(page.getByText(/create new event/i)).toBeVisible();
     
-    // Fill memorial creation form
-    await page.getByLabel(/loved one.*name/i).fill('Admin Created Memorial');
+    // Fill event creation form
+    await page.getByLabel(/loved one.*name/i).fill('Admin Created Event');
     await page.getByLabel(/owner email/i).fill('newowner@example.com');
     await page.getByLabel(/owner name/i).fill('New Owner');
     await page.getByLabel(/owner phone/i).fill('(555) 123-4567');
     
-    await page.getByRole('button', { name: /create memorial/i }).click();
+    await page.getByRole('button', { name: /create event/i }).click();
     
-    await expect(page.getByText(/memorial created successfully/i)).toBeVisible();
+    await expect(page.getByText(/event created successfully/i)).toBeVisible();
     await expect(page.getByText(/email sent to owner/i)).toBeVisible();
   });
 
@@ -210,8 +210,8 @@ test.describe('Admin Portal Flow', () => {
     await page.getByRole('tab', { name: /memorials/i }).click();
     
     // Select multiple memorials
-    await page.getByRole('checkbox', { name: /select memorial/i }).first().check();
-    await page.getByRole('checkbox', { name: /select memorial/i }).nth(1).check();
+    await page.getByRole('checkbox', { name: /select event/i }).first().check();
+    await page.getByRole('checkbox', { name: /select event/i }).nth(1).check();
     
     // Should show bulk actions
     await expect(page.getByText(/2 selected/i)).toBeVisible();
@@ -236,7 +236,7 @@ test.describe('Admin Portal Flow', () => {
     await expect(activityFeed).toBeVisible();
     
     // Should show different types of activities
-    await expect(activityFeed.getByText(/memorial created/i)).toBeVisible();
+    await expect(activityFeed.getByText(/event created/i)).toBeVisible();
     await expect(activityFeed.getByText(/user registered/i)).toBeVisible();
     await expect(activityFeed.getByText(/payment processed/i)).toBeVisible();
   });
@@ -246,7 +246,7 @@ test.describe('Admin Portal Flow', () => {
     await expect(page.getByRole('tab', { name: /overview/i })).toBeVisible();
     await expect(page.getByRole('tab', { name: /funeral directors/i })).toBeVisible();
     await expect(page.getByRole('tab', { name: /memorials/i })).toBeVisible();
-    await expect(page.getByRole('tab', { name: /create memorial/i })).toBeVisible();
+    await expect(page.getByRole('tab', { name: /create event/i })).toBeVisible();
     await expect(page.getByRole('tab', { name: /audit logs/i })).toBeVisible();
     
     // Should show admin-only actions

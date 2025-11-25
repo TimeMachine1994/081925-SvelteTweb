@@ -27,30 +27,30 @@ export const PATCH: RequestHandler = async ({ request, locals, params }) => {
 			);
 		}
 
-		// Get memorial to verify ownership
+		// Get event to verify ownership
 		const memorialDoc = await adminDb.collection('memorials').doc(memorialId).get();
 
 		if (!memorialDoc.exists) {
-			return json({ error: 'Memorial not found' }, { status: 404 });
+			return json({ error: 'Event not found' }, { status: 404 });
 		}
 
-		const memorial = memorialDoc.data();
+		const event = memorialDoc.data();
 
-		if (!memorial) {
-			return json({ error: 'Memorial data not found' }, { status: 404 });
+		if (!event) {
+			return json({ error: 'Event data not found' }, { status: 404 });
 		}
 
-		// Check if user has permission to edit this memorial
+		// Check if user has permission to edit this event
 		const canEdit =
-			memorial.ownerUid === locals.user.uid ||
-			memorial.funeralDirectorUid === locals.user.uid ||
+			event.ownerUid === locals.user.uid ||
+			event.funeralDirectorUid === locals.user.uid ||
 			locals.user.role === 'admin';
 
 		if (!canEdit) {
 			return json({ error: 'Permission denied' }, { status: 403 });
 		}
 
-		// Update Memorial.services with new structure
+		// Update Event.services with new structure
 		const updateData: any = {
 			'services.main': main,
 			'services.additional': additional || [],

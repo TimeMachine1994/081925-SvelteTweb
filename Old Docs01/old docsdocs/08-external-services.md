@@ -2,7 +2,7 @@
 
 ## Overview
 
-Tributestream integrates with several external services to provide comprehensive memorial service functionality. This document covers the configuration, usage patterns, and integration details for each external service.
+Tributestream integrates with several external services to provide comprehensive event service functionality. This document covers the configuration, usage patterns, and integration details for each external service.
 
 ## Cloudflare Stream
 
@@ -233,21 +233,21 @@ async function handleRecordingReady(webhook: any) {
     updatedAt: serverTimestamp()
   });
   
-  // Update memorial archive entries
+  // Update event archive entries
   const memorials = await getDocs(
     query(collection(db, 'memorials'),
           where('livestreamArchive', 'array-contains-any', [{ cloudflareId: uid }]))
   );
   
-  for (const memorial of memorials.docs) {
-    const data = memorial.data();
+  for (const event of memorials.docs) {
+    const data = event.data();
     const updatedArchive = data.livestreamArchive?.map(entry => 
       entry.cloudflareId === uid 
         ? { ...entry, recordingReady: true, recordingPlaybackUrl: playback.hls }
         : entry
     );
     
-    await updateDoc(memorial.ref, {
+    await updateDoc(event.ref, {
       livestreamArchive: updatedArchive,
       updatedAt: serverTimestamp()
     });
@@ -351,7 +351,7 @@ async function verifyUserClaims(idToken: string) {
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Memorial access rules
+    // Event access rules
     match /memorials/{memorialId} {
       allow read: if resource.data.isPublic == true ||
                      request.auth != null && (
@@ -481,9 +481,9 @@ export async function POST({ request, locals }) {
     return json({ error: 'Authentication required' }, { status: 401 });
   }
   
-  // Verify memorial ownership
-  const memorial = await getDoc(doc(db, 'memorials', memorialId));
-  if (!memorial.exists() || memorial.data().ownerUid !== user.uid) {
+  // Verify event ownership
+  const event = await getDoc(doc(db, 'memorials', memorialId));
+  if (!event.exists() || event.data().ownerUid !== user.uid) {
     return json({ error: 'Unauthorized' }, { status: 403 });
   }
   
@@ -657,18 +657,18 @@ async function sendWelcomeEmail(userEmail: string, userName: string, memorialUrl
         <div style="padding: 40px;">
           <h2>Hello ${userName},</h2>
           
-          <p>Your memorial has been successfully created. You can now:</p>
+          <p>Your event has been successfully created. You can now:</p>
           
           <ul>
             <li>Add photos and memories</li>
             <li>Schedule livestream services</li>
             <li>Invite family and friends</li>
-            <li>Customize your memorial page</li>
+            <li>Customize your event page</li>
           </ul>
           
           <div style="text-align: center; margin: 40px 0;">
             <a href="${memorialUrl}" style="background: #667eea; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
-              View Your Memorial
+              View Your Event
             </a>
           </div>
           
@@ -683,7 +683,7 @@ async function sendWelcomeEmail(userEmail: string, userName: string, memorialUrl
   await transporter.sendMail({
     from: env.FROM_EMAIL,
     to: userEmail,
-    subject: 'Welcome to Tributestream - Your Memorial is Ready',
+    subject: 'Welcome to Tributestream - Your Event is Ready',
     html: emailTemplate
   });
 }
@@ -712,7 +712,7 @@ async function sendPaymentConfirmationEmail(userId: string, amount: number) {
             <ul>
               <li>Your livestream service is now confirmed</li>
               <li>You'll receive streaming instructions 24 hours before your service</li>
-              <li>Family and friends can access your memorial page to join the service</li>
+              <li>Family and friends can access your event page to join the service</li>
             </ul>
           </div>
           
@@ -827,4 +827,4 @@ async function sendErrorAlert(errorLog: ErrorLog) {
 
 ---
 
-*This external services documentation provides comprehensive integration details for all third-party services used by Tributestream, ensuring reliable and secure operation of the memorial service platform.*
+*This external services documentation provides comprehensive integration details for all third-party services used by Tributestream, ensuring reliable and secure operation of the event service platform.*

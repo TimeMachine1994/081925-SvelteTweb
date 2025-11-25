@@ -22,7 +22,7 @@
 - Brand name: "Tributestream" → "Tributestream Live"
 - "For Families" → "For Hosts"
 - "For Funeral Directors" → "For Event Planners"
-- "Create Memorial" → "Create Event"
+- "Create Event" → "Create Event"
 - All hover colors: gold → blue
 
 **2. Footer (Footer.svelte)** ✅
@@ -33,7 +33,7 @@
 
 **3. Homepage (+page.svelte)** ✅ COMPLETE TRANSFORMATION
 - **Hero Section:**
-  - "Beautiful, reliable memorial livestreams" → "Beautiful, reliable event livestreams"
+  - "Beautiful, reliable event livestreams" → "Beautiful, reliable event livestreams"
   - "Bring everyone together—at church, graveside, or from home" → "Bring everyone together for life's celebrations—from anywhere"
   - "For Families" → "For Event Hosts"
   - "For Funeral Directors" → "For Event Planners"
@@ -55,13 +55,13 @@
 - **How It Works Section:**
   - Tabs: "Families" / "Funeral Directors" → "Event Hosts" / "Event Planners"
   - Steps updated to event language
-  - "Create Memorial" button → "Create Event" button
+  - "Create Event" button → "Create Event" button
 
 - **Timeline:**
-  - "Memorial service broadcast" → "Your celebration broadcast worldwide"
+  - "Event service broadcast" → "Your celebration broadcast worldwide"
 
 - **FAQ Items:**
-  - "memorial link" → "event link"
+  - "event link" → "event link"
   - "funeral homes" → "event planners and venues"
   - All references updated to event terminology
 
@@ -76,7 +76,7 @@
   - Partner list: Funeral homes → Event Centers, Wedding Venues, Hotels, etc.
 
 - **Meta Tags:**
-  - Title: "Beautiful, reliable memorial livestreams" → "Beautiful, reliable event livestreams"
+  - Title: "Beautiful, reliable event livestreams" → "Beautiful, reliable event livestreams"
   - Description updated to wedding/birthday/anniversary focus
 
 ### Phase 2: Bulk Color Replacement ✅ COMPLETE
@@ -122,7 +122,7 @@
 ## ⏳ Next Steps Required
 
 ### Immediate Priority (Phase 2 Completion):
-1. **Create `/create-event` route** (currently redirects to `/register/loved-one`)
+1. **Create `/create-event` route** (currently redirects to `/register/new-event-and-account`)
 2. **Transform marketing pages:**
    - `/for-hosts` (currently `/for-families`)
    - `/for-event-planners` (currently `/for-funeral-directors`)
@@ -154,7 +154,7 @@
 - **Soft Background:** `#F0F9FF` (blue-50)
 
 ### Replaced Colors:
-- ~~#D5BA7F~~ (old memorial gold)
+- ~~#D5BA7F~~ (old event gold)
 - ~~#C5AA6F~~ (darker gold)
 
 ---
@@ -205,8 +205,8 @@
 
 ### User Experience:
 - **Homepage now celebrates:** Weddings, Birthdays, Anniversaries, Special Events
-- **Visual theme:** Modern, vibrant blue (celebration) vs. muted gold (memorial)
-- **Language:** Joyful, event-focused vs. somber, memorial-focused
+- **Visual theme:** Modern, vibrant blue (celebration) vs. muted gold (event)
+- **Language:** Joyful, event-focused vs. somber, event-focused
 
 ### Technical Debt:
 - Minimal - most changes are complete and functional
@@ -220,7 +220,7 @@
 | Route | Status | Notes |
 |-------|--------|-------|
 | `/` | ✅ Complete | Homepage fully transformed |
-| `/create-event` | ⚠️ Not created | Currently redirects to `/register/loved-one` |
+| `/create-event` | ⚠️ Not created | Currently redirects to `/register/new-event-and-account` |
 | `/for-hosts` | ⚠️ Not created | Need to create or rename `/for-families` |
 | `/for-event-planners` | ⚠️ Not created | Need to create or rename `/for-funeral-directors` |
 | `/search` | ⏳ Needs review | Search functionality terminology |

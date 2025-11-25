@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-// Find Janet Pusey memorial specifically
+// Find Janet Pusey event specifically
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import dotenv from 'dotenv';
@@ -40,7 +40,7 @@ const adminDb = getFirestore(adminApp);
 
 async function findJanetPusey() {
 	try {
-		console.log('\n🎯 DIRECT SEARCH for Janet Pusey memorial...');
+		console.log('\n🎯 DIRECT SEARCH for Janet Pusey event...');
 		
 		// Test 1: Direct query by fullSlug
 		console.log('\n1️⃣ Testing fullSlug query...');
@@ -108,7 +108,7 @@ async function findJanetPusey() {
 		if (!migrationQuery.empty) {
 			migrationQuery.docs.forEach((doc, index) => {
 				const data = doc.data();
-				console.log(`   📄 Migration Memorial #${index + 1}:`);
+				console.log(`   📄 Migration Event #${index + 1}:`);
 				console.log(`      Document ID: ${doc.id}`);
 				console.log(`      Name: ${data.lovedOneName}`);
 				console.log(`      FullSlug: ${data.fullSlug}`);

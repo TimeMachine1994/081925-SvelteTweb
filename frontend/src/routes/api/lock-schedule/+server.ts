@@ -27,12 +27,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			return json({ error: 'Payment not successful. Please complete payment.' }, { status: 402 });
 		}
 
-		// 2. Update the memorial document in Firestore
+		// 2. Update the event document in Firestore
 		const memorialRef = adminDb.collection('memorials').doc(memorialId);
 		const memorialDoc = await memorialRef.get();
 
 		if (!memorialDoc.exists) {
-			return json({ error: 'Memorial not found' }, { status: 404 });
+			return json({ error: 'Event not found' }, { status: 404 });
 		}
 
 		const updatePayload = {
@@ -53,7 +53,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		await memorialRef.update(updatePayload);
 
-		console.log('✅ Schedule locked and memorial updated successfully for:', memorialId);
+		console.log('✅ Schedule locked and event updated successfully for:', memorialId);
 
 		return json({
 			success: true,

@@ -77,7 +77,7 @@ async function simulateSecondSession() {
     console.log('\n🎯 Now the Event has:');
     console.log('   1. "Opening Ceremony and Welcome" (30 min)');
     console.log('   2. "Eulogies and Remembrances" (40 min)');
-    console.log('   → Growing collection of memorial videos!');
+    console.log('   → Growing collection of event videos!');
     
   } catch (error) {
     console.error('❌ Error:', error);

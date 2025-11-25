@@ -40,14 +40,14 @@
 - Status tracking (live, scheduled, ended, idle)
 - Recording status display
 - Visibility controls
-- Memorial association
+- Event association
 - Duration and provider tracking
 
 **Slideshows** (`/admin/services/slideshows`)
 - Photo count and status display
-- Memorial association
+- Event association
 - Creator tracking
-- Click to view on memorial page
+- Click to view on event page
 
 **Schedule Requests** (`/admin/services/schedule-requests`)
 - Approval workflow (pending, approved, denied, completed)
@@ -57,8 +57,8 @@
 
 ### 👥 Users Domain
 
-**Memorial Owners** (`/admin/users/memorial-owners`)
-- Memorial count per user
+**Event Owners** (`/admin/users/event-owners`)
+- Event count per user
 - Payment status tracking
 - Suspension management
 - Last login tracking
@@ -67,7 +67,7 @@
 **Funeral Directors** (`/admin/users/funeral-directors`)
 - Approval workflow
 - Status management
-- Memorial creation tracking
+- Event creation tracking
 - Contact information display
 - Pending approval filter
 
@@ -174,7 +174,7 @@ routes/admin/services/memorials/+page.svelte + +page.server.ts
 routes/admin/services/streams/+page.svelte + +page.server.ts
 routes/admin/services/slideshows/+page.svelte + +page.server.ts
 routes/admin/services/schedule-requests/+page.svelte + +page.server.ts
-routes/admin/users/memorial-owners/+page.svelte + +page.server.ts
+routes/admin/users/event-owners/+page.svelte + +page.server.ts
 routes/admin/users/funeral-directors/+page.svelte + +page.server.ts
 routes/admin/users/admin-users/+page.svelte + +page.server.ts
 routes/admin/content/blog/+page.svelte + +page.server.ts
@@ -238,7 +238,7 @@ npm run dev
    - Keyboard navigation
 
 3. **Create Detail Pages**
-   - Individual memorial detail page
+   - Individual event detail page
    - Individual stream detail page
    - Individual user detail page
    - Edit forms for each resource

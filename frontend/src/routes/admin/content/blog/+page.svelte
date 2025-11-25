@@ -39,7 +39,7 @@ Manage blog posts and articles
 			width: 150,
 			formatter: (val: string) => {
 				const categoryMap: Record<string, string> = {
-					'memorial-planning': '💝 Memorial Planning',
+					'event-planning': '💝 Event Planning',
 					'grief-support': '🤝 Grief Support',
 					technology: '💻 Technology',
 					'funeral-industry': '🏥 Funeral Industry',
@@ -145,7 +145,7 @@ Manage blog posts and articles
 						label: 'Category',
 						type: 'enum',
 						options: [
-							{ value: 'memorial-planning', label: 'Memorial Planning' },
+							{ value: 'event-planning', label: 'Event Planning' },
 							{ value: 'grief-support', label: 'Grief Support' },
 							{ value: 'technology', label: 'Technology' },
 							{ value: 'funeral-industry', label: 'Funeral Industry' },

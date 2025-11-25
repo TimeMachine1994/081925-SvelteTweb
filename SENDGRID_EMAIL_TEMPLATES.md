@@ -5,7 +5,7 @@ Copy and paste these HTML templates into SendGrid's Code Editor for each dynamic
 ## 1. Enhanced Registration Email
 
 **Template ID Variable**: `SENDGRID_TEMPLATE_ENHANCED_REGISTRATION`
-**Subject**: `Welcome to Tributestream - Memorial for {{lovedOneName}}`
+**Subject**: `Welcome to Tributestream - Event for {{lovedOneName}}`
 
 ```html
 <!DOCTYPE html>
@@ -20,18 +20,18 @@ Copy and paste these HTML templates into SendGrid's Code Editor for each dynamic
         <!-- Header -->
         <div style="background: linear-gradient(135deg, #D5BA7F 0%, #E5CA8F 100%); padding: 30px; text-align: center;">
             <h1 style="color: white; margin: 0; font-size: 28px;">🎥 Tributestream</h1>
-            <p style="color: white; margin: 10px 0 0 0; font-size: 16px;">Welcome to your memorial</p>
+            <p style="color: white; margin: 10px 0 0 0; font-size: 16px;">Welcome to your event</p>
         </div>
         
         <!-- Content -->
         <div style="padding: 30px;">
             <h2 style="color: #1a1a1a; margin-top: 0;">Welcome to Tributestream for {{lovedOneName}}</h2>
             <p style="color: #333; line-height: 1.6;">Hello {{ownerName}},</p>
-            <p style="color: #333; line-height: 1.6;">Thank you for choosing Tributestream to honor the memory of {{lovedOneName}}. Your dedicated memorial page is now ready.</p>
+            <p style="color: #333; line-height: 1.6;">Thank you for choosing Tributestream to honor the memory of {{lovedOneName}}. Your dedicated event page is now ready.</p>
             
             <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #D5BA7F;">
-                <h3 style="color: #1a1a1a; margin-top: 0;">Your Memorial Details</h3>
-                <p style="margin: 5px 0;"><strong>Memorial URL:</strong></p>
+                <h3 style="color: #1a1a1a; margin-top: 0;">Your Event Details</h3>
+                <p style="margin: 5px 0;"><strong>Event URL:</strong></p>
                 <p style="margin: 5px 0;"><a href="{{memorialUrl}}" style="color: #D5BA7F; text-decoration: none;">{{memorialUrl}}</a></p>
                 
                 <h4 style="color: #1a1a1a; margin: 20px 0 10px 0;">Login Credentials</h4>
@@ -47,7 +47,7 @@ Copy and paste these HTML templates into SendGrid's Code Editor for each dynamic
             
             <div style="text-align: center; margin: 30px 0;">
                 <a href="{{memorialUrl}}" style="background: linear-gradient(135deg, #D5BA7F 0%, #E5CA8F 100%); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
-                    View Memorial
+                    View Event
                 </a>
             </div>
         </div>
@@ -86,7 +86,7 @@ Copy and paste these HTML templates into SendGrid's Code Editor for each dynamic
         <!-- Content -->
         <div style="padding: 30px;">
             <h2 style="color: #1a1a1a; margin-top: 0;">Welcome to Tributestream</h2>
-            <p style="color: #333; line-height: 1.6;">An account has been created for you to manage the memorial for <strong>{{lovedOneName}}</strong>.</p>
+            <p style="color: #333; line-height: 1.6;">An account has been created for you to manage the event for <strong>{{lovedOneName}}</strong>.</p>
             
             <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #D5BA7F;">
                 <h3 style="color: #1a1a1a; margin-top: 0;">Login Credentials</h3>
@@ -112,7 +112,7 @@ Copy and paste these HTML templates into SendGrid's Code Editor for each dynamic
 ## 3. Invitation Email
 
 **Template ID Variable**: `SENDGRID_TEMPLATE_INVITATION`
-**Subject**: `An invitation to contribute to the memorial for {{memorialName}}`
+**Subject**: `An invitation to contribute to the event for {{memorialName}}`
 
 ```html
 <!DOCTYPE html>
@@ -120,7 +120,7 @@ Copy and paste these HTML templates into SendGrid's Code Editor for each dynamic
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Memorial Invitation</title>
+    <title>Event Invitation</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f5f5f5;">
     <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
@@ -134,7 +134,7 @@ Copy and paste these HTML templates into SendGrid's Code Editor for each dynamic
         <div style="padding: 30px;">
             <h2 style="color: #1a1a1a; margin-top: 0;">You're Invited to Contribute</h2>
             <p style="color: #333; line-height: 1.6;">Hello,</p>
-            <p style="color: #333; line-height: 1.6;">{{fromName}} has invited you to contribute to the online memorial for <strong>{{memorialName}}</strong>.</p>
+            <p style="color: #333; line-height: 1.6;">{{fromName}} has invited you to contribute to the online event for <strong>{{memorialName}}</strong>.</p>
             
             <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #D5BA7F;">
                 <h3 style="color: #1a1a1a; margin-top: 0;">How to Contribute</h3>
@@ -246,11 +246,11 @@ Copy and paste these HTML templates into SendGrid's Code Editor for each dynamic
         <div style="padding: 30px;">
             <h2 style="color: #1a1a1a; margin-top: 0;">Payment Confirmed</h2>
             <p style="color: #333; line-height: 1.6;">Dear Customer,</p>
-            <p style="color: #333; line-height: 1.6;">Thank you for choosing Tributestream! Your payment has been successfully processed and your memorial service for <strong>{{lovedOneName}}</strong> has been confirmed.</p>
+            <p style="color: #333; line-height: 1.6;">Thank you for choosing Tributestream! Your payment has been successfully processed and your event service for <strong>{{lovedOneName}}</strong> has been confirmed.</p>
             
             <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #D5BA7F;">
                 <h3 style="color: #1a1a1a; margin-top: 0;">📋 Payment Details</h3>
-                <p style="margin: 5px 0;"><strong>Memorial:</strong> {{lovedOneName}}</p>
+                <p style="margin: 5px 0;"><strong>Event:</strong> {{lovedOneName}}</p>
                 <p style="margin: 5px 0;"><strong>Payment ID:</strong> {{paymentIntentId}}</p>
                 <p style="margin: 5px 0;"><strong>Payment Date:</strong> {{paymentDate}}</p>
                 <p style="margin: 5px 0;"><strong>Email:</strong> {{customerEmail}}</p>
@@ -260,7 +260,7 @@ Copy and paste these HTML templates into SendGrid's Code Editor for each dynamic
             <div style="background: #e8f5e8; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #28a745;">
                 <h3 style="color: #1a1a1a; margin-top: 0;">📅 What's Next?</h3>
                 <ul style="color: #333; line-height: 1.6; margin: 0; padding-left: 20px;">
-                    <li>Your memorial service schedule has been confirmed</li>
+                    <li>Your event service schedule has been confirmed</li>
                     <li>Our team will contact you within 24 hours to coordinate service details</li>
                     <li>You can access your booking anytime in your Tributestream portal</li>
                     <li>We'll send additional information about your service setup closer to the date</li>
@@ -268,7 +268,7 @@ Copy and paste these HTML templates into SendGrid's Code Editor for each dynamic
             </div>
             
             <p style="color: #333; line-height: 1.6;">If you have any questions, please don't hesitate to contact our support team at support@tributestream.com or (555) 123-4567.</p>
-            <p style="color: #333; line-height: 1.6;">Thank you for trusting us with your memorial service.</p>
+            <p style="color: #333; line-height: 1.6;">Thank you for trusting us with your event service.</p>
         </div>
         
         <!-- Footer -->
@@ -306,11 +306,11 @@ Copy and paste these HTML templates into SendGrid's Code Editor for each dynamic
         <div style="padding: 30px;">
             <h2 style="color: #1a1a1a; margin-top: 0;">Action Required</h2>
             <p style="color: #333; line-height: 1.6;">Dear Customer,</p>
-            <p style="color: #333; line-height: 1.6;">Your payment for the memorial service for <strong>{{lovedOneName}}</strong> requires additional verification or action from you.</p>
+            <p style="color: #333; line-height: 1.6;">Your payment for the event service for <strong>{{lovedOneName}}</strong> requires additional verification or action from you.</p>
             
             <div style="background: #fef3c7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
                 <h3 style="color: #1a1a1a; margin-top: 0;">⚠️ Action Required</h3>
-                <p style="margin: 5px 0;"><strong>Memorial:</strong> {{lovedOneName}}</p>
+                <p style="margin: 5px 0;"><strong>Event:</strong> {{lovedOneName}}</p>
                 <p style="margin: 5px 0;"><strong>Payment ID:</strong> {{paymentIntentId}}</p>
                 <p style="margin: 5px 0;"><strong>Date:</strong> {{actionDate}}</p>
                 <p style="margin: 15px 0 5px 0;">Your bank or payment provider requires additional verification to complete this transaction.</p>
@@ -318,7 +318,7 @@ Copy and paste these HTML templates into SendGrid's Code Editor for each dynamic
             
             <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0ea5e9;">
                 <h3 style="color: #1a1a1a; margin-top: 0;">🔐 Complete Your Payment</h3>
-                <p style="color: #333; line-height: 1.6;">To complete your payment and confirm your memorial service, please:</p>
+                <p style="color: #333; line-height: 1.6;">To complete your payment and confirm your event service, please:</p>
                 <ol style="color: #333; line-height: 1.6; margin: 10px 0; padding-left: 20px;">
                     <li>Click the button below to complete the verification process</li>
                     <li>Follow the instructions from your bank or payment provider</li>
@@ -332,7 +332,7 @@ Copy and paste these HTML templates into SendGrid's Code Editor for each dynamic
                 </div>
             </div>
             
-            <p style="color: #dc2626; line-height: 1.6; font-weight: bold;">Important: Your memorial service reservation is held for 24 hours while you complete this verification. Please complete the process as soon as possible to secure your booking.</p>
+            <p style="color: #dc2626; line-height: 1.6; font-weight: bold;">Important: Your event service reservation is held for 24 hours while you complete this verification. Please complete the process as soon as possible to secure your booking.</p>
             
             <p style="color: #333; line-height: 1.6;">If you need assistance or have questions about this verification process, please contact our support team at support@tributestream.com or (555) 123-4567.</p>
         </div>
@@ -372,11 +372,11 @@ Copy and paste these HTML templates into SendGrid's Code Editor for each dynamic
         <div style="padding: 30px;">
             <h2 style="color: #1a1a1a; margin-top: 0;">Payment Issue</h2>
             <p style="color: #333; line-height: 1.6;">Dear Customer,</p>
-            <p style="color: #333; line-height: 1.6;">We encountered an issue processing your payment for the memorial service for <strong>{{lovedOneName}}</strong>.</p>
+            <p style="color: #333; line-height: 1.6;">We encountered an issue processing your payment for the event service for <strong>{{lovedOneName}}</strong>.</p>
             
             <div style="background: #fef2f2; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #dc2626;">
                 <h3 style="color: #1a1a1a; margin-top: 0;">❌ Payment Failed</h3>
-                <p style="margin: 5px 0;"><strong>Memorial:</strong> {{lovedOneName}}</p>
+                <p style="margin: 5px 0;"><strong>Event:</strong> {{lovedOneName}}</p>
                 <p style="margin: 5px 0;"><strong>Payment ID:</strong> {{paymentIntentId}}</p>
                 <p style="margin: 5px 0;"><strong>Date:</strong> {{failureDate}}</p>
                 <p style="margin: 15px 0 5px 0;"><strong>Reason:</strong> {{failureReason}}</p>
@@ -384,7 +384,7 @@ Copy and paste these HTML templates into SendGrid's Code Editor for each dynamic
             
             <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #0ea5e9;">
                 <h3 style="color: #1a1a1a; margin-top: 0;">🔄 Next Steps</h3>
-                <p style="color: #333; line-height: 1.6;">Don't worry - your memorial service reservation is still held for 24 hours. Please try one of the following:</p>
+                <p style="color: #333; line-height: 1.6;">Don't worry - your event service reservation is still held for 24 hours. Please try one of the following:</p>
                 <ul style="color: #333; line-height: 1.6; margin: 10px 0; padding-left: 20px;">
                     <li>Check that your payment method has sufficient funds</li>
                     <li>Verify your card details are correct</li>
@@ -399,7 +399,7 @@ Copy and paste these HTML templates into SendGrid's Code Editor for each dynamic
                 </div>
             </div>
             
-            <p style="color: #333; line-height: 1.6;">If you continue to experience issues, please contact our support team at support@tributestream.com or (555) 123-4567. We're here to help ensure your memorial service goes smoothly.</p>
+            <p style="color: #333; line-height: 1.6;">If you continue to experience issues, please contact our support team at support@tributestream.com or (555) 123-4567. We're here to help ensure your event service goes smoothly.</p>
             <p style="color: #333; line-height: 1.6;">Thank you for your patience.</p>
         </div>
         
@@ -507,9 +507,9 @@ Copy and paste these HTML templates into SendGrid's Code Editor for each dynamic
             
             <div style="background: #fff3cd; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; border-left: 4px solid #ffc107;">
                 <p style="margin: 0; color: #856404;">
-                    <strong>Need to create a memorial?</strong><br>
-                    <a href="https://tributestream.com/register/loved-one" style="color: #D5BA7F; text-decoration: none; font-weight: bold;">
-                        Start creating a memorial →
+                    <strong>Need to create a event?</strong><br>
+                    <a href="https://tributestream.com/register/new-event-and-account" style="color: #D5BA7F; text-decoration: none; font-weight: bold;">
+                        Start creating a event →
                     </a>
                 </p>
             </div>

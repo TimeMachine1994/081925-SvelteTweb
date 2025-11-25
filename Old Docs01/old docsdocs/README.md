@@ -2,7 +2,7 @@
 
 ## Overview
 
-Tributestream is a comprehensive memorial service platform that enables funeral directors and families to create digital memorials with integrated livestreaming capabilities. Built with SvelteKit, TypeScript, Firebase, and Cloudflare Stream.
+Tributestream is a comprehensive event service platform that enables funeral directors and families to create digital memorials with integrated livestreaming capabilities. Built with SvelteKit, TypeScript, Firebase, and Cloudflare Stream.
 
 ## Documentation Structure
 
@@ -39,17 +39,17 @@ Tributestream is a comprehensive memorial service platform that enables funeral 
 ### Core User Roles
 - **Admin**: Platform administrators with full system access
 - **Funeral Director**: Professional users who manage multiple memorials
-- **Owner**: Family members who own and manage their memorial
+- **Owner**: Family members who own and manage their event
 
 ### Main Collections
-- `memorials` - Memorial service information and content
+- `memorials` - Event service information and content
 - `livestreamConfigs` - Booking and calculator data
 - `streams` - Unified livestream management (new system)
 - `funeral_directors` - Funeral director profiles and business information
 - `users` - User authentication and profile data
 
 ### Key Features
-- Memorial creation and management
+- Event creation and management
 - Multi-service livestreaming with visibility controls
 - Automatic recording and archive management
 - Role-based access control and permissions
@@ -69,7 +69,7 @@ Tributestream is a comprehensive memorial service platform that enables funeral 
 This documentation reflects the current state of Tributestream as of September 2024, including:
 - Svelte 5 migration with runes
 - Unified livestream system (Version 2)
-- Memorial service data model refactor
+- Event service data model refactor
 - Production-ready authentication system
 - Comprehensive role-based access control
 

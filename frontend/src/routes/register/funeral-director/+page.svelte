@@ -121,12 +121,12 @@
 						<div class="flex items-center gap-3">
 							<CheckCircle class="h-6 w-6 text-green-600" />
 							<div class="flex-1">
-								<h3 class="text-lg font-semibold text-green-800">Memorial Created Successfully!</h3>
+								<h3 class="text-lg font-semibold text-green-800">Event Created Successfully!</h3>
 								<p class="text-sm text-green-700 mt-1">{form.message}</p>
 								{#if form.memorialSlug}
 									<div class="mt-3 space-y-2">
 										<p class="text-sm text-green-700">
-											<strong>Memorial URL:</strong> 
+											<strong>Event URL:</strong> 
 											<a href="/{form.memorialSlug}" target="_blank" class="underline hover:text-green-800">
 												tributestream.com/{form.memorialSlug}
 											</a>
@@ -166,15 +166,15 @@
 				>
 					<div class="space-y-6">
 						<div class="mb-8 text-center">
-							<h2 class="mb-2 text-2xl font-bold text-gray-900">Enhanced Memorial Registration</h2>
-							<p class="text-gray-600">Complete memorial setup with family contact, director, and service information.</p>
+							<h2 class="mb-2 text-2xl font-bold text-gray-900">Enhanced Event Registration</h2>
+							<p class="text-gray-600">Complete event setup with family contact, director, and service information.</p>
 						</div>
 
-						<!-- Memorial Information -->
+						<!-- Event Information -->
 						<div class="space-y-4">
 							<h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
 								<Heart class="h-5 w-5" />
-								Memorial Information
+								Event Information
 							</h3>
 							<div class="grid grid-cols-1 gap-4">
 								<div>
@@ -319,7 +319,7 @@
 							<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
 								<div>
 									<label for="memorialDate" class="mb-2 block text-sm font-medium text-gray-700">
-										Memorial Date
+										Event Date
 									</label>
 									<input
 										type="date"
@@ -332,7 +332,7 @@
 								</div>
 								<div>
 									<label for="memorialTime" class="mb-2 block text-sm font-medium text-gray-700">
-										Memorial Time
+										Event Time
 									</label>
 									<input
 										type="time"
@@ -398,9 +398,9 @@
 										<h3 class="text-sm font-semibold text-blue-800">What happens next?</h3>
 										<ul class="mt-2 text-sm text-blue-700 space-y-1">
 											<li>• Family account will be created with temporary password</li>
-											<li>• Memorial page will be set up with the loved one's information</li>
+											<li>• Event page will be set up with the loved one's information</li>
 											<li>• Welcome email with login credentials will be sent to the family</li>
-											<li>• Family will have full control to customize their memorial</li>
+											<li>• Family will have full control to customize their event</li>
 										</ul>
 									</div>
 								</div>
@@ -428,7 +428,7 @@
 							disabled={isSubmitting}
 							loading={isSubmitting}
 						>
-							{isSubmitting ? 'Creating Memorial...' : 'Create Family Memorial'}
+							{isSubmitting ? 'Creating Event...' : 'Create Family Event'}
 						</Button>
 					</div>
 				</form>

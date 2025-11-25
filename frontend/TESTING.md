@@ -34,7 +34,7 @@ frontend/
 │   └── mocks/                      # Mock implementations
 ├── e2e/                           # End-to-end tests
 │   ├── auth.spec.ts
-│   ├── memorial-creation.spec.ts
+│   ├── event-creation.spec.ts
 │   ├── streaming.spec.ts
 │   └── fixtures/                   # E2E test fixtures
 └── scripts/                       # Test data management
@@ -71,7 +71,7 @@ npm run test:unit:watch  # Watch mode
 
 **Examples**:
 - Authentication logic
-- Memorial CRUD operations
+- Event CRUD operations
 - Payment processing
 - Email notifications
 
@@ -144,18 +144,18 @@ Provides consistent test data creation:
 // Create test user
 const user = createTestUser({ role: 'owner' });
 
-// Create test memorial
-const memorial = createTestMemorial({ ownerUid: user.uid });
+// Create test event
+const event = createTestMemorial({ ownerUid: user.uid });
 
 // Create test stream
-const stream = createTestStream({ memorialId: memorial.id });
+const stream = createTestStream({ memorialId: event.id });
 ```
 
 ### Fixtures (`tests/fixtures/`)
 
 Static test data for consistent testing:
 - User profiles
-- Memorial templates
+- Event templates
 - Stream configurations
 - Payment data
 
@@ -270,12 +270,12 @@ test('returns user data for authenticated request', async () => {
 ```typescript
 import { test, expect } from '@playwright/test';
 
-test('user can create memorial', async ({ page }) => {
+test('user can create event', async ({ page }) => {
   await page.goto('/dashboard');
-  await page.click('[data-testid="create-memorial"]');
+  await page.click('[data-testid="create-event"]');
   await page.fill('[name="lovedOneName"]', 'John Doe');
   await page.click('[type="submit"]');
-  await expect(page.locator('.memorial-card')).toBeVisible();
+  await expect(page.locator('.event-card')).toBeVisible();
 });
 ```
 

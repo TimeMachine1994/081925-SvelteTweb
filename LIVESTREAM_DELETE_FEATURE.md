@@ -1,7 +1,7 @@
 # Livestream Delete Feature Implementation
 
 ## Overview
-Added the ability for admins to delete livestreams from the admin memorial details view.
+Added the ability for admins to delete livestreams from the admin event details view.
 
 ## Changes Made
 
@@ -11,14 +11,14 @@ Added the ability for admins to delete livestreams from the admin memorial detai
 **Features**:
 - ✅ DELETE method to remove streams from Firestore
 - ✅ POST method (alternative for clients that don't support DELETE)
-- ✅ Permission checking (admin, memorial owner, or funeral director)
+- ✅ Permission checking (admin, event owner, or funeral director)
 - ✅ Audit log creation for deletion tracking
 - ✅ Cloudflare cleanup placeholder (for future implementation)
 - ✅ Comprehensive error handling and logging
 
 **Authorization**:
 - Admins (role: 'admin')
-- Memorial owners (ownerUid matches)
+- Event owners (ownerUid matches)
 - Funeral directors (funeralDirectorUid matches)
 
 **Endpoint**: `DELETE /api/streams/[streamId]/delete`
@@ -33,7 +33,7 @@ Added the ability for admins to delete livestreams from the admin memorial detai
 }
 ```
 
-### 2. Admin Memorial Details Page Updates
+### 2. Admin Event Details Page Updates
 **File**: `frontend/src/routes/admin/services/memorials/[memorialId]/+page.svelte`
 
 **Added**:
@@ -58,8 +58,8 @@ Added the ability for admins to delete livestreams from the admin memorial detai
 ## User Flow
 
 ### Admin Delete Stream Flow:
-1. **Navigate** to Admin → Services → Memorials → [Select Memorial]
-2. **View** all livestreams in the memorial details
+1. **Navigate** to Admin → Services → Memorials → [Select Event]
+2. **View** all livestreams in the event details
 3. **Click** "🗑️ Delete Stream" button on any livestream
 4. **Confirm** deletion in popup dialog:
    - "Are you sure you want to delete this livestream?"
@@ -75,8 +75,8 @@ Added the ability for admins to delete livestreams from the admin memorial detai
 ```typescript
 const hasPermission =
   userRole === 'admin' ||
-  memorial.ownerUid === userId ||
-  memorial.funeralDirectorUid === userId;
+  event.ownerUid === userId ||
+  event.funeralDirectorUid === userId;
 ```
 
 ### Audit Logging
@@ -89,7 +89,7 @@ Creates audit log entry with:
 - `performedByEmail`
 - `performedByRole`
 - `timestamp`
-- `details`: Stream title, status, memorial name
+- `details`: Stream title, status, event name
 
 ## Technical Details
 
@@ -103,13 +103,13 @@ const response = await fetch(`/api/streams/${streamId}/delete`, {
 ### Error Handling
 - 401: Authentication required
 - 403: Permission denied
-- 404: Stream or memorial not found
+- 404: Stream or event not found
 - 500: Internal server error
 
 ### Firestore Operations
 1. Fetch stream document
 2. Verify stream exists
-3. Fetch memorial document
+3. Fetch event document
 4. Check permissions
 5. Delete stream document
 6. Create audit log (non-blocking)
@@ -141,7 +141,7 @@ const response = await fetch(`/api/streams/${streamId}/delete`, {
 
 ### Manual Testing:
 - [ ] Admin can delete stream
-- [ ] Memorial owner can delete stream
+- [ ] Event owner can delete stream
 - [ ] Funeral director can delete stream
 - [ ] Unauthorized user cannot delete stream
 - [ ] Confirmation dialog appears
@@ -155,7 +155,7 @@ const response = await fetch(`/api/streams/${streamId}/delete`, {
 - [ ] Deleting stream without permission (403)
 - [ ] Network error during deletion
 - [ ] Multiple rapid delete attempts
-- [ ] Deleting last stream in memorial
+- [ ] Deleting last stream in event
 
 ## Files Modified
 

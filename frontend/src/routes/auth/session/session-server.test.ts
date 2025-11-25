@@ -68,7 +68,7 @@ describe('Auth Session Server Load Function', () => {
 
 	it('should handle slug with special characters', async () => {
 		const mockUrl = new URL(
-			'http://localhost/auth/session?token=test-token&slug=test-memorial-with-dashes'
+			'http://localhost/auth/session?token=test-token&slug=test-event-with-dashes'
 		);
 		const mockEvent = {
 			url: mockUrl
@@ -78,7 +78,7 @@ describe('Auth Session Server Load Function', () => {
 
 		expect(result).toEqual({
 			token: 'test-token',
-			slug: 'test-memorial-with-dashes',
+			slug: 'test-event-with-dashes',
 			error: null
 		});
 	});

@@ -1,11 +1,11 @@
-// firecms/src/types/memorial.ts
+// firecms/src/types/event.ts
 
 /**
- * Defines the data structure for a Memorial document in Firestore.
+ * Defines the data structure for a Event document in Firestore.
  * Updated to match frontend schema and include new Phase 1 refactoring fields.
  */
-export type Memorial = {
-    // Core memorial information
+export type Event = {
+    // Core event information
     id: string;
     lovedOneName: string;
     slug: string;
@@ -18,7 +18,7 @@ export type Memorial = {
     directorFullName?: string;
     funeralHomeName?: string;
     
-    // Memorial service details
+    // Event service details
     memorialDate?: string;
     memorialTime?: string;
     memorialLocationName?: string;

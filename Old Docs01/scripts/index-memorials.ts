@@ -1,9 +1,9 @@
 import { adminDb } from '../src/lib/server/firebase'; // Adjust path as needed
 import { indexMemorial } from '../src/lib/server/algolia-indexing';
-import type { Memorial } from '../src/lib/types/memorial';
+import type { Event } from '../src/lib/types/event';
 
 async function indexAllMemorials() {
-	console.log('Starting memorial indexing...');
+	console.log('Starting event indexing...');
 	const memorialsRef = adminDb.collection('memorials');
 	const snapshot = await memorialsRef.get();
 
@@ -12,15 +12,15 @@ async function indexAllMemorials() {
 		return;
 	}
 
-	const memorials: Memorial[] = [];
+	const memorials: Event[] = [];
 	snapshot.forEach((doc) => {
-		memorials.push({ id: doc.id, ...doc.data() } as Memorial);
+		memorials.push({ id: doc.id, ...doc.data() } as Event);
 	});
 
 	console.log(`Found ${memorials.length} memorials to index.`);
 
-	for (const memorial of memorials) {
-		await indexMemorial(memorial);
+	for (const event of memorials) {
+		await indexMemorial(event);
 	}
 
 	console.log('Finished indexing all memorials.');

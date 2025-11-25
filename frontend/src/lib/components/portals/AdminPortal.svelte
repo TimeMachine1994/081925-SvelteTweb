@@ -1,6 +1,6 @@
-<!-- Simplified Admin Portal - Funeral Director Approval & Memorial Management -->
+<!-- Simplified Admin Portal - Funeral Director Approval & Event Management -->
 <script lang="ts">
-	import type { Memorial } from '$lib/types/memorial';
+	import type { Event } from '$lib/types/event';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { invalidateAll } from '$app/navigation';
@@ -13,7 +13,7 @@
 		pendingFuneralDirectors = [],
 		approvedFuneralDirectors = []
 	}: {
-		memorials: Memorial[];
+		memorials: Event[];
 		allUsers: { uid: string; email: string; displayName: string; role?: string }[];
 		pendingFuneralDirectors?: any[];
 		approvedFuneralDirectors?: any[];
@@ -21,10 +21,10 @@
 
 	// Active tab state
 	let activeTab = $state<
-		'overview' | 'funeral-directors' | 'memorials' | 'memorial-owners' | 'create-memorial' | 'audit-logs' | 'schedule-requests'
+		'overview' | 'funeral-directors' | 'memorials' | 'event-owners' | 'create-event' | 'audit-logs' | 'schedule-requests'
 	>('overview');
 
-	// Memorial creation form state
+	// Event creation form state
 	let newMemorialForm = $state({
 		lovedOneName: '',
 		creatorEmail: '',
@@ -41,7 +41,7 @@
 	let isCreatingMemorial = $state(false);
 	let isTogglingStatus = $state(false);
 
-	// Memorial selection state
+	// Event selection state
 	let selectedMemorials = $state<Set<string>>(new Set());
 	let selectAll = $state(false);
 
@@ -125,7 +125,7 @@
 	}
 
 	/**
-	 * Toggle memorial completion status for selected memorials
+	 * Toggle event completion status for selected memorials
 	 */
 	async function toggleMemorialStatus(isComplete: boolean) {
 		if (selectedMemorials.size === 0) {
@@ -136,14 +136,14 @@
 		const memorialIds = Array.from(selectedMemorials);
 		const statusText = isComplete ? 'completed' : 'scheduled';
 		
-		if (!confirm(`Mark ${memorialIds.length} memorial(s) as ${statusText}?`)) {
+		if (!confirm(`Mark ${memorialIds.length} event(s) as ${statusText}?`)) {
 			return;
 		}
 
 		isTogglingStatus = true;
 
 		try {
-			const response = await fetch('/api/admin/toggle-memorial-status', {
+			const response = await fetch('/api/admin/toggle-event-status', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ memorialIds, isComplete })
@@ -156,13 +156,13 @@
 				await invalidateAll(); // Refresh data
 				selectedMemorials.clear();
 				selectAll = false;
-				alert(`Successfully marked ${result.updatedCount} memorial(s) as ${statusText}!`);
+				alert(`Successfully marked ${result.updatedCount} event(s) as ${statusText}!`);
 			} else {
-				console.error(`❌ [ADMIN] Failed to toggle memorial status:`, result.error);
+				console.error(`❌ [ADMIN] Failed to toggle event status:`, result.error);
 				alert(`Failed to update memorials: ${result.error}`);
 			}
 		} catch (error) {
-			console.error('❌ [ADMIN] Error toggling memorial status:', error);
+			console.error('❌ [ADMIN] Error toggling event status:', error);
 			alert('Network error occurred while updating memorials');
 		} finally {
 			isTogglingStatus = false;
@@ -185,7 +185,7 @@
 	}
 
 	/**
-	 * Handle individual memorial selection
+	 * Handle individual event selection
 	 */
 	function handleMemorialSelect(memorialId: string, event: Event) {
 		const target = event.target as HTMLInputElement;
@@ -237,11 +237,11 @@
 	}
 
 	/**
-	 * Create a new memorial as admin
+	 * Create a new event as admin
 	 */
 	async function createMemorial(event: Event) {
 		event.preventDefault();
-		console.log('📝 [ADMIN] Creating new memorial:', newMemorialForm);
+		console.log('📝 [ADMIN] Creating new event:', newMemorialForm);
 
 		// Validate required fields
 		if (!newMemorialForm.lovedOneName || !newMemorialForm.creatorEmail) {
@@ -252,17 +252,17 @@
 		isCreatingMemorial = true;
 
 		try {
-			const response = await fetch('/api/admin/create-memorial', {
+			const response = await fetch('/api/admin/create-event', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(newMemorialForm)
 			});
 
 			const result = await response.json();
-			console.log('📝 [ADMIN] Memorial creation response:', result);
+			console.log('📝 [ADMIN] Event creation response:', result);
 
 			if (response.ok) {
-				console.log('✅ [ADMIN] Memorial created successfully:', result.memorialId);
+				console.log('✅ [ADMIN] Event created successfully:', result.memorialId);
 				// Reset form
 				newMemorialForm = {
 					lovedOneName: '',
@@ -275,15 +275,15 @@
 					location: ''
 				};
 				await invalidateAll();
-				alert(`Memorial created successfully! ID: ${result.memorialId}`);
+				alert(`Event created successfully! ID: ${result.memorialId}`);
 				activeTab = 'memorials'; // Switch to memorials tab
 			} else {
-				console.error('❌ [ADMIN] Failed to create memorial:', result.error);
-				alert(`Failed to create memorial: ${result.error}`);
+				console.error('❌ [ADMIN] Failed to create event:', result.error);
+				alert(`Failed to create event: ${result.error}`);
 			}
 		} catch (error) {
-			console.error('❌ [ADMIN] Error creating memorial:', error);
-			alert('Network error occurred while creating memorial');
+			console.error('❌ [ADMIN] Error creating event:', error);
+			alert('Network error occurred while creating event');
 		} finally {
 			isCreatingMemorial = false;
 		}
@@ -359,17 +359,17 @@
 	}
 
 	/**
-	 * Delete a memorial
+	 * Delete a event
 	 */
 	async function deleteMemorial(memorialId: string, memorialName: string) {
-		if (!confirm(`Are you sure you want to delete the memorial for "${memorialName}"? This action cannot be undone.`)) {
+		if (!confirm(`Are you sure you want to delete the event for "${memorialName}"? This action cannot be undone.`)) {
 			return;
 		}
 
-		console.log('🗑️ [ADMIN] Deleting memorial:', memorialId);
+		console.log('🗑️ [ADMIN] Deleting event:', memorialId);
 
 		try {
-			const response = await fetch(`/api/admin/delete-memorial`, {
+			const response = await fetch(`/api/admin/delete-event`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ memorialId })
@@ -378,16 +378,16 @@
 			const result = await response.json();
 
 			if (response.ok) {
-				console.log('✅ [ADMIN] Memorial deleted successfully');
+				console.log('✅ [ADMIN] Event deleted successfully');
 				await invalidateAll();
-				alert('Memorial deleted successfully');
+				alert('Event deleted successfully');
 			} else {
-				console.error('❌ [ADMIN] Failed to delete memorial:', result.error);
-				alert(`Failed to delete memorial: ${result.error}`);
+				console.error('❌ [ADMIN] Failed to delete event:', result.error);
+				alert(`Failed to delete event: ${result.error}`);
 			}
 		} catch (error) {
-			console.error('❌ [ADMIN] Error deleting memorial:', error);
-			alert('Network error occurred while deleting memorial');
+			console.error('❌ [ADMIN] Error deleting event:', error);
+			alert('Network error occurred while deleting event');
 		}
 	}
 
@@ -402,7 +402,7 @@
 		}
 
 		const count = selectedMemorials.size;
-		if (!confirm(`⚠️ Are you sure you want to DELETE ${count} memorial${count > 1 ? 's' : ''}?\n\nThis action CANNOT be undone!`)) {
+		if (!confirm(`⚠️ Are you sure you want to DELETE ${count} event${count > 1 ? 's' : ''}?\n\nThis action CANNOT be undone!`)) {
 			return;
 		}
 
@@ -415,7 +415,7 @@
 		try {
 			for (const memorialId of selectedMemorials) {
 				try {
-					const response = await fetch(`/api/admin/delete-memorial`, {
+					const response = await fetch(`/api/admin/delete-event`, {
 						method: 'POST',
 						headers: { 'Content-Type': 'application/json' },
 						body: JSON.stringify({ memorialId })
@@ -425,20 +425,20 @@
 						successCount++;
 					} else {
 						errorCount++;
-						console.error('Failed to delete memorial:', memorialId);
+						console.error('Failed to delete event:', memorialId);
 					}
 				} catch (err) {
 					errorCount++;
-					console.error('Error deleting memorial:', memorialId, err);
+					console.error('Error deleting event:', memorialId, err);
 				}
 			}
 
 			console.log(`✅ [ADMIN] Bulk delete complete: ${successCount} succeeded, ${errorCount} failed`);
 			
 			if (errorCount > 0) {
-				alert(`Deleted ${successCount} memorial${successCount !== 1 ? 's' : ''}.\n${errorCount} failed.`);
+				alert(`Deleted ${successCount} event${successCount !== 1 ? 's' : ''}.\n${errorCount} failed.`);
 			} else {
-				alert(`Successfully deleted ${successCount} memorial${successCount !== 1 ? 's' : ''}!`);
+				alert(`Successfully deleted ${successCount} event${successCount !== 1 ? 's' : ''}!`);
 			}
 
 			// Clear selection and refresh
@@ -592,11 +592,11 @@
 	}
 
 	/**
-	 * Open payment modal for marking memorial as paid
+	 * Open payment modal for marking event as paid
 	 */
-	function openPaymentModal(memorial: any) {
-		console.log('💳 [ADMIN] Opening payment modal for:', memorial.id);
-		paymentModal = memorial;
+	function openPaymentModal(event: any) {
+		console.log('💳 [ADMIN] Opening payment modal for:', event.id);
+		paymentModal = event;
 		paymentForm = {
 			method: 'cash',
 			notes: ''
@@ -615,13 +615,13 @@
 	}
 
 	/**
-	 * Open edit notes modal for a paid memorial
+	 * Open edit notes modal for a paid event
 	 */
-	function openEditNotesModal(memorial: any) {
-		console.log('📝 [ADMIN] Opening edit notes modal for:', memorial.id);
-		editNotesModal = memorial;
+	function openEditNotesModal(event: any) {
+		console.log('📝 [ADMIN] Opening edit notes modal for:', event.id);
+		editNotesModal = event;
 		editNotesForm = {
-			notes: memorial.manualPayment?.notes || ''
+			notes: event.manualPayment?.notes || ''
 		};
 	}
 
@@ -634,7 +634,7 @@
 	}
 
 	/**
-	 * Update payment notes for a paid memorial
+	 * Update payment notes for a paid event
 	 */
 	async function updatePaymentNotes() {
 		if (!editNotesModal) return;
@@ -674,7 +674,7 @@
 	}
 
 	/**
-	 * Toggle payment status for a memorial
+	 * Toggle payment status for a event
 	 */
 	async function togglePaymentStatus(memorialId: string, isPaid: boolean) {
 		console.log('💳 [ADMIN] Toggling payment status for:', memorialId, 'to:', isPaid);
@@ -697,7 +697,7 @@
 			if (response.ok) {
 				console.log('✅ [ADMIN] Payment status updated successfully');
 				await invalidateAll();
-				alert(`Memorial marked as ${isPaid ? 'PAID' : 'UNPAID'}!`);
+				alert(`Event marked as ${isPaid ? 'PAID' : 'UNPAID'}!`);
 				closePaymentModal();
 			} else {
 				console.error('❌ [ADMIN] Failed to update payment status:', result.error);
@@ -714,8 +714,8 @@
 	/**
 	 * Quick toggle payment without modal (for unpaid -> paid with default values)
 	 */
-	async function quickMarkPaid(memorial: any) {
-		if (!confirm(`Mark "${memorial.lovedOneName}" as PAID?`)) {
+	async function quickMarkPaid(event: any) {
+		if (!confirm(`Mark "${event.lovedOneName}" as PAID?`)) {
 			return;
 		}
 
@@ -725,7 +725,7 @@
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					memorialId: memorial.id,
+					memorialId: event.id,
 					isPaid: true,
 					paymentMethod: 'manual',
 					paymentNotes: 'Marked as paid via admin portal'
@@ -736,7 +736,7 @@
 
 			if (response.ok) {
 				await invalidateAll();
-				alert('Memorial marked as PAID!');
+				alert('Event marked as PAID!');
 			} else {
 				alert(`Failed: ${result.error}`);
 			}
@@ -751,8 +751,8 @@
 	/**
 	 * Quick toggle to unpaid
 	 */
-	async function quickMarkUnpaid(memorial: any) {
-		if (!confirm(`Mark "${memorial.lovedOneName}" as UNPAID?`)) {
+	async function quickMarkUnpaid(event: any) {
+		if (!confirm(`Mark "${event.lovedOneName}" as UNPAID?`)) {
 			return;
 		}
 
@@ -762,7 +762,7 @@
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					memorialId: memorial.id,
+					memorialId: event.id,
 					isPaid: false
 				})
 			});
@@ -771,7 +771,7 @@
 
 			if (response.ok) {
 				await invalidateAll();
-				alert('Memorial marked as UNPAID!');
+				alert('Event marked as UNPAID!');
 			} else {
 				alert(`Failed: ${result.error}`);
 			}
@@ -903,9 +903,9 @@
 				<option value="overview">📊 Overview</option>
 				<option value="funeral-directors">🏥 Funeral Directors</option>
 				<option value="memorials">💝 Memorials</option>
-				<option value="memorial-owners">👥 Memorial Owners</option>
+				<option value="event-owners">👥 Event Owners</option>
 				<option value="schedule-requests">📝 Schedule Requests</option>
-				<option value="create-memorial">➕ Create Memorial</option>
+				<option value="create-event">➕ Create Event</option>
 				<option value="audit-logs">🔍 Audit Logs</option>
 			</select>
 		</div>
@@ -937,12 +937,12 @@
 				💝 Memorials
 			</button>
 			<button
-				onclick={() => (activeTab = 'memorial-owners')}
-				class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px] {activeTab === 'memorial-owners' 
+				onclick={() => (activeTab = 'event-owners')}
+				class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px] {activeTab === 'event-owners' 
 					? 'bg-white text-gray-900 shadow-lg' 
 					: 'bg-white/10 text-white hover:bg-white/20'}"
 			>
-				👥 Memorial Owners
+				👥 Event Owners
 			</button>
 			<button
 				onclick={() => {
@@ -961,12 +961,12 @@
 				{/if}
 			</button>
 			<button
-				onclick={() => (activeTab = 'create-memorial')}
-				class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px] {activeTab === 'create-memorial' 
+				onclick={() => (activeTab = 'create-event')}
+				class="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-h-[44px] {activeTab === 'create-event' 
 					? 'bg-white text-gray-900 shadow-lg' 
 					: 'bg-white/10 text-white hover:bg-white/20'}"
 			>
-				➕ Create Memorial
+				➕ Create Event
 			</button>
 			<button
 				onclick={() => {
@@ -1064,20 +1064,20 @@
 									</tr>
 								</thead>
 								<tbody>
-									{#each scheduledMemorials as memorial}
+									{#each scheduledMemorials as event}
 										<tr class="border-b border-white/10 hover:bg-white/5">
 											<td class="px-3 py-2">
 												<input
 													type="checkbox"
-													checked={selectedMemorials.has(memorial.id || '')}
-													onchange={(e) => handleMemorialSelect(memorial.id || '', e)}
+													checked={selectedMemorials.has(event.id || '')}
+													onchange={(e) => handleMemorialSelect(event.id || '', e)}
 													class="rounded border-white/20 bg-white/10 text-blue-500 w-4 h-4"
 												/>
 											</td>
-											<td class="px-3 py-2 text-white font-medium">{memorial.lovedOneName}</td>
+											<td class="px-3 py-2 text-white font-medium">{event.lovedOneName}</td>
 											<td class="px-3 py-2 text-sm text-white/70">
-												{#if memorial.scheduledStartTime}
-													{new Date(memorial.scheduledStartTime).toLocaleString('en-US', {
+												{#if event.scheduledStartTime}
+													{new Date(event.scheduledStartTime).toLocaleString('en-US', {
 														month: 'short',
 														day: 'numeric',
 														year: 'numeric',
@@ -1089,13 +1089,13 @@
 												{/if}
 											</td>
 											<td class="px-3 py-2 text-sm text-white/70">
-												{memorial.location}
+												{event.location}
 											</td>
 											<td class="px-3 py-2">
 												<div class="flex items-center gap-2">
-													{#if memorial.isPaid}
+													{#if event.isPaid}
 														<button
-															onclick={() => quickMarkUnpaid(memorial)}
+															onclick={() => quickMarkUnpaid(event)}
 															disabled={isTogglingPayment}
 															class="rounded bg-green-500 px-2 py-1 text-xs text-white w-fit hover:bg-green-600 transition-colors"
 															title="Click to mark as unpaid"
@@ -1103,7 +1103,7 @@
 															✅ Paid
 														</button>
 														<button
-															onclick={() => openEditNotesModal(memorial)}
+															onclick={() => openEditNotesModal(event)}
 															disabled={isUpdatingNotes}
 															class="rounded bg-blue-500 px-2 py-1 text-xs text-white w-fit hover:bg-blue-600 transition-colors"
 															title="Edit payment notes"
@@ -1112,7 +1112,7 @@
 														</button>
 													{:else}
 														<button
-															onclick={() => openPaymentModal(memorial)}
+															onclick={() => openPaymentModal(event)}
 															disabled={isTogglingPayment}
 															class="rounded bg-amber-500 px-2 py-1 text-xs text-white w-fit hover:bg-amber-600 transition-colors"
 															title="Click to mark as paid"
@@ -1122,19 +1122,19 @@
 													{/if}
 												</div>
 											</td>
-											<td class="px-3 py-2 text-sm text-white/70">{memorial.creatorEmail}</td>
+											<td class="px-3 py-2 text-sm text-white/70">{event.creatorEmail}</td>
 											<td class="px-3 py-2">
 												<div class="flex gap-2 flex-wrap">
 													<a
-														href="/{memorial.fullSlug}"
+														href="/{event.fullSlug}"
 														class="text-sm text-blue-400 hover:text-blue-300">View</a
 													>
 													<a
-														href="/memorials/{memorial.id}/streams"
+														href="/memorials/{event.id}/streams"
 														class="text-sm text-green-400 hover:text-green-300">Streams</a
 													>
 													<a
-														href="/schedule/{memorial.id}"
+														href="/schedule/{event.id}"
 														class="text-sm text-purple-400 hover:text-purple-300">Schedule</a
 													>
 													<button
@@ -1144,7 +1144,7 @@
 														Complete
 													</button>
 													<button
-														onclick={() => deleteMemorial(memorial.id || '', memorial.lovedOneName)}
+														onclick={() => deleteMemorial(event.id || '', event.lovedOneName)}
 														class="text-sm text-red-400 hover:text-red-300"
 													>
 														Delete
@@ -1160,21 +1160,21 @@
 
 					<!-- Mobile Cards -->
 					<div class="md:hidden space-y-3">
-						{#each scheduledMemorials as memorial}
+						{#each scheduledMemorials as event}
 							<div class="rounded-lg border border-white/10 bg-white/5 p-4">
 								<div class="flex items-start gap-3 mb-3">
 									<input
 										type="checkbox"
-										checked={selectedMemorials.has(memorial.id || '')}
-										onchange={(e) => handleMemorialSelect(memorial.id || '', e)}
+										checked={selectedMemorials.has(event.id || '')}
+										onchange={(e) => handleMemorialSelect(event.id || '', e)}
 										class="mt-1 rounded border-white/20 bg-white/10 text-blue-500 w-5 h-5 min-w-[20px]"
 									/>
 									<div class="flex-1 min-w-0">
-										<h3 class="text-white font-medium text-base mb-1 break-words">{memorial.lovedOneName}</h3>
+										<h3 class="text-white font-medium text-base mb-1 break-words">{event.lovedOneName}</h3>
 										
-										{#if memorial.scheduledStartTime}
+										{#if event.scheduledStartTime}
 											<p class="text-sm text-white/70 mb-1">
-												📅 {new Date(memorial.scheduledStartTime).toLocaleString('en-US', {
+												📅 {new Date(event.scheduledStartTime).toLocaleString('en-US', {
 													month: 'short',
 													day: 'numeric',
 													year: 'numeric',
@@ -1185,13 +1185,13 @@
 										{/if}
 										
 										<p class="text-sm text-white/70 mb-1">
-											📍 {memorial.location}
+											📍 {event.location}
 										</p>
 										
 										<div class="mb-2 flex gap-2">
-										{#if memorial.isPaid}
+										{#if event.isPaid}
 											<button
-												onclick={() => quickMarkUnpaid(memorial)}
+												onclick={() => quickMarkUnpaid(event)}
 												disabled={isTogglingPayment}
 												class="inline-block rounded bg-green-500 px-2 py-1 text-xs text-white hover:bg-green-600 transition-colors"
 												title="Click to mark as unpaid"
@@ -1199,7 +1199,7 @@
 												✅ Paid
 											</button>
 											<button
-												onclick={() => openEditNotesModal(memorial)}
+												onclick={() => openEditNotesModal(event)}
 												disabled={isUpdatingNotes}
 												class="inline-block rounded bg-blue-500 px-2 py-1 text-xs text-white hover:bg-blue-600 transition-colors"
 												title="Edit payment notes"
@@ -1208,7 +1208,7 @@
 											</button>
 										{:else}
 											<button
-												onclick={() => openPaymentModal(memorial)}
+												onclick={() => openPaymentModal(event)}
 												disabled={isTogglingPayment}
 												class="inline-block rounded bg-amber-500 px-2 py-1 text-xs text-white hover:bg-amber-600 transition-colors"
 												title="Click to mark as paid"
@@ -1218,24 +1218,24 @@
 										{/if}
 									</div>
 										
-										<p class="text-sm text-white/70 mb-1 break-all">{memorial.creatorEmail}</p>
+										<p class="text-sm text-white/70 mb-1 break-all">{event.creatorEmail}</p>
 									</div>
 								</div>
 								<div class="flex flex-wrap gap-2">
 									<a
-										href="/{memorial.fullSlug}"
+										href="/{event.fullSlug}"
 										class="flex-1 min-w-[calc(50%-0.25rem)] text-center px-3 py-2 rounded-lg bg-blue-500/20 text-blue-300 text-sm font-medium min-h-[44px] flex items-center justify-center"
 									>
 										View
 									</a>
 									<a
-										href="/memorials/{memorial.id}/streams"
+										href="/memorials/{event.id}/streams"
 										class="flex-1 min-w-[calc(50%-0.25rem)] text-center px-3 py-2 rounded-lg bg-green-500/20 text-green-300 text-sm font-medium min-h-[44px] flex items-center justify-center"
 									>
 										Streams
 									</a>
 									<a
-										href="/schedule/{memorial.id}"
+										href="/schedule/{event.id}"
 										class="w-full px-3 py-2 rounded-lg bg-purple-500/20 text-purple-300 text-sm font-medium min-h-[44px] flex items-center justify-center"
 									>
 										📅 Edit Schedule
@@ -1247,10 +1247,10 @@
 										✅ Mark Complete
 									</button>
 									<button
-										onclick={() => deleteMemorial(memorial.id || '', memorial.lovedOneName)}
+										onclick={() => deleteMemorial(event.id || '', event.lovedOneName)}
 										class="w-full px-3 py-2 rounded-lg bg-red-500/20 text-red-300 text-sm font-medium min-h-[44px]"
 									>
-										🗑️ Delete Memorial
+										🗑️ Delete Event
 									</button>
 								</div>
 							</div>
@@ -1278,13 +1278,13 @@
 						Review Pending Directors ({pendingFuneralDirectors.length})
 					</Button>
 					<Button
-						onclick={() => (activeTab = 'create-memorial')}
+						onclick={() => (activeTab = 'create-event')}
 						variant="secondary"
 						size="md"
 						rounded="lg"
 						class="w-full sm:w-auto min-h-[44px]"
 					>
-						Create New Memorial
+						Create New Event
 					</Button>
 				</div>
 			</div>
@@ -1454,7 +1454,7 @@
 									<option value="">Select Type</option>
 									<option value="funeral_home">Funeral Home</option>
 									<option value="cremation_service">Cremation Service</option>
-									<option value="memorial_service">Memorial Service Provider</option>
+									<option value="memorial_service">Event Service Provider</option>
 									<option value="other">Other</option>
 								</select>
 							</div>
@@ -1494,7 +1494,7 @@
 	{#if activeTab === 'memorials'}
 		<div class="space-y-6">
 			<div class="flex items-center justify-between">
-				<h2 class="text-2xl font-bold text-white">Memorial Management</h2>
+				<h2 class="text-2xl font-bold text-white">Event Management</h2>
 				{#if memorials.length > 0}
 					<div class="flex items-center gap-3">
 						<label class="flex items-center gap-2 text-sm text-white/70">
@@ -1544,26 +1544,26 @@
 						</thead>
 						<tbody>
 							{#if memorials && memorials.length > 0}
-								{#each memorials as memorial}
+								{#each memorials as event}
 									<tr class="border-b border-white/10 hover:bg-white/5">
 										<td class="px-4 py-3">
 											<input
 												type="checkbox"
-												checked={selectedMemorials.has(memorial.id || '')}
-												onchange={(e) => handleMemorialSelect(memorial.id || '', e)}
+												checked={selectedMemorials.has(event.id || '')}
+												onchange={(e) => handleMemorialSelect(event.id || '', e)}
 												class="rounded border-white/20 bg-white/10 text-blue-500"
 											/>
 										</td>
-										<td class="px-4 py-3 text-white">{memorial.lovedOneName}</td>
-										<td class="px-4 py-3 text-sm text-white/70">{memorial.creatorEmail}</td>
+										<td class="px-4 py-3 text-white">{event.lovedOneName}</td>
+										<td class="px-4 py-3 text-sm text-white/70">{event.creatorEmail}</td>
 										<td class="px-4 py-3">
 											<div class="flex flex-col gap-1">
-												{#if memorial.isComplete}
+												{#if event.isComplete}
 													<span class="rounded bg-green-500 px-2 py-1 text-xs text-white w-fit">✅ Completed</span>
 												{:else}
 													<span class="rounded bg-amber-500 px-2 py-1 text-xs text-white w-fit">📅 Scheduled</span>
 												{/if}
-												{#if memorial.isPublic}
+												{#if event.isPublic}
 													<span class="rounded bg-blue-500 px-2 py-1 text-xs text-white w-fit">Public</span>
 												{:else}
 													<span class="rounded bg-gray-500 px-2 py-1 text-xs text-white w-fit">Private</span>
@@ -1573,25 +1573,25 @@
 										<td class="px-4 py-3">
 											<div class="flex gap-2">
 												<a
-													href="/{memorial.fullSlug}"
+													href="/{event.fullSlug}"
 													class="text-sm text-blue-400 hover:text-blue-300">View</a
 												>
 												<a
-													href="/memorials/{memorial.id}/streams"
+													href="/memorials/{event.id}/streams"
 													class="text-sm text-green-400 hover:text-green-300">Streams</a
 												>
 												<a
-													href="/schedule?memorialId={memorial.id}"
+													href="/schedule?memorialId={event.id}"
 													class="text-sm text-purple-400 hover:text-purple-300">Schedule</a
 												>
 												<button
-													onclick={() => toggleMemorialStatus(!memorial.isComplete)}
-													class="text-sm {memorial.isComplete ? 'text-amber-400 hover:text-amber-300' : 'text-green-400 hover:text-green-300'}"
+													onclick={() => toggleMemorialStatus(!event.isComplete)}
+													class="text-sm {event.isComplete ? 'text-amber-400 hover:text-amber-300' : 'text-green-400 hover:text-green-300'}"
 												>
-													{memorial.isComplete ? 'Mark Scheduled' : 'Mark Complete'}
+													{event.isComplete ? 'Mark Scheduled' : 'Mark Complete'}
 												</button>
 												<button
-													onclick={() => deleteMemorial(memorial.id || '', memorial.lovedOneName)}
+													onclick={() => deleteMemorial(event.id || '', event.lovedOneName)}
 													class="text-sm text-red-400 hover:text-red-300"
 												>
 													Delete
@@ -1613,11 +1613,11 @@
 		</div>
 	{/if}
 
-	<!-- Memorial Owners Tab -->
-	{#if activeTab === 'memorial-owners'}
+	<!-- Event Owners Tab -->
+	{#if activeTab === 'event-owners'}
 		<div class="space-y-6">
-			<h2 class="mb-4 text-2xl font-bold text-white">Memorial Owners</h2>
-			<p class="text-white/70 mb-6">Manage families and individuals who own memorial pages</p>
+			<h2 class="mb-4 text-2xl font-bold text-white">Event Owners</h2>
+			<p class="text-white/70 mb-6">Manage families and individuals who own event pages</p>
 
 			<div class="overflow-hidden rounded-xl border border-white/10 bg-white/5">
 				<div class="overflow-x-auto">
@@ -1644,7 +1644,7 @@
 										</td>
 										<td class="px-4 py-3">
 											<div class="flex flex-col gap-1">
-												<span class="text-white font-medium">{ownerMemorials.length} memorial{ownerMemorials.length !== 1 ? 's' : ''}</span>
+												<span class="text-white font-medium">{ownerMemorials.length} event{ownerMemorials.length !== 1 ? 's' : ''}</span>
 												{#if ownerMemorials.length > 0}
 													<div class="text-xs text-white/60">
 														{ownerMemorials.slice(0, 2).map(m => m.lovedOneName).join(', ')}
@@ -1663,14 +1663,14 @@
 												<button
 													class="text-sm text-blue-400 hover:text-blue-300"
 													onclick={() => {
-														// Navigate to user's first memorial if they have one
+														// Navigate to user's first event if they have one
 														if (ownerMemorials.length > 0) {
 															window.open(`/${ownerMemorials[0].fullSlug}`, '_blank');
 														}
 													}}
 													disabled={ownerMemorials.length === 0}
 												>
-													View Memorial{ownerMemorials.length > 1 ? 's' : ''}
+													View Event{ownerMemorials.length > 1 ? 's' : ''}
 												</button>
 												<button
 													class="text-sm text-green-400 hover:text-green-300"
@@ -1694,7 +1694,7 @@
 								{/each}
 							{:else}
 								<tr>
-									<td colspan="5" class="px-4 py-8 text-center text-white/70">No memorial owners found</td>
+									<td colspan="5" class="px-4 py-8 text-center text-white/70">No event owners found</td>
 								</tr>
 							{/if}
 						</tbody>
@@ -1702,7 +1702,7 @@
 				</div>
 			</div>
 
-			<!-- Memorial Owners Summary Stats -->
+			<!-- Event Owners Summary Stats -->
 			<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 				<div class="rounded-xl border border-white/10 bg-white/5 p-6">
 					<h3 class="text-lg font-semibold text-white mb-2">Total Owners</h3>
@@ -1734,10 +1734,10 @@
 		</div>
 	{/if}
 
-	<!-- Create Memorial Tab -->
-	{#if activeTab === 'create-memorial'}
+	<!-- Create Event Tab -->
+	{#if activeTab === 'create-event'}
 		<div class="space-y-4 md:space-y-6">
-			<h2 class="text-xl md:text-2xl font-bold text-white">Create New Memorial</h2>
+			<h2 class="text-xl md:text-2xl font-bold text-white">Create New Event</h2>
 
 			<div class="rounded-xl border border-white/10 bg-white/5 p-4 md:p-6">
 				<form onsubmit={createMemorial} class="space-y-4">
@@ -1805,7 +1805,7 @@
 					</div>
 
 					<div>
-						<label class="mb-2 block text-sm md:text-base font-semibold text-white">Memorial Description</label>
+						<label class="mb-2 block text-sm md:text-base font-semibold text-white">Event Description</label>
 						<textarea
 							bind:value={newMemorialForm.content}
 							class="h-24 w-full resize-none rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-base text-white placeholder-white/50 focus:border-amber-400 focus:outline-none"
@@ -1820,7 +1820,7 @@
 							id="isPublic"
 							class="h-4 w-4 rounded border-white/20 bg-white/10 text-amber-400 focus:ring-amber-400"
 						/>
-						<label for="isPublic" class="text-white">Make memorial publicly visible</label>
+						<label for="isPublic" class="text-white">Make event publicly visible</label>
 					</div>
 
 					<div class="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
@@ -1834,7 +1834,7 @@
 							rounded="lg"
 							class="w-full sm:w-auto min-h-[48px]"
 						>
-							{isCreatingMemorial ? 'Creating...' : '✨ Create Memorial'}
+							{isCreatingMemorial ? 'Creating...' : '✨ Create Event'}
 						</Button>
 						<Button
 							variant="secondary"
@@ -1899,7 +1899,7 @@
 						<table class="w-full">
 							<thead class="bg-white/5">
 								<tr>
-									<th class="px-4 py-3 text-left text-xs font-medium text-white/70">Memorial</th>
+									<th class="px-4 py-3 text-left text-xs font-medium text-white/70">Event</th>
 									<th class="px-4 py-3 text-left text-xs font-medium text-white/70">Requested By</th>
 									<th class="px-4 py-3 text-left text-xs font-medium text-white/70">Date</th>
 									<th class="px-4 py-3 text-left text-xs font-medium text-white/70">Status</th>
@@ -1975,16 +1975,16 @@
 				<h2 class="mb-6 text-2xl font-bold text-white">Schedule Edit Request</h2>
 
 				<div class="space-y-6">
-					<!-- Memorial Info -->
+					<!-- Event Info -->
 					<div>
-						<h3 class="mb-2 text-sm font-medium text-white/70">Memorial</h3>
+						<h3 class="mb-2 text-sm font-medium text-white/70">Event</h3>
 						<p class="text-white">{selectedEditRequest.memorialName}</p>
 						<a
 							href="/{selectedEditRequest.memorialId}"
 							class="text-sm text-amber-400 hover:text-amber-300"
 							target="_blank"
 						>
-							View Memorial →
+							View Event →
 						</a>
 					</div>
 
@@ -2098,10 +2098,10 @@
 							class="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-3 text-base text-white focus:border-amber-400 focus:outline-none min-h-[44px]"
 						>
 							<option value="">All Actions</option>
-							<option value="memorial_created">Memorial Created</option>
-							<option value="memorial_updated">Memorial Updated</option>
-							<option value="memorial_deleted">Memorial Deleted</option>
-							<option value="memorial_viewed">Memorial Viewed</option>
+							<option value="memorial_created">Event Created</option>
+							<option value="memorial_updated">Event Updated</option>
+							<option value="memorial_deleted">Event Deleted</option>
+							<option value="memorial_viewed">Event Viewed</option>
 							<option value="user_login">User Login</option>
 							<option value="user_logout">User Logout</option>
 							<option value="funeral_director_approved">Director Approved</option>
@@ -2124,7 +2124,7 @@
 							class="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-3 text-base text-white focus:border-amber-400 focus:outline-none min-h-[44px]"
 						>
 							<option value="">All Types</option>
-							<option value="memorial">Memorial</option>
+							<option value="event">Event</option>
 							<option value="user">User</option>
 							<option value="schedule">Schedule</option>
 							<option value="payment">Payment</option>
@@ -2305,10 +2305,10 @@
 	{#if paymentModal}
 		<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
 			<div class="w-full max-w-md rounded-xl border border-white/20 bg-gradient-to-br from-slate-900 to-slate-800 p-6 shadow-2xl">
-				<h3 class="mb-4 text-xl font-bold text-white">Mark Memorial as Paid</h3>
+				<h3 class="mb-4 text-xl font-bold text-white">Mark Event as Paid</h3>
 				
 				<div class="mb-4 rounded-lg border border-white/10 bg-white/5 p-3">
-					<p class="text-sm text-white/70 mb-1">Memorial:</p>
+					<p class="text-sm text-white/70 mb-1">Event:</p>
 					<p class="font-semibold text-white">{paymentModal.lovedOneName}</p>
 					<p class="text-sm text-white/70 mt-1">Creator: {paymentModal.creatorEmail}</p>
 				</div>
@@ -2377,7 +2377,7 @@
 				<h3 class="mb-4 text-xl font-bold text-white">Edit Payment Notes</h3>
 				
 				<div class="mb-4 rounded-lg border border-white/10 bg-white/5 p-3">
-					<p class="text-sm text-white/70 mb-1">Memorial:</p>
+					<p class="text-sm text-white/70 mb-1">Event:</p>
 					<p class="font-semibold text-white">{editNotesModal.lovedOneName}</p>
 					<p class="text-sm text-white/70 mt-1">Creator: {editNotesModal.creatorEmail}</p>
 				</div>

@@ -18,7 +18,7 @@ This custom claim is set in Firebase Auth and verified on every request via sess
 ## Capabilities
 
 ### Full System Access
-- **All Memorials**: View, edit, delete any memorial regardless of creator
+- **All Memorials**: View, edit, delete any event regardless of creator
 - **All Users**: View, modify, delete user accounts
 - **Funeral Directors**: Approve, suspend, manage FD accounts
 - **System Configuration**: Access to admin-only routes and tools
@@ -37,8 +37,8 @@ This custom claim is set in Firebase Auth and verified on every request via sess
 ### Permission Overrides
 Admins bypass all ownership checks:
 ```typescript
-// Memorial access
-if (memorial.createdBy !== user.uid && user.role !== 'admin') {
+// Event access
+if (event.createdBy !== user.uid && user.role !== 'admin') {
   throw error(403, 'Unauthorized');
 }
 // Admin can access regardless of createdBy
@@ -183,7 +183,7 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
     
-    // Admin can access any memorial
+    // Admin can access any event
     match /memorials/{memorialId} {
       allow read: if resource.data.isPublic == true || 
         isOwner(resource.data) || 
@@ -255,7 +255,7 @@ export const POST = async ({ request, locals }) => {
 - Handle user support requests
 - Delete spam/abuse accounts
 
-### Memorial Management
+### Event Management
 - Review flagged memorials
 - Edit memorials on behalf of users
 - Delete inappropriate content
@@ -289,8 +289,8 @@ async function logAdminAction(action: string, details: any) {
 
 // Example usage
 await logAdminAction('delete_memorial', {
-  memorialId: memorial.id,
-  memorialSlug: memorial.fullSlug,
+  memorialId: event.id,
+  memorialSlug: event.fullSlug,
   reason: 'User request'
 });
 ```

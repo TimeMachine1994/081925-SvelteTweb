@@ -20,7 +20,7 @@
 
 	function getCategoryColor(category: string): string {
 		const colors: Record<string, string> = {
-			'memorial-planning': '#3B82F6',
+			'event-planning': '#3B82F6',
 			'grief-support': '#8B9DC3',
 			'technology': '#7C9885',
 			'funeral-industry': '#A67C7C',
@@ -33,7 +33,7 @@
 
 	function getCategoryLabel(category: string): string {
 		const labels: Record<string, string> = {
-			'memorial-planning': 'Memorial Planning',
+			'event-planning': 'Event Planning',
 			'grief-support': 'Grief Support',
 			'technology': 'Technology',
 			'funeral-industry': 'Funeral Industry',
@@ -48,15 +48,15 @@
 	let currentSlide = 0;
 	const bannerSlides = [
 		{
-			title: 'Need Help Planning a Memorial Service?',
+			title: 'Need Help Planning a Event Service?',
 			subtitle: 'Our expert team is here to guide you through every step',
 			cta: 'Get Started Free',
-			link: '/register/loved-one',
+			link: '/register/new-event-and-account',
 			background: 'linear-gradient(135deg, #3B82F6 0%, #B8860B 100%)'
 		},
 		{
 			title: 'Professional Live Streaming Services',
-			subtitle: 'Bring distant family and friends together for your memorial',
+			subtitle: 'Bring distant family and friends together for your event',
 			cta: 'Book Demo',
 			link: '/book-demo',
 			background: 'linear-gradient(135deg, #8B9DC3 0%, #6B7280 100%)'
@@ -80,9 +80,9 @@
 </script>
 
 <svelte:head>
-	<title>Tributestream Blog - Memorial Planning & Live Streaming Insights</title>
-	<meta name="description" content="Expert guidance on memorial planning, live streaming services, and supporting families during difficult times. Professional insights for funeral directors and families." />
-	<meta name="keywords" content="memorial planning, live streaming, funeral services, grief support, tribute stream" />
+	<title>Tributestream Blog - Event Planning & Live Streaming Insights</title>
+	<meta name="description" content="Expert guidance on event planning, live streaming services, and supporting families during difficult times. Professional insights for funeral directors and families." />
+	<meta name="keywords" content="event planning, live streaming, funeral services, grief support, tribute stream" />
 	
 	<!-- Canonical URL -->
 	<link rel="canonical" href="https://tributestream.com/blog" />
@@ -90,8 +90,8 @@
 	<!-- Open Graph / Facebook -->
 	<meta property="og:type" content="website" />
 	<meta property="og:site_name" content="Tributestream" />
-	<meta property="og:title" content="Tributestream Blog - Memorial Planning & Live Streaming" />
-	<meta property="og:description" content="Expert guidance on memorial planning, live streaming services, and supporting families during difficult times." />
+	<meta property="og:title" content="Tributestream Blog - Event Planning & Live Streaming" />
+	<meta property="og:description" content="Expert guidance on event planning, live streaming services, and supporting families during difficult times." />
 	<meta property="og:url" content="https://tributestream.com/blog" />
 	<meta property="og:image" content="https://tributestream.com/blog-og-image.jpg" />
 	<meta property="og:image:alt" content="Tributestream Blog" />
@@ -102,8 +102,8 @@
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:site" content="@tributestream" />
 	<meta name="twitter:creator" content="@tributestream" />
-	<meta name="twitter:title" content="Tributestream Blog - Memorial Planning & Live Streaming" />
-	<meta name="twitter:description" content="Expert guidance on memorial planning, live streaming services, and supporting families during difficult times." />
+	<meta name="twitter:title" content="Tributestream Blog - Event Planning & Live Streaming" />
+	<meta name="twitter:description" content="Expert guidance on event planning, live streaming services, and supporting families during difficult times." />
 	<meta name="twitter:image" content="https://tributestream.com/blog-og-image.jpg" />
 	<meta name="twitter:image:alt" content="Tributestream Blog" />
 	
@@ -112,7 +112,7 @@
 		'@context': 'https://schema.org',
 		'@type': 'Blog',
 		name: 'Tributestream Blog',
-		description: 'Expert guidance on memorial planning, live streaming services, and supporting families during difficult times.',
+		description: 'Expert guidance on event planning, live streaming services, and supporting families during difficult times.',
 		url: 'https://tributestream.com/blog',
 		publisher: {
 			'@type': 'Organization',
@@ -130,7 +130,7 @@
 	<section class="hero-section">
 		<div class="hero-content">
 			<h1 class="hero-title">Tributestream Blog</h1>
-			<p class="hero-subtitle">Expert guidance on memorial planning, live streaming, and supporting families</p>
+			<p class="hero-subtitle">Expert guidance on event planning, live streaming, and supporting families</p>
 			{#if usingMockData}
 				<div class="mock-data-notice">
 					<p>📝 Currently showing sample content. Use FireCMS to create real blog posts.</p>

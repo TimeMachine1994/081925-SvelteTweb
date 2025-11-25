@@ -2,11 +2,11 @@
 
 ## Overview
 
-Tributestream's integration flows define how different components, services, and user interactions work together to deliver a seamless memorial service experience. This document covers end-to-end workflows, data flows, and system integrations.
+Tributestream's integration flows define how different components, services, and user interactions work together to deliver a seamless event service experience. This document covers end-to-end workflows, data flows, and system integrations.
 
 ## Core User Workflows
 
-### 1. Family Memorial Creation Flow
+### 1. Family Event Creation Flow
 
 #### Family Self-Registration
 ```mermaid
@@ -26,13 +26,13 @@ sequenceDiagram
     FB->>API: Return user credentials
     API->>FB: setCustomUserClaims(role: 'owner')
     API->>FS: Create user document
-    API->>FS: Create memorial document
+    API->>FS: Create event document
     API->>Email: Send welcome email
-    API->>UI: Return success + memorial ID
-    UI->>F: Redirect to memorial dashboard
+    API->>UI: Return success + event ID
+    UI->>F: Redirect to event dashboard
 ```
 
-#### Funeral Director Memorial Creation
+#### Funeral Director Event Creation
 ```mermaid
 sequenceDiagram
     participant FD as Funeral Director
@@ -43,18 +43,18 @@ sequenceDiagram
     participant Email as Email Service
 
     FD->>UI: Access director dashboard
-    UI->>FD: Display "Create Memorial" form
-    FD->>UI: Submit family + memorial data
-    UI->>API: POST /api/funeral-director/create-memorial
-    API->>FS: Create memorial document (funeralDirectorUid set)
+    UI->>FD: Display "Create Event" form
+    FD->>UI: Submit family + event data
+    UI->>API: POST /api/funeral-director/create-event
+    API->>FS: Create event document (funeralDirectorUid set)
     API->>FB: Create family user account
     API->>FB: Set custom claims (role: 'owner')
     API->>Email: Send invitation to family
-    API->>UI: Return memorial details
-    UI->>FD: Show success + memorial link
+    API->>UI: Return event details
+    UI->>FD: Show success + event link
 ```
 
-### 2. Memorial Service Scheduling Flow
+### 2. Event Service Scheduling Flow
 
 #### Service Details Configuration
 ```mermaid
@@ -65,9 +65,9 @@ sequenceDiagram
     participant FS as Firestore
     participant AS as Auto-Save Service
 
-    U->>UI: Access /memorial/[id]/schedule
+    U->>UI: Access /event/[id]/schedule
     UI->>API: GET /api/memorials/[id]/schedule
-    API->>FS: Load memorial + calculator data
+    API->>FS: Load event + calculator data
     API->>UI: Return services + calculator config
     UI->>U: Display schedule form
 
@@ -75,14 +75,14 @@ sequenceDiagram
         U->>UI: Modify service details
         UI->>AS: Trigger auto-save (debounced)
         AS->>API: POST /api/memorials/[id]/schedule/auto-save
-        API->>FS: Update memorial.services + calculatorConfig
+        API->>FS: Update event.services + calculatorConfig
         API->>UI: Return save status
         UI->>U: Show save indicator
     end
 
     U->>UI: Click "Book Now"
     UI->>API: POST /api/create-payment-intent
-    API->>FS: Verify memorial ownership
+    API->>FS: Verify event ownership
     API->>Stripe: Create payment intent
     Stripe->>API: Return client secret
     API->>UI: Return payment details
@@ -103,7 +103,7 @@ sequenceDiagram
 
     FD->>UI: Access livestream control center
     UI->>API: GET /api/memorials/[id]/streams
-    API->>FS: Load memorial streams
+    API->>FS: Load event streams
     API->>UI: Return stream data
 
     FD->>UI: Click "Create Stream"
@@ -150,7 +150,7 @@ sequenceDiagram
     Note over API: Create archive entry
     API->>CF: Check for immediate recording
     CF->>API: Return recording status
-    API->>FS: Create archive entry in memorial
+    API->>FS: Create archive entry in event
     API->>FS: Update stream status to 'completed'
     API->>UI: Return archive details
 
@@ -173,26 +173,26 @@ sequenceDiagram
     end
 ```
 
-### 4. Memorial Page Viewing Flow
+### 4. Event Page Viewing Flow
 
-#### Public Memorial Access
+#### Public Event Access
 ```mermaid
 sequenceDiagram
     participant V as Visitor
-    participant UI as Memorial Page
+    participant UI as Event Page
     participant Server as Page Server
     participant FS as Firestore
     participant CF as Cloudflare Stream
 
     V->>UI: Access /[fullSlug]
     UI->>Server: Load +page.server.ts
-    Server->>FS: Load memorial by fullSlug
-    Server->>FS: Load visible streams for memorial
-    Server->>UI: Return memorial + streams data
-    UI->>V: Display memorial content
+    Server->>FS: Load event by fullSlug
+    Server->>FS: Load visible streams for event
+    Server->>UI: Return event + streams data
+    UI->>V: Display event content
 
     alt Has Live Streams
-        UI->>V: Show "🔴 Live Memorial Services" section
+        UI->>V: Show "🔴 Live Event Services" section
         loop Live Stream Display
             UI->>CF: Load HLS stream
             CF->>UI: Return video stream
@@ -201,7 +201,7 @@ sequenceDiagram
     end
 
     alt Has Recorded Streams
-        UI->>V: Show "📹 Recorded Memorial Services" section
+        UI->>V: Show "📹 Recorded Event Services" section
         loop Recorded Stream Display
             UI->>CF: Load recorded video
             CF->>UI: Return video content
@@ -302,8 +302,8 @@ async function handleStreamConnected(webhook: any) {
     updatedAt: serverTimestamp()
   });
   
-  // Update memorial archive if exists
-  const memorial = await getDocs(
+  // Update event archive if exists
+  const event = await getDocs(
     query(collection(db, 'memorials'), 
           where('livestreamArchive', 'array-contains-any', [{ cloudflareId: streamId }]))
   );
@@ -325,7 +325,7 @@ async function handleRecordingReady(webhook: any) {
     updatedAt: serverTimestamp()
   });
   
-  // Update memorial archive entries
+  // Update event archive entries
   await updateMemorialArchives(uid, {
     recordingReady: true,
     recordingPlaybackUrl: playback.hls,
@@ -341,13 +341,13 @@ async function handleRecordingReady(webhook: any) {
 ```typescript
 // Payment processing workflow
 async function createPaymentIntent(memorialId: string, amount: number) {
-  // 1. Verify memorial ownership
-  const memorial = await getDoc(doc(db, 'memorials', memorialId));
-  if (!memorial.exists()) {
-    throw new Error('Memorial not found');
+  // 1. Verify event ownership
+  const event = await getDoc(doc(db, 'memorials', memorialId));
+  if (!event.exists()) {
+    throw new Error('Event not found');
   }
   
-  const memorialData = memorial.data();
+  const memorialData = event.data();
   if (memorialData.ownerUid !== user.uid && !user.isAdmin) {
     throw new Error('Insufficient permissions');
   }
@@ -498,11 +498,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 ## Data Flow Patterns
 
-### 1. Memorial Service Data Flow
+### 1. Event Service Data Flow
 
 ```mermaid
 graph TD
-    A[Memorial Creation] --> B[Memorial.services]
+    A[Event Creation] --> B[Event.services]
     B --> C[Schedule Page]
     C --> D[Calculator Component]
     D --> E[LivestreamConfig]
@@ -510,7 +510,7 @@ graph TD
     F --> G[Stream Creation]
     G --> H[Livestream Control]
     H --> I[Archive Creation]
-    I --> J[Memorial Page Display]
+    I --> J[Event Page Display]
     
     B --> K[Server-side Rendering]
     K --> J
@@ -554,7 +554,7 @@ graph TD
     G -->|Yes| I[Execute Request]
     I --> J[Return Response]
     
-    F --> K[Memorial Middleware]
+    F --> K[Event Middleware]
     F --> L[Stream Middleware]
     F --> M[Admin Middleware]
     
@@ -665,10 +665,10 @@ async function updateMemorialWithRetry(memorialId: string, updates: any, maxRetr
     try {
       await runTransaction(db, async (transaction) => {
         const memorialRef = doc(db, 'memorials', memorialId);
-        const memorial = await transaction.get(memorialRef);
+        const event = await transaction.get(memorialRef);
         
-        if (!memorial.exists()) {
-          throw new Error('Memorial not found');
+        if (!event.exists()) {
+          throw new Error('Event not found');
         }
         
         transaction.update(memorialRef, {
@@ -704,7 +704,7 @@ const LazyVideoPlayer = lazy(() => import('$lib/components/VideoPlayerCard.svelt
 
 // Route-based code splitting
 const routes = {
-  '/memorial/[id]/livestream': () => import('./livestream/+page.svelte'),
+  '/event/[id]/livestream': () => import('./livestream/+page.svelte'),
   '/admin': () => import('./admin/+page.svelte'),
   '/profile': () => import('./profile/+page.svelte')
 };
@@ -713,19 +713,19 @@ const routes = {
 ### 2. Data Prefetching & Caching
 
 ```typescript
-// Memorial data prefetching
+// Event data prefetching
 export async function load({ params, fetch }) {
   const memorialId = params.id;
   
   // Parallel data loading
-  const [memorial, streams, config] = await Promise.all([
+  const [event, streams, config] = await Promise.all([
     fetch(`/api/memorials/${memorialId}`).then(r => r.json()),
     fetch(`/api/memorials/${memorialId}/streams`).then(r => r.json()),
     fetch(`/api/memorials/${memorialId}/config`).then(r => r.json())
   ]);
   
   return {
-    memorial: memorial.data,
+    event: event.data,
     streams: streams.data,
     config: config.data
   };

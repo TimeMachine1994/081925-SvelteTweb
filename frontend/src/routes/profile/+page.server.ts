@@ -1,10 +1,10 @@
 import { adminDb } from '$lib/server/firebase';
 import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
-import type { Memorial } from '$lib/types/memorial';
+import type { Event } from '$lib/types/event';
 import { verifyRecaptcha, RECAPTCHA_ACTIONS, getScoreThreshold } from '$lib/utils/recaptcha';
 import { dev } from '$app/environment';
-import { generateUniqueMemorialSlug } from '$lib/utils/memorial-slug';
+import { generateUniqueMemorialSlug } from '$lib/utils/event-slug';
 
 // Helper function to convert Timestamps and Dates to strings
 function sanitizeData(data: any): any {
@@ -45,7 +45,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		}
 
 		// Fetch memorials based on role
-		let memorials: Memorial[] = [];
+		let memorials: Event[] = [];
 		if (role === 'funeral_director') {
 			// Query using funeralDirectorUid (compatible with both old and new memorials)
 			const memorialsSnap = await adminDb
@@ -59,7 +59,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 				.where('funeralDirector.id', '==', uid)
 				.get();
 		
-			// Combine results and deduplicate by memorial ID
+			// Combine results and deduplicate by event ID
 			const memorialMap = new Map();
 		
 			[...memorialsSnap.docs, ...memorialsSnap2.docs].forEach((doc) => {
@@ -68,7 +68,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 					if (!data.fullSlug && data.slug) {
 						data.fullSlug = data.slug;
 					}
-					memorialMap.set(doc.id, { id: doc.id, ...data } as Memorial);
+					memorialMap.set(doc.id, { id: doc.id, ...data } as Event);
 				}
 			});
 		
@@ -83,7 +83,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 				if (!data.fullSlug && data.slug) {
 					data.fullSlug = data.slug;
 				}
-				return { id: doc.id, ...data } as Memorial;
+				return { id: doc.id, ...data } as Event;
 			});
 		}
 		// Add other roles as needed
@@ -178,12 +178,12 @@ export const actions: Actions = {
 			});
 		}
 
-		// Check if user has already created a memorial and hasn't paid
+		// Check if user has already created a event and hasn't paid
 		const userDoc = await adminDb.collection('users').doc(locals.user.uid).get();
 		const userData = userDoc.data();
 
 		if (userData?.memorialCount > 0 && !userData?.hasPaidForMemorial) {
-			// Get the first memorial to redirect user to payment
+			// Get the first event to redirect user to payment
 			const memorialsSnap = await adminDb
 				.collection('memorials')
 				.where('ownerUid', '==', locals.user.uid)
@@ -193,7 +193,7 @@ export const actions: Actions = {
 			const firstMemorialId = memorialsSnap.docs[0]?.id;
 			
 			return fail(400, {
-				message: 'You must complete payment for your existing memorial before creating a new one.',
+				message: 'You must complete payment for your existing event before creating a new one.',
 				needsPayment: true,
 				memorialId: firstMemorialId
 			});
@@ -209,22 +209,22 @@ export const actions: Actions = {
 		}
 
 		try {
-			// Generate unique memorial slug
+			// Generate unique event slug
 			const fullSlug = await generateUniqueMemorialSlug(lovedOneName);
-			console.log(`[PROFILE] Creating memorial with unique fullSlug: ${fullSlug}`);
+			console.log(`[PROFILE] Creating event with unique fullSlug: ${fullSlug}`);
 
-			// Create the memorial
+			// Create the event
 			const memorialData = {
 				lovedOneName,
 				fullSlug,
 				ownerUid: locals.user.uid,
 				ownerEmail: locals.user.email,
 				
-				// Memorial metadata
+				// Event metadata
 				title: `Celebration of Life for ${lovedOneName}`,
 				description: `A celebration of life dedicated to ${lovedOneName}`,
 
-				// Basic memorial structure
+				// Basic event structure
 				services: {
 					main: {
 						location: { name: '', address: '', isUnknown: true },
@@ -234,13 +234,13 @@ export const actions: Actions = {
 					additional: []
 				},
 
-				// Memorial settings
+				// Event settings
 				isPublic: true, // Make public so it's accessible
 				content: `<h1>Celebration of Life for ${lovedOneName}</h1><p>This page is dedicated to celebrating the life and legacy of ${lovedOneName}.</p>`,
 				custom_html: null,
 				isPaid: false, // Track payment status
 				
-				// Additional fields for memorial page
+				// Additional fields for event page
 				photos: [],
 				embeds: [],
 				birthDate: null,
@@ -253,7 +253,7 @@ export const actions: Actions = {
 
 			const memorialRef = await adminDb.collection('memorials').add(memorialData);
 
-			// Update user's memorial count
+			// Update user's event count
 			await adminDb
 				.collection('users')
 				.doc(locals.user.uid)
@@ -265,13 +265,13 @@ export const actions: Actions = {
 					{ merge: true }
 				);
 
-			console.log(`[PROFILE] Memorial created successfully with ID: ${memorialRef.id}`);
+			console.log(`[PROFILE] Event created successfully with ID: ${memorialRef.id}`);
 
-			// Redirect to the newly created memorial page
+			// Redirect to the newly created event page
 			throw redirect(303, `/${fullSlug}`);
 		} catch (error) {
-			console.error('Error creating memorial:', error);
-			return fail(500, { message: 'Failed to create memorial. Please try again.' });
+			console.error('Error creating event:', error);
+			return fail(500, { message: 'Failed to create event. Please try again.' });
 		}
 	}
 };

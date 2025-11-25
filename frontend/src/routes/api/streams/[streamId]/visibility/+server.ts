@@ -6,7 +6,7 @@ import type { RequestHandler } from './$types';
  * Update stream visibility
  * POST /api/streams/[streamId]/visibility
  * 
- * Controls whether a stream (live, scheduled, or recorded) appears on the memorial page
+ * Controls whether a stream (live, scheduled, or recorded) appears on the event page
  */
 export const POST: RequestHandler = async ({ params, request, locals }) => {
 	const { streamId } = params;
@@ -33,15 +33,15 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 		
 		const streamData = streamDoc.data();
 		
-		// Permission check: Must be admin or memorial owner/funeral director
+		// Permission check: Must be admin or event owner/funeral director
 		const memorialRef = adminDb.collection('memorials').doc(streamData.memorialId);
-		const memorial = await memorialRef.get();
+		const event = await memorialRef.get();
 		
-		if (!memorial.exists) {
-			return json({ error: 'Memorial not found' }, { status: 404 });
+		if (!event.exists) {
+			return json({ error: 'Event not found' }, { status: 404 });
 		}
 		
-		const memorialData = memorial.data();
+		const memorialData = event.data();
 		const isAdmin = locals.user.role === 'admin';
 		const isOwner = memorialData.createdBy === locals.user.uid;
 		const isFuneralDirector = memorialData.funeralDirectorId === locals.user.uid;

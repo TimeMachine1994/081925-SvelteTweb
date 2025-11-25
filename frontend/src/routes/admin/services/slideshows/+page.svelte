@@ -1,7 +1,7 @@
 <!--
 SLIDESHOWS ADMIN PAGE
 
-Manage memorial slideshows across all memorials
+Manage event slideshows across all memorials
 -->
 <script lang="ts">
 	import AdminLayout from '$lib/components/admin/AdminLayout.svelte';
@@ -27,7 +27,7 @@ Manage memorial slideshows across all memorials
 		},
 		{
 			id: 'memorialName',
-			label: 'Memorial',
+			label: 'Event',
 			field: 'memorialName',
 			width: 200,
 			sortable: true
@@ -92,7 +92,7 @@ Manage memorial slideshows across all memorials
 	}
 
 	function handleRowClick(slideshow: any) {
-		// Navigate to memorial page with slideshow
+		// Navigate to event page with slideshow
 		goto(`/${slideshow.memorialSlug}#slideshow-${slideshow.id}`);
 	}
 </script>
@@ -113,7 +113,7 @@ Manage memorial slideshows across all memorials
 			<FilterBuilder
 				fields={[
 					{ id: 'title', label: 'Title', type: 'string' },
-					{ id: 'memorialName', label: 'Memorial', type: 'string' },
+					{ id: 'memorialName', label: 'Event', type: 'string' },
 					{
 						id: 'status',
 						label: 'Status',

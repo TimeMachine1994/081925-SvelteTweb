@@ -41,8 +41,8 @@ async function resetAndCreateAccounts() {
       console.log('✅ Test accounts created successfully!');
       console.log('\n📋 Results:');
       result.results.forEach(item => {
-        if (item.type === 'memorial') {
-          console.log(`   Memorial: ${item.success ? '✅' : '❌'} ${item.id || item.error}`);
+        if (item.type === 'event') {
+          console.log(`   Event: ${item.success ? '✅' : '❌'} ${item.id || item.error}`);
         } else {
           console.log(`   ${item.role}: ${item.success ? '✅' : '❌'} ${item.email} ${item.message || item.error || ''}`);
         }

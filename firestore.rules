@@ -54,7 +54,7 @@ service cloud.firestore {
            request.auth.token.email.matches('.*@tributestream.com'));
       }
       
-      // Admins can read/write any memorial.
+      // Admins can read/write any event.
       // Otherwise, apply existing logic plus funeral director permissions.
       allow read: if isAdmin() || 
                      isAdminEmail() ||

@@ -1,13 +1,13 @@
 # LLM SYSTEM CONTEXT — Tributestream App
 
-You are assisting with a SvelteKit-based web platform called Tributestream: a role-based memorial and livestream system for families and funeral directors.
+You are assisting with a SvelteKit-based web platform called Tributestream: a role-based event and livestream system for families and funeral directors.
 
 ## Core principles
-- Role-based access: Admin > Owner (memorial creator) > Funeral Director (service provider) > Family Member (invited) > Viewer (public).
+- Role-based access: Admin > Owner (event creator) > Funeral Director (service provider) > Family Member (invited) > Viewer (public).
 - Registration flows differ by entry page:
   - Funeral directors must register at `/register/funeral-home` and require admin approval before they can begin registering owners.
-  - Owners generally arrive via the home page, enter their loved one’s name, and complete the memorial registration form (`/register/loved-one` or the general `/register`).
-- Strong admin oversight: approvals for funeral directors, system metrics, user management, and memorial moderation.
+  - Owners generally arrive via the home page, enter their loved one’s name, and complete the event registration form (`/register/new-event-and-account` or the general `/register`).
+- Strong admin oversight: approvals for funeral directors, system metrics, user management, and event moderation.
 - Livestream integration and permissions: owners and assigned funeral directors can initiate/stop livestreams for a tribute (with appropriate locking and audit logs planned).
 
 ## High-level goals and documents
@@ -22,9 +22,9 @@ You are assisting with a SvelteKit-based web platform called Tributestream: a ro
 3. Admin reviews/approves in `/admin` (approval emails sent)
 4. Approved FD can register owners, prepopulated data in family registration
 
-### Owner memorial creation (typical)
+### Owner event creation (typical)
 1. From home page, user enters loved one’s name
-2. Completes registration form (e.g., `/register` or `/register/loved-one`)
+2. Completes registration form (e.g., `/register` or `/register/new-event-and-account`)
 3. Stripe payment (if applicable), schedule setup, and livestream permissions ready
 
 ### Invitation acceptance (family members)
@@ -33,35 +33,35 @@ You are assisting with a SvelteKit-based web platform called Tributestream: a ro
 3. Gain scoped access to upload photos or view schedules (per role)
 
 ## SvelteKit pages (routes) and purposes
-- `/+page.svelte` — Home/landing. Primary funnel to start memorial creation by entering loved one’s name.
+- `/+page.svelte` — Home/landing. Primary funnel to start event creation by entering loved one’s name.
 - `/admin/+page.svelte` — Admin dashboard. Pending FD approvals, recent memorials, quick-create memorials, stats tiles.
 - `/admin-test/+page.svelte` — Admin testing area (likely experimental UI).
 - `/app/calculator/+page.svelte` — Pricing/schedule calculator UI used in booking or schedule flow.
 - `/app/checkout/success/+page.svelte` — Post-payment success page for Stripe checkout.
 - `/auth/session/+page.svelte` — Session info/view to debug or manage auth state (dev-friendly).
-- `/funeral-director/create-customer-memorial/+page.svelte` — FD creates an owner’s memorial on behalf of a family.
+- `/funeral-director/create-customer-event/+page.svelte` — FD creates an owner’s event on behalf of a family.
 - `/funeral-director/dashboard/+page.svelte` — FD portal dashboard with their memorials, actions, and stats.
-- `/funeral-director/mobile-stream/[memorialId]/+page.svelte` — Mobile streaming interface for FD on a specific memorial.
+- `/funeral-director/mobile-stream/[memorialId]/+page.svelte` — Mobile streaming interface for FD on a specific event.
 - `/funeral-director/register/+page.svelte` — Legacy/alternative FD registration page (use `/register/funeral-home` as canonical).
 - `/funeral-director-admin-form/+page.svelte` — Admin-facing or internal FD form (likely legacy/testing).
 - `/invite/[invitationId]/+page.svelte` — Invitation acceptance for family members/contributors.
 - `/login/+page.svelte` — Login page with password reset support.
 - `/my-portal/+page.svelte` — Role-based portal (Owner, FD, Family, Viewer) with tailored dashboards.
-- `/my-portal/tributes/[memorialId]/edit/+page.svelte` — Owner/FD memorial management UI (edit details, schedule, assets).
+- `/my-portal/tributes/[memorialId]/edit/+page.svelte` — Owner/FD event management UI (edit details, schedule, assets).
 - `/payment/+page.svelte` — Payment page/flow entry.
 - `/payment/receipt/+page.svelte` — Payment receipt view.
 - `/profile/+page.svelte` — Profile page (role-themed UI, glassmorphism design).
-- `/register/+page.svelte` — General memorial registration entry (Owner flow).
+- `/register/+page.svelte` — General event registration entry (Owner flow).
 - `/register/funeral-director/+page.svelte` — FD-assisted family registration (enhanced with FD prepopulation).
 - `/register/funeral-home/+page.svelte` — Primary FD onboarding application (requires admin approval).
-- `/register/loved-one/+page.svelte` — Owner memorial registration form (driven from loved one’s name).
+- `/register/new-event-and-account/+page.svelte` — Owner event registration form (driven from loved one’s name).
 - `/schedule/+page.svelte` — Scheduling entry page (calculator, selection).
 - `/schedule/[memorialId]/+page.svelte` — Scheduling detail page for a tribute.
 - `/schedule/new/+page.svelte` — Start a new schedule flow.
-- `/search/+page.svelte` — Memorial search.
+- `/search/+page.svelte` — Event search.
 - `/theme/+page.svelte` — Theme showcase (UI/brand exploration).
 - `/theme2/+page.svelte` — Alternative theme showcase.
-- `/tributes/[fullSlug]/+page.svelte` — Public memorial view by full slug.
+- `/tributes/[fullSlug]/+page.svelte` — Public event view by full slug.
 
 ## API routes and purposes
 ### Admin
@@ -70,7 +70,7 @@ You are assisting with a SvelteKit-based web platform called Tributestream: a ro
 - `/api/admin/applications/[id]/reject/+server.ts` — Reject FD application by id.
 - `/api/admin/approve-funeral-director/+server.ts` — Approve FD (used by admin UI).
 - `/api/admin/reject-funeral-director/+server.ts` — Reject FD (used by admin UI).
-- `/api/admin/create-memorial/+server.ts` — Admin creates a memorial and owner account.
+- `/api/admin/create-event/+server.ts` — Admin creates a event and owner account.
 - `/api/admin/stats/+server.ts` — Admin dashboard stats.
 - `/api/admin/users/+server.ts` — Admin user directory CRUD (list/create; per nested endpoints manage state).
 - `/api/admin/users/[uid]/activate/+server.ts` — Activate user.
@@ -87,23 +87,23 @@ You are assisting with a SvelteKit-based web platform called Tributestream: a ro
 - `/api/funeral-director/register/+server.ts` — FD registration endpoint (application submission).
 - `/api/funeral-director/profile/+server.ts` — FD profile read/update.
 - `/api/funeral-director/memorials/+server.ts` — FD’s memorials list or management surface.
-- `/api/funeral-director/create-memorial/+server.ts` — FD creates a memorial.
-- `/api/funeral-director/create-customer-memorial/+server.ts` — FD creates memorial on behalf of customer.
+- `/api/funeral-director/create-event/+server.ts` — FD creates a event.
+- `/api/funeral-director/create-customer-event/+server.ts` — FD creates event on behalf of customer.
 - `/api/funeral-director/quick-register-family/+server.ts` — Quick path to register a family/owner.
 
 ### Memorials (ownership, invites, follows)
-- `/api/memorials/[memorialId]/assign/+server.ts` — Assign FD/owner or roles to a memorial.
+- `/api/memorials/[memorialId]/assign/+server.ts` — Assign FD/owner or roles to a event.
 - `/api/memorials/[memorialId]/invite/+server.ts` — Create invitation for family member.
 - `/api/memorials/[memorialId]/invite/[invitationId]/+server.ts` — Manage or accept a specific invitation.
-- `/api/memorials/[memorialId]/follow/+server.ts` — Follow/unfollow memorial.
+- `/api/memorials/[memorialId]/follow/+server.ts` — Follow/unfollow event.
 
 ### Scheduling and locking
-- `/api/memorials/[memorialId]/schedule/+server.ts` — CRUD schedule data for a memorial.
+- `/api/memorials/[memorialId]/schedule/+server.ts` — CRUD schedule data for a event.
 - `/api/memorials/[memorialId]/schedule/auto-save/+server.ts` — Debounced auto-save endpoint for schedule edits.
 - `/api/lock-schedule/+server.ts` — Locking mechanism to prevent conflicts.
 
 ### Livestream
-- `/api/memorials/[memorialId]/livestream/+server.ts` — Livestream config/metadata for a memorial.
+- `/api/memorials/[memorialId]/livestream/+server.ts` — Livestream config/metadata for a event.
 - `/api/memorials/[memorialId]/livestreams/+server.ts` — List livestream sessions/records.
 - `/api/memorials/[memorialId]/livestream/[streamId]/+server.ts` — Livestream session details.
 - `/api/memorials/[memorialId]/livestream/start/+server.ts` — Start livestream with permission checks.
@@ -119,7 +119,7 @@ You are assisting with a SvelteKit-based web platform called Tributestream: a ro
 - `/api/send-action-required-email/+server.ts` — Admin action-required notification.
 
 ### Embeds
-- `/api/memorials/[memorialId]/embeds/+server.ts` — Embed provisioning/management for memorial pages.
+- `/api/memorials/[memorialId]/embeds/+server.ts` — Embed provisioning/management for event pages.
 
 ## Role and permission expectations (from RolePlan)
 - Owner: Create, edit, and manage owned memorials; upload/edit/delete photos; moderate family photos; invite/revoke family; manage schedules, payments, livestreams.
@@ -152,7 +152,7 @@ You are assisting with a SvelteKit-based web platform called Tributestream: a ro
 - If ambiguity exists (e.g., legacy vs. canonical paths), call out the preferred canonical route:
   - FD applies at `/register/funeral-home`.
   - FD-assisted family registrations occur at `/register/funeral-director`.
-- Proactively consider admin visibility/controls when changing flows that affect director status or memorial ownership.
+- Proactively consider admin visibility/controls when changing flows that affect director status or event ownership.
 
 ## Open questions to confirm with the team
 - Should `/funeral-director/register` and `/funeral-director-admin-form` be retired/redirected to `/register/funeral-home`?

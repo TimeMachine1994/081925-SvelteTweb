@@ -22,14 +22,14 @@
 
 	let { data } = $props();
 
-	// Check if memorial is paid
-	const isPaid = $derived(data?.memorial?.isPaid || false);
+	// Check if event is paid
+	const isPaid = $derived(data?.event?.isPaid || false);
 
 	// Edit request modal state
 	let showEditModal = $state(false);
 	let editRequestSuccess = $state(false);
 
-	// Get memorial ID from route params
+	// Get event ID from route params
 	const memorialId = $page.params.memorialId as string;
 
 	// Loading state
@@ -50,14 +50,14 @@
 		autoSaved: false
 	});
 
-	// Service data (loaded from Memorial.services)
+	// Service data (loaded from Event.services)
 	let services = $state({
-		main: data?.memorial?.services?.main || {
+		main: data?.event?.services?.main || {
 			location: { name: '', address: '', isUnknown: false },
 			time: { date: null, time: null, isUnknown: false },
 			hours: 2
 		},
-		additional: data?.memorial?.services?.additional || []
+		additional: data?.event?.services?.additional || []
 	});
 
 	// Additional service toggles (UI state)
@@ -75,8 +75,8 @@
 		hours: 2
 	});
 
-	// Memorial metadata
-	const lovedOneName = data?.memorial?.lovedOneName || '';
+	// Event metadata
+	const lovedOneName = data?.event?.lovedOneName || '';
 
 	// Data structure validation logging - moved to onMount to avoid state reference warnings
 
@@ -434,7 +434,7 @@
 				const streamSyncData = {
 					services: updatedServices,
 					calculatorData: calculatorData,
-					memorialName: data?.memorial?.lovedOneName
+					memorialName: data?.event?.lovedOneName
 				};
 
 				const streamResults = await syncStreamsWithSchedule(memorialId, streamSyncData);
@@ -618,14 +618,14 @@
 	<title>{isPaid ? 'Payment Receipt' : 'Price Calculator'} - Tributestream</title>
 	<meta
 		name="description"
-		content="Configure your memorial service livestream package with our comprehensive pricing calculator."
+		content="Configure your event service livestream package with our comprehensive pricing calculator."
 	/>
 </svelte:head>
 
 {#if isPaid}
 	<!-- Payment Receipt View -->
 	<ScheduleReceipt
-		memorial={data.memorial}
+		event={data.event}
 		calculatorConfig={data.calculatorConfig}
 		onRequestEdit={() => (showEditModal = true)}
 	/>
@@ -648,13 +648,13 @@
 	<!-- Edit Request Modal -->
 	{#if showEditModal}
 		<EditRequestModal
-			memorial={data.memorial}
+			event={data.event}
 			onClose={() => (showEditModal = false)}
 			onSubmit={handleEditRequest}
 		/>
 	{/if}
 {:else}
-	<!-- Calculator View (Unpaid Memorial) -->
+	<!-- Calculator View (Unpaid Event) -->
 	<!-- Header -->
 	<section class="bg-gradient-to-br from-black via-gray-900 to-amber-900 py-16 text-white">
 	<div class="mx-auto max-w-4xl px-4 text-center">
@@ -666,7 +666,7 @@
 			</h1>
 		</div>
 		<p class="mx-auto max-w-2xl text-xl text-gray-300">
-			Configure your memorial service livestream package for {lovedOneName || 'your loved one'}
+			Configure your event service livestream package for {lovedOneName || 'your loved one'}
 		</p>
 
 		<!-- Auto-save status indicator -->

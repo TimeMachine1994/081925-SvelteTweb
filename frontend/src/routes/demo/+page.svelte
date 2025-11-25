@@ -19,12 +19,12 @@
 	const scenarios: Scenario[] = [
 		{
 			id: 'first_memorial_service',
-			name: 'First Memorial Service',
-			description: 'Experience creating your first memorial from scratch with guided setup',
+			name: 'First Event Service',
+			description: 'Experience creating your first event from scratch with guided setup',
 			icon: '🏛️',
 			role: 'Funeral Director',
 			features: [
-				'Create memorial from scratch',
+				'Create event from scratch',
 				'Schedule livestream',
 				'Upload photo slideshow',
 				'Configure service details'
@@ -33,7 +33,7 @@
 		{
 			id: 'managing_multiple',
 			name: 'Managing Multiple Services',
-			description: 'See how to handle concurrent memorial services with multiple streams',
+			description: 'See how to handle concurrent event services with multiple streams',
 			icon: '📊',
 			role: 'Funeral Director',
 			features: [
@@ -46,27 +46,27 @@
 		{
 			id: 'legacy_celebration',
 			name: 'Legacy Celebration',
-			description: 'Explore a fully-featured memorial with slideshow and recordings',
+			description: 'Explore a fully-featured event with slideshow and recordings',
 			icon: '💐',
-			role: 'Memorial Owner',
+			role: 'Event Owner',
 			features: [
-				'View complete memorial page',
+				'View complete event page',
 				'Photo slideshow display',
 				'Stream recordings',
-				'Memorial customization'
+				'Event customization'
 			]
 		},
 		{
 			id: 'viewer_experience',
 			name: 'Viewer Experience',
-			description: 'Experience a memorial service as a guest attending remotely',
+			description: 'Experience a event service as a guest attending remotely',
 			icon: '👁️',
 			role: 'Guest Viewer',
 			features: [
 				'Watch live stream',
 				'Leave condolences',
 				'View photo memories',
-				'Share memorial link'
+				'Share event link'
 			]
 		}
 	];
@@ -119,16 +119,16 @@
 				});
 			}
 
-			// Redirect to memorial if one was created, otherwise to portal
+			// Redirect to event if one was created, otherwise to portal
 			let redirectPath = '/my-portal';
 			
 			if (data.memorialSlug) {
-				// Redirect to the created memorial
+				// Redirect to the created event
 				redirectPath = `/${data.memorialSlug}`;
-				console.log('[DEMO_LANDING] Memorial created, redirecting to:', redirectPath);
+				console.log('[DEMO_LANDING] Event created, redirecting to:', redirectPath);
 			} else {
 				// Fallback to portal
-				console.log('[DEMO_LANDING] No memorial created, redirecting to portal');
+				console.log('[DEMO_LANDING] No event created, redirecting to portal');
 			}
 
 			goto(redirectPath);
@@ -144,7 +144,7 @@
 	<title>Try Tributestream Demo | No Credit Card Required</title>
 	<meta
 		name="description"
-		content="Experience Tributestream's memorial livestreaming platform with our interactive demo. Try all features with realistic data - no signup or credit card required."
+		content="Experience Tributestream's event livestreaming platform with our interactive demo. Try all features with realistic data - no signup or credit card required."
 	/>
 </svelte:head>
 

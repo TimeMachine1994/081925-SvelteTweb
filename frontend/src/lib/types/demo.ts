@@ -83,16 +83,16 @@ export interface DemoEntity {
 }
 
 /**
- * Demo memorial with full demo entity metadata
+ * Demo event with full demo entity metadata
  */
 export interface DemoMemorial extends DemoEntity {
-  /** Memorial document ID */
+  /** Event document ID */
   memorialId: string;
   
   /** Name of the loved one */
   lovedOneName: string;
   
-  /** Memorial full slug for URL */
+  /** Event full slug for URL */
   fullSlug: string;
   
   /** Owner user ID (will be demo user) */
@@ -101,7 +101,7 @@ export interface DemoMemorial extends DemoEntity {
   /** Optional funeral director ID */
   funeralDirectorUid?: string;
   
-  /** Whether memorial is public */
+  /** Whether event is public */
   isPublic: boolean;
 }
 
@@ -115,7 +115,7 @@ export interface DemoStream extends DemoEntity {
   /** Stream title */
   title: string;
   
-  /** Associated memorial ID */
+  /** Associated event ID */
   memorialId: string;
   
   /** Stream status */
@@ -135,7 +135,7 @@ export interface DemoSlideshow extends DemoEntity {
   /** Slideshow title */
   title: string;
   
-  /** Associated memorial ID */
+  /** Associated event ID */
   memorialId: string;
   
   /** Number of photos in slideshow */
@@ -204,7 +204,7 @@ export interface CreateDemoSessionResponse {
   /** Initial role assigned */
   initialRole: string;
   
-  /** Memorial slug if demo data was seeded */
+  /** Event slug if demo data was seeded */
   memorialSlug?: string;
   
   /** Error message if failed */

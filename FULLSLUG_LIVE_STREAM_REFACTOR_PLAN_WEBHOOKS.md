@@ -406,7 +406,7 @@ export const GET: RequestHandler = async ({ url }) => {
 <!-- now use liveStreams which updates in real-time via Firestore -->
 
 {#if hasVisibleStreams}
-	<div class="memorial-streams">
+	<div class="event-streams">
 		<!-- Live Streams -->
 		{#if categorizedLiveStreams.length > 0}
 			<div class="stream-section live-section">
@@ -723,7 +723,7 @@ curl -X POST https://yourdomain.com/api/webhooks/cloudflare-stream \
 
 ### Real-Time Update Testing
 
-- [ ] Open memorial page in 2+ browser tabs
+- [ ] Open event page in 2+ browser tabs
 - [ ] Start OBS stream
 - [ ] Verify ALL tabs update within 2 seconds
 - [ ] Stop OBS stream
@@ -733,7 +733,7 @@ curl -X POST https://yourdomain.com/api/webhooks/cloudflare-stream \
 
 - [ ] Test with stream that has no cloudflareInputId
 - [ ] Test with legacy cloudflareInputId field (not in streamCredentials)
-- [ ] Test multiple streams on same memorial
+- [ ] Test multiple streams on same event
 - [ ] Test stream status changing multiple times rapidly
 - [ ] Test with browser tab in background (should still update)
 - [ ] Test with network interruption (Firestore reconnects automatically)

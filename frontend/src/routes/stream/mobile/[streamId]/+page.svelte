@@ -127,9 +127,9 @@
 		<div class="header">
 			<div class="header-content">
 				<h1>📱 Mobile Camera</h1>
-				{#if data.memorial}
-					<p class="memorial-info">
-						Streaming for <strong>{data.memorial.lovedOneName}</strong>
+				{#if data.event}
+					<p class="event-info">
+						Streaming for <strong>{data.event.lovedOneName}</strong>
 					</p>
 				{/if}
 				<p class="stream-title">{data.stream.title}</p>
@@ -301,15 +301,15 @@
 				</div>
 			</details>
 
-			{#if data.memorial?.fullSlug}
-				<div class="memorial-link">
+			{#if data.event?.fullSlug}
+				<div class="event-link">
 					<a
-						href="/{data.memorial.fullSlug}"
+						href="/{data.event.fullSlug}"
 						target="_blank"
 						class="link-btn"
 					>
 						<ExternalLink class="icon" />
-						View Memorial Page
+						View Event Page
 					</a>
 				</div>
 			{/if}
@@ -359,7 +359,7 @@
 		font-size: 2rem;
 	}
 
-	.memorial-info {
+	.event-info {
 		margin: 0.5rem 0;
 		opacity: 0.95;
 		font-size: 1rem;
@@ -644,7 +644,7 @@
 		line-height: 1.5;
 	}
 
-	.memorial-link {
+	.event-link {
 		margin-top: 1.5rem;
 		padding-top: 1.5rem;
 		border-top: 1px solid #e0e0e0;

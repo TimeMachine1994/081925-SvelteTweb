@@ -11,7 +11,7 @@ async function initializeAdminDb() {
 		}
 	}
 }
-import type { Memorial } from '$lib/types/memorial';
+import type { Event } from '$lib/types/event';
 
 export interface AccessCheckResult {
 	hasAccess: boolean;
@@ -32,7 +32,7 @@ export interface UserContext {
 export async function verifyMemorialAccess(
 	user: any,
 	memorialId: string,
-	memorial?: any
+	event?: any
 ): Promise<AccessCheckResult> {
 	try {
 		const userContext: UserContext = {
@@ -42,8 +42,8 @@ export async function verifyMemorialAccess(
 			isAdmin: user.customClaims?.admin || false
 		};
 
-		// If memorial data is provided, use it directly for testing
-		if (memorial) {
+		// If event data is provided, use it directly for testing
+		if (event) {
 			// Check if user is admin first (highest priority)
 			if (userContext.role === 'admin') {
 				return {
@@ -54,16 +54,16 @@ export async function verifyMemorialAccess(
 			}
 
 			// Check if user is owner
-			if (memorial.ownerUid === user.uid || userContext.role === 'owner') {
+			if (event.ownerUid === user.uid || userContext.role === 'owner') {
 				return {
 					hasAccess: true,
 					accessLevel: 'admin',
-					reason: 'User is memorial owner'
+					reason: 'User is event owner'
 				};
 			}
 
 			// Check if user is funeral director
-			if (memorial.funeralDirectorUid === user.uid || userContext.role === 'funeral_director') {
+			if (event.funeralDirectorUid === user.uid || userContext.role === 'funeral_director') {
 				return {
 					hasAccess: true,
 					accessLevel: 'admin', // Changed to admin for funeral directors in tests
@@ -76,7 +76,7 @@ export async function verifyMemorialAccess(
 			return {
 				hasAccess: false,
 				accessLevel: 'none',
-				reason: 'No access permission for this memorial'
+				reason: 'No access permission for this event'
 			};
 		}
 
@@ -113,15 +113,15 @@ export function logAccessAttempt(details: any) {
 }
 
 /**
- * Comprehensive memorial access verification system
+ * Comprehensive event access verification system
  * Checks permissions for different user roles and actions
  */
 export class MemorialAccessVerifier {
 	/**
-	 * Check if user has access to view a memorial
+	 * Check if user has access to view a event
 	 */
 	static async checkViewAccess(memorialId: string, user: UserContext): Promise<AccessCheckResult> {
-		console.log('🔍 Checking view access for memorial:', memorialId, 'user:', user.uid);
+		console.log('🔍 Checking view access for event:', memorialId, 'user:', user.uid);
 
 		try {
 			await initializeAdminDb(); // Ensure DB is initialized
@@ -134,29 +134,29 @@ export class MemorialAccessVerifier {
 				};
 			}
 
-			// Get memorial document
+			// Get event document
 			const memorialDoc = await adminDb.collection('memorials').doc(memorialId).get();
 			if (!memorialDoc.exists) {
 				return {
 					hasAccess: false,
 					accessLevel: 'none',
-					reason: 'Memorial not found'
+					reason: 'Event not found'
 				};
 			}
 
-			const memorial = memorialDoc.data() as Memorial;
+			const event = memorialDoc.data() as Event;
 
 			// Owner always has access
-			if (memorial.ownerUid === user.uid) {
+			if (event.ownerUid === user.uid) {
 				return {
 					hasAccess: true,
 					accessLevel: 'admin',
-					reason: 'Memorial owner'
+					reason: 'Event owner'
 				};
 			}
 
 			// Funeral director has access to assigned memorials
-			if (user.role === 'funeral_director' && memorial.funeralDirectorUid === user.uid) {
+			if (user.role === 'funeral_director' && event.funeralDirectorUid === user.uid) {
 				return {
 					hasAccess: true,
 					accessLevel: 'edit',
@@ -183,10 +183,10 @@ export class MemorialAccessVerifier {
 	}
 
 	/**
-	 * Check if user has edit access to a memorial
+	 * Check if user has edit access to a event
 	 */
 	static async checkEditAccess(memorialId: string, user: UserContext): Promise<AccessCheckResult> {
-		console.log('✏️ Checking edit access for memorial:', memorialId, 'user:', user.uid);
+		console.log('✏️ Checking edit access for event:', memorialId, 'user:', user.uid);
 
 		// First check view access
 		const viewAccess = await this.checkViewAccess(memorialId, user);
@@ -241,7 +241,7 @@ export class MemorialAccessVerifier {
 	 */
 	static async getUserAccessibleMemorials(
 		user: UserContext
-	): Promise<Array<{ memorial: Memorial; accessLevel: string }>> {
+	): Promise<Array<{ event: Event; accessLevel: string }>> {
 		console.log('📋 Getting accessible memorials for user:', user.uid);
 
 		try {
@@ -251,13 +251,13 @@ export class MemorialAccessVerifier {
 				return [];
 			}
 
-			const accessibleMemorials: Array<{ memorial: Memorial; accessLevel: string }> = [];
+			const accessibleMemorials: Array<{ event: Event; accessLevel: string }> = [];
 
 			// Admin gets all memorials with full access
 			if (user.role === 'admin') {
 				const allMemorialsSnap = await adminDb.collection('memorials').get();
 				return allMemorialsSnap.docs.map((doc: any) => ({
-					memorial: { id: doc.id, ...doc.data() } as Memorial,
+					event: { id: doc.id, ...doc.data() } as Event,
 					accessLevel: 'admin'
 				}));
 			}
@@ -270,7 +270,7 @@ export class MemorialAccessVerifier {
 
 			ownedMemorialsSnap.docs.forEach((doc: any) => {
 				accessibleMemorials.push({
-					memorial: { id: doc.id, ...doc.data() } as Memorial,
+					event: { id: doc.id, ...doc.data() } as Event,
 					accessLevel: 'admin'
 				});
 			});
@@ -284,7 +284,7 @@ export class MemorialAccessVerifier {
 
 				assignedMemorialsSnap.docs.forEach((doc: any) => {
 					accessibleMemorials.push({
-						memorial: { id: doc.id, ...doc.data() } as Memorial,
+						event: { id: doc.id, ...doc.data() } as Event,
 						accessLevel: 'edit'
 					});
 				});

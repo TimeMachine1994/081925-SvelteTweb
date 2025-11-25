@@ -4,7 +4,7 @@ import { adminDb, adminAuth } from '$lib/server/firebase';
 import { Timestamp } from 'firebase-admin/firestore';
 import { sendEnhancedRegistrationEmail } from '$lib/server/email';
 import { validateEmail } from '$lib/utils/email-validation';
-import { generateUniqueMemorialSlug } from '$lib/utils/memorial-slug';
+import { generateUniqueMemorialSlug } from '$lib/utils/event-slug';
 import { createStandardUserProfile } from '$lib/utils/user-profile';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -75,18 +75,18 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			.doc(userRecord.uid)
 			.set(userProfile);
 
-		// Generate unique memorial slug
+		// Generate unique event slug
 		const memorialSlug = await generateUniqueMemorialSlug(lovedOneName);
 
 		// Combine service date and time
 		const serviceDateTime = new Date(`${serviceDate}T${serviceTime}`);
 
-		// Parse loved one's name for memorial structure
+		// Parse loved one's name for event structure
 		const nameParts = lovedOneName.trim().split(' ');
 		const firstName = nameParts[0] || '';
 		const lastName = nameParts.slice(1).join(' ') || '';
 
-		// Create memorial
+		// Create event
 		const memorialRef = adminDb.collection('memorials').doc();
 		await memorialRef.set({
 			title: `In Memory of ${lovedOneName}`,
@@ -142,7 +142,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		return json({
 			success: true,
-			message: 'Family memorial created successfully',
+			message: 'Family event created successfully',
 			memorialId: memorialRef.id,
 			memorialUrl: `/${memorialRef.id}`
 		});
@@ -158,7 +158,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 		
 		return json({ 
-			error: 'Failed to create family memorial. Please try again.'
+			error: 'Failed to create family event. Please try again.'
 		}, { status: 500 });
 	}
 };

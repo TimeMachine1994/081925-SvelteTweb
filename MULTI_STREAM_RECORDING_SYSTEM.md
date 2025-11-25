@@ -2,7 +2,7 @@
 
 ## 🎯 How It Works
 
-Your memorial pages now support **multiple streams and recordings** with smart display logic.
+Your event pages now support **multiple streams and recordings** with smart display logic.
 
 ---
 
@@ -101,20 +101,20 @@ Public → Hidden → Archived → Public
 #### **Public** (default)
 - `visibility: 'public'`
 - `isVisible: true`
-- ✅ Shows on memorial page
+- ✅ Shows on event page
 - ✅ Shows in all relevant sections (live/scheduled/recorded)
 
 #### **Hidden**
 - `visibility: 'hidden'`
 - `isVisible: false`
-- ❌ Hidden from memorial page
+- ❌ Hidden from event page
 - ✅ Still visible in admin
 - Use case: Temporarily hide a recording
 
 #### **Archived**
 - `visibility: 'archived'`
 - `isVisible: false`
-- ❌ Hidden from memorial page
+- ❌ Hidden from event page
 - ✅ Still visible in admin (marked as archived)
 - Use case: Old recordings you want to keep but not display
 
@@ -129,9 +129,9 @@ Day 1: Funeral Service
   ↓
 Create Stream 1 → Go Live → Stream Ends
   ↓
-Recording 1 appears on memorial page
+Recording 1 appears on event page
 
-Day 7: Memorial Service
+Day 7: Event Service
   ↓
 Create Stream 2 → Go Live
   ↓
@@ -240,7 +240,7 @@ This ensures streams appear immediately when broadcasting, even if:
 ## ✅ **Key Features**
 
 ### **✨ Multiple Live Streams**
-- Create unlimited streams per memorial
+- Create unlimited streams per event
 - Each gets own Cloudflare Input ID
 - Multiple can broadcast simultaneously
 
@@ -281,7 +281,7 @@ This ensures streams appear immediately when broadcasting, even if:
 
 3. **Go Live**
    - Start streaming with credentials
-   - Stream automatically appears on memorial page
+   - Stream automatically appears on event page
 
 4. **Manage Visibility**
    - Toggle visibility as needed
@@ -290,7 +290,7 @@ This ensures streams appear immediately when broadcasting, even if:
 
 ### **For Viewers:**
 
-1. **Visit Memorial Page**
+1. **Visit Event Page**
    - See live streams immediately (if any)
    - See countdown for upcoming streams
    - Watch any past recordings
@@ -305,7 +305,7 @@ This ensures streams appear immediately when broadcasting, even if:
 ## 📁 **Key Files**
 
 ### **Components:**
-- `MemorialStreamDisplay.svelte` - Memorial page display
+- `MemorialStreamDisplay.svelte` - Event page display
 - `StreamCard.svelte` - Admin stream management card
 
 ### **API Endpoints:**
@@ -316,7 +316,7 @@ This ensures streams appear immediately when broadcasting, even if:
 
 ### **Pages:**
 - `/memorials/[id]/manage-streams` - Admin management
-- `/[fullSlug]` - Public memorial page
+- `/[fullSlug]` - Public event page
 
 ---
 
@@ -330,10 +330,10 @@ You now have a complete multi-stream system that:
 - ✅ Updates in real-time
 - ✅ Works without webhooks (smart detection)
 
-**Each memorial can have:**
+**Each event can have:**
 - Unlimited streams
 - Multiple live streams at once
 - Preserved recording history
 - Granular visibility control
 
-Perfect for memorials with multiple services (funeral, memorial, celebration of life, etc.)!
+Perfect for memorials with multiple services (funeral, event, celebration of life, etc.)!

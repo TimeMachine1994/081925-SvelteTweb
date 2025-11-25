@@ -37,13 +37,13 @@
 **Current Implementation:**
 ```typescript
 // Role-based access verification
-export async function verifyMemorialAccess(user, memorialId, memorial) {
+export async function verifyMemorialAccess(user, memorialId, event) {
   // Check owner access
-  if (memorial.ownerId === user.uid || userContext.role === 'owner') {
+  if (event.ownerId === user.uid || userContext.role === 'owner') {
     return { hasAccess: true, accessLevel: 'admin' };
   }
   // Check funeral director access
-  if (memorial.funeralDirectorId === user.uid || userContext.role === 'funeral_director') {
+  if (event.funeralDirectorId === user.uid || userContext.role === 'funeral_director') {
     return { hasAccess: true, accessLevel: 'admin' };
   }
   // Family member invitation check
@@ -72,13 +72,13 @@ export async function validateUserRole(req, res, next) {
 }
 ```
 
-#### 🔴 HIGH RISK: Memorial Access Logic Gap
-**Issue**: Role-based access allows any user with 'owner' role to access any memorial
+#### 🔴 HIGH RISK: Event Access Logic Gap
+**Issue**: Role-based access allows any user with 'owner' role to access any event
 **Impact**: Data breach potential
-**Recommendation**: Always verify specific memorial ownership
+**Recommendation**: Always verify specific event ownership
 ```typescript
 // Fix: Verify actual ownership, not just role
-if (memorial.ownerId === user.uid && userContext.role === 'owner') {
+if (event.ownerId === user.uid && userContext.role === 'owner') {
   return { hasAccess: true, accessLevel: 'admin' };
 }
 ```
@@ -96,7 +96,7 @@ if (memorial.ownerId === user.uid && userContext.role === 'owner') {
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Memorial access rules
+    // Event access rules
     match /memorials/{memorialId} {
       allow read: if isOwner(resource.data.ownerUid) 
                   || isFuneralDirector(resource.data.funeralDirectorUid)
@@ -208,11 +208,11 @@ app.use(helmet({
 
 ### Immediate Actions Required (Within 24 Hours)
 
-1. **Fix Memorial Access Logic**
+1. **Fix Event Access Logic**
    ```typescript
    // CRITICAL: Fix ownership verification
-   if (memorial.ownerId === user.uid && userContext.role === 'owner') {
-     // Only allow access if user actually owns the memorial
+   if (event.ownerId === user.uid && userContext.role === 'owner') {
+     // Only allow access if user actually owns the event
    }
    ```
 
@@ -276,7 +276,7 @@ app.use(helmet({
 - Add privacy policy links
 
 ### HIPAA Considerations ⚠️ **PARTIAL**
-- Memorial information may contain health data
+- Event information may contain health data
 - Photo uploads could contain medical information
 
 **Recommendations:**
@@ -314,7 +314,7 @@ npm run dependency-check
 | Risk Level | Count | Examples |
 |------------|-------|----------|
 | 🔴 Critical | 0 | None identified |
-| 🔴 High | 2 | Memorial access logic, Server-side validation |
+| 🔴 High | 2 | Event access logic, Server-side validation |
 | 🟡 Medium | 3 | PII exposure, Photo validation, Invitation security |
 | 🟢 Low | 5 | Rate limiting, Input validation, Security headers |
 | 🔵 Info | 4 | Session monitoring, Audit logging |

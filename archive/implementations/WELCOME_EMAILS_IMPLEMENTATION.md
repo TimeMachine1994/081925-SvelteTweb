@@ -7,8 +7,8 @@
 Two new SendGrid email templates matching your existing design:
 
 - **Template 11: Owner Welcome Email**
-  - Professional welcome message for memorial owners
-  - Clear next steps to create first memorial
+  - Professional welcome message for event owners
+  - Clear next steps to create first event
   - Support contact information
   - Link to profile page
 
@@ -71,7 +71,7 @@ Go to: https://mc.sendgrid.com/dynamic-templates
 
 **Template 11 - Owner Welcome:**
 - Name: "Owner Welcome - Tributestream"
-- Subject: "Welcome to Tributestream - Let's Create Your Memorial"
+- Subject: "Welcome to Tributestream - Let's Create Your Event"
 - Copy HTML from `SENDGRID_NEW_WELCOME_TEMPLATES.md`
 - Note the template ID (starts with `d-`)
 
@@ -105,7 +105,7 @@ Use SendGrid's test send feature to verify:
 ### Owner Welcome Email Includes:
 - ✨ Account details confirmation
 - 🌟 4-step getting started guide
-- 🔘 "Create Your Memorial" button
+- 🔘 "Create Your Event" button
 - 💡 Support contact information
 - ❤️ Warm, compassionate tone
 
@@ -114,7 +114,7 @@ Use SendGrid's test send feature to verify:
 - 🚀 Complete profile instructions
 - 💼 List of professional features
 - 📞 Priority support access
-- 💡 Pro tip about quick memorial creation
+- 💡 Pro tip about quick event creation
 - 🤝 Partnership-focused messaging
 
 ## 🛡️ Error Handling

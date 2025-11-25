@@ -1,6 +1,6 @@
 # Fixes To Make
 
-## ✅ FIXED: Funeral Director Memorial Tracking (Oct 29, 2025)
+## ✅ FIXED: Funeral Director Event Tracking (Oct 29, 2025)
 
 ### Problem
 Memorials created by funeral directors through `/register/funeral-director` were not appearing in their "Managed Memorials" list on the profile page.
@@ -16,8 +16,8 @@ This caused a disconnect where memorials were created but not linked to the fune
 
 #### 1. Updated Registration Form (`/register/funeral-director/+page.server.ts`)
 - Added `locals` parameter to action function
-- Added query to fetch funeral director profile before memorial creation
-- Added `funeralDirectorUid: locals.user?.uid || null` to memorial data
+- Added query to fetch funeral director profile before event creation
+- Added `funeralDirectorUid: locals.user?.uid || null` to event data
 - Added `funeralDirector` object with full director details:
   ```typescript
   funeralDirector: locals.user ? {
@@ -29,14 +29,14 @@ This caused a disconnect where memorials were created but not linked to the fune
   } : null
   ```
 
-#### 2. Updated Memorial Type (`memorial.ts`)
-- Added `funeralDirector` object to Memorial interface for TypeScript support
+#### 2. Updated Event Type (`event.ts`)
+- Added `funeralDirector` object to Event interface for TypeScript support
 
 #### 3. Enhanced Profile Page Query (`/profile/+page.server.ts`)
 - Made query robust by checking BOTH fields:
   - Query 1: `where('funeralDirectorUid', '==', uid)` (old format)
   - Query 2: `where('funeralDirector.id', '==', uid)` (new format)
-- Deduplicate results using Map to avoid showing same memorial twice
+- Deduplicate results using Map to avoid showing same event twice
 - Ensures backward compatibility with existing memorials
 
 ### Impact
@@ -46,8 +46,8 @@ This caused a disconnect where memorials were created but not linked to the fune
 - ✅ Backward compatible with existing memorials in database
 
 ### Testing Needed
-1. Create new memorial via `/register/funeral-director` as funeral director
-2. Verify memorial appears in profile page "Managed Memorials" section
+1. Create new event via `/register/funeral-director` as funeral director
+2. Verify event appears in profile page "Managed Memorials" section
 3. Verify "Schedule" and "Manage Streams" buttons work
 4. Test with existing funeral director account that has old memorials
 
@@ -61,14 +61,14 @@ This caused a disconnect where memorials were created but not linked to the fune
 The "Complete Payment" button on the profile page had no link - it didn't take users anywhere when clicked.
 
 ### Solution
-Added link to the schedule/calculator page for the user's memorial:
+Added link to the schedule/calculator page for the user's event:
 ```svelte
 <a href="/schedule/{data.memorials?.[0]?.id}" class="inline-block">
   <Button>Complete Payment</Button>
 </a>
 ```
 
-Since owners should only have one memorial, we use `data.memorials?.[0]?.id` to get their first memorial's ID and link to `/schedule/[id]`.
+Since owners should only have one event, we use `data.memorials?.[0]?.id` to get their first event's ID and link to `/schedule/[id]`.
 
 **File Modified:** `lib/components/Profile.svelte` (line 399)
 

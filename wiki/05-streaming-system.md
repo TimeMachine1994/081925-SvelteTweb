@@ -1,6 +1,6 @@
 # Streaming System Architecture
 
-> **Overview:** TributeStream's live streaming system enables users to stream from mobile devices directly to memorial pages and integrate with OBS for professional broadcasting.
+> **Overview:** TributeStream's live streaming system enables users to stream from mobile devices directly to event pages and integrate with OBS for professional broadcasting.
 
 ---
 
@@ -42,7 +42,7 @@
 
 ### 1. Mobile Camera Input
 
-**Use Case:** Stream from a phone camera to OBS or memorial page
+**Use Case:** Stream from a phone camera to OBS or event page
 
 **Protocols:**
 - **Ingestion:** WHIP (WebRTC) - Phone → Cloudflare
@@ -114,7 +114,7 @@ External Source → RTMP URL + Key → Cloudflare → Live
 │  ┌─────────────────────────────────────────┐                │
 │  │     Client Components (Svelte)          │                │
 │  │  - Mobile streaming page                │                │
-│  │  - Memorial stream display              │                │
+│  │  - Event stream display              │                │
 │  │  - Admin dashboard                      │                │
 │  └─────────────────────────────────────────┘                │
 │                                                               │
@@ -469,7 +469,7 @@ class WHIPClient {
     liveWatchUrl?: string;        // Optional, from webhook
     status: string;
   },
-  memorial: {
+  event: {
     lovedOneName: string;
     fullSlug: string;
   } | null
@@ -619,7 +619,7 @@ Mobile Page (onSnapshot listener)
         ├─► Display HLS URL with copy button
         └─► Show alternative option hint
 
-Memorial Page (onSnapshot listener)
+Event Page (onSnapshot listener)
     │
     ├─► Stream status = 'live'
     ├─► Show in "Live Now" section
@@ -663,7 +663,7 @@ Camera Operator
                 ├─► status = 'completed'
                 └─► liveEndedAt = now
 
-Memorial Page
+Event Page
     │
     ├─► Stream status = 'completed'
     ├─► Move to "Past Streams"
@@ -871,7 +871,7 @@ Events:
 
 **Returns:**
 - Stream data (WHIP URL, cloudflare ID, URLs)
-- Memorial context
+- Event context
 - 404 if stream not found
 - 400 if not armed correctly
 - 500 if WHIP URL missing

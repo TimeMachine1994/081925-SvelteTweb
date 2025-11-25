@@ -171,11 +171,11 @@ import { VideoPlayer } from './VideoPlayer.js'
 export class MemorialVideoPlayer extends VideoPlayer {
   constructor(data, memorialData) {
     super(data)
-    this.memorial = memorialData
+    this.event = memorialData
     this.memorialName = memorialData?.lovedOneName || ''
   }
   
-  // Memorial-specific methods
+  // Event-specific methods
   async notifyFamilyMembers() {
     // Send notifications to family members when stream starts
     const notification = {
@@ -192,7 +192,7 @@ export class MemorialVideoPlayer extends VideoPlayer {
   }
   
   async createArchiveEntry() {
-    // Create archive entry in memorial collection
+    // Create archive entry in event collection
     const archiveEntry = {
       id: this.id,
       title: this.title,
@@ -211,7 +211,7 @@ export class MemorialVideoPlayer extends VideoPlayer {
       updatedAt: this.updatedAt
     }
     
-    // Add to memorial's livestreamArchive array
+    // Add to event's livestreamArchive array
     await updateDoc(doc(db, 'memorials', this.memorialId), {
       livestreamArchive: arrayUnion(archiveEntry)
     })
@@ -598,18 +598,18 @@ export class LiveVideoPlayer extends MemorialVideoPlayer {
 
 ## 📱 **Usage Examples**
 
-### **Memorial Page (Public View):**
+### **Event Page (Public View):**
 ```svelte
 <script>
   import VideoPlayerComponent from '$lib/components/VideoPlayerComponent.svelte'
   
-  let { streams, memorial } = $props()
+  let { streams, event } = $props()
 </script>
 
 {#each streams as streamData}
   <VideoPlayerComponent 
     {streamData} 
-    memorialData={memorial}
+    memorialData={event}
     mode="public"
     showControls={false}
     autoSync={true}
@@ -622,13 +622,13 @@ export class LiveVideoPlayer extends MemorialVideoPlayer {
 <script>
   import VideoPlayerComponent from '$lib/components/VideoPlayerComponent.svelte'
   
-  let { streams, memorial } = $props()
+  let { streams, event } = $props()
 </script>
 
 {#each streams as streamData}
   <VideoPlayerComponent 
     {streamData} 
-    memorialData={memorial}
+    memorialData={event}
     mode="admin"
     showControls={true}
     autoSync={true}
@@ -641,12 +641,12 @@ export class LiveVideoPlayer extends MemorialVideoPlayer {
 <script>
   import VideoPlayerComponent from '$lib/components/VideoPlayerComponent.svelte'
   
-  let { streamData, memorial } = $props()
+  let { streamData, event } = $props()
 </script>
 
 <VideoPlayerComponent 
   {streamData} 
-  memorialData={memorial}
+  memorialData={event}
   mode="mobile"
   showControls={true}
   autoSync={true}

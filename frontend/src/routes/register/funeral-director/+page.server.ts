@@ -3,15 +3,15 @@ import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { sendFuneralDirectorRegistrationEmail } from '$lib/server/email';
 import { indexMemorial } from '$lib/server/algolia-indexing';
-import type { Memorial } from '$lib/types/memorial';
-import { generateUniqueMemorialSlug } from '$lib/utils/memorial-slug';
+import type { Event } from '$lib/types/event';
+import { generateUniqueMemorialSlug } from '$lib/utils/event-slug';
 import { createStandardUserProfile } from '$lib/utils/user-profile';
 
 /**
  * ENHANCED FUNERAL DIRECTOR REGISTRATION PAGE
  *
  * Allows funeral directors to register families with comprehensive
- * memorial and service information
+ * event and service information
  */
 
 // Helper function to generate a random password
@@ -184,7 +184,7 @@ export const actions: Actions = {
 
 			// Update or create user profile in Firestore
 			if (isExistingUser) {
-				console.log('📝 Updating existing user profile with new memorial info...');
+				console.log('📝 Updating existing user profile with new event info...');
 				// Get existing profile
 				const existingProfileDoc = await adminDb.collection('users').doc(userRecord.uid).get();
 				const existingProfile = existingProfileDoc.data() || {};
@@ -197,7 +197,7 @@ export const actions: Actions = {
 					familyContactPhone: familyContactPhone || existingProfile.familyContactPhone,
 					contactPreference: contactPreference || existingProfile.contactPreference,
 					updatedAt: new Date(),
-					// Increment memorial count if it exists
+					// Increment event count if it exists
 					memorialCount: (existingProfile.memorialCount || 0) + 1
 				};
 
@@ -229,10 +229,10 @@ export const actions: Actions = {
 				funeralDirectorProfile = funeralDirectorDoc.exists ? funeralDirectorDoc.data() : null;
 			}
 
-			// 4. Create comprehensive memorial with all service details
-			console.log('🕊️ Creating comprehensive memorial...');
+			// 4. Create comprehensive event with all service details
+			console.log('🕊️ Creating comprehensive event...');
 			const memorialData = {
-				// Core memorial fields
+				// Core event fields
 				lovedOneName: lovedOneName,
 				slug: fullSlug, // Use fullSlug as slug for consistency
 				fullSlug: fullSlug,
@@ -304,11 +304,11 @@ export const actions: Actions = {
 			};
 
 			const memorialRef = await adminDb.collection('memorials').add(memorialData);
-			console.log(`✅ Comprehensive memorial created for ${lovedOneName} with ID: ${memorialRef.id}`);
-			console.log(`🔗 Memorial fullSlug: ${fullSlug}`);
+			console.log(`✅ Comprehensive event created for ${lovedOneName} with ID: ${memorialRef.id}`);
+			console.log(`🔗 Event fullSlug: ${fullSlug}`);
 
-			// Index the new memorial in Algolia
-			await indexMemorial({ ...memorialData, id: memorialRef.id } as unknown as Memorial);
+			// Index the new event in Algolia
+			await indexMemorial({ ...memorialData, id: memorialRef.id } as unknown as Event);
 
 			// 5. Generate magic link for calculator access
 			console.log('🎟️ Generating magic link for calculator access...');
@@ -319,7 +319,7 @@ export const actions: Actions = {
 			});
 			const baseUrl = process.env.PUBLIC_BASE_URL || 'https://tributestream.com';
 			const calculatorMagicLink = `${baseUrl}/auth/session?token=${calculatorToken}&redirect=schedule/${memorialRef.id}`;
-			console.log('🔗 Calculator magic link created for memorial:', memorialRef.id);
+			console.log('🔗 Calculator magic link created for event:', memorialRef.id);
 
 			// 6. Send funeral director registration email with magic link
 			console.log(`📧 Sending funeral director registration email to ${isExistingUser ? 'existing' : 'new'} user...`);
@@ -340,10 +340,10 @@ export const actions: Actions = {
 			console.log(`✅ Custom token created for ${familyContactEmail}`);
 
 			// 7. Return success to show to user, then redirect to profile
-			console.log(`🚀 Memorial created successfully: ${fullSlug}`);
+			console.log(`🚀 Event created successfully: ${fullSlug}`);
 			
 			if (isExistingUser) {
-				console.log('🎉 Additional memorial created for existing user successfully!');
+				console.log('🎉 Additional event created for existing user successfully!');
 			} else {
 				console.log('🎉 Enhanced funeral director registration completed successfully!');
 			}
@@ -351,7 +351,7 @@ export const actions: Actions = {
 			// For authenticated funeral directors completing their profile, show success then redirect to profile
 			return {
 				success: true,
-				message: `Memorial created successfully for ${lovedOneName}! Credentials have been emailed to ${familyContactEmail}.`,
+				message: `Event created successfully for ${lovedOneName}! Credentials have been emailed to ${familyContactEmail}.`,
 				memorialSlug: fullSlug,
 				familyContactEmail: familyContactEmail
 			};

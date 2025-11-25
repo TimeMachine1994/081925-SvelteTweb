@@ -105,7 +105,7 @@ This document outlines the systematic refactoring plan to remove purple, green, 
 
 #### **Registration Pages**
 - `/routes/register/funeral-home/+page.svelte`
-- `/routes/register/loved-one/+page.svelte`
+- `/routes/register/new-event-and-account/+page.svelte`
 - Replace blue form elements and buttons with gold
 
 ### 2.3 Low Priority Components

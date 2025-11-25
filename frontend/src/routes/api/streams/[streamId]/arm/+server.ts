@@ -39,14 +39,14 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 		// Verify permissions
 		const memorialDoc = await adminDb.collection('memorials').doc(streamData.memorialId).get();
 		if (!memorialDoc.exists) {
-			throw SvelteKitError(404, 'Memorial not found');
+			throw SvelteKitError(404, 'Event not found');
 		}
 
-		const memorial = memorialDoc.data()!;
+		const event = memorialDoc.data()!;
 		const hasPermission =
 			locals.user.role === 'admin' ||
-			memorial.ownerUid === userId ||
-			memorial.funeralDirectorUid === userId;
+			event.ownerUid === userId ||
+			event.funeralDirectorUid === userId;
 
 		if (!hasPermission) {
 			console.log('❌ [ARM API] User lacks permission:', userId);

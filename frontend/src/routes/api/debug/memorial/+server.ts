@@ -3,9 +3,9 @@ import { adminDb } from '$lib/server/firebase';
 import type { RequestHandler } from './$types';
 
 /**
- * Debug endpoint to investigate memorial data issues
- * Usage: GET /api/debug/memorial?name=Derenne Marie DeCuir
- * or: GET /api/debug/memorial?id=MEMORIAL_ID
+ * Debug endpoint to investigate event data issues
+ * Usage: GET /api/debug/event?name=Derenne Marie DeCuir
+ * or: GET /api/debug/event?id=MEMORIAL_ID
  */
 export const GET: RequestHandler = async ({ url, locals }) => {
 	// Optional: Add auth check for admins only
@@ -18,7 +18,7 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 
 	if (!memorialName && !memorialId) {
 		return json({ 
-			error: 'Please provide either ?name=Memorial Name or ?id=memorialId' 
+			error: 'Please provide either ?name=Event Name or ?id=memorialId' 
 		}, { status: 400 });
 	}
 
@@ -29,12 +29,12 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 		// Search by ID
 		if (memorialId) {
 			queryMethod = 'ID lookup';
-			console.log(`🔍 [DEBUG] Looking up memorial by ID: ${memorialId}`);
+			console.log(`🔍 [DEBUG] Looking up event by ID: ${memorialId}`);
 			memorialDoc = await adminDb.collection('memorials').doc(memorialId).get();
 
 			if (!memorialDoc.exists) {
 				return json({ 
-					error: 'Memorial not found', 
+					error: 'Event not found', 
 					queryMethod,
 					memorialId 
 				}, { status: 404 });
@@ -43,7 +43,7 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 		// Search by name
 		else if (memorialName) {
 			queryMethod = 'Name search';
-			console.log(`🔍 [DEBUG] Searching for memorial by name: ${memorialName}`);
+			console.log(`🔍 [DEBUG] Searching for event by name: ${memorialName}`);
 			const snapshot = await adminDb
 				.collection('memorials')
 				.where('lovedOneName', '==', memorialName)
@@ -52,7 +52,7 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 
 			if (snapshot.empty) {
 				return json({ 
-					error: 'Memorial not found', 
+					error: 'Event not found', 
 					queryMethod,
 					searchedName: memorialName 
 				}, { status: 404 });
@@ -65,7 +65,7 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 		const rawData = memorialDoc!.data();
 		const memorialDocId = memorialDoc!.id;
 
-		console.log(`✅ [DEBUG] Found memorial: ${memorialDocId}`);
+		console.log(`✅ [DEBUG] Found event: ${memorialDocId}`);
 
 		// Try to process each field safely
 		const diagnostics: any = {

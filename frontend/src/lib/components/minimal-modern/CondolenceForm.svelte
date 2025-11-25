@@ -194,7 +194,7 @@
       />
       <div>
         <label for="isPublic" class="text-sm font-medium {themeConfig.text}">
-          Share publicly on memorial page
+          Share publicly on event page
         </label>
         <p class="text-xs {themeConfig.hero.sub} mt-1">
           Uncheck this if you'd like your message to be private and only visible to the family.
@@ -218,7 +218,7 @@
   <!-- Guidelines -->
   <div class="mt-6 pt-4 border-t {themeConfig.footer.border}">
     <p class="text-xs {themeConfig.hero.sub}">
-      Please keep messages respectful and appropriate. All public messages are moderated before appearing on the memorial page.
+      Please keep messages respectful and appropriate. All public messages are moderated before appearing on the event page.
     </p>
   </div>
 </div>

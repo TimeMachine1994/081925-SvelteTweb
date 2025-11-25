@@ -2,12 +2,12 @@
 
 ## Problem Statement
 
-Currently, regular memorial owners can only schedule services through the service calculator, while stream creation is restricted to funeral directors and admins. The calculator saves scheduling data but doesn't create actual streams, creating a disconnect between service planning and stream management.
+Currently, regular event owners can only schedule services through the service calculator, while stream creation is restricted to funeral directors and admins. The calculator saves scheduling data but doesn't create actual streams, creating a disconnect between service planning and stream management.
 
 ## Desired Outcome
 
 Create a seamless workflow where:
-- Memorial owners schedule services via calculator → streams are auto-created
+- Event owners schedule services via calculator → streams are auto-created
 - Both calculator and stream management interfaces stay synchronized
 - Funeral directors can manage auto-created streams normally on service day
 
@@ -16,7 +16,7 @@ Create a seamless workflow where:
 ### Service Calculator Flow (Owners)
 - **Location**: `/schedule` or similar calculator interface
 - **Current Behavior**: Saves scheduling data to database
-- **User Role**: Memorial owners (`role: 'owner'`)
+- **User Role**: Event owners (`role: 'owner'`)
 - **Data Captured**: Service timing, location, duration, etc.
 
 ### Stream Management Flow (Funeral Directors)

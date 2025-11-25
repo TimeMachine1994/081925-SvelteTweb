@@ -25,7 +25,7 @@ Recovery system for soft-deleted items
 			width: 120,
 			formatter: (val: string) => {
 				const typeMap: Record<string, string> = {
-					memorial: '💝 Memorial',
+					event: '💝 Event',
 					stream: '📹 Stream',
 					user: '👤 User',
 					slideshow: '🎬 Slideshow',
@@ -138,7 +138,7 @@ Recovery system for soft-deleted items
 						label: 'Type',
 						type: 'enum',
 						options: [
-							{ value: 'memorial', label: 'Memorial' },
+							{ value: 'event', label: 'Event' },
 							{ value: 'stream', label: 'Stream' },
 							{ value: 'user', label: 'User' },
 							{ value: 'slideshow', label: 'Slideshow' },

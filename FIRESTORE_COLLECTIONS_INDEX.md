@@ -11,7 +11,7 @@ This documentation is split into three focused documents:
 ### 1. [FIRESTORE_COLLECTIONS_CORE.md](./FIRESTORE_COLLECTIONS_CORE.md)
 **Core application collections powering primary functionality:**
 - `users` - User accounts and profiles
-- `memorials` - Memorial pages
+- `memorials` - Event pages
 - `streams` - Livestreams and recordings
 - `funeral_directors` - Professional profiles
 
@@ -27,7 +27,7 @@ This documentation is split into three focused documents:
 ### 3. [FIRESTORE_COLLECTIONS_OTHER.md](./FIRESTORE_COLLECTIONS_OTHER.md)
 **Subcollections, content, commerce, and maintenance:**
 - `memorials/{id}/slideshows` - Photo slideshows
-- `memorials/{id}/followers` - Memorial followers
+- `memorials/{id}/followers` - Event followers
 - `blog` - Blog posts
 - `purchases` - Payment transactions (placeholder)
 - `live_streams` - Alternative Mux streams (legacy)
@@ -81,11 +81,11 @@ This documentation is split into three focused documents:
 | Collection | Purpose | Document |
 |------------|---------|----------|
 | `users` | User accounts | [Core](./FIRESTORE_COLLECTIONS_CORE.md#1-users) |
-| `memorials` | Memorial pages | [Core](./FIRESTORE_COLLECTIONS_CORE.md#2-memorials) |
+| `memorials` | Event pages | [Core](./FIRESTORE_COLLECTIONS_CORE.md#2-memorials) |
 | `streams` | Livestreams | [Core](./FIRESTORE_COLLECTIONS_CORE.md#3-streams) |
 | `funeral_directors` | Professional profiles | [Core](./FIRESTORE_COLLECTIONS_CORE.md#4-funeral_directors) |
 | `memorials/{id}/slideshows` | Photo slideshows | [Other](./FIRESTORE_COLLECTIONS_OTHER.md#1-memorialsmemorialidslideshows) |
-| `memorials/{id}/followers` | Memorial followers | [Other](./FIRESTORE_COLLECTIONS_OTHER.md#2-memorialsmemorialidfollowers) |
+| `memorials/{id}/followers` | Event followers | [Other](./FIRESTORE_COLLECTIONS_OTHER.md#2-memorialsmemorialidfollowers) |
 | `admin_actions` | Admin logging | [Admin](./FIRESTORE_COLLECTIONS_ADMIN.md#1-admin_actions) |
 | `admin_audit_logs` | Detailed auditing | [Admin](./FIRESTORE_COLLECTIONS_ADMIN.md#2-admin_audit_logs) |
 | `audit_logs` | System auditing | [Admin](./FIRESTORE_COLLECTIONS_ADMIN.md#3-audit_logs) |
@@ -122,12 +122,12 @@ demoSessions ──> users (demo)
 
 ### By Query Frequency:
 
-1. **memorials** - Every memorial page load, search, creation
+1. **memorials** - Every event page load, search, creation
 2. **streams** - Every livestream display and management
 3. **users** - Every authentication check and profile load
-4. **memorials/{id}/slideshows** - Memorial page slideshow display
+4. **memorials/{id}/slideshows** - Event page slideshow display
 5. **audit_logs** - All significant operations
-6. **funeral_directors** - FD profile loads and memorial creation
+6. **funeral_directors** - FD profile loads and event creation
 
 ### By Write Operations:
 
@@ -148,7 +148,7 @@ demoSessions ──> users (demo)
 4. Log to `admin_actions` if auto-approved
 ```
 
-### Memorial Creation
+### Event Creation
 ```
 1. Create document in `memorials` collection
 2. Link to owner via `ownerUid`
@@ -162,7 +162,7 @@ demoSessions ──> users (demo)
 1. Create in `streams` collection (auto from schedule or manual)
 2. Cloudflare webhook updates status → 'live'
 3. Recording ready webhook → update `recordingReady`
-4. Display on memorial page via parent `memorialId`
+4. Display on event page via parent `memorialId`
 ```
 
 ### Payment Processing
@@ -178,7 +178,7 @@ demoSessions ──> users (demo)
 ### Demo Session
 ```
 1. Create in `demoSessions` with 4 pre-created users
-2. Seed demo memorial with `isDemo: true`
+2. Seed demo event with `isDemo: true`
 3. Create demo streams and slideshows
 4. All entities tagged with `demoSessionId`
 5. Daily cleanup deletes expired demos
@@ -285,4 +285,4 @@ curl -X POST https://your-domain.com/api/demo/cleanup
 
 ---
 
-*This documentation covers Firestore collections for the Tributestream memorial livestreaming platform. For questions or updates, contact the development team.*
+*This documentation covers Firestore collections for the Tributestream event livestreaming platform. For questions or updates, contact the development team.*

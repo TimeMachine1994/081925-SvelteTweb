@@ -24,7 +24,7 @@ export const load = async ({ locals, url }: any) => {
 			.limit(limit);
 		snapshot = await query.get();
 	} catch (error) {
-		console.error('Error loading memorial owners with sorting:', error);
+		console.error('Error loading event owners with sorting:', error);
 		// Fallback: just filter by role without sorting
 		let query = adminDb.collection('users').where('role', '==', 'owner').limit(limit);
 		snapshot = await query.get();

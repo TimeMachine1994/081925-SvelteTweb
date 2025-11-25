@@ -36,8 +36,8 @@ Created comprehensive stream types including:
 
 ### 4. Stream Management Page (`routes/memorials/[id]/manage-streams/`) ✅
 **Components:**
-- Server load function - fetches memorial + streams
-- Permission checking - admins, funeral directors, memorial owners
+- Server load function - fetches event + streams
+- Permission checking - admins, funeral directors, event owners
 - Stream list display using StreamCard
 - Empty state with "Create Stream" CTA
 - Management tips info box
@@ -112,10 +112,10 @@ Stream Key: <cloudflare-input-id>
 ### Stream Key Implementation
 - [ ] Implement status updates when OBS connects
 - [ ] Update stream status to 'live' automatically
-- [ ] Set playback URL for memorial page
-- [ ] Test OBS → Cloudflare → Memorial Page flow
+- [ ] Set playback URL for event page
+- [ ] Test OBS → Cloudflare → Event Page flow
 
-### Memorial Page Integration
+### Event Page Integration
 - [ ] Verify countdown → live transition works
 - [ ] Test with armed "Stream Key" streams
 - [ ] Ensure playback URL populates correctly
@@ -147,7 +147,7 @@ Stream Key: <cloudflare-input-id>
 ### 🔄 Pending
 - [ ] OBS connects using RTMP credentials
 - [ ] Stream status updates to 'live'
-- [ ] Memorial page shows live stream
+- [ ] Event page shows live stream
 - [ ] Countdown switches to live player
 - [ ] Stream ends properly
 - [ ] Recording available after stream
@@ -183,11 +183,11 @@ Module './funeral-director' has already exported a member named 'ServiceDetails'
 ## Next Steps
 
 **To test the complete flow:**
-1. Navigate to `/memorials/[memorial-id]/manage-streams`
+1. Navigate to `/memorials/[event-id]/manage-streams`
 2. Arm a stream with "Stream Key"
 3. Copy RTMP URL and Stream Key
 4. Open OBS and configure stream settings
 5. Start streaming from OBS
-6. **TODO:** Verify stream appears live on memorial page
+6. **TODO:** Verify stream appears live on event page
 
-**Priority:** Implement Phase 2 - Stream status updates and memorial page integration.
+**Priority:** Implement Phase 2 - Stream status updates and event page integration.

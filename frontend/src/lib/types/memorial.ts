@@ -39,7 +39,7 @@ export interface TimeInfo {
 	isUnknown: boolean; // Unknown time flag
 }
 
-export interface Memorial {
+export interface Event {
 	id?: string; // Document ID from Firestore
 	lovedOneName: string;
 	slug: string;
@@ -65,7 +65,7 @@ export interface Memorial {
 	isComplete: boolean;
 	content: string;
 	custom_html: string | null;
-	isLegacy?: boolean; // Indicates if this memorial uses custom_html instead of structured data
+	isLegacy?: boolean; // Indicates if this event uses custom_html instead of structured data
 	createdByUserId?: string; // Used to identify migration script created memorials
 	createdAt: Timestamp;
 	imageUrl?: string; // Adding optional fields that might be missing from schema but used in code

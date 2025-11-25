@@ -646,7 +646,7 @@ Welcome to the Tributestream admin wiki!
 This guide will help you understand the platform.
 
 ## Key Concepts
-- [[Memorials]] - Creating memorial pages
+- [[Memorials]] - Creating event pages
 - [[Streams]] - Setting up live streams
 - [[Users]] - Managing user accounts
 

@@ -2,18 +2,18 @@
 
 ## Overview
 
-Tributestream uses Firebase Firestore as its primary database with a document-based NoSQL structure. The schema is designed for scalability, real-time updates, and efficient querying while maintaining data consistency across the memorial service platform.
+Tributestream uses Firebase Firestore as its primary database with a document-based NoSQL structure. The schema is designed for scalability, real-time updates, and efficient querying while maintaining data consistency across the event service platform.
 
 ## Collections Structure
 
 ```
 firestore/
-├── memorials/                    # Memorial service documents
+├── memorials/                    # Event service documents
 ├── users/                        # User authentication and profiles
 ├── funeral_directors/            # Funeral director applications and profiles
 ├── livestreamConfigs/           # Booking and calculator configurations
 ├── streams/                     # Unified stream management (new system)
-├── followers/                   # Memorial follower relationships
+├── followers/                   # Event follower relationships
 ├── invitations/                 # Family member invitations
 ├── audit_logs/                  # System audit trail
 └── system_stats/                # System-wide statistics
@@ -23,15 +23,15 @@ firestore/
 
 ### memorials Collection
 
-Primary collection storing memorial service information and content.
+Primary collection storing event service information and content.
 
 ```typescript
 // Document ID: Auto-generated or custom slug
 {
   // Identity & Basic Info
   lovedOneName: string;           // "John Doe"
-  slug: string;                   // "john-doe-memorial"
-  fullSlug: string;               // "john-doe-memorial-2024"
+  slug: string;                   // "john-doe-event"
+  fullSlug: string;               // "john-doe-event-2024"
   
   // Ownership & Access Control
   ownerUid: string;               // Firebase Auth UID of family owner
@@ -65,14 +65,14 @@ Primary collection storing memorial service information and content.
   },
   
   // Content & Media
-  content: string;                // Memorial description/obituary (HTML)
+  content: string;                // Event description/obituary (HTML)
   custom_html: string | null;     // Custom HTML content
   imageUrl?: string;              // Profile image URL (Firebase Storage)
   photos?: string[];              // Array of photo URLs
   embeds?: [                      // Video embeds
     {
       id: string;                 // Unique embed ID
-      title: string;              // "Memorial Video"
+      title: string;              // "Event Video"
       type: 'youtube' | 'vimeo';  // Platform type
       embedUrl: string;           // Embed URL
       createdAt: Timestamp;       // Creation time
@@ -84,7 +84,7 @@ Primary collection storing memorial service information and content.
   livestreamArchive?: [           // Array of archived livestreams
     {
       id: string;                 // Archive entry ID
-      title: string;              // "Memorial Service"
+      title: string;              // "Event Service"
       description?: string;       // Optional description
       cloudflareId: string;       // Cloudflare Stream ID
       playbackUrl: string;        // HLS/DASH playback URL
@@ -165,7 +165,7 @@ User authentication and profile information.
   notificationPreferences?: {
     email: boolean;               // Email notifications
     push: boolean;                // Push notifications
-    memorial_updates: boolean;    // Memorial update notifications
+    memorial_updates: boolean;    // Event update notifications
     livestream_alerts: boolean;   // Livestream notifications
   },
   
@@ -224,19 +224,19 @@ Funeral director applications and business profiles.
 
 ### livestreamConfigs Collection
 
-Booking and calculator configuration data, separate from memorial content.
+Booking and calculator configuration data, separate from event content.
 
 ```typescript
 // Document ID: Auto-generated
 {
   // Reference
   id: string;                     // Document ID
-  memorialId: string;             // Reference to memorial document
+  memorialId: string;             // Reference to event document
   uid: string;                    // User UID who created config
   
   // Calculator Form Data
   formData: {
-    memorialId: string;           // Memorial reference
+    memorialId: string;           // Event reference
     selectedTier: 'record' | 'live' | 'legacy' | null; // Service tier
     addons: {
       photography: boolean;       // Photography service
@@ -287,12 +287,12 @@ New unified stream management system replacing multiple legacy collections.
 {
   // Identity
   id: string;                     // Stream ID (matches document ID)
-  title: string;                  // "Memorial Service for John Doe"
+  title: string;                  // "Event Service for John Doe"
   description?: string;           // Optional description
   
-  // Memorial Association
-  memorialId?: string;            // Associated memorial ID
-  memorialName?: string;          // Memorial name for reference
+  // Event Association
+  memorialId?: string;            // Associated event ID
+  memorialName?: string;          // Event name for reference
   
   // Cloudflare Integration
   cloudflareId?: string;          // Cloudflare Stream ID
@@ -353,13 +353,13 @@ New unified stream management system replacing multiple legacy collections.
 
 ### followers Collection
 
-Memorial follower relationships for notifications and engagement.
+Event follower relationships for notifications and engagement.
 
 ```typescript
 // Document ID: Auto-generated
 {
   id: string;                     // Follower relationship ID
-  memorialId: string;             // Memorial being followed
+  memorialId: string;             // Event being followed
   userId: string;                 // Follower user ID
   userEmail: string;              // Follower email
   userName?: string;              // Follower display name
@@ -381,13 +381,13 @@ Memorial follower relationships for notifications and engagement.
 
 ### invitations Collection
 
-Family member invitation system for memorial access.
+Family member invitation system for event access.
 
 ```typescript
 // Document ID: Auto-generated
 {
   id: string;                     // Invitation ID
-  memorialId: string;             // Memorial ID
+  memorialId: string;             // Event ID
   inviterUid: string;             // UID of person sending invitation
   inviterName: string;            // Name of inviter
   inviteeEmail: string;           // Email of person being invited
@@ -426,7 +426,7 @@ System audit trail for security and compliance.
   
   // Action Details
   action: string;                 // "memorial_created", "stream_started", etc.
-  resource: string;               // "memorial", "stream", "user"
+  resource: string;               // "event", "stream", "user"
   resourceId: string;             // ID of affected resource
   
   // User Context
@@ -469,7 +469,7 @@ System-wide statistics and analytics.
   activeUsers: number;            // Active users (last 30 days)
   newUsersThisMonth: number;      // New registrations this month
   
-  // Memorial Statistics
+  // Event Statistics
   totalMemorials: number;         // Total memorials created
   publicMemorials: number;        // Public memorials
   privateMemorials: number;       // Private memorials
@@ -502,7 +502,7 @@ System-wide statistics and analytics.
 ### Composite Indexes
 
 ```javascript
-// Memorial queries
+// Event queries
 memorials: [
   ['ownerUid', 'createdAt'],           // User's memorials by date
   ['funeralDirectorUid', 'createdAt'], // Funeral director's memorials
@@ -512,7 +512,7 @@ memorials: [
 
 // Stream queries
 streams: [
-  ['memorialId', 'status'],            // Memorial streams by status
+  ['memorialId', 'status'],            // Event streams by status
   ['status', 'createdAt'],             // All streams by status and date
   ['createdBy', 'createdAt'],          // User's streams by date
   ['isPublic', 'isVisible', 'status']  // Public visible streams
@@ -520,7 +520,7 @@ streams: [
 
 // Follower queries
 followers: [
-  ['memorialId', 'followedAt'],        // Memorial followers by date
+  ['memorialId', 'followedAt'],        // Event followers by date
   ['userId', 'followedAt']             // User's followed memorials
 ]
 
@@ -540,7 +540,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Memorial access rules
+    // Event access rules
     match /memorials/{memorialId} {
       allow read: if resource.data.isPublic == true ||
                      request.auth != null && (
@@ -597,13 +597,13 @@ service cloud.firestore {
 
 ## Data Migration Patterns
 
-### Memorial Services Migration
+### Event Services Migration
 
 ```typescript
 // Migrate from legacy fields to services structure
 async function migrateMemorialServices(memorialId: string) {
-  const memorial = await getDoc(doc(db, 'memorials', memorialId));
-  const data = memorial.data();
+  const event = await getDoc(doc(db, 'memorials', memorialId));
+  const data = event.data();
   
   if (!data.services && (data.memorialDate || data.memorialLocationName)) {
     const services = {
@@ -638,11 +638,11 @@ async function migrateMemorialServices(memorialId: string) {
 ```typescript
 // Migrate from legacy stream systems to unified streams
 async function migrateLegacyStreams() {
-  // Migrate from memorial.livestreamArchive to streams collection
+  // Migrate from event.livestreamArchive to streams collection
   const memorials = await getDocs(collection(db, 'memorials'));
   
-  for (const memorial of memorials.docs) {
-    const data = memorial.data();
+  for (const event of memorials.docs) {
+    const data = event.data();
     
     if (data.livestreamArchive?.length > 0) {
       for (const archive of data.livestreamArchive) {
@@ -650,7 +650,7 @@ async function migrateLegacyStreams() {
           id: archive.id,
           title: archive.title,
           description: archive.description,
-          memorialId: memorial.id,
+          memorialId: event.id,
           memorialName: data.lovedOneName,
           cloudflareId: archive.cloudflareId,
           playbackUrl: archive.playbackUrl,
@@ -680,7 +680,7 @@ async function migrateLegacyStreams() {
 ### Query Optimization
 
 ```typescript
-// Efficient memorial loading with pagination
+// Efficient event loading with pagination
 const getMemorials = async (limit = 20, lastDoc = null) => {
   let query = query(
     collection(db, 'memorials'),
@@ -727,19 +727,19 @@ interface MemorialSummary {
 
 // Maintain denormalized summaries for fast listing
 const updateMemorialSummary = async (memorialId: string) => {
-  const memorial = await getDoc(doc(db, 'memorials', memorialId));
+  const event = await getDoc(doc(db, 'memorials', memorialId));
   const streams = await getDocs(
     query(collection(db, 'streams'), where('memorialId', '==', memorialId))
   );
   
   const summary: MemorialSummary = {
     id: memorialId,
-    lovedOneName: memorial.data().lovedOneName,
-    imageUrl: memorial.data().imageUrl,
-    serviceDate: memorial.data().services?.main?.time?.date,
-    location: memorial.data().services?.main?.location?.name,
-    isPublic: memorial.data().isPublic,
-    followerCount: memorial.data().followerCount || 0,
+    lovedOneName: event.data().lovedOneName,
+    imageUrl: event.data().imageUrl,
+    serviceDate: event.data().services?.main?.time?.date,
+    location: event.data().services?.main?.location?.name,
+    isPublic: event.data().isPublic,
+    followerCount: event.data().followerCount || 0,
     streamCount: streams.size,
     hasLiveStream: streams.docs.some(doc => doc.data().status === 'live')
   };
@@ -750,4 +750,4 @@ const updateMemorialSummary = async (memorialId: string) => {
 
 ---
 
-*This database schema provides a comprehensive foundation for Tributestream's memorial service platform with proper relationships, indexing, and security. For API integration patterns, see [API Routes Reference](./02-api-routes.md).*
+*This database schema provides a comprehensive foundation for Tributestream's event service platform with proper relationships, indexing, and security. For API integration patterns, see [API Routes Reference](./02-api-routes.md).*

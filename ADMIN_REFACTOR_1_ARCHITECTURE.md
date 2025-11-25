@@ -23,13 +23,13 @@ This document outlines the information architecture and navigation refactor for 
 - System health indicators
 
 #### **Services** Domain
-- **Memorials** - Memorial management
+- **Memorials** - Event management
 - **Streams** - Livestream oversight
 - **Slideshows** - Photo slideshow library
 - **Recordings** - Archive management
 
 #### **Users** Domain
-- **Memorial Owners** - Family accounts
+- **Event Owners** - Family accounts
 - **Funeral Directors** - Professional accounts
 - **Viewers** - Public accounts
 - **Admins** - Staff accounts
@@ -81,7 +81,7 @@ Services > [Memorials] [Streams] [Slideshows] [Recordings]
 
 **Example: /admin/users**
 ```
-Users > [Memorial Owners] [Funeral Directors] [Viewers] [Admins]
+Users > [Event Owners] [Funeral Directors] [Viewers] [Admins]
 ```
 
 ### Breadcrumbs (Always Visible)
@@ -101,8 +101,8 @@ Users > [Memorial Owners] [Funeral Directors] [Viewers] [Admins]
   <Crumb href="/admin">Admin</Crumb>
   <Crumb href="/admin/services">Services</Crumb>
   <Crumb href="/admin/services/memorials">Memorials</Crumb>
-  {#if memorial}
-    <Crumb current>{memorial.lovedOneName}</Crumb>
+  {#if event}
+    <Crumb current>{event.lovedOneName}</Crumb>
   {/if}
 </Breadcrumbs>
 ```
@@ -116,7 +116,7 @@ Users > [Memorial Owners] [Funeral Directors] [Viewers] [Admins]
 **Global Search (Cmd/Ctrl + K)**
 ```typescript
 interface SearchResult {
-  type: 'memorial' | 'stream' | 'user' | 'funeral_director' | 
+  type: 'event' | 'stream' | 'user' | 'funeral_director' | 
         'blog_post' | 'audit_log' | 'session';
   id: string;
   title: string;
@@ -130,10 +130,10 @@ interface SearchResult {
 - **All Records** - Search across all collections
 - **Memorials** - By loved one name, slug, owner email
 - **Users** - By name, email, role
-- **Streams** - By title, memorial name, status
+- **Streams** - By title, event name, status
 - **Funeral Directors** - By company name, contact person
 - **Audit Logs** - By action, user, resource type
-- **IDs** - Direct ID lookup (memorial ID, user UID, stream ID)
+- **IDs** - Direct ID lookup (event ID, user UID, stream ID)
 
 **Implementation:**
 ```svelte
@@ -144,7 +144,7 @@ interface SearchResult {
   />
   
   <SearchFilters>
-    <FilterChip value="type:memorial">Memorials</FilterChip>
+    <FilterChip value="type:event">Memorials</FilterChip>
     <FilterChip value="type:user">Users</FilterChip>
     <FilterChip value="status:pending">Pending</FilterChip>
     <FilterChip value="isPaid:false">Unpaid</FilterChip>
@@ -174,7 +174,7 @@ export async function GET({ url, locals }) {
   
   // Search across collections
   const results = await Promise.all([
-    types.includes('memorial') ? searchMemorials(query, filters) : [],
+    types.includes('event') ? searchMemorials(query, filters) : [],
     types.includes('user') ? searchUsers(query, filters) : [],
     types.includes('stream') ? searchStreams(query, filters) : [],
     // ... other collections
@@ -458,7 +458,7 @@ export function buildAdminUrl(state: AdminUrlState) {
 ]}>
   <svelte:fragment slot="actions">
     <Button on:click={exportToCSV}>Export</Button>
-    <Button variant="primary" on:click={createMemorial}>Create Memorial</Button>
+    <Button variant="primary" on:click={createMemorial}>Create Event</Button>
   </svelte:fragment>
   
   <svelte:fragment slot="controls">
@@ -606,7 +606,7 @@ System
 ## 10. Success Metrics
 
 **Navigation Efficiency:**
-- Time to find specific memorial: < 10 seconds
+- Time to find specific event: < 10 seconds
 - Clicks to common actions: ≤ 3 clicks
 - Search success rate: > 95%
 

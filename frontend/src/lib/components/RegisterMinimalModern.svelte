@@ -149,7 +149,7 @@
 				Create your account
 			</h2>
 			<p class="mt-2 text-sm {theme.hero.sub}">
-				Join Tributestream to create meaningful memorial experiences
+				Join Tributestream to create meaningful event experiences
 			</p>
 		</div>
 
@@ -237,8 +237,8 @@
 										{/if}
 									</div>
 									<div>
-										<div class="font-medium text-gray-900">Create a memorial for my loved one</div>
-										<div class="text-sm text-gray-600">Register as memorial owner</div>
+										<div class="font-medium text-gray-900">Create a event for my loved one</div>
+										<div class="text-sm text-gray-600">Register as event owner</div>
 									</div>
 								</div>
 							</label>

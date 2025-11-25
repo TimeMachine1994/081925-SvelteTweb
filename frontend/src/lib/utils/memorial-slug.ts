@@ -19,7 +19,7 @@ export function generateBaseSlug(lovedOneName: string): string {
 }
 
 /**
- * Check if a memorial slug already exists in Firestore
+ * Check if a event slug already exists in Firestore
  * @param slug - Slug to check
  * @returns Promise<boolean> - true if slug exists, false if available
  */
@@ -40,7 +40,7 @@ export async function checkSlugExists(slug: string): Promise<boolean> {
 }
 
 /**
- * Generate a unique memorial slug by checking Firestore and adding counter if needed
+ * Generate a unique event slug by checking Firestore and adding counter if needed
  * @param lovedOneName - Name of the deceased
  * @param maxAttempts - Maximum number of attempts to find unique slug (default: 100)
  * @returns Promise<string> - Unique slug guaranteed to not exist in database

@@ -2,7 +2,7 @@
 
 **Document Version:** 1.0  
 **Date:** November 15, 2025  
-**Objective:** Transform funeral/memorial-focused platform into "Tributestream Live" - a vibrant events livestreaming platform for birthdays, weddings, and celebrations
+**Objective:** Transform funeral/event-focused platform into "Tributestream Live" - a vibrant events livestreaming platform for birthdays, weddings, and celebrations
 
 ---
 
@@ -23,8 +23,8 @@
 ## Executive Summary
 
 ### Current State
-- **Brand:** Tributestream (funeral/memorial livestreaming)
-- **Theme:** Gold (#D5BA7F) and slate gray memorial aesthetic
+- **Brand:** Tributestream (funeral/event livestreaming)
+- **Theme:** Gold (#D5BA7F) and slate gray event aesthetic
 - **Target Market:** Funeral homes and grieving families
 - **Content:** Death-focused, somber tone
 
@@ -37,7 +37,7 @@
 ### Impact Assessment
 - **Files to Update:** ~102 Svelte components
 - **Color References:** ~245 instances of gold color (#D5BA7F)
-- **Terminology Changes:** ~1,914 instances of funeral/memorial terms
+- **Terminology Changes:** ~1,914 instances of funeral/event terms
 - **Estimated Effort:** 40-60 hours
 
 ---
@@ -46,9 +46,9 @@
 
 ### Color Palette Change
 
-#### Current (Memorial Theme)
+#### Current (Event Theme)
 ```
-Primary: #D5BA7F (Memorial Gold)
+Primary: #D5BA7F (Event Gold)
 Background: #faf8f5 (Warm beige)
 Text: Slate 800
 Accent: Slate 900
@@ -153,7 +153,7 @@ Replace: hover:bg-blue-600
 
 | Old Term | New Term | Context |
 |----------|----------|---------|
-| Memorial | Event | All contexts |
+| Event | Event | All contexts |
 | Funeral | Celebration/Event | Service descriptions |
 | Funeral Director | Event Planner | User role |
 | Funeral Home | Event Venue | Business entity |
@@ -268,7 +268,7 @@ interface EventCardProps {
 
 #### `CountdownVideoPlayer.svelte`
 - Update styling to blue theme
-- Change messaging from memorial to event countdown
+- Change messaging from event to event countdown
 - Add celebration-themed overlays
 
 ---
@@ -323,7 +323,7 @@ interface Event {
 ### 4.3 TypeScript Interface Updates
 
 **Files to Update:**
-- `lib/types/memorial.ts` → `lib/types/event.ts`
+- `lib/types/event.ts` → `lib/types/event.ts`
 - `lib/types/user.ts` (role updates)
 - `lib/types/calculator.ts` (service → event pricing)
 
@@ -432,8 +432,8 @@ interface Event {
 - `lib/components/Profile.svelte`
 
 **Changes:**
-- Update memorial creation → event creation
-- Change "Create Memorial" to "Create Event"
+- Update event creation → event creation
+- Change "Create Event" to "Create Event"
 - Update event management UI
 
 ### 6.2 Registration Flows
@@ -609,7 +609,7 @@ Revert specific phases while keeping others:
 - [ ] No gold colors visible on any page
 
 ### Phase 2 Complete
-- [ ] No "funeral" or "memorial" references in user-facing content
+- [ ] No "funeral" or "event" references in user-facing content
 - [ ] All roles renamed
 - [ ] Database supports both old and new terminology
 
@@ -694,8 +694,8 @@ Revert specific phases while keeping others:
 - Gradual transition helps maintain SEO and brand recognition
 
 ### Legacy Support
-- Keep memorial/funeral functionality available
-- Create separate "memorial" subdomain for legacy customers
+- Keep event/funeral functionality available
+- Create separate "event" subdomain for legacy customers
 - Offer migration path for existing funeral home partners
 
 ### Event Types to Support
@@ -711,7 +711,7 @@ Revert specific phases while keeping others:
 
 ### Market Research
 - Survey existing customers about rebrand
-- A/B test celebration messaging vs memorial messaging
+- A/B test celebration messaging vs event messaging
 - Monitor conversion rates during transition
 
 ---

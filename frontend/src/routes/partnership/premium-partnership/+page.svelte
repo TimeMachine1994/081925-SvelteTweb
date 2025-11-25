@@ -39,7 +39,7 @@
 			Premium Partnership
 		</h1>
 		<p class="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
-			The complete solution for funeral homes ready to offer world-class memorial streaming services with full marketing support and custom branding.
+			The complete solution for funeral homes ready to offer world-class event streaming services with full marketing support and custom branding.
 		</p>
 		<div class="flex flex-col sm:flex-row gap-4 justify-center">
 			<Button theme="minimal" class="bg-blue-500 text-black hover:bg-[#2563EB] px-8 py-3" onclick={handleLearnMore}>
@@ -60,7 +60,7 @@
 				Premium Features & Support
 			</h2>
 			<p class="text-lg text-slate-600">
-				Everything you need to become the premier memorial streaming provider in your area
+				Everything you need to become the premier event streaming provider in your area
 			</p>
 		</div>
 
@@ -122,7 +122,7 @@
 			<div class="bg-white p-8 rounded-lg shadow-lg">
 				<h3 class="text-2xl font-bold text-slate-900 mb-4">Ready to Elevate Your Services?</h3>
 				<p class="text-slate-600 mb-6">
-					Our Premium Partnership is designed for funeral homes that want to offer the highest level of memorial streaming services with comprehensive support.
+					Our Premium Partnership is designed for funeral homes that want to offer the highest level of event streaming services with comprehensive support.
 				</p>
 				<div class="space-y-3">
 					<Button theme="minimal" class="w-full bg-blue-500 text-black hover:bg-[#2563EB] py-3" onclick={handleLearnMore}>
@@ -178,7 +178,7 @@
 			Ready to Transform Your Funeral Home?
 		</h2>
 		<p class="text-lg text-slate-300 mb-8 max-w-2xl mx-auto">
-			Join our Premium Partnership and become the go-to funeral home for memorial streaming services in your area.
+			Join our Premium Partnership and become the go-to funeral home for event streaming services in your area.
 		</p>
 		<div class="flex flex-col sm:flex-row gap-4 justify-center">
 			<Button theme="minimal" class="bg-blue-500 text-black hover:bg-[#2563EB] px-8 py-3" onclick={handleLearnMore}>

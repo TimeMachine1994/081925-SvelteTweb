@@ -270,7 +270,7 @@
 </script>
 
 {#if hasVisibleStreams}
-	<div class="memorial-streams">
+	<div class="event-streams">
 		<!-- Live Streams -->
 		{#if categorizedLiveStreams.length > 0}
 			<div class="stream-section live-section">
@@ -314,7 +314,7 @@
 								scheduledStartTime={stream.scheduledStartTime}
 								streamTitle={stream.title}
 								streamDescription={stream.description}
-								theme="memorial"
+								theme="event"
 								{currentTime}
 							/>
 						{:else}
@@ -362,9 +362,9 @@
 	</div>
 {:else}
 	<!-- Stock Placeholder Player for New Memorials -->
-	<div class="memorial-streams">
+	<div class="event-streams">
 		<div class="stream-section no-stream-section">
-			<h2 class="stream-section-title">Memorial Service</h2>
+			<h2 class="stream-section-title">Event Service</h2>
 			<div class="stream-item">
 				<div class="stock-player">
 					<div class="video-container">
@@ -389,7 +389,7 @@
 									<div class="placeholder-label">LIVESTREAM UPCOMING</div>
 									<h3 class="placeholder-title">Video Coming Soon</h3>
 									<p class="placeholder-description">
-										The memorial service will be livestreamed here. This page will go live automatically when the service begins.
+										The event service will be livestreamed here. This page will go live automatically when the service begins.
 									</p>
 								</div>
 							</div>
@@ -439,7 +439,7 @@
 {/if}
 
 <style>
-	.memorial-streams {
+	.event-streams {
 		width: 100%;
 		max-width: 1000px;
 		margin: 0 auto;

@@ -25,7 +25,7 @@ LIVE_RESPONSE=$(curl -s -X POST "$WEBHOOK_URL" \
     "uid": "test-cloudflare-input-id-12345",
     "status": "connected",
     "meta": {
-      "name": "Test Memorial Stream"
+      "name": "Test Event Stream"
     },
     "created": "2024-01-01T12:00:00Z",
     "modified": "2024-01-01T12:05:00Z"
@@ -44,7 +44,7 @@ DISCONNECT_RESPONSE=$(curl -s -X POST "$WEBHOOK_URL" \
     "uid": "test-cloudflare-input-id-12345",
     "status": "disconnected",
     "meta": {
-      "name": "Test Memorial Stream"
+      "name": "Test Event Stream"
     },
     "created": "2024-01-01T12:00:00Z",
     "modified": "2024-01-01T12:10:00Z"
@@ -63,7 +63,7 @@ READY_RESPONSE=$(curl -s -X POST "$WEBHOOK_URL" \
     "uid": "test-cloudflare-input-id-12345",
     "status": "ready",
     "meta": {
-      "name": "Test Memorial Stream"
+      "name": "Test Event Stream"
     },
     "created": "2024-01-01T12:00:00Z",
     "modified": "2024-01-01T11:55:00Z"
@@ -82,7 +82,7 @@ ERROR_RESPONSE=$(curl -s -X POST "$WEBHOOK_URL" \
     "uid": "test-cloudflare-input-id-12345",
     "status": "error",
     "meta": {
-      "name": "Test Memorial Stream",
+      "name": "Test Event Stream",
       "errorMessage": "ERR_UNSUPPORTED_VIDEO_CODEC: Video codec not supported"
     },
     "created": "2024-01-01T12:00:00Z",

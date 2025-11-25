@@ -61,9 +61,9 @@ export const GET: RequestHandler = async ({ cookies, url }) => {
 	}
 };
 
-// POST - Create new memorial
+// POST - Create new event
 export const POST: RequestHandler = async ({ cookies, request }) => {
-	console.log('📝 [ADMIN API] POST memorial request');
+	console.log('📝 [ADMIN API] POST event request');
 
 	try {
 		// Verify admin authentication
@@ -86,9 +86,9 @@ export const POST: RequestHandler = async ({ cookies, request }) => {
 
 		// Generate slug and fullSlug
 		const slug = lovedOneName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-		const fullSlug = `memorial-for-${slug}`;
+		const fullSlug = `event-for-${slug}`;
 
-		// Create memorial document
+		// Create event document
 		const memorialData = {
 			lovedOneName,
 			creatorEmail,
@@ -104,23 +104,23 @@ export const POST: RequestHandler = async ({ cookies, request }) => {
 
 		const docRef = await adminDb.collection('memorials').add(memorialData);
 
-		console.log('✅ [ADMIN API] Memorial created:', docRef.id);
+		console.log('✅ [ADMIN API] Event created:', docRef.id);
 
 		return json({
 			success: true,
 			memorialId: docRef.id,
-			memorial: { id: docRef.id, ...memorialData }
+			event: { id: docRef.id, ...memorialData }
 		});
 
 	} catch (error) {
-		console.error('❌ [ADMIN API] Error creating memorial:', error);
-		return json({ error: 'Failed to create memorial' }, { status: 500 });
+		console.error('❌ [ADMIN API] Error creating event:', error);
+		return json({ error: 'Failed to create event' }, { status: 500 });
 	}
 };
 
-// PUT - Update memorial
+// PUT - Update event
 export const PUT: RequestHandler = async ({ cookies, request }) => {
-	console.log('📝 [ADMIN API] PUT memorial request');
+	console.log('📝 [ADMIN API] PUT event request');
 
 	try {
 		// Verify admin authentication
@@ -138,29 +138,29 @@ export const PUT: RequestHandler = async ({ cookies, request }) => {
 		const { id, ...updateData } = body;
 
 		if (!id) {
-			return json({ error: 'Memorial ID is required' }, { status: 400 });
+			return json({ error: 'Event ID is required' }, { status: 400 });
 		}
 
-		// Update memorial document
+		// Update event document
 		await adminDb.collection('memorials').doc(id).update({
 			...updateData,
 			updatedAt: new Date(),
 			updatedBy: decodedClaims.uid
 		});
 
-		console.log('✅ [ADMIN API] Memorial updated:', id);
+		console.log('✅ [ADMIN API] Event updated:', id);
 
 		return json({ success: true, memorialId: id });
 
 	} catch (error) {
-		console.error('❌ [ADMIN API] Error updating memorial:', error);
-		return json({ error: 'Failed to update memorial' }, { status: 500 });
+		console.error('❌ [ADMIN API] Error updating event:', error);
+		return json({ error: 'Failed to update event' }, { status: 500 });
 	}
 };
 
-// DELETE - Delete memorial
+// DELETE - Delete event
 export const DELETE: RequestHandler = async ({ cookies, url }) => {
-	console.log('📝 [ADMIN API] DELETE memorial request');
+	console.log('📝 [ADMIN API] DELETE event request');
 
 	try {
 		// Verify admin authentication
@@ -176,18 +176,18 @@ export const DELETE: RequestHandler = async ({ cookies, url }) => {
 
 		const memorialId = url.searchParams.get('id');
 		if (!memorialId) {
-			return json({ error: 'Memorial ID is required' }, { status: 400 });
+			return json({ error: 'Event ID is required' }, { status: 400 });
 		}
 
-		// Delete memorial document
+		// Delete event document
 		await adminDb.collection('memorials').doc(memorialId).delete();
 
-		console.log('✅ [ADMIN API] Memorial deleted:', memorialId);
+		console.log('✅ [ADMIN API] Event deleted:', memorialId);
 
 		return json({ success: true, memorialId });
 
 	} catch (error) {
-		console.error('❌ [ADMIN API] Error deleting memorial:', error);
-		return json({ error: 'Failed to delete memorial' }, { status: 500 });
+		console.error('❌ [ADMIN API] Error deleting event:', error);
+		return json({ error: 'Failed to delete event' }, { status: 500 });
 	}
 };

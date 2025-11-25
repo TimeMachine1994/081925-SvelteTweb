@@ -118,8 +118,8 @@ export interface FuneralDirectorMemorialRequest {
 		};
 	};
 
-	// Memorial Configuration
-	memorial: {
+	// Event Configuration
+	event: {
 		title?: string;
 		description?: string;
 		isPublic: boolean;

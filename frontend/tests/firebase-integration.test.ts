@@ -42,16 +42,16 @@ describe('Firebase Integration Tests', () => {
 		expect(data?.testId).toBe('firebase-integration-test');
 	});
 
-	it('should create and retrieve memorial data', async () => {
-		// Test memorial creation workflow
+	it('should create and retrieve event data', async () => {
+		// Test event creation workflow
 		const memorialData = {
-			lovedOneName: 'Test Memorial Person',
-			slug: 'test-memorial-integration',
-			fullSlug: 'test-memorial-integration',
+			lovedOneName: 'Test Event Person',
+			slug: 'test-event-integration',
+			fullSlug: 'test-event-integration',
 			ownerUid: 'test-owner-uid',
 			ownerEmail: 'test@example.com',
 			isPublic: false,
-			content: 'Test memorial content',
+			content: 'Test event content',
 			createdAt: new Date(),
 			updatedAt: new Date()
 		};
@@ -59,12 +59,12 @@ describe('Firebase Integration Tests', () => {
 		const docRef = await adminDb.collection('memorials').add(memorialData);
 		expect(docRef.id).toBeDefined();
 
-		// Retrieve the memorial
+		// Retrieve the event
 		const snapshot = await docRef.get();
 		const retrievedData = snapshot.data();
 
-		expect(retrievedData?.lovedOneName).toBe('Test Memorial Person');
-		expect(retrievedData?.slug).toBe('test-memorial-integration');
+		expect(retrievedData?.lovedOneName).toBe('Test Event Person');
+		expect(retrievedData?.slug).toBe('test-event-integration');
 		expect(retrievedData?.ownerEmail).toBe('test@example.com');
 	});
 
@@ -99,8 +99,8 @@ describe('Firebase Integration Tests', () => {
 			action: 'integration_test_action',
 			userEmail: 'test@example.com',
 			userRole: 'owner',
-			resourceType: 'memorial',
-			resourceId: 'test-memorial-id',
+			resourceType: 'event',
+			resourceId: 'test-event-id',
 			details: { testType: 'integration' },
 			success: true,
 			timestamp: new Date(),

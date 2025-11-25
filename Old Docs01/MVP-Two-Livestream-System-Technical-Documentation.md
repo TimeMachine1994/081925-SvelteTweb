@@ -18,7 +18,7 @@ The **MVP Two Livestream System** is a complete, production-ready livestream sol
 - ✅ **Manual Recording Sync**: Backup recording detection and sync mechanisms
 - ✅ **Complete Lifecycle Management**: Scheduled → Live → Completed → Archived
 - ✅ **Debug Tools**: Comprehensive troubleshooting and status fixing tools
-- ✅ **Memorial Integration**: Seamless integration with memorial pages
+- ✅ **Event Integration**: Seamless integration with event pages
 - ✅ **Public/Private Streaming**: Granular visibility controls
 
 ---
@@ -51,7 +51,7 @@ interface MVPTwoStream {
   
   // Status & Lifecycle
   status: 'scheduled' | 'live' | 'completed' | 'cancelled';
-  isVisible: boolean;             // Show on memorial page
+  isVisible: boolean;             // Show on event page
   isPublic: boolean;              // Public access control
   
   // Scheduling
@@ -81,7 +81,7 @@ interface MVPTwoStream {
   
   // Ownership
   createdBy: string;              // User UID
-  memorialId?: string;            // Associated memorial
+  memorialId?: string;            // Associated event
   
   // Timestamps
   createdAt: Date;
@@ -96,9 +96,9 @@ interface MVPTwoStream {
 - Collection of recorded clips
 - Event-based organization
 
-#### **Memorial Integration**
+#### **Event Integration**
 - Streams linked via `memorialId` field
-- Memorial pages query streams by `memorialId`
+- Event pages query streams by `memorialId`
 - Visibility controlled by `isVisible` and `isPublic` flags
 
 ---
@@ -171,7 +171,7 @@ interface MVPTwoStream {
 #### **`/api/livestreamMVPTwo/public/streams/`**
 - **GET**: Public stream listing (no auth required)
 - Filtered by `isPublic: true` and `isVisible: true`
-- Memorial page integration
+- Event page integration
 
 #### **`/api/livestreamMVPTwo/public-streams/`**
 - **GET**: Alternative public endpoint
@@ -198,7 +198,7 @@ interface MVPTwoStream {
 
 #### **`MVPTwoStreamCreator.svelte`**
 - **Purpose**: New stream creation form
-- **Features**: Title, description, scheduling, memorial linking
+- **Features**: Title, description, scheduling, event linking
 - **Integration**: Calls POST `/api/livestreamMVPTwo/streams/`
 
 #### **`MVPTwoStreamCredentials.svelte`**
@@ -219,9 +219,9 @@ interface MVPTwoStream {
 ### **Player Components** (`/livestreamMVPTwo/components/player/`)
 
 #### **`MVPTwoStreamPlayer.svelte`**
-- **Purpose**: Public-facing stream player for memorial pages
+- **Purpose**: Public-facing stream player for event pages
 - **Features**: Auto-switching live/recorded, responsive design
-- **Integration**: Memorial page embedding
+- **Integration**: Event page embedding
 
 ### **Shared Components** (`/livestreamMVPTwo/components/shared/`)
 
@@ -307,7 +307,7 @@ interface MVPTwoStream {
 ## 🔄 **Data Flow & Lifecycle**
 
 ### **Stream Creation Flow**
-1. **User Input**: Title, description, memorial linking
+1. **User Input**: Title, description, event linking
 2. **API Call**: POST `/api/livestreamMVPTwo/streams/`
 3. **Cloudflare Setup**: Immediate Live Input creation
 4. **Database Storage**: Stream record with credentials
@@ -317,7 +317,7 @@ interface MVPTwoStream {
 1. **Credential Access**: RTMP URL/key or WHIP endpoint
 2. **External Software**: OBS Studio or browser streaming
 3. **Status Monitoring**: Automatic connection detection
-4. **Live Playback**: Real-time HLS stream on memorial pages
+4. **Live Playback**: Real-time HLS stream on event pages
 5. **Recording**: Automatic Cloudflare recording
 
 ### **Recording Processing Flow**
@@ -325,7 +325,7 @@ interface MVPTwoStream {
 2. **Cloudflare Processing**: Video encoding and preparation
 3. **Webhook Notification**: Automatic recording ready notification
 4. **Database Update**: Recording URLs and metadata
-5. **Public Availability**: Recorded video on memorial pages
+5. **Public Availability**: Recorded video on event pages
 
 ### **Manual Sync Flow** (Backup System)
 1. **User Action**: Click "Sync Recording" button
@@ -388,7 +388,7 @@ interface MVPTwoStream {
 
 ### **Authorization Levels**
 1. **Stream Owner**: Full CRUD access to owned streams
-2. **Memorial Admin**: Access to memorial-linked streams
+2. **Event Admin**: Access to event-linked streams
 3. **Public**: Read-only access to public, visible streams
 
 ### **Data Privacy**
@@ -407,7 +407,7 @@ interface MVPTwoStream {
 - **Bandwidth**: Unlimited streaming bandwidth
 
 ### **Database Optimization**
-- **Indexed Queries**: User ID and memorial ID indexing
+- **Indexed Queries**: User ID and event ID indexing
 - **Minimal Writes**: Efficient status update patterns
 - **Real-time Updates**: Firestore real-time listeners
 

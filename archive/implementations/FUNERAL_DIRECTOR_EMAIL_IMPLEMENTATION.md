@@ -29,7 +29,7 @@ export async function sendFuneralDirectorRegistrationEmail(data: FuneralDirector
 **Dynamic Template Data Sent:**
 - `familyName` - Family contact name
 - `lovedOneName` - Deceased person's name
-- `memorialUrl` - Full memorial URL
+- `memorialUrl` - Full event URL
 - `memorialSlug` - Just the slug (extracted from URL)
 - `email` - Family email address
 - `password` - Account password (empty string for existing users)
@@ -82,7 +82,7 @@ SENDGRID_TEMPLATE_FUNERAL_DIRECTOR_REGISTRATION=d-xxxxxxxxxx
 1. **Header** - Tributestream branding with gold gradient
 2. **Greeting** - "Dear {Family Name},"
 3. **Sympathy Message** - "Tributestream wishes you our deepest sympathy..."
-4. **Memorial URL Box** - Prominent display of shareable link
+4. **Event URL Box** - Prominent display of shareable link
 5. **Timeline** - "You will be contacted within 24-48 hours..."
 6. **Personal Touch** - "We look forward to meeting you..."
 7. **Account Info Box** (Yellow highlight)
@@ -96,7 +96,7 @@ SENDGRID_TEMPLATE_FUNERAL_DIRECTOR_REGISTRATION=d-xxxxxxxxxx
 ### Key Features:
 
 ✅ **Professional & Compassionate** tone throughout  
-✅ **Clear action items** with memorial URL  
+✅ **Clear action items** with event URL  
 ✅ **Conditional password display** (new users only)  
 ✅ **Optional notes section** (shows only when provided)  
 ✅ **Mobile-responsive** HTML design  
@@ -109,7 +109,7 @@ SENDGRID_TEMPLATE_FUNERAL_DIRECTOR_REGISTRATION=d-xxxxxxxxxx
 
 ### Before:
 1. Funeral director submits form
-2. **New users** → Basic email (❌ NO memorial URL)
+2. **New users** → Basic email (❌ NO event URL)
 3. **Existing users** → Enhanced email (✅ has URL, ❌ no password field)
 4. Inconsistent experience
 
@@ -118,7 +118,7 @@ SENDGRID_TEMPLATE_FUNERAL_DIRECTOR_REGISTRATION=d-xxxxxxxxxx
 2. **All users** → Funeral director email template
 3. **New users** → See password in yellow box
 4. **Existing users** → See login link instead
-5. **All users** → Get memorial URL, notes, and clear next steps
+5. **All users** → Get event URL, notes, and clear next steps
 6. Consistent, professional experience
 
 ---
@@ -129,7 +129,7 @@ SENDGRID_TEMPLATE_FUNERAL_DIRECTOR_REGISTRATION=d-xxxxxxxxxx
    - Go to: https://mc.sendgrid.com/dynamic-templates
    - Create new dynamic template
    - Copy HTML from `FUNERAL_DIRECTOR_EMAIL_TEMPLATE.md`
-   - Set subject: `Memorial Service for {{lovedOneName}} - Tributestream`
+   - Set subject: `Event Service for {{lovedOneName}} - Tributestream`
    - Note the template ID (starts with `d-`)
 
 2. **Update Environment Variable**
@@ -154,7 +154,7 @@ SENDGRID_TEMPLATE_FUNERAL_DIRECTOR_REGISTRATION=d-xxxxxxxxxx
 ## ✅ Benefits of New System
 
 1. **Consistent Experience** - All families get same professional email
-2. **Memorial URL Included** - No more missing links for new users
+2. **Event URL Included** - No more missing links for new users
 3. **Conditional Content** - Password shown only when needed
 4. **Director Notes** - Additional context can be included
 5. **Professional Tone** - Appropriate sympathy messaging
@@ -181,7 +181,7 @@ SENDGRID_TEMPLATE_FUNERAL_DIRECTOR_REGISTRATION=d-xxxxxxxxxx
 - [ ] Test funeral director form with EXISTING user (should show login link)
 - [ ] Test with additional notes (should show green box)
 - [ ] Test without additional notes (box should be hidden)
-- [ ] Verify memorial URL links work correctly
+- [ ] Verify event URL links work correctly
 - [ ] Check email rendering on mobile devices
 - [ ] Verify all dynamic variables populate correctly
 - [ ] Confirm click tracking is disabled (URLs not mangled)

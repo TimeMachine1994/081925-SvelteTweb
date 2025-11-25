@@ -34,7 +34,7 @@ async function setupTestData() {
         isVisible: true,
         isPublic: true,
         createdBy: 'test-user',
-        memorialId: 'test-memorial',
+        memorialId: 'test-event',
         createdAt: new Date(),
         updatedAt: new Date()
       },
@@ -48,7 +48,7 @@ async function setupTestData() {
         isVisible: true,
         isPublic: true,
         createdBy: 'test-user',
-        memorialId: 'test-memorial',
+        memorialId: 'test-event',
         createdAt: new Date(Date.now() - 1800000), // 30 minutes ago
         updatedAt: new Date()
       },
@@ -64,7 +64,7 @@ async function setupTestData() {
         isVisible: true,
         isPublic: true,
         createdBy: 'test-user',
-        memorialId: 'test-memorial',
+        memorialId: 'test-event',
         createdAt: new Date(Date.now() - 3600000), // 1 hour ago
         updatedAt: new Date(),
         recordings: [
@@ -89,7 +89,7 @@ async function setupTestData() {
         isVisible: true,
         isPublic: true,
         createdBy: 'test-user',
-        memorialId: 'test-memorial',
+        memorialId: 'test-event',
         createdAt: new Date(),
         updatedAt: new Date()
       },
@@ -101,7 +101,7 @@ async function setupTestData() {
         isVisible: true,
         isPublic: true,
         createdBy: 'test-user',
-        memorialId: 'test-memorial',
+        memorialId: 'test-event',
         createdAt: new Date(Date.now() - 7200000), // 2 hours ago
         updatedAt: new Date(),
         recordings: [
@@ -142,10 +142,10 @@ async function setupTestData() {
       }
     ];
 
-    // Create test memorial
+    // Create test event
     const testMemorial = {
-      id: 'test-memorial',
-      lovedOneName: 'Test Memorial for Status Transitions',
+      id: 'test-event',
+      lovedOneName: 'Test Event for Status Transitions',
       slug: 'test-status-transitions',
       isPublic: true,
       createdBy: 'test-user',
@@ -153,9 +153,9 @@ async function setupTestData() {
       updatedAt: new Date()
     };
 
-    console.log('📝 Creating test memorial...');
-    await db.collection('memorials').doc('test-memorial').set(testMemorial);
-    console.log('✅ Test memorial created');
+    console.log('📝 Creating test event...');
+    await db.collection('memorials').doc('test-event').set(testMemorial);
+    console.log('✅ Test event created');
 
     console.log('\n📝 Creating test streams...');
     for (const stream of testStreams) {
@@ -172,7 +172,7 @@ async function setupTestData() {
     console.log('  🎬 Multi-Recording Stream - test-multi-recording-stream');
 
     console.log('\n🌐 Test URLs:');
-    console.log('  Memorial Page: http://localhost:5174/test-status-transitions');
+    console.log('  Event Page: http://localhost:5174/test-status-transitions');
     console.log('  API Status: http://localhost:5173/api/streams/test-live-stream/status');
     console.log('  API Recordings: http://localhost:5173/api/streams/test-multi-recording-stream/recordings');
 
@@ -204,8 +204,8 @@ async function cleanupTestData() {
       console.log(`🗑️ Deleted stream: ${streamId}`);
     }
 
-    await db.collection('memorials').doc('test-memorial').delete();
-    console.log('🗑️ Deleted test memorial');
+    await db.collection('memorials').doc('test-event').delete();
+    console.log('🗑️ Deleted test event');
 
     console.log('✅ Test data cleanup complete');
 

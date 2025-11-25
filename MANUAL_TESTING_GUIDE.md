@@ -43,7 +43,7 @@ Test Names:
    - Name: "John Doe"
    - Email: "newowner@example.com"
    - Password: "SecurePass123"
-   - Select "Create a memorial for my loved one"
+   - Select "Create a event for my loved one"
 3. Submit form
 
 **Expected Results**:
@@ -91,11 +91,11 @@ Test Names:
 - ❌ Email field highlighted
 - ❌ Fast failure (no server request)
 
-### 2. Loved One Registration (`/register/loved-one`)
+### 2. Loved One Registration (`/register/new-event-and-account`)
 
 #### Test 2.1: Family Registration - Success Flow
 **Steps**:
-1. Navigate to `/register/loved-one`
+1. Navigate to `/register/new-event-and-account`
 2. Fill form:
    - Loved One's Name: "Mary Smith"
    - Your Name: "John Smith"
@@ -104,9 +104,9 @@ Test Names:
 3. Submit form
 
 **Expected Results**:
-- ✅ Memorial created with unique slug
+- ✅ Event created with unique slug
 - ✅ User account created and logged in
-- ✅ Redirected to memorial page
+- ✅ Redirected to event page
 - ✅ Email sent to family with credentials
 
 #### Test 2.2: Family Registration - Duplicate Email
@@ -117,16 +117,16 @@ Test Names:
 **Expected Results**:
 - ❌ Fast error response
 - ❌ Email field highlighted
-- ❌ No memorial creation attempted
+- ❌ No event creation attempted
 
-#### Test 2.3: Memorial Slug Uniqueness
+#### Test 2.3: Event Slug Uniqueness
 **Steps**:
-1. Create memorial for "John Doe"
+1. Create event for "John Doe"
 2. Immediately create another for "John Doe"
 
 **Expected Results**:
-- ✅ First memorial: `celebration-of-life-for-john-doe`
-- ✅ Second memorial: `celebration-of-life-for-john-doe-1`
+- ✅ First event: `celebration-of-life-for-john-doe`
+- ✅ Second event: `celebration-of-life-for-john-doe-1`
 - ✅ Both memorials accessible
 
 ### 3. Funeral Director Registration (`/register/funeral-director`)
@@ -146,14 +146,14 @@ Test Names:
    - Service Date: "2024-02-15"
    - Service Time: "14:00"
    - Location: "Main Chapel"
-   - Address: "123 Memorial Ave"
+   - Address: "123 Event Ave"
 4. Submit form
 
 **Expected Results**:
 - ✅ Both emails validated
 - ✅ Family account created
-- ✅ Memorial created with service details
-- ✅ Redirected to memorial page
+- ✅ Event created with service details
+- ✅ Redirected to event page
 - ✅ Registration email sent to family
 
 #### Test 3.2: Multiple Email Validation
@@ -194,7 +194,7 @@ curl -X POST /api/funeral-director/quick-register-family \
 
 **Expected Results**:
 - ✅ JSON response with success
-- ✅ Memorial created
+- ✅ Event created
 - ✅ Family account created
 
 #### Test 4.2: API Error Handling
@@ -242,7 +242,7 @@ curl -X POST /api/funeral-director/quick-register-family \
 1. Test duplicate email on each endpoint:
    - `/register` (owner)
    - `/register` (viewer)
-   - `/register/loved-one`
+   - `/register/new-event-and-account`
    - `/register/funeral-director`
    - API endpoints
 
@@ -398,7 +398,7 @@ curl -X POST /api/funeral-director/quick-register-family \
 - ✅ No partial data creation on validation failures
 
 ### Should Pass
-- ✅ Memorial slugs are always unique
+- ✅ Event slugs are always unique
 - ✅ User profiles have consistent structure
 - ✅ API responses follow standard format
 - ✅ Mobile experience is smooth

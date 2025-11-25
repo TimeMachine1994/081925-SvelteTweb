@@ -1,7 +1,7 @@
-# 🐛 Bug Fix: User Pages Errors (Memorial Owners & Admin Users)
+# 🐛 Bug Fix: User Pages Errors (Event Owners & Admin Users)
 
 **Issues:** 
-1. Memorial Owners page → 500 Internal Server Error
+1. Event Owners page → 500 Internal Server Error
 2. Admin Users page → 404 Not Found
 
 **Date Fixed:** November 12, 2025
@@ -10,7 +10,7 @@
 
 ## 🔍 Root Causes
 
-### Issue 1: Memorial Owners 500 Error
+### Issue 1: Event Owners 500 Error
 **Cause:** Firestore compound query without index
 - Query: `where('role', '==', 'owner').orderBy('createdAt', 'desc')`
 - Compound queries (where + orderBy on different fields) require Firestore composite indexes
@@ -42,8 +42,8 @@
 }
 ```
 
-### Fix 2: Memorial Owners Error Handling
-**File:** `routes/admin/users/memorial-owners/+page.server.ts`
+### Fix 2: Event Owners Error Handling
+**File:** `routes/admin/users/event-owners/+page.server.ts`
 
 **Change:** Added try-catch fallback for compound query
 
@@ -58,7 +58,7 @@ try {
     .limit(limit);
   snapshot = await query.get();
 } catch (error) {
-  console.error('Error loading memorial owners with sorting:', error);
+  console.error('Error loading event owners with sorting:', error);
   // Fallback: just filter by role without sorting
   let query = adminDb.collection('users').where('role', '==', 'owner').limit(limit);
   snapshot = await query.get();
@@ -116,10 +116,10 @@ try {
 
 ## 🎯 Expected Behavior Now
 
-### ✅ Memorial Owners Page
+### ✅ Event Owners Page
 - **Loads Successfully** - No more 500 errors
 - **Graceful Fallback** - Shows data without sorting if index missing
-- **All User Data** - Displays owners with their memorial counts and payment status
+- **All User Data** - Displays owners with their event counts and payment status
 
 ### ✅ Admin Users Page
 - **Correct Route** - Navigation now points to the correct path
@@ -151,7 +151,7 @@ try {
 
 To enable sorting, create these composite indexes in Firestore Console:
 
-### Index 1: Memorial Owners Sorting
+### Index 1: Event Owners Sorting
 - **Collection:** `users`
 - **Fields:**
   - `role` (Ascending)
@@ -178,7 +178,7 @@ To enable sorting, create these composite indexes in Firestore Console:
 
 ## 🧪 Testing Checklist
 
-- [x] Navigate to `/admin/users/memorial-owners` - Loads successfully
+- [x] Navigate to `/admin/users/event-owners` - Loads successfully
 - [x] Navigate to `/admin/users/admin-users` - Loads successfully (no 404)
 - [x] Navigate to `/admin/users/funeral-directors` - Loads successfully
 - [x] All pages display user data correctly
@@ -190,11 +190,11 @@ To enable sorting, create these composite indexes in Firestore Console:
 ## 🎉 Result
 
 **Before:**
-- Memorial Owners → 500 Internal Server Error
+- Event Owners → 500 Internal Server Error
 - Admin Users → 404 Not Found
 
 **After:**
-- Memorial Owners → ✅ Loads with data (unsorted if no index)
+- Event Owners → ✅ Loads with data (unsorted if no index)
 - Admin Users → ✅ Loads with data via correct route
 
 All user management pages now load successfully!

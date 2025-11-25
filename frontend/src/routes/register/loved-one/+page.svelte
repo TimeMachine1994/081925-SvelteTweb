@@ -7,7 +7,7 @@
 	import { executeRecaptcha, RECAPTCHA_ACTIONS } from '$lib/utils/recaptcha';
 	import { dev } from '$app/environment';
 
-	console.log('🎯 Loved-One Registration form initializing');
+	console.log('🎯 new-event-and-account Registration form initializing');
 
 	let { form }: { form?: { error?: any; field?: string; success?: boolean } } = $props();
 
@@ -240,7 +240,7 @@
 				<div class="form-message success-message">
 					<span class="message-icon">✅</span>
 					<span class="message-text">
-						Success! Please check your email for your login details and memorial setup information.
+						Success! Please check your email for your login details and event setup information.
 					</span>
 				</div>
 			{/if}
@@ -256,10 +256,10 @@
 					disabled={isSubmitting}
 					loading={isSubmitting}
 				>
-					{isSubmitting ? '🔄 Creating Memorial...' : '🚀 Create Memorial'}
+					{isSubmitting ? '🔄 Creating Event...' : '🚀 Create Event'}
 				</Button>
 				<p class="submit-note">
-					By submitting this form, you'll create your account and set up the memorial page. Login
+					By submitting this form, you'll create your account and set up the event page. Login
 					credentials will be sent to your email address.
 				</p>
 			</div>

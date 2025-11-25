@@ -32,7 +32,7 @@ RECAPTCHA_SECRET_KEY=your_secret_key_here
   - Viewer registration: `registerViewer` action
   - Admin registration: `registerAdmin` action
 
-- **Memorial Creation** (`/profile`)
+- **Event Creation** (`/profile`)
   - `createMemorial` action with high security threshold
 
 - **Contact Form** (`/api/contact`)
@@ -51,7 +51,7 @@ All forms now include:
 ## 🛡️ Security Features
 
 ### Score Thresholds
-- **High Security (0.7)**: Registration, Memorial Creation
+- **High Security (0.7)**: Registration, Event Creation
 - **Medium Security (0.5)**: Contact Forms, Demo Booking
 - **Low Security (0.3)**: Search, Newsletter
 

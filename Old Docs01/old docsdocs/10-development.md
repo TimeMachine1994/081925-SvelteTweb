@@ -107,7 +107,7 @@ Set up Firestore security rules:
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Memorial access rules
+    // Event access rules
     match /memorials/{memorialId} {
       allow read: if resource.data.isPublic == true ||
                      request.auth != null && (
@@ -324,18 +324,18 @@ npx playwright codegen localhost:5173
 Example E2E test:
 
 ```typescript
-// tests/memorial-creation.spec.ts
+// tests/event-creation.spec.ts
 import { test, expect } from '@playwright/test';
 
-test('create memorial workflow', async ({ page }) => {
+test('create event workflow', async ({ page }) => {
   await page.goto('/register/family');
   
-  await page.fill('[data-testid="loved-one-name"]', 'John Doe');
+  await page.fill('[data-testid="new-event-and-account-name"]', 'John Doe');
   await page.fill('[data-testid="creator-email"]', 'family@example.com');
   
-  await page.click('[data-testid="create-memorial"]');
+  await page.click('[data-testid="create-event"]');
   
-  await expect(page).toHaveURL(/\/memorial\/[\w-]+$/);
+  await expect(page).toHaveURL(/\/event\/[\w-]+$/);
   await expect(page.locator('h1')).toContainText('John Doe');
 });
 ```

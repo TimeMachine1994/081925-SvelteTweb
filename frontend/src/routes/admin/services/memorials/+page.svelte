@@ -1,7 +1,7 @@
 <!--
 MEMORIALS ADMIN PAGE
 
-High-density data grid for memorial management
+High-density data grid for event management
 Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 -->
 <script lang="ts">
@@ -87,8 +87,8 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 		// Confirm delete action
 		if (action === 'delete') {
 			const count = ids.length;
-			const memorial = count === 1 ? 'memorial' : 'memorials';
-			const confirmMessage = `Are you sure you want to delete ${count} ${memorial}?\n\nThis will mark them as deleted and they will be hidden from the admin list.`;
+			const event = count === 1 ? 'event' : 'memorials';
+			const confirmMessage = `Are you sure you want to delete ${count} ${event}?\n\nThis will mark them as deleted and they will be hidden from the admin list.`;
 			
 			if (!confirm(confirmMessage)) {
 				return;
@@ -98,7 +98,7 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 		const response = await fetch('/api/admin/bulk-actions', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ action, ids, resourceType: 'memorial' })
+			body: JSON.stringify({ action, ids, resourceType: 'event' })
 		});
 
 		if (response.ok) {
@@ -117,24 +117,24 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 		}
 	}
 
-	function handleRowClick(memorial: any) {
-		goto(`/admin/services/memorials/${memorial.id}`);
+	function handleRowClick(event: any) {
+		goto(`/admin/services/memorials/${event.id}`);
 	}
 </script>
 
 <AdminLayout
 	title="Memorials"
-	subtitle="Manage all memorial pages and services"
+	subtitle="Manage all event pages and services"
 	actions={[
 		{
 			label: 'Filters',
 			icon: '🔍',
 			onclick: () => (showFilters = !showFilters)
 		},
-		...$can('memorial', 'create')
+		...$can('event', 'create')
 			? [
 					{
-						label: 'Create Memorial',
+						label: 'Create Event',
 						icon: '➕',
 						variant: 'primary',
 						onclick: () => goto('/admin/services/memorials/create')
@@ -161,11 +161,11 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 	<DataGrid
 		{columns}
 		data={data.memorials}
-		selectable={$can('memorial', 'update')}
+		selectable={$can('event', 'update')}
 		selectedMemorials={selectedMemorials}
 		onBulkAction={handleBulkAction}
 		onRowClick={handleRowClick}
-		resourceType="memorial"
+		resourceType="event"
 	/>
 </AdminLayout>
 

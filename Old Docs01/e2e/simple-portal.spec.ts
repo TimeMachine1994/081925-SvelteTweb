@@ -5,7 +5,7 @@ test.describe('Simple Portal Tests', () => {
     await page.goto('/');
     
     // Site redirects unauthenticated users to login, which is correct behavior
-    await expect(page).toHaveTitle(/.*Login.*|.*Memorial.*|.*Tribute.*|.*Home.*/);
+    await expect(page).toHaveTitle(/.*Login.*|.*Event.*|.*Tribute.*|.*Home.*/);
     
     // Check that page loads without errors (no 404/500)
     expect(page.url()).toMatch(/\/(login|$)/);

@@ -140,7 +140,7 @@
 	<title>Register Your Funeral Home - Tributestream</title>
 	<meta
 		name="description"
-		content="Join Tributestream's network of professional funeral directors and provide families with beautiful memorial experiences."
+		content="Join Tributestream's network of professional funeral directors and provide families with beautiful event experiences."
 	/>
 </svelte:head>
 
@@ -156,7 +156,7 @@
 			<h1 class="mb-4 text-4xl font-bold text-gray-900">Register Your Funeral Home</h1>
 			<p class="mx-auto max-w-2xl text-xl text-gray-600">
 				Join Tributestream's network of professional funeral directors and provide families with
-				beautiful, lasting memorial experiences.
+				beautiful, lasting event experiences.
 			</p>
 		</div>
 

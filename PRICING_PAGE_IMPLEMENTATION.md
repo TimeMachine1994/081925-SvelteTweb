@@ -20,7 +20,7 @@ Added pricing information section before the account credentials box:
 </div>
 ```
 
-**Location:** Positioned between "View Memorial Page" button and account information box.
+**Location:** Positioned between "View Event Page" button and account information box.
 
 ---
 
@@ -86,13 +86,13 @@ setHeaders({
 ## 🎯 Smart Booking CTA
 
 ### Personalized Call-to-Action:
-For logged-in users who have a memorial, the booking section displays a personalized CTA:
+For logged-in users who have a event, the booking section displays a personalized CTA:
 
 **Features:**
 - ✅ Detects if user is logged in
-- ✅ Checks if user has a memorial in their account
+- ✅ Checks if user has a event in their account
 - ✅ Shows personalized CTA with loved one's name
-- ✅ Direct link to memorial's booking section (`/{fullSlug}#booking`)
+- ✅ Direct link to event's booking section (`/{fullSlug}#booking`)
 - ✅ Prominent gold button styling
 - ✅ Only shown to authenticated users with memorials
 
@@ -100,13 +100,13 @@ For logged-in users who have a memorial, the booking section displays a personal
 ```
 Ready to Complete Your Booking?
 Complete your booking details for [Loved One's Name]
-[Go to My Memorial Booking →]
+[Go to My Event Booking →]
 ```
 
 **Technical Implementation:**
-- Server-side query in `+page.server.ts` fetches user's memorial
-- Conditional rendering in `+page.svelte` shows CTA only when memorial exists
-- Link format: `/{memorial.fullSlug}#booking` (navigates to booking section)
+- Server-side query in `+page.server.ts` fetches user's event
+- Conditional rendering in `+page.svelte` shows CTA only when event exists
+- Link format: `/{event.fullSlug}#booking` (navigates to booking section)
 
 ---
 

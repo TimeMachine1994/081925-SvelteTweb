@@ -20,7 +20,7 @@
 
 ## System Overview
 
-The **StreamCard** component system is the core UI infrastructure for managing livestreams in Tributestream's memorial service platform. It provides comprehensive stream management capabilities including:
+The **StreamCard** component system is the core UI infrastructure for managing livestreams in Tributestream's event service platform. It provides comprehensive stream management capabilities including:
 
 - **RTMP Streaming** - Traditional streaming with OBS/external software
 - **Browser Streaming** - WebRTC/WHIP streaming directly from browser
@@ -30,8 +30,8 @@ The **StreamCard** component system is the core UI infrastructure for managing l
 
 ### Primary Use Cases
 
-1. **Funeral Directors** - Create and manage memorial livestreams
-2. **Memorial Owners** - View streams created via service calculator
+1. **Funeral Directors** - Create and manage event livestreams
+2. **Event Owners** - View streams created via service calculator
 3. **Admins** - Full stream management and monitoring capabilities
 
 ### Component Locations
@@ -76,7 +76,7 @@ frontend/src/lib/components/
 
 - **Access Control**
   - Role-based permissions (admin, funeral_director, owner)
-  - Memorial ownership verification
+  - Event ownership verification
   - Stream visibility controls (public/hidden)
 
 ### 🎨 User Experience
@@ -265,7 +265,7 @@ StreamCard.svelte
 - Access browser streaming
 - View credentials
 
-#### 3. Memorial Owner (`role: 'owner'`)
+#### 3. Event Owner (`role: 'owner'`)
 **Limited Access**
 - View streams for owned memorials
 - Cannot manually create streams (auto-created via calculator)
@@ -279,8 +279,8 @@ StreamCard.svelte
 // Server-side permission check (in API endpoints)
 const hasPermission = 
   locals.user.role === 'admin' ||
-  memorial.ownerUid === userId ||
-  memorial.funeralDirectorUid === userId;
+  event.ownerUid === userId ||
+  event.funeralDirectorUid === userId;
 
 if (!hasPermission) {
   throw SvelteKitError(403, 'Permission denied');
@@ -301,7 +301,7 @@ if (!hasPermission) {
 
 // canManageStream determined by:
 // - User role (admin, funeral_director)
-// - Memorial ownership
+// - Event ownership
 // - Funeral director assignment
 ```
 
@@ -428,7 +428,7 @@ if (!hasPermission) {
 }
 ```
 
-### 2. Memorial Page Integration
+### 2. Event Page Integration
 - Streams loaded in `[fullSlug]/+page.server.ts`
 - Public streams visible to all
 - Private streams require authentication

@@ -11,7 +11,7 @@
 		BookingItem,
 		LivestreamConfig
 	} from '$lib/types/livestream';
-	import type { Memorial } from '$lib/types/memorial';
+	import type { Event } from '$lib/types/event';
 	import { onMount } from 'svelte';
 	import { auth } from '$lib/firebase';
 	import { goto } from '$app/navigation'; // Import goto
@@ -21,7 +21,7 @@
 		data
 	}: {
 		memorialId: string | null;
-		data: { memorial: Memorial | null; config: LivestreamConfig | null };
+		data: { event: Event | null; config: LivestreamConfig | null };
 	} = $props();
 
 	console.log('🧮 Calculator Component Initializing...', { memorialId, data });
@@ -78,9 +78,9 @@
 			if (data.config.currentStep) {
 				currentStep = data.config.currentStep;
 			}
-		} else if (data.memorial) {
-			console.log('📝 Pre-filling form with memorial data:', data.memorial);
-			formData.lovedOneName = data.memorial.lovedOneName;
+		} else if (data.event) {
+			console.log('📝 Pre-filling form with event data:', data.event);
+			formData.lovedOneName = data.event.lovedOneName;
 		}
 	});
 
@@ -378,7 +378,7 @@
 	async function proceedToPayment() {
 		console.log('💳 Proceeding to payment...');
 		if (!memorialId) {
-			console.error('Memorial ID is required to proceed to payment.');
+			console.error('Event ID is required to proceed to payment.');
 			// Optionally, display an error to the user
 			return;
 		}

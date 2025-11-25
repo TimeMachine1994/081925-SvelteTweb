@@ -11,11 +11,11 @@
 
 ## 🎯 System Overview
 
-The role-based portal system provides secure, role-specific access to memorial management functionality for four distinct user types:
+The role-based portal system provides secure, role-specific access to event management functionality for four distinct user types:
 
-- **Owner**: Full memorial management and administrative control
-- **Funeral Director**: Professional memorial creation and livestream management
-- **Family Member**: Invitation-based access for photo uploads and memorial participation
+- **Owner**: Full event management and administrative control
+- **Funeral Director**: Professional event creation and livestream management
+- **Family Member**: Invitation-based access for photo uploads and event participation
 - **Viewer**: Public access for following memorials and viewing livestreams
 
 ---
@@ -85,7 +85,7 @@ src/
 └── routes/
     ├── my-portal/              # Role-based routing
     ├── funeral-director/       # FD-specific routes
-    └── tributes/              # Public memorial pages
+    └── tributes/              # Public event pages
 ```
 
 ### Key Technologies
@@ -133,7 +133,7 @@ src/
 ### Component Library
 - **Glass Cards**: Glassmorphism design with backdrop blur
 - **Action Cards**: Interactive portal navigation
-- **Memorial Cards**: Consistent memorial display
+- **Event Cards**: Consistent event display
 - **Loading States**: Unified loading indicators
 - **Error Boundaries**: Graceful error handling
 
@@ -148,7 +148,7 @@ src/
 4. Session management with automatic refresh
 
 ### Authorization Matrix
-| Role | Create Memorial | Edit Memorial | Upload Photos | Manage Stream | View All |
+| Role | Create Event | Edit Event | Upload Photos | Manage Stream | View All |
 |------|----------------|---------------|---------------|---------------|----------|
 | Owner | ✅ | ✅ (own) | ✅ | ✅ | ✅ (own) |
 | Funeral Director | ✅ | ✅ (assigned) | ✅ | ✅ | ✅ (assigned) |
@@ -168,7 +168,7 @@ src/
 ### Caching Strategy
 ```typescript
 // Multi-layer caching implementation
-- Memorial data: 10-minute TTL, 85% hit rate
+- Event data: 10-minute TTL, 85% hit rate
 - User sessions: 5-minute TTL, 92% hit rate
 - Static assets: 24-hour TTL, 98% hit rate
 - API responses: Variable TTL, 78% hit rate
@@ -197,7 +197,7 @@ src/
 - **Performance Tests**: Load testing up to 1000 concurrent users
 
 ### Test Categories
-- Memorial access verification
+- Event access verification
 - Role-based permission enforcement
 - Invitation workflow testing
 - Photo upload permission validation

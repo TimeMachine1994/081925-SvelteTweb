@@ -153,7 +153,7 @@ export function getClientIP(request: Request): string {
  * Predefined rate limit configurations for different endpoints
  */
 export const RATE_LIMITS = {
-	// Memorial registration: 3 attempts per hour, block for 24 hours if exceeded
+	// Event registration: 3 attempts per hour, block for 24 hours if exceeded
 	MEMORIAL_REGISTRATION: {
 		windowMs: 60 * 60 * 1000, // 1 hour
 		maxAttempts: 3,

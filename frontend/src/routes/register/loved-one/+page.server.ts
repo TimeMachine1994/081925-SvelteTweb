@@ -3,9 +3,9 @@ import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import { sendEnhancedRegistrationEmail } from '$lib/server/email';
 import { indexMemorial } from '$lib/server/algolia-indexing';
-import type { Memorial } from '$lib/types/memorial';
+import type { Event } from '$lib/types/event';
 import { validateEmail } from '$lib/utils/email-validation';
-import { generateUniqueMemorialSlug } from '$lib/utils/memorial-slug';
+import { generateUniqueMemorialSlug } from '$lib/utils/event-slug';
 import { createStandardUserProfile } from '$lib/utils/user-profile';
 import { verifyRecaptcha, RECAPTCHA_ACTIONS, getScoreThreshold } from '$lib/utils/recaptcha';
 import { checkRateLimit, getClientIP, RATE_LIMITS, getBlockedTimeRemaining } from '$lib/server/rate-limiter';
@@ -59,7 +59,7 @@ export const actions: Actions = {
 				ip: clientIP,
 				country: geoCheck.country,
 				reason: `Blocked country: ${countryDisplay}`,
-				endpoint: '/register/loved-one'
+				endpoint: '/register/new-event-and-account'
 			});
 			
 			return fail(403, {
@@ -72,7 +72,7 @@ export const actions: Actions = {
 				ip: clientIP,
 				country: geoCheck.country,
 				reason: geoCheck.reason || 'Suspicious country',
-				endpoint: '/register/loved-one'
+				endpoint: '/register/new-event-and-account'
 			});
 			console.warn(`⚠️ Suspicious location detected: ${countryDisplay} - ${geoCheck.reason}`);
 		}
@@ -93,7 +93,7 @@ export const actions: Actions = {
 				country: geoCheck.country,
 				email: email || 'unknown',
 				reason: `Honeypot triggered: Field filled with "${honeypot}"`,
-				endpoint: '/register/loved-one'
+				endpoint: '/register/new-event-and-account'
 			});
 			
 			// Return success to fool the bot, but don't actually create anything
@@ -104,7 +104,7 @@ export const actions: Actions = {
 			return fail(400, { error: 'Please fill out all required fields.' });
 		}
 
-		// Verify reCAPTCHA token (HIGH_SECURITY threshold for memorial creation)
+		// Verify reCAPTCHA token (HIGH_SECURITY threshold for event creation)
 		if (!recaptchaToken) {
 			console.error('❌ reCAPTCHA token missing from request');
 			return fail(400, { 
@@ -175,7 +175,7 @@ export const actions: Actions = {
 			await adminDb.collection('users').doc(userRecord.uid).set(userProfile);
 			console.log(`User profile created for ${email} with owner role 📝`);
 
-			// 4. Create memorial
+			// 4. Create event
 			const memorialData = {
 				lovedOneName: lovedOneName,
 				fullSlug,
@@ -201,7 +201,7 @@ export const actions: Actions = {
 					additional: [] // Empty initially
 				},
 
-				// Basic memorial settings
+				// Basic event settings
 				isPublic: true, // Set to true by default
 				isComplete: false, // New memorials start as scheduled/incomplete
 				content: '',
@@ -211,10 +211,10 @@ export const actions: Actions = {
 				updatedAt: new Date()
 			};
 			const memorialRef = await adminDb.collection('memorials').add(memorialData);
-			console.log(`Memorial created for ${lovedOneName} with fullSlug: ${fullSlug} 🕊️`);
+			console.log(`Event created for ${lovedOneName} with fullSlug: ${fullSlug} 🕊️`);
 
-			// Index the new memorial in Algolia
-			await indexMemorial({ ...memorialData, id: memorialRef.id } as unknown as Memorial);
+			// Index the new event in Algolia
+			await indexMemorial({ ...memorialData, id: memorialRef.id } as unknown as Event);
 
 			// 5. Send enhanced registration email
 			await sendEnhancedRegistrationEmail({

@@ -24,7 +24,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		const formData = await request.formData();
 		const videoBlob = formData.get('video') as File;
 		const memorialId = formData.get('memorialId') as string;
-		const title = formData.get('title') as string || 'Memorial Slideshow';
+		const title = formData.get('title') as string || 'Event Slideshow';
 		const photosData = formData.get('photos') as string;
 		const settingsData = formData.get('settings') as string;
 
@@ -33,7 +33,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 
 		if (!memorialId) {
-			throw error(400, 'Memorial ID is required');
+			throw error(400, 'Event ID is required');
 		}
 
 		console.log('🎬 [SLIDESHOW API] Processing upload:', {
@@ -43,13 +43,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			userId: locals.user.uid
 		});
 
-		// Verify user has access to this memorial
+		// Verify user has access to this event
 		const memorialRef = adminDb.collection('memorials').doc(memorialId);
 		const memorialDoc = await memorialRef.get();
 		
 		if (!memorialDoc.exists) {
-			console.log('🔒 [SLIDESHOW API] Memorial not found:', memorialId);
-			throw error(404, 'Memorial not found');
+			console.log('🔒 [SLIDESHOW API] Event not found:', memorialId);
+			throw error(404, 'Event not found');
 		}
 
 		const memorialData = memorialDoc.data();
@@ -108,7 +108,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		// Ensure no undefined values for Firestore
 		const slideshowDoc = {
 			id: slideshowId,
-			title: title || 'Memorial Slideshow',
+			title: title || 'Event Slideshow',
 			memorialId,
 			cloudflareStreamId: cloudflareResult.uid || null,
 			embedUrl: cloudflareResult.preview || null,
@@ -141,7 +141,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		
 		console.log('📝 [SLIDESHOW API] Cleaned slideshow document:', JSON.stringify(cleanSlideshowDoc, null, 2));
 
-		// Save to memorial's slideshows subcollection
+		// Save to event's slideshows subcollection
 		const slideshowRef = adminDb
 			.collection('memorials')
 			.doc(memorialId)
@@ -150,7 +150,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			
 		await slideshowRef.set(cleanSlideshowDoc);
 
-		// Update memorial to indicate it has slideshows
+		// Update event to indicate it has slideshows
 		await memorialRef.update({
 			hasSlideshow: true,
 			updatedAt: new Date().toISOString()
@@ -196,7 +196,7 @@ async function uploadToCloudflareStream(videoBlob: File, title: string) {
 	const metadata = {
 		name: title,
 		meta: {
-			type: 'memorial-slideshow',
+			type: 'event-slideshow',
 			created: new Date().toISOString()
 		}
 	};

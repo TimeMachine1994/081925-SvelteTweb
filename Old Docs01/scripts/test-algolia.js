@@ -19,7 +19,7 @@ async function testAlgolia() {
 
 		// Add a test record
 		const testRecord = {
-			objectID: 'test-memorial-1',
+			objectID: 'test-event-1',
 			lovedOneName: 'John Doe',
 			slug: 'john-doe',
 			fullSlug: 'tributes/john-doe',

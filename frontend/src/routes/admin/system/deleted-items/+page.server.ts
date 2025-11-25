@@ -53,7 +53,7 @@ export const load = async ({ locals, url }: any) => {
 				// Determine name based on resource type
 				let name = 'Unknown';
 				if (collectionName === 'memorials') {
-					name = data.lovedOneName || 'Unknown Memorial';
+					name = data.lovedOneName || 'Unknown Event';
 				} else if (collectionName === 'streams') {
 					name = data.title || 'Unknown Stream';
 				} else if (collectionName === 'users') {
@@ -89,7 +89,7 @@ export const load = async ({ locals, url }: any) => {
 	// Calculate stats
 	const stats = {
 		expiringSoon: deletedItems.filter((item) => item.daysUntilPermanent <= 7).length,
-		memorials: deletedItems.filter((item) => item.resourceType === 'memorial').length,
+		memorials: deletedItems.filter((item) => item.resourceType === 'event').length,
 		streams: deletedItems.filter((item) => item.resourceType === 'stream').length,
 		users: deletedItems.filter((item) => item.resourceType === 'user').length,
 		blogPosts: deletedItems.filter((item) => item.resourceType === 'blog_post').length

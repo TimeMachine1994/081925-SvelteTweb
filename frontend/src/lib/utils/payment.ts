@@ -1,4 +1,4 @@
-import type { Memorial } from '$lib/types/memorial';
+import type { Event } from '$lib/types/event';
 
 /**
  * 🎯 Payment status utility functions for Owner Portal
@@ -7,17 +7,17 @@ import type { Memorial } from '$lib/types/memorial';
 export type PaymentStatus = 'complete' | 'incomplete' | 'none';
 
 /**
- * 💳 Determines the payment status for a memorial based on service configuration
+ * 💳 Determines the payment status for a event based on service configuration
  */
-export function getPaymentStatus(memorial: Memorial): PaymentStatus {
-	console.log('💳 Checking payment status for memorial:', memorial.id);
+export function getPaymentStatus(event: Event): PaymentStatus {
+	console.log('💳 Checking payment status for event:', event.id);
 
-	if (!memorial.services?.paymentStatus) {
+	if (!event.services?.paymentStatus) {
 		console.log('📋 No payment status found - status: none');
 		return 'none';
 	}
 
-	const status = memorial.services.paymentStatus;
+	const status = event.services.paymentStatus;
 	console.log('🔍 Service payment status:', status);
 
 	if (status === 'paid') {
@@ -33,10 +33,10 @@ export function getPaymentStatus(memorial: Memorial): PaymentStatus {
 }
 
 /**
- * 🏆 Gets the default memorial (latest created) from a list of memorials
+ * 🏆 Gets the default event (latest created) from a list of memorials
  */
-export function getDefaultMemorial(memorials: Memorial[]): Memorial | null {
-	console.log('🏆 Finding default memorial from', memorials.length, 'memorials');
+export function getDefaultMemorial(memorials: Event[]): Event | null {
+	console.log('🏆 Finding default event from', memorials.length, 'memorials');
 
 	if (memorials.length === 0) {
 		console.log('📭 No memorials found');
@@ -63,7 +63,7 @@ export function getDefaultMemorial(memorials: Memorial[]): Memorial | null {
 
 	const defaultMemorial = sorted[0];
 	console.log(
-		'🎯 Default memorial selected:',
+		'🎯 Default event selected:',
 		defaultMemorial.lovedOneName,
 		'(',
 		defaultMemorial.id,
@@ -74,11 +74,11 @@ export function getDefaultMemorial(memorials: Memorial[]): Memorial | null {
 }
 
 /**
- * 📅 Formats memorial date and time for display
+ * 📅 Formats event date and time for display
  */
-export function formatMemorialDateTime(memorial: Memorial): string {
-	const date = memorial.memorialDate;
-	const time = memorial.memorialTime;
+export function formatMemorialDateTime(event: Event): string {
+	const date = event.memorialDate;
+	const time = event.memorialTime;
 
 	if (!date && !time) return 'Date and time TBD';
 	if (!date) return `Time: ${time}`;
@@ -88,11 +88,11 @@ export function formatMemorialDateTime(memorial: Memorial): string {
 }
 
 /**
- * 🏠 Formats memorial location for display
+ * 🏠 Formats event location for display
  */
-export function formatMemorialLocation(memorial: Memorial): string {
-	const name = memorial.memorialLocationName;
-	const address = memorial.memorialLocationAddress;
+export function formatMemorialLocation(event: Event): string {
+	const name = event.memorialLocationName;
+	const address = event.memorialLocationAddress;
 
 	if (!name && !address) return 'Location TBD';
 	if (!address) return name || '';

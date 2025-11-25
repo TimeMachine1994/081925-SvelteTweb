@@ -17,7 +17,7 @@ Complete MUX API client for enterprise-grade recording:
 - **Error Handling** with comprehensive logging
 
 ### **2. Dual Recording Architecture**
-Redundant recording for critical memorial services:
+Redundant recording for critical event services:
 - **Primary Recording**: Cloudflare Stream (proven, reliable)
 - **Backup Recording**: MUX (optional, enterprise-grade)
 - **Graceful Degradation**: Works without MUX configuration
@@ -80,7 +80,7 @@ Easiest streaming method for non-technical users:
 
 ### **Why Dual Recording?**
 
-**Scenario:** Critical memorial service that MUST be recorded
+**Scenario:** Critical event service that MUST be recorded
 
 1. **Cloudflare Primary:**
    - Handles live streaming (proven reliable)
@@ -228,7 +228,7 @@ if (isMUXConfigured()) {
 - [ ] Verify dual recording badges appear
 - [ ] Start phone camera → Grant permissions
 - [ ] Click "Start Streaming" → Verify WHIP connection
-- [ ] Check stream goes live on memorial page
+- [ ] Check stream goes live on event page
 - [ ] Verify Cloudflare recording badge shows "processing"
 - [ ] If MUX configured: Verify MUX backup badge
 - [ ] Stop phone stream → Verify proper cleanup

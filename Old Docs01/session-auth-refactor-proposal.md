@@ -37,15 +37,15 @@ interface StandardUser {
 }
 ```
 
-### Memorial Object Structure
+### Event Object Structure
 ```typescript
 interface StandardMemorial {
-  id: string;                     // Memorial document ID
-  ownerUid: string;              // Memorial owner's Firebase UID
+  id: string;                     // Event document ID
+  ownerUid: string;              // Event owner's Firebase UID
   funeralDirectorUid?: string;   // Assigned funeral director's UID
   createdAt: Date;               // Creation timestamp
   updatedAt: Date;               // Last update timestamp
-  // ... other memorial fields
+  // ... other event fields
 }
 ```
 
@@ -60,11 +60,11 @@ interface SessionContext {
 
 ### Phase 1: Data Model Standardization
 
-#### 1.1 Memorial Field Migration
+#### 1.1 Event Field Migration
 - [ ] Update all Firestore queries to use `ownerUid` consistently
 - [ ] Update all Firestore queries to use `funeralDirectorUid` consistently
 - [ ] Remove references to deprecated `ownerId`, `createdByUserId` fields
-- [ ] Update memorial access utilities to use standard field names
+- [ ] Update event access utilities to use standard field names
 
 #### 1.2 User Role Standardization
 - [ ] Consolidate role checking to use `locals.user.role` as primary source
@@ -104,7 +104,7 @@ interface SessionContext {
 - [ ] Add consistent logging for auth events
 
 #### 4.2 Permission Checking
-- [ ] Update all memorial access checks to use `MemorialAccessVerifier`
+- [ ] Update all event access checks to use `MemorialAccessVerifier`
 - [ ] Remove duplicate permission checking logic
 - [ ] Ensure consistent access level responses
 
@@ -115,7 +115,7 @@ interface SessionContext {
 - `src/lib/auth.ts` - Standardize User interface
 - `src/routes/api/session/+server.ts` - Fix race condition, add security headers
 
-### Memorial Access Files
+### Event Access Files
 - `src/lib/utils/memorialAccess.ts` - Update field name references
 - `src/lib/server/memorialMiddleware.ts` - Standardize user context creation
 
@@ -131,7 +131,7 @@ interface SessionContext {
 ## Testing Requirements
 
 ### Unit Tests
-- [ ] Update memorial access utility tests for new field names
+- [ ] Update event access utility tests for new field names
 - [ ] Test session creation and verification flows
 - [ ] Test role-based permission checking
 

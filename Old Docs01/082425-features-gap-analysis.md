@@ -17,15 +17,15 @@ Location: /frontend/src/routes/profile/
 Component: frontend/src/lib/components/Profile.svelte
 Public Tribute Page
 
-Description: The public-facing page that displays a memorial tribute to visitors.
+Description: The public-facing page that displays a event tribute to visitors.
 Location: /frontend/src/routes/tributes/[fullSlug]/
 Multi-Step Registration
 
 Description: A specialized registration flow with distinct paths for 'Funeral Directors' and 'Loved Ones'.
-Location: /frontend/src/routes/register/funeral-director/ and /frontend/src/routes/register/loved-one/
+Location: /frontend/src/routes/register/funeral-director/ and /frontend/src/routes/register/new-event-and-account/
 Livestream Management
 
-Description: A user-facing page for creating and managing new livestreams associated with a memorial.
+Description: A user-facing page for creating and managing new livestreams associated with a event.
 Location: /frontend/src/routes/my-portal/tributes/[memorialId]/livestream/new/
 Theme Showcase Pages
 
@@ -37,15 +37,15 @@ Create Livestream
 Endpoint: POST /api/livestream/create
 Description: Creates a new livestream session.
 Location: frontend/src/routes/api/livestream/create/+server.ts
-Follow Memorial
+Follow Event
 
 Endpoint: POST /api/memorials/[memorialId]/follow
-Description: Allows a user to follow a specific memorial.
+Description: Allows a user to follow a specific event.
 Location: frontend/src/routes/api/memorials/[memorialId]/follow/+server.ts
-Invite to Memorial
+Invite to Event
 
 Endpoint: POST /api/memorials/[memorialId]/invite
-Description: Enables sending invitations for a memorial to other users.
+Description: Enables sending invitations for a event to other users.
 Location: frontend/src/routes/api/memorials/[memorialId]/invite/+server.ts
 User Logout
 

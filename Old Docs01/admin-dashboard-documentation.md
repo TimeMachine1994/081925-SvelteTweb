@@ -1,7 +1,7 @@
 # Admin Dashboard Documentation
 
 ## Overview
-The admin dashboard provides comprehensive management capabilities for Tributestream administrators, including user management, memorial oversight, and system statistics.
+The admin dashboard provides comprehensive management capabilities for Tributestream administrators, including user management, event oversight, and system statistics.
 
 ## Authentication Flow
 
@@ -41,7 +41,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 ### Data Transformation
 
-#### Memorial Data Processing
+#### Event Data Processing
 - **Timestamp Conversion**: All Firestore Timestamps converted to ISO strings
 - **Nested Object Handling**: 
   - `paymentHistory[]` - converts `createdAt`, `updatedAt` timestamps
@@ -70,9 +70,9 @@ stats: {
 
 ## Data Structures
 
-### Memorial Interface
+### Event Interface
 ```typescript
-interface Memorial {
+interface Event {
   id: string;
   title: string;
   description?: string;
@@ -144,7 +144,7 @@ interface AdminUser {
 - **Route Protection**: Server-side authentication checks
 
 ### Data Protection
-- **Sensitive Data**: Admin access to all user and memorial data
+- **Sensitive Data**: Admin access to all user and event data
 - **Audit Trail**: All admin actions should be logged (future enhancement)
 - **Permission Boundaries**: Clear separation between admin and user capabilities
 
@@ -172,7 +172,7 @@ interface AdminUser {
 
 ### Differences
 1. **Custom Claims**: Admin users get `isAdmin: true` claim
-2. **Redirect Logic**: Admins redirected to `/admin`, others to `/my-portal` or memorial
+2. **Redirect Logic**: Admins redirected to `/admin`, others to `/my-portal` or event
 3. **Data Access**: Admins can access all system data, owners only their own
 
 ### Consistency Verification ✅
@@ -185,7 +185,7 @@ interface AdminUser {
 
 ### Functionality
 - [ ] User management actions (edit, delete, suspend)
-- [ ] Memorial management actions (edit, delete, transfer ownership)
+- [ ] Event management actions (edit, delete, transfer ownership)
 - [ ] System configuration management
 - [ ] Audit logging for admin actions
 - [ ] Bulk operations for data management

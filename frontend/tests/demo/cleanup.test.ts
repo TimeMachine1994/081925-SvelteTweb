@@ -97,13 +97,13 @@ describe('Demo Cleanup API', () => {
 			size: 2,
 			docs: [
 				{
-					id: 'memorial-1',
+					id: 'event-1',
 					ref: {
 						delete: vi.fn().mockResolvedValue(undefined)
 					}
 				},
 				{
-					id: 'memorial-2',
+					id: 'event-2',
 					ref: {
 						delete: vi.fn().mockResolvedValue(undefined)
 					}
@@ -156,7 +156,7 @@ describe('Demo Cleanup API', () => {
 			where: mockWhere
 		});
 
-		// Mock memorial subcollections
+		// Mock event subcollections
 		const mockMemorialDoc = vi.fn();
 		mockMemorialDoc.mockReturnValue({
 			collection: vi.fn((name) => {
@@ -311,7 +311,7 @@ describe('Demo Cleanup API', () => {
 			size: 1,
 			docs: [
 				{
-					id: 'memorial-1',
+					id: 'event-1',
 					ref: {
 						delete: vi.fn().mockRejectedValue(new Error('Delete failed'))
 					}
@@ -355,7 +355,7 @@ describe('Demo Cleanup API', () => {
 
 		const response = (json as any).mock.calls[0][0];
 		expect(response.errors.length).toBeGreaterThan(0);
-		expect(response.errors[0]).toContain('Failed to delete memorial');
+		expect(response.errors[0]).toContain('Failed to delete event');
 	});
 
 	it('should manually trigger cleanup for specific session (POST)', async () => {

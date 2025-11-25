@@ -4,7 +4,7 @@
 	import { goto } from '$app/navigation';
 	
 	let { data } = $props();
-	const { memorial, streams, slideshows, followerCount } = data;
+	const { event, streams, slideshows, followerCount } = data;
 
 	function formatDate(isoString: string | null) {
 		if (!isoString) return 'N/A';
@@ -25,7 +25,7 @@
 		return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
 	}
 
-	const publicUrl = memorial.fullSlug ? `https://tributestream.com/${memorial.fullSlug}` : '';
+	const publicUrl = event.fullSlug ? `https://tributestream.com/${event.fullSlug}` : '';
 
 	// Stream creation state
 	let showStreamForm = $state(false);
@@ -35,7 +35,7 @@
 	let isCreatingStream = $state(false);
 
 	async function handleDelete() {
-		const confirmMessage = `Are you sure you want to delete "${memorial.lovedOneName}"?\n\nThis will mark it as deleted and hide it from the admin list.`;
+		const confirmMessage = `Are you sure you want to delete "${event.lovedOneName}"?\n\nThis will mark it as deleted and hide it from the admin list.`;
 		
 		if (!confirm(confirmMessage)) {
 			return;
@@ -47,20 +47,20 @@
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ 
 					action: 'delete', 
-					ids: [memorial.id], 
-					resourceType: 'memorial' 
+					ids: [event.id], 
+					resourceType: 'event' 
 				})
 			});
 
 			if (response.ok) {
-				alert('Memorial deleted successfully');
+				alert('Event deleted successfully');
 				goto('/admin/services/memorials');
 			} else {
-				alert('Failed to delete memorial. Please try again.');
+				alert('Failed to delete event. Please try again.');
 			}
 		} catch (error) {
-			console.error('Error deleting memorial:', error);
-			alert('An error occurred while deleting the memorial.');
+			console.error('Error deleting event:', error);
+			alert('An error occurred while deleting the event.');
 		}
 	}
 
@@ -81,7 +81,7 @@
 			// Combine date and time into ISO format
 			const scheduledStartTime = `${streamDate}T${streamTime}:00`;
 
-			const response = await fetch(`/api/memorials/${memorial.id}/streams`, {
+			const response = await fetch(`/api/memorials/${event.id}/streams`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
@@ -141,7 +141,7 @@
 	}
 </script>
 
-<AdminLayout title="Memorial Details" subtitle="View and manage all aspects of this memorial">
+<AdminLayout title="Event Details" subtitle="View and manage all aspects of this event">
 	<div class="header-actions">
 		<button onclick={() => goto('/admin/services/memorials')}>← Back</button>
 		<div>
@@ -150,24 +150,24 @@
 	</div>
 
 	<div class="card">
-		<h1>💝 {memorial.lovedOneName}</h1>
+		<h1>💝 {event.lovedOneName}</h1>
 		<p>{publicUrl}</p>
-		<p>Created by {memorial.creatorEmail} • {formatDate(memorial.createdAt)}</p>
+		<p>Created by {event.creatorEmail} • {formatDate(event.createdAt)}</p>
 		<div class="badges">
-			<span class:complete={memorial.isComplete}>{memorial.isComplete ? '✅ Complete' : '⚠️ Incomplete'}</span>
-			<span class:paid={memorial.isPaid}>{memorial.isPaid ? '✅ Paid' : `❌ Unpaid ($${memorial.totalPrice})`}</span>
-			<span>{memorial.isPublic ? '👁️ Public' : '🔒 Private'}</span>
+			<span class:complete={event.isComplete}>{event.isComplete ? '✅ Complete' : '⚠️ Incomplete'}</span>
+			<span class:paid={event.isPaid}>{event.isPaid ? '✅ Paid' : `❌ Unpaid ($${event.totalPrice})`}</span>
+			<span>{event.isPublic ? '👁️ Public' : '🔒 Private'}</span>
 		</div>
 	</div>
 
 	<div class="card">
 		<h2>📋 Basic Information</h2>
 		<div class="grid">
-			<div><strong>ID:</strong> {memorial.id}</div>
-			<div><strong>Loved One:</strong> {memorial.lovedOneName}</div>
-			<div><strong>Slug:</strong> {memorial.fullSlug}</div>
-			<div><strong>Created:</strong> {formatDate(memorial.createdAt)}</div>
-			<div><strong>Updated:</strong> {formatDate(memorial.updatedAt)} ({formatRelativeTime(memorial.updatedAt)})</div>
+			<div><strong>ID:</strong> {event.id}</div>
+			<div><strong>Loved One:</strong> {event.lovedOneName}</div>
+			<div><strong>Slug:</strong> {event.fullSlug}</div>
+			<div><strong>Created:</strong> {formatDate(event.createdAt)}</div>
+			<div><strong>Updated:</strong> {formatDate(event.updatedAt)} ({formatRelativeTime(event.updatedAt)})</div>
 		</div>
 	</div>
 
@@ -188,7 +188,7 @@
 						id="stream-title"
 						type="text"
 						bind:value={streamTitle}
-						placeholder="Enter stream title (e.g., Memorial Service for {memorial.lovedOneName})"
+						placeholder="Enter stream title (e.g., Event Service for {event.lovedOneName})"
 						disabled={isCreatingStream}
 					/>
 				</div>
@@ -240,7 +240,7 @@
 		<div class="streams-grid">
 			{#each streams as stream}
 				<div class="stream-item">
-					<StreamCard {stream} canManage={true} memorialId={memorial.id} />
+					<StreamCard {stream} canManage={true} memorialId={event.id} />
 					<button 
 						class="delete-stream-btn" 
 						onclick={() => handleDeleteStream(stream.id, stream.title)}
@@ -265,8 +265,8 @@
 
 	<div class="card">
 		<h2>💳 Payment</h2>
-		<p>Status: {memorial.isPaid ? '✅ Paid' : '❌ Unpaid'}</p>
-		<p>Amount: ${memorial.totalPrice}</p>
+		<p>Status: {event.isPaid ? '✅ Paid' : '❌ Unpaid'}</p>
+		<p>Amount: ${event.totalPrice}</p>
 	</div>
 
 	<div class="card">

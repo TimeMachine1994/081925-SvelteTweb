@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { validateEmail } from './email-validation';
-import { generateUniqueMemorialSlug } from './memorial-slug';
+import { generateUniqueMemorialSlug } from './event-slug';
 import { createStandardUserProfile, validateUserProfileData } from './user-profile';
 
 // Mock Firebase
@@ -47,7 +47,7 @@ describe('Registration Flow Integration Tests', () => {
 			const emailValidation = await validateEmail('newowner@example.com', 'email');
 			expect(emailValidation.isValid).toBe(true);
 
-			// 2. Generate unique memorial slug (for future memorial creation)
+			// 2. Generate unique event slug (for future event creation)
 			const slug = await generateUniqueMemorialSlug('John Doe');
 			expect(slug).toBe('celebration-of-life-for-john-doe');
 
@@ -92,7 +92,7 @@ describe('Registration Flow Integration Tests', () => {
 			const directorEmailValidation = await validateEmail('director@funeral.com', 'directorEmail');
 			expect(directorEmailValidation.isValid).toBe(true);
 
-			// 3. Generate unique memorial slug
+			// 3. Generate unique event slug
 			const slug = await generateUniqueMemorialSlug('Mary Smith');
 			expect(slug).toBe('celebration-of-life-for-mary-smith');
 
@@ -125,8 +125,8 @@ describe('Registration Flow Integration Tests', () => {
 		});
 	});
 
-	describe('Memorial Creation Flow', () => {
-		it('should handle memorial creation with slug collision', async () => {
+	describe('Event Creation Flow', () => {
+		it('should handle event creation with slug collision', async () => {
 			// Mock slug collision scenario
 			mockGet
 				.mockResolvedValueOnce({ empty: false }) // Base slug exists
@@ -138,7 +138,7 @@ describe('Registration Flow Integration Tests', () => {
 		});
 
 		it('should handle payment restriction for multiple memorials', () => {
-			// Simulate user with existing memorial and no payment
+			// Simulate user with existing event and no payment
 			const userData = {
 				memorialCount: 1,
 				hasPaidForMemorial: false

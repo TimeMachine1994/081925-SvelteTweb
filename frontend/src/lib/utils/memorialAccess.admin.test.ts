@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { MemorialAccessVerifier, hasPhotoUploadPermission } from './memorialAccess';
 import type { UserContext } from './memorialAccess';
 
-describe('Admin Role Memorial Access', () => {
+describe('Admin Role Event Access', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
@@ -15,7 +15,7 @@ describe('Admin Role Memorial Access', () => {
 			isAdmin: true
 		};
 
-		it('should grant admin full access to any memorial', async () => {
+		it('should grant admin full access to any event', async () => {
 			const result = await MemorialAccessVerifier.checkViewAccess('memorial123', adminUser);
 
 			expect(result).toEqual({
@@ -25,7 +25,7 @@ describe('Admin Role Memorial Access', () => {
 			});
 		});
 
-		it('should grant admin edit access to any memorial', async () => {
+		it('should grant admin edit access to any event', async () => {
 			const result = await MemorialAccessVerifier.checkEditAccess('memorial123', adminUser);
 
 			expect(result).toEqual({
@@ -77,14 +77,14 @@ describe('Admin Role Memorial Access', () => {
 				isAdmin: true
 			};
 
-			// Even if they're not the memorial owner, admin should have access
+			// Even if they're not the event owner, admin should have access
 			const result = await MemorialAccessVerifier.checkViewAccess('memorial123', adminOwner);
 
 			expect(result.accessLevel).toBe('admin');
 			expect(result.reason).toBe('Admin privileges');
 		});
 
-		it('should grant admin access regardless of memorial ownership', async () => {
+		it('should grant admin access regardless of event ownership', async () => {
 			const adminUser: UserContext = {
 				uid: 'admin123',
 				email: 'admin@test.com',
@@ -122,9 +122,9 @@ describe('Admin Role Memorial Access', () => {
 
 		it('should deny photo upload access for all users in V1', async () => {
 			const adminUser = { uid: 'admin-123', role: 'admin', email: 'admin@test.com' };
-			const memorial = { id: 'memorial-123', ownerUid: 'owner-123' };
+			const event = { id: 'event-123', ownerUid: 'owner-123' };
 
-			const result = await MemorialAccessVerifier.checkPhotoUploadAccess('memorial-123', adminUser);
+			const result = await MemorialAccessVerifier.checkPhotoUploadAccess('event-123', adminUser);
 
 			expect(result).toEqual({
 				hasAccess: false,

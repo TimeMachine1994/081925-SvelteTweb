@@ -116,7 +116,7 @@ const { uid, status, meta } = payload;
   "uid": "abc123-cloudflare-live-input-id",
   "status": "connected",
   "meta": {
-    "name": "Memorial Service Stream"
+    "name": "Event Service Stream"
   }
 }
 ```
@@ -421,7 +421,7 @@ When properly configured, you should see:
 - Viewer count may show (if available)
 - No manual refresh needed
 
-3. **In Memorial Page**:
+3. **In Event Page**:
 - Countdown timer disappears
 - Live video player appears
 - Status shows "● LIVE"

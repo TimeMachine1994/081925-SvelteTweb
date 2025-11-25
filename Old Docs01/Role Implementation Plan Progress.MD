@@ -17,10 +17,10 @@ The system supports four primary user roles:
 
 | Role | Status | Portal Component | Description |
 |------|--------|------------------|-------------|
-| `owner` | ✅ **Implemented** | `OwnerPortal.svelte` | Memorial creators with full management rights |
+| `owner` | ✅ **Implemented** | `OwnerPortal.svelte` | Event creators with full management rights |
 | `family_member` | ✅ **Implemented** | `FamilyMemberPortal.svelte` | Invitation-based access for family contributors |
-| `viewer` | ✅ **Implemented** | `ViewerPortal.svelte` | Follow/unfollow system for memorial supporters |
-| `funeral_director` | ✅ **Implemented** | `FuneralDirectorPortal.svelte` | Professional memorial and livestream management |
+| `viewer` | ✅ **Implemented** | `ViewerPortal.svelte` | Follow/unfollow system for event supporters |
+| `funeral_director` | ✅ **Implemented** | `FuneralDirectorPortal.svelte` | Professional event and livestream management |
 
 ## ✅ Completed Implementation
 
@@ -34,7 +34,7 @@ The system supports four primary user roles:
 ### Auto-Login Implementation (✅ Complete)
 Based on `090725-auto-login-plan.md`, the auto-login system is **fully implemented**:
 
-- ✅ **Registration Logic**: `register/loved-one/+page.server.ts` creates custom tokens
+- ✅ **Registration Logic**: `register/new-event-and-account/+page.server.ts` creates custom tokens
 - ✅ **Session Handler**: `/auth/session/+page.svelte` handles client-side authentication
 - ✅ **Session Creation**: `/api/session/+server.ts` creates session cookies and redirects
 - ✅ **Workflow**: Complete token → session → redirect flow operational
@@ -43,12 +43,12 @@ Based on `090725-auto-login-plan.md`, the auto-login system is **fully implement
 The `OwnerPortal.svelte` is **comprehensively implemented** with:
 
 - ✅ Modern UI with role-specific theming (amber/orange with crown icon)
-- ✅ Memorial management dashboard
+- ✅ Event management dashboard
 - ✅ Payment status integration
 - ✅ Action buttons for all core functions
 - ✅ Legacy invitation system (functional)
 - ✅ Livestream schedule management
-- ✅ Multi-memorial selector
+- ✅ Multi-event selector
 
 ### Basic Invitation System (✅ Functional)
 - ✅ **API Endpoint**: `/api/memorials/[memorialId]/invite` implemented
@@ -61,9 +61,9 @@ The `OwnerPortal.svelte` is **comprehensively implemented** with:
 ### Family Member Portal (🔄 Basic Structure)
 **Current State**: Minimal implementation in `FamilyMemberPortal.svelte`
 - ✅ Basic component structure exists
-- ✅ Memorial listing capability
+- ✅ Event listing capability
 - ✅ "Add Photos" action link
-- 🔲 **Missing**: Full memorial access control
+- 🔲 **Missing**: Full event access control
 - 🔲 **Missing**: Photo upload permissions enforcement
 - 🔲 **Missing**: Read-only schedule access
 
@@ -80,7 +80,7 @@ The `OwnerPortal.svelte` is **comprehensively implemented** with:
 - **`/my-portal` Routing System**: Complete role-based portal routing with authentication
 - **Invitation Acceptance Workflow**: Full invitation system with beautiful UI and role assignment
 - **Photo Upload Permissions**: Role-based security enforcement for all photo operations
-- **Funeral Director Portal**: Professional dashboard with stats, quick actions, and memorial management
+- **Funeral Director Portal**: Professional dashboard with stats, quick actions, and event management
 
 ## ✅ Stage 2: Core Features (COMPLETED)
 
@@ -92,7 +92,7 @@ The `OwnerPortal.svelte` is **comprehensively implemented** with:
 | Follow API endpoint | ✅ Complete | High | `/api/memorials/[memorialId]/follow` functional |
 | Firestore rules for followers | ✅ Complete | High | Security rules implemented |
 | Family photo upload rules | ✅ Complete | High | Role-based permissions implemented |
-| Memorial access verification | ✅ Complete | High | Comprehensive middleware system created |
+| Event access verification | ✅ Complete | High | Comprehensive middleware system created |
 
 ### Phase 2: Owner Portal Enhancements
 
@@ -107,7 +107,7 @@ The `OwnerPortal.svelte` is **comprehensively implemented** with:
 | Task | Status | Priority | Notes |
 |------|--------|----------|-------|
 | Family member load function | ✅ Complete | High | `/my-portal` handles all roles with proper routing |
-| Memorial access verification | ✅ Complete | High | Comprehensive invitation-based access control |
+| Event access verification | ✅ Complete | High | Comprehensive invitation-based access control |
 | Photo upload restrictions | ✅ Complete | High | Role-based photo upload with middleware |
 | Viewer follow functionality | ✅ Complete | High | Complete follow/unfollow system with UI |
 | Viewer portal enhancement | ✅ Complete | High | Modern UI with followed memorials display |
@@ -118,7 +118,7 @@ The `OwnerPortal.svelte` is **comprehensively implemented** with:
 |------|--------|----------|-------|
 | FD authentication system | ✅ Complete | High | Role-based authentication with claims |
 | FD portal dashboard | ✅ Complete | High | Functional dashboard with stats and actions |
-| Memorial management access | ✅ Complete | High | FDs can access assigned memorials |
+| Event management access | ✅ Complete | High | FDs can access assigned memorials |
 | Livestream management | ✅ Complete | High | Complete livestream control system |
 | Permission enforcement | ✅ Complete | High | Middleware ensures proper FD permissions |
 | UI integration | ✅ Complete | Medium | Livestream controls integrated in portal |
@@ -144,7 +144,7 @@ The `OwnerPortal.svelte` is **comprehensively implemented** with:
 | **Monitoring & Analytics** | 🔲 Pending | Medium | Track role-based feature usage |
 | **User Onboarding** | 🔲 Pending | Low | Guided tours for each role type |
 
-### 3. Memorial Access Control
+### 3. Event Access Control
 **Issue**: No invitation-based access verification
 - **Expected**: Family members access memorials via invitation acceptance
 - **Current**: Invitation creation works, but no acceptance/verification flow
@@ -152,7 +152,7 @@ The `OwnerPortal.svelte` is **comprehensively implemented** with:
 
 ### 4. Funeral Director Integration
 **Issue**: Funeral director role severely underdeveloped
-- **Expected**: Full professional workflow with memorial creation and livestream management
+- **Expected**: Full professional workflow with event creation and livestream management
 - **Current**: Placeholder portal component only
 - **Impact**: Core user type cannot perform intended functions
 
@@ -173,7 +173,7 @@ The `OwnerPortal.svelte` is **comprehensively implemented** with:
 ### ⚡ High Priority (Next Sprint)
 1. **Implement follow/unfollow system** - Core viewer functionality
 2. **Add schedule auto-save** - UX improvement
-3. **Create family member memorial access** - Role functionality gap
+3. **Create family member event access** - Role functionality gap
 4. **Build livestream permission system** - Owner/funeral director controls with start/stop functionality
 
 ### 📋 Medium Priority (Future Sprints)
@@ -193,7 +193,7 @@ The `OwnerPortal.svelte` is **comprehensively implemented** with:
 ### Week 2: Core Features
 1. Implement follow/unfollow system for viewers
 2. Add schedule auto-save functionality
-3. Create family member memorial access verification
+3. Create family member event access verification
 4. Build livestream permission system
 
 ### Week 3: Polish & Testing
@@ -253,7 +253,7 @@ All Stage 3 tasks successfully implemented:
 
 **✅ API Documentation:**
 - `api-endpoints.md` - Complete documentation of all role-based endpoints
-- Memorial management, invitation system, follow functionality
+- Event management, invitation system, follow functionality
 - Livestream controls, photo uploads, funeral director workflows
 - Error codes, rate limiting, authentication requirements
 - Testing examples with cURL commands
@@ -274,7 +274,7 @@ All production preparation tasks successfully completed:
 
 ### Completed Tasks:
 - ✅ **Unit Test Suite**: **100% PASS RATE ACHIEVED** - All 20 tests passing across 4 test files
-  - Memorial access verification tests
+  - Event access verification tests
   - Middleware permission enforcement tests  
   - Auto-save composable tests
   - Photo upload permission tests

@@ -16,11 +16,11 @@ Complete guide to Firebase Authentication, session management, user roles, and s
 - Magic link authentication
 - Security best practices
 
-#### [02 - Memorial Creation Flow](./02-memorial-creation-flow.md)
-Step-by-step guide through the memorial creation process from initial setup to going live.
+#### [02 - Event Creation Flow](./02-event-creation-flow.md)
+Step-by-step guide through the event creation process from initial setup to going live.
 
 **Topics Covered**:
-- Memorial data model
+- Event data model
 - Service configuration
 - Livestream setup
 - Photo slideshows
@@ -31,10 +31,10 @@ Step-by-step guide through the memorial creation process from initial setup to g
 Complete schema documentation for all Firestore collections.
 
 **Collections Documented**:
-- `memorials` - Core memorial data
+- `memorials` - Core event data
 - `users` - User profiles
 - `funeral_directors` - FD information
-- `invitations` - Memorial invites
+- `invitations` - Event invites
 - `blog` - Content management
 - `schedule_edit_requests` - Change requests
 - `wiki_pages` - This wiki!
@@ -58,7 +58,7 @@ Guide to admin dashboard features and operations.
 
 **Topics Covered**:
 - Dashboard architecture
-- Memorial management
+- Event management
 - User management
 - Funeral director oversight
 - Wiki system
@@ -76,7 +76,7 @@ Guide to admin dashboard features and operations.
    - [[Firestore Data Models]]
 
 2. **Understand Key Flows**:
-   - [[Memorial Creation Flow]]
+   - [[Event Creation Flow]]
    - [[Livestream Integration]]
 
 3. **Admin Access**:
@@ -90,7 +90,7 @@ Guide to admin dashboard features and operations.
 
 2. **Troubleshooting**:
    - [[Livestream Integration]] - Stream issues
-   - [[Memorial Creation Flow]] - Setup problems
+   - [[Event Creation Flow]] - Setup problems
 
 ---
 
@@ -123,9 +123,9 @@ Guide to admin dashboard features and operations.
 
 #### URL Structure
 ```
-tributestream.com/memorial/[fullSlug]
-tributestream.com/memorial/[fullSlug]/edit
-tributestream.com/memorial/[fullSlug]/livestream
+tributestream.com/event/[fullSlug]
+tributestream.com/event/[fullSlug]/edit
+tributestream.com/event/[fullSlug]/livestream
 tributestream.com/admin
 tributestream.com/admin/wiki
 ```
@@ -136,7 +136,7 @@ Client → Firebase Auth → ID Token → /api/auth/session → Session Cookie
 → hooks.server.ts → locals.user → Protected Route
 ```
 
-#### Memorial Lifecycle
+#### Event Lifecycle
 ```
 Create → Configure → Schedule Stream → Payment → Go Live → Archive
 ```
@@ -227,7 +227,7 @@ const admin = require('firebase-admin');
 await admin.auth().setCustomUserClaims(uid, { role: 'admin' });
 ```
 
-### Troubleshooting a Memorial
+### Troubleshooting a Event
 
 1. Check Firestore data
 2. Verify `isPublic` and `isComplete` flags

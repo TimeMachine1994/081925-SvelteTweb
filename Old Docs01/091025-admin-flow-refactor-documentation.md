@@ -1,11 +1,11 @@
 # Admin Flow Refactor Documentation
 
 **Date:** September 10, 2025  
-**Task:** Refactor admin flow for simplicity, funeral director approval, and memorial creation
+**Task:** Refactor admin flow for simplicity, funeral director approval, and event creation
 
 ## Overview
 
-Successfully refactored the Tributestream admin flow to be simpler, more functional, and better organized. The new admin system provides clear workflows for funeral director approval and memorial creation while maintaining comprehensive logging and following established API patterns.
+Successfully refactored the Tributestream admin flow to be simpler, more functional, and better organized. The new admin system provides clear workflows for funeral director approval and event creation while maintaining comprehensive logging and following established API patterns.
 
 ## Key Improvements Made
 
@@ -15,8 +15,8 @@ Successfully refactored the Tributestream admin flow to be simpler, more functio
 - **Features:**
   - 📊 Overview tab with system statistics
   - 🏥 Funeral Directors tab for approval workflow
-  - 💝 Memorials tab for memorial management
-  - ➕ Create Memorial tab for admin memorial creation
+  - 💝 Memorials tab for event management
+  - ➕ Create Event tab for admin event creation
 
 ### 2. **Funeral Director Approval Workflow**
 - **New Feature:** Complete approval/rejection system for funeral directors
@@ -27,12 +27,12 @@ Successfully refactored the Tributestream admin flow to be simpler, more functio
   4. Approval updates Firebase Auth claims and Firestore permissions
   5. Comprehensive audit logging for all actions
 
-### 3. **Admin Memorial Creation**
+### 3. **Admin Event Creation**
 - **New Feature:** Admins can create memorials directly for families
 - **Process Flow:**
-  1. Admin fills out memorial creation form
+  1. Admin fills out event creation form
   2. System creates Firebase Auth user if needed
-  3. Memorial document created with proper ownership
+  3. Event document created with proper ownership
   4. Family receives login credentials (TODO: email implementation)
 
 ## Technical Implementation
@@ -55,11 +55,11 @@ Successfully refactored the Tributestream admin flow to be simpler, more functio
 // Creates audit log entry
 ```
 
-#### `/api/admin/create-memorial` (POST)
+#### `/api/admin/create-event` (POST)
 ```typescript
-// Creates new memorial as admin
+// Creates new event as admin
 // Handles user creation if needed
-// Sets up proper memorial ownership
+// Sets up proper event ownership
 // Creates audit log entry
 ```
 
@@ -112,7 +112,7 @@ Successfully refactored the Tributestream admin flow to be simpler, more functio
 {
   action: 'approve_funeral_director' | 'reject_funeral_director' | 'create_memorial',
   targetId: string,
-  targetType: 'funeral_director' | 'memorial',
+  targetType: 'funeral_director' | 'event',
   performedBy: string,
   performedByEmail: string,
   timestamp: Timestamp,
@@ -167,7 +167,7 @@ console.log('📝 [ADMIN API] Logging approval action to audit trail');
 - **Admin Created Users:** `role: 'owner'`, `canCreateMemorials: true`
 
 ### Firestore Security Rules Compatibility
-- All changes maintain compatibility with existing memorial access patterns
+- All changes maintain compatibility with existing event access patterns
 - Admin actions respect existing permission middleware
 - Funeral director permissions follow established role-based access control
 
@@ -204,7 +204,7 @@ console.log('📝 [ADMIN API] Logging approval action to audit trail');
 ### New Files
 - `/frontend/src/routes/api/admin/approve-funeral-director/+server.ts`
 - `/frontend/src/routes/api/admin/reject-funeral-director/+server.ts`
-- `/frontend/src/routes/api/admin/create-memorial/+server.ts`
+- `/frontend/src/routes/api/admin/create-event/+server.ts`
 - `/frontend/src/routes/admin/$types.d.ts`
 - `/091025-admin-flow-refactor-documentation.md`
 
@@ -215,8 +215,8 @@ console.log('📝 [ADMIN API] Logging approval action to audit trail');
 
 ## Integration with Existing Systems
 
-### Memorial Flow Compatibility
-- **Maintains:** All existing memorial creation patterns from `/register/loved-one`
+### Event Flow Compatibility
+- **Maintains:** All existing event creation patterns from `/register/new-event-and-account`
 - **Enhances:** Admin can now create memorials directly without family registration
 - **Preserves:** All existing API endpoints and data structures
 
@@ -250,7 +250,7 @@ console.log('📝 [ADMIN API] Logging approval action to audit trail');
 - [ ] Admin login and dashboard access
 - [ ] Funeral director approval workflow
 - [ ] Funeral director rejection workflow
-- [ ] Memorial creation as admin
+- [ ] Event creation as admin
 - [ ] Error handling for invalid inputs
 - [ ] Permission verification for non-admin users
 - [ ] Console logging verification
@@ -268,7 +268,7 @@ The admin flow refactor successfully addresses all requirements:
 
 1. ✅ **Simplified:** Clean tabbed interface with focused functionality
 2. ✅ **Funeral Director Approval:** Complete workflow with one-click actions
-3. ✅ **Memorial Creation:** Admin can create memorials directly for families
+3. ✅ **Event Creation:** Admin can create memorials directly for families
 4. ✅ **API Integration:** Uses established patterns and Firestore collections
 5. ✅ **Comprehensive Logging:** Detailed console logging throughout all operations
 6. ✅ **Documentation:** Complete technical documentation of all changes

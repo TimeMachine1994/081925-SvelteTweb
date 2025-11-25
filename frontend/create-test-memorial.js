@@ -60,14 +60,14 @@ async function listAllMemorials() {
 		
 		snapshot.docs.forEach((doc, index) => {
 			const data = doc.data();
-			const memorial = {
+			const event = {
 				id: doc.id,
 				...data
 			};
 			
-			memorials.push(memorial);
+			memorials.push(event);
 			
-			console.log(`${index + 1}. Memorial ID: ${doc.id}`);
+			console.log(`${index + 1}. Event ID: ${doc.id}`);
 			console.log(`   Name: ${data.lovedOneName || 'No name'}`);
 			console.log(`   Slug: ${data.slug || 'No slug'}`);
 			console.log(`   Full Slug: ${data.fullSlug || 'No fullSlug'}`);
@@ -136,7 +136,7 @@ async function listAllMemorials() {
 		}
 		
 		// Check for memorials with fullSlug field
-		console.log('\n📊 Memorial fullSlug analysis:');
+		console.log('\n📊 Event fullSlug analysis:');
 		const withFullSlug = memorials.filter(m => m.fullSlug);
 		const withoutFullSlug = memorials.filter(m => !m.fullSlug);
 		
@@ -167,13 +167,13 @@ async function listAllMemorials() {
 
 listAllMemorials()
 	.then((memorials) => {
-		console.log('\n🎉 Memorial listing completed!');
+		console.log('\n🎉 Event listing completed!');
 		console.log(`📊 Total memorials: ${memorials.length}`);
 		
 		if (memorials.length === 0) {
 			console.log('\n💡 Next steps:');
 			console.log('   1. Create test memorials using: node src/scripts/create-test-data.js');
-			console.log('   2. Or create the specific "janet-pusey" memorial for testing');
+			console.log('   2. Or create the specific "janet-pusey" event for testing');
 		}
 		
 		process.exit(0);

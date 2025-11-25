@@ -7,12 +7,12 @@
 ✅ **COMPLETED** - Two fixes applied to the payment confirmed page (ScheduleReceipt component):
 
 1. **Removed Service Date Field** - Was showing incorrect date (1 day prior) due to timezone conversion bug
-2. **Added Payment Notes Field** - Now displays admin notes entered when marking memorial as paid
+2. **Added Payment Notes Field** - Now displays admin notes entered when marking event as paid
 
 ### Quick Reference
 - **File Modified**: `frontend/src/routes/schedule/[memorialId]/_components/ScheduleReceipt.svelte`
 - **Lines Changed**: 327-332
-- **Fields Now Shown**: Memorial Name, Status (Paid), Payment Date, Payment Notes
+- **Fields Now Shown**: Event Name, Status (Paid), Payment Date, Payment Notes
 
 ---
 
@@ -28,8 +28,8 @@
 - Displayed in EST (UTC-5): 2024-11-14 19:00:00 (previous day!)
 
 ### 2. Payment Notes Not Displayed
-**Problem**: When admin marks memorial as paid and adds notes, these notes don't appear on the payment confirmed page
-**Data Location**: Notes are stored in `memorial.manualPayment.notes` (set via admin panel)
+**Problem**: When admin marks event as paid and adds notes, these notes don't appear on the payment confirmed page
+**Data Location**: Notes are stored in `event.manualPayment.notes` (set via admin panel)
 **Current State**: The field exists but is not displayed on the receipt
 
 ## Changes Made
@@ -40,13 +40,13 @@
 
 **Removed Code**:
 ```svelte
-{#if memorial.services?.main?.time?.date}
+{#if event.services?.main?.time?.date}
   <div class="flex items-center justify-between border-b border-gray-100 py-3">
     <span class="font-medium text-gray-600">Service Date</span>
     <span class="text-gray-900">
       {formatServiceDate(
-        memorial.services.main.time.date,
-        memorial.services.main.time.time
+        event.services.main.time.date,
+        event.services.main.time.time
       )}
     </span>
   </div>
@@ -64,16 +64,16 @@
 
 **Added Code**:
 ```svelte
-{#if memorial.manualPayment?.notes}
+{#if event.manualPayment?.notes}
   <div class="flex items-center justify-between border-b border-gray-100 py-3">
     <span class="font-medium text-gray-600">Payment Notes</span>
-    <span class="text-gray-900">{memorial.manualPayment.notes}</span>
+    <span class="text-gray-900">{event.manualPayment.notes}</span>
   </div>
 {/if}
 ```
 
 **Rationale**:
-- Displays the notes that admin enters when marking memorial as paid
+- Displays the notes that admin enters when marking event as paid
 - Provides transparency about payment details
 - Shows method-specific information (check number, transaction ID, etc.)
 
@@ -94,10 +94,10 @@
 ### Admin Panel Action:
 1. Admin clicks "Mark as Paid" in Admin Portal
 2. Fills in payment method and notes
-3. Notes saved to: `memorial.manualPayment.notes`
+3. Notes saved to: `event.manualPayment.notes`
 
 ### Payment Confirmed Page Display:
-1. Memorial status: "Paid" badge
+1. Event status: "Paid" badge
 2. Payment date: When marked as paid
 3. **Payment notes**: Admin's notes (NEW)
 4. Service date: (REMOVED)
@@ -115,13 +115,13 @@
 
 **Removed (lines 327-337)**:
 ```svelte
-{#if memorial.services?.main?.time?.date}
+{#if event.services?.main?.time?.date}
   <div class="flex items-center justify-between border-b border-gray-100 py-3">
     <span class="font-medium text-gray-600">Service Date</span>
     <span class="text-gray-900">
       {formatServiceDate(
-        memorial.services.main.time.date,
-        memorial.services.main.time.time
+        event.services.main.time.date,
+        event.services.main.time.time
       )}
     </span>
   </div>
@@ -130,10 +130,10 @@
 
 **Added (lines 327-332)**:
 ```svelte
-{#if memorial.manualPayment?.notes}
+{#if event.manualPayment?.notes}
   <div class="flex items-center justify-between border-b border-gray-100 py-3">
     <span class="font-medium text-gray-600">Payment Notes</span>
-    <span class="text-gray-900">{memorial.manualPayment.notes}</span>
+    <span class="text-gray-900">{event.manualPayment.notes}</span>
   </div>
 {/if}
 ```
@@ -141,7 +141,7 @@
 ## Testing Checklist
 
 - [x] Service date field no longer appears on payment confirmed page
-- [x] Payment notes display when memorial is manually marked as paid
+- [x] Payment notes display when event is manually marked as paid
 - [x] Payment notes show correct information from admin panel
 - [x] Layout remains clean with payment date and payment notes
 - [x] No timezone issues with remaining date fields
@@ -153,7 +153,7 @@
 ### Enhancement 1: Edit Notes Button in Admin Panel
 **Request**: Add ability to edit payment notes for already-paid memorials
 **Implementation**: 
-- Add "Edit Notes" button next to "Paid" status in memorial management table
+- Add "Edit Notes" button next to "Paid" status in event management table
 - Create edit notes modal with textarea for updating payment notes
 - Add API call to update only the payment notes field
 - Available in both desktop table and mobile card views
@@ -176,14 +176,14 @@ let isUpdatingNotes = $state(false);
 ```
 
 **Functions Added (lines 617-674)**:
-- `openEditNotesModal(memorial)` - Opens edit modal with current notes
+- `openEditNotesModal(event)` - Opens edit modal with current notes
 - `closeEditNotesModal()` - Closes modal and resets form
 - `updatePaymentNotes()` - Updates notes via API and refreshes data
 
 **Desktop Table - Edit Notes Button (lines 1105-1112)**:
 ```svelte
 <button
-  onclick={() => openEditNotesModal(memorial)}
+  onclick={() => openEditNotesModal(event)}
   disabled={isUpdatingNotes}
   class="rounded bg-blue-500 px-2 py-1 text-xs text-white w-fit hover:bg-blue-600 transition-colors"
   title="Edit payment notes"
@@ -195,7 +195,7 @@ let isUpdatingNotes = $state(false);
 **Mobile Cards - Edit Notes Button (lines 1201-1208)**:
 ```svelte
 <button
-  onclick={() => openEditNotesModal(memorial)}
+  onclick={() => openEditNotesModal(event)}
   disabled={isUpdatingNotes}
   class="inline-block rounded bg-blue-500 px-2 py-1 text-xs text-white hover:bg-blue-600 transition-colors"
   title="Edit payment notes"
@@ -205,7 +205,7 @@ let isUpdatingNotes = $state(false);
 ```
 
 **Edit Notes Modal UI (lines 2372-2422)**:
-- Full modal with memorial information display
+- Full modal with event information display
 - Textarea for editing notes (4 rows)
 - Save and Cancel buttons
 - Loading states and disabled states while updating
@@ -213,11 +213,11 @@ let isUpdatingNotes = $state(false);
 #### 2. `frontend/src/routes/schedule/[memorialId]/_components/ScheduleReceipt.svelte` ✅
 **Improved Payment Notes Display (lines 327-332)**:
 ```svelte
-{#if memorial.manualPayment?.notes}
+{#if event.manualPayment?.notes}
   <div class="flex flex-col gap-2 border-b border-gray-100 py-3">
     <span class="font-medium text-gray-600">Payment Notes</span>
     <p class="text-gray-900 max-w-md break-words ml-0 whitespace-pre-wrap">
-      {memorial.manualPayment.notes}
+      {event.manualPayment.notes}
     </p>
   </div>
 {/if}
@@ -234,11 +234,11 @@ let isUpdatingNotes = $state(false);
 
 **API Endpoint Used**:
 - Reuses existing `/api/admin/toggle-payment-status` endpoint
-- Sends same memorial ID, isPaid: true, payment method, and updated notes
+- Sends same event ID, isPaid: true, payment method, and updated notes
 - No new API endpoint needed - smart reuse of existing infrastructure
 
 **User Flow**:
-1. Admin sees "✅ Paid" badge on memorial in admin panel
+1. Admin sees "✅ Paid" badge on event in admin panel
 2. Clicks "📝 Edit Notes" button next to paid status
 3. Modal opens with current notes prefilled
 4. Admin edits notes in textarea
@@ -268,7 +268,7 @@ let isUpdatingNotes = $state(false);
 
 1. **✅ Removed buggy service date field** - No more timezone issues causing incorrect date display
 2. **✅ Added payment notes field** - Admin notes now display on payment confirmation page
-3. **✅ Added Edit Notes button** - Admins can edit payment notes after marking memorial as paid
+3. **✅ Added Edit Notes button** - Admins can edit payment notes after marking event as paid
 4. **✅ Improved text spacing** - Payment notes wrap properly with better layout
 5. **✅ Whitespace preservation** - Line breaks and spacing are preserved in payment notes
 
@@ -278,14 +278,14 @@ let isUpdatingNotes = $state(false);
 - [ ] "Edit Notes" button appears next to "Paid" status (desktop view)
 - [ ] "Edit Notes" button appears next to "Paid" status (mobile view)
 - [ ] Click "Edit Notes" opens modal with current notes prefilled
-- [ ] Update notes and save successfully updates memorial
+- [ ] Update notes and save successfully updates event
 - [ ] Modal closes and data refreshes after successful save
 - [ ] Loading states work correctly during update
 - [ ] Tip text appears: "Tip: Press Enter to add line breaks"
 
 **Payment Confirmation Page Testing**:
 - [ ] Service date field no longer appears
-- [ ] Payment notes display when memorial is manually marked as paid
+- [ ] Payment notes display when event is manually marked as paid
 - [ ] Long notes wrap properly without overflow
 - [ ] **Line breaks are preserved** (test with multi-line notes)
 - [ ] **Spacing is preserved** (test with multiple paragraphs)

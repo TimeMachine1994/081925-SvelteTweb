@@ -25,12 +25,12 @@ vi.mock('@sveltejs/kit', () => ({
   fail: vi.fn((status, data) => ({ type: 'failure', status, data }))
 }));
 
-describe('Memorial FullSlug Generation', () => {
+describe('Event FullSlug Generation', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('should generate unique slug and create accessible memorial', async () => {
+  it('should generate unique slug and create accessible event', async () => {
     // Mock user data (no existing memorials)
     const mockUserData = {
       memorialCount: 0,
@@ -47,7 +47,7 @@ describe('Memorial FullSlug Generation', () => {
     });
 
     const mockSet = vi.fn().mockResolvedValue();
-    const mockAdd = vi.fn().mockResolvedValue({ id: 'test-memorial-id' });
+    const mockAdd = vi.fn().mockResolvedValue({ id: 'test-event-id' });
 
     vi.mocked(adminDb.collection).mockImplementation((collectionName) => {
       if (collectionName === 'users') {
@@ -95,7 +95,7 @@ describe('Memorial FullSlug Generation', () => {
     // Verify slug uniqueness check was performed
     expect(mockSlugCheck).toHaveBeenCalled();
 
-    // Verify memorial creation with proper structure
+    // Verify event creation with proper structure
     expect(mockAdd).toHaveBeenCalledWith({
       lovedOneName: 'John Smith',
       slug: 'celebration-of-life-for-john-smith',
@@ -125,10 +125,10 @@ describe('Memorial FullSlug Generation', () => {
       updatedAt: expect.any(Date)
     });
 
-    // Verify successful result with memorial URL
+    // Verify successful result with event URL
     expect(result).toEqual({
       success: true,
-      memorialId: 'test-memorial-id',
+      memorialId: 'test-event-id',
       memorialSlug: 'celebration-of-life-for-john-smith',
       memorialUrl: '/celebration-of-life-for-john-smith',
       message: 'Celebration of Life for John Smith created successfully! You can view it at /celebration-of-life-for-john-smith'
@@ -152,7 +152,7 @@ describe('Memorial FullSlug Generation', () => {
       .mockResolvedValueOnce({ empty: true });  // Second slug is unique
 
     const mockSet = vi.fn().mockResolvedValue();
-    const mockAdd = vi.fn().mockResolvedValue({ id: 'test-memorial-id-2' });
+    const mockAdd = vi.fn().mockResolvedValue({ id: 'test-event-id-2' });
 
     vi.mocked(adminDb.collection).mockImplementation((collectionName) => {
       if (collectionName === 'users') {
@@ -198,7 +198,7 @@ describe('Memorial FullSlug Generation', () => {
     // Verify slug uniqueness check was performed twice
     expect(mockSlugCheck).toHaveBeenCalledTimes(2);
 
-    // Verify memorial was created with unique slug
+    // Verify event was created with unique slug
     expect(mockAdd).toHaveBeenCalledWith(
       expect.objectContaining({
         slug: 'celebration-of-life-for-jane-doe-1',

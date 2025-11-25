@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 /**
- * Test script to verify Memorial.services structure works correctly
- * Tests the complete flow from memorial creation to Calculator/Schedule components
+ * Test script to verify Event.services structure works correctly
+ * Tests the complete flow from event creation to Calculator/Schedule components
  */
 
 import admin from 'firebase-admin';
@@ -25,43 +25,43 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 
 async function testMemorialServicesStructure() {
-  console.log('\n🧪 Testing Memorial.services Structure\n');
+  console.log('\n🧪 Testing Event.services Structure\n');
 
   try {
-    // 1. Find test memorial created by our test accounts script
-    console.log('1. Looking for test memorial...');
+    // 1. Find test event created by our test accounts script
+    console.log('1. Looking for test event...');
     const memorialsSnapshot = await db.collection('memorials')
       .where('lovedOneName', '==', 'John Test Doe')
       .limit(1)
       .get();
 
     if (memorialsSnapshot.empty) {
-      console.log('❌ No test memorial found. Creating one...');
+      console.log('❌ No test event found. Creating one...');
       await createTestMemorial();
       return;
     }
 
-    const memorial = memorialsSnapshot.docs[0];
-    const memorialData = memorial.data();
-    const memorialId = memorial.id;
+    const event = memorialsSnapshot.docs[0];
+    const memorialData = event.data();
+    const memorialId = event.id;
 
-    console.log(`✅ Found test memorial: ${memorialId}`);
+    console.log(`✅ Found test event: ${memorialId}`);
     console.log(`   Loved one: ${memorialData.lovedOneName}`);
 
     // 2. Verify services structure
     console.log('\n2. Verifying services structure...');
     if (!memorialData.services) {
-      console.log('❌ Memorial missing services structure');
+      console.log('❌ Event missing services structure');
       return;
     }
 
     if (!memorialData.services.main) {
-      console.log('❌ Memorial missing services.main');
+      console.log('❌ Event missing services.main');
       return;
     }
 
     if (!Array.isArray(memorialData.services.additional)) {
-      console.log('❌ Memorial services.additional is not an array');
+      console.log('❌ Event services.additional is not an array');
       return;
     }
 
@@ -77,7 +77,7 @@ async function testMemorialServicesStructure() {
     console.log('\n4. Testing Calculator component data transformation...');
     testCalculatorDataTransformation(memorialData);
 
-    console.log('\n✅ All tests passed! Memorial.services structure is working correctly.\n');
+    console.log('\n✅ All tests passed! Event.services structure is working correctly.\n');
 
   } catch (error) {
     console.error('❌ Test failed:', error.message);
@@ -86,7 +86,7 @@ async function testMemorialServicesStructure() {
 }
 
 async function createTestMemorial() {
-  console.log('Creating test memorial with new services structure...');
+  console.log('Creating test event with new services structure...');
   
   const testMemorialData = {
     lovedOneName: 'John Test Doe',
@@ -101,8 +101,8 @@ async function createTestMemorial() {
     services: {
       main: {
         location: {
-          name: 'Test Memorial Chapel',
-          address: '123 Memorial Ave, Test City, TC 12345',
+          name: 'Test Event Chapel',
+          address: '123 Event Ave, Test City, TC 12345',
           isUnknown: false
         },
         time: {
@@ -135,16 +135,16 @@ async function createTestMemorial() {
     },
     
     isPublic: true,
-    content: 'Test memorial for services structure validation',
+    content: 'Test event for services structure validation',
     custom_html: null,
     createdAt: new Date(),
     updatedAt: new Date()
   };
 
   const memorialRef = await db.collection('memorials').add(testMemorialData);
-  console.log(`✅ Created test memorial: ${memorialRef.id}`);
+  console.log(`✅ Created test event: ${memorialRef.id}`);
   
-  // Test the newly created memorial
+  // Test the newly created event
   await testMemorialServicesStructure();
 }
 
@@ -153,7 +153,7 @@ async function testAPIEndpoints(memorialId) {
   const fetch = (await import('node-fetch')).default;
   
   try {
-    // Test GET memorial data
+    // Test GET event data
     const response = await fetch(`http://localhost:5174/api/memorials/${memorialId}`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
@@ -162,12 +162,12 @@ async function testAPIEndpoints(memorialId) {
     if (response.ok) {
       const data = await response.json();
       if (data.services && data.services.main) {
-        console.log('✅ GET memorial API returns correct services structure');
+        console.log('✅ GET event API returns correct services structure');
       } else {
-        console.log('❌ GET memorial API missing services structure');
+        console.log('❌ GET event API missing services structure');
       }
     } else {
-      console.log('⚠️  Memorial API not accessible (authentication required)');
+      console.log('⚠️  Event API not accessible (authentication required)');
     }
   } catch (error) {
     console.log('⚠️  API test skipped (server may not be running)');

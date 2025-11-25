@@ -57,7 +57,7 @@
 - `routes/admin/services/streams/+page.svelte`
 - `routes/admin/services/slideshows/+page.svelte`
 - `routes/admin/services/schedule-requests/+page.svelte`
-- `routes/admin/users/memorial-owners/+page.svelte`
+- `routes/admin/users/event-owners/+page.svelte`
 - `routes/admin/users/funeral-directors/+page.svelte`
 - `routes/admin/users/admin-users/+page.svelte`
 - `routes/admin/content/blog/+page.svelte`
@@ -75,10 +75,10 @@
 <DataGrid
   {columns}
   data={data.memorials}
-  selectable={$can('memorial', 'update')}
+  selectable={$can('event', 'update')}
   selectedMemorials={selectedMemorials}
   onBulkAction={handleBulkAction}
-  resourceType="memorial"
+  resourceType="event"
 />
 <!-- onRowClick disabled until detail pages are created -->
 ```
@@ -103,9 +103,9 @@
 ## 📋 Next Steps (Phase 3)
 
 1. **Create Detail Pages** for each resource type:
-   - `/admin/services/memorials/[id]` - Memorial detail view
+   - `/admin/services/memorials/[id]` - Event detail view
    - `/admin/services/streams/[id]` - Stream detail view
-   - `/admin/users/memorial-owners/[id]` - User profile view
+   - `/admin/users/event-owners/[id]` - User profile view
    - `/admin/users/funeral-directors/[id]` - Director profile view
    - etc.
 

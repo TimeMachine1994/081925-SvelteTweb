@@ -24,7 +24,7 @@
 
 <svelte:head>
 	<title>Basic Partnership - Tributestream</title>
-	<meta name="description" content="Start offering memorial streaming services with our no-cost Basic Partnership. Get free marketing materials, training, and support." />
+	<meta name="description" content="Start offering event streaming services with our no-cost Basic Partnership. Get free marketing materials, training, and support." />
 </svelte:head>
 
 <!-- Hero Section -->
@@ -37,7 +37,7 @@
 			Basic Partnership
 		</h1>
 		<p class="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">
-			Start offering professional memorial streaming services to families at no upfront cost. Everything you need to get started is included.
+			Start offering professional event streaming services to families at no upfront cost. Everything you need to get started is included.
 		</p>
 		<div class="flex flex-col sm:flex-row gap-4 justify-center">
 			<Button theme="minimal" class="bg-blue-500 text-black hover:bg-[#2563EB] px-8 py-3" onclick={handleGetStarted}>
@@ -58,7 +58,7 @@
 				What's Included
 			</h2>
 			<p class="text-lg text-slate-600">
-				Everything you need to start offering memorial streaming services
+				Everything you need to start offering event streaming services
 			</p>
 		</div>
 
@@ -116,7 +116,7 @@
 			Ready to Get Started?
 		</h2>
 		<p class="text-lg text-slate-600 mb-8 max-w-2xl mx-auto">
-			Join our Basic Partnership program today and start offering professional memorial streaming services to families at no cost to you.
+			Join our Basic Partnership program today and start offering professional event streaming services to families at no cost to you.
 		</p>
 		<div class="flex flex-col sm:flex-row gap-4 justify-center">
 			<Button theme="minimal" class="bg-blue-500 text-black hover:bg-[#2563EB] px-8 py-3" onclick={handleGetStarted}>

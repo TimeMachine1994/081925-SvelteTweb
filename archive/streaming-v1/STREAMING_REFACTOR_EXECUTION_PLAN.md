@@ -103,7 +103,7 @@ export interface Stream {
 ### 2.3 Testing
 - [ ] Create stream with OBS method
 - [ ] Configure OBS and stream
-- [ ] Verify live playback on memorial page
+- [ ] Verify live playback on event page
 - [ ] Verify recording after stream ends
 - [ ] Test with existing streams
 
@@ -156,7 +156,7 @@ export interface Stream {
 - [ ] Start phone camera
 - [ ] Add phone to OBS as browser source
 - [ ] Stream from OBS
-- [ ] Verify memorial page shows OBS output
+- [ ] Verify event page shows OBS output
 - [ ] Verify recording from OBS stream
 
 **Deliverables:** Phone to OBS method functional
@@ -231,7 +231,7 @@ export async function setupPhoneToMUXMethod() {
 **Tasks:**
 - [ ] Show phone camera interface
 - [ ] Add MUX badge/indicator
-- [ ] Show "Streaming to memorial with MUX recording"
+- [ ] Show "Streaming to event with MUX recording"
 - [ ] Add live status
 
 ### 4.5 Update Recordings API
@@ -250,12 +250,12 @@ const recordings = {
 - [ ] Add MUX recording check
 - [ ] Implement multi-source logic
 - [ ] Return preferred source
-- [ ] Update memorial page to use preferred source
+- [ ] Update event page to use preferred source
 
 ### 4.6 Testing
 - [ ] Stream from phone
 - [ ] Verify Cloudflare restreaming to MUX
-- [ ] Check live playback on memorial
+- [ ] Check live playback on event
 - [ ] Verify MUX recording after stream
 - [ ] Test WHEP playback
 

@@ -8,7 +8,7 @@ This document serves as the single source of truth for the technical design of t
 
 ### 1.2. Project Overview
 
-Tributestream is a specialized online platform designed to help users create, manage, and share memorial services and tributes for their loved ones. The migration to SvelteKit aims to improve performance, simplify the codebase, and enhance the developer experience.
+Tributestream is a specialized online platform designed to help users create, manage, and share event services and tributes for their loved ones. The migration to SvelteKit aims to improve performance, simplify the codebase, and enhance the developer experience.
 
 ## 2. Architecture
 
@@ -32,12 +32,12 @@ The application uses Firestore as its primary database.
 
 ### 3.1. `memorials` Collection
 
-This collection stores all data related to a specific memorial service.
+This collection stores all data related to a specific event service.
 
 -   **Key Fields:**
     -   `lovedOneName` (string): The full name of the deceased.
     -   `slug` (string): A URL-friendly identifier.
-    -   `creatorUid` (string): The UID of the user who created the memorial.
+    -   `creatorUid` (string): The UID of the user who created the event.
     -   `photos` (array of strings): Stores public URLs for images in Firebase Storage.
     -   **Service Coordination Fields:**
         -   `familyContactName` (string, optional)
@@ -79,7 +79,7 @@ User authentication is managed using Firebase Auth, with session management hand
 
 -   **Custom Claims:** Access control is implemented using Firebase Auth custom claims (`role`, `admin`).
 -   **Server Hooks:** The `hooks.server.ts` file verifies the session on every request and attaches the user's identity and roles to `event.locals`.
--   **Storage Rules:** Firebase Storage rules restrict write access to a memorial's photo path to the memorial's owner (`creatorUid`).
+-   **Storage Rules:** Firebase Storage rules restrict write access to a event's photo path to the event's owner (`creatorUid`).
 
 ## 5. API Service Contract
 
@@ -90,10 +90,10 @@ User authentication is managed using Firebase Auth, with session management hand
 
 ### 6.1. Key Components
 
--   **`LiveUrlPreview.svelte`:** A new component that provides a real-time preview of the public memorial URL as the user types the loved one's name in the registration form.
+-   **`LiveUrlPreview.svelte`:** A new component that provides a real-time preview of the public event URL as the user types the loved one's name in the registration form.
 -   **`funeral-director/+page.svelte`:** The registration form has been refactored into a multi-section service coordination form, collecting detailed information about the service, family contacts, and funeral director.
 -   **Role-Based Portals (e.g., `OwnerPortal.svelte`):** The `/my-portal` page dynamically renders different dashboard components based on the user's role.
--   **`PhotoUploader.svelte` & `PhotoGallery.svelte`:** Core components for managing memorial photos, using progressive enhancement and `invalidateAll()` for seamless UI updates.
+-   **`PhotoUploader.svelte` & `PhotoGallery.svelte`:** Core components for managing event photos, using progressive enhancement and `invalidateAll()` for seamless UI updates.
 -   **`RolePreviewer.svelte`:** An admin-only component for testing different role-based portal views.
 
 ## 7. State Management

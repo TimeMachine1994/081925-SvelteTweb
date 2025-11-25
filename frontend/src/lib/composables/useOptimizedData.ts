@@ -1,6 +1,6 @@
 import { writable, derived, type Readable } from 'svelte/store';
 import { browser } from '$app/environment';
-import type { Memorial } from '$lib/types/memorial';
+import type { Event } from '$lib/types/event';
 
 interface CacheEntry<T> {
 	data: T;
@@ -178,19 +178,19 @@ export function useOptimizedData<T>(
 	};
 }
 
-// Specialized hook for memorial data
+// Specialized hook for event data
 export function useMemorialData(memorialId: string, options?: OptimizedDataOptions) {
-	return useOptimizedData<Memorial>(
-		`memorial:${memorialId}`,
+	return useOptimizedData<Event>(
+		`event:${memorialId}`,
 		async () => {
 			const response = await fetch(`/api/memorials/${memorialId}`);
 			if (!response.ok) {
-				throw new Error(`Failed to fetch memorial: ${response.statusText}`);
+				throw new Error(`Failed to fetch event: ${response.statusText}`);
 			}
 			return response.json();
 		},
 		{
-			ttl: 10 * 60 * 1000, // 10 minutes for memorial data
+			ttl: 10 * 60 * 1000, // 10 minutes for event data
 			staleWhileRevalidate: true,
 			...options
 		}
@@ -199,7 +199,7 @@ export function useMemorialData(memorialId: string, options?: OptimizedDataOptio
 
 // Specialized hook for user's memorials list
 export function useUserMemorials(userId: string, options?: OptimizedDataOptions) {
-	return useOptimizedData<Memorial[]>(
+	return useOptimizedData<Event[]>(
 		`user-memorials:${userId}`,
 		async () => {
 			const response = await fetch(`/api/users/${userId}/memorials`);
@@ -218,7 +218,7 @@ export function useUserMemorials(userId: string, options?: OptimizedDataOptions)
 
 // Specialized hook for funeral director assigned memorials
 export function useFuneralDirectorMemorials(options?: OptimizedDataOptions) {
-	return useOptimizedData<Memorial[]>(
+	return useOptimizedData<Event[]>(
 		'funeral-director-memorials',
 		async () => {
 			const response = await fetch('/api/funeral-director/memorials');
@@ -239,15 +239,15 @@ export function useFuneralDirectorMemorials(options?: OptimizedDataOptions) {
 export function useBatchMemorialData(memorialIds: string[], options?: OptimizedDataOptions) {
 	const batchKey = `batch-memorials:${memorialIds.sort().join(',')}`;
 
-	return useOptimizedData<Memorial[]>(
+	return useOptimizedData<Event[]>(
 		batchKey,
 		async () => {
 			// Check cache for individual memorials first
-			const cached: Memorial[] = [];
+			const cached: Event[] = [];
 			const toFetch: string[] = [];
 
 			for (const id of memorialIds) {
-				const cachedMemorial = dataCache.get<Memorial>(`memorial:${id}`);
+				const cachedMemorial = dataCache.get<Event>(`event:${id}`);
 				if (cachedMemorial) {
 					cached.push(cachedMemorial);
 				} else {
@@ -267,18 +267,18 @@ export function useBatchMemorialData(memorialIds: string[], options?: OptimizedD
 					throw new Error(`Failed to fetch memorials: ${response.statusText}`);
 				}
 
-				const fetched: Memorial[] = await response.json();
+				const fetched: Event[] = await response.json();
 
 				// Cache individual memorials
-				fetched.forEach((memorial) => {
-					dataCache.set(`memorial:${memorial.id}`, memorial, options?.ttl);
+				fetched.forEach((event) => {
+					dataCache.set(`event:${event.id}`, event, options?.ttl);
 				});
 
 				cached.push(...fetched);
 			}
 
 			// Sort by original order
-			return memorialIds.map((id) => cached.find((m) => m.id === id)).filter(Boolean) as Memorial[];
+			return memorialIds.map((id) => cached.find((m) => m.id === id)).filter(Boolean) as Event[];
 		},
 		{
 			ttl: 5 * 60 * 1000,
@@ -290,8 +290,8 @@ export function useBatchMemorialData(memorialIds: string[], options?: OptimizedD
 // Global cache management
 export const cacheManager = {
 	invalidateMemorial: (memorialId: string) => {
-		dataCache.invalidate(`memorial:${memorialId}`);
-		dataCache.invalidatePattern(`.*memorials.*`); // Invalidate lists containing this memorial
+		dataCache.invalidate(`event:${memorialId}`);
+		dataCache.invalidatePattern(`.*memorials.*`); // Invalidate lists containing this event
 	},
 
 	invalidateUserData: (userId: string) => {

@@ -19,7 +19,7 @@
   - `readonly_admin` - View-only access
 
 - **Features:**
-  - Resource-based permissions (memorial, stream, user, etc.)
+  - Resource-based permissions (event, stream, user, etc.)
   - Action-based access control (read, create, update, delete)
   - Scope support (own, team, all)
   - Conditional permissions (field-level checks)
@@ -29,8 +29,8 @@
 ```typescript
 import { hasPermission } from '$lib/admin/permissions';
 
-if (hasPermission(user, 'memorial', 'update', memorial)) {
-  // User can update this memorial
+if (hasPermission(user, 'event', 'update', event)) {
+  // User can update this event
 }
 ```
 
@@ -50,7 +50,7 @@ if (hasPermission(user, 'memorial', 'update', memorial)) {
   import { adminUser, can } from '$lib/stores/adminUser';
 </script>
 
-{#if $can('memorial', 'delete', memorial)}
+{#if $can('event', 'delete', event)}
   <button>Delete</button>
 {/if}
 ```
@@ -63,7 +63,7 @@ if (hasPermission(user, 'memorial', 'update', memorial)) {
 - **Domain-Based Structure:**
   - 📊 Dashboard
   - 🕊️ Services (Memorials, Streams, Slideshows, Schedule Requests)
-  - 👥 Users (Memorial Owners, Funeral Directors, Admin Users)
+  - 👥 Users (Event Owners, Funeral Directors, Admin Users)
   - 📝 Content (Blog Posts)
   - ⚙️ System (Audit Logs, Demo Sessions, Deleted Items, Wiki)
 
@@ -159,7 +159,7 @@ if (hasPermission(user, 'memorial', 'update', memorial)) {
 - ✅ Mobile responsive layout
 
 **Resource Types:**
-- `memorial` - Mark Paid, Make Public/Private, Export, Delete
+- `event` - Mark Paid, Make Public/Private, Export, Delete
 - `stream` - Make Visible/Invisible, Delete
 - `user` - Email Users, Export, Suspend
 
@@ -196,7 +196,7 @@ if (hasPermission(user, 'memorial', 'update', memorial)) {
 - ✅ Advanced filtering panel
 - ✅ Bulk selection and actions
 - ✅ Row click navigation to detail view
-- ✅ Create memorial button (permission-based)
+- ✅ Create event button (permission-based)
 - ✅ Server-side data loading with pagination support
 
 ---
@@ -220,7 +220,7 @@ if (hasPermission(user, 'memorial', 'update', memorial)) {
 - ✅ Stream status tracking (live, scheduled, ended, idle)
 - ✅ Recording status display
 - ✅ Visibility controls
-- ✅ Memorial association
+- ✅ Event association
 - ✅ Duration tracking
 - ✅ Provider identification (Cloudflare/Mux)
 
@@ -232,10 +232,10 @@ if (hasPermission(user, 'memorial', 'update', memorial)) {
 **Features:**
 - ✅ Photo count display
 - ✅ Status tracking (draft, generating, ready, failed)
-- ✅ Memorial association
+- ✅ Event association
 - ✅ Creator tracking
 - ✅ Duration display
-- ✅ Click to view on memorial page
+- ✅ Click to view on event page
 
 ---
 
@@ -251,11 +251,11 @@ if (hasPermission(user, 'memorial', 'update', memorial)) {
 
 ---
 
-### 14. Memorial Owners Page ✅
-**Files:** `routes/admin/users/memorial-owners/+page.svelte` + server
+### 14. Event Owners Page ✅
+**Files:** `routes/admin/users/event-owners/+page.svelte` + server
 
 **Features:**
-- ✅ Memorial count per user
+- ✅ Event count per user
 - ✅ Payment status tracking
 - ✅ Suspension management
 - ✅ Last login tracking
@@ -269,7 +269,7 @@ if (hasPermission(user, 'memorial', 'update', memorial)) {
 **Features:**
 - ✅ Approval workflow
 - ✅ Status management (pending, approved, rejected, suspended)
-- ✅ Memorial creation tracking
+- ✅ Event creation tracking
 - ✅ Contact information display
 - ✅ Filter by status
 
@@ -363,7 +363,7 @@ if (hasPermission(user, 'memorial', 'update', memorial)) {
 12. `routes/admin/services/streams/+page.svelte` + server
 13. `routes/admin/services/slideshows/+page.svelte` + server
 14. `routes/admin/services/schedule-requests/+page.svelte` + server
-15. `routes/admin/users/memorial-owners/+page.svelte` + server
+15. `routes/admin/users/event-owners/+page.svelte` + server
 16. `routes/admin/users/funeral-directors/+page.svelte` + server
 17. `routes/admin/users/admin-users/+page.svelte` + server
 18. `routes/admin/content/blog/+page.svelte` + server
@@ -439,7 +439,7 @@ if (hasPermission(user, 'memorial', 'update', memorial)) {
 - [ ] `/admin/services/schedule-requests` - Requests show with stats
 
 ### Users Domain
-- [ ] `/admin/users/memorial-owners` - Owners list loads
+- [ ] `/admin/users/event-owners` - Owners list loads
 - [ ] `/admin/users/funeral-directors` - Directors with approval status
 - [ ] `/admin/users/admin-users` - Admin users with roles
 

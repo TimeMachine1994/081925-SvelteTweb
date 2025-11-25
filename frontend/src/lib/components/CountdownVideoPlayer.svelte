@@ -6,7 +6,7 @@
 		streamTitle: string;
 		streamDescription?: string;
 		posterUrl?: string;
-		theme?: 'memorial' | 'homepage';
+		theme?: 'event' | 'homepage';
 		currentTime: Date;
 	}
 
@@ -15,7 +15,7 @@
 		streamTitle, 
 		streamDescription, 
 		posterUrl,
-		theme = 'memorial',
+		theme = 'event',
 		currentTime
 	}: Props = $props();
 
@@ -52,7 +52,7 @@
 	});
 </script>
 
-<div class="countdown-video-player" class:memorial-theme={theme === 'memorial'} class:homepage-theme={theme === 'homepage'}>
+<div class="countdown-video-player" class:event-theme={theme === 'event'} class:homepage-theme={theme === 'homepage'}>
 	<div class="video-container">
 		<!-- Video Screen with Lens Flare Effect -->
 		<div class="video-screen">
@@ -417,8 +417,8 @@
 	}
 
 	/* Theme Variations */
-	.memorial-theme {
-		/* Memorial page specific styling */
+	.event-theme {
+		/* Event page specific styling */
 	}
 
 	.homepage-theme {

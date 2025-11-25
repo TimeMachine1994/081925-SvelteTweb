@@ -10,10 +10,10 @@ Migrate all existing UI components and pages to use the new Minimal Modern desig
 
 ### **Existing Pages (32 total)**
 - **Core Pages**: Homepage, Auth (login/register), Profile, Contact
-- **Memorial Pages**: Memorial display, Streams, Scheduling
+- **Event Pages**: Event display, Streams, Scheduling
 - **Admin/Portal**: Funeral director dashboard, Admin panel
 - **Utility Pages**: Payment, Search, Calculator
-- **Example Pages**: Theme showroom, Memorial example
+- **Example Pages**: Theme showroom, Event example
 
 ### **Existing UI Components**
 - **Legacy UI Library** (`/lib/ui/`): 8 components (Button, Card, Input, Navbar, etc.)
@@ -51,7 +51,7 @@ Migrate all existing UI components and pages to use the new Minimal Modern desig
 #### 2.1 Authentication Flow ✅
 - [x] **Login Page** (`/login`) - Complete redesign with Minimal Modern
 - [x] **Register Page** (`/register`) - Use existing `RegisterMinimalModern.svelte`
-- [x] **Registration Variants** - Update funeral director and loved-one registration
+- [x] **Registration Variants** - Update funeral director and new-event-and-account registration
 - [x] **Auth Session** - Update session handling page
 
 #### 2.2 Homepage & Marketing ✅
@@ -64,15 +64,15 @@ Migrate all existing UI components and pages to use the new Minimal Modern desig
 - [x] **Profile Page** (`/profile`) - Update with MemorialCard, Stats components
 - [x] **My Portal** (`/my-portal`) - Redesign with Card, Button components
 
-### **Phase 3: Memorial Experience (Week 3)** ✅ **COMPLETED**
+### **Phase 3: Event Experience (Week 3)** ✅ **COMPLETED**
 **Priority: HIGH**
 
-#### 3.1 Memorial Display ✅
-- [x] **Memorial Pages** (`/[fullSlug]`) - Use MemorialCard, ServiceSchedule, Gallery
-- [x] **Memorial Streams** (`/memorials/[id]/streams`) - Integrate StreamStatus, VideoPlayer
-- [x] **Memorial Follow** - Update MemorialFollowButton with new design
+#### 3.1 Event Display ✅
+- [x] **Event Pages** (`/[fullSlug]`) - Use MemorialCard, ServiceSchedule, Gallery
+- [x] **Event Streams** (`/memorials/[id]/streams`) - Integrate StreamStatus, VideoPlayer
+- [x] **Event Follow** - Update MemorialFollowButton with new design
 
-#### 3.2 Memorial Management ✅
+#### 3.2 Event Management ✅
 - [x] **Schedule Pages** (`/schedule/*`) - Use ServiceSchedule, Timeline components
 - [x] **Search Page** (`/search`) - Update with Input, Card, Badge components
 
@@ -149,8 +149,8 @@ import { Button, Card } from '$lib/components/minimal-modern';
 
 ### **Component Testing** ✅ **COMPLETED**
 - [x] **Theme Showroom** - All components display correctly
-- [x] **Memorial Example** - Complete memorial page works
-- [x] **User Flows** - Registration, memorial creation, streaming
+- [x] **Event Example** - Complete event page works
+- [x] **User Flows** - Registration, event creation, streaming
 - [x] **Admin Functions** - Dashboard, management features
 
 ---
@@ -179,7 +179,7 @@ import { Button, Card } from '$lib/components/minimal-modern';
 3. **Register Page** (`/register`) - Using RegisterMinimalModern component
 4. **Contact Page** (`/contact`) - Professional contact form with FAQ
 5. **Profile Page** (`/profile`) - Enhanced user dashboard
-6. **Memorial Pages** (`/[fullSlug]`) - Updated memorial display
+6. **Event Pages** (`/[fullSlug]`) - Updated event display
 7. **Search Page** (`/search`) - Modern search interface
 8. **Global Layout** - ABeeZee typography and theme system
 
@@ -217,7 +217,7 @@ import { Button, Card } from '$lib/components/minimal-modern';
 - **Design System Documentation**: `MINIMAL_MODERN_INTEGRATION_GUIDE.md`
 - **Component Library**: `/src/lib/components/minimal-modern/`
 - **Theme Showroom**: `http://localhost:5173/theme-showroom`
-- **Example Implementation**: `http://localhost:5173/memorial-example`
+- **Example Implementation**: `http://localhost:5173/event-example`
 
 **Estimated Timeline**: 3 weeks for core migration (75% complete)
 **Risk Level**: Low (existing design system is stable and tested)

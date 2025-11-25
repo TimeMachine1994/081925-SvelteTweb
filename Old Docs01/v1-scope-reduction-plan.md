@@ -7,9 +7,9 @@
 
 ### V1 Core Features (Keep & Complete)
 - ✅ **Admin Role**: Full system administration capabilities
-- ✅ **Owner Role**: Memorial owners (families) with full memorial management
-- ✅ **Funeral Director Role**: Professional memorial creation and management
-- ✅ **Memorial Creation & Management**: Core memorial functionality
+- ✅ **Owner Role**: Event owners (families) with full event management
+- ✅ **Funeral Director Role**: Professional event creation and management
+- ✅ **Event Creation & Management**: Core event functionality
 - ✅ **Schedule Management**: Service scheduling and booking
 - ✅ **Payment Integration**: Stripe checkout and payment processing
 - ✅ **Livestream Management**: Basic livestream setup and control
@@ -18,10 +18,10 @@
 
 ### V2 Deferred Features (Remove from V1)
 - ❌ **Family Member Role**: Invitation system, family contributor management
-- ❌ **Viewer Role**: Public memorial viewing, following system
+- ❌ **Viewer Role**: Public event viewing, following system
 - ❌ **Photo Upload System**: All photo upload/management functionality
 - ❌ **Invitation System**: Email invitations and role assignments
-- ❌ **Public Memorial Access**: Anonymous/public viewing capabilities
+- ❌ **Public Event Access**: Anonymous/public viewing capabilities
 
 ## Removal Strategy
 
@@ -46,9 +46,9 @@ type UserRole = 'admin' | 'owner' | 'funeral_director';
 #### Family Member & Viewer Related
 - `/api/memorials/[memorialId]/invite` - Family member invitations
 - `/api/invitations/*` - All invitation management
-- `/api/memorials/[memorialId]/follow` - Memorial following for viewers
-- `/api/memorials/public` - Public memorial listing
-- `/register` - General viewer registration (keep funeral-director and loved-one)
+- `/api/memorials/[memorialId]/follow` - Event following for viewers
+- `/api/memorials/public` - Public event listing
+- `/register` - General viewer registration (keep funeral-director and new-event-and-account)
 
 #### Photo Upload Related
 - `/api/memorials/[memorialId]/photos/upload` - Photo upload endpoint
@@ -82,10 +82,10 @@ type UserRole = 'admin' | 'owner' | 'funeral_director';
 - `memorial_followers` - Viewer following system
 - `family_contributions` - Family member contributions
 
-#### Clean Memorial Schema
+#### Clean Event Schema
 ```typescript
-// REMOVE these fields from Memorial type:
-interface Memorial {
+// REMOVE these fields from Event type:
+interface Event {
   // Remove:
   familyMemberUids?: string[];
   isPublic?: boolean;
@@ -103,7 +103,7 @@ interface Memorial {
 
 #### Registration Pages
 - `/register/+page.svelte` - General viewer registration
-- Keep: `/register/loved-one` and `/register/funeral-director`
+- Keep: `/register/new-event-and-account` and `/register/funeral-director`
 
 #### Portal Pages
 - `/family-portal` - Family member dashboard
@@ -112,7 +112,7 @@ interface Memorial {
 #### Feature Pages
 - `/photos/*` - All photo management pages
 - `/invite/*` - Invitation acceptance pages
-- `/public-memorials` - Public memorial browsing
+- `/public-memorials` - Public event browsing
 
 ### 6. Site-Wide Audit Logging Implementation
 
@@ -127,7 +127,7 @@ interface AuditEvent {
   userEmail: string;
   userRole: 'admin' | 'owner' | 'funeral_director';
   action: AuditAction;
-  resourceType: 'memorial' | 'user' | 'schedule' | 'payment' | 'livestream';
+  resourceType: 'event' | 'user' | 'schedule' | 'payment' | 'livestream';
   resourceId: string;
   details: Record<string, any>;
   ipAddress?: string;
@@ -135,7 +135,7 @@ interface AuditEvent {
 }
 
 type AuditAction = 
-  // Memorial actions
+  // Event actions
   | 'memorial_created' | 'memorial_updated' | 'memorial_deleted'
   // User actions  
   | 'user_login' | 'user_logout' | 'user_created' | 'role_changed'
@@ -210,8 +210,8 @@ const testAccounts = [
 ### Phase 3: API Cleanup (Priority 2)
 1. Remove invitation-related endpoints
 2. Remove photo upload endpoints
-3. Remove public memorial endpoints
-4. Clean up memorial access logic
+3. Remove public event endpoints
+4. Clean up event access logic
 
 ### Phase 4: Audit Logging Implementation (Priority 2)
 1. Create audit logging middleware
@@ -220,7 +220,7 @@ const testAccounts = [
 4. Build admin audit viewer interface
 
 ### Phase 5: Database Schema Updates (Priority 3)
-1. Update Memorial interface
+1. Update Event interface
 2. Clean up unused database collections
 3. Remove deprecated fields from existing documents
 4. Update security rules
@@ -229,7 +229,7 @@ const testAccounts = [
 
 ### Regression Testing
 - [ ] Verify admin functionality remains intact
-- [ ] Verify owner memorial management works
+- [ ] Verify owner event management works
 - [ ] Verify funeral director workflow functions
 - [ ] Verify payment and scheduling systems work
 - [ ] Verify livestream functionality operates

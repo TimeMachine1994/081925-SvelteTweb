@@ -2,20 +2,20 @@
 
 ## 1. Executive Summary
 
-This document outlines the comprehensive refactoring plan for the funeral director registration system at `/register/funeral-director`. The current simple registration form will be transformed into a detailed service coordination form that collects comprehensive funeral service information while maintaining the same core functionality of account creation, memorial setup, and auto-login flow.
+This document outlines the comprehensive refactoring plan for the funeral director registration system at `/register/funeral-director`. The current simple registration form will be transformed into a detailed service coordination form that collects comprehensive funeral service information while maintaining the same core functionality of account creation, event setup, and auto-login flow.
 
 ### Current State vs. Target State
 
 **Current State:**
 - Simple 5-field form (loved one name, director name, email, phone, funeral home)
 - Creates user account with `owner` role
-- Creates basic memorial with slug
+- Creates basic event with slug
 - Auto-login via custom token
 - Basic email notification with login credentials
 
 **Target State:**
 - Comprehensive 12+ field service coordination form
-- Enhanced memorial creation with detailed service information
+- Enhanced event creation with detailed service information
 - Live URL preview functionality
 - Family contact information collection
 - Service scheduling and location details
@@ -33,15 +33,15 @@ Based on the current implementation:
 2. **User Creation** → Firebase Auth with generated password
 3. **Role Assignment** → Custom claim `role: 'owner'`
 4. **User Profile** → Firestore `users` collection
-5. **Memorial Creation** → Firestore `memorials` collection with basic slug
+5. **Event Creation** → Firestore `memorials` collection with basic slug
 6. **Email Notification** → SendGrid with login credentials
 7. **Auto-Login** → Custom token → `/auth/session` → redirect to portal
 
-### 2.2. Current Memorial Schema
+### 2.2. Current Event Schema
 
-The existing `Memorial` interface includes:
+The existing `Event` interface includes:
 ```typescript
-interface Memorial {
+interface Event {
   id: string;
   lovedOneName: string;
   slug: string;
@@ -63,12 +63,12 @@ interface Memorial {
 
 ## 3. Data Model Enhancements
 
-### 3.1. Memorial Schema Extensions
+### 3.1. Event Schema Extensions
 
-The current `Memorial` interface already includes most required fields. We need to add:
+The current `Event` interface already includes most required fields. We need to add:
 
 ```typescript
-interface Memorial {
+interface Event {
   // Existing fields (already supported)
   lovedOneName: string;
   slug: string;
@@ -122,7 +122,7 @@ Transform the existing form into a comprehensive service coordination form with 
 - Live URL Preview
 - Family Information
 - Funeral Director & Service Details
-- Memorial Location
+- Event Location
 - Contact Preference
 - Additional Notes
 
@@ -161,7 +161,7 @@ Professional email template with service details summary and clear next steps.
 
 1. **Phase 1: Add New Fields (Non-Breaking)**
    ```typescript
-   // Add to existing Memorial documents
+   // Add to existing Event documents
    {
      familyContactName?: string;
      familyContactEmail?: string;
@@ -173,7 +173,7 @@ Professional email template with service details summary and clear next steps.
    ```
 
 2. **Phase 2: Update FireCMS Schema**
-   - Update `firecms/src/types/memorial.ts`
+   - Update `firecms/src/types/event.ts`
    - Update `firecms/src/collections/memorials.tsx`
    - Add new fields to admin interface
 
@@ -186,7 +186,7 @@ Professional email template with service details summary and clear next steps.
        const data = doc.data();
        // Log any data inconsistencies
        if (!data.creatorEmail && !data.familyContactEmail) {
-         console.warn(`Memorial ${doc.id} missing contact email`);
+         console.warn(`Event ${doc.id} missing contact email`);
        }
      });
    }
@@ -228,7 +228,7 @@ The enhanced registration maintains the existing RBAC system:
 **Enhanced Admin View:**
 - Admin dashboard will automatically display new fields
 - No code changes required due to dynamic rendering
-- Enhanced memorial details in admin interface
+- Enhanced event details in admin interface
 
 ## 9. Testing Strategy
 
@@ -246,7 +246,7 @@ describe('Funeral Director Registration', () => {
     const { getByText } = render(FuneralDirectorRegistration);
     expect(getByText('Family Information')).toBeInTheDocument();
     expect(getByText('Funeral Director & Service Details')).toBeInTheDocument();
-    expect(getByText('Memorial Location')).toBeInTheDocument();
+    expect(getByText('Event Location')).toBeInTheDocument();
   });
 
   test('validates required fields', async () => {
@@ -286,7 +286,7 @@ describe('Funeral Director Registration Action', () => {
     expect(result.data.error).toContain('required fields');
   });
 
-  test('creates user and memorial successfully', async () => {
+  test('creates user and event successfully', async () => {
     // Mock Firebase Admin SDK
     const mockUserRecord = { uid: 'test-uid' };
     vi.mocked(adminAuth.createUser).mockResolvedValue(mockUserRecord);
@@ -325,7 +325,7 @@ test.describe('Funeral Director Registration Integration', () => {
     // Verify redirect to portal
     await expect(page).toHaveURL(/\/my-portal/);
     
-    // Verify memorial creation
+    // Verify event creation
     await expect(page.locator('text=John Doe')).toBeVisible();
   });
 });
@@ -338,7 +338,7 @@ test.describe('Funeral Director Registration Integration', () => {
 // Test file: e2e/funeral-director-registration.spec.ts
 import { test, expect } from '@playwright/test';
 
-test('funeral director registration and memorial management', async ({ page }) => {
+test('funeral director registration and event management', async ({ page }) => {
   // Registration
   await page.goto('/register/funeral-director');
   await fillRegistrationForm(page);
@@ -347,8 +347,8 @@ test('funeral director registration and memorial management', async ({ page }) =
   // Auto-login verification
   await expect(page).toHaveURL(/\/my-portal/);
   
-  // Memorial management
-  await page.click('text=Edit Memorial');
+  // Event management
+  await page.click('text=Edit Event');
   await expect(page.locator('[name="lovedOneName"]')).toHaveValue('John Doe');
   
   // Photo upload
@@ -363,7 +363,7 @@ test('funeral director registration and memorial management', async ({ page }) =
 
 **Tasks:**
 - [ ] Create `LiveUrlPreview.svelte` component
-- [ ] Update memorial TypeScript interfaces
+- [ ] Update event TypeScript interfaces
 - [ ] Add new fields to FireCMS schema
 - [ ] Write unit tests for new components
 

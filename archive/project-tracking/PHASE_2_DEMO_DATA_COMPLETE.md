@@ -2,7 +2,7 @@
 
 ## Overview
 
-Phase 2 of the Tributestream Demo System has been successfully implemented. Demo sessions now automatically create realistic memorial data complete with streams, condolences, and service information tailored to each scenario.
+Phase 2 of the Tributestream Demo System has been successfully implemented. Demo sessions now automatically create realistic event data complete with streams, condolences, and service information tailored to each scenario.
 
 ---
 
@@ -12,12 +12,12 @@ Phase 2 of the Tributestream Demo System has been successfully implemented. Demo
 
 Created comprehensive templates for 4 scenarios with realistic fictional data:
 
-#### **Scenario 1: First Memorial Service**
+#### **Scenario 1: First Event Service**
 - **Character**: Eleanor Marie Thompson (81, retired teacher)
 - **Context**: Recent passing (3 days ago), upcoming service
 - **Data**:
   - Full biography and obituary
-  - Scheduled memorial service (2 days in future)
+  - Scheduled event service (2 days in future)
   - 1 scheduled livestream
   - 2 condolence messages
   - Funeral home information
@@ -36,17 +36,17 @@ Created comprehensive templates for 4 scenarios with realistic fictional data:
 - **Context**: Rich life history, service already completed
 - **Data**:
   - Extensive biography covering 95 years
-  - Completed memorial service
+  - Completed event service
   - 7-photo slideshow spanning decades
   - 4 heartfelt condolences
   - Veteran hospital volunteer work
 
 #### **Scenario 4: Viewer Experience**
 - **Character**: Michael Anthony Rodriguez (63, beloved coach)
-- **Context**: Community memorial with high engagement
+- **Context**: Community event with high engagement
 - **Data**:
   - Teacher/coach biography
-  - Public school memorial service
+  - Public school event service
   - 5-photo tribute slideshow
   - 5 condolences (including anonymous student)
   - Community impact stories
@@ -58,7 +58,7 @@ Created comprehensive templates for 4 scenarios with realistic fictional data:
 ### Data Seeding Functions (`seedData.ts`)
 
 #### **`seedDemoMemorial()`**
-- Creates Firestore memorial document with:
+- Creates Firestore event document with:
   - Full biographical data
   - Service date/time/location
   - Funeral home information
@@ -68,7 +68,7 @@ Created comprehensive templates for 4 scenarios with realistic fictional data:
   - Realistic view counts
 
 #### **`seedDemoStreams()`**
-- Creates memorial stream subcollections with:
+- Creates event stream subcollections with:
   - Scheduled, live, or completed status
   - RTMP credentials (demo placeholders)
   - Playback URLs for completed streams
@@ -80,13 +80,13 @@ Created comprehensive templates for 4 scenarios with realistic fictional data:
   - Realistic messages from various relationships
   - Public/private settings
   - Timestamp backdating for realism
-  - Updates memorial condolence counter
+  - Updates event condolence counter
 
 #### **`seedDemoScenario()`**
 - Orchestrates all seeding in correct order
-- Returns memorial ID and slug for redirect
+- Returns event ID and slug for redirect
 - Handles errors gracefully
-- Updates session document with memorial info
+- Updates session document with event info
 
 ---
 
@@ -98,8 +98,8 @@ Created comprehensive templates for 4 scenarios with realistic fictional data:
 1. Create 4 demo users (existing Phase 1)
 2. Create demo session document (existing Phase 1)
 3. **NEW**: Seed realistic data based on selected scenario
-4. **NEW**: Store memorial ID and slug in session
-5. **NEW**: Return memorial slug in response for redirect
+4. **NEW**: Store event ID and slug in session
+5. **NEW**: Return event slug in response for redirect
 6. Generate custom token and return
 
 **Benefits:**
@@ -111,9 +111,9 @@ Created comprehensive templates for 4 scenarios with realistic fictional data:
 ### Demo Landing Page (`/demo`)
 
 **Updated to:**
-- Accept memorial slug from session creation response
-- Redirect directly to created memorial page
-- Fallback to `/my-portal` if no memorial created
+- Accept event slug from session creation response
+- Redirect directly to created event page
+- Fallback to `/my-portal` if no event created
 - Enhanced user experience with immediate content
 
 ---
@@ -172,7 +172,7 @@ The existing cleanup API (`/api/demo/cleanup`) will automatically delete:
   - Realistic fictional personas
 
 - ✅ `frontend/src/lib/server/demo/seedData.ts` (250 lines)
-  - Memorial seeding function
+  - Event seeding function
   - Stream seeding function
   - Condolence seeding function
   - Scenario orchestration
@@ -184,12 +184,12 @@ The existing cleanup API (`/api/demo/cleanup`) will automatically delete:
 
 - ✅ `frontend/src/routes/api/demo/session/+server.ts`
   - Integrated data seeding step
-  - Added memorial slug to response
+  - Added event slug to response
   - Enhanced error handling
 
 - ✅ `frontend/src/routes/demo/+page.svelte`
   - Updated redirect logic
-  - Memorial-first navigation
+  - Event-first navigation
   - Portal fallback
 
 ---
@@ -199,17 +199,17 @@ The existing cleanup API (`/api/demo/cleanup`) will automatically delete:
 ### Complete Demo Journey:
 
 1. **User visits `/demo`**
-   - Selects scenario (e.g., "First Memorial Service")
+   - Selects scenario (e.g., "First Event Service")
    - Clicks "Start Demo"
 
 2. **Session creation (backend)**
    - Creates 4 demo users ✅
    - Creates demo session ✅
-   - **Seeds memorial with streams & condolences ✅**
-   - **Returns memorial slug ✅**
+   - **Seeds event with streams & condolences ✅**
+   - **Returns event slug ✅**
 
-3. **User redirected to memorial page**
-   - **Sees fully populated memorial ✅**
+3. **User redirected to event page**
+   - **Sees fully populated event ✅**
    - **Can view biography, obituary ✅**
    - **See scheduled streams ✅**
    - **Read existing condolences ✅**
@@ -233,7 +233,7 @@ The existing cleanup API (`/api/demo/cleanup`) will automatically delete:
 ### What Works Now:
 
 ✅ **Complete demo data creation**
-✅ **Realistic memorial pages**
+✅ **Realistic event pages**
 ✅ **Scheduled and completed streams**
 ✅ **Authentic condolence messages**
 ✅ **Proper owner assignment**
@@ -243,28 +243,28 @@ The existing cleanup API (`/api/demo/cleanup`) will automatically delete:
 
 ### Test Scenarios:
 
-1. **First Memorial Service**
+1. **First Event Service**
    ```
-   Expected: Memorial for Eleanor Thompson with 1 scheduled stream
-   Navigate to: /demo → Select scenario → Should see memorial page
+   Expected: Event for Eleanor Thompson with 1 scheduled stream
+   Navigate to: /demo → Select scenario → Should see event page
    ```
 
 2. **Managing Multiple**
    ```
-   Expected: Memorial for James Mitchell with 2 scheduled streams
+   Expected: Event for James Mitchell with 2 scheduled streams
    Navigate to: /demo → Select scenario → Should see multiple events
    ```
 
 3. **Legacy Celebration**
    ```
-   Expected: Memorial for Dorothy Wilson with completed service
+   Expected: Event for Dorothy Wilson with completed service
    Navigate to: /demo → Select scenario → Should see rich history
    ```
 
 4. **Viewer Experience**
    ```
-   Expected: Memorial for Coach Rodriguez with community tributes
-   Navigate to: /demo → Select scenario → Should see public memorial
+   Expected: Event for Coach Rodriguez with community tributes
+   Navigate to: /demo → Select scenario → Should see public event
    ```
 
 ---
@@ -289,7 +289,7 @@ The following are planned for Phase 3:
 **Phase 2 Complete:**
 - ✅ 4 realistic scenario templates
 - ✅ Automated data seeding
-- ✅ Memorial + stream + condolence creation
+- ✅ Event + stream + condolence creation
 - ✅ Smart redirect to populated content
 - ✅ Proper cleanup integration
 - ✅ ~600 lines of production-ready code
@@ -324,6 +324,6 @@ The following are planned for Phase 3:
 
 ## ✅ Phase 2 Status: COMPLETE
 
-All Phase 2 objectives achieved. Demo system now provides immersive, realistic demonstration of Tributestream platform with authentic memorial content tailored to different user scenarios.
+All Phase 2 objectives achieved. Demo system now provides immersive, realistic demonstration of Tributestream platform with authentic event content tailored to different user scenarios.
 
 **Ready for deployment and testing!**

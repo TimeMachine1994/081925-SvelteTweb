@@ -8,7 +8,7 @@ Tributestream uses Firebase Firestore as the primary database. This document out
 
 ### `memorials`
 
-Primary collection for all memorial services.
+Primary collection for all event services.
 
 ```typescript
 {
@@ -24,7 +24,7 @@ Primary collection for all memorial services.
   // Services (New Structure)
   services: {
     main: {
-      type: 'funeral' | 'celebration' | 'memorial' | 'other';
+      type: 'funeral' | 'celebration' | 'event' | 'other';
       time: {
         date: string;                  // YYYY-MM-DD
         time: string;                  // HH:MM
@@ -97,7 +97,7 @@ Primary collection for all memorial services.
   // Status Flags
   isPublic: boolean;
   isComplete: boolean;
-  isDemo?: boolean;                    // Demo memorial
+  isDemo?: boolean;                    // Demo event
   
   // Timestamps
   createdAt: Timestamp;
@@ -209,7 +209,7 @@ Funeral home and director information.
 
 ### `invitations`
 
-Memorial invitation system.
+Event invitation system.
 
 ```typescript
 {
@@ -296,7 +296,7 @@ Blog posts and articles.
 
 ### `schedule_edit_requests`
 
-Memorial schedule change requests (requires admin approval).
+Event schedule change requests (requires admin approval).
 
 ```typescript
 {
@@ -533,11 +533,11 @@ memorialLocationName: "Church Name"
 
 Code should check both old and new structures:
 ```typescript
-const serviceDate = memorial.services?.main?.time?.date || memorial.memorialDate;
+const serviceDate = event.services?.main?.time?.date || event.memorialDate;
 ```
 
 ## Related Documentation
 
 - [[Authentication Flow]] - User roles and permissions
-- [[Memorial Creation Flow]] - How data is created
+- [[Event Creation Flow]] - How data is created
 - [[Admin Dashboard]] - Managing data via UI

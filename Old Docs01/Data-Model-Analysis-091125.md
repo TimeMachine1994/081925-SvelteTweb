@@ -43,7 +43,7 @@ This document provides a comprehensive review of the Firestore data models as im
 
 ## 2. Memorials Collection (`memorials`)
 
-**Intended Schema (`memorial.ts -> Memorial`):**
+**Intended Schema (`event.ts -> Event`):**
 ```typescript
 {
     id: string;
@@ -57,16 +57,16 @@ This document provides a comprehensive review of the Firestore data models as im
 ```
 
 **Implementation Analysis:**
-- Memorials are created in several places, most notably `/register/funeral-director/+page.server.ts` and `/register/loved-one/+page.server.ts`.
+- Memorials are created in several places, most notably `/register/funeral-director/+page.server.ts` and `/register/new-event-and-account/+page.server.ts`.
 - As identified previously, the creation logic in `/register/funeral-director/+page.server.ts` was writing both `ownerUid` and `createdByUserId` with different values, creating a direct conflict. (This was recently fixed).
 - The type definition itself contains comments like `// Adding optional fields that might be missing` and `// Missing properties used in ViewerPortal`, which is a strong indicator that the type is out of sync with the implementation.
 
 **V1 Status:**
-✅ **Resolved:** Removed `familyMemberUids` field from Memorial type
-✅ **Resolved:** Removed redundant `createdByUserId` field from memorial creation logic
+✅ **Resolved:** Removed `familyMemberUids` field from Event type
+✅ **Resolved:** Removed redundant `createdByUserId` field from event creation logic
 
 **Remaining Inconsistencies:**
-1.  **In-Type Patching**: The `Memorial` type has been patched with comments to account for fields used elsewhere in the code but not formally added to the schema. This indicates a breakdown in maintaining a single source of truth for the data model.
+1.  **In-Type Patching**: The `Event` type has been patched with comments to account for fields used elsewhere in the code but not formally added to the schema. This indicates a breakdown in maintaining a single source of truth for the data model.
 
 ---
 
@@ -125,13 +125,13 @@ The V1 refactor has successfully addressed several major data model inconsistenc
 
 ### ✅ **Resolved Issues:**
 - **Role System Simplified**: Removed `family_member` and `viewer` roles, keeping only `admin`, `owner`, and `funeral_director`
-- **Memorial Access Control**: Removed `familyMemberUids` field and redundant `createdByUserId` logic
+- **Event Access Control**: Removed `familyMemberUids` field and redundant `createdByUserId` logic
 - **Funeral Director Workflow**: Simplified to auto-approved registration without license requirements
 - **Admin Dashboard**: Removed complex application approval system
 
 ### 🔄 **Remaining Issues to Address:**
 - **User Model Ambiguity**: Still lacks a single, authoritative `User` type (missing `phone` and `createdByFuneralDirector` fields)
-- **Memorial Type Patching**: In-type comments indicate ongoing schema drift
+- **Event Type Patching**: In-type comments indicate ongoing schema drift
 - **Livestream Model Conflicts**: Two conflicting models (`LivestreamConfig` vs `CalculatorConfig`) still exist
 
 ### 📈 **V1 Benefits:**

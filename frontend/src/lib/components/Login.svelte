@@ -136,7 +136,7 @@
 
 <svelte:head>
 	<title>Sign In - Tributestream</title>
-	<meta name="description" content="Sign in to your Tributestream account to manage memorial services and connect with families." />
+	<meta name="description" content="Sign in to your Tributestream account to manage event services and connect with families." />
 </svelte:head>
 
 <div class="{theme.root} min-h-screen flex items-center justify-center py-12 px-4" style="font-family: {theme.font.body}">
@@ -149,7 +149,7 @@
 						Sign In to Tributestream
 					</h2>
 					<p class="mt-2 text-sm {theme.hero.sub}">
-						Access your memorial services and connect with families
+						Access your event services and connect with families
 					</p>
 				</div>
 

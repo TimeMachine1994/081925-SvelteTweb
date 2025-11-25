@@ -30,7 +30,7 @@ export const ErrorCodes = {
 	INSUFFICIENT_PERMISSIONS: 'INSUFFICIENT_PERMISSIONS',
 	INVALID_ROLE: 'INVALID_ROLE',
 
-	// Memorial Access
+	// Event Access
 	MEMORIAL_NOT_FOUND: 'MEMORIAL_NOT_FOUND',
 	MEMORIAL_ACCESS_DENIED: 'MEMORIAL_ACCESS_DENIED',
 	INVITATION_REQUIRED: 'INVITATION_REQUIRED',
@@ -56,9 +56,9 @@ export const ErrorMessages = {
 	[ErrorCodes.AUTH_REQUIRED]: 'Please sign in to continue',
 	[ErrorCodes.INSUFFICIENT_PERMISSIONS]: "You don't have permission to perform this action",
 	[ErrorCodes.INVALID_ROLE]: 'Your account role is not recognized',
-	[ErrorCodes.MEMORIAL_NOT_FOUND]: 'Memorial not found or no longer available',
-	[ErrorCodes.MEMORIAL_ACCESS_DENIED]: "You don't have access to this memorial",
-	[ErrorCodes.INVITATION_REQUIRED]: 'You need an invitation to access this memorial',
+	[ErrorCodes.MEMORIAL_NOT_FOUND]: 'Event not found or no longer available',
+	[ErrorCodes.MEMORIAL_ACCESS_DENIED]: "You don't have access to this event",
+	[ErrorCodes.INVITATION_REQUIRED]: 'You need an invitation to access this event',
 	[ErrorCodes.SAVE_FAILED]: 'Failed to save changes. Please try again',
 	[ErrorCodes.LOAD_FAILED]: 'Failed to load data. Please refresh the page',
 	[ErrorCodes.VALIDATION_ERROR]: 'Please check your input and try again',
@@ -270,14 +270,14 @@ export function getRoleSpecificErrorMessage(error: AppError, userRole: string): 
 	const roleMessages: Record<string, Record<string, string>> = {
 		viewer: {
 			[ErrorCodes.MEMORIAL_ACCESS_DENIED]:
-				'This memorial is private. You need to follow it or receive an invitation to view it.',
+				'This event is private. You need to follow it or receive an invitation to view it.',
 			[ErrorCodes.INSUFFICIENT_PERMISSIONS]: 'Viewers can only view memorials, not edit them.'
 		},
 		family_member: {
 			[ErrorCodes.INVITATION_REQUIRED]:
-				'You need an invitation from the memorial owner to access this memorial.',
+				'You need an invitation from the event owner to access this event.',
 			[ErrorCodes.INSUFFICIENT_PERMISSIONS]:
-				'You can view and add photos, but cannot edit memorial details.'
+				'You can view and add photos, but cannot edit event details.'
 		},
 		funeral_director: {
 			[ErrorCodes.MEMORIAL_ACCESS_DENIED]:
@@ -287,7 +287,7 @@ export function getRoleSpecificErrorMessage(error: AppError, userRole: string): 
 		},
 		owner: {
 			[ErrorCodes.INSUFFICIENT_PERMISSIONS]:
-				'As the memorial owner, you should have full access. Please contact support.'
+				'As the event owner, you should have full access. Please contact support.'
 		}
 	};
 

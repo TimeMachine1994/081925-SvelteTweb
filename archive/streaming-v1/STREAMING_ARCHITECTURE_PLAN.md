@@ -53,7 +53,7 @@ Instead of showing RTMP credentials by default, the StreamCard will present **th
 
 ```
 ┌─────────────┐
-│   Camera    │──► OBS Software ──RTMP──► Cloudflare Stream ──► Memorial Page
+│   Camera    │──► OBS Software ──RTMP──► Cloudflare Stream ──► Event Page
 └─────────────┘                                    │
                                                    ├──► Live Viewers
                                                    └──► Recording (auto)
@@ -71,13 +71,13 @@ Instead of showing RTMP credentials by default, the StreamCard will present **th
 3. User clicks "Start Streaming" in OBS
 
 #### **During Stream (Live)**
-- Stream appears on memorial page via Cloudflare HLS/WHEP
+- Stream appears on event page via Cloudflare HLS/WHEP
 - Live viewer count displayed
 - Real-time playback for viewers
 
 #### **After Stream (Offline)**
 - Cloudflare processes recording (1-3 minutes)
-- Once processing completes, VOD appears on memorial page
+- Once processing completes, VOD appears on event page
 - Recording stored in Cloudflare Stream
 
 ### Technical Details
@@ -130,7 +130,7 @@ Instead of showing RTMP credentials by default, the StreamCard will present **th
                                   Cloudflare Stream #1
                                   (RTMP Destination)
                                           │
-                                          ├──► Memorial Page
+                                          ├──► Event Page
                                           ├──► Live Viewers
                                           └──► Recording
 ```
@@ -173,7 +173,7 @@ Instead of showing RTMP credentials by default, the StreamCard will present **th
    - Phone camera now appears in OBS
    - User adds overlays, scenes, etc. in OBS
    - User clicks "Start Streaming" in OBS
-   - Final mixed output goes to memorial page
+   - Final mixed output goes to event page
 
 #### **Technical Flow**
 
@@ -185,12 +185,12 @@ Instead of showing RTMP credentials by default, the StreamCard will present **th
 3. **Stream #2's playback URL** provided to user for OBS Browser Source
 4. **OBS mixes** phone camera with overlays/scenes
 5. **OBS streams final output** to Stream #1 via RTMP
-6. **Stream #1 appears** on memorial page
+6. **Stream #1 appears** on event page
 
 #### **Recording**
 - Recording happens on **Stream #1** (the final OBS output)
 - After stream ends, Cloudflare processes recording
-- VOD appears on memorial page
+- VOD appears on event page
 
 ### Technical Details
 
@@ -205,13 +205,13 @@ Instead of showing RTMP credentials by default, the StreamCard will present **th
 ## Option 3: Phone to MUX
 
 ### Use Case
-**Direct phone streaming with guaranteed recording** - User streams directly from phone to memorial page, with MUX as recording backup via Cloudflare restreaming.
+**Direct phone streaming with guaranteed recording** - User streams directly from phone to event page, with MUX as recording backup via Cloudflare restreaming.
 
 ### Workflow
 
 ```
 ┌─────────────┐
-│    Phone    │──WHIP──► Cloudflare Stream ──┬──► Memorial Page
+│    Phone    │──WHIP──► Cloudflare Stream ──┬──► Event Page
 └─────────────┘                               │    (Live Viewers)
                                               │
                                               │ Cloudflare
@@ -233,7 +233,7 @@ Instead of showing RTMP credentials by default, the StreamCard will present **th
 Stream from Your Phone
 ────────────────────────
 📱 This option streams directly from your phone
-   to the memorial page.
+   to the event page.
 
 🎥 Recording is guaranteed via MUX backup.
 
@@ -249,7 +249,7 @@ Status: Ready to stream
 4. User sees:
    ```
    📹 Camera Preview
-   [Start Streaming to Memorial]
+   [Start Streaming to Event]
    
    ⚙️ Camera  ⚙️ Microphone
    ```
@@ -257,13 +257,13 @@ Status: Ready to stream
 #### **During Stream**
 - Phone streams via WebRTC/WHIP to Cloudflare
 - Cloudflare automatically restreams to MUX
-- Live stream appears on memorial page
+- Live stream appears on event page
 - Viewers watch via Cloudflare HLS/WHEP
 
 #### **After Stream**
 - MUX processes recording
 - WHEP recording URL retrieved from MUX
-- VOD embedded on memorial page
+- VOD embedded on event page
 - Fallback: If Cloudflare has recording, use that instead
 
 ### Technical Details

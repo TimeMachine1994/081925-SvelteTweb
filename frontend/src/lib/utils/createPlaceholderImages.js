@@ -30,7 +30,7 @@ function createOptimizedPoster(width, height, title) {
 }
 
 // Generate the placeholder images
-const heroPlaceholder = createOptimizedPoster(800, 450, 'Memorial Service Video');
+const heroPlaceholder = createOptimizedPoster(800, 450, 'Event Service Video');
 const demoPlaceholder = createOptimizedPoster(800, 450, 'How It Works Demo');
 
 // Create a TypeScript file with the optimized images
@@ -45,9 +45,9 @@ export const OPTIMIZED_VIDEO_POSTERS = {
   
   // Responsive image sets for different screen sizes
   heroResponsive: {
-    small: '${createOptimizedPoster(400, 225, 'Memorial Service')}',
-    medium: '${createOptimizedPoster(800, 450, 'Memorial Service Video')}',
-    large: '${createOptimizedPoster(1200, 675, 'Memorial Service Video')}'
+    small: '${createOptimizedPoster(400, 225, 'Event Service')}',
+    medium: '${createOptimizedPoster(800, 450, 'Event Service Video')}',
+    large: '${createOptimizedPoster(1200, 675, 'Event Service Video')}'
   },
   
   demoResponsive: {

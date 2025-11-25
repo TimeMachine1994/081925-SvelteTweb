@@ -68,20 +68,20 @@ export async function cleanupFirebaseTest() {
 }
 
 /**
- * Create test memorial data
+ * Create test event data
  */
 export async function createTestMemorial(overrides: any = {}) {
-	const memorial = {
-		id: `test-memorial-${Date.now()}`,
+	const event = {
+		id: `test-event-${Date.now()}`,
 		lovedOneName: 'Test Loved One',
-		slug: 'test-loved-one',
-		fullSlug: 'test-loved-one-123',
+		slug: 'test-new-event-and-account',
+		fullSlug: 'test-new-event-and-account-123',
 		creatorEmail: 'owner@test.com',
 		creatorName: 'Test Owner',
 		ownerUid: 'test-owner-123',
 		funeralDirectorUid: 'test-fd-123',
 		isPublic: true,
-		content: 'Test memorial content',
+		content: 'Test event content',
 		custom_html: null,
 		createdAt: new Date(),
 		updatedAt: new Date(),
@@ -90,13 +90,13 @@ export async function createTestMemorial(overrides: any = {}) {
 
 	// Add to test database
 	if (testDb) {
-		await testDb.collection('memorials').doc(memorial.id).set(memorial);
+		await testDb.collection('memorials').doc(event.id).set(event);
 	} else {
 		// Use admin DB for real Firebase testing
-		await adminDb.collection('memorials').doc(memorial.id).set(memorial);
+		await adminDb.collection('memorials').doc(event.id).set(event);
 	}
 
-	return memorial;
+	return event;
 }
 
 /**
@@ -155,8 +155,8 @@ export async function cleanupTestData() {
 	// Clean up test memorials
 	const memorialsSnap = await db
 		.collection('memorials')
-		.where('id', '>=', 'test-memorial-')
-		.where('id', '<', 'test-memorial-z')
+		.where('id', '>=', 'test-event-')
+		.where('id', '<', 'test-event-z')
 		.get();
 
 	const deletePromises = memorialsSnap.docs.map((doc) => doc.ref.delete());

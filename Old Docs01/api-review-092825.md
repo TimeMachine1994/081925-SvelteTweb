@@ -11,12 +11,12 @@ This review identifies **significant duplication and inconsistencies** across Tr
 - **Collection**: `memorials.livestream` field
 - **Status**: ⚠️ **DEPRECATED** - Admin-only, basic functionality
 
-### **2. Memorial-Specific Livestream API** (`/api/memorials/[memorialId]/livestream/`)
-- **Purpose**: Full-featured memorial livestream management
+### **2. Event-Specific Livestream API** (`/api/memorials/[memorialId]/livestream/`)
+- **Purpose**: Full-featured event livestream management
 - **Collection**: `livestream_sessions` + `memorials.livestreamArchive`
 - **Status**: ✅ **ACTIVE** - Production system with archive management
 
-### **3. Memorial Livestreams Collection API** (`/api/memorials/[memorialId]/livestreams/`)
+### **3. Event Livestreams Collection API** (`/api/memorials/[memorialId]/livestreams/`)
 - **Purpose**: Simple livestream subcollection management
 - **Collection**: `memorials/{id}/livestreams` subcollection
 - **Status**: ⚠️ **UNCLEAR** - Minimal functionality, unclear purpose
@@ -35,14 +35,14 @@ This review identifies **significant duplication and inconsistencies** across Tr
 
 **Functionality**:
 - ✅ Creates Cloudflare Live Input
-- ✅ Updates memorial document with livestream data
+- ✅ Updates event document with livestream data
 - ❌ Admin-only access (hardcoded)
 - ❌ No session management
 - ❌ No recording management
 
 **Data Structure**:
 ```javascript
-memorial.livestream = {
+event.livestream = {
   uid: string,
   rtmpsUrl: string,
   streamKey: string,
@@ -53,11 +53,11 @@ memorial.livestream = {
 **Issues**:
 - 🚨 **Admin-only**: Hardcoded admin requirement limits usability
 - 🚨 **No recording**: No automatic recording management
-- 🚨 **Single stream**: Can't handle multiple streams per memorial
+- 🚨 **Single stream**: Can't handle multiple streams per event
 
 ---
 
-### **2. Memorial-Specific Livestream API**
+### **2. Event-Specific Livestream API**
 **Path**: `/api/memorials/[memorialId]/livestream/`
 
 **Endpoints**:
@@ -78,7 +78,7 @@ memorial.livestream = {
 
 **Data Structure**:
 ```javascript
-// Archive entries in memorial.livestreamArchive[]
+// Archive entries in event.livestreamArchive[]
 {
   id: string,
   title: string,
@@ -92,18 +92,18 @@ memorial.livestream = {
 ```
 
 **Strengths**:
-- 🎯 **Memorial-centric**: Properly scoped to memorial context
+- 🎯 **Event-centric**: Properly scoped to event context
 - 🎯 **Full lifecycle**: Handles start → live → stop → archive
 - 🎯 **Permission system**: Proper access controls
 - 🎯 **Recording pipeline**: Complete recording management
 
 ---
 
-### **3. Memorial Livestreams Collection API**
+### **3. Event Livestreams Collection API**
 **Path**: `/api/memorials/[memorialId]/livestreams/`
 
 **Endpoints**:
-- `GET /` - List livestreams for memorial
+- `GET /` - List livestreams for event
 - `POST /start` - Start livestream session
 
 **Functionality**:
@@ -133,7 +133,7 @@ memorial.livestream = {
 - 🚨 **No Cloudflare**: Missing integration with streaming provider
 - 🚨 **Manual config**: Requires manual stream URL/key input
 - 🚨 **No recordings**: No automatic recording pipeline
-- 🚨 **Duplicate purpose**: Overlaps with memorial livestream API
+- 🚨 **Duplicate purpose**: Overlaps with event livestream API
 
 ---
 
@@ -168,7 +168,7 @@ memorial.livestream = {
   isVisible: boolean,
   isPublic: boolean,
   recordingReady: boolean,
-  memorialId?: string,  // Optional memorial association
+  memorialId?: string,  // Optional event association
   createdBy: string,
   displayOrder: number
 }
@@ -203,8 +203,8 @@ memorial.livestream = {
 
 ### **3. Conflicting Data Storage**
 ```
-❌ memorial.livestream (legacy field)
-❌ memorial.livestreamArchive[] (archive entries)
+❌ event.livestream (legacy field)
+❌ event.livestreamArchive[] (archive entries)
 ❌ memorials/{id}/livestreams (subcollection)
 ❌ mvp_two_streams (standalone collection)
 ```
@@ -212,12 +212,12 @@ memorial.livestream = {
 
 ### **4. Inconsistent Permission Models**
 - **Legacy**: Admin-only (hardcoded)
-- **Memorial**: Owner/funeral director (middleware-based)
+- **Event**: Owner/funeral director (middleware-based)
 - **Livestreams**: Owner/funeral director (inline checks)
 - **MVP Two**: User-based (createdBy field)
 
 ### **5. Recording Management Conflicts**
-- **Memorial API**: Uses `memorial.livestreamArchive[]` with webhooks
+- **Event API**: Uses `event.livestreamArchive[]` with webhooks
 - **MVP Two**: Uses `mvp_two_streams.recordingReady` with sync endpoints
 - **Others**: No recording management
 
@@ -232,14 +232,14 @@ memorial.livestream = {
    - Add deprecation warnings
    - Document migration path
 
-2. **Consolidate Memorial APIs**
+2. **Consolidate Event APIs**
    - Choose between `/livestream/` and `/livestreams/` (recommend `/livestream/`)
    - Migrate any existing data
    - Remove duplicate endpoints
 
 3. **Standardize WHIP Implementation**
    - Choose one WHIP endpoint (recommend MVP Two version)
-   - Update memorial API to use MVP Two WHIP logic
+   - Update event API to use MVP Two WHIP logic
    - Ensure consistent error handling
 
 ### **Phase 2: Architecture Unification (2-3 weeks)**
@@ -249,7 +249,7 @@ memorial.livestream = {
    // Proposed unified structure
    {
      id: string,
-     memorialId?: string,  // Optional memorial association
+     memorialId?: string,  // Optional event association
      title: string,
      status: 'scheduled' | 'live' | 'completed',
      cloudflareId: string,
@@ -271,13 +271,13 @@ memorial.livestream = {
 
 2. **Single Stream Collection**
    - Use `streams` collection for all streams
-   - Add `memorialId` field for memorial association
+   - Add `memorialId` field for event association
    - Maintain backward compatibility with views
 
 3. **Unified Permission System**
    - Single middleware for all stream operations
    - Consistent access control logic
-   - Support both memorial-scoped and user-scoped permissions
+   - Support both event-scoped and user-scoped permissions
 
 ### **Phase 3: Feature Consolidation (1-2 weeks)**
 
@@ -287,7 +287,7 @@ memorial.livestream = {
    ✅ /api/streams/[id]/start (start stream)
    ✅ /api/streams/[id]/stop (stop stream)
    ✅ /api/streams/[id]/whip (WHIP protocol)
-   ✅ /api/memorials/[id]/streams (memorial-scoped view)
+   ✅ /api/memorials/[id]/streams (event-scoped view)
    ```
 
 2. **Unified Recording Pipeline**
@@ -336,9 +336,9 @@ memorial.livestream = {
 Based on this analysis, the MVP control panel should:
 
 1. **Use MVP Two API** as the foundation (most modern)
-2. **Add memorial association** to MVP Two streams
-3. **Implement unified permissions** using memorial middleware
-4. **Maintain archive compatibility** with existing memorial system
+2. **Add event association** to MVP Two streams
+3. **Implement unified permissions** using event middleware
+4. **Maintain archive compatibility** with existing event system
 5. **Provide migration path** from old systems
 
 This approach leverages the best features from each system while eliminating duplication and providing a clear path forward.

@@ -94,7 +94,7 @@ export function usePreloader() {
 			case 'family_member':
 				if (memorialId) {
 					await preloader.preload(
-						`memorial:${memorialId}`,
+						`event:${memorialId}`,
 						() => fetch(`/api/memorials/${memorialId}`).then((r) => r.json()),
 						'high'
 					);
@@ -118,20 +118,20 @@ export function usePreloader() {
 		priority: 'high' | 'medium' | 'low' = 'medium'
 	) => {
 		await preloader.preload(
-			`memorial:${memorialId}`,
+			`event:${memorialId}`,
 			() => fetch(`/api/memorials/${memorialId}`).then((r) => r.json()),
 			priority
 		);
 
 		// Preload related data
 		await preloader.preload(
-			`memorial-photos:${memorialId}`,
+			`event-photos:${memorialId}`,
 			() => fetch(`/api/memorials/${memorialId}/photos`).then((r) => r.json()),
 			'low'
 		);
 
 		await preloader.preload(
-			`memorial-stream-status:${memorialId}`,
+			`event-stream-status:${memorialId}`,
 			() => fetch(`/api/memorials/${memorialId}/stream/status`).then((r) => r.json()),
 			'medium'
 		);

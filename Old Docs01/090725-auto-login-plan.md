@@ -1,6 +1,6 @@
 Below is a clean, implementation-ready rewrite of your plan that covers auto-login for:
 
-the Owner from the memorial (“Create Tribute”) form,
+the Owner from the event (“Create Tribute”) form,
 
 a Viewer (quick register/login), and
 
@@ -11,18 +11,18 @@ Auto-Login & Redirect Plan (Rewritten)
 
 Automatically authenticate new (or newly claimed) users right after they submit:
 
-the Memorial form (Owner),
+the Event form (Owner),
 
 a Quick Viewer registration, or
 
 the Funeral Director Program form (Funeral Director),
-then redirect them to the correct destination (memorial page or portal) with a valid session cookie.
+then redirect them to the correct destination (event page or portal) with a valid session cookie.
 
 2) Scope
 
 Applies to three entry points:
 
-Owner: POST /create (memorial form)
+Owner: POST /create (event form)
 
 Viewer: POST /auth/quick-viewer (or inline quick-signup on any page)
 
@@ -62,18 +62,18 @@ sequenceDiagram
 
 4) Redirect Rules (per role)
 
-Owner (memorial creator): next = "/{slug}"
+Owner (event creator): next = "/{slug}"
 
 Viewer (quick signup):
 
-If there’s a referring memorial slug: next = "/{slug}"
+If there’s a referring event slug: next = "/{slug}"
 
 Else: next = "/portal"
 
 Funeral Director: next = "/portal"
 
 5) Implementation Steps
-Step A — Memorial Form (Owner Auto-Login)
+Step A — Event Form (Owner Auto-Login)
 
 File: src/routes/create/+page.server.ts
 
@@ -102,7 +102,7 @@ If request included a refererSlug, set next = "/"+refererSlug; else next = "/por
 
 Redirect: /auth/session?token=…&next=…&role=viewer.
 
-Also use this path when a logged-out user clicks “heart” on a memorial: capture the slug as refererSlug so they land back on the same memorial post-login.
+Also use this path when a logged-out user clicks “heart” on a event: capture the slug as refererSlug so they land back on the same event post-login.
 
 Step C — Funeral Director Program (FD Auto-Login)
 
@@ -187,7 +187,7 @@ Do-Once
 
  Shared redirectToSession({ uid, next, role }) helper.
 
-Owner (Memorial Form)
+Owner (Event Form)
 
  Create user (if needed), set claim role=owner.
 

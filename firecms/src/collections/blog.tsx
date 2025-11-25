@@ -131,7 +131,7 @@ export const blogCollection = buildCollection<BlogPost>({
             dataType: "string",
             name: "Category",
             enumValues: [
-                { id: "memorial-planning", label: "Memorial Planning" },
+                { id: "event-planning", label: "Event Planning" },
                 { id: "grief-support", label: "Grief Support" },
                 { id: "technology", label: "Technology" },
                 { id: "funeral-industry", label: "Funeral Industry" },

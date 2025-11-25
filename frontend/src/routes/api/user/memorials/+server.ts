@@ -40,7 +40,7 @@ export const GET: RequestHandler = async ({ locals }) => {
 			const data = doc.data();
 			return {
 				id: doc.id,
-				lovedOneName: data.lovedOneName || 'Unnamed Memorial',
+				lovedOneName: data.lovedOneName || 'Unnamed Event',
 				fullSlug: data.fullSlug,
 				isPublic: data.isPublic || false,
 				createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt,

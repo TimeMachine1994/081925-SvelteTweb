@@ -16,7 +16,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		const { memorialId, photos, settings } = await request.json();
 
 		if (!memorialId) {
-			return json({ error: 'Memorial ID is required' }, { status: 400 });
+			return json({ error: 'Event ID is required' }, { status: 400 });
 		}
 
 		// Validate and clean the photos array
@@ -42,17 +42,17 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 
 		console.log(`📝 Saving draft: ${cleanPhotos.length} photos, settings:`, cleanSettings);
 
-		// Verify user has access to this memorial
+		// Verify user has access to this event
 		const memorialRef = adminDb.collection('memorials').doc(memorialId);
 		const memorialDoc = await memorialRef.get();
 
 		if (!memorialDoc.exists) {
-			return json({ error: 'Memorial not found' }, { status: 404 });
+			return json({ error: 'Event not found' }, { status: 404 });
 		}
 
 		const memorialData = memorialDoc.data();
 		
-		// Check permissions using the same pattern as other memorial APIs
+		// Check permissions using the same pattern as other event APIs
 		const hasPermission = 
 			decodedClaims.role === 'admin' ||
 			memorialData?.ownerUid === userId ||
@@ -60,7 +60,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			
 		if (!hasPermission) {
 			console.log('🔒 [DRAFT API] Insufficient permissions for user:', userId, 'role:', decodedClaims.role);
-			console.log('🔒 [DRAFT API] Memorial owner:', memorialData?.ownerUid, 'funeral director:', memorialData?.funeralDirectorUid);
+			console.log('🔒 [DRAFT API] Event owner:', memorialData?.ownerUid, 'funeral director:', memorialData?.funeralDirectorUid);
 			return json({ error: 'Insufficient permissions' }, { status: 403 });
 		}
 
@@ -85,7 +85,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		
 		await draftRef.set(draftData);
 
-		console.log(`✅ Draft saved successfully for memorial ${memorialId}, user ${userId}`);
+		console.log(`✅ Draft saved successfully for event ${memorialId}, user ${userId}`);
 
 		return json({ 
 			success: true, 
@@ -128,20 +128,20 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 		const memorialId = url.searchParams.get('memorialId');
 
 		if (!memorialId) {
-			return json({ error: 'Memorial ID is required' }, { status: 400 });
+			return json({ error: 'Event ID is required' }, { status: 400 });
 		}
 
-		// Verify user has access to this memorial
+		// Verify user has access to this event
 		const memorialRef = adminDb.collection('memorials').doc(memorialId);
 		const memorialDoc = await memorialRef.get();
 
 		if (!memorialDoc.exists) {
-			return json({ error: 'Memorial not found' }, { status: 404 });
+			return json({ error: 'Event not found' }, { status: 404 });
 		}
 
 		const memorialData = memorialDoc.data();
 		
-		// Check permissions using the same pattern as other memorial APIs
+		// Check permissions using the same pattern as other event APIs
 		const hasPermission = 
 			decodedClaims.role === 'admin' ||
 			memorialData?.ownerUid === userId ||
@@ -149,7 +149,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 			
 		if (!hasPermission) {
 			console.log('🔒 [DRAFT API GET] Insufficient permissions for user:', userId, 'role:', decodedClaims.role);
-			console.log('🔒 [DRAFT API GET] Memorial owner:', memorialData?.ownerUid, 'funeral director:', memorialData?.funeralDirectorUid);
+			console.log('🔒 [DRAFT API GET] Event owner:', memorialData?.ownerUid, 'funeral director:', memorialData?.funeralDirectorUid);
 			return json({ error: 'Insufficient permissions' }, { status: 403 });
 		}
 
@@ -172,7 +172,7 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 
 		const draftData = draftDoc.data();
 
-		console.log(`✅ Draft loaded for memorial ${memorialId}, user ${userId}`);
+		console.log(`✅ Draft loaded for event ${memorialId}, user ${userId}`);
 
 		return json({ 
 			success: true, 
@@ -199,20 +199,20 @@ export const DELETE: RequestHandler = async ({ url, cookies }) => {
 		const memorialId = url.searchParams.get('memorialId');
 
 		if (!memorialId) {
-			return json({ error: 'Memorial ID is required' }, { status: 400 });
+			return json({ error: 'Event ID is required' }, { status: 400 });
 		}
 
-		// Verify user has access to this memorial
+		// Verify user has access to this event
 		const memorialRef = adminDb.collection('memorials').doc(memorialId);
 		const memorialDoc = await memorialRef.get();
 
 		if (!memorialDoc.exists) {
-			return json({ error: 'Memorial not found' }, { status: 404 });
+			return json({ error: 'Event not found' }, { status: 404 });
 		}
 
 		const memorialData = memorialDoc.data();
 		
-		// Check permissions using the same pattern as other memorial APIs
+		// Check permissions using the same pattern as other event APIs
 		const hasPermission = 
 			decodedClaims.role === 'admin' ||
 			memorialData?.ownerUid === userId ||
@@ -232,7 +232,7 @@ export const DELETE: RequestHandler = async ({ url, cookies }) => {
 
 		await draftRef.delete();
 
-		console.log(`🗑️ Draft deleted for memorial ${memorialId}, user ${userId}`);
+		console.log(`🗑️ Draft deleted for event ${memorialId}, user ${userId}`);
 
 		return json({ 
 			success: true, 

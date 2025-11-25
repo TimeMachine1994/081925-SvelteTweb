@@ -27,15 +27,15 @@ test.describe('Follow/Unfollow System', () => {
     }
   });
 
-  test('Viewer can follow a memorial', async ({ page }) => {
+  test('Viewer can follow a event', async ({ page }) => {
     // Login as viewer
     await page.goto('/login');
     await page.fill('#loginEmail', testUsers.viewer1);
     await page.fill('#loginPassword', password);
     await page.click('#loginForm button[type="submit"]');
     
-    // Navigate to a public memorial
-    await page.goto('/tributes/public-memorial-123');
+    // Navigate to a public event
+    await page.goto('/tributes/public-event-123');
     
     // Should see follow button
     await expect(page.locator('button:has-text("Follow")')).toBeVisible();
@@ -48,8 +48,8 @@ test.describe('Follow/Unfollow System', () => {
     await expect(page.locator('text=You are now following')).toBeVisible();
   });
 
-  test('Followed memorial appears in viewer portal', async ({ page }) => {
-    // Login as viewer who followed memorial
+  test('Followed event appears in viewer portal', async ({ page }) => {
+    // Login as viewer who followed event
     await page.goto('/login');
     await page.fill('#loginEmail', testUsers.viewer1);
     await page.fill('#loginPassword', password);
@@ -58,20 +58,20 @@ test.describe('Follow/Unfollow System', () => {
     // Navigate to viewer portal
     await page.goto('/my-portal');
     
-    // Should see followed memorial in the list
+    // Should see followed event in the list
     await expect(page.locator('text=Followed Memorials')).toBeVisible();
-    await expect(page.locator('text=public-memorial-123')).toBeVisible();
+    await expect(page.locator('text=public-event-123')).toBeVisible();
   });
 
-  test('Viewer can unfollow a memorial', async ({ page }) => {
+  test('Viewer can unfollow a event', async ({ page }) => {
     // Login as viewer
     await page.goto('/login');
     await page.fill('#loginEmail', testUsers.viewer1);
     await page.fill('#loginPassword', password);
     await page.click('#loginForm button[type="submit"]');
     
-    // Navigate to followed memorial
-    await page.goto('/tributes/public-memorial-123');
+    // Navigate to followed event
+    await page.goto('/tributes/public-event-123');
     
     // Should see following button
     await expect(page.locator('button:has-text("Following")')).toBeVisible();
@@ -84,7 +84,7 @@ test.describe('Follow/Unfollow System', () => {
     await expect(page.locator('text=You unfollowed')).toBeVisible();
   });
 
-  test('Unfollowed memorial removed from viewer portal', async ({ page }) => {
+  test('Unfollowed event removed from viewer portal', async ({ page }) => {
     // Login as viewer who unfollowed
     await page.goto('/login');
     await page.fill('#loginEmail', testUsers.viewer1);
@@ -94,8 +94,8 @@ test.describe('Follow/Unfollow System', () => {
     // Navigate to viewer portal
     await page.goto('/my-portal');
     
-    // Memorial should no longer be in followed list
-    await expect(page.locator('text=public-memorial-123')).not.toBeVisible();
+    // Event should no longer be in followed list
+    await expect(page.locator('text=public-event-123')).not.toBeVisible();
   });
 
   test('Follow API endpoints work correctly', async ({ page }) => {
@@ -108,7 +108,7 @@ test.describe('Follow/Unfollow System', () => {
     // Test follow API directly
     const followResponse = await page.evaluate(async () => {
       try {
-        const res = await fetch('/api/memorials/test-memorial/follow', {
+        const res = await fetch('/api/memorials/test-event/follow', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' }
         });
@@ -123,7 +123,7 @@ test.describe('Follow/Unfollow System', () => {
     // Test unfollow API
     const unfollowResponse = await page.evaluate(async () => {
       try {
-        const res = await fetch('/api/memorials/test-memorial/unfollow', {
+        const res = await fetch('/api/memorials/test-event/unfollow', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' }
         });
@@ -152,9 +152,9 @@ test.describe('Follow/Unfollow System', () => {
     await page2.fill('#loginPassword', password);
     await page2.click('#loginForm button[type="submit"]');
     
-    // Both navigate to same memorial
-    await page.goto('/tributes/follow-count-memorial');
-    await page2.goto('/tributes/follow-count-memorial');
+    // Both navigate to same event
+    await page.goto('/tributes/follow-count-event');
+    await page2.goto('/tributes/follow-count-event');
     
     // Check initial follow count
     const initialCount = await page.locator('[data-testid="follow-count"]').textContent();
@@ -175,28 +175,28 @@ test.describe('Follow/Unfollow System', () => {
     await page2.close();
   });
 
-  test('Owner cannot follow their own memorial', async ({ page }) => {
+  test('Owner cannot follow their own event', async ({ page }) => {
     // Login as owner
     await page.goto('/login');
     await page.fill('#loginEmail', testUsers.owner);
     await page.fill('#loginPassword', password);
     await page.click('#loginForm button[type="submit"]');
     
-    // Navigate to their own memorial
-    await page.goto('/tributes/owner-memorial-123');
+    // Navigate to their own event
+    await page.goto('/tributes/owner-event-123');
     
     // Should NOT see follow button
     await expect(page.locator('button:has-text("Follow")')).not.toBeVisible();
   });
 
   test('Follow status persists across sessions', async ({ page }) => {
-    // Login and follow memorial
+    // Login and follow event
     await page.goto('/login');
     await page.fill('#loginEmail', testUsers.viewer1);
     await page.fill('#loginPassword', password);
     await page.click('#loginForm button[type="submit"]');
     
-    await page.goto('/tributes/persistent-memorial');
+    await page.goto('/tributes/persistent-event');
     await page.click('button:has-text("Follow")');
     
     // Logout
@@ -208,14 +208,14 @@ test.describe('Follow/Unfollow System', () => {
     await page.fill('#loginPassword', password);
     await page.click('#loginForm button[type="submit"]');
     
-    // Navigate to memorial
-    await page.goto('/tributes/persistent-memorial');
+    // Navigate to event
+    await page.goto('/tributes/persistent-event');
     
     // Should still show as following
     await expect(page.locator('button:has-text("Following")')).toBeVisible();
   });
 
-  test('Memorial discovery shows unfollowed memorials', async ({ page }) => {
+  test('Event discovery shows unfollowed memorials', async ({ page }) => {
     // Login as viewer
     await page.goto('/login');
     await page.fill('#loginEmail', testUsers.viewer1);
@@ -229,9 +229,9 @@ test.describe('Follow/Unfollow System', () => {
     await expect(page.locator('text=Discover Memorials')).toBeVisible();
     
     // Should show memorials not yet followed
-    await expect(page.locator('[data-testid="discover-memorial"]')).toBeVisible();
+    await expect(page.locator('[data-testid="discover-event"]')).toBeVisible();
     
     // Each should have a follow button
-    await expect(page.locator('[data-testid="discover-memorial"] button:has-text("Follow")')).toBeVisible();
+    await expect(page.locator('[data-testid="discover-event"] button:has-text("Follow")')).toBeVisible();
   });
 });

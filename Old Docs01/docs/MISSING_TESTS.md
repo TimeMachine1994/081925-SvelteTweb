@@ -146,7 +146,7 @@ describe('Calculator Component - Missing Tests', () => {
   it('should validate service details before proceeding');
   it('should auto-save form data periodically');
   it('should restore auto-saved data on page reload');
-  it('should handle Memorial.services data structure correctly');
+  it('should handle Event.services data structure correctly');
   it('should sync with LivestreamConfig collection');
   it('should show pricing breakdowns clearly');
 });
@@ -187,7 +187,7 @@ describe('StripeCheckout Component', () => {
 describe('FuneralDirectorPortal Component', () => {
   it('should display assigned memorials');
   it('should show livestream management options');
-  it('should handle memorial creation workflow');
+  it('should handle event creation workflow');
   it('should display approval status');
   it('should show analytics and reports');
 });
@@ -199,7 +199,7 @@ describe('FuneralDirectorPortal Component', () => {
 describe('ViewerPortal Component', () => {
   it('should display followed memorials');
   it('should show live stream notifications');
-  it('should handle memorial following/unfollowing');
+  it('should handle event following/unfollowing');
   it('should display upcoming services');
   it('should respect privacy settings');
 });
@@ -216,25 +216,25 @@ describe('Cloudflare Recording Webhook', () => {
   it('should verify webhook signatures');
   it('should update archive entries when recordings are ready');
   it('should handle malformed webhook payloads');
-  it('should update multiple memorial archives');
+  it('should update multiple event archives');
   it('should log webhook processing results');
 });
 ```
 
-#### Memorial Management:
+#### Event Management:
 ```typescript
 // src/routes/api/memorials/[memorialId]/+server.test.ts
-describe('Memorial Management API', () => {
-  it('should update memorial details');
-  it('should handle memorial deletion');
-  it('should manage memorial privacy settings');
-  it('should handle memorial ownership transfers');
+describe('Event Management API', () => {
+  it('should update event details');
+  it('should handle event deletion');
+  it('should manage event privacy settings');
+  it('should handle event ownership transfers');
 });
 ```
 
 #### Follow System:
 ```typescript
-// src/routes/api/memorial/follow/+server.test.ts
+// src/routes/api/event/follow/+server.test.ts
 describe('Follow System API', () => {
   it('should allow users to follow memorials');
   it('should prevent duplicate follows');
@@ -267,7 +267,7 @@ describe('API Error Handling', () => {
 test.describe('Mobile Responsiveness', () => {
   test('livestream controls work on mobile devices');
   test('calculator form is usable on small screens');
-  test('memorial pages render correctly on tablets');
+  test('event pages render correctly on tablets');
   test('navigation menus work on touch devices');
   test('file uploads work on mobile browsers');
 });
@@ -306,7 +306,7 @@ describe('API Security', () => {
 describe('Livestream Performance', () => {
   it('should handle multiple concurrent viewers');
   it('should maintain performance with large archive collections');
-  it('should optimize database queries for memorial loading');
+  it('should optimize database queries for event loading');
   it('should handle file upload performance');
   it('should test CDN integration performance');
 });
@@ -319,7 +319,7 @@ describe('Livestream Performance', () => {
 ```typescript
 // e2e/visual-regression.spec.ts
 test.describe('Visual Regression', () => {
-  test('memorial page layout consistency');
+  test('event page layout consistency');
   test('calculator form visual stability');
   test('livestream player appearance');
   test('admin dashboard layout');
@@ -402,8 +402,8 @@ describe('Email System Integration', () => {
 ### Missing Test Utilities:
 
 ```typescript
-// src/lib/test-utils/memorial-factory.ts
-export function createMockMemorial(overrides?: Partial<Memorial>): Memorial;
+// src/lib/test-utils/event-factory.ts
+export function createMockMemorial(overrides?: Partial<Event>): Event;
 
 // src/lib/test-utils/livestream-factory.ts
 export function createMockLivestream(overrides?: Partial<LivestreamConfig>): LivestreamConfig;

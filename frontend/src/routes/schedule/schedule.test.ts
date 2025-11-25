@@ -299,14 +299,14 @@ describe('Schedule Page - Navigation Logic', () => {
 		vi.clearAllMocks();
 	});
 
-	it('should extract memorial ID from URL params', () => {
+	it('should extract event ID from URL params', () => {
 		const searchParams = new URLSearchParams('?memorialId=test-123');
 		const memorialId = searchParams.get('memorialId');
 
 		expect(memorialId).toBe('test-123');
 	});
 
-	it('should redirect to profile when no memorial ID', () => {
+	it('should redirect to profile when no event ID', () => {
 		const searchParams = new URLSearchParams('');
 		const memorialId = searchParams.get('memorialId');
 

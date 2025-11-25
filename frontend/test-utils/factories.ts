@@ -1,4 +1,4 @@
-import type { Memorial, User, FuneralDirector, Stream } from '$lib/types';
+import type { Event, User, FuneralDirector, Stream } from '$lib/types';
 
 // Test data factories for consistent test data generation
 export const createTestUser = (overrides: Partial<User> = {}): User => ({
@@ -12,8 +12,8 @@ export const createTestUser = (overrides: Partial<User> = {}): User => ({
   ...overrides
 });
 
-export const createTestMemorial = (overrides: Partial<Memorial> = {}): Memorial => ({
-  id: 'test-memorial-id',
+export const createTestMemorial = (overrides: Partial<Event> = {}): Event => ({
+  id: 'test-event-id',
   lovedOneName: 'John Doe',
   slug: 'celebration-of-life-for-john-doe',
   fullSlug: 'celebration-of-life-for-john-doe',
@@ -24,7 +24,7 @@ export const createTestMemorial = (overrides: Partial<Memorial> = {}): Memorial 
   services: {
     main: {
       location: { 
-        name: 'Memorial Chapel', 
+        name: 'Event Chapel', 
         address: '123 Main St, City, State 12345',
         isUnknown: false 
       },
@@ -59,7 +59,7 @@ export const createTestFuneralDirector = (overrides: Partial<FuneralDirector> = 
   id: 'test-fd-id',
   uid: 'test-fd-uid',
   email: 'director@funeral.com',
-  companyName: 'Memorial Services Inc',
+  companyName: 'Event Services Inc',
   contactPerson: 'John Director',
   phone: '(555) 555-5555',
   address: {
@@ -76,9 +76,9 @@ export const createTestFuneralDirector = (overrides: Partial<FuneralDirector> = 
 
 export const createTestStream = (overrides: Partial<Stream> = {}): Stream => ({
   id: 'test-stream-id',
-  memorialId: 'test-memorial-id',
-  title: 'Memorial Service Stream',
-  description: 'Live stream of memorial service',
+  memorialId: 'test-event-id',
+  title: 'Event Service Stream',
+  description: 'Live stream of event service',
   scheduledStartTime: new Date(Date.now() + 3600000), // 1 hour from now
   isLive: false,
   isVisible: true,
@@ -102,7 +102,7 @@ export const createTestCalculatorConfig = () => ({
   totalPrice: 199,
   services: {
     main: {
-      location: { name: 'Memorial Chapel', address: '123 Main St', isUnknown: false },
+      location: { name: 'Event Chapel', address: '123 Main St', isUnknown: false },
       time: { date: '2024-01-15', time: '14:00', isUnknown: false },
       hours: 2
     },
@@ -119,9 +119,9 @@ export const createTestCalculatorConfig = () => ({
 export const createTestPaymentData = () => ({
   amount: 19900, // $199.00 in cents
   currency: 'usd',
-  description: 'Memorial Service Package',
+  description: 'Event Service Package',
   metadata: {
-    memorialId: 'test-memorial-id',
+    memorialId: 'test-event-id',
     tier: 'standard'
   }
 });

@@ -215,6 +215,6 @@ describe('Login Component', () => {
     
     const registerLink = screen.getByText(/create account/i);
     expect(registerLink).toBeInTheDocument();
-    expect(registerLink.closest('a')).toHaveAttribute('href', '/register/loved-one');
+    expect(registerLink.closest('a')).toHaveAttribute('href', '/register/new-event-and-account');
   });
 });

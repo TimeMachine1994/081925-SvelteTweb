@@ -58,9 +58,9 @@ interface FuneralDirector {
 }
 ```
 
-## 2. Enhanced Memorial Registration Schema
+## 2. Enhanced Event Registration Schema
 
-### API Endpoint: `POST /api/funeral-director/create-memorial`
+### API Endpoint: `POST /api/funeral-director/create-event`
 
 ```typescript
 interface FuneralDirectorMemorialRequest {
@@ -169,8 +169,8 @@ interface FuneralDirectorMemorialRequest {
     };
   };
   
-  // Memorial Configuration
-  memorial: {
+  // Event Configuration
+  event: {
     title?: string; // Auto-generated if not provided
     description?: string;
     isPublic: boolean;
@@ -268,16 +268,16 @@ PATCH /api/memorials/{memorialId}/livestream/{streamId}
 // Get livestream details
 GET /api/memorials/{memorialId}/livestream/{streamId}
 
-// Get all livestreams for a memorial
+// Get all livestreams for a event
 GET /api/memorials/{memorialId}/livestreams
 ```
 
-## 4. Enhanced Memorial Schema Updates
+## 4. Enhanced Event Schema Updates
 
 ### Updates to existing `memorials` collection:
 
 ```typescript
-interface Memorial {
+interface Event {
   // ... existing fields ...
   
   // New Funeral Director fields
@@ -295,7 +295,7 @@ interface Memorial {
     viewing?: ServiceDetails;
     funeral?: ServiceDetails;
     burial?: ServiceDetails;
-    memorial?: ServiceDetails;
+    event?: ServiceDetails;
   };
   
   // Livestreaming capabilities
@@ -334,7 +334,7 @@ match /funeral_directors/{funeralDirectorId} {
     get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
 }
 
-// Enhanced memorial rules for funeral directors
+// Enhanced event rules for funeral directors
 match /memorials/{memorialId} {
   // ... existing rules ...
   
@@ -350,11 +350,11 @@ match /memorials/{memorialId} {
 
 // Livestream rules
 match /memorials/{memorialId}/livestreams/{streamId} {
-  // Funeral director who created the memorial can manage streams
+  // Funeral director who created the event can manage streams
   allow read, write: if request.auth != null &&
     get(/databases/$(database)/documents/memorials/$(memorialId)).data.funeralDirector.id == request.auth.uid;
   
-  // Memorial owner can view streams
+  // Event owner can view streams
   allow read: if request.auth != null &&
     get(/databases/$(database)/documents/memorials/$(memorialId)).data.ownerId == request.auth.uid;
   
@@ -371,16 +371,16 @@ match /memorials/{memorialId}/livestreams/{streamId} {
 - `PATCH /api/funeral-director/profile` - Update funeral director profile
 - `GET /api/funeral-director/memorials` - Get all memorials managed by funeral director
 
-### Enhanced Memorial Creation
-- `POST /api/funeral-director/create-memorial` - Create memorial with enhanced data
-- `GET /api/funeral-director/memorial/{id}` - Get memorial details for editing
-- `PATCH /api/funeral-director/memorial/{id}` - Update memorial content
-- `DELETE /api/funeral-director/memorial/{id}` - Delete memorial (if permitted)
+### Enhanced Event Creation
+- `POST /api/funeral-director/create-event` - Create event with enhanced data
+- `GET /api/funeral-director/event/{id}` - Get event details for editing
+- `PATCH /api/funeral-director/event/{id}` - Update event content
+- `DELETE /api/funeral-director/event/{id}` - Delete event (if permitted)
 
 ### Livestreaming
 - `POST /api/memorials/{id}/livestream/start` - Start livestream
 - `PATCH /api/memorials/{id}/livestream/{streamId}` - Update stream status
-- `GET /api/memorials/{id}/livestreams` - Get all streams for memorial
+- `GET /api/memorials/{id}/livestreams` - Get all streams for event
 - `DELETE /api/memorials/{id}/livestream/{streamId}` - End/delete stream
 
 This schema design provides a comprehensive foundation for the funeral director functionality while maintaining security and scalability.

@@ -28,7 +28,7 @@
 
 	function getCategoryColor(category) {
 		const colors = {
-			'memorial-planning': '#D5BA7F',
+			'event-planning': '#D5BA7F',
 			'grief-support': '#8B9DC3',
 			'technology': '#7C9885',
 			'funeral-industry': '#A67C7C',
@@ -41,7 +41,7 @@
 
 	function getCategoryLabel(category) {
 		const labels = {
-			'memorial-planning': 'Memorial Planning',
+			'event-planning': 'Event Planning',
 			'grief-support': 'Grief Support',
 			'technology': 'Technology',
 			'funeral-industry': 'Funeral Industry',
@@ -353,10 +353,10 @@
 		<section class="cta-section">
 			<div class="container">
 				<div class="cta-content">
-					<h2>Need Help with Your Memorial Service?</h2>
-					<p>Our expert team is here to guide you through planning and live streaming your memorial service.</p>
+					<h2>Need Help with Your Event Service?</h2>
+					<p>Our expert team is here to guide you through planning and live streaming your event service.</p>
 					<div class="cta-buttons">
-						<a href="/register/loved-one" class="cta-btn primary">Get Started Free</a>
+						<a href="/register/new-event-and-account" class="cta-btn primary">Get Started Free</a>
 						<a href="/contact" class="cta-btn secondary">Contact Us</a>
 					</div>
 				</div>

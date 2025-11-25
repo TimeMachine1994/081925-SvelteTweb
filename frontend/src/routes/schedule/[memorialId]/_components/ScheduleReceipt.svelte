@@ -13,11 +13,11 @@
 	} from 'lucide-svelte';
 
 	let {
-		memorial,
+		event,
 		calculatorConfig,
 		onRequestEdit
 	}: {
-		memorial: any;
+		event: any;
 		calculatorConfig: any;
 		onRequestEdit: () => void;
 	} = $props();
@@ -68,8 +68,8 @@
 	}
 
 	function getPaymentMethod(): string {
-		if (memorial.manualPayment) {
-			const method = memorial.manualPayment.method;
+		if (event.manualPayment) {
+			const method = event.manualPayment.method;
 			const methodNames: Record<string, string> = {
 				cash: 'Cash',
 				check: 'Check',
@@ -89,7 +89,7 @@
 		return (
 			calculatorConfig?.paymentIntentId ||
 			calculatorConfig?.checkoutSessionId ||
-			memorial.manualPayment?.notes ||
+			event.manualPayment?.notes ||
 			null
 		);
 	}
@@ -101,8 +101,8 @@
 TRIBUTESTREAM PAYMENT RECEIPT
 =============================
 
-Memorial: ${memorial.lovedOneName}
-Payment Date: ${formatDate(memorial.paidAt || calculatorConfig?.paidAt)}
+Event: ${event.lovedOneName}
+Payment Date: ${formatDate(event.paidAt || calculatorConfig?.paidAt)}
 Payment Method: ${getPaymentMethod()}
 ${getPaymentId() ? `Payment ID: ${getPaymentId()}` : ''}
 
@@ -119,10 +119,10 @@ TOTAL: ${formatCurrency(calculatorConfig.total)}
 
 SERVICE INFORMATION
 -------------------
-Date: ${formatServiceDate(memorial.services?.main?.time?.date, memorial.services?.main?.time?.time)}
-Location: ${memorial.services?.main?.location?.name || 'TBD'}
-${memorial.services?.main?.location?.address ? `Address: ${memorial.services?.main?.location?.address}` : ''}
-Duration: ${memorial.services?.main?.hours || 2} hours
+Date: ${formatServiceDate(event.services?.main?.time?.date, event.services?.main?.time?.time)}
+Location: ${event.services?.main?.location?.name || 'TBD'}
+${event.services?.main?.location?.address ? `Address: ${event.services?.main?.location?.address}` : ''}
+Duration: ${event.services?.main?.hours || 2} hours
 
 Thank you for choosing Tributestream!
 `;
@@ -131,7 +131,7 @@ Thank you for choosing Tributestream!
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement('a');
 		a.href = url;
-		a.download = `Tributestream-Receipt-${memorial.lovedOneName.replace(/\s+/g, '-')}.txt`;
+		a.download = `Tributestream-Receipt-${event.lovedOneName.replace(/\s+/g, '-')}.txt`;
 		document.body.appendChild(a);
 		a.click();
 		document.body.removeChild(a);
@@ -140,7 +140,7 @@ Thank you for choosing Tributestream!
 </script>
 
 <svelte:head>
-	<title>Payment Receipt - {memorial.lovedOneName} - Tributestream</title>
+	<title>Payment Receipt - {event.lovedOneName} - Tributestream</title>
 	<meta name="description" content="Your Tributestream service booking has been confirmed" />
 </svelte:head>
 
@@ -154,7 +154,7 @@ Thank you for choosing Tributestream!
 				</div>
 				<h1 class="mb-2 text-3xl font-bold text-gray-900">Payment Confirmed</h1>
 				<p class="text-lg text-gray-600">
-					Your memorial service booking for <strong>{memorial.lovedOneName}</strong> is confirmed
+					Your event service booking for <strong>{event.lovedOneName}</strong> is confirmed
 					and paid
 				</p>
 			</div>
@@ -178,7 +178,7 @@ Thank you for choosing Tributestream!
 						<div class="flex items-center justify-between border-b border-gray-100 py-2">
 							<span class="text-sm text-gray-600">Payment Date</span>
 							<span class="font-medium"
-								>{formatDate(memorial.paidAt || calculatorConfig?.paidAt)}</span
+								>{formatDate(event.paidAt || calculatorConfig?.paidAt)}</span
 							>
 						</div>
 						<div class="flex items-center justify-between border-b border-gray-100 py-2">
@@ -191,10 +191,10 @@ Thank you for choosing Tributestream!
 								<span class="font-mono text-sm">{getPaymentId()}</span>
 							</div>
 						{/if}
-						{#if memorial.manualPayment?.markedPaidBy}
+						{#if event.manualPayment?.markedPaidBy}
 							<div class="flex items-center justify-between border-b border-gray-100 py-2">
 								<span class="text-sm text-gray-600">Processed By</span>
-								<span class="text-sm">{memorial.manualPayment.markedPaidBy}</span>
+								<span class="text-sm">{event.manualPayment.markedPaidBy}</span>
 							</div>
 						{/if}
 						<div class="flex items-center justify-between border-b border-gray-100 py-2">
@@ -219,26 +219,26 @@ Thank you for choosing Tributestream!
 							<p class="flex items-center">
 								<Calendar class="mr-2 h-4 w-4 text-gray-400" />
 								{formatServiceDate(
-									memorial.services?.main?.time?.date,
-									memorial.services?.main?.time?.time
+									event.services?.main?.time?.date,
+									event.services?.main?.time?.time
 								)}
 							</p>
-							{#if memorial.services?.main?.location?.name}
+							{#if event.services?.main?.location?.name}
 								<p class="flex items-start">
 									<MapPin class="mt-0.5 mr-2 h-4 w-4 text-gray-400" />
 									<span>
-										{memorial.services.main.location.name}
-										{#if memorial.services.main.location.address}
+										{event.services.main.location.name}
+										{#if event.services.main.location.address}
 											<br />
-											<span class="text-gray-500">{memorial.services.main.location.address}</span>
+											<span class="text-gray-500">{event.services.main.location.address}</span>
 										{/if}
 									</span>
 								</p>
 							{/if}
-							{#if memorial.services?.main?.hours}
+							{#if event.services?.main?.hours}
 								<p class="flex items-center">
 									<Clock class="mr-2 h-4 w-4 text-gray-400" />
-									{memorial.services.main.hours} hour{memorial.services.main.hours !== 1 ? 's' : ''}
+									{event.services.main.hours} hour{event.services.main.hours !== 1 ? 's' : ''}
 									coverage
 								</p>
 							{/if}
@@ -272,11 +272,11 @@ Thank you for choosing Tributestream!
 					</div>
 
 					<!-- Additional Services -->
-					{#if memorial.services?.additional && memorial.services.additional.length > 0}
+					{#if event.services?.additional && event.services.additional.length > 0}
 						<div class="mt-6 border-t border-gray-200 pt-6">
 							<h3 class="mb-4 font-semibold text-gray-900">Additional Services</h3>
 							<div class="space-y-2 text-sm">
-								{#each memorial.services.additional as service}
+								{#each event.services.additional as service}
 									<p>
 										<strong>
 											{service.type === 'location' ? 'Additional Location' : 'Additional Day'}:
@@ -300,14 +300,14 @@ Thank you for choosing Tributestream!
 					<CheckCircle class="h-16 w-16 text-green-500" />
 				</div>
 				<h1 class="mb-2 text-3xl font-bold text-gray-900">Payment Confirmed</h1>
-				<p class="text-lg text-gray-600">This memorial service has been marked as paid</p>
+				<p class="text-lg text-gray-600">This event service has been marked as paid</p>
 			</div>
 
 			<div class="mx-auto max-w-2xl rounded-lg bg-white p-8 shadow-lg">
 				<div class="space-y-4">
 					<div class="flex items-center justify-between border-b border-gray-100 py-3">
-						<span class="font-medium text-gray-600">Memorial</span>
-						<span class="text-lg font-semibold text-gray-900">{memorial.lovedOneName}</span>
+						<span class="font-medium text-gray-600">Event</span>
+						<span class="text-lg font-semibold text-gray-900">{event.lovedOneName}</span>
 					</div>
 					<div class="flex items-center justify-between border-b border-gray-100 py-3">
 						<span class="font-medium text-gray-600">Status</span>
@@ -318,16 +318,16 @@ Thank you for choosing Tributestream!
 							Paid
 						</span>
 					</div>
-					{#if memorial.paidAt}
+					{#if event.paidAt}
 						<div class="flex items-center justify-between border-b border-gray-100 py-3">
 							<span class="font-medium text-gray-600">Payment Date</span>
-							<span class="text-gray-900">{formatDate(memorial.paidAt)}</span>
+							<span class="text-gray-900">{formatDate(event.paidAt)}</span>
 						</div>
 					{/if}
-					{#if memorial.manualPayment?.notes}
+					{#if event.manualPayment?.notes}
 						<div class="flex flex-col gap-2 border-b border-gray-100 py-3">
 							<span class="font-medium text-gray-600">Payment Notes</span>
-							<p class="text-gray-900 max-w-md break-words ml-0 whitespace-pre-wrap">{memorial.manualPayment.notes}</p>
+							<p class="text-gray-900 max-w-md break-words ml-0 whitespace-pre-wrap">{event.manualPayment.notes}</p>
 						</div>
 					{/if}
 				</div>
@@ -347,14 +347,14 @@ Thank you for choosing Tributestream!
 					Request Changes
 				</button>
 
-				<!-- View Memorial -->
-				{#if memorial.fullSlug}
+				<!-- View Event -->
+				{#if event.fullSlug}
 					<a
-						href="/{memorial.fullSlug}"
+						href="/{event.fullSlug}"
 						class="flex items-center justify-center rounded-lg border-2 border-blue-400 bg-blue-50 px-4 py-3 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-100"
 					>
 						<ExternalLink class="mr-2 h-4 w-4" />
-						View Memorial
+						View Event
 					</a>
 				{/if}
 			</div>

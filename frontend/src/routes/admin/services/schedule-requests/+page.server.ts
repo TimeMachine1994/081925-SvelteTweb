@@ -24,7 +24,7 @@ export const load = async ({ locals, url }: any) => {
 
 	const snapshot = await query.get();
 
-	// Get memorial names and user emails
+	// Get event names and user emails
 	const memorialIds = snapshot.docs.map((doc) => doc.data().memorialId).filter(Boolean);
 	const userIds = snapshot.docs.map((doc) => doc.data().requestedBy).filter(Boolean);
 

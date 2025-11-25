@@ -15,7 +15,7 @@
 		if (uploaded) {
 			alert('Slideshow successfully uploaded to Cloudflare Stream!');
 		} else {
-			alert('Slideshow generated! You can download it or add a memorial ID to upload to cloud.');
+			alert('Slideshow generated! You can download it or add a event ID to upload to cloud.');
 		}
 	}
 </script>
@@ -28,7 +28,7 @@
 <div class="test-page">
 	<div class="test-header">
 		<h1>🎬 Slideshow Creator Test</h1>
-		<p>Upload photos and generate a memorial slideshow video</p>
+		<p>Upload photos and generate a event slideshow video</p>
 	</div>
 
 	<PhotoSlideshowCreator 
@@ -49,7 +49,7 @@
 
 		<div class="test-note">
 			<strong>Note:</strong> This test page generates videos locally without uploading to Cloudflare Stream. 
-			To test the full upload functionality, use the slideshow creator within an actual memorial page.
+			To test the full upload functionality, use the slideshow creator within an actual event page.
 		</div>
 
 		<h3>Features Included:</h3>

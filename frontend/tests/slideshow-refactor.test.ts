@@ -45,24 +45,24 @@ describe('Slideshow Refactoring Tests', () => {
     });
 
     it('should generate correct slideshow navigation URL', () => {
-      const memorialId = 'memorial-123';
+      const memorialId = 'event-123';
       const expectedUrl = `/slideshow-generator?memorialId=${memorialId}`;
 
-      expect(expectedUrl).toBe('/slideshow-generator?memorialId=memorial-123');
+      expect(expectedUrl).toBe('/slideshow-generator?memorialId=event-123');
     });
 
-    it('should handle slideshow navigation for memorial owners', () => {
-      const memorial = {
-        id: 'memorial-456',
+    it('should handle slideshow navigation for event owners', () => {
+      const event = {
+        id: 'event-456',
         lovedOneName: 'John Doe'
       };
 
-      const handleSlideshowClick = (memorial: any) => {
-        return `/slideshow-generator?memorialId=${memorial.id}`;
+      const handleSlideshowClick = (event: any) => {
+        return `/slideshow-generator?memorialId=${event.id}`;
       };
 
-      const result = handleSlideshowClick(memorial);
-      expect(result).toBe('/slideshow-generator?memorialId=memorial-456');
+      const result = handleSlideshowClick(event);
+      expect(result).toBe('/slideshow-generator?memorialId=event-456');
     });
 
     it('should validate user role for slideshow access', () => {
@@ -98,10 +98,10 @@ describe('Slideshow Refactoring Tests', () => {
     });
 
     it('should generate correct slideshow URL for stream management', () => {
-      const memorialId = 'memorial-789';
+      const memorialId = 'event-789';
       const expectedUrl = `/slideshow-generator?memorialId=${memorialId}`;
 
-      expect(expectedUrl).toBe('/slideshow-generator?memorialId=memorial-789');
+      expect(expectedUrl).toBe('/slideshow-generator?memorialId=event-789');
     });
 
     it('should validate permissions for slideshow creation in stream management', () => {
@@ -211,7 +211,7 @@ describe('Slideshow Refactoring Tests', () => {
     });
 
     it('should handle slideshow success navigation', () => {
-      const memorialId = 'memorial-123';
+      const memorialId = 'event-123';
       
       const handleSlideshowSuccess = (uploaded: boolean, memorialId?: string) => {
         if (uploaded) {
@@ -224,35 +224,35 @@ describe('Slideshow Refactoring Tests', () => {
         return null;
       };
 
-      expect(handleSlideshowSuccess(true, memorialId)).toBe('/memorials/memorial-123');
+      expect(handleSlideshowSuccess(true, memorialId)).toBe('/memorials/event-123');
       expect(handleSlideshowSuccess(true)).toBe('/profile');
       expect(handleSlideshowSuccess(false)).toBe(null);
     });
   });
 
   describe('Navigation Integration Tests', () => {
-    it('should preserve memorial context in navigation', () => {
-      const memorial = {
-        id: 'memorial-123',
+    it('should preserve event context in navigation', () => {
+      const event = {
+        id: 'event-123',
         lovedOneName: 'Jane Doe',
-        fullSlug: 'jane-doe-memorial'
+        fullSlug: 'jane-doe-event'
       };
 
-      const generateSlideshowUrl = (memorial: any) => {
-        return `/slideshow-generator?memorialId=${memorial.id}`;
+      const generateSlideshowUrl = (event: any) => {
+        return `/slideshow-generator?memorialId=${event.id}`;
       };
 
-      const url = generateSlideshowUrl(memorial);
+      const url = generateSlideshowUrl(event);
       const urlParams = new URLSearchParams(url.split('?')[1]);
       
-      expect(urlParams.get('memorialId')).toBe('memorial-123');
+      expect(urlParams.get('memorialId')).toBe('event-123');
     });
 
     it('should handle URL parameter parsing', () => {
-      const testUrl = '/slideshow-generator?memorialId=memorial-456&edit=true';
+      const testUrl = '/slideshow-generator?memorialId=event-456&edit=true';
       const url = new URL(testUrl, 'http://localhost');
       
-      expect(url.searchParams.get('memorialId')).toBe('memorial-456');
+      expect(url.searchParams.get('memorialId')).toBe('event-456');
       expect(url.searchParams.get('edit')).toBe('true');
     });
 
@@ -267,14 +267,14 @@ describe('Slideshow Refactoring Tests', () => {
         return '/profile';
       };
 
-      expect(getBackNavigationPath('memorial-123', 'streams')).toBe('/memorials/memorial-123/streams');
-      expect(getBackNavigationPath('memorial-123', 'profile')).toBe('/profile');
+      expect(getBackNavigationPath('event-123', 'streams')).toBe('/memorials/event-123/streams');
+      expect(getBackNavigationPath('event-123', 'profile')).toBe('/profile');
       expect(getBackNavigationPath()).toBe('/profile');
     });
   });
 
   describe('Error Handling and Edge Cases', () => {
-    it('should handle missing memorial ID gracefully', () => {
+    it('should handle missing event ID gracefully', () => {
       const generateSlideshowUrl = (memorialId?: string) => {
         if (!memorialId) {
           return '/slideshow-generator';
@@ -283,7 +283,7 @@ describe('Slideshow Refactoring Tests', () => {
       };
 
       expect(generateSlideshowUrl()).toBe('/slideshow-generator');
-      expect(generateSlideshowUrl('memorial-123')).toBe('/slideshow-generator?memorialId=memorial-123');
+      expect(generateSlideshowUrl('event-123')).toBe('/slideshow-generator?memorialId=event-123');
     });
 
     it('should handle scroll element not found', async () => {
@@ -314,26 +314,26 @@ describe('Slideshow Refactoring Tests', () => {
     });
 
     it('should validate user permissions before showing slideshow buttons', () => {
-      const shouldShowSlideshowButton = (user: any, memorial: any) => {
-        if (!user || !memorial) return false;
+      const shouldShowSlideshowButton = (user: any, event: any) => {
+        if (!user || !event) return false;
         
         return (
           user.role === 'owner' ||
           user.role === 'admin' ||
-          (user.role === 'funeral_director' && memorial.funeralDirectorUid === user.uid) ||
-          memorial.ownerUid === user.uid
+          (user.role === 'funeral_director' && event.funeralDirectorUid === user.uid) ||
+          event.ownerUid === user.uid
         );
       };
 
       const owner = { uid: 'user-1', role: 'owner' };
       const admin = { uid: 'user-2', role: 'admin' };
       const funeralDirector = { uid: 'user-3', role: 'funeral_director' };
-      const memorial = { id: 'memorial-1', ownerUid: 'user-1', funeralDirectorUid: 'user-3' };
+      const event = { id: 'event-1', ownerUid: 'user-1', funeralDirectorUid: 'user-3' };
 
-      expect(shouldShowSlideshowButton(owner, memorial)).toBe(true);
-      expect(shouldShowSlideshowButton(admin, memorial)).toBe(true);
-      expect(shouldShowSlideshowButton(funeralDirector, memorial)).toBe(true);
-      expect(shouldShowSlideshowButton(null, memorial)).toBe(false);
+      expect(shouldShowSlideshowButton(owner, event)).toBe(true);
+      expect(shouldShowSlideshowButton(admin, event)).toBe(true);
+      expect(shouldShowSlideshowButton(funeralDirector, event)).toBe(true);
+      expect(shouldShowSlideshowButton(null, event)).toBe(false);
       expect(shouldShowSlideshowButton(owner, null)).toBe(false);
     });
   });
@@ -358,22 +358,22 @@ describe('Slideshow Refactoring Tests', () => {
       expect(slideshowConfig.defaultSettings.photoDuration).toBe(3);
     });
 
-    it('should preserve memorial integration', () => {
-      const memorial = {
-        id: 'memorial-123',
+    it('should preserve event integration', () => {
+      const event = {
+        id: 'event-123',
         lovedOneName: 'Test Person',
         hasSlideshow: false
       };
 
-      const updateMemorialWithSlideshow = (memorial: any, slideshowId: string) => {
+      const updateMemorialWithSlideshow = (event: any, slideshowId: string) => {
         return {
-          ...memorial,
+          ...event,
           hasSlideshow: true,
           slideshowId
         };
       };
 
-      const updatedMemorial = updateMemorialWithSlideshow(memorial, 'slideshow-456');
+      const updatedMemorial = updateMemorialWithSlideshow(event, 'slideshow-456');
       
       expect(updatedMemorial.hasSlideshow).toBe(true);
       expect(updatedMemorial.slideshowId).toBe('slideshow-456');

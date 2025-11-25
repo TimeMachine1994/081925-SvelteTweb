@@ -6,22 +6,22 @@ Tributestream uses a comprehensive type system built with TypeScript interfaces 
 
 ## Core Data Models
 
-### Memorial Interface
+### Event Interface
 
-The `Memorial` interface is the central data structure representing a memorial service.
+The `Event` interface is the central data structure representing a event service.
 
 ```typescript
-interface Memorial {
+interface Event {
   // Identity
   lovedOneName: string;           // Name of the deceased
   slug: string;                   // URL-safe identifier
   fullSlug: string;               // Complete URL path
   
   // Ownership & Access
-  ownerUid: string;               // Family member who owns the memorial
+  ownerUid: string;               // Family member who owns the event
   funeralDirectorUid?: string;    // Optional funeral director association
-  creatorEmail: string;           // Email of memorial creator
-  creatorName: string;            // Name of memorial creator
+  creatorEmail: string;           // Email of event creator
+  creatorName: string;            // Name of event creator
   
   // Service Details (Consolidated Structure)
   services: {
@@ -30,7 +30,7 @@ interface Memorial {
   };
   
   // Content & Media
-  content: string;                // Memorial description/obituary
+  content: string;                // Event description/obituary
   custom_html: string | null;     // Custom HTML content
   imageUrl?: string;              // Profile image URL
   photos?: string[];              // Photo gallery URLs
@@ -102,7 +102,7 @@ interface TimeInfo {
 
 ### Livestream Configuration
 
-The `LivestreamConfig` interface manages booking and calculator data separately from memorial content.
+The `LivestreamConfig` interface manages booking and calculator data separately from event content.
 
 ```typescript
 interface LivestreamConfig {
@@ -111,7 +111,7 @@ interface LivestreamConfig {
   bookingItems: BookingItem[];    // Itemized booking details
   total: number;                  // Total cost
   uid: string;                    // User who created config
-  memorialId: string;             // Associated memorial ID
+  memorialId: string;             // Associated event ID
   status: 'draft' | 'saved' | 'pending_payment' | 'paid' | 'confirmed';
   createdAt: Timestamp;
   lastModified: Timestamp;
@@ -120,7 +120,7 @@ interface LivestreamConfig {
 }
 
 interface CalculatorFormData {
-  memorialId: string;             // Memorial reference
+  memorialId: string;             // Event reference
   selectedTier: Tier;             // Service tier
   addons: Addons;                 // Selected add-ons
   createdAt?: Date;
@@ -160,9 +160,9 @@ interface Stream {
   title: string;                  // Stream title
   description?: string;           // Optional description
   
-  // Memorial Association
-  memorialId?: string;            // Associated memorial ID
-  memorialName?: string;          // Memorial name for reference
+  // Event Association
+  memorialId?: string;            // Associated event ID
+  memorialName?: string;          // Event name for reference
   
   // Stream Configuration
   cloudflareId?: string;          // Cloudflare Stream ID
@@ -423,22 +423,22 @@ interface MVPTwoStreamData {
 
 ## Data Relationships
 
-### Memorial → Services Relationship
-- One memorial has one main service
-- One memorial can have multiple additional services
+### Event → Services Relationship
+- One event has one main service
+- One event can have multiple additional services
 - Services contain location, time, and duration information
 
-### Memorial → Streams Relationship
-- One memorial can have multiple streams
+### Event → Streams Relationship
+- One event can have multiple streams
 - Each stream is associated with a specific service
 - Streams maintain their own visibility and recording state
 
-### Memorial → LivestreamConfig Relationship
-- One memorial can have one active livestream configuration
+### Event → LivestreamConfig Relationship
+- One event can have one active livestream configuration
 - Configuration contains booking and payment information
-- Separate from memorial content for data integrity
+- Separate from event content for data integrity
 
-### User → Memorial Relationship
+### User → Event Relationship
 - Users can own multiple memorials (ownerUid)
 - Funeral directors can be associated with multiple memorials (funeralDirectorUid)
 - Access control is role-based with permission inheritance
@@ -457,13 +457,13 @@ function isValidStreamAction(action: string): action is StreamAction {
 
 ## Usage Patterns
 
-### Creating a Memorial with Services
+### Creating a Event with Services
 
 ```typescript
-const memorial: Memorial = {
+const event: Event = {
   lovedOneName: "John Doe",
-  slug: "john-doe-memorial",
-  fullSlug: "john-doe-memorial-2024",
+  slug: "john-doe-event",
+  fullSlug: "john-doe-event-2024",
   ownerUid: "user123",
   creatorEmail: "family@example.com",
   creatorName: "Jane Doe",
@@ -483,7 +483,7 @@ const memorial: Memorial = {
     },
     additional: []
   },
-  content: "Memorial service for John Doe...",
+  content: "Event service for John Doe...",
   custom_html: null,
   isPublic: true,
   createdAt: Timestamp.now(),
@@ -495,10 +495,10 @@ const memorial: Memorial = {
 
 ```typescript
 const streamRequest: CreateStreamRequest = {
-  title: "John Doe Memorial Service",
-  description: "Live memorial service",
+  title: "John Doe Event Service",
+  description: "Live event service",
   memorialId: "memorial123",
-  memorialName: "John Doe Memorial",
+  memorialName: "John Doe Event",
   scheduledStartTime: new Date("2024-10-15T14:00:00"),
   isVisible: true,
   isPublic: true

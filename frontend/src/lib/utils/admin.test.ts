@@ -70,7 +70,7 @@ describe('AdminService', () => {
 				get: vi.fn().mockResolvedValue({ docs: mockUsers })
 			});
 
-			// Mock memorial count queries
+			// Mock event count queries
 			mockAdminDb.collection.mockReturnValue({
 				where: vi.fn().mockReturnValue({
 					get: vi.fn().mockResolvedValue(mockMemorials)

@@ -6,16 +6,16 @@ import type { Stream } from '$lib/types/stream';
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const memorialId = params.id;
 
-	// Fetch memorial details
+	// Fetch event details
 	const memorialDoc = await adminDb.collection('memorials').doc(memorialId).get();
 
 	if (!memorialDoc.exists) {
-		throw SvelteKitError(404, 'Memorial not found');
+		throw SvelteKitError(404, 'Event not found');
 	}
 
 	const memorialData = memorialDoc.data()!;
 	
-	const memorial = {
+	const event = {
 		id: memorialDoc.id,
 		lovedOneName: memorialData.lovedOneName,
 		ownerUid: memorialData.ownerUid,
@@ -36,7 +36,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			memorialData.ownerUid === userId;
 	}
 
-	// Fetch streams for this memorial
+	// Fetch streams for this event
 	const streamsSnapshot = await adminDb
 		.collection('streams')
 		.where('memorialId', '==', memorialId)
@@ -49,7 +49,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	})) as Stream[];
 
 	return {
-		memorial,
+		event,
 		streams,
 		canManage
 	};

@@ -4,7 +4,7 @@
 
 ### 1. ✅ Stream Arming (Admin Panel)
 - **Admin Streams Page:** `/admin/services/streams`
-- **Memorial Detail Page:** `/admin/services/memorials/[id]`
+- **Event Detail Page:** `/admin/services/memorials/[id]`
 - **Features:**
   - Arm streams with OBS credentials (Stream Key)
   - Get real Cloudflare RTMPS URL + Stream Key
@@ -23,7 +23,7 @@
 - **Auto status updates** when stream goes live/ends
 - **Playback URL set automatically** when stream connects
 
-### 4. ✅ Memorial Page Auto-Reload
+### 4. ✅ Event Page Auto-Reload
 - **File:** `[fullSlug]/+page.svelte`
 - **Component:** `MemorialStreamDisplay.svelte`
 - **Features:**
@@ -105,7 +105,7 @@
 
 5. **`routes/[fullSlug]/+page.svelte`**
    - Already uses MemorialStreamDisplay
-   - Shows streams to memorial visitors
+   - Shows streams to event visitors
    - No changes needed ✅
 
 ### Admin Pages
@@ -144,8 +144,8 @@ CLOUDFLARE_WEBHOOK_SECRET=your-webhook-secret
 - [ ] Start Streaming
 - [ ] Check admin panel shows "Live" status
 
-### Test Memorial Page
-- [ ] Navigate to memorial page `/{fullSlug}`
+### Test Event Page
+- [ ] Navigate to event page `/{fullSlug}`
 - [ ] See countdown timer for scheduled stream
 - [ ] Start OBS stream
 - [ ] Wait 10-30 seconds
@@ -190,7 +190,7 @@ CLOUDFLARE_WEBHOOK_SECRET=your-webhook-secret
    - Download recording option
 
 4. **Multi-Camera Support**
-   - Multiple Live Inputs per memorial
+   - Multiple Live Inputs per event
    - Camera switching
    - Picture-in-picture
 
@@ -207,13 +207,13 @@ CLOUDFLARE_WEBHOOK_SECRET=your-webhook-secret
 3. ✅ `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` set
 4. [ ] Test full flow in staging environment
 5. [ ] Monitor server logs for webhook receipts
-6. [ ] Test memorial page auto-reload timing
+6. [ ] Test event page auto-reload timing
 
 ### Monitoring
 - Watch for webhook errors in logs
 - Monitor Cloudflare Live Inputs dashboard
 - Check stream status updates in Firestore
-- Verify memorial pages reload correctly
+- Verify event pages reload correctly
 
 ## Support & Documentation
 
@@ -229,7 +229,7 @@ CLOUDFLARE_WEBHOOK_SECRET=your-webhook-secret
 - ✅ Admin can arm streams with OBS credentials
 - ✅ Real Cloudflare RTMPS URLs and stream keys
 - ✅ Webhooks configured for auto status updates
-- ✅ Memorial pages auto-reload when stream goes live
+- ✅ Event pages auto-reload when stream goes live
 - ✅ Live video displays in Cloudflare iframe player
 - ✅ Polling fallback if webhooks delayed
 

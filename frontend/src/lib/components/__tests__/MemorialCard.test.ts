@@ -41,11 +41,11 @@ vi.mock('../minimal-modern/Badge.svelte', () => ({
 
 describe('MemorialCard Component', () => {
   const mockMemorial = {
-    id: 'memorial-123',
+    id: 'event-123',
     name: 'John Michael Doe',
     dates: 'January 15, 1950 - December 20, 2023',
     description: 'A loving father, husband, and friend who touched the lives of everyone he met.',
-    imageUrl: 'https://example.com/memorial-photo.jpg',
+    imageUrl: 'https://example.com/event-photo.jpg',
     location: 'St. Mary\'s Church, Springfield',
     serviceDate: 'December 25, 2023 at 2:00 PM'
   };
@@ -55,10 +55,10 @@ describe('MemorialCard Component', () => {
   });
 
   describe('Basic Rendering', () => {
-    it('renders memorial name and dates', () => {
+    it('renders event name and dates', () => {
       render(MemorialCard, {
         props: {
-          memorial: mockMemorial
+          event: mockMemorial
         }
       });
 
@@ -66,10 +66,10 @@ describe('MemorialCard Component', () => {
       expect(screen.getByText('January 15, 1950 - December 20, 2023')).toBeInTheDocument();
     });
 
-    it('renders memorial description when provided', () => {
+    it('renders event description when provided', () => {
       render(MemorialCard, {
         props: {
-          memorial: mockMemorial
+          event: mockMemorial
         }
       });
 
@@ -79,7 +79,7 @@ describe('MemorialCard Component', () => {
     it('renders location when provided', () => {
       render(MemorialCard, {
         props: {
-          memorial: mockMemorial
+          event: mockMemorial
         }
       });
 
@@ -89,7 +89,7 @@ describe('MemorialCard Component', () => {
     it('renders service date when provided', () => {
       render(MemorialCard, {
         props: {
-          memorial: mockMemorial
+          event: mockMemorial
         }
       });
 
@@ -99,14 +99,14 @@ describe('MemorialCard Component', () => {
 
     it('renders without optional fields', () => {
       const minimalMemorial = {
-        id: 'memorial-456',
+        id: 'event-456',
         name: 'Jane Smith',
         dates: '1960 - 2023'
       };
 
       render(MemorialCard, {
         props: {
-          memorial: minimalMemorial
+          event: minimalMemorial
         }
       });
 
@@ -117,16 +117,16 @@ describe('MemorialCard Component', () => {
   });
 
   describe('Image Handling', () => {
-    it('renders memorial image when provided', () => {
+    it('renders event image when provided', () => {
       render(MemorialCard, {
         props: {
-          memorial: mockMemorial
+          event: mockMemorial
         }
       });
 
       const image = screen.getByAltText('John Michael Doe');
       expect(image).toBeInTheDocument();
-      expect(image).toHaveAttribute('src', 'https://example.com/memorial-photo.jpg');
+      expect(image).toHaveAttribute('src', 'https://example.com/event-photo.jpg');
     });
 
     it('does not render image container when no image provided', () => {
@@ -137,7 +137,7 @@ describe('MemorialCard Component', () => {
 
       render(MemorialCard, {
         props: {
-          memorial: memorialWithoutImage
+          event: memorialWithoutImage
         }
       });
 
@@ -146,7 +146,7 @@ describe('MemorialCard Component', () => {
   });
 
   describe('Live Status', () => {
-    it('shows live badge when memorial is live', () => {
+    it('shows live badge when event is live', () => {
       const liveMemorial = {
         ...mockMemorial,
         isLive: true
@@ -154,7 +154,7 @@ describe('MemorialCard Component', () => {
 
       render(MemorialCard, {
         props: {
-          memorial: liveMemorial
+          event: liveMemorial
         }
       });
 
@@ -170,15 +170,15 @@ describe('MemorialCard Component', () => {
 
       render(MemorialCard, {
         props: {
-          memorial: regularMemorial
+          event: regularMemorial
         }
       });
 
       expect(screen.queryByText('🔴 Live')).not.toBeInTheDocument();
-      expect(screen.getByText('View Memorial')).toBeInTheDocument();
+      expect(screen.getByText('View Event')).toBeInTheDocument();
     });
 
-    it('shows correct viewer count text for live memorial', () => {
+    it('shows correct viewer count text for live event', () => {
       const liveMemorial = {
         ...mockMemorial,
         isLive: true,
@@ -187,14 +187,14 @@ describe('MemorialCard Component', () => {
 
       render(MemorialCard, {
         props: {
-          memorial: liveMemorial
+          event: liveMemorial
         }
       });
 
       expect(screen.getByText('15 viewers watching')).toBeInTheDocument();
     });
 
-    it('shows correct viewer count text for completed memorial', () => {
+    it('shows correct viewer count text for completed event', () => {
       const completedMemorial = {
         ...mockMemorial,
         isLive: false,
@@ -203,7 +203,7 @@ describe('MemorialCard Component', () => {
 
       render(MemorialCard, {
         props: {
-          memorial: completedMemorial
+          event: completedMemorial
         }
       });
 
@@ -219,7 +219,7 @@ describe('MemorialCard Component', () => {
 
       render(MemorialCard, {
         props: {
-          memorial: memorialWithOneViewer
+          event: memorialWithOneViewer
         }
       });
 
@@ -228,7 +228,7 @@ describe('MemorialCard Component', () => {
   });
 
   describe('Privacy Status', () => {
-    it('shows private badge when memorial is private', () => {
+    it('shows private badge when event is private', () => {
       const privateMemorial = {
         ...mockMemorial,
         isPrivate: true
@@ -236,7 +236,7 @@ describe('MemorialCard Component', () => {
 
       render(MemorialCard, {
         props: {
-          memorial: privateMemorial
+          event: privateMemorial
         }
       });
 
@@ -251,7 +251,7 @@ describe('MemorialCard Component', () => {
 
       render(MemorialCard, {
         props: {
-          memorial: publicMemorial
+          event: publicMemorial
         }
       });
 
@@ -265,12 +265,12 @@ describe('MemorialCard Component', () => {
 
       render(MemorialCard, {
         props: {
-          memorial: mockMemorial,
+          event: mockMemorial,
           onView
         }
       });
 
-      const viewButton = screen.getByText('View Memorial');
+      const viewButton = screen.getByText('View Event');
       await fireEvent.click(viewButton);
 
       expect(onView).toHaveBeenCalledTimes(1);
@@ -281,7 +281,7 @@ describe('MemorialCard Component', () => {
 
       render(MemorialCard, {
         props: {
-          memorial: mockMemorial,
+          event: mockMemorial,
           onShare
         }
       });
@@ -292,7 +292,7 @@ describe('MemorialCard Component', () => {
     it('does not render share button when onShare not provided', () => {
       render(MemorialCard, {
         props: {
-          memorial: mockMemorial
+          event: mockMemorial
         }
       });
 
@@ -304,7 +304,7 @@ describe('MemorialCard Component', () => {
 
       render(MemorialCard, {
         props: {
-          memorial: mockMemorial,
+          event: mockMemorial,
           onShare
         }
       });
@@ -322,7 +322,7 @@ describe('MemorialCard Component', () => {
 
       render(MemorialCard, {
         props: {
-          memorial: mockMemorial,
+          event: mockMemorial,
           theme: 'elegant'
         }
       });
@@ -335,7 +335,7 @@ describe('MemorialCard Component', () => {
 
       render(MemorialCard, {
         props: {
-          memorial: mockMemorial
+          event: mockMemorial
         }
       });
 
@@ -345,21 +345,21 @@ describe('MemorialCard Component', () => {
     it('applies custom CSS classes', () => {
       const { container } = render(MemorialCard, {
         props: {
-          memorial: mockMemorial,
-          class: 'custom-memorial-card'
+          event: mockMemorial,
+          class: 'custom-event-card'
         }
       });
 
-      const card = container.querySelector('.custom-memorial-card');
+      const card = container.querySelector('.custom-event-card');
       expect(card).toBeInTheDocument();
     });
   });
 
   describe('Accessibility', () => {
-    it('provides proper alt text for memorial image', () => {
+    it('provides proper alt text for event image', () => {
       render(MemorialCard, {
         props: {
-          memorial: mockMemorial
+          event: mockMemorial
         }
       });
 
@@ -367,10 +367,10 @@ describe('MemorialCard Component', () => {
       expect(image).toBeInTheDocument();
     });
 
-    it('uses semantic heading for memorial name', () => {
+    it('uses semantic heading for event name', () => {
       render(MemorialCard, {
         props: {
-          memorial: mockMemorial
+          event: mockMemorial
         }
       });
 
@@ -384,7 +384,7 @@ describe('MemorialCard Component', () => {
 
       render(MemorialCard, {
         props: {
-          memorial: mockMemorial,
+          event: mockMemorial,
           onView,
           onShare
         }
@@ -392,7 +392,7 @@ describe('MemorialCard Component', () => {
 
       const buttons = screen.getAllByRole('button');
       expect(buttons).toHaveLength(2);
-      expect(buttons[0]).toHaveTextContent('View Memorial');
+      expect(buttons[0]).toHaveTextContent('View Event');
       expect(buttons[1]).toHaveTextContent('Share');
     });
   });
@@ -406,7 +406,7 @@ describe('MemorialCard Component', () => {
 
       const { container } = render(MemorialCard, {
         props: {
-          memorial: memorialWithLongDescription
+          event: memorialWithLongDescription
         }
       });
 
@@ -416,7 +416,7 @@ describe('MemorialCard Component', () => {
   });
 
   describe('Edge Cases', () => {
-    it('handles missing memorial data gracefully', () => {
+    it('handles missing event data gracefully', () => {
       const incompleteMemorial = {
         id: 'incomplete',
         name: '',
@@ -425,12 +425,12 @@ describe('MemorialCard Component', () => {
 
       render(MemorialCard, {
         props: {
-          memorial: incompleteMemorial
+          event: incompleteMemorial
         }
       });
 
       // Should not crash and should render basic structure
-      expect(screen.getByText('View Memorial')).toBeInTheDocument();
+      expect(screen.getByText('View Event')).toBeInTheDocument();
     });
 
     it('handles zero viewer count', () => {
@@ -441,7 +441,7 @@ describe('MemorialCard Component', () => {
 
       render(MemorialCard, {
         props: {
-          memorial: memorialWithZeroViewers
+          event: memorialWithZeroViewers
         }
       });
 
@@ -456,7 +456,7 @@ describe('MemorialCard Component', () => {
 
       render(MemorialCard, {
         props: {
-          memorial: memorialWithoutViewerCount
+          event: memorialWithoutViewerCount
         }
       });
 
@@ -474,7 +474,7 @@ describe('MemorialCard Component', () => {
 
       render(MemorialCard, {
         props: {
-          memorial: liveMemorial
+          event: liveMemorial
         }
       });
 
@@ -491,7 +491,7 @@ describe('MemorialCard Component', () => {
 
       render(MemorialCard, {
         props: {
-          memorial: privateMemorial
+          event: privateMemorial
         }
       });
 

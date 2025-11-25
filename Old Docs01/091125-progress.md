@@ -9,7 +9,7 @@ This session focused on finalizing the Tributestream V1 role system refactor and
 - **Problem**: Dev server failing to start due to missing `PhotoGallery` component references
 - **Solution**: 
   - Removed lingering import: `import PhotoGallery from '$lib/components/PhotoGallery.svelte';`
-  - Removed component usage: `<PhotoGallery photos={memorial.photos} />`
+  - Removed component usage: `<PhotoGallery photos={event.photos} />`
   - Added explanatory comment about V1 photo upload removal
 - **Result**: Dev server now starts cleanly on `http://localhost:5174/`
 

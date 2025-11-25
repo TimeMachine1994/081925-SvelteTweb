@@ -15,7 +15,7 @@
 	const testData = {
 		enhanced_registration: {
 			lovedOneName: 'John Doe',
-			memorialUrl: 'https://tributestream.com/john-doe-memorial',
+			memorialUrl: 'https://tributestream.com/john-doe-event',
 			ownerName: 'Jane Doe',
 			password: 'TempPass123!'
 		},
@@ -25,7 +25,7 @@
 		},
 		invitation: {
 			fromName: 'Jane Doe',
-			memorialName: 'John Doe Memorial',
+			memorialName: 'John Doe Event',
 			invitationId: 'test-invitation-123'
 		},
 		email_change: {
@@ -33,19 +33,19 @@
 			confirmationUrl: 'https://tributestream.com/confirm-email?token=test123'
 		},
 		payment_confirmation: {
-			memorialId: 'test-memorial-123',
+			memorialId: 'test-event-123',
 			paymentIntentId: 'pi_test123456789',
 			lovedOneName: 'John Doe',
 			amount: 299.99
 		},
 		payment_action: {
-			memorialId: 'test-memorial-123',
+			memorialId: 'test-event-123',
 			paymentIntentId: 'pi_test123456789',
 			lovedOneName: 'John Doe',
 			nextActionUrl: 'https://tributestream.com/payment/confirm'
 		},
 		payment_failure: {
-			memorialId: 'test-memorial-123',
+			memorialId: 'test-event-123',
 			paymentIntentId: 'pi_test123456789',
 			lovedOneName: 'John Doe',
 			failureReason: 'Card declined - insufficient funds'
@@ -159,7 +159,7 @@
 	const templateLabels = {
 		enhanced_registration: 'Enhanced Registration',
 		basic_registration: 'Basic Registration',
-		invitation: 'Memorial Invitation',
+		invitation: 'Event Invitation',
 		email_change: 'Email Change Confirmation',
 		payment_confirmation: 'Payment Confirmation',
 		payment_action: 'Payment Action Required',

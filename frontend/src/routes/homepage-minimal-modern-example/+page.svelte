@@ -18,7 +18,7 @@
 
 	const faqItems = [
 		{ q: "How quickly can we go live?", a: "Same day in most cases. Call us for availability at 407-221-5922." },
-		{ q: "Is the memorial link private?", a: "Yes, you control who receives the link. Password protection is optional." },
+		{ q: "Is the event link private?", a: "Yes, you control who receives the link. Password protection is optional." },
 		{ q: "Can we download the recording?", a: "Yes, you receive a high-quality archive file after the service." }
 	];
 
@@ -54,7 +54,7 @@
 		if (lovedOneName.trim()) {
 			params.set('name', lovedOneName.trim());
 		}
-		goto(`/register/loved-one?${params.toString()}`);
+		goto(`/register/new-event-and-account?${params.toString()}`);
 	}
 
 	function handleSearchTributes() {
@@ -68,8 +68,8 @@
 </script>
 
 <svelte:head>
-	<title>Tributestream - Compassionate Livestreams for Memorial Services</title>
-	<meta name="description" content="Professional livestreaming services for memorial services across Central Florida. Connect families anywhere with respectful, high-quality broadcasts." />
+	<title>Tributestream - Compassionate Livestreams for Event Services</title>
+	<meta name="description" content="Professional livestreaming services for event services across Central Florida. Connect families anywhere with respectful, high-quality broadcasts." />
 </svelte:head>
 
 <div class="{theme.root}" style="font-family: {theme.font.body}">
@@ -96,7 +96,7 @@
 				Tributestream makes hearts full again
 			</h1>
 			<p class="mb-8 text-xl md:text-2xl opacity-90">
-				Professional livestreaming for memorial services across Central Florida
+				Professional livestreaming for event services across Central Florida
 			</p>
 			
 			<div class="flex flex-col items-center gap-4 max-w-md mx-auto">
@@ -174,7 +174,7 @@
 							🔒
 						</div>
 						<p class="text-sm opacity-80">
-							Your memorial service remains private with secure links that you control. Optional password protection available.
+							Your event service remains private with secure links that you control. Optional password protection available.
 						</p>
 					</div>
 				</Card>
@@ -214,7 +214,7 @@
 	<section class="py-16 bg-blue-500/10">
 		<div class="max-w-4xl mx-auto px-6 text-center">
 			<h2 class="text-3xl font-bold {theme.text}" style="font-family: {theme.font.heading}">
-				Ready to Create a Memorial?
+				Ready to Create a Event?
 			</h2>
 			<p class="mt-4 text-lg {theme.hero.sub} mb-8">
 				Let us help you share this important moment with family and friends, near and far.

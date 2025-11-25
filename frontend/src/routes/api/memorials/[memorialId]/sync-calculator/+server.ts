@@ -26,9 +26,9 @@ export const POST: RequestHandler = async ({ request, locals, params }) => {
 
 		const stream = streamDoc.data()!;
 
-		// Check if stream belongs to this memorial
+		// Check if stream belongs to this event
 		if (stream.memorialId !== memorialId) {
-			return json({ error: 'Stream does not belong to this memorial' }, { status: 400 });
+			return json({ error: 'Stream does not belong to this event' }, { status: 400 });
 		}
 
 		// Check if stream has calculator linking info
@@ -36,19 +36,19 @@ export const POST: RequestHandler = async ({ request, locals, params }) => {
 			return json({ error: 'Stream is not linked to calculator data' }, { status: 400 });
 		}
 
-		// Get memorial to verify ownership and update calculator data
+		// Get event to verify ownership and update calculator data
 		const memorialDoc = await adminDb.collection('memorials').doc(memorialId).get();
 
 		if (!memorialDoc.exists) {
-			return json({ error: 'Memorial not found' }, { status: 404 });
+			return json({ error: 'Event not found' }, { status: 404 });
 		}
 
-		const memorial = memorialDoc.data()!;
+		const event = memorialDoc.data()!;
 
-		// Check if user has permission to edit this memorial
+		// Check if user has permission to edit this event
 		const canEdit =
-			memorial.ownerUid === locals.user.uid ||
-			memorial.funeralDirectorUid === locals.user.uid ||
+			event.ownerUid === locals.user.uid ||
+			event.funeralDirectorUid === locals.user.uid ||
 			locals.user.role === 'admin';
 
 		if (!canEdit) {
@@ -60,7 +60,7 @@ export const POST: RequestHandler = async ({ request, locals, params }) => {
 		const newDate = newDateTime.toISOString().split('T')[0]; // YYYY-MM-DD
 		const newTime = newDateTime.toTimeString().split(' ')[0].substring(0, 5); // HH:MM
 
-		// Update the appropriate service in memorial.services
+		// Update the appropriate service in event.services
 		const updateData: any = {
 			updatedAt: Timestamp.now()
 		};
@@ -78,7 +78,7 @@ export const POST: RequestHandler = async ({ request, locals, params }) => {
 			}
 		}
 
-		// Update memorial with new calculator data
+		// Update event with new calculator data
 		await adminDb.collection('memorials').doc(memorialId).update(updateData);
 
 		console.log('🔄 [SYNC] Updated calculator data from stream change:', {

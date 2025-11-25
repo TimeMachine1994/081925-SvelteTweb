@@ -28,7 +28,7 @@ describe('PhotoSlideshowCreator', () => {
   describe('Loading Published Slideshow', () => {
     const mockPublishedSlideshow = {
       id: 'slideshow-123',
-      title: 'Test Memorial Slideshow',
+      title: 'Test Event Slideshow',
       playbackUrl: 'https://firebase.storage.com/video.mp4',
       firebaseStorageUrl: 'https://firebase.storage.com/video.mp4',
       photos: [
@@ -73,17 +73,17 @@ describe('PhotoSlideshowCreator', () => {
 
       render(PhotoSlideshowCreator, {
         props: {
-          memorialId: 'memorial-123'
+          memorialId: 'event-123'
         }
       });
 
       await waitFor(() => {
-        expect(mockFetch).toHaveBeenCalledWith('/api/memorials/memorial-123/slideshow');
+        expect(mockFetch).toHaveBeenCalledWith('/api/memorials/event-123/slideshow');
       });
 
       // Should show published status
       await waitFor(() => {
-        expect(screen.getByText('🌟 Published to Memorial')).toBeInTheDocument();
+        expect(screen.getByText('🌟 Published to Event')).toBeInTheDocument();
       });
 
       // Should show published slideshow title
@@ -113,7 +113,7 @@ describe('PhotoSlideshowCreator', () => {
 
       render(PhotoSlideshowCreator, {
         props: {
-          memorialId: 'memorial-123'
+          memorialId: 'event-123'
         }
       });
 
@@ -140,7 +140,7 @@ describe('PhotoSlideshowCreator', () => {
 
       render(PhotoSlideshowCreator, {
         props: {
-          memorialId: 'memorial-123'
+          memorialId: 'event-123'
         }
       });
 
@@ -172,13 +172,13 @@ describe('PhotoSlideshowCreator', () => {
 
       render(PhotoSlideshowCreator, {
         props: {
-          memorialId: 'memorial-123'
+          memorialId: 'event-123'
         }
       });
 
       await waitFor(() => {
-        expect(mockFetch).toHaveBeenCalledWith('/api/memorials/memorial-123/slideshow');
-        expect(mockFetch).toHaveBeenCalledWith('/api/slideshow/draft?memorialId=memorial-123');
+        expect(mockFetch).toHaveBeenCalledWith('/api/memorials/event-123/slideshow');
+        expect(mockFetch).toHaveBeenCalledWith('/api/slideshow/draft?memorialId=event-123');
       });
     });
   });
@@ -213,7 +213,7 @@ describe('PhotoSlideshowCreator', () => {
 
       render(PhotoSlideshowCreator, {
         props: {
-          memorialId: 'memorial-123'
+          memorialId: 'event-123'
         }
       });
 
@@ -227,15 +227,15 @@ describe('PhotoSlideshowCreator', () => {
       await fireEvent.click(unpublishBtn);
 
       await waitFor(() => {
-        expect(mockFetch).toHaveBeenCalledWith('/api/memorials/memorial-123/slideshow', {
+        expect(mockFetch).toHaveBeenCalledWith('/api/memorials/event-123/slideshow', {
           method: 'DELETE'
         });
       });
     });
   });
 
-  describe('Save to Memorial Functionality', () => {
-    it('should show "Update Memorial" for published slideshows', async () => {
+  describe('Save to Event Functionality', () => {
+    it('should show "Update Event" for published slideshows', async () => {
       const mockPublishedSlideshow = {
         id: 'slideshow-123',
         playbackUrl: 'https://firebase.storage.com/video.mp4',
@@ -252,16 +252,16 @@ describe('PhotoSlideshowCreator', () => {
 
       render(PhotoSlideshowCreator, {
         props: {
-          memorialId: 'memorial-123'
+          memorialId: 'event-123'
         }
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Update Memorial')).toBeInTheDocument();
+        expect(screen.getByText('Update Event')).toBeInTheDocument();
       });
     });
 
-    it('should show "Save to Memorial" for new slideshows', async () => {
+    it('should show "Save to Event" for new slideshows', async () => {
       // Mock no published slideshow
       mockFetch.mockResolvedValueOnce({
         ok: false,
@@ -279,7 +279,7 @@ describe('PhotoSlideshowCreator', () => {
 
       render(PhotoSlideshowCreator, {
         props: {
-          memorialId: 'memorial-123'
+          memorialId: 'event-123'
         }
       });
 
@@ -297,7 +297,7 @@ describe('PhotoSlideshowCreator', () => {
 
       render(PhotoSlideshowCreator, {
         props: {
-          memorialId: 'memorial-123'
+          memorialId: 'event-123'
         }
       });
 
@@ -329,7 +329,7 @@ describe('PhotoSlideshowCreator', () => {
 
       render(PhotoSlideshowCreator, {
         props: {
-          memorialId: 'memorial-123'
+          memorialId: 'event-123'
         }
       });
 

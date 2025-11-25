@@ -22,7 +22,7 @@ Phase 1 of the demo system implementation is complete! We've built a solid found
 
 **Files Modified:**
 - `frontend/src/app.d.ts` - Added demo fields to User interface
-- `frontend/src/lib/types/memorial.ts` - Added demo entity fields
+- `frontend/src/lib/types/event.ts` - Added demo entity fields
 - `frontend/src/lib/types/stream.ts` - Added demo entity fields
 - `frontend/src/lib/types/slideshow.ts` - Added demo entity fields
 
@@ -138,9 +138,9 @@ Phase 1 of the demo system implementation is complete! We've built a solid found
 - 📱 Fully responsive
 
 **Scenarios:**
-1. **First Memorial Service** - Funeral Director (guided setup)
+1. **First Event Service** - Funeral Director (guided setup)
 2. **Managing Multiple Services** - Funeral Director (dashboard view)
-3. **Legacy Celebration** - Memorial Owner (rich content)
+3. **Legacy Celebration** - Event Owner (rich content)
 4. **Viewer Experience** - Guest Viewer (public view)
 
 **User Flow:**
@@ -322,7 +322,7 @@ With Phase 1 complete, we can now move to **Phase 2: Demo Scenarios & Pre-popula
 2. **Data Seeding Functions** - Auto-populate on session creation
 3. **4 Complete Scenarios** - Each with custom data
 4. **Demo Assets** - 20+ sample photos, videos, thumbnails
-5. **Memorial Templates** - Pre-configured memorial pages
+5. **Event Templates** - Pre-configured event pages
 
 **Estimated Time:** Week 2 (25-30 hours)
 

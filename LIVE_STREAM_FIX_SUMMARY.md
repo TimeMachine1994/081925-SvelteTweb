@@ -68,7 +68,7 @@ curl -X POST https://your-domain.com/api/webhooks/test-live \
   -H "Content-Type: application/json" \
   -d '{"streamId": "YOUR_CLOUDFLARE_INPUT_ID", "action": "go-live"}'
 
-# 3. Open memorial page in browser
+# 3. Open event page in browser
 # Should see stream go from scheduled → live automatically
 
 # 4. Check stream status
@@ -80,7 +80,7 @@ curl https://your-domain.com/api/streams/YOUR_STREAM_ID/status
 1. **Configure Cloudflare webhook** (see WEBHOOK_SETUP_GUIDE.md)
 2. **Create a stream** in your app
 3. **Start OBS** with the RTMP credentials
-4. **Watch the memorial page** - should update automatically
+4. **Watch the event page** - should update automatically
 5. **Check logs** for webhook activity
 
 ---
@@ -106,7 +106,7 @@ GET /api/streams/{streamId}/status
 ```
 
 ### 4. Monitor Browser Console
-Open memorial page and watch for:
+Open event page and watch for:
 ```
 ✅ [REALTIME] Firestore listeners setup for N streams
 🔄 [REALTIME] Stream updated: abc123 { status: 'live', ... }
@@ -197,7 +197,7 @@ Before going live, verify:
 - [ ] Test endpoint works: `/api/webhooks/test-live`
 - [ ] Webhook endpoint accessible: `/api/webhooks/cloudflare-stream`
 - [ ] Stream status endpoint works: `/api/streams/{id}/status`
-- [ ] Memorial page shows Firestore listener setup in console
+- [ ] Event page shows Firestore listener setup in console
 - [ ] Test stream goes from scheduled → live successfully
 - [ ] Live stream displays video player correctly
 - [ ] Stream ends and shows as completed

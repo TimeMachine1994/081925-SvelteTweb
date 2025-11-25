@@ -74,7 +74,7 @@ export const auditMiddleware: Handle = async ({ event, resolve }) => {
  * Determine audit action based on route and HTTP method
  */
 function determineAuditAction(pathname: string, method: string): string | null {
-	// Memorial routes
+	// Event routes
 	if (pathname.includes('/memorials/')) {
 		if (method === 'POST' && pathname.endsWith('/memorials')) return 'memorial_created';
 		if (method === 'PUT' || method === 'PATCH') return 'memorial_updated';
@@ -96,7 +96,7 @@ function determineAuditAction(pathname: string, method: string): string | null {
 	if (pathname.includes('/admin/')) {
 		if (pathname.includes('approve-funeral-director')) return 'funeral_director_approved';
 		if (pathname.includes('reject-funeral-director')) return 'funeral_director_rejected';
-		if (pathname.includes('create-memorial')) return 'admin_memorial_created';
+		if (pathname.includes('create-event')) return 'admin_memorial_created';
 	}
 
 	// User routes
@@ -125,16 +125,16 @@ function determineAuditAction(pathname: string, method: string): string | null {
  * Extract resource type and ID from pathname
  */
 function extractResourceInfo(pathname: string): {
-	type: 'memorial' | 'user' | 'schedule' | 'payment' | 'system';
+	type: 'event' | 'user' | 'schedule' | 'payment' | 'system';
 	id: string;
 } {
-	// Extract memorial ID from various routes
+	// Extract event ID from various routes
 	const memorialMatch = pathname.match(/\/memorials\/([^\/]+)/);
 	if (memorialMatch) {
-		return { type: 'memorial', id: memorialMatch[1] };
+		return { type: 'event', id: memorialMatch[1] };
 	}
 
-	// Extract schedule memorial ID
+	// Extract schedule event ID
 	const scheduleMatch = pathname.match(/\/schedule\/([^\/]+)/);
 	if (scheduleMatch) {
 		return { type: 'schedule', id: scheduleMatch[1] };

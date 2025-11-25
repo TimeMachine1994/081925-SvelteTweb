@@ -46,38 +46,38 @@ try {
 
 const db = admin.firestore();
 
-// Load the legacy memorial data
+// Load the legacy event data
 const legacyDataPath = path.join(__dirname, '../LEGACY_MEMORIAL_VIMEO_DATA_WITH_SLUGS.json');
 const legacyData = JSON.parse(fs.readFileSync(legacyDataPath, 'utf8'));
 
 /**
- * Generate a unique memorial ID
+ * Generate a unique event ID
  */
 function generateMemorialId() {
   return db.collection('memorials').doc().id;
 }
 
 /**
- * Create a memorial document structure compatible with the existing system
+ * Create a event document structure compatible with the existing system
  */
-function createMemorialDocument(memorial, index) {
+function createMemorialDocument(event, index) {
   const memorialId = generateMemorialId();
   const now = admin.firestore.Timestamp.now();
   
   return {
     id: memorialId,
-    // Basic memorial information
-    lovedOnesName: memorial.lovedOnesName,
-    fullSlug: memorial.fullSlug,
+    // Basic event information
+    lovedOnesName: event.lovedOnesName,
+    fullSlug: event.fullSlug,
     
-    // Legacy memorial specific fields
+    // Legacy event specific fields
     isLegacy: true,
     legacySource: 'wordpress_sql_extraction',
-    legacyVimeoEmbed: memorial.custom_url,
+    legacyVimeoEmbed: event.custom_url,
     
-    // Standard memorial fields (with defaults for legacy)
-    title: `Celebration of Life for ${memorial.lovedOnesName}`,
-    description: `A memorial service celebrating the life of ${memorial.lovedOnesName}. This is a legacy memorial imported from the previous Tributestream system.`,
+    // Standard event fields (with defaults for legacy)
+    title: `Celebration of Life for ${event.lovedOnesName}`,
+    description: `A event service celebrating the life of ${event.lovedOnesName}. This is a legacy event imported from the previous Tributestream system.`,
     
     // Dates (using extraction date as placeholder since original dates weren't preserved)
     createdAt: now,
@@ -92,13 +92,13 @@ function createMemorialDocument(memorial, index) {
     ownerId: 'legacy-import', // Placeholder - needs manual assignment
     ownerEmail: 'legacy@tributestream.com', // Placeholder
     
-    // Memorial type and status
+    // Event type and status
     type: 'legacy',
     status: 'active',
     
     // Location (placeholder for legacy)
     location: {
-      name: 'Legacy Memorial Location',
+      name: 'Legacy Event Location',
       address: '',
       city: '',
       state: '',
@@ -118,7 +118,7 @@ function createMemorialDocument(memorial, index) {
       totalLegacyMemorials: legacyData.memorials.length
     },
     
-    // Memorial features
+    // Event features
     features: {
       hasPhotos: false, // Unknown for legacy
       hasVideos: true,
@@ -136,40 +136,40 @@ function createMemorialDocument(memorial, index) {
     },
     
     // SEO and routing
-    seoTitle: `${memorial.lovedOnesName} - Memorial Service | Tributestream`,
-    seoDescription: `Join us in celebrating the life of ${memorial.lovedOnesName}. Watch the memorial service and share memories with family and friends.`,
+    seoTitle: `${event.lovedOnesName} - Event Service | Tributestream`,
+    seoDescription: `Join us in celebrating the life of ${event.lovedOnesName}. Watch the event service and share memories with family and friends.`,
     
     // Tags for categorization
-    tags: ['legacy', 'vimeo', 'memorial-service', 'celebration-of-life']
+    tags: ['legacy', 'vimeo', 'event-service', 'celebration-of-life']
   };
 }
 
 /**
- * Import a single memorial to Firestore
+ * Import a single event to Firestore
  */
-async function importMemorial(memorial, index) {
+async function importMemorial(event, index) {
   try {
-    const memorialDoc = createMemorialDocument(memorial, index);
+    const memorialDoc = createMemorialDocument(event, index);
     
-    // Check if memorial with this fullSlug already exists
+    // Check if event with this fullSlug already exists
     const existingQuery = await db.collection('memorials')
-      .where('fullSlug', '==', memorial.fullSlug)
+      .where('fullSlug', '==', event.fullSlug)
       .limit(1)
       .get();
     
     if (!existingQuery.empty) {
-      console.log(`⚠️  Memorial already exists: ${memorial.lovedOnesName} (${memorial.fullSlug})`);
+      console.log(`⚠️  Event already exists: ${event.lovedOnesName} (${event.fullSlug})`);
       return { success: false, reason: 'already_exists' };
     }
     
-    // Import the memorial
+    // Import the event
     await db.collection('memorials').doc(memorialDoc.id).set(memorialDoc);
     
-    console.log(`✅ Imported: ${memorial.lovedOnesName} (${memorial.fullSlug})`);
+    console.log(`✅ Imported: ${event.lovedOnesName} (${event.fullSlug})`);
     return { success: true, id: memorialDoc.id };
     
   } catch (error) {
-    console.error(`❌ Failed to import ${memorial.lovedOnesName}:`, error.message);
+    console.error(`❌ Failed to import ${event.lovedOnesName}:`, error.message);
     return { success: false, reason: error.message };
   }
 }
@@ -178,7 +178,7 @@ async function importMemorial(memorial, index) {
  * Main import function
  */
 async function importLegacyMemorials() {
-  console.log('🚀 Starting legacy memorial import...');
+  console.log('🚀 Starting legacy event import...');
   console.log(`📊 Total memorials to import: ${legacyData.memorials.length}`);
   console.log('');
   
@@ -198,8 +198,8 @@ async function importLegacyMemorials() {
     
     console.log(`📦 Processing batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(legacyData.memorials.length / batchSize)}`);
     
-    const batchPromises = batch.map((memorial, batchIndex) => 
-      importMemorial(memorial, i + batchIndex)
+    const batchPromises = batch.map((event, batchIndex) => 
+      importMemorial(event, i + batchIndex)
     );
     
     const batchResults = await Promise.all(batchPromises);
@@ -213,7 +213,7 @@ async function importLegacyMemorials() {
       } else {
         results.failed++;
         results.errors.push({
-          memorial: batch[batchIndex].lovedOnesName,
+          event: batch[batchIndex].lovedOnesName,
           error: result.reason
         });
       }
@@ -237,15 +237,15 @@ async function importLegacyMemorials() {
     console.log('');
     console.log('❌ Errors encountered:');
     results.errors.forEach(error => {
-      console.log(`   - ${error.memorial}: ${error.error}`);
+      console.log(`   - ${error.event}: ${error.error}`);
     });
   }
   
   console.log('');
   console.log('🔗 Next steps:');
   console.log('   1. Assign proper owner IDs to imported memorials');
-  console.log('   2. Update service dates with actual memorial dates');
-  console.log('   3. Test legacy memorial rendering on the website');
+  console.log('   2. Update service dates with actual event dates');
+  console.log('   3. Test legacy event rendering on the website');
   console.log('   4. Set up proper fullSlug routing for legacy content');
   
   return results;
@@ -262,7 +262,7 @@ async function updateMemorialOwner(fullSlug, ownerId, ownerEmail) {
       .get();
     
     if (memorialQuery.empty) {
-      console.log(`❌ Memorial not found: ${fullSlug}`);
+      console.log(`❌ Event not found: ${fullSlug}`);
       return false;
     }
     
@@ -342,7 +342,7 @@ switch (command) {
     break;
     
   default:
-    console.log('Tributestream Legacy Memorial Import Script');
+    console.log('Tributestream Legacy Event Import Script');
     console.log('');
     console.log('Usage:');
     console.log('  node import-legacy-memorials.js import           # Import all legacy memorials');

@@ -14,9 +14,9 @@
 
 	const theme = getTheme('minimal');
 
-	// Sample memorial data
-	const memorial = {
-		id: 'memorial-123',
+	// Sample event data
+	const event = {
+		id: 'event-123',
 		name: 'Maria Elena Cruz',
 		dates: '1946 – 2025',
 		description: 'A gentle light, a steady hand, and a song for every season. Maria\'s kindness reached everyone she met. She was a devoted mother, grandmother, and friend who brought joy to all who knew her.',
@@ -42,7 +42,7 @@
 		},
 		{
 			id: 'service',
-			title: 'Memorial Service',
+			title: 'Event Service',
 			time: '11:00 AM',
 			duration: '45 minutes',
 			location: 'Main Sanctuary',
@@ -91,11 +91,11 @@
 
 	// Event handlers
 	function handleViewMemorial() {
-		console.log('Viewing memorial:', memorial.id);
+		console.log('Viewing event:', event.id);
 	}
 
 	function handleShareMemorial() {
-		console.log('Sharing memorial:', memorial.id);
+		console.log('Sharing event:', event.id);
 	}
 
 	function handleJoinStream(event: any) {
@@ -118,8 +118,8 @@
 </script>
 
 <svelte:head>
-	<title>Maria Elena Cruz Memorial - Tributestream</title>
-	<meta name="description" content="Memorial service for Maria Elena Cruz. Join family and friends in celebrating her life." />
+	<title>Maria Elena Cruz Event - Tributestream</title>
+	<meta name="description" content="Event service for Maria Elena Cruz. Join family and friends in celebrating her life." />
 </svelte:head>
 
 <div class="{theme.root} min-h-screen" style="font-family: {theme.font.body}">
@@ -134,11 +134,11 @@
 	<section class="py-12 bg-gradient-to-b from-slate-50 to-white">
 		<div class="max-w-6xl mx-auto px-6">
 			<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-				<!-- Memorial Card -->
+				<!-- Event Card -->
 				<div class="lg:col-span-1">
 					<MemorialCard 
 						theme="minimal" 
-						{memorial} 
+						{event} 
 						onView={handleViewMemorial}
 						onShare={handleShareMemorial}
 					/>
@@ -189,10 +189,10 @@
 						<Gallery theme="minimal" images={galleryImages} />
 					</div>
 
-					<!-- Memorial Stats -->
+					<!-- Event Stats -->
 					<div class="{theme.card} p-6">
 						<h3 class="text-xl font-semibold {theme.text} mb-4" style="font-family: {theme.font.heading}">
-							Memorial Impact
+							Event Impact
 						</h3>
 						<Stats theme="minimal" stats={memorialStats} />
 					</div>
@@ -203,11 +203,11 @@
 					<!-- Condolence Form -->
 					<CondolenceForm
 						theme="minimal"
-						memorialId={memorial.id}
+						memorialId={event.id}
 						onSubmit={handleCondolenceSubmit}
 					/>
 
-					<!-- Memorial Tags -->
+					<!-- Event Tags -->
 					<div class="{theme.card} p-6">
 						<h3 class="text-lg font-semibold {theme.text} mb-4" style="font-family: {theme.font.heading}">
 							Remembering Maria
@@ -215,7 +215,7 @@
 						<TagCloud theme="minimal" tags={memorialTags} />
 					</div>
 
-					<!-- Memorial Details -->
+					<!-- Event Details -->
 					<div class="{theme.card} p-6">
 						<h3 class="text-lg font-semibold {theme.text} mb-4" style="font-family: {theme.font.heading}">
 							Service Details
@@ -263,7 +263,7 @@
 	<footer class="mt-16 border-t {theme.footer.border} {theme.footer.wrap}">
 		<div class="max-w-6xl mx-auto px-6 py-8 text-center">
 			<p class="text-sm {theme.hero.sub}">
-				This memorial page was created with love by the Cruz family using Tributestream.
+				This event page was created with love by the Cruz family using Tributestream.
 			</p>
 			<p class="text-xs {theme.hero.sub} mt-2">
 				© 2025 Tributestream. Compassionate technology for meaningful moments.

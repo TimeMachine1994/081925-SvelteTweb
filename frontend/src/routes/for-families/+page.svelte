@@ -22,26 +22,26 @@
 		isSubmitting = true;
 		
 		// Navigate to registration with pre-filled name
-		goto(`/register/loved-one?name=${encodeURIComponent(lovedOneName.trim())}`);
+		goto(`/register/new-event-and-account?name=${encodeURIComponent(lovedOneName.trim())}`);
 	}
 
 	function handleCreateMemorial() {
 		if (lovedOneName.trim()) {
-			goto(`/register/loved-one?name=${encodeURIComponent(lovedOneName.trim())}`);
+			goto(`/register/new-event-and-account?name=${encodeURIComponent(lovedOneName.trim())}`);
 		} else {
-			goto('/register/loved-one');
+			goto('/register/new-event-and-account');
 		}
 	}
 
 	function handleGetStarted() {
-		goto('/register/loved-one');
+		goto('/register/new-event-and-account');
 	}
 
 	const benefits = [
 		{
 			icon: Heart,
-			title: "Beautiful Memorial Pages",
-			description: "Create a stunning, personalized memorial that truly captures their spirit and celebrates their life."
+			title: "Beautiful Event Pages",
+			description: "Create a stunning, personalized event that truly captures their spirit and celebrates their life."
 		},
 		{
 			icon: Users,
@@ -75,7 +75,7 @@
 	<title>For Families - Tributestream</title>
 	<meta
 		name="description"
-		content="Create a beautiful memorial for your loved one. Share memories, connect with family and friends, and honor their legacy with Tributestream."
+		content="Create a beautiful event for your loved one. Share memories, connect with family and friends, and honor their legacy with Tributestream."
 	/>
 </svelte:head>
 
@@ -91,12 +91,12 @@
 				Celebrate a Life Well-Lived
 			</h1>
 			<p class="text-lg md:text-xl {theme.hero.sub} max-w-2xl mx-auto mb-10">
-				Create a beautiful, lasting memorial that brings family together and honors your loved one's legacy. Share memories, connect hearts, and celebrate the life that touched so many.
+				Create a beautiful, lasting event that brings family together and honors your loved one's legacy. Share memories, connect hearts, and celebrate the life that touched so many.
 			</p>
 
-			<!-- Quick Memorial Creation Form -->
+			<!-- Quick Event Creation Form -->
 			<Card theme="minimal" class="mx-auto mb-8 max-w-md p-8">
-				<h3 class="mb-4 text-xl font-semibold text-slate-900 text-center">Start Your Memorial</h3>
+				<h3 class="mb-4 text-xl font-semibold text-slate-900 text-center">Start Your Event</h3>
 				<form onsubmit={handleFormSubmit} class="space-y-4">
 					<div>
 						<label for="lovedOneName" class="mb-2 block text-sm font-medium text-slate-700">
@@ -211,7 +211,7 @@
 						</div>
 						<h3 class="mb-4 text-2xl font-bold text-slate-900">Start in Minutes</h3>
 						<p class="mb-6 text-slate-600">
-							Creating a memorial is simple and takes just a few minutes. No technical skills required - just love and memories to share.
+							Creating a event is simple and takes just a few minutes. No technical skills required - just love and memories to share.
 						</p>
 						<div class="flex justify-center">
 							<Button

@@ -5,7 +5,7 @@ import type { RequestHandler } from './$types';
 export const POST: RequestHandler = async ({ params, request, locals }) => {
 	const { memorialId } = params;
 	
-	console.log('🎬 [SLIDESHOW API] POST - Adding slideshow to memorial:', memorialId);
+	console.log('🎬 [SLIDESHOW API] POST - Adding slideshow to event:', memorialId);
 	
 	// Check authentication
 	if (!locals.user) {
@@ -21,13 +21,13 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 			photoCount: slideshowData.photos?.length || 0
 		});
 		
-		// Verify user has access to this memorial
+		// Verify user has access to this event
 		const memorialRef = adminDb.collection('memorials').doc(memorialId);
 		const memorialDoc = await memorialRef.get();
 		
 		if (!memorialDoc.exists) {
-			console.log('🔒 [SLIDESHOW API] Memorial not found:', memorialId);
-			throw error(404, 'Memorial not found');
+			console.log('🔒 [SLIDESHOW API] Event not found:', memorialId);
+			throw error(404, 'Event not found');
 		}
 		
 		const memorialData = memorialDoc.data();
@@ -81,7 +81,7 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 		
 		console.log('✅ [SLIDESHOW API] Slideshow added successfully:', slideshowData.id);
 		
-		// Update memorial document to include slideshow reference
+		// Update event document to include slideshow reference
 		await memorialRef.update({
 			hasSlideshow: true,
 			updatedAt: new Date().toISOString()
@@ -90,7 +90,7 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 		return json({ 
 			success: true, 
 			slideshowId: slideshowData.id,
-			message: 'Slideshow added to memorial successfully'
+			message: 'Slideshow added to event successfully'
 		});
 		
 	} catch (err: any) {
@@ -100,17 +100,17 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 			throw err; // Re-throw SvelteKit errors
 		}
 		
-		throw error(500, 'Failed to add slideshow to memorial');
+		throw error(500, 'Failed to add slideshow to event');
 	}
 };
 
 export const GET: RequestHandler = async ({ params, locals }) => {
 	const { memorialId } = params;
 	
-	console.log('🎬 [SLIDESHOW API] GET - Fetching slideshows for memorial:', memorialId);
+	console.log('🎬 [SLIDESHOW API] GET - Fetching slideshows for event:', memorialId);
 	
 	try {
-		// Get all slideshows for this memorial
+		// Get all slideshows for this event
 		const slideshowsRef = adminDb
 			.collection('memorials')
 			.doc(memorialId)
@@ -137,7 +137,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 export const DELETE: RequestHandler = async ({ params, locals }) => {
 	const { memorialId } = params;
 	
-	console.log('🗑️ [SLIDESHOW API] DELETE - Unpublishing slideshow for memorial:', memorialId);
+	console.log('🗑️ [SLIDESHOW API] DELETE - Unpublishing slideshow for event:', memorialId);
 	
 	// Check authentication
 	if (!locals.user) {
@@ -146,13 +146,13 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
 	}
 	
 	try {
-		// Verify user has access to this memorial
+		// Verify user has access to this event
 		const memorialRef = adminDb.collection('memorials').doc(memorialId);
 		const memorialDoc = await memorialRef.get();
 		
 		if (!memorialDoc.exists) {
-			console.log('🔒 [SLIDESHOW API] Memorial not found:', memorialId);
-			throw error(404, 'Memorial not found');
+			console.log('🔒 [SLIDESHOW API] Event not found:', memorialId);
+			throw error(404, 'Event not found');
 		}
 		
 		const memorialData = memorialDoc.data();
@@ -170,7 +170,7 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
 			throw error(403, 'Insufficient permissions');
 		}
 		
-		// Get all published slideshows for this memorial
+		// Get all published slideshows for this event
 		const slideshowsRef = adminDb
 			.collection('memorials')
 			.doc(memorialId)
@@ -199,7 +199,7 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
 		
 		console.log('✅ [SLIDESHOW API] Unpublished', slideshowsSnapshot.docs.length, 'slideshows');
 		
-		// Update memorial document to reflect no published slideshow
+		// Update event document to reflect no published slideshow
 		await memorialRef.update({
 			hasSlideshow: false,
 			updatedAt: new Date().toISOString()

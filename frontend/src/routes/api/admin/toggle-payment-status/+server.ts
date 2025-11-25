@@ -22,10 +22,10 @@ export async function POST({ request, locals }: any) {
 
 		// === PARSE REQUEST ===
 		const { memorialId, isPaid, paymentMethod, paymentNotes } = await request.json();
-		console.log('💳 [ADMIN API] Toggling payment for memorial:', memorialId, 'to:', isPaid);
+		console.log('💳 [ADMIN API] Toggling payment for event:', memorialId, 'to:', isPaid);
 
 		if (!memorialId) {
-			return json({ error: 'Memorial ID is required' }, { status: 400 });
+			return json({ error: 'Event ID is required' }, { status: 400 });
 		}
 
 		if (typeof isPaid !== 'boolean') {
@@ -37,8 +37,8 @@ export async function POST({ request, locals }: any) {
 		const memorialDoc = await memorialRef.get();
 
 		if (!memorialDoc.exists) {
-			console.log('❌ [ADMIN API] Memorial not found');
-			return json({ error: 'Memorial not found' }, { status: 404 });
+			console.log('❌ [ADMIN API] Event not found');
+			return json({ error: 'Event not found' }, { status: 404 });
 		}
 
 		const updateData: any = {
@@ -66,13 +66,13 @@ export async function POST({ request, locals }: any) {
 
 		await memorialRef.update(updateData);
 
-		console.log(`✅ [ADMIN API] Memorial payment status updated to: ${isPaid ? 'PAID' : 'UNPAID'}`);
+		console.log(`✅ [ADMIN API] Event payment status updated to: ${isPaid ? 'PAID' : 'UNPAID'}`);
 
 		// Log the action for audit trail
 		try {
 			await adminDb.collection('audit_logs').add({
 				action: isPaid ? 'mark_paid' : 'mark_unpaid',
-				resourceType: 'memorial',
+				resourceType: 'event',
 				resourceId: memorialId,
 				performedBy: locals.user.email,
 				performedAt: new Date(),
@@ -89,7 +89,7 @@ export async function POST({ request, locals }: any) {
 
 		return json({
 			success: true,
-			message: `Memorial marked as ${isPaid ? 'paid' : 'unpaid'}`,
+			message: `Event marked as ${isPaid ? 'paid' : 'unpaid'}`,
 			memorialId,
 			isPaid
 		});

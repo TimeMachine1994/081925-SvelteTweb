@@ -1,7 +1,7 @@
 # Schedule Page Payment Receipt Implementation Plan
 
 ## Overview
-Transform the schedule calculator page (`/schedule/[memorialId]`) to show a summary receipt when a memorial is marked as paid, while allowing users to request edits through a form submission system.
+Transform the schedule calculator page (`/schedule/[memorialId]`) to show a summary receipt when a event is marked as paid, while allowing users to request edits through a form submission system.
 
 ---
 
@@ -12,7 +12,7 @@ Transform the schedule calculator page (`/schedule/[memorialId]`) to show a summ
 - Users can edit services, tiers, add-ons freely
 
 ### New Behavior
-- **Check `memorial.isPaid` flag** on page load
+- **Check `event.isPaid` flag** on page load
 - **If UNPAID**: Show calculator form (existing behavior)
 - **If PAID**: Show receipt summary with edit request button
 
@@ -28,7 +28,7 @@ Transform the schedule calculator page (`/schedule/[memorialId]`) to show a summ
 Reuse existing receipt page styling from `/payment/receipt/+page.svelte`
 
 ### Data Source
-Use `memorial.calculatorConfig` fields:
+Use `event.calculatorConfig` fields:
 ```typescript
 {
   bookingItems: [
@@ -51,14 +51,14 @@ Use `memorial.calculatorConfig` fields:
 #### A. Payment Status Header
 ```
 ✅ Payment Confirmed
-Your memorial service booking is confirmed and paid
+Your event service booking is confirmed and paid
 ```
 
 #### B. Package Summary
 - Tier name (Tributestream Record/Live/Legacy)
 - Base price
-- Service date and time (from `memorial.services.main.time`)
-- Location (from `memorial.services.main.location`)
+- Service date and time (from `event.services.main.time`)
+- Location (from `event.services.main.location`)
 
 #### C. Order Details
 - Line items from `calculatorConfig.bookingItems[]`
@@ -82,7 +82,7 @@ Your memorial service booking is confirmed and paid
 
 #### F. Actions
 - **"Request Schedule Changes"** button (primary)
-- **"View Memorial Page"** link
+- **"View Event Page"** link
 - **"Manage Streams"** link
 - **"Download Receipt"** button (optional)
 
@@ -91,14 +91,14 @@ If `calculatorConfig.bookingItems` is missing or empty:
 ```
 ✅ Payment Confirmed
 
-This memorial service has been marked as paid.
+This event service has been marked as paid.
 
-Memorial: [lovedOneName]
+Event: [lovedOneName]
 Status: Paid
 Payment Date: [paidAt or createdAt]
 
 [Request Schedule Changes button]
-[View Memorial Page link]
+[View Event Page link]
 ```
 
 ---
@@ -121,7 +121,7 @@ Payment Date: [paidAt or createdAt]
 ```typescript
 {
   id: string,                    // Auto-generated
-  memorialId: string,            // Reference to memorial
+  memorialId: string,            // Reference to event
   memorialName: string,          // For quick reference
   requestedBy: string,           // User UID
   requestedByEmail: string,      // User email
@@ -158,7 +158,7 @@ Payment Date: [paidAt or createdAt]
   message: string
 }
 
-// Permissions: memorial owner, funeral director, or admin
+// Permissions: event owner, funeral director, or admin
 ```
 
 ---
@@ -172,7 +172,7 @@ Location: Admin portal Overview tab or new dedicated tab
 
 #### A. Requests List View
 Table with columns:
-- **Memorial Name** (with link to memorial)
+- **Event Name** (with link to event)
 - **Requested By** (email)
 - **Request Date**
 - **Status Badge** (pending/approved/denied/completed)
@@ -184,7 +184,7 @@ When admin clicks on a request:
 ```
 Schedule Edit Request
 
-Memorial: [Name] [View Memorial link]
+Event: [Name] [View Event link]
 Requested by: [Email] on [Date]
 Status: [Badge]
 
@@ -211,7 +211,7 @@ ADMIN ACTIONS
 #### D. Filters
 - Status filter dropdown
 - Date range filter
-- Search by memorial name or requester email
+- Search by event name or requester email
 
 ### Admin Actions API
 **PATCH** `/api/admin/schedule-edit-requests/[requestId]`
@@ -264,8 +264,8 @@ ADMIN ACTIONS
 ### TypeScript Interfaces
 
 ```typescript
-// Add to memorial.ts
-export interface Memorial {
+// Add to event.ts
+export interface Event {
   // ... existing fields
   isPaid?: boolean;
   paymentStatus?: 'paid' | 'unpaid';
@@ -366,13 +366,13 @@ match /schedule_edit_requests/{requestId} {
 
 ## 7. User Experience Flow
 
-### Scenario A: Unpaid Memorial
+### Scenario A: Unpaid Event
 1. User visits `/schedule/{memorialId}`
 2. Sees full calculator interface
 3. Can edit services, tiers, add-ons
 4. Clicks "Save and Pay Later" or "Book Now"
 
-### Scenario B: Paid Memorial (Full Data)
+### Scenario B: Paid Event (Full Data)
 1. User visits `/schedule/{memorialId}`
 2. Sees receipt summary with:
    - ✅ Payment confirmed header
@@ -384,15 +384,15 @@ match /schedule_edit_requests/{requestId} {
 4. Modal opens with textarea
 5. Submits request
 6. Sees success message
-7. Can view memorial or manage streams
+7. Can view event or manage streams
 
-### Scenario C: Paid Memorial (Missing Data)
+### Scenario C: Paid Event (Missing Data)
 1. User visits `/schedule/{memorialId}`
 2. Sees generic paid confirmation:
    - ✅ Payment confirmed
-   - Memorial name
+   - Event name
    - Status: Paid
-3. Can request changes or view memorial
+3. Can request changes or view event
 
 ### Scenario D: Admin Reviews Request
 1. Admin logs into admin portal
@@ -412,9 +412,9 @@ match /schedule_edit_requests/{requestId} {
 ## 8. Testing Checklist
 
 ### Schedule Page
-- [ ] Unpaid memorial shows calculator
-- [ ] Paid memorial with full data shows receipt
-- [ ] Paid memorial with missing data shows generic message
+- [ ] Unpaid event shows calculator
+- [ ] Paid event with full data shows receipt
+- [ ] Paid event with missing data shows generic message
 - [ ] Receipt displays all booking items correctly
 - [ ] Payment information displays correctly
 - [ ] Manual payment shows correct method
@@ -442,13 +442,13 @@ match /schedule_edit_requests/{requestId} {
 - [ ] Pagination works (if implemented)
 
 ### Edge Cases
-- [ ] Memorial with no calculatorConfig
-- [ ] Memorial with partial calculatorConfig
-- [ ] Memorial marked paid by admin (manual)
-- [ ] Memorial paid via Stripe
+- [ ] Event with no calculatorConfig
+- [ ] Event with partial calculatorConfig
+- [ ] Event marked paid by admin (manual)
+- [ ] Event paid via Stripe
 - [ ] User has no permission
-- [ ] Multiple edit requests for same memorial
-- [ ] Request for deleted memorial
+- [ ] Multiple edit requests for same event
+- [ ] Request for deleted event
 
 ---
 
@@ -534,7 +534,7 @@ match /schedule_edit_requests/{requestId} {
 ### Required
 - Existing receipt page styling
 - Admin portal component
-- Memorial type with isPaid field
+- Event type with isPaid field
 - User authentication
 
 ### Optional
@@ -545,9 +545,9 @@ match /schedule_edit_requests/{requestId} {
 
 ## Security Considerations
 
-1. **Authorization**: Only memorial owners, funeral directors, or admins can submit edit requests
+1. **Authorization**: Only event owners, funeral directors, or admins can submit edit requests
 2. **Data Validation**: Sanitize user input for request details
-3. **Rate Limiting**: Prevent spam requests (max 3 per memorial per day)
+3. **Rate Limiting**: Prevent spam requests (max 3 per event per day)
 4. **Audit Trail**: Keep all requests for compliance (no deletes)
 5. **Admin-only Updates**: Only admins can change request status
 6. **Session Verification**: Validate user session on all API calls
@@ -560,7 +560,7 @@ match /schedule_edit_requests/{requestId} {
 ✅ **Payment Details**: Show if available (manual or Stripe)  
 ✅ **Edit Capability**: Request form with admin approval workflow  
 ✅ **Missing Data**: Generic "paid" message  
-✅ **Actions**: Request changes, view memorial, manage streams  
+✅ **Actions**: Request changes, view event, manage streams  
 
 ---
 

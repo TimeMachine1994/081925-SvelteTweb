@@ -4,7 +4,7 @@ import { adminDb } from '$lib/server/firebase';
 import { Timestamp } from 'firebase-admin/firestore';
 
 export const POST: RequestHandler = async ({ request, params, locals }) => {
-	console.log('📝 [EDIT REQUEST] Received schedule edit request for memorial:', params.memorialId);
+	console.log('📝 [EDIT REQUEST] Received schedule edit request for event:', params.memorialId);
 
 	try {
 		// Check authentication
@@ -15,7 +15,7 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 
 		const { memorialId } = params;
 		if (!memorialId) {
-			return json({ error: 'Memorial ID is required' }, { status: 400 });
+			return json({ error: 'Event ID is required' }, { status: 400 });
 		}
 
 		// Parse request body
@@ -29,41 +29,41 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 			return json({ error: 'Request details must be 500 characters or less' }, { status: 400 });
 		}
 
-		// Get memorial and verify permissions
+		// Get event and verify permissions
 		const memorialRef = adminDb.collection('memorials').doc(memorialId);
 		const memorialDoc = await memorialRef.get();
 
 		if (!memorialDoc.exists) {
-			console.log('❌ [EDIT REQUEST] Memorial not found:', memorialId);
-			return json({ error: 'Memorial not found' }, { status: 404 });
+			console.log('❌ [EDIT REQUEST] Event not found:', memorialId);
+			return json({ error: 'Event not found' }, { status: 404 });
 		}
 
-		const memorial = memorialDoc.data();
+		const event = memorialDoc.data();
 		const userRole = locals.user.role;
 		const userId = locals.user.uid;
 
 		// Check permissions (owner, funeral director, or admin)
 		const hasPermission =
 			userRole === 'admin' ||
-			memorial?.ownerUid === userId ||
-			memorial?.funeralDirectorUid === userId;
+			event?.ownerUid === userId ||
+			event?.funeralDirectorUid === userId;
 
 		if (!hasPermission) {
 			console.log('❌ [EDIT REQUEST] User lacks permission:', {
 				userRole,
 				userId,
-				ownerUid: memorial?.ownerUid,
-				funeralDirectorUid: memorial?.funeralDirectorUid
+				ownerUid: event?.ownerUid,
+				funeralDirectorUid: event?.funeralDirectorUid
 			});
 			return json({ error: 'Insufficient permissions' }, { status: 403 });
 		}
 
-		// Verify memorial is paid
-		if (!memorial?.isPaid) {
+		// Verify event is paid
+		if (!event?.isPaid) {
 			return json({ error: 'Edit requests are only available for paid memorials' }, { status: 400 });
 		}
 
-		// Rate limiting: Check for recent requests from same user for same memorial
+		// Rate limiting: Check for recent requests from same user for same event
 		const recentRequestsQuery = await adminDb
 			.collection('schedule_edit_requests')
 			.where('memorialId', '==', memorialId)
@@ -73,14 +73,14 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 
 		if (recentRequestsQuery.size >= 3) {
 			return json({ 
-				error: 'You have reached the maximum number of edit requests (3) for this memorial in the last 24 hours' 
+				error: 'You have reached the maximum number of edit requests (3) for this event in the last 24 hours' 
 			}, { status: 429 });
 		}
 
 		// Create edit request document
 		const editRequest = {
 			memorialId,
-			memorialName: memorial?.lovedOneName || 'Unknown Memorial',
+			memorialName: event?.lovedOneName || 'Unknown Event',
 			requestedBy: userId,
 			requestedByEmail: locals.user.email || '',
 			requestDetails: requestDetails.trim(),
@@ -89,10 +89,10 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 			
 			// Snapshot of current config for reference
 			currentConfig: {
-				tier: memorial?.calculatorConfig?.formData?.selectedTier || '',
-				services: memorial?.services || {},
-				bookingItems: memorial?.calculatorConfig?.bookingItems || [],
-				total: memorial?.calculatorConfig?.total || 0
+				tier: event?.calculatorConfig?.formData?.selectedTier || '',
+				services: event?.services || {},
+				bookingItems: event?.calculatorConfig?.bookingItems || [],
+				total: event?.calculatorConfig?.total || 0
 			}
 		};
 

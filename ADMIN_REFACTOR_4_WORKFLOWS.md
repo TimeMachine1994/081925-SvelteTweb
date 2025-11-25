@@ -36,14 +36,14 @@ interface Transition {
   action?: (context: any) => Promise<void>;
 }
 
-// Memorial State Machine
+// Event State Machine
 export const memorialStateMachine: StateMachine = {
   initialState: 'draft',
   states: {
     draft: {
       id: 'draft',
       label: 'Draft',
-      description: 'Memorial is being created',
+      description: 'Event is being created',
       color: 'gray',
       icon: '📝',
       allowedActions: ['edit', 'submit_for_review']
@@ -59,7 +59,7 @@ export const memorialStateMachine: StateMachine = {
     approved: {
       id: 'approved',
       label: 'Approved',
-      description: 'Memorial approved, awaiting payment',
+      description: 'Event approved, awaiting payment',
       color: 'blue',
       icon: '✅',
       allowedActions: ['mark_paid', 'edit']
@@ -67,7 +67,7 @@ export const memorialStateMachine: StateMachine = {
     live: {
       id: 'live',
       label: 'Live',
-      description: 'Memorial is live and public',
+      description: 'Event is live and public',
       color: 'green',
       icon: '🌐',
       allowedActions: ['edit', 'unpublish', 'archive']
@@ -75,7 +75,7 @@ export const memorialStateMachine: StateMachine = {
     archived: {
       id: 'archived',
       label: 'Archived',
-      description: 'Memorial archived',
+      description: 'Event archived',
       color: 'gray',
       icon: '📦',
       allowedActions: ['restore']
@@ -83,7 +83,7 @@ export const memorialStateMachine: StateMachine = {
     rejected: {
       id: 'rejected',
       label: 'Rejected',
-      description: 'Memorial rejected',
+      description: 'Event rejected',
       color: 'red',
       icon: '❌',
       allowedActions: ['edit', 'resubmit']
@@ -552,9 +552,9 @@ export async function createTaskFromEvent(event: string, data: any) {
       await adminDb.collection('admin_tasks').add({
         type: 'investigation',
         priority: 'high',
-        title: `Payment dispute for memorial #${data.memorialId}`,
+        title: `Payment dispute for event #${data.memorialId}`,
         description: data.disputeReason,
-        resourceType: 'memorial',
+        resourceType: 'event',
         resourceId: data.memorialId,
         assignedTo: await getUsersByRole('financial_admin'),
         createdBy: 'system',
@@ -734,10 +734,10 @@ interface ChecklistItem {
   runbookLink?: string;
 }
 
-// Example: Memorial review checklist
+// Example: Event review checklist
 const memorialReviewChecklist: Checklist = {
   id: 'memorial_review',
-  title: 'Memorial Review Checklist',
+  title: 'Event Review Checklist',
   context: 'memorial_review',
   items: [
     {
@@ -753,7 +753,7 @@ const memorialReviewChecklist: Checklist = {
     },
     {
       id: 'review_content',
-      text: 'Review memorial content for appropriateness',
+      text: 'Review event content for appropriateness',
       required: true,
       runbookLink: '/admin/runbooks/content-moderation'
     },

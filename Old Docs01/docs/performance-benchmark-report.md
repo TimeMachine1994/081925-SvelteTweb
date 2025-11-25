@@ -65,7 +65,7 @@ const { data: memorials } = useOptimizedData(
 | Endpoint Category | Average | 95th Percentile | 99th Percentile |
 |-------------------|---------|-----------------|-----------------|
 | Authentication | 120ms | 180ms | 250ms |
-| Memorial CRUD | 150ms | 220ms | 300ms |
+| Event CRUD | 150ms | 220ms | 300ms |
 | Photo Upload | 280ms | 450ms | 600ms |
 | Livestream Control | 95ms | 140ms | 180ms |
 | Invitation System | 110ms | 160ms | 200ms |
@@ -102,7 +102,7 @@ const getMemorialsByRole = async (userId: string, role: string) => {
 ### Caching Performance 💾 **EXCELLENT**
 
 #### Cache Hit Rates
-- **Memorial Data**: 85% hit rate (10-minute TTL)
+- **Event Data**: 85% hit rate (10-minute TTL)
 - **User Sessions**: 92% hit rate (5-minute TTL)
 - **Static Assets**: 98% hit rate (24-hour TTL)
 - **API Responses**: 78% hit rate (variable TTL)
@@ -152,7 +152,7 @@ const preloadCriticalResources = () => {
   
   // Prefetch likely next pages based on user role
   if (userRole === 'funeral_director') {
-    prefetchRoute('/funeral-director/create-memorial');
+    prefetchRoute('/funeral-director/create-event');
   }
 };
 ```
@@ -163,18 +163,18 @@ const preloadCriticalResources = () => {
 
 ### 1. Data Fetching Optimization
 ```typescript
-// Batch memorial data fetching
+// Batch event data fetching
 export function useBatchMemorialData(memorialIds: string[]) {
   return useOptimizedData(
     `batch-memorials:${memorialIds.sort().join(',')}`,
     async () => {
       // Check individual caches first
       const cached = memorialIds
-        .map(id => dataCache.get(`memorial:${id}`))
+        .map(id => dataCache.get(`event:${id}`))
         .filter(Boolean);
       
       const toFetch = memorialIds.filter(id => 
-        !dataCache.get(`memorial:${id}`)
+        !dataCache.get(`event:${id}`)
       );
       
       if (toFetch.length === 0) return cached;
@@ -188,8 +188,8 @@ export function useBatchMemorialData(memorialIds: string[]) {
       const fetched = await response.json();
       
       // Cache individual results
-      fetched.forEach(memorial => {
-        dataCache.set(`memorial:${memorial.id}`, memorial);
+      fetched.forEach(event => {
+        dataCache.set(`event:${event.id}`, event);
       });
       
       return [...cached, ...fetched];
@@ -292,7 +292,7 @@ Query: memorials.where('familyMemberUids', 'array-contains', userId)
 1. **Implement Service Worker Caching**
 ```typescript
 // Cache API responses and static assets
-const CACHE_NAME = 'memorial-portal-v1';
+const CACHE_NAME = 'event-portal-v1';
 const urlsToCache = [
   '/',
   '/styles/main.css',
@@ -339,7 +339,7 @@ const optimizeImage = async (file: File) => {
 ### Medium-Term Optimizations
 
 4. **Implement Edge Caching**
-   - Cache memorial data at CDN edge locations
+   - Cache event data at CDN edge locations
    - Use geographic distribution for global users
    - Implement cache invalidation strategies
 

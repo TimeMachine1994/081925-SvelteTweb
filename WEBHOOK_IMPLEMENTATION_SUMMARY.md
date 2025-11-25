@@ -105,8 +105,8 @@ function getPlaybackUrl(stream) {
 
 #### 1. Test Stream Going Live
 
-1. **Open memorial page in 2-3 browser tabs/windows**
-   - Navigate to a memorial with a scheduled stream
+1. **Open event page in 2-3 browser tabs/windows**
+   - Navigate to a event with a scheduled stream
    - Verify countdown timer is showing
 
 2. **Start OBS broadcast**
@@ -162,7 +162,7 @@ function getPlaybackUrl(stream) {
 
 #### 3. Test Multiple Browsers Simultaneously
 
-1. **Open memorial page in:**
+1. **Open event page in:**
    - Chrome
    - Firefox
    - Safari (if available)
@@ -177,7 +177,7 @@ function getPlaybackUrl(stream) {
 ### Test Edge Cases
 
 - [ ] **Stream with no cloudflareInputId** - Should handle gracefully
-- [ ] **Multiple streams on same memorial** - Each should update independently
+- [ ] **Multiple streams on same event** - Each should update independently
 - [ ] **Browser in background tab** - Should still receive updates
 - [ ] **Network interruption** - Firestore reconnects automatically
 - [ ] **Webhook delivered twice** - Should be idempotent (no issues)

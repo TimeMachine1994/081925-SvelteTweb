@@ -42,7 +42,7 @@
 				{#if data.testResults.memorialCount !== undefined}
 					<div class="flex items-center space-x-2">
 						<span class="text-green-500">✅</span>
-						<span>Memorial Count: {data.testResults.memorialCount}</span>
+						<span>Event Count: {data.testResults.memorialCount}</span>
 					</div>
 				{/if}
 
@@ -57,7 +57,7 @@
 					<div class="flex items-center space-x-2">
 						<span class="text-green-500">✅</span>
 						<span
-							>Sample Memorial Loaded: {data.testResults.sampleMemorialLoaded ? 'Yes' : 'No'}</span
+							>Sample Event Loaded: {data.testResults.sampleMemorialLoaded ? 'Yes' : 'No'}</span
 						>
 					</div>
 				{/if}

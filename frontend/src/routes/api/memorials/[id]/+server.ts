@@ -10,21 +10,21 @@ export const GET: RequestHandler = async ({ params }) => {
 		const memorialDoc = await memorialRef.get();
 
 		if (!memorialDoc.exists) {
-			return json({ error: 'Memorial not found' }, { status: 404 });
+			return json({ error: 'Event not found' }, { status: 404 });
 		}
 
-		const memorial = memorialDoc.data();
+		const event = memorialDoc.data();
 
-		// Return essential memorial data including fullSlug
+		// Return essential event data including fullSlug
 		return json({
 			id: memorialDoc.id,
-			lovedOneName: memorial?.lovedOneName,
-			fullSlug: memorial?.fullSlug,
-			isPublic: memorial?.isPublic,
-			createdAt: memorial?.createdAt?.toDate?.()?.toISOString() || memorial?.createdAt
+			lovedOneName: event?.lovedOneName,
+			fullSlug: event?.fullSlug,
+			isPublic: event?.isPublic,
+			createdAt: event?.createdAt?.toDate?.()?.toISOString() || event?.createdAt
 		});
 	} catch (error) {
-		console.error('Error fetching memorial:', error);
-		return json({ error: 'Failed to fetch memorial' }, { status: 500 });
+		console.error('Error fetching event:', error);
+		return json({ error: 'Failed to fetch event' }, { status: 500 });
 	}
 };

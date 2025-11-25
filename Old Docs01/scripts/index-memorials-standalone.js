@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 // Load environment variables from .env file
 dotenv.config();
 
-console.log('🚀 Starting memorial indexing script...');
+console.log('🚀 Starting event indexing script...');
 
 // Initialize Firebase Admin
 if (!admin.apps.length) {
@@ -36,17 +36,17 @@ const algoliaClient = algoliasearch(
 
 console.log('🔍 Algolia client initialized');
 
-async function indexMemorial(memorial) {
-	if (!memorial.id) {
-		throw new Error('Memorial ID is required for indexing.');
+async function indexMemorial(event) {
+	if (!event.id) {
+		throw new Error('Event ID is required for indexing.');
 	}
 
 	const record = {
-		objectID: memorial.id,
-		lovedOneName: memorial.lovedOneName,
-		slug: memorial.slug,
-		fullSlug: memorial.fullSlug,
-		createdAt: memorial.createdAt,
+		objectID: event.id,
+		lovedOneName: event.lovedOneName,
+		slug: event.slug,
+		fullSlug: event.fullSlug,
+		createdAt: event.createdAt,
 	};
 
 	try {
@@ -54,14 +54,14 @@ async function indexMemorial(memorial) {
 			indexName: 'memorials',
 			body: record
 		});
-		console.log(`✅ Successfully indexed memorial: ${memorial.lovedOneName} (${memorial.id})`);
+		console.log(`✅ Successfully indexed event: ${event.lovedOneName} (${event.id})`);
 	} catch (error) {
-		console.error(`❌ Error indexing memorial ${memorial.id}:`, error);
+		console.error(`❌ Error indexing event ${event.id}:`, error);
 	}
 }
 
 async function indexAllMemorials() {
-	console.log('📋 Starting memorial indexing...');
+	console.log('📋 Starting event indexing...');
 	
 	const adminDb = admin.firestore();
 	const memorialsRef = adminDb.collection('memorials');
@@ -79,8 +79,8 @@ async function indexAllMemorials() {
 
 	console.log(`📊 Found ${memorials.length} memorials to index.`);
 
-	for (const memorial of memorials) {
-		await indexMemorial(memorial);
+	for (const event of memorials) {
+		await indexMemorial(event);
 	}
 
 	console.log('🎉 Finished indexing all memorials.');

@@ -65,7 +65,7 @@ test.describe('Login Flow', () => {
 
   test('register link works', async ({ page }) => {
     await page.getByText(/create account/i).click();
-    await expect(page).toHaveURL(/\/register\/loved-one/);
+    await expect(page).toHaveURL(/\/register\/new-event-and-account/);
   });
 
   test('remembers login state across page refreshes', async ({ page }) => {

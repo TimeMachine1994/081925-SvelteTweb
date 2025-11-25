@@ -1,37 +1,37 @@
 import { describe, it, expect } from 'vitest';
 
 describe('Routing Fixes Integration', () => {
-	describe('Memorial URL Generation', () => {
-		it('should generate correct memorial URLs without /tributes/', () => {
-			const memorial = {
-				id: 'memorial-123',
-				fullSlug: 'john-doe-memorial-2024',
-				slug: 'john-doe-memorial'
+	describe('Event URL Generation', () => {
+		it('should generate correct event URLs without /tributes/', () => {
+			const event = {
+				id: 'event-123',
+				fullSlug: 'john-doe-event-2024',
+				slug: 'john-doe-event'
 			};
 
 			// Test the correct URL format
-			const correctUrl = `/${memorial.fullSlug}`;
-			expect(correctUrl).toBe('/john-doe-memorial-2024');
+			const correctUrl = `/${event.fullSlug}`;
+			expect(correctUrl).toBe('/john-doe-event-2024');
 			expect(correctUrl).not.toContain('/tributes/');
 		});
 
 		it('should handle fallback to slug if fullSlug missing', () => {
-			const memorial = {
-				id: 'memorial-456',
-				slug: 'jane-smith-memorial'
+			const event = {
+				id: 'event-456',
+				slug: 'jane-smith-event'
 				// fullSlug missing
 			};
 
-			const url = `/${memorial.fullSlug || memorial.slug}`;
-			expect(url).toBe('/jane-smith-memorial');
+			const url = `/${event.fullSlug || event.slug}`;
+			expect(url).toBe('/jane-smith-event');
 			expect(url).not.toContain('/tributes/');
 		});
 
 		it('should generate correct email tribute URLs', () => {
-			const fullSlug = 'memorial-service-2024';
+			const fullSlug = 'event-service-2024';
 			const tributeUrl = `https://tributestream.com/${fullSlug}`;
 			
-			expect(tributeUrl).toBe('https://tributestream.com/memorial-service-2024');
+			expect(tributeUrl).toBe('https://tributestream.com/event-service-2024');
 			expect(tributeUrl).not.toContain('/tributes/');
 		});
 	});
@@ -44,7 +44,7 @@ describe('Routing Fixes Integration', () => {
 			expect(managementUrl).not.toContain('/my-portal/tributes/');
 		});
 
-		it('should redirect new memorial creation to family registration', () => {
+		it('should redirect new event creation to family registration', () => {
 			const createUrl = '/register/family';
 			
 			expect(createUrl).toBe('/register/family');
@@ -54,45 +54,45 @@ describe('Routing Fixes Integration', () => {
 
 	describe('API Response URLs', () => {
 		it('should generate correct mobile viewer URLs', () => {
-			const memorial = {
-				fullSlug: 'test-memorial-2024',
-				slug: 'test-memorial',
-				id: 'memorial-789'
+			const event = {
+				fullSlug: 'test-event-2024',
+				slug: 'test-event',
+				id: 'event-789'
 			};
 
-			const viewerUrl = `/${memorial.fullSlug || memorial.slug || memorial.id}`;
-			expect(viewerUrl).toBe('/test-memorial-2024');
+			const viewerUrl = `/${event.fullSlug || event.slug || event.id}`;
+			expect(viewerUrl).toBe('/test-event-2024');
 			expect(viewerUrl).not.toContain('/tributes/');
 		});
 
 		it('should handle missing fullSlug gracefully', () => {
-			const memorial = {
-				slug: 'backup-memorial',
-				id: 'memorial-999'
+			const event = {
+				slug: 'backup-event',
+				id: 'event-999'
 			};
 
-			const viewerUrl = `/${memorial.fullSlug || memorial.slug || memorial.id}`;
-			expect(viewerUrl).toBe('/backup-memorial');
+			const viewerUrl = `/${event.fullSlug || event.slug || event.id}`;
+			expect(viewerUrl).toBe('/backup-event');
 		});
 
 		it('should fallback to ID if both slug fields missing', () => {
-			const memorial = {
-				id: 'memorial-000'
+			const event = {
+				id: 'event-000'
 			};
 
-			const viewerUrl = `/${memorial.fullSlug || memorial.slug || memorial.id}`;
-			expect(viewerUrl).toBe('/memorial-000');
+			const viewerUrl = `/${event.fullSlug || event.slug || event.id}`;
+			expect(viewerUrl).toBe('/event-000');
 		});
 	});
 
 	describe('Livestream Dashboard Navigation', () => {
-		it('should generate correct "View Memorial" link', () => {
-			const memorial = {
-				fullSlug: 'livestream-memorial-2024'
+		it('should generate correct "View Event" link', () => {
+			const event = {
+				fullSlug: 'livestream-event-2024'
 			};
 
-			const viewMemorialUrl = `/${memorial.fullSlug}`;
-			expect(viewMemorialUrl).toBe('/livestream-memorial-2024');
+			const viewMemorialUrl = `/${event.fullSlug}`;
+			expect(viewMemorialUrl).toBe('/livestream-event-2024');
 			expect(viewMemorialUrl).not.toContain('/tributes/');
 		});
 	});
@@ -100,7 +100,7 @@ describe('Routing Fixes Integration', () => {
 	describe('Legacy Path Detection', () => {
 		it('should identify legacy /tributes/ paths as incorrect', () => {
 			const legacyPaths = [
-				'/tributes/some-memorial',
+				'/tributes/some-event',
 				'/my-portal/tributes/123/edit',
 				'/my-portal/tributes/new'
 			];
@@ -113,10 +113,10 @@ describe('Routing Fixes Integration', () => {
 
 		it('should validate correct paths do not contain /tributes/', () => {
 			const correctPaths = [
-				'/memorial-service-2024',
+				'/event-service-2024',
 				'/profile',
 				'/register/family',
-				'/livestream/memorial-123'
+				'/livestream/event-123'
 			];
 
 			correctPaths.forEach(path => {
@@ -126,11 +126,11 @@ describe('Routing Fixes Integration', () => {
 	});
 
 	describe('URL Validation', () => {
-		it('should validate memorial page URLs are at root level', () => {
+		it('should validate event page URLs are at root level', () => {
 			const memorialUrls = [
-				'/john-doe-memorial',
+				'/john-doe-event',
 				'/jane-smith-service-2024',
-				'/memorial-celebration'
+				'/event-celebration'
 			];
 
 			memorialUrls.forEach(url => {
@@ -144,7 +144,7 @@ describe('Routing Fixes Integration', () => {
 			const managementUrls = [
 				'/profile',
 				'/register/family',
-				'/livestream/memorial-123'
+				'/livestream/event-123'
 			];
 
 			managementUrls.forEach(url => {

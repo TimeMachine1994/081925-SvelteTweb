@@ -82,7 +82,7 @@ npm run dev
 
 ### Create a Stream
 1. Login as **admin** or **funeral_director**
-2. Navigate to `/memorials/[memorial-id]/streams`
+2. Navigate to `/memorials/[event-id]/streams`
 3. Click **"Create Stream"**
 4. Fill in title and description
 5. Click **"Create Stream"**
@@ -141,7 +141,7 @@ frontend/
 │       │   ├── live-streams/
 │       │   │   ├── create/
 │       │   │   │   └── +server.ts ✨ NEW
-│       │   │   ├── memorial/[memorialId]/
+│       │   │   ├── event/[memorialId]/
 │       │   │   │   └── +server.ts ✨ NEW
 │       │   │   └── [id]/
 │       │   │       ├── stop/
@@ -254,8 +254,8 @@ Creates a new live streaming session
 }
 ```
 
-### GET /api/live-streams/memorial/:memorialId
-Lists all streams for a memorial
+### GET /api/live-streams/event/:memorialId
+Lists all streams for a event
 
 ### POST /api/live-streams/:id/stop
 Stops an active stream
@@ -300,7 +300,7 @@ Handles Mux webhook events (automatic)
 - [ ] Webhook signature verification is enabled
 - [ ] API endpoints check user authentication
 - [ ] Stream permissions verified (admin/funeral_director only)
-- [ ] Memorial ownership checked before stream access
+- [ ] Event ownership checked before stream access
 - [ ] HTTPS enabled for all webhook endpoints
 
 ---

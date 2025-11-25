@@ -32,17 +32,17 @@ test.describe('Auth Session Flow', () => {
 		// This would typically be done through your registration flow
 		
 		// Navigate to registration to get a valid token
-		await page.goto('/register/loved-one');
+		await page.goto('/register/new-event-and-account');
 		
 		// Fill out the registration form
-		await page.fill('input[name="lovedOneName"]', 'Test Memorial');
+		await page.fill('input[name="lovedOneName"]', 'Test Event');
 		await page.fill('input[name="yourName"]', 'Test User');
 		await page.fill('input[name="email"]', `test-${Date.now()}@example.com`);
 		await page.fill('input[name="phone"]', '555-0123');
 		
 		// Submit the form and capture the redirect
 		const responsePromise = page.waitForResponse(response => 
-			response.url().includes('/register/loved-one') && response.status() === 200
+			response.url().includes('/register/new-event-and-account') && response.status() === 200
 		);
 		
 		await page.click('button[type="submit"]');
@@ -75,7 +75,7 @@ test.describe('Auth Session Flow', () => {
 				// This is expected if emulators aren't properly configured
 				expect(errorText).toContain('Authentication failed');
 			} else {
-				// Should be redirected to memorial or portal
+				// Should be redirected to event or portal
 				expect(currentUrl).toMatch(/(tributes|my-portal)/);
 			}
 		} catch (error) {
@@ -84,10 +84,10 @@ test.describe('Auth Session Flow', () => {
 		}
 	});
 
-	test('should redirect to memorial when slug is provided', async ({ page }) => {
+	test('should redirect to event when slug is provided', async ({ page }) => {
 		// Test with a mock token and slug
 		const mockToken = 'mock-custom-token-for-testing';
-		const testSlug = 'test-memorial-slug';
+		const testSlug = 'test-event-slug';
 		
 		await page.goto(`/auth/session?token=${mockToken}&slug=${testSlug}`);
 		

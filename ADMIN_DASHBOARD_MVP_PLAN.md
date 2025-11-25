@@ -8,7 +8,7 @@ Create a streamlined admin dashboard with **3 core elements only**:
 
 ### 1. 🗂️ **5 Main Tabs**
 - **Overview**: System metrics and quick stats
-- **Memorials**: Memorial management
+- **Memorials**: Event management
 - **Users**: User account management  
 - **Purchases**: Payment and transaction tracking
 - **Streams**: Stream monitoring and management
@@ -66,7 +66,7 @@ Create a streamlined admin dashboard with **3 core elements only**:
 #### 💝 Memorials Tab  
 - **CRUD Operations**: Create, Read, Update, Delete memorials
 - Table view with search/filter
-- Edit memorial details inline
+- Edit event details inline
 
 #### 👥 Users Tab
 - **CRUD Operations**: Create, Read, Update, Delete users  

@@ -87,7 +87,7 @@ Phone Browser → WHIP → Cloudflare → Iframe URL → OBS → Main Stream
    - Best quality and lowest latency
    - Position/resize as needed
    - Mix with other cameras/sources
-   - Stream to memorial page via main stream
+   - Stream to event page via main stream
 
 ---
 
@@ -117,7 +117,7 @@ If Browser Source doesn't work for some reason:
 ### **Multi-Camera Funerals**
 ```
 Phone 1 (Wide angle) ─┐
-Phone 2 (Close-up)   ─┤→ OBS → Memorial Stream
+Phone 2 (Close-up)   ─┤→ OBS → Event Stream
 Phone 3 (Crowd)      ─┘
 ```
 
@@ -369,7 +369,7 @@ Phone streams at:
 **Result:**
 - Professional multi-camera production
 - Total equipment cost: ~$50 (phone holders)
-- Broadcast quality memorial service
+- Broadcast quality event service
 - Family watches from home with perfect view
 
 ---
@@ -399,7 +399,7 @@ Mobile Input streaming allows you to:
 - ✅ No apps or downloads needed
 - ✅ Browser-based (Chrome/Safari)
 - ✅ Low latency via WHIP/WebRTC
-- ✅ Perfect for funerals and memorial services
+- ✅ Perfect for funerals and event services
 
 **The flow is simple:**
 ```

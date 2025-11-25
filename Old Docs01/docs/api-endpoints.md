@@ -18,13 +18,13 @@ Each endpoint enforces role-based permissions:
 
 ---
 
-## Memorial Management Endpoints
+## Event Management Endpoints
 
 ### GET `/api/memorials/[memorialId]`
-**Description**: Retrieve memorial details  
+**Description**: Retrieve event details  
 **Access**: All roles (with appropriate permissions)  
 **Parameters**:
-- `memorialId` (path): Memorial ID
+- `memorialId` (path): Event ID
 
 **Response**:
 ```json
@@ -45,15 +45,15 @@ Each endpoint enforces role-based permissions:
 
 **Error Codes**:
 - `403`: Insufficient permissions
-- `404`: Memorial not found
+- `404`: Event not found
 
 ---
 
 ### POST `/api/memorials/[memorialId]/schedule`
-**Description**: Update memorial schedule  
+**Description**: Update event schedule  
 **Access**: Owner, Funeral Director  
 **Parameters**:
-- `memorialId` (path): Memorial ID
+- `memorialId` (path): Event ID
 
 **Request Body**:
 ```json
@@ -79,7 +79,7 @@ Each endpoint enforces role-based permissions:
 **Description**: Auto-save schedule changes  
 **Access**: Owner, Funeral Director  
 **Parameters**:
-- `memorialId` (path): Memorial ID
+- `memorialId` (path): Event ID
 
 **Request Body**:
 ```json
@@ -105,7 +105,7 @@ Each endpoint enforces role-based permissions:
 **Description**: Create invitation for family member  
 **Access**: Owner, Funeral Director  
 **Parameters**:
-- `memorialId` (path): Memorial ID
+- `memorialId` (path): Event ID
 
 **Request Body**:
 ```json
@@ -131,7 +131,7 @@ Each endpoint enforces role-based permissions:
 **Description**: Accept/decline invitation  
 **Access**: Invited user  
 **Parameters**:
-- `memorialId` (path): Memorial ID
+- `memorialId` (path): Event ID
 - `invitationId` (path): Invitation ID
 
 **Request Body**:
@@ -156,10 +156,10 @@ Each endpoint enforces role-based permissions:
 ## Follow System Endpoints
 
 ### POST `/api/memorials/[memorialId]/follow`
-**Description**: Follow/unfollow memorial  
+**Description**: Follow/unfollow event  
 **Access**: Viewer  
 **Parameters**:
-- `memorialId` (path): Memorial ID
+- `memorialId` (path): Event ID
 
 **Request Body**:
 ```json
@@ -185,7 +185,7 @@ Each endpoint enforces role-based permissions:
 **Description**: Start livestream  
 **Access**: Owner, Funeral Director  
 **Parameters**:
-- `memorialId` (path): Memorial ID
+- `memorialId` (path): Event ID
 
 **Request Body**:
 ```json
@@ -211,7 +211,7 @@ Each endpoint enforces role-based permissions:
 **Description**: Stop livestream  
 **Access**: Owner, Funeral Director  
 **Parameters**:
-- `memorialId` (path): Memorial ID
+- `memorialId` (path): Event ID
 - `streamId` (path): Stream ID
 
 **Response**:
@@ -226,9 +226,9 @@ Each endpoint enforces role-based permissions:
 
 ### GET `/api/memorials/[memorialId]/stream/status`
 **Description**: Get livestream status  
-**Access**: All roles (with memorial access)  
+**Access**: All roles (with event access)  
 **Parameters**:
-- `memorialId` (path): Memorial ID
+- `memorialId` (path): Event ID
 
 **Response**:
 ```json
@@ -245,10 +245,10 @@ Each endpoint enforces role-based permissions:
 ## Photo Management Endpoints
 
 ### POST `/api/memorials/[memorialId]/photos`
-**Description**: Upload photo to memorial  
+**Description**: Upload photo to event  
 **Access**: Owner, Funeral Director, Family Member (with invitation)  
 **Parameters**:
-- `memorialId` (path): Memorial ID
+- `memorialId` (path): Event ID
 
 **Request Body**: FormData with photo file
 
@@ -269,10 +269,10 @@ Each endpoint enforces role-based permissions:
 ---
 
 ### DELETE `/api/memorials/[memorialId]/photos/[photoId]`
-**Description**: Delete photo from memorial  
+**Description**: Delete photo from event  
 **Access**: Owner, Funeral Director, Photo uploader  
 **Parameters**:
-- `memorialId` (path): Memorial ID
+- `memorialId` (path): Event ID
 - `photoId` (path): Photo ID
 
 **Response**:
@@ -309,8 +309,8 @@ Each endpoint enforces role-based permissions:
 
 ---
 
-### POST `/api/funeral-director/create-memorial`
-**Description**: Create new memorial (funeral director workflow)  
+### POST `/api/funeral-director/create-event`
+**Description**: Create new event (funeral director workflow)  
 **Access**: Funeral Director  
 
 **Request Body**:
@@ -432,7 +432,7 @@ All endpoints return errors in the following format:
 |------|-------------|
 | `AUTH_REQUIRED` | Authentication required |
 | `INSUFFICIENT_PERMISSIONS` | User lacks required permissions |
-| `MEMORIAL_NOT_FOUND` | Memorial does not exist |
+| `MEMORIAL_NOT_FOUND` | Event does not exist |
 | `INVITATION_REQUIRED` | Family member needs invitation |
 | `VALIDATION_ERROR` | Request validation failed |
 | `FIREBASE_ERROR` | Database operation failed |
@@ -466,19 +466,19 @@ Use Firebase Auth emulator or test tokens for development.
 
 ### Example cURL Commands
 
-**Get Memorial**:
+**Get Event**:
 ```bash
 curl -H "Authorization: Bearer <token>" \
-     https://api.yourdomain.com/api/memorials/memorial-123
+     https://api.yourdomain.com/api/memorials/event-123
 ```
 
-**Follow Memorial**:
+**Follow Event**:
 ```bash
 curl -X POST \
      -H "Authorization: Bearer <token>" \
      -H "Content-Type: application/json" \
      -d '{"action": "follow"}' \
-     https://api.yourdomain.com/api/memorials/memorial-123/follow
+     https://api.yourdomain.com/api/memorials/event-123/follow
 ```
 
 **Start Livestream**:
@@ -486,8 +486,8 @@ curl -X POST \
 curl -X POST \
      -H "Authorization: Bearer <token>" \
      -H "Content-Type: application/json" \
-     -d '{"streamTitle": "Memorial Service", "streamDescription": "Live service"}' \
-     https://api.yourdomain.com/api/memorials/memorial-123/livestream/start
+     -d '{"streamTitle": "Event Service", "streamDescription": "Live service"}' \
+     https://api.yourdomain.com/api/memorials/event-123/livestream/start
 ```
 
 ---

@@ -1,14 +1,14 @@
 /**
  * Debug script to test slideshow loading functionality
- * Run this in the browser console when on a memorial slideshow page
+ * Run this in the browser console when on a event slideshow page
  */
 
 async function debugSlideshowLoading(memorialId) {
-  console.log('🔍 Starting slideshow loading debug for memorial:', memorialId);
+  console.log('🔍 Starting slideshow loading debug for event:', memorialId);
   
   try {
-    // Test 1: Check if memorial exists and has slideshow
-    console.log('\n📋 Test 1: Checking memorial slideshow API...');
+    // Test 1: Check if event exists and has slideshow
+    console.log('\n📋 Test 1: Checking event slideshow API...');
     const slideshowResponse = await fetch(`/api/memorials/${memorialId}/slideshow`);
     console.log('📡 Slideshow API status:', slideshowResponse.status, slideshowResponse.statusText);
     
@@ -141,5 +141,5 @@ window.debugPhotoLoading = debugPhotoLoading;
 
 console.log('🔧 Slideshow debug functions loaded!');
 console.log('📋 Usage:');
-console.log('  debugSlideshowLoading("your-memorial-id")');
+console.log('  debugSlideshowLoading("your-event-id")');
 console.log('  debugPhotoLoading("photo-url")');

@@ -30,16 +30,16 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		});
 
 		if (!videoBlob || !memorialId) {
-			throw error(400, 'Video file and memorial ID are required');
+			throw error(400, 'Video file and event ID are required');
 		}
 
-		// Verify memorial exists and user has permission
+		// Verify event exists and user has permission
 		const memorialRef = adminDb.collection('memorials').doc(memorialId);
 		const memorialDoc = await memorialRef.get();
 
 		if (!memorialDoc.exists) {
-			console.log('🔥 [FIREBASE SLIDESHOW API] Memorial not found:', memorialId);
-			throw error(404, 'Memorial not found');
+			console.log('🔥 [FIREBASE SLIDESHOW API] Event not found:', memorialId);
+			throw error(404, 'Event not found');
 		}
 
 		const memorialData = memorialDoc.data();
@@ -170,7 +170,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		// Ensure no undefined values for Firestore
 		const slideshowDoc = {
 			id: slideshowId,
-			title: title || 'Memorial Slideshow',
+			title: title || 'Event Slideshow',
 			memorialId,
 			firebaseStoragePath: firebaseResult.storagePath,
 			playbackUrl: firebaseResult.downloadURL,
@@ -203,7 +203,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		
 		console.log('📝 [FIREBASE SLIDESHOW API] Cleaned slideshow document:', JSON.stringify(cleanSlideshowDoc, null, 2));
 
-		// Save to memorial's slideshows subcollection
+		// Save to event's slideshows subcollection
 		const slideshowRef = adminDb
 			.collection('memorials')
 			.doc(memorialId)
@@ -212,7 +212,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			
 		await slideshowRef.set(cleanSlideshowDoc);
 
-		// Update memorial to indicate it has slideshows
+		// Update event to indicate it has slideshows
 		await memorialRef.update({
 			hasSlideshow: true,
 			updatedAt: new Date().toISOString()
@@ -368,7 +368,7 @@ async function uploadToFirebaseStorage(videoBlob: File, memorialId: string, titl
 					memorialId,
 					title,
 					uploadedAt: new Date().toISOString(),
-					type: 'memorial-slideshow'
+					type: 'event-slideshow'
 				}
 			}
 		});

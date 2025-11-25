@@ -30,11 +30,11 @@
 	// Loading state
 	let pageLoaded = $state(true);
 
-	// Get memorial ID from route params or data
-	const memorialId = $page.params.memorialId || data?.memorial?.id || '';
+	// Get event ID from route params or data
+	const memorialId = $page.params.memorialId || data?.event?.id || '';
 	let lovedOneName = $state('');
 
-	// Memorial services data (new structure)
+	// Event services data (new structure)
 	let services = $state({
 		main: {
 			location: { name: '', address: '', isUnknown: false },
@@ -390,7 +390,7 @@
 		}
 
 		try {
-			// Save configuration to the memorial's schedule data
+			// Save configuration to the event's schedule data
 			const scheduleData = {
 				selectedTier,
 				mainService,
@@ -440,24 +440,24 @@
 		};
 	}
 
-	// Redirect to memorial-specific route or new memorial creation
+	// Redirect to event-specific route or new event creation
 	function redirectToProperRoute() {
 		// Check if user has existing memorials
 		goto('/schedule/new');
 	}
 
-	// This page now serves as a redirect to the proper memorial-specific route
+	// This page now serves as a redirect to the proper event-specific route
 
-	// Auto-save functionality moved to memorial-specific routes
+	// Auto-save functionality moved to event-specific routes
 
-	// Only redirect if no memorial ID is provided in URL
+	// Only redirect if no event ID is provided in URL
 	$effect(() => {
 		if (browser) {
 			const urlParams = new URLSearchParams(window.location.search);
 			const paramMemorialId = urlParams.get('memorialId');
 
 			if (!paramMemorialId) {
-				// No memorial ID provided, redirect to profile to select memorial
+				// No event ID provided, redirect to profile to select event
 				goto('/profile');
 			}
 		}
@@ -540,7 +540,7 @@
 				console.error('Error loading existing data:', error);
 			}
 		} else {
-			// If no memorial ID, redirect to profile to select/create memorial
+			// If no event ID, redirect to profile to select/create event
 			goto('/profile');
 		}
 	});
@@ -593,7 +593,7 @@
 	<title>Price Calculator - Tributestream</title>
 	<meta
 		name="description"
-		content="Calculate the cost of your memorial service with our interactive pricing calculator."
+		content="Calculate the cost of your event service with our interactive pricing calculator."
 	/>
 </svelte:head>
 
@@ -609,7 +609,7 @@
 			</h1>
 		</div>
 		<p class="mx-auto max-w-2xl text-xl text-gray-300">
-			Configure your memorial service livestream package with our comprehensive pricing calculator
+			Configure your event service livestream package with our comprehensive pricing calculator
 		</p>
 	</div>
 </section>

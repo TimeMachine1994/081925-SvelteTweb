@@ -1,20 +1,20 @@
 # 🔗 Social Media Share Buttons - Implementation Plan
 
 ## Overview
-Add respectful, gold-themed social media share buttons to help families spread the word about memorial services and encourage attendance/participation.
+Add respectful, gold-themed social media share buttons to help families spread the word about event services and encourage attendance/participation.
 
 ---
 
 ## 📍 Implementation Locations
 
-### **Location 1: Memorial Page** ✅
+### **Location 1: Event Page** ✅
 **Placement:** Below the video player / stream display  
-**Context:** Main public-facing memorial page (`/[fullSlug]`)  
-**Purpose:** Allow visitors to share the memorial with friends and family
+**Context:** Main public-facing event page (`/[fullSlug]`)  
+**Purpose:** Allow visitors to share the event with friends and family
 
 **Component:** `MemorialStreamDisplay.svelte`
 - Add share buttons section after stream player
-- Conditional: Only show if memorial is public
+- Conditional: Only show if event is public
 - Position: Centered, below video container
 
 ### **Location 2: Schedule Paid Confirmation Page** ✅
@@ -24,16 +24,16 @@ Add respectful, gold-themed social media share buttons to help families spread t
 
 **Component:** `ScheduleReceipt.svelte` or paid confirmation section
 - Add to receipt/confirmation UI
-- Show alongside "View Memorial" button
-- Include message: "Share this memorial to invite family and friends"
+- Show alongside "View Event" button
+- Include message: "Share this event to invite family and friends"
 
-### **Location 3: Memorial Owner Profile** ✅
-**Placement:** Next to "View Slideshow" and "View Memorial" buttons  
-**Context:** Owner profile page (`/profile`) - memorial card/list  
-**Purpose:** Give owners easy access to share their memorial
+### **Location 3: Event Owner Profile** ✅
+**Placement:** Next to "View Slideshow" and "View Event" buttons  
+**Context:** Owner profile page (`/profile`) - event card/list  
+**Purpose:** Give owners easy access to share their event
 
-**Component:** Profile memorial card component
-- Add as action buttons in memorial card
+**Component:** Profile event card component
+- Add as action buttons in event card
 - Show in button group with existing actions
 - Compact icon-only view for space efficiency
 
@@ -50,10 +50,10 @@ Add respectful, gold-themed social media share buttons to help families spread t
 
 ### **Layout Options**
 
-#### **Full Display (Memorial Page & Schedule Paid)**
+#### **Full Display (Event Page & Schedule Paid)**
 ```
 ┌─────────────────────────────────────────────┐
-│  Share This Memorial                         │
+│  Share This Event                         │
 │  [📘 Facebook] [🐦 Twitter] [📧 Email]      │
 │  [📋 Copy Link]                              │
 └─────────────────────────────────────────────┘
@@ -93,7 +93,7 @@ interface Props {
   memorialName: string;
   memorialUrl: string;
   variant?: 'full' | 'compact' | 'icon-only';
-  theme?: 'memorial' | 'default';
+  theme?: 'event' | 'default';
   showLabel?: boolean;
 }
 ```
@@ -122,8 +122,8 @@ https://twitter.com/intent/tweet?url={memorialUrl}&text={encodedText}
 ```javascript
 mailto:?subject={encodedSubject}&body={encodedBody}
 ```
-- Subject: "Memorial Service for {lovedOneName}"
-- Body: "You're invited to view the memorial for {lovedOneName}:\n{memorialUrl}"
+- Subject: "Event Service for {lovedOneName}"
+- Body: "You're invited to view the event for {lovedOneName}:\n{memorialUrl}"
 
 #### **Copy Link**
 ```javascript
@@ -149,40 +149,40 @@ navigator.clipboard.writeText(memorialUrl)
 
 ### **Files to Modify**
 
-#### **1. Memorial Page**
+#### **1. Event Page**
 - **File:** `frontend/src/lib/components/MemorialStreamDisplay.svelte`
 - **Change:** Add `<SocialShareButtons>` after stream player
-- **Condition:** Only if `memorial.isPublic === true`
+- **Condition:** Only if `event.isPublic === true`
 
 #### **2. Schedule Paid Page**
 - **File:** `frontend/src/routes/schedule/[memorialId]/_components/ScheduleReceipt.svelte`
 - **Change:** Add share buttons section in receipt/success view
-- **Context:** "Share this memorial" section with CTA
+- **Context:** "Share this event" section with CTA
 
 #### **3. Profile Page**
-- **File:** `frontend/src/routes/profile/+page.svelte` (or memorial card component)
-- **Change:** Add share dropdown/buttons to memorial actions
+- **File:** `frontend/src/routes/profile/+page.svelte` (or event card component)
+- **Change:** Add share dropdown/buttons to event actions
 - **Variant:** Compact or dropdown menu style
 
 ---
 
 ## 🎯 User Experience Flow
 
-### **Memorial Page Visitor**
-1. Views memorial and livestream
+### **Event Page Visitor**
+1. Views event and livestream
 2. Sees share buttons below video
 3. Clicks Facebook → Opens share dialog
-4. Posts to Facebook with memorial link
-5. Friends see post → Visit memorial
+4. Posts to Facebook with event link
+5. Friends see post → Visit event
 
-### **Memorial Owner (After Booking)**
+### **Event Owner (After Booking)**
 1. Completes service booking
 2. Sees success receipt page
-3. Prompted: "Share this memorial to invite attendees"
+3. Prompted: "Share this event to invite attendees"
 4. Clicks Email → Sends to family list
 5. Recipients get invitation email
 
-### **Memorial Owner (From Profile)**
+### **Event Owner (From Profile)**
 1. Views their memorials in profile
 2. Clicks share icon dropdown
 3. Copies link to share via WhatsApp
@@ -193,15 +193,15 @@ navigator.clipboard.writeText(memorialUrl)
 ## 🔐 Privacy Considerations
 
 ### **Respect for Privacy**
-- ✅ Only show share buttons if `memorial.isPublic === true`
-- ✅ Don't expose private memorial URLs
-- ✅ Allow memorial owner to control shareability
+- ✅ Only show share buttons if `event.isPublic === true`
+- ✅ Don't expose private event URLs
+- ✅ Allow event owner to control shareability
 - ✅ Respectful messaging (no "promote" language)
 
 ### **Content Shared**
-- Memorial URL (public link)
+- Event URL (public link)
 - Loved one's name
-- Generic text: "Memorial Service" (not "funeral")
+- Generic text: "Event Service" (not "funeral")
 - NO personal details, dates, locations in share text
 
 ---
@@ -211,8 +211,8 @@ navigator.clipboard.writeText(memorialUrl)
 ### **What to Track** (Optional Analytics)
 - Share button click rate
 - Most popular platform (Facebook vs Twitter vs Email)
-- Profile vs Memorial page shares
-- Conversion: Shares → Memorial page visits
+- Profile vs Event page shares
+- Conversion: Shares → Event page visits
 
 ### **Privacy-Respecting Analytics**
 - No tracking of individual users
@@ -232,10 +232,10 @@ navigator.clipboard.writeText(memorialUrl)
 5. Style with gold theme (#D5BA7F)
 6. Test all share links
 
-### **Phase 2: Memorial Page Integration** ✅
+### **Phase 2: Event Page Integration** ✅
 1. Import component into `MemorialStreamDisplay.svelte`
 2. Position below video player
-3. Pass memorial name and URL as props
+3. Pass event name and URL as props
 4. Add conditional rendering (public only)
 5. Test responsive layout
 
@@ -246,7 +246,7 @@ navigator.clipboard.writeText(memorialUrl)
 4. Test after successful payment flow
 
 ### **Phase 4: Profile Page** ✅
-1. Locate memorial card/list in profile
+1. Locate event card/list in profile
 2. Add compact share button/dropdown
 3. Position next to existing action buttons
 4. Test interaction and dropdown behavior
@@ -271,7 +271,7 @@ interface SocialShareButtonsProps {
   
   // Optional styling
   variant?: 'full' | 'compact' | 'icons-only';
-  theme?: 'memorial' | 'light' | 'dark';
+  theme?: 'event' | 'light' | 'dark';
   showLabel?: boolean;
   
   // Optional behavior
@@ -285,23 +285,23 @@ interface SocialShareButtonsProps {
 
 ### **Usage Examples**
 
-#### **Memorial Page (Full)**
+#### **Event Page (Full)**
 ```svelte
 <SocialShareButtons
-  memorialName={memorial.lovedOneName}
+  memorialName={event.lovedOneName}
   memorialUrl="https://tributestream.com/{fullSlug}"
   variant="full"
-  theme="memorial"
+  theme="event"
   showLabel={true}
-  isPublic={memorial.isPublic}
+  isPublic={event.isPublic}
 />
 ```
 
 #### **Profile Page (Compact)**
 ```svelte
 <SocialShareButtons
-  memorialName={memorial.lovedOneName}
-  memorialUrl="https://tributestream.com/{memorial.fullSlug}"
+  memorialName={event.lovedOneName}
+  memorialUrl="https://tributestream.com/{event.fullSlug}"
   variant="icons-only"
   theme="light"
   showLabel={false}
@@ -311,11 +311,11 @@ interface SocialShareButtonsProps {
 #### **Schedule Receipt (Full with CTA)**
 ```svelte
 <div class="share-section">
-  <h3>Share This Memorial</h3>
-  <p>Invite family and friends to view the memorial</p>
+  <h3>Share This Event</h3>
+  <p>Invite family and friends to view the event</p>
   <SocialShareButtons
-    memorialName={memorial.lovedOneName}
-    memorialUrl="https://tributestream.com/{memorial.fullSlug}"
+    memorialName={event.lovedOneName}
+    memorialUrl="https://tributestream.com/{event.fullSlug}"
     variant="full"
   />
 </div>
@@ -326,13 +326,13 @@ interface SocialShareButtonsProps {
 ## 🎭 Messaging Guidelines
 
 ### **Do's ✅**
-- "Share this memorial"
+- "Share this event"
 - "Invite family and friends"
 - "Spread the word"
 - "Let others know"
 
 ### **Don'ts ❌**
-- "Promote this memorial" (too commercial)
+- "Promote this event" (too commercial)
 - "Get more views" (insensitive)
 - "Go viral" (inappropriate)
 - "Market this service" (wrong tone)
@@ -345,12 +345,12 @@ interface SocialShareButtonsProps {
 - QR code generation for print materials
 - Embeddable widgets for funeral home websites
 - Custom share images (Open Graph)
-- Memorial service reminders (calendar integration)
+- Event service reminders (calendar integration)
 - Guest book sharing prompt
 
 ### **Analytics Dashboard**
 - Share count by platform
-- Memorial reach metrics
+- Event reach metrics
 - Referral sources
 - Attendance correlation
 
@@ -361,7 +361,7 @@ interface SocialShareButtonsProps {
 ### **Before Implementation**
 - [ ] Review design with stakeholders
 - [ ] Confirm social media platform selection
-- [ ] Verify memorial URL structure
+- [ ] Verify event URL structure
 - [ ] Check privacy/GDPR compliance
 - [ ] Design share button icons/colors
 
@@ -371,9 +371,9 @@ interface SocialShareButtonsProps {
 - [ ] Add copy-to-clipboard with notification
 - [ ] Style with gold theme
 - [ ] Make responsive (mobile/desktop)
-- [ ] Add to Memorial page below video
+- [ ] Add to Event page below video
 - [ ] Add to Schedule paid/receipt page
-- [ ] Add to Profile memorial cards
+- [ ] Add to Profile event cards
 - [ ] Test all share links
 - [ ] Test accessibility
 
@@ -390,7 +390,7 @@ interface SocialShareButtonsProps {
 ## 🎯 Expected Outcomes
 
 ### **Business Impact**
-- Increased memorial visibility
+- Increased event visibility
 - More service attendees (live and virtual)
 - Enhanced family engagement
 - Organic growth through referrals
@@ -401,14 +401,14 @@ interface SocialShareButtonsProps {
 - One-click sharing
 - Multiple platform options
 - Privacy-respecting
-- Professional memorial presentation
+- Professional event presentation
 
 ---
 
 ## 📞 Support & Maintenance
 
 ### **User Support**
-- FAQ: "How do I share my memorial?"
+- FAQ: "How do I share my event?"
 - Troubleshooting guide for share issues
 - Privacy settings documentation
 

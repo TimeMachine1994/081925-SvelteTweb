@@ -2,7 +2,7 @@
 
 ## Overview
 
-Tributestream provides a comprehensive API for user registration, memorial creation, and funeral director services. All endpoints implement pre-validation for optimal performance and consistent error handling.
+Tributestream provides a comprehensive API for user registration, event creation, and funeral director services. All endpoints implement pre-validation for optimal performance and consistent error handling.
 
 ## Authentication
 
@@ -45,7 +45,7 @@ All endpoints follow a consistent error response format:
 #### Register Owner
 **POST** `/register?/registerOwner`
 
-Creates a new memorial owner account.
+Creates a new event owner account.
 
 **Form Data:**
 ```typescript
@@ -110,10 +110,10 @@ Creates a new admin account (restricted access).
 
 ### 2. Loved One Registration
 
-#### Create Memorial for Loved One
-**POST** `/register/loved-one`
+#### Create Event for Loved One
+**POST** `/register/new-event-and-account`
 
-Creates a family account and memorial in one step.
+Creates a family account and event in one step.
 
 **Form Data:**
 ```typescript
@@ -125,7 +125,7 @@ Creates a family account and memorial in one step.
 }
 ```
 
-**Success Response:** Redirects to memorial page
+**Success Response:** Redirects to event page
 
 **Error Examples:**
 ```json
@@ -146,7 +146,7 @@ Creates a family account and memorial in one step.
 #### Enhanced Funeral Director Registration
 **POST** `/register/funeral-director`
 
-Creates a comprehensive family account and memorial with service details.
+Creates a comprehensive family account and event with service details.
 
 **Form Data:**
 ```typescript
@@ -176,7 +176,7 @@ Creates a comprehensive family account and memorial with service details.
 }
 ```
 
-**Success Response:** Redirects to memorial page
+**Success Response:** Redirects to event page
 
 **Error Examples:**
 ```json
@@ -242,10 +242,10 @@ Creates a professional funeral director profile.
 
 ### 2. Quick Family Registration
 
-#### Quick Register Family Memorial
+#### Quick Register Family Event
 **POST** `/api/funeral-director/quick-register-family`
 
-Quickly creates a family account and memorial (funeral director only).
+Quickly creates a family account and event (funeral director only).
 
 **Request Body:**
 ```json
@@ -261,9 +261,9 @@ Quickly creates a family account and memorial (funeral director only).
 ```json
 {
   "success": true,
-  "message": "Family memorial created successfully",
-  "memorialId": "memorial-id",
-  "memorialUrl": "/memorial-slug"
+  "message": "Family event created successfully",
+  "memorialId": "event-id",
+  "memorialUrl": "/event-slug"
 }
 ```
 
@@ -286,14 +286,14 @@ Quickly creates a family account and memorial (funeral director only).
 }
 ```
 
-## Memorial Creation
+## Event Creation
 
-### Profile Page Memorial Creation
+### Profile Page Event Creation
 
-#### Create Memorial (Owner Only)
+#### Create Event (Owner Only)
 **POST** `/profile?/createMemorial`
 
-Creates a new memorial for existing owners.
+Creates a new event for existing owners.
 
 **Form Data:**
 ```typescript
@@ -303,13 +303,13 @@ Creates a new memorial for existing owners.
 }
 ```
 
-**Success Response:** Redirects to memorial page
+**Success Response:** Redirects to event page
 
 **Error Examples:**
 ```json
 // Payment required
 {
-  "message": "You must complete payment for your existing memorial before creating a new one."
+  "message": "You must complete payment for your existing event before creating a new one."
 }
 
 // Missing name
@@ -330,7 +330,7 @@ Creates a new memorial for existing owners.
 All registration endpoints implement pre-validation that:
 
 1. **Checks email availability** before expensive operations
-2. **Generates unique memorial slugs** with collision detection
+2. **Generates unique event slugs** with collision detection
 3. **Validates data formats** before processing
 4. **Provides field-specific errors** for better UX
 
@@ -340,7 +340,7 @@ All registration endpoints implement pre-validation that:
 - **Existence checking**: Proactive Firebase Auth duplicate detection
 - **Consistent messaging**: Standardized error messages across all endpoints
 
-### Memorial Slug Generation
+### Event Slug Generation
 
 - **Unique generation**: Guaranteed uniqueness with counter-based collision resolution
 - **SEO-friendly**: Clean, readable URLs
@@ -358,7 +358,7 @@ All endpoints implement rate limiting to prevent abuse:
 
 - **Registration endpoints**: 5 requests per minute per IP
 - **API endpoints**: 10 requests per minute per authenticated user
-- **Memorial creation**: 3 requests per minute per user
+- **Event creation**: 3 requests per minute per user
 
 ## Security Features
 
@@ -367,7 +367,7 @@ All endpoints implement rate limiting to prevent abuse:
 All public registration endpoints require reCAPTCHA verification:
 
 - **Registration forms**: reCAPTCHA v3 with action-specific scoring
-- **Memorial creation**: Anti-spam protection
+- **Event creation**: Anti-spam protection
 - **Score thresholds**: Configurable per action type
 
 ### Authentication Requirements
@@ -451,12 +451,12 @@ if (!response.ok) {
 ### Version 2.0 (Current)
 - **Added pre-validation** for all registration endpoints
 - **Standardized error responses** with field targeting
-- **Improved memorial slug generation** with uniqueness guarantees
+- **Improved event slug generation** with uniqueness guarantees
 - **Enhanced user profile structure** with role-specific fields
 - **Added comprehensive testing** for all validation utilities
 
 ### Version 1.0
 - Basic registration endpoints
 - Simple error handling
-- Basic memorial creation
+- Basic event creation
 - Firebase Auth integration

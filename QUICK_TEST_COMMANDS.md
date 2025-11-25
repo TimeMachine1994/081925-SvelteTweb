@@ -26,7 +26,7 @@ curl -X POST http://localhost:5173/api/webhooks/test-live \
   -H "Content-Type: application/json" \
   -d '{"streamId": "CF_INPUT_ID", "action": "go-live"}'
 ```
-**Result**: Stream status changes to 'live', memorial page updates automatically
+**Result**: Stream status changes to 'live', event page updates automatically
 
 ---
 
@@ -76,8 +76,8 @@ curl -X POST http://localhost:5173/api/webhooks/test-live \
 # 4. Check stream status after (should be 'live')
 curl http://localhost:5173/api/streams/YOUR_STREAM_ID/status
 
-# 5. Open memorial page - should show live stream!
-# Open: http://localhost:5173/your-memorial-slug
+# 5. Open event page - should show live stream!
+# Open: http://localhost:5173/your-event-slug
 
 # 6. End the stream
 curl -X POST http://localhost:5173/api/webhooks/test-live \
@@ -93,7 +93,7 @@ curl http://localhost:5173/api/streams/YOUR_STREAM_ID/status
 ## 🔍 Watch Real-Time Updates
 
 ### In Browser Console
-1. Open memorial page
+1. Open event page
 2. Open DevTools (F12)
 3. Go to Console tab
 4. Look for:
@@ -118,7 +118,7 @@ Watch your terminal running `npm run dev`:
 ## 🎬 What You Should See
 
 ### Before Going Live:
-- Memorial page shows countdown timer
+- Event page shows countdown timer
 - Status: "Upcoming Service"
 - Time remaining displayed
 
@@ -148,7 +148,7 @@ firebase firestore:get streams/YOUR_STREAM_ID
 
 ### Monitor All Streams
 ```bash
-# Check all streams in memorial
+# Check all streams in event
 curl http://localhost:5173/api/memorials/MEMORIAL_ID/streams
 ```
 
@@ -168,10 +168,10 @@ The test endpoint can be called multiple times:
 # Right:  curl ... -d '{"streamId": "abc123CloudflareInputId"}'
 ```
 
-### Problem: No update on memorial page
+### Problem: No update on event page
 1. Check browser console for listener setup
 2. Hard refresh page (Ctrl+Shift+R)
-3. Verify streamId in URL matches memorial's streams
+3. Verify streamId in URL matches event's streams
 
 ### Problem: Stream shows but no video
 1. Check stream status endpoint
@@ -186,7 +186,7 @@ Before calling it done:
 - [ ] Webhook endpoint responds with `"status": "ok"`
 - [ ] Status endpoint shows stream details
 - [ ] Test "go-live" changes status to 'live'
-- [ ] Memorial page updates automatically (no refresh)
+- [ ] Event page updates automatically (no refresh)
 - [ ] Browser console shows Firestore listener updates
 - [ ] Test "end-stream" changes status to 'completed'
 - [ ] Can repeat test multiple times successfully

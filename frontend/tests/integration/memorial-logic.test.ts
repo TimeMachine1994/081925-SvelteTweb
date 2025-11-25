@@ -34,7 +34,7 @@ vi.mock('$lib/server/firebase', () => ({
   }
 }));
 
-describe('Memorial Logic Integration', () => {
+describe('Event Logic Integration', () => {
   const mockUser = createTestUser({ role: 'owner' });
   const mockMemorial = createTestMemorial();
 
@@ -43,13 +43,13 @@ describe('Memorial Logic Integration', () => {
     setupTestEnvironment();
   });
 
-  describe('Memorial Creation Logic', () => {
-    it('creates memorial with valid data', async () => {
+  describe('Event Creation Logic', () => {
+    it('creates event with valid data', async () => {
       mockGet.mockResolvedValue(mockFirebaseDoc({ 
         memorialCount: 0, 
         hasPaidForMemorial: false 
       }));
-      mockAdd.mockResolvedValue({ id: 'new-memorial-id' });
+      mockAdd.mockResolvedValue({ id: 'new-event-id' });
 
       const memorialData = {
         lovedOneName: 'John Doe',
@@ -64,14 +64,14 @@ describe('Memorial Logic Integration', () => {
       expect(mockAdd).toHaveBeenCalledWith(memorialData);
     });
 
-    it('validates memorial ownership', () => {
-      const memorial = createTestMemorial({ ownerUid: mockUser.uid });
-      const isOwner = memorial.ownerUid === mockUser.uid;
+    it('validates event ownership', () => {
+      const event = createTestMemorial({ ownerUid: mockUser.uid });
+      const isOwner = event.ownerUid === mockUser.uid;
       
       expect(isOwner).toBe(true);
     });
 
-    it('generates unique memorial slug', () => {
+    it('generates unique event slug', () => {
       const lovedOneName = 'John Michael Doe Jr.';
       const slug = lovedOneName
         .toLowerCase()
@@ -83,7 +83,7 @@ describe('Memorial Logic Integration', () => {
       expect(slug).toBe('john-michael-doe-jr');
     });
 
-    it('prevents duplicate memorial creation for unpaid users', async () => {
+    it('prevents duplicate event creation for unpaid users', async () => {
       mockGet.mockResolvedValue(mockFirebaseDoc({ 
         memorialCount: 1, 
         hasPaidForMemorial: false 
@@ -96,13 +96,13 @@ describe('Memorial Logic Integration', () => {
     });
   });
 
-  describe('Memorial Update Logic', () => {
-    it('updates memorial with valid changes', async () => {
+  describe('Event Update Logic', () => {
+    it('updates event with valid changes', async () => {
       mockGet.mockResolvedValue(mockFirebaseDoc(mockMemorial));
       mockUpdate.mockResolvedValue(undefined);
 
       const updateData = {
-        content: 'Updated memorial content',
+        content: 'Updated event content',
         isPublic: true,
         updatedAt: new Date()
       };
@@ -113,8 +113,8 @@ describe('Memorial Logic Integration', () => {
     });
 
     it('validates update permissions', () => {
-      const memorial = createTestMemorial({ ownerUid: 'other-user' });
-      const canUpdate = memorial.ownerUid === mockUser.uid;
+      const event = createTestMemorial({ ownerUid: 'other-user' });
+      const canUpdate = event.ownerUid === mockUser.uid;
       
       expect(canUpdate).toBe(false);
     });
@@ -137,14 +137,14 @@ describe('Memorial Logic Integration', () => {
     });
   });
 
-  describe('Memorial Deletion Logic', () => {
-    it('deletes memorial with proper permissions', async () => {
+  describe('Event Deletion Logic', () => {
+    it('deletes event with proper permissions', async () => {
       const memorialWithOwner = { ...mockMemorial, ownerUid: mockUser.uid };
       mockGet.mockResolvedValue(mockFirebaseDoc(memorialWithOwner));
       mockDelete.mockResolvedValue(undefined);
 
-      const memorial = await mockGet();
-      const canDelete = memorial.data().ownerUid === mockUser.uid;
+      const event = await mockGet();
+      const canDelete = event.data().ownerUid === mockUser.uid;
       
       if (canDelete) {
         await mockDelete();
@@ -155,14 +155,14 @@ describe('Memorial Logic Integration', () => {
     });
 
     it('prevents deletion by non-owners', () => {
-      const memorial = createTestMemorial({ ownerUid: 'other-user' });
-      const canDelete = memorial.ownerUid === mockUser.uid;
+      const event = createTestMemorial({ ownerUid: 'other-user' });
+      const canDelete = event.ownerUid === mockUser.uid;
       
       expect(canDelete).toBe(false);
     });
   });
 
-  describe('Memorial Search Logic', () => {
+  describe('Event Search Logic', () => {
     it('filters public memorials for search', () => {
       const memorials = [
         createTestMemorial({ isPublic: true, lovedOneName: 'John Doe' }),
@@ -170,8 +170,8 @@ describe('Memorial Logic Integration', () => {
         createTestMemorial({ isPublic: true, lovedOneName: 'Bob Johnson' })
       ];
 
-      const publicMemorials = memorials.filter(memorial => 
-        memorial.isPublic || memorial.ownerUid === mockUser.uid
+      const publicMemorials = memorials.filter(event => 
+        event.isPublic || event.ownerUid === mockUser.uid
       );
 
       expect(publicMemorials).toHaveLength(2);
@@ -184,8 +184,8 @@ describe('Memorial Logic Integration', () => {
         createTestMemorial({ isPublic: false, ownerUid: 'other-user' })
       ];
 
-      const visibleMemorials = memorials.filter(memorial => 
-        memorial.isPublic || memorial.ownerUid === mockUser.uid
+      const visibleMemorials = memorials.filter(event => 
+        event.isPublic || event.ownerUid === mockUser.uid
       );
 
       expect(visibleMemorials).toHaveLength(1);
@@ -193,7 +193,7 @@ describe('Memorial Logic Integration', () => {
     });
   });
 
-  describe('Memorial Validation Logic', () => {
+  describe('Event Validation Logic', () => {
     it('validates required fields', () => {
       const requiredFields = ['lovedOneName', 'ownerUid', 'ownerEmail'];
       const memorialData: Record<string, any> = {
@@ -230,10 +230,10 @@ describe('Memorial Logic Integration', () => {
   });
 
   describe('Stream Integration Logic', () => {
-    it('creates stream for memorial', async () => {
+    it('creates stream for event', async () => {
       const streamData = {
         memorialId: mockMemorial.id,
-        title: 'Memorial Service Stream',
+        title: 'Event Service Stream',
         createdBy: 'funeral-director-uid',
         rtmpEnabled: true,
         isVisible: true

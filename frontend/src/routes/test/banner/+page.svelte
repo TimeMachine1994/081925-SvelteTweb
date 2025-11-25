@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { setLoginTimestamp, clearBannerState, debugBannerState } from '$lib/utils/bookingBanner';
 
-	let testMemorialId = $state('test-memorial-123');
+	let testMemorialId = $state('test-event-123');
 	let debugOutput = $state('');
 
 	function setRecentLogin() {
@@ -22,7 +22,7 @@
 			
 			debugOutput = JSON.stringify({
 				loginTimestamp: sessionStorage.getItem('login-timestamp'),
-				bannerSeen: sessionStorage.getItem(`memorial-booking-banner-seen-${testMemorialId}`),
+				bannerSeen: sessionStorage.getItem(`event-booking-banner-seen-${testMemorialId}`),
 				allBannerKeys: bannerKeys,
 				currentTime: Date.now()
 			}, null, 2);
@@ -47,11 +47,11 @@
 			
 			<div class="space-y-2">
 				<label class="block">
-					<span class="text-sm font-medium">Memorial ID:</span>
+					<span class="text-sm font-medium">Event ID:</span>
 					<input 
 						bind:value={testMemorialId}
 						class="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md"
-						placeholder="test-memorial-123"
+						placeholder="test-event-123"
 					/>
 				</label>
 			</div>
@@ -90,7 +90,7 @@
 		<h3 class="font-semibold mb-2">Testing Instructions:</h3>
 		<ol class="list-decimal list-inside space-y-1 text-sm">
 			<li>Click "Set Recent Login" to simulate a fresh login</li>
-			<li>Navigate to a memorial page where you are the owner</li>
+			<li>Navigate to a event page where you are the owner</li>
 			<li>The banner should appear after 3 seconds</li>
 			<li>Use "Clear All Banner State" to reset for testing</li>
 		</ol>
@@ -100,8 +100,8 @@
 		<h3 class="font-semibold mb-2">Banner Display Conditions:</h3>
 		<ul class="list-disc list-inside space-y-1 text-sm">
 			<li>User must be logged in</li>
-			<li>User must be the memorial owner (ownerUid matches user.uid)</li>
-			<li>Memorial must not be paid/completed</li>
+			<li>User must be the event owner (ownerUid matches user.uid)</li>
+			<li>Event must not be paid/completed</li>
 			<li>Banner must not have been seen in this session</li>
 			<li>Login must be recent (within 5 minutes) or no timestamp exists</li>
 		</ul>

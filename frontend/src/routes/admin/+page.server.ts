@@ -9,14 +9,14 @@ import { adminDb } from '$lib/server/firebase';
  * 2. Recent memorials (for oversight)
  * 3. Basic system stats
  *
- * Follows established patterns from memorial flow analysis
+ * Follows established patterns from event flow analysis
  */
 export const load = async ({ locals }: any) => {
 	console.log('🔐 [ADMIN LOAD] Starting admin dashboard load for:', locals.user?.email);
 
 	try {
 		// === AUTHENTICATION & AUTHORIZATION ===
-		// Following same pattern as memorial APIs
+		// Following same pattern as event APIs
 		if (!locals.user) {
 			console.log('🚫 [ADMIN LOAD] No authenticated user - redirecting to login');
 			throw redirect(302, '/login');
@@ -46,10 +46,10 @@ export const load = async ({ locals }: any) => {
 		]);
 
 		// === PROCESS RECENT MEMORIALS ===
-		// Following memorial collection structure from flow analysis
+		// Following event collection structure from flow analysis
 		const recentMemorials = recentMemorialsSnap.docs.map((doc) => {
 			const data = doc.data();
-			console.log(`💝 [ADMIN LOAD] Processing memorial: ${data.lovedOneName}`);
+			console.log(`💝 [ADMIN LOAD] Processing event: ${data.lovedOneName}`);
 
 			// Extract scheduled start time from new or legacy structure
 			let scheduledStartTime = null;

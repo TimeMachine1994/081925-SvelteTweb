@@ -10,7 +10,7 @@ This document provides a comprehensive analysis of the Tributestream role-based 
 The system implements four primary user roles:
 
 1. **`admin`** - System administrators with full access
-2. **`owner`** - Memorial owners (families who create memorials)
+2. **`owner`** - Event owners (families who create memorials)
 3. **`funeral_director`** - Funeral home staff managing memorials for families
 4. **`family_member`** - Family members invited to contribute to memorials
 5. **`viewer`** - General users who can view and follow public memorials
@@ -26,7 +26,7 @@ The system implements four primary user roles:
 - **Role Setting API**: `/api/set-role-claim` endpoint for admin role management
 
 #### 2. User Registration & Role Assignment (95% Complete)
-- **Owner Registration**: `/register/loved-one` correctly assigns `owner` role
+- **Owner Registration**: `/register/new-event-and-account` correctly assigns `owner` role
 - **Funeral Director Registration**: `/register/funeral-home` assigns `funeral_director` role
 - **Viewer Registration**: `/register` assigns `viewer` role
 - **Admin Creation**: Scripts available for admin account creation
@@ -35,13 +35,13 @@ The system implements four primary user roles:
 #### 3. Admin System (90% Complete)
 - **Admin Portal**: Complete tabbed interface with funeral director approval workflow
 - **Funeral Director Approval**: Full workflow with status management
-- **Memorial Creation**: Admins can create memorials for families
+- **Event Creation**: Admins can create memorials for families
 - **Audit Logging**: Comprehensive admin action tracking
 
-#### 4. Memorial Access Control (85% Complete)
+#### 4. Event Access Control (85% Complete)
 - **Access Verification**: Comprehensive `MemorialAccessVerifier` class
 - **Permission Levels**: Proper `admin`, `edit`, `view`, `none` access levels
-- **Owner Access**: Memorial owners have full admin access
+- **Owner Access**: Event owners have full admin access
 - **Funeral Director Access**: Assigned funeral directors have edit access
 
 ### 🔄 **PARTIALLY IMPLEMENTED FEATURES**
@@ -95,15 +95,15 @@ The system implements four primary user roles:
 - Audit trails for livestream actions
 - Remote producer and onsite videographer roles
 
-#### 2. Memorial Creation Restrictions (40% Complete)
+#### 2. Event Creation Restrictions (40% Complete)
 **✅ Implemented:**
 - Admin can create memorials
 - Funeral directors can create memorials via registration form
 
 **❌ Missing:**
-- Restriction of memorial creation to only owners and funeral directors
+- Restriction of event creation to only owners and funeral directors
 - Prevention of viewers/family members from accessing creation endpoints
-- Proper permission checks in `/register/loved-one` endpoint
+- Proper permission checks in `/register/new-event-and-account` endpoint
 
 #### 3. Contributor Management (20% Complete)
 **✅ Implemented:**
@@ -194,7 +194,7 @@ export class MemorialAccessVerifier {
 
 ### 1. **Permission Enforcement Inconsistency**
 - Some endpoints check permissions properly, others don't
-- Memorial creation not restricted to owners/funeral directors
+- Event creation not restricted to owners/funeral directors
 - Photo upload permissions not consistently enforced
 
 ### 2. **Missing Core Features**
@@ -219,7 +219,7 @@ export class MemorialAccessVerifier {
 1. **Standardize Permission Checks**
    - Implement consistent permission middleware for all API endpoints
    - Use `MemorialAccessVerifier` class throughout the application
-   - Add permission checks to memorial creation endpoints
+   - Add permission checks to event creation endpoints
 
 2. **Complete Photo Permissions**
    - Add `uploadedBy` field to photo documents
@@ -264,7 +264,7 @@ export class MemorialAccessVerifier {
 
 ### Unit Tests Needed
 - [ ] Permission verification for all role combinations
-- [ ] Memorial access control edge cases
+- [ ] Event access control edge cases
 - [ ] Invitation workflow testing
 - [ ] Photo upload permission validation
 

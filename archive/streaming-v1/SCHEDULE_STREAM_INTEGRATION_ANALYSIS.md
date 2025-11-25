@@ -16,7 +16,7 @@ The Tributestream schedule calculator currently has **critical data flow issues*
 
 ### 2. **Performance & Cost Risks**
 - **Cloudflare API Abuse**: Excessive live input creation (every auto-save)
-- **Database Pollution**: Multiple duplicate streams per memorial
+- **Database Pollution**: Multiple duplicate streams per event
 - **API Rate Limiting**: Potential Cloudflare API throttling
 - **Storage Costs**: Unnecessary stream storage and bandwidth usage
 
@@ -38,7 +38,7 @@ The Tributestream schedule calculator currently has **critical data flow issues*
 
 ### Data Flow Diagram
 ```
-User Input → Schedule Form → Auto-save (2s) → Memorial.services → Stream Creation
+User Input → Schedule Form → Auto-save (2s) → Event.services → Stream Creation
                                     ↓
                             createStreamsFromSchedule()
                                     ↓
@@ -62,7 +62,7 @@ User Input → Schedule Form → Auto-save (2s) → Memorial.services → Stream
 
 ### 1. **Memorials Collection**
 ```typescript
-interface Memorial {
+interface Event {
   id: string;
   lovedOneName: string;
   ownerUid: string;
@@ -128,7 +128,7 @@ interface Stream {
 ### 1. **Stream Management APIs**
 
 #### `GET /api/memorials/[memorialId]/streams`
-- **Purpose**: Fetch all streams for a memorial
+- **Purpose**: Fetch all streams for a event
 - **Issues**: No filtering by calculator service type
 - **Missing**: Stream-service relationship data
 

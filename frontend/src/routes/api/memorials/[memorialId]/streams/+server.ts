@@ -10,22 +10,22 @@ async function setupOBSStreaming(title: string) {
 	throw new Error('OBS streaming via this endpoint is deprecated. Please use /api/live-streams/create for new WHIP streams.');
 }
 
-// GET - Fetch all streams for a memorial
+// GET - Fetch all streams for a event
 export const GET: RequestHandler = async ({ locals, params }) => {
-	console.log('🎬 [STREAMS API] GET - Fetching streams for memorial:', params.memorialId);
+	console.log('🎬 [STREAMS API] GET - Fetching streams for event:', params.memorialId);
 
 	const memorialId = params.memorialId;
 
 	try {
-		// Verify memorial exists
+		// Verify event exists
 		const memorialDoc = await adminDb.collection('memorials').doc(memorialId).get();
 
 		if (!memorialDoc.exists) {
-			console.log('❌ [STREAMS API] Memorial not found:', memorialId);
-			throw SvelteKitError(404, 'Memorial not found');
+			console.log('❌ [STREAMS API] Event not found:', memorialId);
+			throw SvelteKitError(404, 'Event not found');
 		}
 
-		const memorial = memorialDoc.data()!;
+		const event = memorialDoc.data()!;
 
 		// For GET requests, allow public access to public memorials
 		// For authenticated users, check permissions for private memorials
@@ -33,23 +33,23 @@ export const GET: RequestHandler = async ({ locals, params }) => {
 			const userId = locals.user.uid;
 			const hasPermission =
 				locals.user.role === 'admin' ||
-				memorial.ownerUid === userId ||
-				memorial.funeralDirectorUid === userId;
+				event.ownerUid === userId ||
+				event.funeralDirectorUid === userId;
 
-			if (!hasPermission && !memorial.isPublic) {
-				console.log('❌ [STREAMS API] User lacks permission for private memorial:', userId);
+			if (!hasPermission && !event.isPublic) {
+				console.log('❌ [STREAMS API] User lacks permission for private event:', userId);
 				throw SvelteKitError(403, 'Permission denied');
 			}
 		} else {
 			// Unauthenticated users can only access public memorials
-			if (!memorial.isPublic) {
-				console.log('❌ [STREAMS API] Unauthenticated access to private memorial');
-				throw SvelteKitError(403, 'Authentication required for private memorial');
+			if (!event.isPublic) {
+				console.log('❌ [STREAMS API] Unauthenticated access to private event');
+				throw SvelteKitError(403, 'Authentication required for private event');
 			}
 		}
 
 		// Fetch streams from the streams collection
-		console.log('🔍 [STREAMS API] Querying streams collection for memorial:', memorialId);
+		console.log('🔍 [STREAMS API] Querying streams collection for event:', memorialId);
 
 		const streamsSnapshot = await adminDb
 			.collection('streams')
@@ -76,10 +76,10 @@ export const GET: RequestHandler = async ({ locals, params }) => {
 		return json({
 			success: true,
 			streams,
-			memorial: {
+			event: {
 				id: memorialId,
-				lovedOneName: memorial.lovedOneName,
-				fullSlug: memorial.fullSlug
+				lovedOneName: event.lovedOneName,
+				fullSlug: event.fullSlug
 			}
 		});
 	} catch (error: any) {
@@ -95,7 +95,7 @@ export const GET: RequestHandler = async ({ locals, params }) => {
 
 // POST - Create a new stream
 export const POST: RequestHandler = async ({ locals, params, request }) => {
-	console.log('🎬 [STREAMS API] POST - Creating stream for memorial:', params.memorialId);
+	console.log('🎬 [STREAMS API] POST - Creating stream for event:', params.memorialId);
 
 	// Check authentication
 	if (!locals.user) {
@@ -126,21 +126,21 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			throw SvelteKitError(400, 'Stream title is required');
 		}
 
-		// Verify memorial exists and user has access
+		// Verify event exists and user has access
 		const memorialDoc = await adminDb.collection('memorials').doc(memorialId).get();
 
 		if (!memorialDoc.exists) {
-			console.log('❌ [STREAMS API] Memorial not found:', memorialId);
-			throw SvelteKitError(404, 'Memorial not found');
+			console.log('❌ [STREAMS API] Event not found:', memorialId);
+			throw SvelteKitError(404, 'Event not found');
 		}
 
-		const memorial = memorialDoc.data()!;
+		const event = memorialDoc.data()!;
 
 		// Check permissions
 		const hasPermission =
 			locals.user.role === 'admin' ||
-			memorial.ownerUid === userId ||
-			memorial.funeralDirectorUid === userId;
+			event.ownerUid === userId ||
+			event.funeralDirectorUid === userId;
 
 		if (!hasPermission) {
 			console.log('❌ [STREAMS API] User lacks permission:', userId);

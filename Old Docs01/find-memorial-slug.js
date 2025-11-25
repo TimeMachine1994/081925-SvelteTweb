@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Find Memorial Slug for Memorial ID
+ * Find Event Slug for Event ID
  */
 
 const admin = require('firebase-admin');
@@ -23,28 +23,28 @@ async function findMemorialSlug() {
   try {
     const memorialId = 'zXbWKFfbmgKMGNzDF7rI';
     
-    console.log('🔍 Looking for memorial:', memorialId);
+    console.log('🔍 Looking for event:', memorialId);
     
     const memorialDoc = await db.collection('memorials').doc(memorialId).get();
     
     if (!memorialDoc.exists) {
-      console.log('❌ Memorial not found');
+      console.log('❌ Event not found');
       return;
     }
     
     const data = memorialDoc.data();
     
-    console.log('\n📋 Memorial Details:');
+    console.log('\n📋 Event Details:');
     console.log(`   ID: ${memorialDoc.id}`);
     console.log(`   Name: ${data.lovedOneName}`);
     console.log(`   Slug: ${data.slug}`);
     console.log(`   Public: ${data.isPublic}`);
     
     if (data.slug) {
-      console.log('\n🔗 Memorial Page URL:');
+      console.log('\n🔗 Event Page URL:');
       console.log(`   http://localhost:5174/${data.slug}`);
     } else {
-      console.log('\n⚠️ No slug found for this memorial');
+      console.log('\n⚠️ No slug found for this event');
     }
     
   } catch (error) {

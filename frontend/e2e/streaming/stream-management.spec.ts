@@ -9,7 +9,7 @@ test.describe('Stream Management Flow', () => {
     await page.getByRole('button', { name: /sign in/i }).click();
     
     // Navigate to stream management
-    await page.goto('/memorials/test-memorial/streams');
+    await page.goto('/memorials/test-event/streams');
   });
 
   test('displays stream management interface', async ({ page }) => {
@@ -22,8 +22,8 @@ test.describe('Stream Management Flow', () => {
     await page.getByRole('button', { name: /create stream/i }).click();
     
     // Fill stream details
-    await page.getByLabel(/stream title/i).fill('Memorial Service Live Stream');
-    await page.getByLabel(/description/i).fill('Live coverage of the memorial service');
+    await page.getByLabel(/stream title/i).fill('Event Service Live Stream');
+    await page.getByLabel(/description/i).fill('Live coverage of the event service');
     await page.getByLabel(/scheduled start time/i).fill('2024-06-15T14:00');
     
     // Select RTMP stream type
@@ -34,7 +34,7 @@ test.describe('Stream Management Flow', () => {
     
     // Should show success and stream details
     await expect(page.getByText(/stream created successfully/i)).toBeVisible();
-    await expect(page.getByText(/memorial service live stream/i)).toBeVisible();
+    await expect(page.getByText(/event service live stream/i)).toBeVisible();
     
     // Should display RTMP connection details
     await expect(page.getByText(/rtmp url/i)).toBeVisible();

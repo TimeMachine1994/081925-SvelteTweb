@@ -109,7 +109,7 @@ async function handleCheckoutSuccess(session: Stripe.Checkout.Session) {
 				? session.payment_intent
 				: session.payment_intent?.id;
 
-		// 1. Update Memorial - SET isPaid flag for payment restrictions
+		// 1. Update Event - SET isPaid flag for payment restrictions
 		const memorialRef = adminDb.collection('memorials').doc(memorialId);
 		await memorialRef.update({
 			isPaid: true, // ✅ CRITICAL: Enable payment restrictions
@@ -129,7 +129,7 @@ async function handleCheckoutSuccess(session: Stripe.Checkout.Session) {
 			})
 		});
 
-		console.log('✅ [WEBHOOK] Memorial updated:', memorialId);
+		console.log('✅ [WEBHOOK] Event updated:', memorialId);
 
 		// 2. Update User - SET hasPaidForMemorial flag ✅
 		const userRef = adminDb.collection('users').doc(uid);

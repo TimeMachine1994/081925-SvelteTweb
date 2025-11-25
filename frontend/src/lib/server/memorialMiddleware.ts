@@ -92,7 +92,7 @@ export function createMemorialRequest(memorialId: string, locals: any): Memorial
 	}
 
 	if (!memorialId) {
-		throw error(400, 'Memorial ID is required');
+		throw error(400, 'Event ID is required');
 	}
 
 	return {

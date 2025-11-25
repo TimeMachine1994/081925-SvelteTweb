@@ -24,7 +24,7 @@ service firebase.storage {
     }
 
     function isFamilyMember(memorialId) {
-      // Check if an accepted invitation exists for this user and memorial
+      // Check if an accepted invitation exists for this user and event
       let invitationId = request.auth.uid + '_' + memorialId;
       return firestore.exists(/databases/(default)/documents/invitations/$(invitationId)) &&
              firestore.get(/databases/(default)/documents/invitations/$(invitationId)).data.status == 'accepted';
@@ -71,17 +71,17 @@ service firebase.storage {
       allow read, write: if isAdmin() || isAdminEmail();
     }
 
-    // Memorial photos:
+    // Event photos:
     // - Publicly readable.
-    // - Writable by the memorial owner OR an invited family member OR funeral director OR admins.
+    // - Writable by the event owner OR an invited family member OR funeral director OR admins.
     match /memorials/{memorialId}/{allPaths=**} {
       allow read;
       allow write: if request.auth != null && (isOwner(memorialId) || isFamilyMember(memorialId) || isFuneralDirector(memorialId) || isAdmin() || isAdminEmail());
     }
 
-    // Memorial slideshows (videos and photos):
-    // - Publicly readable so slideshows can be viewed on memorial pages
-    // - Writable by the memorial owner OR an invited family member OR funeral director OR admins
+    // Event slideshows (videos and photos):
+    // - Publicly readable so slideshows can be viewed on event pages
+    // - Writable by the event owner OR an invited family member OR funeral director OR admins
     match /slideshows/{memorialId}/{allPaths=**} {
       allow read;
       allow write: if request.auth != null && (isOwner(memorialId) || isFamilyMember(memorialId) || isFuneralDirector(memorialId) || isAdmin() || isAdminEmail());

@@ -3,7 +3,7 @@
   import Button from './Button.svelte';
   import Badge from './Badge.svelte';
   
-  interface Memorial {
+  interface Event {
     id: string;
     name: string;
     dates: string;
@@ -18,7 +18,7 @@
   
   interface Props {
     theme?: ThemeKey;
-    memorial: Memorial;
+    event: Event;
     class?: string;
     onView?: () => void;
     onShare?: () => void;
@@ -26,7 +26,7 @@
   
   let {
     theme = 'minimal',
-    memorial,
+    event,
     class: className = '',
     onView,
     onShare
@@ -36,15 +36,15 @@
 </script>
 
 <div class="{themeConfig.card} p-6 {className} hover:shadow-lg transition-shadow duration-200">
-  <!-- Memorial Image -->
-  {#if memorial.imageUrl}
+  <!-- Event Image -->
+  {#if event.imageUrl}
     <div class="relative mb-4 overflow-hidden rounded-xl">
       <img 
-        src={memorial.imageUrl} 
-        alt={memorial.name}
+        src={event.imageUrl} 
+        alt={event.name}
         class="w-full h-48 object-cover"
       />
-      {#if memorial.isLive}
+      {#if event.isLive}
         <div class="absolute top-3 right-3">
           <Badge theme={theme} class="bg-red-500 text-white animate-pulse">
             🔴 Live
@@ -54,14 +54,14 @@
     </div>
   {/if}
 
-  <!-- Memorial Header -->
+  <!-- Event Header -->
   <div class="mb-4">
     <div class="flex items-start justify-between mb-2">
       <h3 class="text-xl font-semibold {themeConfig.text}" style="font-family: {themeConfig.font.heading}">
-        {memorial.name}
+        {event.name}
       </h3>
       <div class="flex gap-2">
-        {#if memorial.isPrivate}
+        {#if event.isPrivate}
           <Badge theme={theme} class="bg-slate-100 text-slate-700 text-xs">
             🔒 Private
           </Badge>
@@ -70,35 +70,35 @@
     </div>
     
     <p class="text-sm {themeConfig.hero.sub} font-medium">
-      {memorial.dates}
+      {event.dates}
     </p>
     
-    {#if memorial.location}
+    {#if event.location}
       <p class="text-sm {themeConfig.hero.sub} mt-1">
-        📍 {memorial.location}
+        📍 {event.location}
       </p>
     {/if}
   </div>
 
-  <!-- Memorial Description -->
-  {#if memorial.description}
+  <!-- Event Description -->
+  {#if event.description}
     <p class="text-sm {themeConfig.hero.sub} mb-4 line-clamp-3">
-      {memorial.description}
+      {event.description}
     </p>
   {/if}
 
   <!-- Service Information -->
-  {#if memorial.serviceDate}
+  {#if event.serviceDate}
     <div class="mb-4 p-3 rounded-lg bg-blue-500/10 border border-[#3B82F6]/20">
       <div class="flex items-center gap-2">
         <span class="text-sm font-medium {themeConfig.text}">Service:</span>
-        <span class="text-sm {themeConfig.hero.sub}">{memorial.serviceDate}</span>
+        <span class="text-sm {themeConfig.hero.sub}">{event.serviceDate}</span>
       </div>
-      {#if memorial.viewerCount !== undefined}
+      {#if event.viewerCount !== undefined}
         <div class="flex items-center gap-2 mt-1">
           <span class="text-xs {themeConfig.hero.sub}">
-            {memorial.viewerCount} {memorial.viewerCount === 1 ? 'viewer' : 'viewers'}
-            {memorial.isLive ? 'watching' : 'attended'}
+            {event.viewerCount} {event.viewerCount === 1 ? 'viewer' : 'viewers'}
+            {event.isLive ? 'watching' : 'attended'}
           </span>
         </div>
       {/if}
@@ -108,7 +108,7 @@
   <!-- Action Buttons -->
   <div class="flex gap-3">
     <Button theme={theme} onclick={onView} class="flex-1">
-      {memorial.isLive ? 'Watch Live' : 'View Memorial'}
+      {event.isLive ? 'Watch Live' : 'View Event'}
     </Button>
     {#if onShare}
       <Button theme={theme} variant="secondary" onclick={onShare}>

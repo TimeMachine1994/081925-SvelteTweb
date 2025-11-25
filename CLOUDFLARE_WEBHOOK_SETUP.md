@@ -7,14 +7,14 @@ Webhooks allow Cloudflare to notify your application when streams go live, end, 
 ## How It Works
 
 ```
-OBS → Cloudflare Live Input → Webhook Notification → Your API → Update Database → Memorial Page Reloads
+OBS → Cloudflare Live Input → Webhook Notification → Your API → Update Database → Event Page Reloads
 ```
 
 When a stream starts:
 1. **OBS connects** to Cloudflare using RTMPS credentials
 2. **Cloudflare detects connection** and sends webhook to your server
 3. **Webhook handler verifies** signature and updates stream status to `live`
-4. **Memorial page polling** detects status change (every 10s)
+4. **Event page polling** detects status change (every 10s)
 5. **Page auto-reloads** showing live video player
 
 ## Setup Instructions
@@ -109,7 +109,7 @@ Cloudflare sends webhooks for these Live Input events:
   "uid": "abc123-cloudflare-live-input-id",
   "status": "connected",
   "meta": {
-    "name": "Memorial Service Stream"
+    "name": "Event Service Stream"
   },
   "created": "2024-01-01T12:00:00Z",
   "modified": "2024-01-01T12:05:00Z"
@@ -166,9 +166,9 @@ if (expectedSig !== sig) throw new Error('Invalid signature');
 - ✅ Timestamp tracking (`liveStartedAt`, `liveEndedAt`)
 - ✅ Error handling
 
-## Memorial Page Auto-Reload
+## Event Page Auto-Reload
 
-The memorial page automatically detects when streams go live:
+The event page automatically detects when streams go live:
 
 **File:** `lib/components/MemorialStreamDisplay.svelte`
 
@@ -230,7 +230,7 @@ if (CLOUDFLARE_WEBHOOK_SECRET) {
 💾 [CLOUDFLARE WEBHOOK] Stream updated
 ```
 
-### Memorial Page Doesn't Reload
+### Event Page Doesn't Reload
 
 **Check:**
 1. Polling is enabled in MemorialStreamDisplay
@@ -248,7 +248,7 @@ console.log('🔄 Polling stream status...', stream.id);
 
 If webhooks aren't configured, the system still works using **polling**:
 
-- Memorial pages poll status every 10 seconds
+- Event pages poll status every 10 seconds
 - Manual status check API: `/api/streams/[streamId]/check-status`
 - Slightly delayed (10-30 seconds) but reliable
 - No webhook secret needed
@@ -260,7 +260,7 @@ If webhooks aren't configured, the system still works using **polling**:
 - [ ] HTTPS enabled on webhook endpoint
 - [ ] Signature verification working
 - [ ] Test stream from OBS to production
-- [ ] Verify memorial page auto-reloads when live
+- [ ] Verify event page auto-reloads when live
 - [ ] Check server logs for webhook receipts
 - [ ] Monitor for webhook failures
 

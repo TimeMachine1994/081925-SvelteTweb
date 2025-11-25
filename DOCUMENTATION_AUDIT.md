@@ -41,7 +41,7 @@
 
 ### **Current Feature Docs**
 5. **`FULL_SLUG_ARCHITECTURE_REVIEW.md`** ✅
-   - Memorial URL slugging system
+   - Event URL slugging system
    - Still accurate architecture
    - **Action:** KEEP
 

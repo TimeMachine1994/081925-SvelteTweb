@@ -8,7 +8,7 @@ This document serves as the single source of truth for the technical design of t
 
 ### 1.2. Project Overview
 
-Tributestream is a specialized online platform designed to help users create, manage, and share memorial services and tributes for their loved ones. The migration to SvelteKit aims to improve performance, simplify the codebase, and enhance the developer experience.
+Tributestream is a specialized online platform designed to help users create, manage, and share event services and tributes for their loved ones. The migration to SvelteKit aims to improve performance, simplify the codebase, and enhance the developer experience.
 
 ## 2. Architecture
 
@@ -37,7 +37,7 @@ The application will continue to use Firestore as its primary database. The exis
 -   **Data Duplication:** To improve performance, some data may be duplicated (e.g., adding `creatorDisplayName` to the `memorials` collection).
 -   **Collection Consolidation:** The `userEventConfigurations`, `eventConfigs`, and `privateNotes` collections may be consolidated to simplify queries.
 -   **Indexing Review:** Firestore indexes will be reviewed and optimized for SvelteKit's data fetching patterns.
--   **Memorial Photos:** A `photos` field (array of strings) has been added to the `memorials` collection. This array stores the public download URLs for each image uploaded to a specific memorial, linking the Firestore document to the files in Firebase Storage.
+-   **Event Photos:** A `photos` field (array of strings) has been added to the `memorials` collection. This array stores the public download URLs for each image uploaded to a specific event, linking the Firestore document to the files in Firebase Storage.
 
 ## 4. Authentication and Authorization
 
@@ -52,7 +52,7 @@ User authentication and authorization will be managed using Firebase Auth, with 
 Backend interactions will be handled by a combination of SvelteKit server endpoints and Firebase Cloud Functions.
 
 -   **SvelteKit Endpoints:** Existing Next.js API routes for admin functionality, login, and search will be re-implemented as SvelteKit `+server.ts` endpoints.
-    -   A new endpoint at `/my-portal/tributes/[memorialId]/upload` handles photo uploads. It accepts `multipart/form-data`, validates user ownership of the memorial, uploads the file to a structured path in Firebase Storage, and updates the corresponding memorial document in Firestore with the new photo's URL.
+    -   A new endpoint at `/my-portal/tributes/[memorialId]/upload` handles photo uploads. It accepts `multipart/form-data`, validates user ownership of the event, uploads the file to a structured path in Firebase Storage, and updates the corresponding event document in Firestore with the new photo's URL.
 -   **Cloud Functions:** Existing callable Cloud Functions for creating memorials, saving calculator configurations, and processing payments will be maintained.
 
 ## 6. Component Migration Plan

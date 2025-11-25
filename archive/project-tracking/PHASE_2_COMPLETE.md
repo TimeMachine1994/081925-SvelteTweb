@@ -86,7 +86,7 @@ EXISTING STREAM
 - [ ] Copy Stream Key → Verify clipboard  
 - [ ] Configure OBS with credentials
 - [ ] Start streaming from OBS
-- [ ] Verify stream goes live on memorial page
+- [ ] Verify stream goes live on event page
 - [ ] Check live indicator appears on StreamCard
 - [ ] Test with existing stream → Verify OBS UI appears
 - [ ] Test schedule editing still works
@@ -219,7 +219,7 @@ migrateStreams();
 ## ✨ Demo Flow
 
 **User creates new stream:**
-1. Clicks "Create Stream" in memorial stream manager
+1. Clicks "Create Stream" in event stream manager
 2. Enters stream title and schedule
 3. Stream created → Redirected to streams page
 4. StreamCard shows **"Choose Streaming Method"**

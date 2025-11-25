@@ -7,16 +7,16 @@ describe('Profile Component - Schedule Navigation Logic', () => {
 		vi.clearAllMocks();
 	});
 
-	it('should generate correct schedule URL for memorial', () => {
-		const memorialId = 'memorial-123';
+	it('should generate correct schedule URL for event', () => {
+		const memorialId = 'event-123';
 		const expectedUrl = `/schedule?memorialId=${memorialId}`;
 
 		// Test the URL generation logic
-		expect(expectedUrl).toBe('/schedule?memorialId=memorial-123');
+		expect(expectedUrl).toBe('/schedule?memorialId=event-123');
 	});
 
 	it('should handle schedule navigation function', async () => {
-		const memorialId = 'memorial-456';
+		const memorialId = 'event-456';
 
 		// Simulate the schedule navigation function
 		const handleScheduleClick = (id: string) => {
@@ -25,33 +25,33 @@ describe('Profile Component - Schedule Navigation Logic', () => {
 
 		handleScheduleClick(memorialId);
 
-		expect(goto).toHaveBeenCalledWith('/schedule?memorialId=memorial-456');
+		expect(goto).toHaveBeenCalledWith('/schedule?memorialId=event-456');
 	});
 
-	it('should validate memorial permissions before navigation', () => {
+	it('should validate event permissions before navigation', () => {
 		const user = { uid: 'test-user', role: 'owner' };
-		const memorial = { id: 'memorial-123', ownerUid: 'test-user' };
+		const event = { id: 'event-123', ownerUid: 'test-user' };
 
 		// Test permission logic
-		const hasSchedulePermission = (user: any, memorial: any) => {
+		const hasSchedulePermission = (user: any, event: any) => {
 			return (
 				user.role === 'admin' ||
 				user.role === 'owner' ||
-				memorial.ownerUid === user.uid ||
-				memorial.funeralDirectorUid === user.uid
+				event.ownerUid === user.uid ||
+				event.funeralDirectorUid === user.uid
 			);
 		};
 
-		expect(hasSchedulePermission(user, memorial)).toBe(true);
+		expect(hasSchedulePermission(user, event)).toBe(true);
 
 		// Test user without permission (different owner)
 		const unauthorizedUser = { uid: 'different-user', role: 'funeral_director' };
-		expect(hasSchedulePermission(unauthorizedUser, memorial)).toBe(false);
+		expect(hasSchedulePermission(unauthorizedUser, event)).toBe(false);
 	});
 
-	it('should handle memorial status for schedule button text', () => {
-		const getScheduleButtonText = (memorial: any) => {
-			if (memorial.calculatorConfig?.status === 'saved') {
+	it('should handle event status for schedule button text', () => {
+		const getScheduleButtonText = (event: any) => {
+			if (event.calculatorConfig?.status === 'saved') {
 				return 'Edit Schedule';
 			}
 			return 'Create Schedule';

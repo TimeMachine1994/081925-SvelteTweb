@@ -6,12 +6,12 @@ export interface BannerState {
 }
 
 /**
- * Determines if the booking reminder banner should be shown for a user on a memorial page
+ * Determines if the booking reminder banner should be shown for a user on a event page
  */
 export function shouldShowBookingBanner(
 	memorialId: string,
 	user: any,
-	memorial: any
+	event: any
 ): BannerState {
 	// Only run in browser environment
 	if (!browser) {
@@ -23,13 +23,13 @@ export function shouldShowBookingBanner(
 		return { shouldShow: false, reason: 'no-user' };
 	}
 
-	// Must have memorial data
-	if (!memorial || !memorial.id) {
-		return { shouldShow: false, reason: 'no-memorial' };
+	// Must have event data
+	if (!event || !event.id) {
+		return { shouldShow: false, reason: 'no-event' };
 	}
 
-	// Check if user has already seen banner for this memorial (persistent across sessions)
-	const bannerSeenKey = `memorial-booking-banner-views-${memorialId}`;
+	// Check if user has already seen banner for this event (persistent across sessions)
+	const bannerSeenKey = `event-booking-banner-views-${memorialId}`;
 	const viewCount = parseInt(localStorage.getItem(bannerSeenKey) || '0', 10);
 	const MAX_VIEWS = 1; // Show banner only once, ever
 	
@@ -37,16 +37,16 @@ export function shouldShowBookingBanner(
 		return { shouldShow: false, reason: `already-seen-${viewCount}-times` };
 	}
 
-	// Only show for memorial owners (users who created/own the memorial)
-	const isMemorialOwner = memorial.ownerUid === user.uid;
+	// Only show for event owners (users who created/own the event)
+	const isMemorialOwner = event.ownerUid === user.uid;
 	
 	if (!isMemorialOwner) {
 		return { shouldShow: false, reason: 'not-owner' };
 	}
 
-	// Check if memorial service has been paid for/completed
+	// Check if event service has been paid for/completed
 	// This would need to be expanded based on your payment tracking system
-	const hasCompletedBooking = memorial.isPaid === true || memorial.bookingStatus === 'completed';
+	const hasCompletedBooking = event.isPaid === true || event.bookingStatus === 'completed';
 	
 	if (hasCompletedBooking) {
 		return { shouldShow: false, reason: 'booking-completed' };
@@ -73,38 +73,38 @@ export function shouldShowBookingBanner(
 }
 
 /**
- * Mark the banner as seen for this memorial (increments view counter)
+ * Mark the banner as seen for this event (increments view counter)
  */
 export function markBannerAsSeen(memorialId: string): void {
 	if (!browser) return;
 	
-	const bannerSeenKey = `memorial-booking-banner-views-${memorialId}`;
+	const bannerSeenKey = `event-booking-banner-views-${memorialId}`;
 	const currentViews = parseInt(localStorage.getItem(bannerSeenKey) || '0', 10);
 	const newViewCount = currentViews + 1;
 	
 	localStorage.setItem(bannerSeenKey, newViewCount.toString());
-	console.log(`🔔 [BOOKING_BANNER] View count for memorial ${memorialId}: ${newViewCount}`);
+	console.log(`🔔 [BOOKING_BANNER] View count for event ${memorialId}: ${newViewCount}`);
 }
 
 /**
- * Get current view count for a memorial banner
+ * Get current view count for a event banner
  */
 export function getBannerViewCount(memorialId: string): number {
 	if (!browser) return 0;
 	
-	const bannerSeenKey = `memorial-booking-banner-views-${memorialId}`;
+	const bannerSeenKey = `event-booking-banner-views-${memorialId}`;
 	return parseInt(localStorage.getItem(bannerSeenKey) || '0', 10);
 }
 
 /**
- * Reset banner view count for a memorial (useful for testing or special cases)
+ * Reset banner view count for a event (useful for testing or special cases)
  */
 export function resetBannerViewCount(memorialId: string): void {
 	if (!browser) return;
 	
-	const bannerSeenKey = `memorial-booking-banner-views-${memorialId}`;
+	const bannerSeenKey = `event-booking-banner-views-${memorialId}`;
 	localStorage.removeItem(bannerSeenKey);
-	console.log(`🔄 [BOOKING_BANNER] Reset view count for memorial ${memorialId}`);
+	console.log(`🔄 [BOOKING_BANNER] Reset view count for event ${memorialId}`);
 }
 
 /**
@@ -130,7 +130,7 @@ export function clearBannerState(): void {
 	// Clear all banner view counters from localStorage
 	const localKeys = Object.keys(localStorage);
 	localKeys.forEach(key => {
-		if (key.startsWith('memorial-booking-banner-views-')) {
+		if (key.startsWith('event-booking-banner-views-')) {
 			localStorage.removeItem(key);
 		}
 	});
@@ -154,6 +154,6 @@ export function debugBannerState(memorialId: string): void {
 		maxViews: 1,
 		willShowAgain: viewCount < 1,
 		loginTimestamp: loginTime?.toLocaleString() || 'none',
-		allBannerKeys: Object.keys(localStorage).filter(k => k.includes('memorial-booking-banner'))
+		allBannerKeys: Object.keys(localStorage).filter(k => k.includes('event-booking-banner'))
 	});
 }

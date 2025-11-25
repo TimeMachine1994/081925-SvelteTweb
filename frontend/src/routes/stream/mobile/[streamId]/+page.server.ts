@@ -33,7 +33,7 @@ export const load: PageServerLoad = async ({ params }) => {
 			throw svelteError(500, 'WHIP URL not found. Please re-arm the stream.');
 		}
 
-		// Get memorial info for context
+		// Get event info for context
 		const memorialRef = adminDb.collection('memorials').doc(streamData.memorialId);
 		const memorialDoc = await memorialRef.get();
 		const memorialData = memorialDoc.exists ? memorialDoc.data() : null;
@@ -49,7 +49,7 @@ export const load: PageServerLoad = async ({ params }) => {
 				hlsUrl: streamData.hlsUrl, // HLS URL set by webhook when live
 				liveWatchUrl: streamData.liveWatchUrl // Preview URL from webhook
 			},
-			memorial: memorialData ? {
+			event: memorialData ? {
 				lovedOneName: memorialData.lovedOneName,
 				fullSlug: memorialData.fullSlug
 			} : null

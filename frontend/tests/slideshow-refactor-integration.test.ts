@@ -41,7 +41,7 @@ describe('Slideshow Refactoring Integration Tests', () => {
         const profileContent = readFileSync(profilePath, 'utf-8');
         
         // Should have navigation link instead of modal
-        expect(profileContent).toContain('href={`/slideshow-generator?memorialId=${memorial.id}`}');
+        expect(profileContent).toContain('href={`/slideshow-generator?memorialId=${event.id}`}');
         
         // Should have Camera icon for slideshow button
         expect(profileContent).toContain('<Camera');
@@ -122,7 +122,7 @@ describe('Slideshow Refactoring Integration Tests', () => {
       }
     });
 
-    it('should handle memorial ID parameter correctly', () => {
+    it('should handle event ID parameter correctly', () => {
       const generatorPath = join(process.cwd(), 'src/routes/slideshow-generator/+page.svelte');
       
       try {
@@ -131,7 +131,7 @@ describe('Slideshow Refactoring Integration Tests', () => {
         // Should parse memorialId from URL parameters
         expect(generatorContent).toContain("$page.url.searchParams.get('memorialId')");
         
-        // Should handle navigation back to memorial or profile
+        // Should handle navigation back to event or profile
         expect(generatorContent).toContain('window.location.href');
         
       } catch (error) {
@@ -192,11 +192,11 @@ describe('Slideshow Refactoring Integration Tests', () => {
         slideshowToProfile: () => '/profile'
       };
 
-      const memorialId = 'test-memorial-123';
+      const memorialId = 'test-event-123';
 
-      expect(navigationFlow.profileToSlideshow(memorialId)).toBe('/slideshow-generator?memorialId=test-memorial-123');
-      expect(navigationFlow.streamToSlideshow(memorialId)).toBe('/slideshow-generator?memorialId=test-memorial-123');
-      expect(navigationFlow.slideshowToMemorial(memorialId)).toBe('/memorials/test-memorial-123');
+      expect(navigationFlow.profileToSlideshow(memorialId)).toBe('/slideshow-generator?memorialId=test-event-123');
+      expect(navigationFlow.streamToSlideshow(memorialId)).toBe('/slideshow-generator?memorialId=test-event-123');
+      expect(navigationFlow.slideshowToMemorial(memorialId)).toBe('/memorials/test-event-123');
       expect(navigationFlow.slideshowToProfile()).toBe('/profile');
     });
 
@@ -207,21 +207,21 @@ describe('Slideshow Refactoring Integration Tests', () => {
       };
 
       const testUrls = [
-        'http://localhost/slideshow-generator?memorialId=memorial-123',
-        'http://localhost/slideshow-generator?memorialId=memorial-456&edit=true',
+        'http://localhost/slideshow-generator?memorialId=event-123',
+        'http://localhost/slideshow-generator?memorialId=event-456&edit=true',
         'http://localhost/slideshow-generator'
       ];
 
-      expect(parseMemorialId(testUrls[0])).toBe('memorial-123');
-      expect(parseMemorialId(testUrls[1])).toBe('memorial-456');
+      expect(parseMemorialId(testUrls[0])).toBe('event-123');
+      expect(parseMemorialId(testUrls[1])).toBe('event-456');
       expect(parseMemorialId(testUrls[2])).toBe(null);
     });
   });
 
   describe('Permission and Role Validation', () => {
     it('should validate slideshow access permissions', () => {
-      const hasPermission = (user: any, memorial: any, action: string) => {
-        if (!user || !memorial) return false;
+      const hasPermission = (user: any, event: any, action: string) => {
+        if (!user || !event) return false;
 
         switch (action) {
           case 'create_slideshow':
@@ -229,8 +229,8 @@ describe('Slideshow Refactoring Integration Tests', () => {
               user.role === 'owner' ||
               user.role === 'admin' ||
               user.role === 'funeral_director' ||
-              memorial.ownerUid === user.uid ||
-              memorial.funeralDirectorUid === user.uid
+              event.ownerUid === user.uid ||
+              event.funeralDirectorUid === user.uid
             );
           case 'manage_streams':
             return (
@@ -249,23 +249,23 @@ describe('Slideshow Refactoring Integration Tests', () => {
         viewer: { uid: 'user-4', role: 'viewer' }
       };
 
-      const memorial = {
-        id: 'memorial-1',
+      const event = {
+        id: 'event-1',
         ownerUid: 'user-1',
         funeralDirectorUid: 'user-3'
       };
 
       // Test slideshow creation permissions
-      expect(hasPermission(users.owner, memorial, 'create_slideshow')).toBe(true);
-      expect(hasPermission(users.admin, memorial, 'create_slideshow')).toBe(true);
-      expect(hasPermission(users.funeralDirector, memorial, 'create_slideshow')).toBe(true);
-      expect(hasPermission(users.viewer, memorial, 'create_slideshow')).toBe(false);
+      expect(hasPermission(users.owner, event, 'create_slideshow')).toBe(true);
+      expect(hasPermission(users.admin, event, 'create_slideshow')).toBe(true);
+      expect(hasPermission(users.funeralDirector, event, 'create_slideshow')).toBe(true);
+      expect(hasPermission(users.viewer, event, 'create_slideshow')).toBe(false);
 
       // Test stream management permissions
-      expect(hasPermission(users.admin, memorial, 'manage_streams')).toBe(true);
-      expect(hasPermission(users.funeralDirector, memorial, 'manage_streams')).toBe(true);
-      expect(hasPermission(users.owner, memorial, 'manage_streams')).toBe(false);
-      expect(hasPermission(users.viewer, memorial, 'manage_streams')).toBe(false);
+      expect(hasPermission(users.admin, event, 'manage_streams')).toBe(true);
+      expect(hasPermission(users.funeralDirector, event, 'manage_streams')).toBe(true);
+      expect(hasPermission(users.owner, event, 'manage_streams')).toBe(false);
+      expect(hasPermission(users.viewer, event, 'manage_streams')).toBe(false);
     });
   });
 });

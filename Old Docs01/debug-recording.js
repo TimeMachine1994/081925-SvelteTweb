@@ -1,16 +1,16 @@
 // Enhanced debug script to check recording status
-// Run this in your browser console on the memorial page
+// Run this in your browser console on the event page
 
 async function debugRecording() {
-    const memorialId = "uuz7qEUXnRkQUbqrChBO"; // Your memorial ID from logs
+    const memorialId = "uuz7qEUXnRkQUbqrChBO"; // Your event ID from logs
     const cloudflareId = "b496cf702af478f1552827d1b73928c1"; // Your current Cloudflare ID
     
-    console.log("🔍 Debugging recording status for memorial:", memorialId);
+    console.log("🔍 Debugging recording status for event:", memorialId);
     console.log("🎬 Cloudflare ID:", cloudflareId);
     
     try {
-        // Check current memorial data
-        console.log("📊 Checking memorial archive entries...");
+        // Check current event data
+        console.log("📊 Checking event archive entries...");
         const archiveResponse = await fetch(`/api/memorials/${memorialId}/livestream/archive`);
         const archiveData = await archiveResponse.json();
         

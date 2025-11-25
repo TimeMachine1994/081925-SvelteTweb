@@ -10,14 +10,14 @@
 
 ### What is Tributestream?
 
-Tributestream is a SaaS platform enabling funeral homes and families to create, manage, and livestream memorial services online. It provides a complete solution for hosting dignified online memorials with livestreaming, photo slideshows, and permanent memorial pages.
+Tributestream is a SaaS platform enabling funeral homes and families to create, manage, and livestream event services online. It provides a complete solution for hosting dignified online memorials with livestreaming, photo slideshows, and permanent event pages.
 
 ### Target Users
 
 1. **Funeral Directors** - Professional users managing multiple services
-2. **Memorial Owners** - Family members scheduling individual services  
+2. **Event Owners** - Family members scheduling individual services  
 3. **Administrators** - Platform operators with full system access
-4. **Viewers** - Public visitors attending virtual memorial services
+4. **Viewers** - Public visitors attending virtual event services
 
 ### Current Technology Stack
 
@@ -33,7 +33,7 @@ Tributestream is a SaaS platform enabling funeral homes and families to create, 
 ## Core Platform Components
 
 ```
-Memorial Pages → Service Calculator → Stream Manager → Live Streaming
+Event Pages → Service Calculator → Stream Manager → Live Streaming
      ↓               ↓                    ↓               ↓
   Slideshow → Payment System → Email System → Cloudflare Stream
 ```
@@ -53,7 +53,7 @@ Memorial Pages → Service Calculator → Stream Manager → Live Streaming
 
 | Feature | Admin | Funeral Director | Owner | Viewer |
 |---------|-------|------------------|-------|--------|
-| Create Memorial | ✅ | ✅ | ❌ | ❌ |
+| Create Event | ✅ | ✅ | ❌ | ❌ |
 | Create Stream (Manual) | ✅ | ✅ | ❌ | ❌ |
 | Use Calculator | ✅ | ✅ | ✅ | ❌ |
 | Emergency Override | ✅ | ❌ | ❌ | ❌ |
@@ -63,9 +63,9 @@ Memorial Pages → Service Calculator → Stream Manager → Live Streaming
 
 ## Core Features
 
-### 1. Memorial Management
+### 1. Event Management
 - Permanent tribute pages with biography, photos, dates
-- Custom URL slugs (tributestream.com/memorial-name)
+- Custom URL slugs (tributestream.com/event-name)
 - Public/private visibility settings
 - Owner and funeral director assignment
 
@@ -100,7 +100,7 @@ Additional days → Streams titled "Additional Day - {Name}"
 - Upload multiple photos
 - Generate video slideshow (5s per photo)
 - Store in Firebase Storage or Cloudflare Stream
-- Embed on memorial page
+- Embed on event page
 
 ### 5. Emergency Override System
 - Admin pastes Vimeo/YouTube embed code
@@ -112,7 +112,7 @@ Additional days → Streams titled "Additional Day - {Name}"
 
 ## Data Models
 
-### Memorial
+### Event
 ```typescript
 {
   id: string;
@@ -168,12 +168,12 @@ Additional days → Streams titled "Additional Day - {Name}"
 
 ## API Structure
 
-### Memorial APIs
+### Event APIs
 - `GET /api/memorials` - List memorials
-- `POST /api/memorials` - Create memorial
-- `GET /api/memorials/[id]` - Get memorial details
-- `PUT /api/memorials/[id]` - Update memorial
-- `DELETE /api/memorials/[id]` - Delete memorial (admin)
+- `POST /api/memorials` - Create event
+- `GET /api/memorials/[id]` - Get event details
+- `PUT /api/memorials/[id]` - Update event
+- `DELETE /api/memorials/[id]` - Delete event (admin)
 
 ### Stream APIs
 - `GET /api/memorials/[memorialId]/streams` - List streams
@@ -207,7 +207,7 @@ Cloudflare Stream Live Input
                     ↓
              Recording Available
                     ↓
-          Memorial Page Playback
+          Event Page Playback
 ```
 
 **Status Detection:** 10-second polling checks Cloudflare API for connection state
@@ -218,18 +218,18 @@ Cloudflare Stream Live Input
 
 ## Key User Flows
 
-### Funeral Director: Create Memorial & Stream
+### Funeral Director: Create Event & Stream
 1. Login with magic link
-2. Create memorial (name, dates, bio, photos)
+2. Create event (name, dates, bio, photos)
 3. Navigate to Stream Manager
 4. Click "Create Stream" → Get RTMP URL + Stream Key
 5. Copy credentials to OBS
 6. Stream on service day → Auto-goes live
 7. Stream ends → Recording generated
 
-### Memorial Owner: Schedule Service
+### Event Owner: Schedule Service
 1. Receive welcome email with login
-2. Access memorial → Click "Schedule Service"
+2. Access event → Click "Schedule Service"
 3. Fill calculator (date/time/location)
 4. Pay or save → Streams auto-created
 5. Funeral director receives RTMP credentials
@@ -241,7 +241,7 @@ Cloudflare Stream Live Input
 3. Click "Emergency Override"
 4. Paste Vimeo/YouTube embed code
 5. Toggle "Override Active" ON
-6. Memorial page shows embedded video seamlessly
+6. Event page shows embedded video seamlessly
 7. After service, toggle OFF
 
 ---
@@ -258,7 +258,7 @@ Cloudflare Stream Live Input
 // API routes check:
 - locals.user exists (authenticated)
 - locals.user.role (admin/funeral_director/owner)
-- memorial.ownerUid === locals.user.uid (ownership)
+- event.ownerUid === locals.user.uid (ownership)
 ```
 
 ### Firestore Security Rules
@@ -272,7 +272,7 @@ Cloudflare Stream Live Input
 ## Email System (SendGrid)
 
 ### Transactional Emails
-- Welcome email (new memorial owner)
+- Welcome email (new event owner)
 - Magic link authentication (funeral directors)
 - Payment confirmations
 - Stream credentials delivery
@@ -311,7 +311,7 @@ Cloudflare Stream Live Input
 - `Card` - Content containers
 - `Input` - Form inputs
 - `LoadingSpinner` - Async operations
-- Memorial-specific components in `src/lib/components/`
+- Event-specific components in `src/lib/components/`
 
 ### Deleted Components (Rebuild Needed)
 - `StreamCard` - Stream display (deleted, needs rebuild)
@@ -349,7 +349,7 @@ Cloudflare Stream Live Input
 ## Current Development State
 
 ### ✅ Working Features
-- Memorial CRUD
+- Event CRUD
 - OBS RTMP streaming (Cloudflare)
 - Emergency override system
 - Service calculator with auto-stream creation
@@ -381,7 +381,7 @@ Cloudflare Stream Live Input
 ```
 frontend/src/
 ├── routes/                    # Pages & API endpoints
-│   ├── memorials/[id]/        # Memorial pages
+│   ├── memorials/[id]/        # Event pages
 │   ├── memorials/[id]/streams # Stream manager
 │   ├── schedule/              # Service calculator
 │   └── api/                   # Backend APIs
@@ -408,7 +408,7 @@ frontend/src/
 ## Testing Strategy
 
 ### Manual Testing
-- Create memorial → Success
+- Create event → Success
 - Create stream → Receive RTMP credentials
 - Stream via OBS → Goes live, recording works
 - Calculator → Auto-creates streams correctly

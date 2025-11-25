@@ -56,7 +56,7 @@ export interface DemoCondolence {
 }
 
 export interface DemoScenarioData {
-	memorial: DemoMemorialTemplate;
+	event: DemoMemorialTemplate;
 	streams: DemoStreamTemplate[];
 	slideshows?: DemoSlideshowTemplate[];
 	condolences?: DemoCondolence[];
@@ -67,7 +67,7 @@ export interface DemoScenarioData {
  */
 export const DEMO_SCENARIOS: Record<string, DemoScenarioData> = {
 	first_memorial_service: {
-		memorial: {
+		event: {
 			fullName: 'Eleanor Marie Thompson',
 			dateOfBirth: '1942-03-15',
 			dateOfDeath: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 3 days ago
@@ -78,21 +78,21 @@ She loved gardening, baking her famous apple pie, and spending time with her fou
 She is survived by her children, Michael and Sarah, and four grandchildren who will cherish her memory forever.`,
 			obituaryText: 'Eleanor Marie Thompson, 81, of Springfield, passed away peacefully on [date] surrounded by her loving family. A celebration of life service will be held on [date] at [location].',
 			funeralHomeInfo: {
-				name: 'Springfield Memorial Chapel',
+				name: 'Springfield Event Chapel',
 				address: '123 Oak Street, Springfield, IL 62701',
 				phone: '(217) 555-0123'
 			},
 			serviceInfo: {
 				date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 2 days from now
 				time: '14:00',
-				location: 'Springfield Memorial Chapel',
+				location: 'Springfield Event Chapel',
 				address: '123 Oak Street, Springfield, IL 62701'
 			}
 		},
 		streams: [
 			{
-				title: 'Memorial Service for Eleanor Thompson',
-				description: 'Live stream of the memorial service celebration of life',
+				title: 'Event Service for Eleanor Thompson',
+				description: 'Live stream of the event service celebration of life',
 				scheduledStartTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000 + 14 * 60 * 60 * 1000).toISOString(),
 				isScheduled: true
 			}
@@ -116,7 +116,7 @@ She is survived by her children, Michael and Sarah, and four grandchildren who w
 	},
 
 	managing_multiple: {
-		memorial: {
+		event: {
 			fullName: 'James Robert Mitchell',
 			dateOfBirth: '1955-07-22',
 			dateOfDeath: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
@@ -147,7 +147,7 @@ He leaves behind his wife of 42 years, Linda, three children, and seven grandchi
 			},
 			{
 				title: 'Funeral Service - James Mitchell',
-				description: 'Memorial service at Riverside Chapel',
+				description: 'Event service at Riverside Chapel',
 				scheduledStartTime: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000 + 11 * 60 * 60 * 1000).toISOString(),
 				isScheduled: true
 			}
@@ -178,7 +178,7 @@ He leaves behind his wife of 42 years, Linda, three children, and seven grandchi
 	},
 
 	legacy_celebration: {
-		memorial: {
+		event: {
 			fullName: 'Dorothy Grace Wilson',
 			dateOfBirth: '1928-12-10',
 			dateOfDeath: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 2 weeks ago
@@ -191,14 +191,14 @@ Dorothy was known for her storytelling, her delicious Sunday dinners, and her un
 She is survived by 5 children, 12 grandchildren, 18 great-grandchildren, and countless friends whose lives she enriched. Her legacy of love, service, and strength will continue through the generations she inspired.`,
 			obituaryText: 'Dorothy Grace Wilson, 95, passed away peacefully on [date] surrounded by her loving family. A celebration of her remarkable life will be held on [date].',
 			funeralHomeInfo: {
-				name: 'Heritage Memorial Gardens',
+				name: 'Heritage Event Gardens',
 				address: '789 Heritage Lane, Lakeside, CA 92040',
 				phone: '(619) 555-0789'
 			},
 			serviceInfo: {
 				date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Service was 1 week ago
 				time: '15:00',
-				location: 'Heritage Memorial Gardens',
+				location: 'Heritage Event Gardens',
 				address: '789 Heritage Lane, Lakeside, CA 92040'
 			}
 		},
@@ -261,7 +261,7 @@ She is survived by 5 children, 12 grandchildren, 18 great-grandchildren, and cou
 	},
 
 	viewer_experience: {
-		memorial: {
+		event: {
 			fullName: 'Michael Anthony Rodriguez',
 			dateOfBirth: '1960-08-30',
 			dateOfDeath: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 3 weeks ago
@@ -272,9 +272,9 @@ Coach Rodriguez, as he was affectionately known, believed in the potential of ev
 Beyond the classroom, Michael was a devoted husband to Maria, proud father to his three children, and an enthusiastic grandfather who never missed a grandkid's game or recital.
 
 His impact on the community will be felt for generations to come through the countless lives he touched, mentored, and inspired.`,
-			obituaryText: 'Michael Anthony Rodriguez, 63, passed away on [date]. A public memorial service was held on [date] at Lincoln High School, where hundreds gathered to honor his legacy.',
+			obituaryText: 'Michael Anthony Rodriguez, 63, passed away on [date]. A public event service was held on [date] at Lincoln High School, where hundreds gathered to honor his legacy.',
 			funeralHomeInfo: {
-				name: 'Community Memorial Services',
+				name: 'Community Event Services',
 				address: '321 Community Drive, Westfield, NJ 07090',
 				phone: '(908) 555-0321'
 			},
@@ -287,7 +287,7 @@ His impact on the community will be felt for generations to come through the cou
 		},
 		streams: [
 			{
-				title: 'Memorial Service - Coach Rodriguez',
+				title: 'Event Service - Coach Rodriguez',
 				description: 'Community celebration of life at Lincoln High School',
 				isScheduled: false // Already completed
 			}

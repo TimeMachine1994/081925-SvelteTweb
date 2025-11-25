@@ -4,7 +4,7 @@ This document outlines the steps to implement a photo upload and gallery feature
 
 ## 1. Update Firebase Storage Rules
 
-The first step is to update the Firebase Storage security rules to allow authenticated users to upload files to a personal bucket associated with a memorial they have created. The photos should be publicly readable.
+The first step is to update the Firebase Storage security rules to allow authenticated users to upload files to a personal bucket associated with a event they have created. The photos should be publicly readable.
 
 **File:** `frontend/storage.rules`
 
@@ -13,7 +13,7 @@ rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
-    // Memorial photos: only the memorial creator can upload photos.
+    // Event photos: only the event creator can upload photos.
     // Photos are publically readable.
     match /memorials/{memorialId}/{allPaths=**} {
       allow read;
@@ -24,9 +24,9 @@ service firebase.storage {
 }
 ```
 
-## 2. Integrate Photo Gallery into the Memorial Edit Page
+## 2. Integrate Photo Gallery into the Event Edit Page
 
-Next, integrate the `PhotoGallery` component into the memorial edit page to display the uploaded photos. This will allow users to see the photos they've uploaded for a specific memorial.
+Next, integrate the `PhotoGallery` component into the event edit page to display the uploaded photos. This will allow users to see the photos they've uploaded for a specific event.
 
 **File:** `frontend/src/routes/my-portal/tributes/[memorialId]/edit/+page.svelte`
 
@@ -39,14 +39,14 @@ Next, integrate the `PhotoGallery` component into the memorial edit page to disp
 	export let data: PageData;
 	export let form: ActionData;
 
-	const { memorial } = data;
+	const { event } = data;
 </script>
 
 <div class="editor-container">
-	<h2>Edit Tribute for {memorial.lovedOneName}</h2>
+	<h2>Edit Tribute for {event.lovedOneName}</h2>
 
 	<form method="POST">
-		<textarea name="content" rows="20">{memorial.content || ''}</textarea>
+		<textarea name="content" rows="20">{event.content || ''}</textarea>
 
 		{#if form?.missing}
 			<p class="error">Content cannot be empty.</p>
@@ -55,8 +55,8 @@ Next, integrate the `PhotoGallery` component into the memorial edit page to disp
 		<button type="submit">Save Changes</button>
 	</form>
 
-	<PhotoUploader memorialId={memorial.id} />
-	<PhotoGallery photos={memorial.photos || []} />
+	<PhotoUploader memorialId={event.id} />
+	<PhotoGallery photos={event.photos || []} />
 </div>
 
 <style>
@@ -103,7 +103,7 @@ Next, integrate the `PhotoGallery` component into the memorial edit page to disp
 
 ## 3. Add "Manage Photos" Link to the Main Portal Page
 
-Finally, add a link to the memorial edit page from the main portal page. This will allow users to easily navigate to the photo management page for each memorial.
+Finally, add a link to the event edit page from the main portal page. This will allow users to easily navigate to the photo management page for each event.
 
 **File:** `frontend/src/routes/my-portal/+page.svelte`
 
@@ -119,15 +119,15 @@ Finally, add a link to the memorial edit page from the main portal page. This wi
 
 	{#if data.memorials && data.memorials.length > 0}
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-			{#each data.memorials as memorial}
+			{#each data.memorials as event}
 				<div class="card">
-					<h2 class="text-xl font-semibold">{memorial.lovedOneName}</h2>
-					<a href="/tributes/{memorial.slug}" class="btn btn-primary mt-4">View Memorial</a>
-					<a href="/my-portal/tributes/{memorial.id}/edit" class="btn btn-secondary mt-2">Edit / Manage Photos</a>
-					{#if memorial.livestreamConfig}
-						<a href="/app/checkout/success?configId={memorial.livestreamConfig.id}" class="btn btn-secondary mt-2">View Livestream Details</a>
+					<h2 class="text-xl font-semibold">{event.lovedOneName}</h2>
+					<a href="/tributes/{event.slug}" class="btn btn-primary mt-4">View Event</a>
+					<a href="/my-portal/tributes/{event.id}/edit" class="btn btn-secondary mt-2">Edit / Manage Photos</a>
+					{#if event.livestreamConfig}
+						<a href="/app/checkout/success?configId={event.livestreamConfig.id}" class="btn btn-secondary mt-2">View Livestream Details</a>
 					{:else}
-						<a href="/app/calculator?memorialId={memorial.id}" class="btn btn-secondary mt-2">Schedule Livestream</a>
+						<a href="/app/calculator?memorialId={event.id}" class="btn btn-secondary mt-2">Schedule Livestream</a>
 					{/if}
 				</div>
 			{/each}
@@ -135,5 +135,5 @@ Finally, add a link to the memorial edit page from the main portal page. This wi
 	{:else}
 		<p>You have not created any memorials yet.</p>
 	{/if}
-	<a href="/my-portal/tributes/new" class="btn btn-primary mt-4">Create a New Memorial</a>
+	<a href="/my-portal/tributes/new" class="btn btn-primary mt-4">Create a New Event</a>
 </div>

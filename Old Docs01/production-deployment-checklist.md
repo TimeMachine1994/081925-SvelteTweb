@@ -4,10 +4,10 @@
 ## ✅ Completed Refactor Items
 
 ### Phase 1: Data Model Standardization
-- [x] **Memorial Fields**: Updated to use `ownerUid` and `funeralDirectorUid` consistently
+- [x] **Event Fields**: Updated to use `ownerUid` and `funeralDirectorUid` consistently
 - [x] **User Interface**: Standardized to include `uid`, `email`, `displayName`, `role`, `isAdmin`
 - [x] **Livestream Models**: Deprecated `CalculatorConfig` in favor of `LivestreamConfig`
-- [x] **Type Definitions**: Updated `memorial.ts`, `auth.ts`, and `app.d.ts`
+- [x] **Type Definitions**: Updated `event.ts`, `auth.ts`, and `app.d.ts`
 
 ### Phase 2: Authentication Security
 - [x] **Race Condition Fix**: Login now uses `window.location.href` instead of `goto()`
@@ -21,7 +21,7 @@
 - [x] **Client Setup**: Updated `firebase.ts` to use environment variables
 
 ### Phase 4: API Route Consistency
-- [x] **Memorial Access**: Updated utilities to use standardized field names
+- [x] **Event Access**: Updated utilities to use standardized field names
 - [x] **Permission Checking**: Consistent `ownerUid`/`funeralDirectorUid` checks
 - [x] **Payment API**: Fixed field name inconsistencies in Stripe integration
 
@@ -36,8 +36,8 @@
 ### Database Migration (If Needed)
 - [ ] **Backup existing data** before any field migrations
 - [ ] Run migration script to update `createdByUserId` → `ownerUid` (if needed)
-- [ ] Verify all memorial documents have `ownerUid` field
-- [ ] Test memorial access with new field structure
+- [ ] Verify all event documents have `ownerUid` field
+- [ ] Test event access with new field structure
 
 ### Security Verification
 - [ ] Verify session cookies have `sameSite: 'lax'` in production
@@ -46,10 +46,10 @@
 - [ ] Validate all protected routes require authentication
 
 ### Testing Checklist
-- [ ] **Unit Tests**: Run all memorial access utility tests
+- [ ] **Unit Tests**: Run all event access utility tests
 - [ ] **Integration Tests**: Test complete login → dashboard flow
 - [ ] **Role Tests**: Verify admin, owner, funeral_director permissions
-- [ ] **API Tests**: Test all memorial CRUD operations
+- [ ] **API Tests**: Test all event CRUD operations
 - [ ] **Payment Tests**: Verify Stripe integration with new field names
 
 ### Performance & Monitoring
@@ -82,7 +82,7 @@ STRIPE_SECRET_KEY="..."
 
 ### Files Modified in Refactor
 - `src/lib/auth.ts` - Standardized User interface
-- `src/lib/types/memorial.ts` - Updated field names
+- `src/lib/types/event.ts` - Updated field names
 - `src/lib/types/livestream.ts` - Deprecated CalculatorConfig
 - `src/hooks.server.ts` - Updated user object creation
 - `src/lib/components/Login.svelte` - Fixed race condition
@@ -120,7 +120,7 @@ If issues arise after deployment:
 ## 📋 Post-Deployment Verification
 
 - [ ] Test login flow with all three user roles
-- [ ] Verify memorial creation and access permissions
+- [ ] Verify event creation and access permissions
 - [ ] Check livestream functionality works correctly
 - [ ] Confirm payment processing uses correct field names
 - [ ] Monitor error logs for authentication issues
@@ -136,7 +136,7 @@ If issues arise after deployment:
 ### Data Model
 - Add database indexes for `ownerUid` and `funeralDirectorUid`
 - Implement soft deletes for memorials
-- Add audit trail for memorial modifications
+- Add audit trail for event modifications
 
 ### Security
 - Add rate limiting to authentication endpoints

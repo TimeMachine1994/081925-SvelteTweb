@@ -2,7 +2,7 @@
 
 ## Overview
 
-Tributestream uses Firebase Authentication with custom session cookies for secure, server-side authentication. The system supports multiple user roles: **admin**, **funeral_director**, and **owner** (memorial creators).
+Tributestream uses Firebase Authentication with custom session cookies for secure, server-side authentication. The system supports multiple user roles: **admin**, **funeral_director**, and **owner** (event creators).
 
 ## Authentication Architecture
 
@@ -55,10 +55,10 @@ event.locals.user = {
 
 **Custom Claim**: `{ role: 'funeral_director' }`
 
-### Owner (Memorial Creator)
+### Owner (Event Creator)
 - Create and manage own memorials
 - Default role for new users
-- Access to own memorial settings
+- Access to own event settings
 
 **Custom Claim**: `{ role: 'owner' }` or no custom claim
 
@@ -81,11 +81,11 @@ if (locals.user.role !== 'admin') {
 - `/admin/wiki/*` - Internal wiki
 - `/admin/mvp-dashboard` - Enhanced admin view
 
-### Memorial Owner Routes
-Memorial pages check ownership:
+### Event Owner Routes
+Event pages check ownership:
 ```typescript
-const memorial = await getMemorial(fullSlug);
-if (memorial.createdBy !== locals.user.uid && locals.user.role !== 'admin') {
+const event = await getMemorial(fullSlug);
+if (event.createdBy !== locals.user.uid && locals.user.role !== 'admin') {
   throw error(403, 'Unauthorized');
 }
 ```
@@ -159,7 +159,7 @@ Claims are cached and checked on every request via session verification.
 
 1. **Always check `locals.user` in server load functions**
 2. **Use role-based redirects** (admin → `/admin`, owner → `/profile`)
-3. **Verify ownership** for memorial-specific actions
+3. **Verify ownership** for event-specific actions
 4. **Log authentication events** for audit trail
 5. **Handle session timeouts gracefully**
 

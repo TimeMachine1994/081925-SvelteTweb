@@ -62,8 +62,8 @@
 	// Drag and drop state for photo reordering
 	let draggedPhotoIndex = $state<number | null>(null);
 	
-	// Memorial data for navigation
-	let memorial = $state<any>(null);
+	// Event data for navigation
+	let event = $state<any>(null);
 	
 	let settings = $state<SlideshowSettings>({
 		photoDuration: 3,
@@ -142,22 +142,22 @@
 		}
 	});
 	
-	// Load memorial data
+	// Load event data
 	async function loadMemorialData() {
 		if (!memorialId) return;
 		
 		try {
-			console.log('🔍 Loading memorial data for:', memorialId);
+			console.log('🔍 Loading event data for:', memorialId);
 			const response = await fetch(`/api/memorials/${memorialId}`);
 			
 			if (response.ok) {
-				memorial = await response.json();
-				console.log('✅ Memorial data loaded:', memorial?.fullSlug);
+				event = await response.json();
+				console.log('✅ Event data loaded:', event?.fullSlug);
 			} else {
-				console.warn('⚠️ Could not load memorial data');
+				console.warn('⚠️ Could not load event data');
 			}
 		} catch (error) {
-			console.error('❌ Error loading memorial data:', error);
+			console.error('❌ Error loading event data:', error);
 		}
 	}
 
@@ -166,7 +166,7 @@
 		if (!memorialId) return;
 		
 		try {
-			// Load memorial data for navigation
+			// Load event data for navigation
 			await loadMemorialData();
 			
 			// First check for published slideshow
@@ -181,7 +181,7 @@
 		}
 	}
 	
-	// Load published slideshow from memorial
+	// Load published slideshow from event
 	async function loadPublishedSlideshow() {
 		if (!memorialId) {
 			console.log('⚠️ No memorialId provided for slideshow loading');
@@ -189,7 +189,7 @@
 		}
 		
 		try {
-			console.log('🔍 Checking for published slideshow for memorial:', memorialId);
+			console.log('🔍 Checking for published slideshow for event:', memorialId);
 			console.log('🔍 Making API call to:', `/api/memorials/${memorialId}/slideshow`);
 			
 			const response = await fetch(`/api/memorials/${memorialId}/slideshow`);
@@ -442,7 +442,7 @@
 		
 		try {
 			isSavingDraft = true;
-			console.log('💾 Saving draft for memorial:', memorialId, 'with', photos.length, 'photos');
+			console.log('💾 Saving draft for event:', memorialId, 'with', photos.length, 'photos');
 			
 			// Convert photos to simple serializable format (avoid complex nested objects)
 			const draftPhotos = photos.map((photo) => ({
@@ -504,7 +504,7 @@
 		
 		try {
 			isLoadingDraft = true;
-			console.log('🔍 Loading draft for memorial:', memorialId);
+			console.log('🔍 Loading draft for event:', memorialId);
 			
 			const response = await fetch(`/api/slideshow/draft?memorialId=${memorialId}`);
 			console.log('📡 Draft API response status:', response.status);
@@ -913,7 +913,7 @@
 	// Upload video to Firebase Storage (client-side to avoid Vercel's 4.5MB limit)
 	async function uploadToFirebase(videoBlob: Blob, photos: SlideshowPhoto[], settings: SlideshowSettings) {
 		try {
-			const title = `Memorial Slideshow - ${new Date().toLocaleDateString()}`;
+			const title = `Event Slideshow - ${new Date().toLocaleDateString()}`;
 			
 			// Step 1: Upload audio if present
 			let audioData = null;
@@ -1032,17 +1032,17 @@
 		}
 	}
 
-	// Add slideshow to memorial (upload to Firebase)
+	// Add slideshow to event (upload to Firebase)
 	async function addToMemorial() {
 		if (!generatedVideoBlob || !memorialId) {
-			console.warn('⚠️ Cannot add to memorial: missing video or memorial ID');
-			alert('Please generate a video and ensure memorial ID is set.');
+			console.warn('⚠️ Cannot add to event: missing video or event ID');
+			alert('Please generate a video and ensure event ID is set.');
 			return;
 		}
 
 		try {
 			isGenerating = true;
-			generationPhase = 'Adding to memorial...';
+			generationPhase = 'Adding to event...';
 			generationProgress = 95;
 
 			// uploadToFirebase returns the parsed JSON result directly, not a Response object
@@ -1055,7 +1055,7 @@
 				isPublished = true;
 				publishedSlideshow = {
 					id: result.slideshowId,
-					title: `Memorial Slideshow - ${new Date().toLocaleDateString()}`,
+					title: `Event Slideshow - ${new Date().toLocaleDateString()}`,
 					playbackUrl: result.downloadURL,
 					photos: photos.map(photo => ({
 						id: photo.id,
@@ -1079,14 +1079,14 @@
 					result
 				});
 				
-				alert('Slideshow successfully added to memorial!');
+				alert('Slideshow successfully added to event!');
 			} else {
 				console.error('❌ Failed to upload slideshow: Invalid response', result);
 				alert('Failed to upload slideshow. Please try again.');
 			}
 		} catch (error) {
-			console.error('❌ Error adding to memorial:', error);
-			alert(`Failed to add to memorial: ${error.message}`);
+			console.error('❌ Error adding to event:', error);
+			alert(`Failed to add to event: ${error.message}`);
 		} finally {
 			isGenerating = false;
 			generationProgress = 0;
@@ -1161,20 +1161,20 @@
 		}
 	}
 
-	// Save slideshow to memorial
+	// Save slideshow to event
 	async function saveToMemorial() {
 		if (!memorialId) return;
 		
 		// Check if we have a video to save
 		if (!generatedVideoBlob) {
 			console.log('No video to save - need to generate slideshow first');
-			alert('Please generate a slideshow first before saving to memorial.');
+			alert('Please generate a slideshow first before saving to event.');
 			return;
 		}
 
 		try {
 			isGenerating = true;
-			generationPhase = 'Saving to memorial...';
+			generationPhase = 'Saving to event...';
 			generationProgress = 95;
 
 			// Upload new video to Firebase
@@ -1186,7 +1186,7 @@
 				isPublished = true;
 				publishedSlideshow = {
 					id: result.slideshowId,
-					title: result.title || `Memorial Slideshow - ${new Date().toLocaleDateString()}`,
+					title: result.title || `Event Slideshow - ${new Date().toLocaleDateString()}`,
 					playbackUrl: result.downloadURL,
 					photos: photos.map(photo => ({
 						id: photo.id,
@@ -1210,7 +1210,7 @@
 					result
 				});
 
-				alert('Slideshow published to memorial successfully!');
+				alert('Slideshow published to event successfully!');
 			} else {
 				// Handle case where API succeeded but didn't return expected data
 				throw new Error('API response missing required data');
@@ -1218,10 +1218,10 @@
 
 			generationProgress = 100;
 		} catch (error) {
-			console.error('Error saving slideshow to memorial:', error);
+			console.error('Error saving slideshow to event:', error);
 			// More detailed error message
 			const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-			alert(`Failed to save slideshow to memorial: ${errorMessage}. Please try again.`);
+			alert(`Failed to save slideshow to event: ${errorMessage}. Please try again.`);
 		} finally {
 			isGenerating = false;
 			generationProgress = 0;
@@ -1229,17 +1229,17 @@
 		}
 	}
 
-	// Unpublish slideshow from memorial
+	// Unpublish slideshow from event
 	async function unpublishFromMemorial() {
 		if (!memorialId || !publishedSlideshow) return;
 
-		const confirmUnpublish = confirm('Are you sure you want to unpublish this slideshow from the memorial? Visitors will no longer be able to see it.');
+		const confirmUnpublish = confirm('Are you sure you want to unpublish this slideshow from the event? Visitors will no longer be able to see it.');
 		if (!confirmUnpublish) return;
 
 		try {
 			isUnpublishing = true;
 
-			// Call API to delete the slideshow from memorial
+			// Call API to delete the slideshow from event
 			const response = await fetch(`/api/memorials/${memorialId}/slideshow`, {
 				method: 'DELETE',
 				headers: {
@@ -1255,7 +1255,7 @@
 				// Show video preview again so user can re-publish if desired
 				showVideoPreview = true;
 				
-				alert('Slideshow unpublished from memorial successfully!');
+				alert('Slideshow unpublished from event successfully!');
 			} else {
 				const errorData = await response.json();
 				throw new Error(errorData.message || 'Failed to unpublish slideshow');
@@ -1392,12 +1392,12 @@
 	async function publishDraftAndReplace() {
 		if (!draftVideoBlob || !memorialId) return;
 
-		const confirmPublish = confirm('Are you sure you want to publish this draft and replace the current version on the memorial?');
+		const confirmPublish = confirm('Are you sure you want to publish this draft and replace the current version on the event?');
 		if (!confirmPublish) return;
 
 		try {
 			isGenerating = true;
-			generationPhase = 'Publishing draft to memorial...';
+			generationPhase = 'Publishing draft to event...';
 			generationProgress = 50;
 
 			// Upload new video to Firebase (this will replace the old one)
@@ -1407,7 +1407,7 @@
 				// Update published slideshow data
 				publishedSlideshow = {
 					id: result.slideshowId,
-					title: result.title || `Memorial Slideshow - ${new Date().toLocaleDateString()}`,
+					title: result.title || `Event Slideshow - ${new Date().toLocaleDateString()}`,
 					playbackUrl: result.downloadURL,
 					photos: photos.map(photo => ({
 						id: photo.id,
@@ -1437,7 +1437,7 @@
 				previewVideoUrl = result.downloadURL;
 
 				generationProgress = 100;
-				alert('Draft published successfully! The memorial now shows your updated slideshow.');
+				alert('Draft published successfully! The event now shows your updated slideshow.');
 			}
 		} catch (error) {
 			console.error('❌ Error publishing draft:', error);
@@ -1456,7 +1456,7 @@
 		const url = URL.createObjectURL(generatedVideoBlob);
 		const a = document.createElement('a');
 		a.href = url;
-		a.download = `memorial-slideshow-${Date.now()}.webm`;
+		a.download = `event-slideshow-${Date.now()}.webm`;
 		document.body.appendChild(a);
 		a.click();
 		document.body.removeChild(a);
@@ -1477,10 +1477,10 @@
 		}
 	}
 	
-	// Save slideshow to memorial (with photos as base64)
+	// Save slideshow to event (with photos as base64)
 	async function saveSlideshow() {
 		if (!memorialId || photos.length === 0) {
-			alert('Please add photos and ensure memorial ID is set.');
+			alert('Please add photos and ensure event ID is set.');
 			return;
 		}
 		
@@ -1511,7 +1511,7 @@
 			
 			const slideshowData = {
 				id: crypto.randomUUID(),
-				title: `Memorial Slideshow - ${new Date().toLocaleDateString()}`,
+				title: `Event Slideshow - ${new Date().toLocaleDateString()}`,
 				photos: photosData,
 				settings: {
 					photoDuration: settings.photoDuration,
@@ -1570,17 +1570,17 @@
 			<div class="header-content">
 				<h2 class="creator-title">
 					<Upload class="title-icon" />
-					Create Memorial Slideshow
+					Create Event Slideshow
 				</h2>
 				<p class="creator-subtitle">
-					Upload photos to create a beautiful memorial slideshow
+					Upload photos to create a beautiful event slideshow
 				</p>
 				
 				<!-- Single Status Indicator (Miller's Rule - reduce cognitive load) -->
 				{#if photos.length > 0}
 					<div class="status-indicator">
 						{#if isPublished}
-							<span class="status-badge published">🌟 Published to Memorial</span>
+							<span class="status-badge published">🌟 Published to Event</span>
 						{:else if isSavingDraft}
 							<span class="status-badge saving">💾 Saving...</span>
 						{:else if lastSaveTime}
@@ -1669,7 +1669,7 @@
 				<div class="step-number">2</div>
 				<h3 class="step-title">Organize Your Photos ({photos.length})</h3>
 				{#if isPublished && !hasDraftChanges}
-					<div class="step-status completed">✓ Published to Memorial</div>
+					<div class="step-status completed">✓ Published to Event</div>
 				{:else if isPublished && hasDraftChanges}
 					<div class="step-status draft">📝 Draft Changes</div>
 				{:else if showVideoPreview}
@@ -1844,13 +1844,13 @@
 		</div>
 	{/if}
 
-	<!-- Step 4: Save to Memorial (When video is ready and not published, or when there are draft changes) -->
+	<!-- Step 4: Save to Event (When video is ready and not published, or when there are draft changes) -->
 	{#if showVideoPreview && (!isPublished || (hasDraftChanges && draftVideoBlob))}
 		<div class="workflow-step active">
 			<div class="step-header">
 				<div class="step-number">4</div>
 				<h3 class="step-title">
-					{hasDraftChanges ? 'Publish Draft' : 'Save to Memorial'}
+					{hasDraftChanges ? 'Publish Draft' : 'Save to Event'}
 				</h3>
 				{#if hasDraftChanges && draftVideoBlob}
 					<div class="step-status draft">📝 Draft Ready to Publish</div>
@@ -1913,7 +1913,7 @@
 							const url = URL.createObjectURL(draftVideoBlob);
 							const a = document.createElement('a');
 							a.href = url;
-							a.download = `memorial-slideshow-draft-${Date.now()}.webm`;
+							a.download = `event-slideshow-draft-${Date.now()}.webm`;
 							document.body.appendChild(a);
 							a.click();
 							document.body.removeChild(a);
@@ -1946,7 +1946,7 @@
 						</button>
 					{/if}
 				{:else if memorialId}
-					<!-- Regular Publish Action - Add to Memorial -->
+					<!-- Regular Publish Action - Add to Event -->
 					<div class="button-group">
 						<button 
 							class="secondary-btn"
@@ -1967,20 +1967,20 @@
 								<svg class="btn-icon animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
 								</svg>
-								Adding to Memorial...
+								Adding to Event...
 							{:else}
 								<svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
 								</svg>
-								Add to Memorial
+								Add to Event
 							{/if}
 						</button>
 					</div>
 				{:else}
-					<!-- No Memorial ID - Show Warning and Download Option -->
-					<div class="no-memorial-warning">
-						<p class="warning-text">⚠️ No memorial linked. You can download the video, but can't publish to a memorial.</p>
-						<p class="warning-hint">To publish to a memorial, access this page from your profile or a memorial page.</p>
+					<!-- No Event ID - Show Warning and Download Option -->
+					<div class="no-event-warning">
+						<p class="warning-text">⚠️ No event linked. You can download the video, but can't publish to a event.</p>
+						<p class="warning-hint">To publish to a event, access this page from your profile or a event page.</p>
 					</div>
 					<button 
 						class="secondary-btn"
@@ -2002,7 +2002,7 @@
 			<div class="step-header">
 				<div class="step-number">3</div>
 				<h3 class="step-title">Slideshow Settings</h3>
-				<div class="step-status completed">✓ Published to Memorial</div>
+				<div class="step-status completed">✓ Published to Event</div>
 			</div>
 			
 			<!-- Read-only Settings Display -->
@@ -2031,7 +2031,7 @@
 			<div class="published-header">
 				<h3 class="published-title">
 					<span class="published-icon">🌟</span>
-					Published to Memorial
+					Published to Event
 				</h3>
 				<div class="published-actions">
 					<button 
@@ -2043,10 +2043,10 @@
 					</button>
 					<button 
 						class="secondary-btn"
-						onclick={() => window.open(`/${memorial?.fullSlug || `memorial/${memorialId}`}`, '_blank')}
+						onclick={() => window.open(`/${event?.fullSlug || `event/${memorialId}`}`, '_blank')}
 					>
 						<ExternalLink class="btn-icon" />
-						View on Memorial
+						View on Event
 					</button>
 					<button 
 						class="danger-btn"
@@ -2060,7 +2060,7 @@
 							Unpublishing...
 						{:else}
 							<X class="btn-icon" />
-							Unpublish from Memorial
+							Unpublish from Event
 						{/if}
 					</button>
 				</div>
@@ -2993,8 +2993,8 @@
 		flex: 0 1 auto;
 	}
 
-	/* No Memorial Warning */
-	.no-memorial-warning {
+	/* No Event Warning */
+	.no-event-warning {
 		background: rgba(251, 191, 36, 0.1);
 		border: 2px solid rgba(251, 191, 36, 0.3);
 		border-radius: 12px;

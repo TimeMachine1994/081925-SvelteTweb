@@ -198,7 +198,7 @@ const MEMORIAL_COLUMNS: DataGridColumn[] = [
 ```typescript
 const STREAM_COLUMNS: DataGridColumn[] = [
   { id: 'title', label: 'Title', field: 'title', width: 250, pinned: 'left' },
-  { id: 'memorialName', label: 'Memorial', field: 'memorialName', width: 200 },
+  { id: 'memorialName', label: 'Event', field: 'memorialName', width: 200 },
   { id: 'status', label: 'Status', field: 'status', width: 120, formatter: StatusBadge },
   { id: 'scheduledStartTime', label: 'Scheduled', field: 'scheduledStartTime', width: 150, formatter: formatDateTime },
   { id: 'viewerCount', label: 'Viewers', field: 'viewerCount', width: 100, align: 'right' },
@@ -369,8 +369,8 @@ interface FilterGroup {
     </div>
     
     <div class="actions">
-      <!-- Memorial bulk actions -->
-      {#if resourceType === 'memorial'}
+      <!-- Event bulk actions -->
+      {#if resourceType === 'event'}
         <BulkAction icon="✅" onclick={() => onAction('markPaid', selectedIds)}>
           Mark Paid
         </BulkAction>
@@ -519,9 +519,9 @@ export async function POST({ request, locals }) {
 ```svelte
 <!-- EditMemorialModal.svelte -->
 <script lang="ts">
-  let { memorial, onSave, onCancel } = $props();
+  let { event, onSave, onCancel } = $props();
   
-  let formData = $state({ ...memorial });
+  let formData = $state({ ...event });
   let errors = $state({});
   let saving = $state(false);
   
@@ -532,7 +532,7 @@ export async function POST({ request, locals }) {
     
     saving = true;
     try {
-      const response = await fetch(`/api/admin/memorials/${memorial.id}`, {
+      const response = await fetch(`/api/admin/memorials/${event.id}`, {
         method: 'PUT',
         body: JSON.stringify(formData)
       });
@@ -546,7 +546,7 @@ export async function POST({ request, locals }) {
   }
 </script>
 
-<Modal title="Edit Memorial: {memorial.lovedOneName}">
+<Modal title="Edit Event: {event.lovedOneName}">
   <form onsubmit|preventDefault={handleSubmit}>
     <FormField label="Loved One's Name" error={errors.lovedOneName}>
       <input type="text" bind:value={formData.lovedOneName} required />
@@ -566,7 +566,7 @@ export async function POST({ request, locals }) {
     <FormField label="Visibility">
       <label>
         <input type="checkbox" bind:checked={formData.isPublic} />
-        Public memorial page
+        Public event page
       </label>
     </FormField>
     
@@ -651,7 +651,7 @@ export async function PUT({ params, request, locals }) {
     }
   }
   
-  // Update memorial
+  // Update event
   await adminDb.collection('memorials').doc(params.id).update(data);
   
   return json({ success: true });
@@ -668,7 +668,7 @@ export async function PUT({ params, request, locals }) {
 // Store drafts locally or in Firestore
 interface Draft {
   id: string;
-  resourceType: 'memorial' | 'stream' | 'user';
+  resourceType: 'event' | 'stream' | 'user';
   resourceId: string;
   changes: Record<string, any>;
   savedAt: Date;

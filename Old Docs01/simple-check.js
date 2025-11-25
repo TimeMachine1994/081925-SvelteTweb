@@ -28,7 +28,7 @@ async function checkTest2() {
         console.log('   Title:', data.title);
         console.log('   Status:', data.status);
         console.log('   Cloudflare ID:', data.cloudflareId);
-        console.log('   Memorial ID:', data.memorialId);
+        console.log('   Event ID:', data.memorialId);
         console.log('   Recording Sessions:', data.recordingSessions?.length || 0);
         
         if (data.recordingSessions) {

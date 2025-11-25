@@ -6,7 +6,7 @@ This document summarizes all API route fixes made to ensure V1 data model compli
 
 The V1 refactor simplifies the role system to three core roles:
 - `admin`: Full system access
-- `owner`: Memorial ownership and management
+- `owner`: Event ownership and management
 - `funeral_director`: Professional service provider (auto-approved)
 
 ## Fixed API Routes
@@ -27,7 +27,7 @@ The V1 refactor simplifies the role system to three core roles:
 - Replaced `createdByUserId` with `ownerUid` for permission validation
 - Simplified role-based access to `admin`, `owner`, `funeral_director` only
 
-### 3. Memorial Schedule Auto-Save API
+### 3. Event Schedule Auto-Save API
 **File:** `/src/routes/api/memorials/[memorialId]/schedule/auto-save/+server.ts`
 **Changes:**
 - Removed `family_member` role checks from permission validation
@@ -36,12 +36,12 @@ The V1 refactor simplifies the role system to three core roles:
 - Simplified permission checks to V1 roles only
 - Updated logging to reflect V1 role system
 
-### 4. Funeral Director Memorial Creation API
-**File:** `/src/routes/api/funeral-director/create-memorial/+server.ts`
+### 4. Funeral Director Event Creation API
+**File:** `/src/routes/api/funeral-director/create-event/+server.ts`
 **Changes:**
 - Updated funeral director status check comments for V1 auto-approval
-- Removed `licenseNumber` from funeral director info in memorial creation
-- Ensured consistent use of `ownerUid` for memorial ownership
+- Removed `licenseNumber` from funeral director info in event creation
+- Ensured consistent use of `ownerUid` for event ownership
 
 ## Additional Server-Side Fixes
 
@@ -52,8 +52,8 @@ The V1 refactor simplifies the role system to three core roles:
 - Updated to use `ownerUid` instead of `createdByUserId`
 - Simplified permission logic to V1 roles only
 
-### 6. Admin Create Memorial API
-**File:** `/src/routes/api/admin/create-memorial/+server.ts`
+### 6. Admin Create Event API
+**File:** `/src/routes/api/admin/create-event/+server.ts`
 **Changes:**
 - Removed duplicate ownership fields (`createdByUserId`, `creatorUid`)
 - Standardized on `ownerUid` as single source of truth
@@ -62,17 +62,17 @@ The V1 refactor simplifies the role system to three core roles:
 ### 7. Profile Page Server Load
 **File:** `/src/routes/profile/+page.server.ts`
 **Changes:**
-- Updated owner memorial queries to use `ownerUid` instead of `createdByUserId`
+- Updated owner event queries to use `ownerUid` instead of `createdByUserId`
 - Maintained funeral director queries using `funeralDirectorUid`
 
 ### 8. Register Loved One Page
-**File:** `/src/routes/register/loved-one/+page.server.ts`
+**File:** `/src/routes/register/new-event-and-account/+page.server.ts`
 **Changes:**
-- Updated memorial creation to use `ownerUid` instead of `createdByUserId`
+- Updated event creation to use `ownerUid` instead of `createdByUserId`
 - Removed legacy `creatorUid` field
-- Fixed Memorial type casting for Algolia indexing
+- Fixed Event type casting for Algolia indexing
 
-### 9. Memorial Schedule API
+### 9. Event Schedule API
 **File:** `/src/routes/api/memorials/[memorialId]/schedule/+server.ts`
 **Changes:**
 - Updated permission checks to use `ownerUid` and `funeralDirectorUid`
@@ -93,7 +93,7 @@ The V1 refactor simplifies the role system to three core roles:
 
 ## Client-Side Component Fixes
 
-### 12. Memorial Follow Button
+### 12. Event Follow Button
 **File:** `/src/lib/components/MemorialFollowButton.svelte`
 **Changes:**
 - Removed `viewer` role restriction
@@ -120,10 +120,10 @@ The V1 refactor simplifies the role system to three core roles:
 - Removed FuneralDirectorApplication interface (auto-approval in V1)
 - Simplified AdminDashboardStats and AdminAction interfaces
 
-### 16. Memorial Types
-**File:** `/src/lib/types/memorial.ts`
+### 16. Event Types
+**File:** `/src/lib/types/event.ts`
 **Changes:**
-- Removed deprecated `familyMemberUids` field from Memorial interface
+- Removed deprecated `familyMemberUids` field from Event interface
 
 ### 17. Funeral Director Types
 **File:** `/src/lib/types/funeral-director.ts`
@@ -140,7 +140,7 @@ The V1 refactor simplifies the role system to three core roles:
 
 ## Utility Updates
 
-### 19. Memorial Access Utils
+### 19. Event Access Utils
 **File:** `/src/lib/utils/memorialAccess.ts`
 **Changes:**
 - Removed `family_member` role access checks
@@ -158,7 +158,7 @@ The V1 refactor simplifies the role system to three core roles:
 ## Data Model Consistency
 
 All API routes now consistently use:
-- `ownerUid`: Single source of truth for memorial ownership
+- `ownerUid`: Single source of truth for event ownership
 - `funeralDirectorUid`: Funeral director assignment
 - V1 role system: `admin`, `owner`, `funeral_director` only
 - Removed: `createdByUserId`, `familyMemberUids`, `family_member`, `viewer` roles
@@ -195,7 +195,7 @@ The application is now fully compliant with the V1 data model and role system.
 - **Funeral Director Auto-Approval**: Registration API reflects immediate approval workflow
 
 ### 🔄 **Remaining Considerations:**
-- **Memorial Creation**: Some routes still create memorials with both `ownerUid` and legacy fields - should be monitored
+- **Event Creation**: Some routes still create memorials with both `ownerUid` and legacy fields - should be monitored
 - **Error Messages**: Some error messages may reference old concepts that users won't understand
 - **Frontend Integration**: Frontend components calling these APIs may need updates to match new data structures
 
@@ -209,7 +209,7 @@ The application is now fully compliant with the V1 data model and role system.
 
 1. **Role-Based Testing**: Test all endpoints with each of the three V1 roles
 2. **Permission Boundaries**: Verify that users can only access appropriate resources
-3. **Memorial Access**: Ensure owners and funeral directors have correct access levels
+3. **Event Access**: Ensure owners and funeral directors have correct access levels
 4. **Registration Flow**: Test funeral director registration and immediate approval
 5. **Payment Flow**: Verify payment intents work with simplified permission model
 

@@ -1,7 +1,7 @@
 // Test data fixtures for consistent testing
 export const testMemorials = [
   {
-    id: 'memorial-1',
+    id: 'event-1',
     lovedOneName: 'John Doe',
     slug: 'celebration-of-life-for-john-doe',
     fullSlug: 'celebration-of-life-for-john-doe',
@@ -11,7 +11,7 @@ export const testMemorials = [
     creatorName: 'Jane Doe',
     services: {
       main: {
-        location: { name: 'Memorial Chapel', address: '123 Main St', isUnknown: false },
+        location: { name: 'Event Chapel', address: '123 Main St', isUnknown: false },
         time: { date: '2024-06-15', time: '14:00', isUnknown: false },
         hours: 2
       },
@@ -32,7 +32,7 @@ export const testMemorials = [
     updatedAt: new Date('2024-01-02T00:00:00Z')
   },
   {
-    id: 'memorial-2',
+    id: 'event-2',
     lovedOneName: 'Mary Smith',
     slug: 'celebration-of-life-for-mary-smith',
     fullSlug: 'celebration-of-life-for-mary-smith',
@@ -118,7 +118,7 @@ export const testFuneralDirectors = [
     id: 'fd-1',
     uid: 'director-1',
     email: 'director1@test.com',
-    companyName: 'Memorial Services Inc',
+    companyName: 'Event Services Inc',
     contactPerson: 'John Director',
     phone: '(555) 555-5555',
     address: {
@@ -153,9 +153,9 @@ export const testFuneralDirectors = [
 export const testStreams = [
   {
     id: 'stream-1',
-    memorialId: 'memorial-1',
-    title: 'Memorial Service Live Stream',
-    description: 'Live coverage of John Doe memorial service',
+    memorialId: 'event-1',
+    title: 'Event Service Live Stream',
+    description: 'Live coverage of John Doe event service',
     scheduledStartTime: new Date('2024-06-15T14:00:00Z'),
     isLive: false,
     isVisible: true,
@@ -174,7 +174,7 @@ export const testStreams = [
   },
   {
     id: 'stream-2',
-    memorialId: 'memorial-1',
+    memorialId: 'event-1',
     title: 'Phone Stream',
     description: 'Mobile phone streaming',
     scheduledStartTime: new Date('2024-06-15T14:00:00Z'),
@@ -197,12 +197,12 @@ export const testStreams = [
 
 export const testCalculatorConfigs = [
   {
-    memorialId: 'memorial-1',
+    memorialId: 'event-1',
     selectedTier: 'standard',
     totalPrice: 199,
     services: {
       main: {
-        location: { name: 'Memorial Chapel', address: '123 Main St', isUnknown: false },
+        location: { name: 'Event Chapel', address: '123 Main St', isUnknown: false },
         time: { date: '2024-06-15', time: '14:00', isUnknown: false },
         hours: 2
       },
@@ -216,7 +216,7 @@ export const testCalculatorConfigs = [
     }
   },
   {
-    memorialId: 'memorial-2',
+    memorialId: 'event-2',
     selectedTier: 'premium',
     totalPrice: 299,
     services: {
@@ -249,8 +249,8 @@ export const testAuditLogs = [
     action: 'memorial_created',
     userId: 'owner-1',
     userEmail: 'owner1@test.com',
-    resourceType: 'memorial',
-    resourceId: 'memorial-1',
+    resourceType: 'event',
+    resourceId: 'event-1',
     details: {
       lovedOneName: 'John Doe',
       ownerEmail: 'owner1@test.com'
@@ -268,7 +268,7 @@ export const testAuditLogs = [
     resourceType: 'stream',
     resourceId: 'stream-1',
     details: {
-      memorialId: 'memorial-1',
+      memorialId: 'event-1',
       streamType: 'rtmp'
     },
     ipAddress: '192.168.1.101',

@@ -15,7 +15,7 @@
 ### 2. Firestore "in" Query Edge Cases
 - `where('__name__', 'in', [])` with empty array causes error
 - Firestore "in" query has a limit of 10 items max
-- If there are no memorial IDs, the query would fail
+- If there are no event IDs, the query would fail
 
 ### 3. Date Conversion Errors
 - Firestore timestamps may not have `.toDate()` method in some cases
@@ -46,14 +46,14 @@ try {
 }
 ```
 
-### 2. Safe Memorial ID Handling
+### 2. Safe Event ID Handling
 **File:** `routes/admin/services/streams/+page.server.ts`
 
 **Fixes:**
 - Filter out null/undefined memorialIds with `.filter(Boolean)`
 - Only query memorials if we have IDs (`if (memorialIds.length > 0)`)
 - Limit to 10 items with `.slice(0, 10)` for Firestore "in" limit
-- Wrap memorial query in try-catch
+- Wrap event query in try-catch
 
 ```typescript
 const memorialIds = [...new Set(snapshot.docs.map((doc) => doc.data().memorialId).filter(Boolean))];
@@ -71,7 +71,7 @@ if (memorialIds.length > 0) {
       memorialMap.set(doc.id, doc.data().lovedOneName);
     });
   } catch (error) {
-    console.error('Error loading memorial names:', error);
+    console.error('Error loading event names:', error);
   }
 }
 ```
@@ -94,14 +94,14 @@ try {
 }
 ```
 
-### 4. Safe Memorial Name Handling
+### 4. Safe Event Name Handling
 **File:** `routes/admin/services/streams/+page.server.ts`
 
 **Fix:** Handle null memorialId gracefully
 
 ```typescript
 memorialId: data.memorialId || null,
-memorialName: data.memorialId ? memorialMap.get(data.memorialId) || 'Unknown' : 'No Memorial',
+memorialName: data.memorialId ? memorialMap.get(data.memorialId) || 'Unknown' : 'No Event',
 ```
 
 ---
@@ -111,7 +111,7 @@ memorialName: data.memorialId ? memorialMap.get(data.memorialId) || 'Unknown' : 
 ### ✅ Streams Page
 - **Loads Successfully** - No more 500 errors
 - **Graceful Fallback** - If sorting fails, shows unsorted data
-- **Safe Data Display** - Missing memorial names show as "No Memorial" or "Unknown"
+- **Safe Data Display** - Missing event names show as "No Event" or "Unknown"
 - **No Crashes** - All data parsing wrapped in error handlers
 
 ### ✅ Memorials Page
@@ -125,12 +125,12 @@ memorialName: data.memorialId ? memorialMap.get(data.memorialId) || 'Unknown' : 
 ### Page Will Load Even If:
 - ✅ Firestore indexes haven't been created yet
 - ✅ There are no streams in database
-- ✅ Streams have no memorial associations
+- ✅ Streams have no event associations
 - ✅ Timestamp fields are missing or malformed
-- ✅ Memorial documents don't exist
+- ✅ Event documents don't exist
 
 ### Data Display:
-- Streams without memorials show "No Memorial"
+- Streams without memorials show "No Event"
 - Missing durations show as `null` (won't crash)
 - All errors logged to console for debugging
 - Page loads with partial data instead of crashing
@@ -162,7 +162,7 @@ Or remove the sorting feature temporarily and just load without orderBy until in
 Try these scenarios:
 - [x] Navigate to `/admin/services/streams` - Should load without 500 error
 - [x] Page loads even with no streams in database
-- [x] Streams without memorial IDs display correctly
+- [x] Streams without event IDs display correctly
 - [x] No console errors about "in" queries
 - [x] Falls back gracefully if sorting fails
 
@@ -177,4 +177,4 @@ The page will now always load, even if:
 - Database is empty
 - Indexes are missing
 - Data is incomplete
-- Memorial associations are broken
+- Event associations are broken

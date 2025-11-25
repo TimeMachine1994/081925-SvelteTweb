@@ -1,5 +1,5 @@
 User Role Implementation Plan (Updated 090725)
-This document outlines the plan to implement role-based access control (RBAC) for different user types within the Tributestream platform. It reflects the latest technical design updates (memorial slugs at root, auto-save schedule form, livestream management, and photo/contributor permissions).
+This document outlines the plan to implement role-based access control (RBAC) for different user types within the Tributestream platform. It reflects the latest technical design updates (event slugs at root, auto-save schedule form, livestream management, and photo/contributor permissions).
 The user roles to be implemented are:
 •	owner
 •	family_member
@@ -20,7 +20,7 @@ Step	Task	Status	Notes
 3	Update Server Auth Hook	✅ Completed	event.locals.user includes role and admin.
 4	Implement Role-Based UI	✅ Completed	/my-portal renders different placeholders by role.
 5	Implement Admin Preview	🔲 Pending	Allow admins to preview portal as different roles.
-6	Secure "Create Memorial"	🔲 Pending	Restrict access to Owners & Funeral Directors only.
+6	Secure "Create Event"	🔲 Pending	Restrict access to Owners & Funeral Directors only.
 7	Implement Photo Permissions	🔲 Pending	Owners: full CRUD + moderation. Family: upload/delete own. FD: upload (assigned).
 8	Implement Contributor Invites	🔲 Pending	Owner can invite/revoke family by email.
 9	Implement Schedule Auto-Save	🔲 Pending	Schedule edits auto-save every ≤5s; consistent across roles.

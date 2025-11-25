@@ -37,7 +37,7 @@ export async function uploadVideoToFirebaseStorage(
 				memorialId,
 				title,
 				uploadedAt: new Date().toISOString(),
-				type: 'memorial-slideshow'
+				type: 'event-slideshow'
 			}
 		};
 

@@ -25,8 +25,8 @@ Error: Type 'undefined' is not assignable to type 'string'
 2. **Update type definitions**:
    ```typescript
    // Use proper type guards
-   if (!memorial?.id) {
-     throw new Error('Memorial ID is required');
+   if (!event?.id) {
+     throw new Error('Event ID is required');
    }
    ```
 
@@ -192,22 +192,22 @@ No webhook events received from Cloudflare
 
 ## Runtime Issues
 
-### Memorial Access Problems
+### Event Access Problems
 
-#### Memorial Not Found
+#### Event Not Found
 
-**Issue**: 404 errors when accessing memorial pages
+**Issue**: 404 errors when accessing event pages
 ```bash
-Error: Memorial not found
+Error: Event not found
 ```
 
 **Solutions**:
-1. **Check memorial slug**:
+1. **Check event slug**:
    ```typescript
    // Verify slug format and existence
-   const memorial = await getMemorialBySlug(params.fullSlug);
-   if (!memorial) {
-     throw error(404, 'Memorial not found');
+   const event = await getMemorialBySlug(params.fullSlug);
+   if (!event) {
+     throw error(404, 'Event not found');
    }
    ```
 
@@ -217,17 +217,17 @@ Error: Memorial not found
    # Check Firebase Console > Firestore > Indexes
    ```
 
-3. **Verify memorial status**:
+3. **Verify event status**:
    ```typescript
-   // Check if memorial is published
-   if (memorial.status !== 'published') {
-     throw error(404, 'Memorial not available');
+   // Check if event is published
+   if (event.status !== 'published') {
+     throw error(404, 'Event not available');
    }
    ```
 
 #### Permission Denied
 
-**Issue**: Users cannot access memorial features
+**Issue**: Users cannot access event features
 ```bash
 Error: Insufficient permissions
 ```
@@ -242,9 +242,9 @@ Error: Insufficient permissions
    }
    ```
 
-2. **Verify memorial ownership**:
+2. **Verify event ownership**:
    ```typescript
-   // Check if user owns or has access to memorial
+   // Check if user owns or has access to event
    const hasAccess = await verifyMemorialAccess(userId, memorialId);
    if (!hasAccess) {
      throw error(403, 'Access denied');
@@ -273,7 +273,7 @@ Error: Failed to start livestream
 2. **Verify stream configuration**:
    ```typescript
    // Check livestream config
-   const config = memorial.livestreamConfig;
+   const config = event.livestreamConfig;
    if (!config?.liveInputId) {
      throw new Error('Livestream not configured');
    }
@@ -319,7 +319,7 @@ Error: Recording not found
 
 #### Slow Page Load Times
 
-**Issue**: Memorial pages loading slowly
+**Issue**: Event pages loading slowly
 ```bash
 Page load time > 3 seconds
 ```
@@ -337,7 +337,7 @@ Page load time > 3 seconds
 2. **Implement caching**:
    ```typescript
    // Cache frequently accessed data
-   const cached = await redis.get(`memorial:${memorialId}`);
+   const cached = await redis.get(`event:${memorialId}`);
    if (cached) return JSON.parse(cached);
    ```
 
@@ -346,7 +346,7 @@ Page load time > 3 seconds
    <!-- Use proper image optimization -->
    <img 
      src="/api/images/{imageId}?w=400&h=300&q=80"
-     alt="Memorial photo"
+     alt="Event photo"
      loading="lazy"
    />
    ```
@@ -426,7 +426,7 @@ Error: Function execution timed out
 1. **Optimize database queries**:
    ```typescript
    // Use more efficient queries
-   const memorial = await db.doc(`memorials/${memorialId}`).get();
+   const event = await db.doc(`memorials/${memorialId}`).get();
    // Instead of querying entire collection
    ```
 
@@ -513,8 +513,8 @@ Error: Quota exceeded
    ```typescript
    // Batch multiple operations
    const batch = db.batch();
-   memorials.forEach(memorial => {
-     batch.update(db.doc(`memorials/${memorial.id}`), updates);
+   memorials.forEach(event => {
+     batch.update(db.doc(`memorials/${event.id}`), updates);
    });
    await batch.commit();
    ```
@@ -522,11 +522,11 @@ Error: Quota exceeded
 2. **Add caching layer**:
    ```typescript
    // Cache frequently accessed data
-   const cacheKey = `memorial:${memorialId}`;
-   let memorial = cache.get(cacheKey);
-   if (!memorial) {
-     memorial = await db.doc(`memorials/${memorialId}`).get();
-     cache.set(cacheKey, memorial, 300); // 5 minute cache
+   const cacheKey = `event:${memorialId}`;
+   let event = cache.get(cacheKey);
+   if (!event) {
+     event = await db.doc(`memorials/${memorialId}`).get();
+     cache.set(cacheKey, event, 300); // 5 minute cache
    }
    ```
 
@@ -540,8 +540,8 @@ Error: Quota exceeded
 // Use structured logging for better debugging
 import { logger } from '$lib/server/logger';
 
-logger.info('Memorial created', {
-  memorialId: memorial.id,
+logger.info('Event created', {
+  memorialId: event.id,
   userId: user.id,
   timestamp: new Date().toISOString()
 });

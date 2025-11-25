@@ -39,22 +39,22 @@ All API routes (except public endpoints) require authentication via Firebase Aut
 }
 ```
 
-## Memorial Management APIs
+## Event Management APIs
 
-### Memorial CRUD Operations
+### Event CRUD Operations
 
 #### GET `/api/memorials/[id]`
-Retrieve memorial details by ID.
+Retrieve event details by ID.
 
 **Parameters:**
-- `id` (string): Memorial ID
+- `id` (string): Event ID
 
 **Response:**
 ```json
 {
   "success": true,
   "data": {
-    "memorial": Memorial,
+    "event": Event,
     "canEdit": boolean,
     "streams": Stream[]
   }
@@ -66,7 +66,7 @@ Retrieve memorial details by ID.
 ---
 
 #### PUT `/api/memorials/[id]`
-Update memorial information.
+Update event information.
 
 **Request Body:**
 ```json
@@ -85,10 +85,10 @@ Update memorial information.
 
 ---
 
-### Memorial Creation
+### Event Creation
 
-#### POST `/api/funeral-director/create-memorial`
-Create memorial as funeral director.
+#### POST `/api/funeral-director/create-event`
+Create event as funeral director.
 
 **Request Body:**
 ```json
@@ -111,7 +111,7 @@ Create memorial as funeral director.
 {
   "success": true,
   "data": {
-    "memorial": Memorial,
+    "event": Event,
     "invitationSent": boolean
   }
 }
@@ -122,7 +122,7 @@ Create memorial as funeral director.
 ---
 
 #### POST `/api/funeral-director/quick-register-family`
-Quick family registration with memorial creation.
+Quick family registration with event creation.
 
 **Request Body:**
 ```json
@@ -138,17 +138,17 @@ Quick family registration with memorial creation.
 
 ---
 
-### Memorial Schedule Management
+### Event Schedule Management
 
 #### GET `/api/memorials/[memorialId]/schedule`
-Get memorial schedule and calculator data.
+Get event schedule and calculator data.
 
 **Response:**
 ```json
 {
   "success": true,
   "data": {
-    "memorial": Memorial,
+    "event": Event,
     "calculatorConfig": CalculatorFormData
   }
 }
@@ -157,7 +157,7 @@ Get memorial schedule and calculator data.
 ---
 
 #### PUT `/api/memorials/[memorialId]/schedule`
-Update memorial schedule and services.
+Update event schedule and services.
 
 **Request Body:**
 ```json
@@ -193,7 +193,7 @@ Auto-save schedule changes.
 List streams with filtering.
 
 **Query Parameters:**
-- `memorialId` (string): Filter by memorial
+- `memorialId` (string): Filter by event
 - `status` (StreamStatus): Filter by status
 - `limit` (number): Results limit
 - `offset` (number): Pagination offset
@@ -380,10 +380,10 @@ Sync recording status with Cloudflare.
 
 ---
 
-### Memorial Stream Integration
+### Event Stream Integration
 
 #### GET `/api/memorials/[id]/streams`
-Get all streams for memorial.
+Get all streams for event.
 
 **Response:**
 ```json
@@ -404,7 +404,7 @@ Get all streams for memorial.
 ---
 
 #### GET `/api/memorials/[id]/streams/status`
-Get real-time status of memorial streams.
+Get real-time status of event streams.
 
 **Response:**
 ```json
@@ -424,7 +424,7 @@ Get real-time status of memorial streams.
 
 ## Legacy Livestream APIs (MVP Two System)
 
-### Memorial Livestream Management
+### Event Livestream Management
 
 #### GET `/api/memorials/[memorialId]/livestream`
 Get livestream configuration.
@@ -642,7 +642,7 @@ Get memorials managed by funeral director.
 {
   "success": true,
   "data": {
-    "memorials": Memorial[],
+    "memorials": Event[],
     "total": number
   }
 }
@@ -846,14 +846,14 @@ Handle Cloudflare recording ready notifications.
 ### Stream Debugging
 
 #### GET `/api/debug/streams/[memorialId]`
-Debug memorial streams.
+Debug event streams.
 
 **Response:**
 ```json
 {
   "success": true,
   "data": {
-    "memorial": Memorial,
+    "event": Event,
     "unifiedStreams": Stream[],
     "legacyStreams": MVPTwoStreamData[],
     "cloudflareStatus": object

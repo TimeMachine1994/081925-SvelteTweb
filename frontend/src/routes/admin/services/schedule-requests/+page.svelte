@@ -1,7 +1,7 @@
 <!--
 SCHEDULE EDIT REQUESTS ADMIN PAGE
 
-Review and approve memorial schedule change requests
+Review and approve event schedule change requests
 -->
 <script lang="ts">
 	import AdminLayout from '$lib/components/admin/AdminLayout.svelte';
@@ -18,7 +18,7 @@ Review and approve memorial schedule change requests
 	const columns = [
 		{
 			id: 'memorialName',
-			label: 'Memorial',
+			label: 'Event',
 			field: 'memorialName',
 			width: 200,
 			sortable: true
@@ -89,7 +89,7 @@ Review and approve memorial schedule change requests
 
 <AdminLayout
 	title="Schedule Edit Requests"
-	subtitle="Review and approve memorial schedule changes"
+	subtitle="Review and approve event schedule changes"
 	actions={[
 		{
 			label: 'Pending Only',

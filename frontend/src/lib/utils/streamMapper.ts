@@ -2,7 +2,7 @@
 // Converts schedule component data into stream creation API requests
 
 import type { StreamCreateRequest, StreamSyncResult, Stream } from '$lib/types/stream';
-import type { ServiceDetails, AdditionalServiceDetails } from '$lib/types/memorial';
+import type { ServiceDetails, AdditionalServiceDetails } from '$lib/types/event';
 
 // Schedule component data structures
 export interface ScheduleServiceData {
@@ -103,7 +103,7 @@ export function mapScheduleToStreams(scheduleData: ScheduleData): EnhancedStream
  * @param service - Service data (main or additional)
  * @param serviceType - Type of service ('main', 'location', 'day')
  * @param serviceIndex - Index for additional services (null for main)
- * @param memorialName - Name of the memorial for context
+ * @param memorialName - Name of the event for context
  * @returns Stream creation request or null if invalid
  */
 function createStreamFromService(
@@ -155,7 +155,7 @@ function createStreamFromService(
 	switch (serviceType) {
 		case 'main':
 			title = `${locationName} Service`;
-			description = `Memorial service at ${locationName}`;
+			description = `Event service at ${locationName}`;
 			break;
 		case 'location':
 			title = `Additional Location - ${locationName}`;
@@ -175,7 +175,7 @@ function createStreamFromService(
 		description += ` - ${location.address}`;
 	}
 
-	// Add memorial context if available
+	// Add event context if available
 	if (memorialName) {
 		description += ` (${memorialName})`;
 	}
@@ -273,7 +273,7 @@ function generateServiceHash(service: ServiceDetails | AdditionalServiceDetails)
 
 /**
  * Synchronizes streams with schedule data (create, update, delete as needed)
- * @param memorialId - Memorial ID
+ * @param memorialId - Event ID
  * @param scheduleData - Schedule data to sync
  * @returns Promise with sync results
  */
@@ -293,12 +293,12 @@ export async function syncStreamsWithSchedule(
 
 	if (!memorialId) {
 		result.success = false;
-		result.errors.push('Memorial ID is required');
+		result.errors.push('Event ID is required');
 		return result;
 	}
 
 	try {
-		// Get existing streams for this memorial
+		// Get existing streams for this event
 		const existingStreamsResponse = await fetch(`/api/memorials/${memorialId}/streams`);
 		const existingStreamsData = await existingStreamsResponse.json();
 		const existingStreams: Stream[] = existingStreamsData.streams || [];
@@ -441,7 +441,7 @@ export async function syncStreamsWithSchedule(
 
 /**
  * Creates streams via API from schedule data (DEPRECATED - use syncStreamsWithSchedule)
- * @param memorialId - Memorial ID
+ * @param memorialId - Event ID
  * @param scheduleData - Schedule data to convert
  * @returns Promise with creation results
  */
@@ -455,7 +455,7 @@ export async function createStreamsFromSchedule(
 	errors: string[];
 }> {
 	console.log('🎬 [STREAM_MAPPER] ========== CREATE STREAMS FROM SCHEDULE STARTED ==========');
-	console.log('🎬 [STREAM_MAPPER] Memorial ID:', memorialId);
+	console.log('🎬 [STREAM_MAPPER] Event ID:', memorialId);
 	console.log('🎬 [STREAM_MAPPER] Schedule data received:', JSON.stringify(scheduleData, null, 2));
 	
 	const results = {
@@ -466,9 +466,9 @@ export async function createStreamsFromSchedule(
 	};
 
 	if (!memorialId) {
-		console.log('❌ [STREAM_MAPPER] Memorial ID is required');
+		console.log('❌ [STREAM_MAPPER] Event ID is required');
 		results.success = false;
-		results.errors.push('Memorial ID is required');
+		results.errors.push('Event ID is required');
 		return results;
 	}
 
@@ -504,7 +504,7 @@ export async function createStreamsFromSchedule(
 	}
 
 	// Create streams via API
-	console.log(`🎬 [STREAM_MAPPER] Creating ${streamRequests.length} streams for memorial:`, memorialId);
+	console.log(`🎬 [STREAM_MAPPER] Creating ${streamRequests.length} streams for event:`, memorialId);
 
 	for (const streamRequest of streamRequests) {
 		try {

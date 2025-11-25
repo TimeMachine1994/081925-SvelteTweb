@@ -21,12 +21,12 @@ describe('OwnerPortal Component', () => {
 
 		// Test what users actually see
 		expect(screen.getByText('Owner Portal')).toBeInTheDocument();
-		expect(screen.getByText('Memorial Management')).toBeInTheDocument();
-		expect(screen.getByText('Create Memorial')).toBeInTheDocument();
+		expect(screen.getByText('Event Management')).toBeInTheDocument();
+		expect(screen.getByText('Create Event')).toBeInTheDocument();
 		// Invitation system removed in V1 - expect(screen.getByText('Manage Invitations')).toBeInTheDocument();
 	});
 
-	it('shows create memorial button and handles clicks', async () => {
+	it('shows create event button and handles clicks', async () => {
 		const mockCreateMemorial = vi.fn();
 
 		render(OwnerPortal, {
@@ -37,17 +37,17 @@ describe('OwnerPortal Component', () => {
 			}
 		});
 
-		const createButton = screen.getByRole('button', { name: /create memorial/i });
+		const createButton = screen.getByRole('button', { name: /create event/i });
 		expect(createButton).toBeInTheDocument();
 
 		await fireEvent.click(createButton);
 		expect(mockCreateMemorial).toHaveBeenCalled();
 	});
 
-	it('displays memorial list when memorials exist', () => {
+	it('displays event list when memorials exist', () => {
 		const mockMemorials = [
-			{ id: '1', lovedOneName: 'John Doe Memorial', ownerUid: 'owner-123' },
-			{ id: '2', lovedOneName: 'Jane Smith Memorial', ownerUid: 'owner-123' }
+			{ id: '1', lovedOneName: 'John Doe Event', ownerUid: 'owner-123' },
+			{ id: '2', lovedOneName: 'Jane Smith Event', ownerUid: 'owner-123' }
 		];
 
 		render(OwnerPortal, {
@@ -57,8 +57,8 @@ describe('OwnerPortal Component', () => {
 			}
 		});
 
-		expect(screen.getByText('John Doe Memorial')).toBeInTheDocument();
-		expect(screen.getByText('Jane Smith Memorial')).toBeInTheDocument();
+		expect(screen.getByText('John Doe Event')).toBeInTheDocument();
+		expect(screen.getByText('Jane Smith Event')).toBeInTheDocument();
 	});
 
 	it('shows empty state when no memorials', () => {

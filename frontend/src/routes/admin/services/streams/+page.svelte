@@ -20,7 +20,7 @@ Manage all livestreams across memorials
 
 <AdminLayout
 	title="Livestreams"
-	subtitle="Manage all memorial livestreams and recordings across all memorials"
+	subtitle="Manage all event livestreams and recordings across all memorials"
 >
 	<div class="streams-container">
 		{#if data.streams.length === 0}

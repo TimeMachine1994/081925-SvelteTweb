@@ -19,19 +19,19 @@
 
 ## 💡 What Are "Payment Restrictions"?
 
-**Payment restrictions** means enforcing the rule that owners can only create **one unpaid memorial**.
+**Payment restrictions** means enforcing the rule that owners can only create **one unpaid event**.
 
 ### Current Problem
 According to your existing code:
 - Users register as "owners" to create memorials for loved ones
 - System tracks `hasPaidForMemorial: false` and `memorialCount: 0`
-- After first memorial creation, they should pay before creating more
+- After first event creation, they should pay before creating more
 - **But**: Payment success doesn't update these flags!
 
 ### What Happens When We Fix It
 ```typescript
 // When webhook receives payment success:
-1. Memorial gets marked: isPaid: true ✓
+1. Event gets marked: isPaid: true ✓
 2. User gets marked: hasPaidForMemorial: true ✓
 3. User can now create additional memorials ✓
 ```
@@ -127,7 +127,7 @@ async function handleCheckoutSuccess(session: Stripe.Checkout.Session) {
       ? session.payment_intent 
       : session.payment_intent?.id;
 
-    // 1. Update Memorial
+    // 1. Update Event
     const memorialRef = adminDb.collection('memorials').doc(memorialId);
     await memorialRef.update({
       isPaid: true,  // ✅ NEW - Enable payment restrictions
@@ -147,7 +147,7 @@ async function handleCheckoutSuccess(session: Stripe.Checkout.Session) {
       })
     });
 
-    console.log('✅ [WEBHOOK] Memorial updated:', memorialId);
+    console.log('✅ [WEBHOOK] Event updated:', memorialId);
 
     // 2. Update User - Enable payment restrictions ✅
     const userRef = adminDb.collection('users').doc(uid);
@@ -285,20 +285,20 @@ export const load: PageServerLoad = async ({ url, locals }) => {
       expand: ['line_items', 'customer']
     });
 
-    // Get memorial data
+    // Get event data
     const memorialId = session.metadata?.memorialId;
     if (!memorialId) {
-      throw error(400, 'Missing memorial ID in session metadata');
+      throw error(400, 'Missing event ID in session metadata');
     }
 
     const memorialDoc = await adminDb.collection('memorials').doc(memorialId).get();
     
     if (!memorialDoc.exists) {
-      throw error(404, 'Memorial not found');
+      throw error(404, 'Event not found');
     }
 
-    const memorial = memorialDoc.data();
-    const config = memorial?.calculatorConfig;
+    const event = memorialDoc.data();
+    const config = event?.calculatorConfig;
 
     // Build receipt data
     const receiptData = {
@@ -322,9 +322,9 @@ export const load: PageServerLoad = async ({ url, locals }) => {
         items: config?.bookingItems || [],
         total: config?.total || (session.amount_total ? session.amount_total / 100 : 0)
       },
-      memorial: {
+      event: {
         id: memorialId,
-        lovedOneName: memorial?.lovedOneName || session.metadata?.lovedOneName
+        lovedOneName: event?.lovedOneName || session.metadata?.lovedOneName
       }
     };
 
@@ -411,7 +411,7 @@ npm run dev
 #### Task 3.3: Test Payment Flow End-to-End (2 hours)
 
 **Test Checklist**:
-- [ ] Create memorial as owner
+- [ ] Create event as owner
 - [ ] Fill out calculator/schedule
 - [ ] Click "Save and Pay Now"
 - [ ] Redirects to Stripe Checkout
@@ -420,15 +420,15 @@ npm run dev
 - [ ] Redirects to `/payment/receipt?session_id=...`
 - [ ] Receipt shows correct data
 - [ ] Check Firestore:
-  - [ ] Memorial `isPaid: true`
-  - [ ] Memorial `calculatorConfig.status: 'paid'`
+  - [ ] Event `isPaid: true`
+  - [ ] Event `calculatorConfig.status: 'paid'`
   - [ ] User `hasPaidForMemorial: true`
 - [ ] Check webhook logs
 - [ ] Check email was sent
 
 **Test Failed Payment**:
 - [ ] Use declined card: `4000 0000 0000 0002`
-- [ ] Check memorial status updated to `payment_failed`
+- [ ] Check event status updated to `payment_failed`
 - [ ] Check failure email sent
 
 **Test 3D Secure**:
@@ -442,12 +442,12 @@ npm run dev
 
 **Test Flow**:
 1. Create account as owner
-2. Create first memorial (free/unpaid)
-3. Try to create second memorial
+2. Create first event (free/unpaid)
+3. Try to create second event
 4. Should be blocked until payment
-5. Complete payment for first memorial
+5. Complete payment for first event
 6. Check `hasPaidForMemorial: true`
-7. Try to create second memorial again
+7. Try to create second event again
 8. Should now be allowed ✅
 
 ---
@@ -475,8 +475,8 @@ After implementation, you should have:
 - `checkout.session.async_payment_failed`
 
 ✅ **Payment status properly updated**
-- Memorial: `isPaid: true`
-- Memorial: `calculatorConfig.status: 'paid'`
+- Event: `isPaid: true`
+- Event: `calculatorConfig.status: 'paid'`
 - User: `hasPaidForMemorial: true`
 
 ✅ **Success page working**
@@ -485,7 +485,7 @@ After implementation, you should have:
 - Professional receipt display
 
 ✅ **Payment restrictions enforced**
-- Owners limited to one unpaid memorial
+- Owners limited to one unpaid event
 - After payment, can create more
 - Clear user messaging
 

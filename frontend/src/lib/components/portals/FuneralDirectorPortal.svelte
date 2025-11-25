@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { Button } from '$lib/ui';
-	import type { Memorial } from '$lib/types/memorial';
+	import type { Event } from '$lib/types/event';
 	import {
 		Calendar,
 		Users,
@@ -19,7 +19,7 @@
 	} from 'lucide-svelte';
 	import LivestreamControl from '$lib/components/LivestreamControl.svelte';
 
-	let { memorials }: { memorials: Memorial[] } = $props();
+	let { memorials }: { memorials: Event[] } = $props();
 
 	console.log('🏢 FuneralDirectorPortal rendering with', memorials.length, 'assigned memorials');
 </script>
@@ -35,7 +35,7 @@
 			</div>
 			<div>
 				<h1 class="text-3xl font-bold text-gray-900">Funeral Director Dashboard</h1>
-				<p class="text-lg text-gray-600">Manage memorial services and support families</p>
+				<p class="text-lg text-gray-600">Manage event services and support families</p>
 			</div>
 		</div>
 
@@ -107,9 +107,9 @@
 			>
 				<div class="mb-3 flex items-center space-x-3">
 					<Plus class="h-6 w-6" />
-					<h3 class="text-lg font-semibold">Create Memorial</h3>
+					<h3 class="text-lg font-semibold">Create Event</h3>
 				</div>
-				<p class="text-green-100">Set up a new memorial service with livestream</p>
+				<p class="text-green-100">Set up a new event service with livestream</p>
 			</a>
 
 			<a
@@ -147,7 +147,7 @@
 
 		{#if memorials && memorials.length > 0}
 			<div class="grid gap-4">
-				{#each memorials as memorial}
+				{#each memorials as event}
 					<div
 						class="rounded-xl border border-gray-200 bg-white p-6 shadow-lg transition-all duration-300 hover:shadow-xl"
 					>
@@ -157,16 +157,16 @@
 									class="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-yellow-600 to-amber-600 shadow-lg"
 								>
 									<span class="text-lg font-bold text-white">
-										{memorial.lovedOneName?.charAt(0) || 'M'}
+										{event.lovedOneName?.charAt(0) || 'M'}
 									</span>
 								</div>
 								<div>
-									<h3 class="text-lg font-semibold text-gray-900">{memorial.lovedOneName}</h3>
+									<h3 class="text-lg font-semibold text-gray-900">{event.lovedOneName}</h3>
 									<div class="flex items-center space-x-4 text-sm text-gray-500">
 										<span class="flex items-center">
 											<Calendar class="mr-1 h-4 w-4" />
-											{memorial.serviceDate
-												? new Date(memorial.serviceDate).toLocaleDateString()
+											{event.serviceDate
+												? new Date(event.serviceDate).toLocaleDateString()
 												: 'Not scheduled'}
 										</span>
 									</div>
@@ -183,7 +183,7 @@
 								</a>
 
 								<a
-									href="/schedule/{memorial.id}"
+									href="/schedule/{event.id}"
 									class="flex items-center space-x-1 rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
 								>
 									<Calendar class="h-4 w-4" />
@@ -191,7 +191,7 @@
 								</a>
 
 								<a
-									href="/{memorial.fullSlug}"
+									href="/{event.fullSlug}"
 									class="rounded-lg bg-yellow-600 px-4 py-2 text-white transition-colors hover:bg-yellow-700"
 								>
 									View
@@ -199,25 +199,25 @@
 							</div>
 						</div>
 
-						<!-- Memorial Details -->
+						<!-- Event Details -->
 						<div class="mt-4 border-t border-gray-100 pt-4">
 							<div class="grid grid-cols-1 gap-4 text-sm md:grid-cols-3">
 								<div>
 									<span class="text-gray-500">Family Contact:</span>
 									<p class="font-medium text-gray-900">
-										{memorial.familyContactEmail || 'Not provided'}
+										{event.familyContactEmail || 'Not provided'}
 									</p>
 								</div>
 								<div>
 									<span class="text-gray-500">Created:</span>
 									<p class="font-medium text-gray-900">
-										{new Date(memorial.createdAt).toLocaleDateString()}
+										{new Date(event.createdAt).toLocaleDateString()}
 									</p>
 								</div>
 								<div>
 									<span class="text-gray-500">Status:</span>
 									<p class="font-medium text-gray-900">
-										{#if memorial.serviceDate}
+										{#if event.serviceDate}
 											<span class="text-green-600">Scheduled</span>
 										{:else}
 											<span class="text-yellow-600">Planning</span>
@@ -235,14 +235,14 @@
 				<div class="mb-4 text-6xl text-gray-400">🏛️</div>
 				<h3 class="mb-2 text-lg font-medium text-gray-900">No Assigned Memorials</h3>
 				<p class="mb-6 text-gray-600">
-					You don't have any memorials assigned to you yet. Create a new memorial to get started.
+					You don't have any memorials assigned to you yet. Create a new event to get started.
 				</p>
 				<a
 					href="/register/funeral-director"
 					class="inline-flex items-center rounded-lg bg-gradient-to-r from-yellow-600 to-amber-600 px-6 py-3 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
 				>
 					<Plus class="mr-2 h-5 w-5" />
-					Create First Memorial
+					Create First Event
 				</a>
 			</div>
 		{/if}
@@ -255,7 +255,7 @@
 			<h3 class="text-lg font-semibold text-gray-900">Need Support?</h3>
 		</div>
 		<p class="mb-4 text-gray-600">
-			Our technical support team is available to help you with livestreaming, memorial setup, and
+			Our technical support team is available to help you with livestreaming, event setup, and
 			family coordination.
 		</p>
 		<div class="flex space-x-4">
@@ -280,18 +280,18 @@
 
 		{#if memorials.length > 0}
 			<div class="space-y-6">
-				{#each memorials as memorial}
+				{#each memorials as event}
 					<div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
 						<div class="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white px-6 py-4">
 							<div class="flex items-center justify-between">
 								<div>
-									<h3 class="text-lg font-semibold text-gray-900">{memorial.lovedOneName}</h3>
+									<h3 class="text-lg font-semibold text-gray-900">{event.lovedOneName}</h3>
 									<p class="text-sm text-gray-600">
-										Service: {memorial.serviceDate
-											? new Date(memorial.serviceDate).toLocaleDateString()
+										Service: {event.serviceDate
+											? new Date(event.serviceDate).toLocaleDateString()
 											: 'Date TBD'}
-										{#if memorial.serviceTime}
-											at {memorial.serviceTime}
+										{#if event.serviceTime}
+											at {event.serviceTime}
 										{/if}
 									</p>
 								</div>
@@ -308,8 +308,8 @@
 
 						<div class="p-6">
 							<LivestreamControl
-								memorialId={memorial.id}
-								memorialName={memorial.lovedOneName}
+								memorialId={event.id}
+								memorialName={event.lovedOneName}
 								showTitle={false}
 							/>
 						</div>
@@ -329,7 +329,7 @@
 					class="inline-flex items-center rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-3 text-white transition-all duration-300 hover:scale-105 hover:shadow-lg"
 				>
 					<Plus class="mr-2 h-5 w-5" />
-					Create Memorial
+					Create Event
 				</a>
 			</div>
 		{/if}

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Memorial Migration Script
+ * Event Migration Script
  * Copies memorials from tributestream-lemhr to fir-tweb Firebase projects
  */
 
@@ -96,7 +96,7 @@ function cleanUndefinedValues(obj) {
  * Migrate memorials collection
  */
 async function migrateMemorials() {
-  console.log('🏛️  Starting memorial migration...');
+  console.log('🏛️  Starting event migration...');
   
   try {
     const memorialsRef = sourceDb.collection('memorials');
@@ -113,7 +113,7 @@ async function migrateMemorials() {
         const memorialData = docSnapshot.data();
         const cleanedData = cleanUndefinedValues(memorialData);
         
-        // Create memorial document in destination
+        // Create event document in destination
         const destMemorialRef = destDb.collection('memorials').doc(docSnapshot.id);
         batch.set(destMemorialRef, cleanedData);
         
@@ -127,13 +127,13 @@ async function migrateMemorials() {
           batchCount = 0;
         }
         
-        // Migrate subcollections for this memorial
+        // Migrate subcollections for this event
         await migrateMemorialSubcollections(docSnapshot.id);
         
         stats.memorials.migrated++;
         
       } catch (error) {
-        console.error(`❌ Error migrating memorial ${docSnapshot.id}:`, error);
+        console.error(`❌ Error migrating event ${docSnapshot.id}:`, error);
         stats.memorials.errors++;
       }
     }
@@ -144,15 +144,15 @@ async function migrateMemorials() {
       console.log(`✅ Committed final batch of ${batchCount} memorials`);
     }
     
-    console.log(`🏛️  Memorial migration complete: ${stats.memorials.migrated}/${stats.memorials.total} successful`);
+    console.log(`🏛️  Event migration complete: ${stats.memorials.migrated}/${stats.memorials.total} successful`);
     
   } catch (error) {
-    console.error('❌ Error in memorial migration:', error);
+    console.error('❌ Error in event migration:', error);
   }
 }
 
 /**
- * Migrate subcollections for a specific memorial
+ * Migrate subcollections for a specific event
  */
 async function migrateMemorialSubcollections(memorialId) {
   // Migrate streams subcollection
@@ -165,7 +165,7 @@ async function migrateMemorialSubcollections(memorialId) {
 }
 
 /**
- * Migrate a subcollection for a memorial
+ * Migrate a subcollection for a event
  */
 async function migrateSubcollection(memorialId, subcollectionName) {
   try {
@@ -174,7 +174,7 @@ async function migrateSubcollection(memorialId, subcollectionName) {
     
     if (snapshot.empty) return;
     
-    console.log(`  📁 Migrating ${snapshot.size} ${subcollectionName} for memorial ${memorialId}`);
+    console.log(`  📁 Migrating ${snapshot.size} ${subcollectionName} for event ${memorialId}`);
     
     const batch = destDb.batch();
     let batchCount = 0;
@@ -209,11 +209,11 @@ async function migrateSubcollection(memorialId, subcollectionName) {
     
     if (batchCount > 0) {
       await batch.commit();
-      console.log(`  ✅ Migrated ${batchCount} ${subcollectionName} for memorial ${memorialId}`);
+      console.log(`  ✅ Migrated ${batchCount} ${subcollectionName} for event ${memorialId}`);
     }
     
   } catch (error) {
-    console.error(`❌ Error migrating ${subcollectionName} for memorial ${memorialId}:`, error);
+    console.error(`❌ Error migrating ${subcollectionName} for event ${memorialId}:`, error);
   }
 }
 
@@ -291,7 +291,7 @@ function printSummary() {
  * Main migration function
  */
 async function runMigration() {
-  console.log('🚀 Starting Firebase memorial migration...');
+  console.log('🚀 Starting Firebase event migration...');
   console.log(`Source: tributestream-lemhr`);
   console.log(`Destination: fir-tweb`);
   console.log('');

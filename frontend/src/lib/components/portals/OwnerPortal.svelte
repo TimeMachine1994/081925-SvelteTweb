@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Memorial } from '$lib/types/memorial';
+	import type { Event } from '$lib/types/event';
 	import { getPaymentStatus, getDefaultMemorial } from '$lib/utils/payment';
 
 	// Import new UI components
@@ -13,14 +13,14 @@
 	import { goto } from '$app/navigation';
 	import { Button } from '$lib/ui';
 
-	let { memorials, invitations }: { memorials: Memorial[]; invitations: [] } = $props();
+	let { memorials, invitations }: { memorials: Event[]; invitations: [] } = $props();
 
 	console.log('👑 OwnerPortal rendering with', memorials.length, 'events');
 
-	// State for selected memorial
+	// State for selected event
 	let selectedMemorialId = $state('');
 
-	// Initialize with default memorial
+	// Initialize with default event
 	$effect(() => {
 		if (memorials.length > 0 && !selectedMemorialId) {
 			const defaultMemorial = getDefaultMemorial(memorials);
@@ -31,18 +31,18 @@
 		}
 	});
 
-	// Get currently selected memorial
+	// Get currently selected event
 	const selectedMemorial = $derived(() => {
 		return memorials.find((m) => m.id === selectedMemorialId) || null;
 	});
 
-	// Get payment status for selected memorial
+	// Get payment status for selected event
 	const paymentStatus = $derived(() => {
-		const memorial = selectedMemorial();
-		return memorial ? getPaymentStatus(memorial) : 'none';
+		const event = selectedMemorial();
+		return event ? getPaymentStatus(event) : 'none';
 	});
 
-	// Handle memorial selection change
+	// Handle event selection change
 	function handleMemorialChange(memorialId: string) {
 		console.log('🔄 Event selection changed to:', memorialId);
 		selectedMemorialId = memorialId;
@@ -93,17 +93,17 @@
 		{#if currentMemorial}
 			<!-- Payment Warning Banner (only show if payment incomplete) -->
 			{#if currentPaymentStatus === 'incomplete'}
-				<PaymentWarningBanner memorial={currentMemorial} />
+				<PaymentWarningBanner event={currentMemorial} />
 			{/if}
 
-			<!-- Memorial Selector (only show if multiple memorials) -->
+			<!-- Event Selector (only show if multiple memorials) -->
 			<MemorialSelector {memorials} {selectedMemorialId} onSelectionChange={handleMemorialChange} />
 
-			<!-- Memorial Card -->
-			<MemorialCard memorial={currentMemorial} />
+			<!-- Event Card -->
+			<MemorialCard event={currentMemorial} />
 
 			<!-- Livestream Schedule Table -->
-			<LivestreamScheduleTable memorial={currentMemorial} />
+			<LivestreamScheduleTable event={currentMemorial} />
 
 			<!-- Invitation Section -->
 			<div class="mt-8 rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
@@ -146,7 +146,7 @@
 			<!-- Bottom Pay Now Button (only show if payment incomplete) -->
 			{#if currentPaymentStatus === 'incomplete'}
 				<div class="mt-6 flex justify-center">
-					<PayNowButton memorial={currentMemorial} variant="primary" />
+					<PayNowButton event={currentMemorial} variant="primary" />
 				</div>
 			{/if}
 		{/if}

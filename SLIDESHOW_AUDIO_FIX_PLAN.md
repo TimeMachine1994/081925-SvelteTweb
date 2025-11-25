@@ -156,7 +156,7 @@ async function uploadAudioToFirebaseStorage(
 ```typescript
 async function uploadToFirebase(videoBlob: Blob, photos: SlideshowPhoto[], settings: SlideshowSettings) {
     try {
-        const title = `Memorial Slideshow - ${new Date().toLocaleDateString()}`;
+        const title = `Event Slideshow - ${new Date().toLocaleDateString()}`;
         
         // Step 1: Upload audio if present
         let audioData = null;
@@ -722,7 +722,7 @@ After implementing all changes, test the following:
 - [ ] Video without audio still works (backward compatibility)
 - [ ] Audio is uploaded to Firebase Storage
 - [ ] Audio URL is saved in slideshow metadata
-- [ ] Published slideshow plays with audio on memorial page
+- [ ] Published slideshow plays with audio on event page
 - [ ] Draft changes preserve audio settings
 - [ ] Mobile auto-scroll still works after generation
 

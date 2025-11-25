@@ -20,12 +20,12 @@ vi.mock('@sveltejs/kit', () => ({
 	fail: vi.fn((status, data) => ({ type: 'failure', status, data }))
 }));
 
-describe('Memorial Creation', () => {
+describe('Event Creation', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
 
-	it('should create memorial for owner successfully', async () => {
+	it('should create event for owner successfully', async () => {
 		// Mock user data (no existing memorials, no payment)
 		const mockUserData = {
 			memorialCount: 0,
@@ -37,7 +37,7 @@ describe('Memorial Creation', () => {
 		});
 
 		const mockSet = vi.fn().mockResolvedValue();
-		const mockAdd = vi.fn().mockResolvedValue({ id: 'new-memorial-id' });
+		const mockAdd = vi.fn().mockResolvedValue({ id: 'new-event-id' });
 
 		vi.mocked(adminDb.collection).mockImplementation((collectionName) => {
 			if (collectionName === 'users') {
@@ -77,7 +77,7 @@ describe('Memorial Creation', () => {
 			locals: mockLocals
 		} as any);
 
-		// Verify memorial creation
+		// Verify event creation
 		expect(mockAdd).toHaveBeenCalledWith({
 			lovedOneName: 'John Smith',
 			slug: 'celebration-of-life-for-john-smith',
@@ -100,7 +100,7 @@ describe('Memorial Creation', () => {
 			updatedAt: expect.any(Date)
 		});
 
-		// Verify user memorial count update
+		// Verify user event count update
 		expect(mockSet).toHaveBeenCalledWith(
 			{
 				memorialCount: 1,
@@ -112,15 +112,15 @@ describe('Memorial Creation', () => {
 		// Verify successful result
 		expect(result).toEqual({
 			success: true,
-			memorialId: 'new-memorial-id',
-			message: 'Memorial created successfully! Please complete setup and payment.'
+			memorialId: 'new-event-id',
+			message: 'Event created successfully! Please complete setup and payment.'
 		});
 	});
 
-	it('should prevent memorial creation if user has unpaid memorial', async () => {
+	it('should prevent event creation if user has unpaid event', async () => {
 		const { fail } = await import('@sveltejs/kit');
 
-		// Mock user data (has existing memorial, no payment)
+		// Mock user data (has existing event, no payment)
 		const mockUserData = {
 			memorialCount: 1,
 			hasPaidForMemorial: false
@@ -157,7 +157,7 @@ describe('Memorial Creation', () => {
 		} as any);
 
 		expect(fail).toHaveBeenCalledWith(400, {
-			message: 'You must complete payment for your existing memorial before creating a new one.'
+			message: 'You must complete payment for your existing event before creating a new one.'
 		});
 	});
 

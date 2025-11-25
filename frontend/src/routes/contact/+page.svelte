@@ -103,7 +103,7 @@
 	<title>Contact Us - Tributestream</title>
 	<meta
 		name="description"
-		content="Get in touch with Tributestream. We're here to help with your memorial services and answer any questions you may have."
+		content="Get in touch with Tributestream. We're here to help with your event services and answer any questions you may have."
 	/>
 </svelte:head>
 

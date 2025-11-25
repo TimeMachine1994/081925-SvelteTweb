@@ -1,10 +1,10 @@
-# 🛡️ Spam Protection System - Memorial Registration
+# 🛡️ Spam Protection System - Event Registration
 
 ## Overview
 
 Comprehensive 4-layer spam protection system implemented to prevent bot registrations, particularly from Singapore and other high-risk countries.
 
-**Problem Identified:** Memorial registration endpoint (`/register/loved-one`) was completely unprotected, allowing bot spam from Singapore and other locations.
+**Problem Identified:** Event registration endpoint (`/register/new-event-and-account`) was completely unprotected, allowing bot spam from Singapore and other locations.
 
 **Solution:** Multi-layered defense system combining client and server-side protections.
 
@@ -18,13 +18,13 @@ Comprehensive 4-layer spam protection system implemented to prevent bot registra
 **Implementation:**
 - **Client-side:** `+page.svelte` - Executes reCAPTCHA before form submission
 - **Server-side:** `+page.server.ts` - Verifies token with Google's API
-- **Threshold:** HIGH_SECURITY (0.7) - Strict scoring for memorial creation
+- **Threshold:** HIGH_SECURITY (0.7) - Strict scoring for event creation
 - **Action:** `create_memorial`
 
 **Code Locations:**
 - `frontend/src/lib/utils/recaptcha.ts` - Utility functions
-- `frontend/src/routes/register/loved-one/+page.svelte` - Client execution
-- `frontend/src/routes/register/loved-one/+page.server.ts` - Server verification
+- `frontend/src/routes/register/new-event-and-account/+page.svelte` - Client execution
+- `frontend/src/routes/register/new-event-and-account/+page.server.ts` - Server verification
 
 **Score Interpretation:**
 - 0.9 - 1.0: Very likely human
@@ -166,7 +166,7 @@ unblockCountry('XX')       // Remove from block list
                  │
                  ▼
 ┌─────────────────────────────────────────────────┐
-│  ✅ Create Memorial & User Account              │
+│  ✅ Create Event & User Account              │
 └─────────────────────────────────────────────────┘
 ```
 
@@ -186,7 +186,7 @@ All suspicious activity is logged with:
 **Log Format:**
 ```
 [SECURITY ALERT 2025-01-15T10:30:45.123Z] Suspicious activity detected:
-  Endpoint: /register/loved-one
+  Endpoint: /register/new-event-and-account
   IP: 103.xxx.xxx.xxx
   Country: Singapore (SG)
   Email: spam@example.com
@@ -283,13 +283,13 @@ isIPBlocked('103.xxx.xxx.xxx');  // Returns true/false
 3. `SPAM_PROTECTION_SYSTEM.md` - This documentation
 
 ### Modified Files:
-1. `frontend/src/routes/register/loved-one/+page.svelte` - Client-side protection
-2. `frontend/src/routes/register/loved-one/+page.server.ts` - Server-side verification
+1. `frontend/src/routes/register/new-event-and-account/+page.svelte` - Client-side protection
+2. `frontend/src/routes/register/new-event-and-account/+page.server.ts` - Server-side verification
 
 ### Existing Files Used:
 1. `frontend/src/lib/utils/recaptcha.ts` - reCAPTCHA utilities
 2. `frontend/src/lib/utils/email-validation.ts` - Email pre-validation
-3. `frontend/src/lib/utils/memorial-slug.ts` - Slug generation
+3. `frontend/src/lib/utils/event-slug.ts` - Slug generation
 
 ---
 

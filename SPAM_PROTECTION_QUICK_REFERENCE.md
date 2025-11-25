@@ -111,7 +111,7 @@ Check your console output for:
 ### Security Alert Format:
 ```
 [SECURITY ALERT 2025-01-15T10:30:45.123Z] Suspicious activity detected:
-  Endpoint: /register/loved-one
+  Endpoint: /register/new-event-and-account
   IP: xxx.xxx.xxx.xxx
   Country: Singapore (SG)
   Email: example@email.com

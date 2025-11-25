@@ -1,11 +1,11 @@
 # Admin Flow Refactor - Complete Documentation
 
 **Date:** October 9, 2025  
-**Refactor Scope:** Simplified admin dashboard aligned with memorial flow patterns
+**Refactor Scope:** Simplified admin dashboard aligned with event flow patterns
 
 ## Overview
 
-Refactored the admin system to be simpler, more focused, and aligned with established memorial flow patterns. The new admin dashboard focuses on two core functions: approving funeral directors and creating memorials.
+Refactored the admin system to be simpler, more focused, and aligned with established event flow patterns. The new admin dashboard focuses on two core functions: approving funeral directors and creating memorials.
 
 ## Key Changes Made
 
@@ -16,14 +16,14 @@ Refactored the admin system to be simpler, more focused, and aligned with establ
 
 **Key Improvements:**
 - ✅ **Targeted Data Loading**: Only loads pending funeral directors and recent memorials
-- ✅ **Established Pattern Alignment**: Follows same authentication/authorization patterns as memorial APIs
+- ✅ **Established Pattern Alignment**: Follows same authentication/authorization patterns as event APIs
 - ✅ **Performance Optimized**: Uses efficient Firestore queries with limits and filters
 - ✅ **Comprehensive Logging**: Detailed console logging for debugging and monitoring
 - ✅ **Error Handling**: Safe fallback data to prevent 500 errors
 
 **Code Structure:**
 ```typescript
-// Authentication & Authorization (following memorial API patterns)
+// Authentication & Authorization (following event API patterns)
 if (!locals.user) throw redirect(302, '/login');
 if (!locals.user.admin && locals.user.role !== 'admin') throw redirect(302, '/profile');
 
@@ -41,8 +41,8 @@ const [pendingDirectorsSnap, recentMemorialsSnap] = await Promise.all([
 
 **Key Features:**
 - 🏥 **Pending Directors Tab**: Approve/reject funeral director applications
-- 💝 **Recent Memorials Tab**: Overview of recent memorial activity
-- ➕ **Create Memorial Tab**: Admin memorial creation workflow
+- 💝 **Recent Memorials Tab**: Overview of recent event activity
+- ➕ **Create Event Tab**: Admin event creation workflow
 
 **UI Improvements:**
 - Clean, modern design with clear action buttons
@@ -72,18 +72,18 @@ console.log('🔄 [ADMIN ACTION] Calling approval API...');
 console.log('🎉 [ADMIN ACTION] Director approved successfully:', result);
 ```
 
-### 4. **Memorial Creation Workflow**
+### 4. **Event Creation Workflow**
 
 **Integration with Existing Patterns:**
-- Uses existing `/api/admin/create-memorial` endpoint
-- Follows same memorial creation flow as public registration
-- Maintains consistency with established memorial collection structure
-- Automatic email notifications to memorial owners
+- Uses existing `/api/admin/create-event` endpoint
+- Follows same event creation flow as public registration
+- Maintains consistency with established event collection structure
+- Automatic email notifications to event owners
 
 **Process:**
 1. Simple form prompts for loved one name and owner email
 2. Creates Firebase Auth user account with random password
-3. Generates memorial with unique slug following established patterns
+3. Generates event with unique slug following established patterns
 4. Sends login credentials via email
 5. Updates admin dashboard stats
 
@@ -91,20 +91,20 @@ console.log('🎉 [ADMIN ACTION] Director approved successfully:', result);
 
 **Collections Used (following established patterns):**
 - `funeral_directors` - Pending applications and approval status
-- `memorials` - Recent memorial oversight and creation
+- `memorials` - Recent event oversight and creation
 - `admin_actions` - Audit trail for admin activities
 - `users` - User account management
 
 **Data Structure Consistency:**
-- Timestamp handling follows memorial flow patterns
-- Permission checking uses same logic as memorial APIs
+- Timestamp handling follows event flow patterns
+- Permission checking uses same logic as event APIs
 - Error handling maintains established safety patterns
 
 ## Technical Implementation Details
 
 ### **Authentication & Authorization**
 ```typescript
-// Consistent with memorial API patterns
+// Consistent with event API patterns
 if (!locals.user.admin && locals.user.role !== 'admin') {
   console.log('🚫 [ADMIN LOAD] User lacks admin privileges:', {
     uid: locals.user.uid,
@@ -117,7 +117,7 @@ if (!locals.user.admin && locals.user.role !== 'admin') {
 
 ### **Data Processing**
 ```typescript
-// Following memorial flow timestamp conversion patterns
+// Following event flow timestamp conversion patterns
 const pendingFuneralDirectors = pendingDirectorsSnap.docs.map(doc => {
   const data = doc.data();
   return {
@@ -146,7 +146,7 @@ const response = await fetch('/api/admin/approve-funeral-director', {
 ### **Server-Side Logging:**
 - `🔐 [ADMIN LOAD]` - Authentication and data loading
 - `🏥 [ADMIN LOAD]` - Funeral director processing
-- `💝 [ADMIN LOAD]` - Memorial processing
+- `💝 [ADMIN LOAD]` - Event processing
 - `📊 [ADMIN LOAD]` - Statistics calculation
 - `💥 [ADMIN LOAD]` - Error handling
 
@@ -154,7 +154,7 @@ const response = await fetch('/api/admin/approve-funeral-director', {
 - `🏛️ [ADMIN PAGE]` - Page lifecycle events
 - `✅ [ADMIN ACTION]` - Approval actions
 - `❌ [ADMIN ACTION]` - Rejection actions
-- `💝 [ADMIN ACTION]` - Memorial creation
+- `💝 [ADMIN ACTION]` - Event creation
 - `🔄 [ADMIN ACTION]` - API calls
 - `🎉 [ADMIN ACTION]` - Success states
 - `💥 [ADMIN ACTION]` - Error handling
@@ -168,14 +168,14 @@ const response = await fetch('/api/admin/approve-funeral-director', {
 
 ## Security Considerations
 
-1. **Consistent Permission Checking**: Uses same patterns as memorial APIs
+1. **Consistent Permission Checking**: Uses same patterns as event APIs
 2. **Audit Trail**: All admin actions logged to `admin_actions` collection
 3. **Input Validation**: Proper validation on both client and server
 4. **Error Information**: Detailed logging without exposing sensitive data to users
 
 ## Integration with Existing Systems
 
-### **Memorial Flow Alignment:**
+### **Event Flow Alignment:**
 - Uses same Firestore collections and document structures
 - Follows established timestamp conversion patterns
 - Maintains consistency with permission checking logic
@@ -213,7 +213,7 @@ const response = await fetch('/api/admin/approve-funeral-director', {
 ## Summary
 
 The admin flow refactor successfully creates a simplified, focused admin dashboard that:
-- ✅ Aligns with established memorial flow patterns
+- ✅ Aligns with established event flow patterns
 - ✅ Uses existing APIs and Firestore collections
 - ✅ Provides comprehensive console logging
 - ✅ Focuses on core admin functions (approve directors, create memorials)

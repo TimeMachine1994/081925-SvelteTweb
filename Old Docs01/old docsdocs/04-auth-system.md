@@ -17,12 +17,12 @@ Admin (Highest)
 
 Funeral Director (Professional)
 ├── Create and manage memorials
-├── Client memorial access
+├── Client event access
 ├── Livestream management
 └── Business profile management
 
 Owner (Family Member)
-├── Own memorial management
+├── Own event management
 ├── Content editing
 ├── Livestream scheduling
 └── Family member invitations
@@ -36,7 +36,7 @@ Owner (Family Member)
 - User account management (activate/suspend)
 - Funeral director application approval/rejection
 - System statistics and audit logs
-- Memorial oversight and moderation
+- Event oversight and moderation
 - Global configuration management
 
 **API Access:**
@@ -48,14 +48,14 @@ Owner (Family Member)
 #### Funeral Director Role
 **Capabilities:**
 - Create memorials for client families
-- Manage assigned memorial services
+- Manage assigned event services
 - Access livestream controls for client memorials
 - Business profile and document management
 - Client communication and coordination
 
 **API Access:**
 - `/api/funeral-director/*` endpoints
-- Memorial management for assigned memorials
+- Event management for assigned memorials
 - Livestream control for professional services
 - Client registration and invitation workflows
 
@@ -65,10 +65,10 @@ Owner (Family Member)
 - Content management (photos, videos, text)
 - Livestream scheduling and management
 - Family member invitation system
-- Memorial privacy and sharing controls
+- Event privacy and sharing controls
 
 **API Access:**
-- Memorial CRUD for owned memorials
+- Event CRUD for owned memorials
 - Livestream management for owned services
 - Content upload and management
 - Family member and invitation management
@@ -245,9 +245,9 @@ async function validateSession(sessionCookie: string) {
 
 ## Authorization Middleware
 
-### Memorial Access Control
+### Event Access Control
 
-#### Memorial Middleware
+#### Event Middleware
 ```typescript
 // memorialMiddleware.ts
 export async function verifyMemorialAccess(
@@ -256,13 +256,13 @@ export async function verifyMemorialAccess(
   action: 'view' | 'edit' | 'delete'
 ): Promise<{ canAccess: boolean; reason: string }> {
   
-  const memorial = await getDoc(doc(db, 'memorials', memorialId));
+  const event = await getDoc(doc(db, 'memorials', memorialId));
   
-  if (!memorial.exists()) {
-    return { canAccess: false, reason: 'Memorial not found' };
+  if (!event.exists()) {
+    return { canAccess: false, reason: 'Event not found' };
   }
   
-  const memorialData = memorial.data();
+  const memorialData = event.data();
   
   // Admin access
   if (user.isAdmin) {
@@ -282,7 +282,7 @@ export async function verifyMemorialAccess(
   
   // Public view access
   if (action === 'view' && memorialData.isPublic) {
-    return { canAccess: true, reason: 'Public memorial' };
+    return { canAccess: true, reason: 'Public event' };
   }
   
   return { canAccess: false, reason: 'Insufficient permissions' };
@@ -342,7 +342,7 @@ export async function verifyStreamAccess(
     };
   }
   
-  // Memorial-based permissions
+  // Event-based permissions
   if (streamData.memorialId) {
     const memorialAccess = await verifyMemorialAccess(
       streamData.memorialId, 
@@ -357,7 +357,7 @@ export async function verifyStreamAccess(
         canStart: true,
         canStop: true,
         canDelete: false,
-        reason: 'Memorial access',
+        reason: 'Event access',
         accessLevel: 'edit'
       };
     }
@@ -424,7 +424,7 @@ export async function POST({ locals, request }) {
 
 ### Resource-Specific Access
 ```typescript
-// Memorial-specific endpoint
+// Event-specific endpoint
 export async function PUT({ locals, params, request }) {
   const { memorialId } = params;
   const user = locals.user;
@@ -445,7 +445,7 @@ export async function PUT({ locals, params, request }) {
     );
   }
   
-  // Proceed with memorial update
+  // Proceed with event update
   return json({ success: true });
 }
 ```
@@ -479,8 +479,8 @@ export async function load({ locals, params }) {
   export let user;
   
   $: canManageStreams = user?.role === 'funeral_director' || user?.isAdmin;
-  $: canEditMemorial = user?.uid === memorial.ownerUid || 
-                       user?.uid === memorial.funeralDirectorUid || 
+  $: canEditMemorial = user?.uid === event.ownerUid || 
+                       user?.uid === event.funeralDirectorUid || 
                        user?.isAdmin;
 </script>
 
@@ -489,7 +489,7 @@ export async function load({ locals, params }) {
 {/if}
 
 {#if canEditMemorial}
-  <button onclick={editMemorial}>Edit Memorial</button>
+  <button onclick={editMemorial}>Edit Event</button>
 {/if}
 ```
 

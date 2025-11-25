@@ -21,7 +21,7 @@
 ### **Method Selection**
 
 #### TC-MS-01: New Stream Creation
-- [ ] Create new stream via memorial stream manager
+- [ ] Create new stream via event stream manager
 - [ ] Verify stream created with `methodConfigured: false`
 - [ ] Navigate to stream management page
 - [ ] **Expected:** Method selection UI appears with 3 options
@@ -80,7 +80,7 @@
 - [ ] Copy RTMP URL to OBS Settings → Stream
 - [ ] Copy Stream Key to OBS Settings → Stream
 - [ ] Start streaming from OBS
-- [ ] **Expected:** Stream goes live on memorial page
+- [ ] **Expected:** Stream goes live on event page
 - [ ] **Expected:** Live indicator appears on StreamCard
 - [ ] Stop streaming from OBS
 - [ ] **Expected:** Stream stops
@@ -142,7 +142,7 @@
 - [ ] Start phone camera stream
 - [ ] Verify phone feed in OBS
 - [ ] Start OBS streaming
-- [ ] **Expected:** Final mixed stream goes live on memorial
+- [ ] **Expected:** Final mixed stream goes live on event
 - [ ] **Expected:** Red "LIVE" badge on StreamCard
 - [ ] Stop OBS streaming
 - [ ] **Expected:** Recording available
@@ -177,7 +177,7 @@
 - [ ] **Expected:** Video preview appears
 - [ ] Click "Start Streaming"
 - [ ] **Expected:** Stream starts via WHIP to Cloudflare
-- [ ] **Expected:** Stream goes live on memorial instantly
+- [ ] **Expected:** Stream goes live on event instantly
 - [ ] **Expected:** Red "LIVE" badge appears
 
 #### TC-P2M-03: Recording Status (Cloudflare Only)
@@ -364,7 +364,7 @@
 
 ### **Setup**
 1. Deploy latest code to test environment
-2. Create test memorial
+2. Create test event
 3. Create test streams for each method
 4. Have OBS installed and configured
 5. Have mobile device ready

@@ -6,7 +6,7 @@ This document covers the four main core collections that power Tributestream's p
 
 ## 1. `users`
 
-**Purpose:** Central user account management for all user types (admins, memorial owners, funeral directors, and viewers).
+**Purpose:** Central user account management for all user types (admins, event owners, funeral directors, and viewers).
 
 ### Structure
 
@@ -32,9 +32,9 @@ This document covers the four main core collections that power Tributestream's p
   lastLoginAt?: Timestamp;
   passwordChangedAt?: Timestamp;
   
-  // Memorial Management
+  // Event Management
   memorialCount?: number;           // Total memorials created
-  hasPaidForMemorial?: boolean;     // Payment status for multiple memorial creation
+  hasPaidForMemorial?: boolean;     // Payment status for multiple event creation
   lastPaymentDate?: Timestamp;
   
   // Registration Tracking
@@ -51,13 +51,13 @@ This document covers the four main core collections that power Tributestream's p
 
 **Registration & Authentication:**
 - `/register/+page.server.ts` - Owner, viewer, and admin registration
-- `/register/loved-one/+page.server.ts` - Family member registration with auto-generated account
+- `/register/new-event-and-account/+page.server.ts` - Family member registration with auto-generated account
 - `/register/funeral-director/+page.server.ts` - Enhanced funeral director registration
 - `/register/funeral-home/+page.server.ts` - Funeral home account creation
 
 **Profile Management:**
 - `/profile/settings/+page.server.ts` - User profile updates and password changes
-- `/profile/+page.server.ts` - Memorial ownership and profile display
+- `/profile/+page.server.ts` - Event ownership and profile display
 
 **Admin Operations:**
 - `/api/admin/mvp/users/+server.ts` - Admin user management CRUD
@@ -76,7 +76,7 @@ This document covers the four main core collections that power Tributestream's p
 2. **Payment Tracking**
    - `hasPaidForMemorial` flag enables creating multiple memorials
    - Updated via Stripe webhook when payment succeeds
-   - Restricts memorial creation for unpaid users
+   - Restricts event creation for unpaid users
 
 3. **Role-Based Access**
    - `role` field determines portal access and permissions
@@ -93,14 +93,14 @@ This document covers the four main core collections that power Tributestream's p
 ### Important Notes
 
 - The `isAdmin` field is deprecated in favor of checking `role === 'admin'`
-- Memorial owners are restricted to 1 memorial until payment
+- Event owners are restricted to 1 event until payment
 - User documents are created during registration before Firebase Auth custom claims
 
 ---
 
 ## 2. `memorials`
 
-**Purpose:** Stores memorial page information, service schedules, payment status, and content for deceased individuals.
+**Purpose:** Stores event page information, service schedules, payment status, and content for deceased individuals.
 
 ### Structure
 
@@ -112,7 +112,7 @@ This document covers the four main core collections that power Tributestream's p
   fullSlug: string;                 // Primary URL slug (used for routing)
   
   // Ownership & Attribution
-  ownerUid: string;                 // Memorial owner's Firebase UID
+  ownerUid: string;                 // Event owner's Firebase UID
   creatorEmail: string;
   creatorName: string;
   funeralDirectorUid?: string;      // Funeral director who created it
@@ -153,8 +153,8 @@ This document covers the four main core collections that power Tributestream's p
   memorialLocationName?: string;
   memorialLocationAddress?: string;
   
-  // Memorial Content
-  content: string;                  // Memorial description/obituary
+  // Event Content
+  content: string;                  // Event description/obituary
   custom_html: string | null;       // Legacy WordPress HTML content
   isLegacy?: boolean;              // Flag for migrated memorials
   birthDate?: string;
@@ -229,17 +229,17 @@ This document covers the four main core collections that power Tributestream's p
 
 ### Usage Locations
 
-**Memorial Display:**
-- `/[fullSlug]/+page.server.ts` - Load memorial by fullSlug for public/private display
+**Event Display:**
+- `/[fullSlug]/+page.server.ts` - Load event by fullSlug for public/private display
 - `/profile/+page.server.ts` - Display user's owned memorials
 - `/schedule/[memorialId]/_components/ScheduleReceipt.svelte` - Payment confirmation page with notes
 
-**Memorial Creation:**
-- `/register/loved-one/+page.server.ts` - Create memorial during family registration
-- `/register/funeral-director/+page.server.ts` - Create memorial for family by FD
-- `/api/funeral-director/create-memorial/+server.ts` - FD creates memorial for customer
-- `/api/funeral-director/quick-register-family/+server.ts` - Quick family registration with memorial
-- `/api/admin/create-memorial/+server.ts` - Admin memorial creation
+**Event Creation:**
+- `/register/new-event-and-account/+page.server.ts` - Create event during family registration
+- `/register/funeral-director/+page.server.ts` - Create event for family by FD
+- `/api/funeral-director/create-event/+server.ts` - FD creates event for customer
+- `/api/funeral-director/quick-register-family/+server.ts` - Quick family registration with event
+- `/api/admin/create-event/+server.ts` - Admin event creation
 
 **Service Scheduling:**
 - `/schedule/[memorialId]/+page.server.ts` - Manage service schedules with calculator
@@ -252,16 +252,16 @@ This document covers the four main core collections that power Tributestream's p
 - Admin Portal `AdminPortal.svelte` - Edit payment notes for paid memorials
 
 **Content Management:**
-- `/api/memorials/[memorialId]/+server.ts` - Memorial CRUD operations
+- `/api/memorials/[memorialId]/+server.ts` - Event CRUD operations
 - `/api/memorials/[memorialId]/streams/+server.ts` - Associated streams
 - `/api/memorials/[memorialId]/slideshow/+server.ts` - Associated slideshows
 - `/api/memorials/[memorialId]/follow/+server.ts` - Follower management
 
 ### Key Operations
 
-1. **Memorial Creation Flow**
+1. **Event Creation Flow**
    - Auto-generates unique `fullSlug` from loved one's name
-   - Creates memorial as private by default
+   - Creates event as private by default
    - Links to owner and optionally funeral director
    - Indexes in Algolia for search functionality
 
@@ -283,10 +283,10 @@ This document covers the four main core collections that power Tributestream's p
    - `custom_html` field stores migrated WordPress content
    - `isLegacy` flag indicates migration script creation
    - `createdByUserId === 'MIGRATION_SCRIPT'` identifies migrated memorials
-   - Memorial page conditionally renders legacy HTML vs structured layout
+   - Event page conditionally renders legacy HTML vs structured layout
 
 5. **Access Control**
-   - `isPublic` determines if memorial is publicly viewable
+   - `isPublic` determines if event is publicly viewable
    - Private memorials require owner/FD/admin access
    - Funeral director can be linked for professional management
 
@@ -301,7 +301,7 @@ This document covers the four main core collections that power Tributestream's p
 
 ## 3. `streams`
 
-**Purpose:** Manages livestream configurations, credentials, recordings, and real-time status for memorial services.
+**Purpose:** Manages livestream configurations, credentials, recordings, and real-time status for event services.
 
 ### Structure
 
@@ -310,9 +310,9 @@ This document covers the four main core collections that power Tributestream's p
   id: string;                       // Firestore document ID
   title: string;
   description?: string;
-  memorialId: string;               // Parent memorial reference
+  memorialId: string;               // Parent event reference
   status: 'scheduled' | 'ready' | 'live' | 'completed' | 'error';
-  isVisible: boolean;               // Hide/show on memorial page
+  isVisible: boolean;               // Hide/show on event page
   
   // Cloudflare Stream Integration
   cloudflareStreamId?: string;      // Cloudflare video/stream ID
@@ -409,7 +409,7 @@ This document covers the four main core collections that power Tributestream's p
 ### Usage Locations
 
 **Stream Display:**
-- `/[fullSlug]/+page.server.ts` - Load streams for memorial page display
+- `/[fullSlug]/+page.server.ts` - Load streams for event page display
 - `/lib/components/StreamPlayer.svelte` - Display live/scheduled/recorded streams
 
 **Stream Management:**
@@ -438,7 +438,7 @@ This document covers the four main core collections that power Tributestream's p
 ### Key Operations
 
 1. **Stream Creation from Schedule**
-   - Auto-created when memorial service schedule is saved
+   - Auto-created when event service schedule is saved
    - Title generated from service location name
    - `scheduledStartTime` set from service date/time
    - Linked via `calculatorServiceType` and `calculatorServiceIndex`
@@ -465,8 +465,8 @@ This document covers the four main core collections that power Tributestream's p
    - `overrideActive` toggle enables/disables without data loss
    - Used when primary streaming fails and alternative needed quickly
 
-6. **Bidirectional Sync with Memorial Services**
-   - `serviceHash` tracks changes to parent memorial service
+6. **Bidirectional Sync with Event Services**
+   - `serviceHash` tracks changes to parent event service
    - `syncStatus` indicates if stream matches current service data
    - Prevents orphaned streams when services are modified
    - Enables update detection and stream reconciliation
@@ -525,9 +525,9 @@ This document covers the four main core collections that power Tributestream's p
 **Profile Management:**
 - `/profile/settings/+page.server.ts` - Load and update FD profile
 
-**Memorial Creation:**
-- `/register/funeral-director/+page.server.ts` - Load FD info for memorial creation
-- `/api/funeral-director/create-memorial/+server.ts` - Create memorial with FD attribution
+**Event Creation:**
+- `/register/funeral-director/+page.server.ts` - Load FD info for event creation
+- `/api/funeral-director/create-event/+server.ts` - Create event with FD attribution
 - `/api/funeral-director/quick-register-family/+server.ts` - Quick family registration
 
 ### Key Operations
@@ -537,9 +537,9 @@ This document covers the four main core collections that power Tributestream's p
    - Links via Firebase Auth UID
    - Auto-approval workflow (status: 'approved' by default)
 
-2. **Memorial Attribution**
+2. **Event Attribution**
    - Funeral director info copied to memorials they create
-   - Enables professional branding on memorial pages
+   - Enables professional branding on event pages
    - Tracks which FD created which memorials
 
 3. **Business Management**
@@ -573,8 +573,8 @@ users (1) ────────────> (many) memorials
 
 1. **users → memorials**: One user can own multiple memorials (`ownerUid`)
 2. **funeral_directors → memorials**: One FD can create many memorials (`funeralDirectorUid`)
-3. **memorials → streams**: One memorial can have multiple streams for different services
-4. **memorials → slideshows**: One memorial can have multiple photo slideshows (subcollection)
+3. **memorials → streams**: One event can have multiple streams for different services
+4. **memorials → slideshows**: One event can have multiple photo slideshows (subcollection)
 5. **users ↔ funeral_directors**: One-to-one relationship via shared UID
 
 ---

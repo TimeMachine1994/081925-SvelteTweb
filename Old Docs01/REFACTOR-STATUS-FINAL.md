@@ -16,7 +16,7 @@ We have successfully **consolidated 4 fragmented livestream systems** into **1 u
 ### **🏗️ Backend Infrastructure** (100% Complete)
 - ✅ **Unified API Endpoints**: 8 clean, consistent endpoints
 - ✅ **Data Schema**: Complete TypeScript interfaces and validation
-- ✅ **Permission System**: Granular access control with memorial integration
+- ✅ **Permission System**: Granular access control with event integration
 - ✅ **WHIP Protocol**: Modern WebRTC streaming support
 - ✅ **Recording Pipeline**: Automatic recording with webhook notifications
 - ✅ **Migration Tools**: Safe data migration from old systems
@@ -30,7 +30,7 @@ We have successfully **consolidated 4 fragmented livestream systems** into **1 u
 
 ### **🔄 System Integration** (100% Complete)
 - ✅ **Webhook Updates**: Cloudflare recording notifications
-- ✅ **Memorial Integration**: Seamless memorial-stream association
+- ✅ **Event Integration**: Seamless event-stream association
 - ✅ **Backward Compatibility**: Maintains compatibility during transition
 - ✅ **Public Discovery**: Public stream browsing capability
 
@@ -45,7 +45,7 @@ We have successfully **consolidated 4 fragmented livestream systems** into **1 u
 | **Permission Systems** | 4 different implementations | 1 unified middleware | 100% consistency |
 | **WHIP Support** | 2 duplicate implementations | 1 comprehensive system | 50% code reduction |
 | **Recording Pipeline** | Inconsistent across systems | Unified webhook system | 100% reliability |
-| **Memorial Integration** | Partial, inconsistent | Complete, seamless | 100% coverage |
+| **Event Integration** | Partial, inconsistent | Complete, seamless | 100% coverage |
 | **Migration Tools** | None | Complete assessment/execution | New capability |
 | **Type Safety** | Partial TypeScript | Complete type coverage | 100% type safety |
 
@@ -55,14 +55,14 @@ We have successfully **consolidated 4 fragmented livestream systems** into **1 u
 
 ### **1. Eliminated All Duplication**
 - ❌ **Legacy API** (`/api/livestream/`) → Replaced
-- ❌ **Memorial Livestreams** (`/api/memorials/[id]/livestreams/`) → Replaced  
+- ❌ **Event Livestreams** (`/api/memorials/[id]/livestreams/`) → Replaced  
 - ❌ **Duplicate WHIP** (`/api/memorials/[id]/livestream/whip/`) → Replaced
 - ✅ **MVP Two API** → Enhanced and unified
 
 ### **2. Enhanced Functionality**
 - 🚀 **WHIP Protocol**: Modern browser-based streaming
 - 🎥 **Recording Pipeline**: Automatic recording with status tracking
-- 🏛️ **Memorial Integration**: Seamless memorial-stream association
+- 🏛️ **Event Integration**: Seamless event-stream association
 - 🌐 **Public Discovery**: Public stream browsing and discovery
 - 🔧 **Migration Tools**: Safe data migration utilities
 - 📊 **Real-time Status**: Live status monitoring and updates
@@ -92,7 +92,7 @@ We have successfully **consolidated 4 fragmented livestream systems** into **1 u
 └── migrate/+server.ts                  ✅ Migration tools
 
 /api/memorials/[id]/streams/
-└── +server.ts                          ✅ Memorial integration
+└── +server.ts                          ✅ Event integration
 
 /lib/types/
 └── stream.ts                           ✅ Type definitions
@@ -123,7 +123,7 @@ import { streamAPI } from '$lib/api/streamClient';
 
 // Create stream
 const stream = await streamAPI.createStream({
-  title: 'Memorial Service',
+  title: 'Event Service',
   memorialId: 'memorial123',
   isVisible: true,
   isPublic: true
@@ -139,17 +139,17 @@ const result = await streamAPI.stopStream(stream.id);
 console.log('Recording Ready:', result.recordingReady);
 ```
 
-### **Memorial Integration**
+### **Event Integration**
 ```javascript
-// Get all streams for a memorial
+// Get all streams for a event
 const streams = await streamAPI.getMemorialStreams('memorial123');
 console.log('Live:', streams.liveStreams.length);
 console.log('Recorded:', streams.recordedStreams.length);
 
-// Create memorial-specific stream
+// Create event-specific stream
 const memorialStream = await streamAPI.createMemorialStream('memorial123', {
-  title: 'Memorial Service',
-  description: 'Live memorial service'
+  title: 'Event Service',
+  description: 'Live event service'
 });
 ```
 
@@ -207,7 +207,7 @@ console.log('Migrated:', result.migrated, 'streams');
 ### **Feature Enhancements** ✅ Delivered
 - **WHIP Protocol**: Modern WebRTC streaming capability
 - **Recording Pipeline**: Automatic recording with webhook notifications
-- **Memorial Integration**: Complete memorial-stream association
+- **Event Integration**: Complete event-stream association
 - **Public Discovery**: Public stream browsing functionality
 - **Migration Tools**: Safe data migration utilities
 - **Real-time Status**: Live status monitoring and updates

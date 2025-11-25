@@ -16,7 +16,7 @@ The following files use Tailwind CSS classes for styling. These classes should b
 
 *   `frontend/src/routes/register/+page.svelte`
 *   `frontend/src/routes/register/funeral-director/+page.svelte`
-*   `frontend/src/routes/register/loved-one/+page.svelte`
+*   `frontend/src/routes/register/new-event-and-account/+page.svelte`
 *   `frontend/src/routes/my-portal/+page.svelte`
 *   `frontend/src/lib/components/portals/AdminPortal.svelte`
 *   `frontend/src/lib/components/portals/FamilyMemberPortal.svelte`

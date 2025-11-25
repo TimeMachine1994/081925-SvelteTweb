@@ -29,9 +29,9 @@ describe('Audit Logger', () => {
 				action: 'memorial_created' as const,
 				userEmail: 'test@example.com',
 				userRole: 'owner' as const,
-				resourceType: 'memorial' as const,
-				resourceId: 'memorial-123',
-				details: { name: 'Test Memorial' },
+				resourceType: 'event' as const,
+				resourceId: 'event-123',
+				details: { name: 'Test Event' },
 				ipAddress: '127.0.0.1',
 				success: true
 			};
@@ -66,8 +66,8 @@ describe('Audit Logger', () => {
 				action: 'memorial_created' as const,
 				userEmail: 'test@example.com',
 				userRole: 'owner' as const,
-				resourceType: 'memorial' as const,
-				resourceId: 'memorial-456',
+				resourceType: 'event' as const,
+				resourceId: 'event-456',
 				details: {},
 				success: true
 			};
@@ -82,7 +82,7 @@ describe('Audit Logger', () => {
 	});
 
 	describe('logMemorialAction', () => {
-		it('should log memorial creation', async () => {
+		it('should log event creation', async () => {
 			const userContext = {
 				uid: 'user-123',
 				userEmail: 'test@example.com',
@@ -92,13 +92,13 @@ describe('Audit Logger', () => {
 			};
 
 			await expect(
-				logMemorialAction(userContext, 'memorial_created', 'memorial-123', {
-					name: 'Test Memorial'
+				logMemorialAction(userContext, 'memorial_created', 'event-123', {
+					name: 'Test Event'
 				})
 			).resolves.not.toThrow();
 		});
 
-		it('should log memorial updates', async () => {
+		it('should log event updates', async () => {
 			const userContext = {
 				uid: 'user-456',
 				userEmail: 'director@example.com',
@@ -108,7 +108,7 @@ describe('Audit Logger', () => {
 			};
 
 			await expect(
-				logMemorialAction(userContext, 'memorial_updated', 'memorial-123', {
+				logMemorialAction(userContext, 'memorial_updated', 'event-123', {
 					field: 'description',
 					oldValue: 'old',
 					newValue: 'new'

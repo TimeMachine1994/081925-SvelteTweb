@@ -9,23 +9,23 @@
 	// Destructure for easier access
 	let { memorialId, editData, isEditMode } = $derived(data);
 	
-	// Memorial data for proper navigation
-	let memorial = $state<any>(null);
+	// Event data for proper navigation
+	let event = $state<any>(null);
 	
-	// Fetch memorial data if memorialId is provided
+	// Fetch event data if memorialId is provided
 	async function fetchMemorialData() {
 		if (!memorialId) return;
 		
 		try {
 			const response = await fetch(`/api/memorials/${memorialId}`);
 			if (response.ok) {
-				memorial = await response.json();
-				console.log('📍 Memorial data loaded:', memorial);
+				event = await response.json();
+				console.log('📍 Event data loaded:', event);
 			} else {
-				console.warn('⚠️ Could not load memorial data for navigation');
+				console.warn('⚠️ Could not load event data for navigation');
 			}
 		} catch (error) {
-			console.error('❌ Error fetching memorial data:', error);
+			console.error('❌ Error fetching event data:', error);
 		}
 	}
 	
@@ -35,7 +35,7 @@
 			console.log('🎬 Edit mode activated for slideshow:', editData?.id);
 		}
 		if (memorialId) {
-			console.log('🎬 Memorial ID loaded:', memorialId);
+			console.log('🎬 Event ID loaded:', memorialId);
 			fetchMemorialData();
 		}
 	});
@@ -80,12 +80,12 @@
 			const action = isEditMode ? 'updated' : 'created';
 			alert(`Slideshow successfully ${action}!`);
 			
-			// Navigate back to memorial or profile
-			if (memorial?.fullSlug) {
-				// Navigate to memorial page using fullSlug
-				window.location.href = `/${memorial.fullSlug}`;
+			// Navigate back to event or profile
+			if (event?.fullSlug) {
+				// Navigate to event page using fullSlug
+				window.location.href = `/${event.fullSlug}`;
 			} else if (memorialId) {
-				// Fallback to memorial ID if fullSlug not available
+				// Fallback to event ID if fullSlug not available
 				window.location.href = `/memorials/${memorialId}`;
 			} else {
 				// Navigate to profile
@@ -98,11 +98,11 @@
 
 	// Handle navigation back
 	function handleBack() {
-		if (memorial?.fullSlug) {
-			// Navigate to memorial page using fullSlug
-			window.location.href = `/${memorial.fullSlug}`;
+		if (event?.fullSlug) {
+			// Navigate to event page using fullSlug
+			window.location.href = `/${event.fullSlug}`;
 		} else if (memorialId) {
-			// Fallback to memorial ID if fullSlug not available
+			// Fallback to event ID if fullSlug not available
 			window.location.href = `/memorials/${memorialId}`;
 		} else {
 			// Navigate to profile
@@ -113,7 +113,7 @@
 
 <svelte:head>
 	<title>{isEditMode ? 'Edit Slideshow' : 'Create Slideshow'} - Tributestream</title>
-	<meta name="description" content={isEditMode ? 'Edit your memorial slideshow' : 'Create a beautiful memorial slideshow'} />
+	<meta name="description" content={isEditMode ? 'Edit your event slideshow' : 'Create a beautiful event slideshow'} />
 </svelte:head>
 
 <div class="slideshow-generator-page">
@@ -132,7 +132,7 @@
 					{#if isEditMode && editData}
 						Editing "{editData.title}"
 					{:else}
-						Upload photos to create a beautiful memorial slideshow
+						Upload photos to create a beautiful event slideshow
 					{/if}
 				</p>
 			</div>

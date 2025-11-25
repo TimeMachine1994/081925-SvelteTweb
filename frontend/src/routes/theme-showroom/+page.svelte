@@ -100,7 +100,7 @@
         A comprehensive set of reusable components in the Minimal Modern design language with ABeeZee font and gold accents.
       </p>
       <div class="mt-8 flex gap-3 flex-wrap">
-        <Button {theme}>Create Memorial</Button>
+        <Button {theme}>Create Event</Button>
         <Button {theme} variant="secondary">View Samples</Button>
       </div>
     </div>
@@ -254,7 +254,7 @@
   <!-- Toast Demo -->
   {#if showToast}
     <div class="fixed bottom-4 right-4 z-50">
-      <Toast {theme} message="Your memorial link has been created. View now." type="success" />
+      <Toast {theme} message="Your event link has been created. View now." type="success" />
     </div>
   {/if}
 

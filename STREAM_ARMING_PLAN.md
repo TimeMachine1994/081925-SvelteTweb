@@ -63,7 +63,7 @@ Add stream "arming" functionality to prepare streams for different types of live
 
 **What It Does:**
 - Generates RTMP credentials for external streaming software
-- Stream goes live on memorial page when OBS connects
+- Stream goes live on event page when OBS connects
 - Integrates with existing scheduled stream display
 
 **Stream Manager Sees:**
@@ -77,12 +77,12 @@ Add stream "arming" functionality to prepare streams for different types of live
 3. Stream manager copies credentials into OBS
 4. User starts streaming in OBS
 5. **Stream status updates from 'scheduled' → 'live'**
-6. **Memorial page automatically switches from countdown to live player**
+6. **Event page automatically switches from countdown to live player**
 7. Viewers can watch the live stream
 
 ---
 
-## Memorial Page Integration
+## Event Page Integration
 
 ### Existing Components (Already Working)
 - **CountdownVideoPlayer.svelte** - Shows countdown before stream
@@ -94,7 +94,7 @@ Add stream "arming" functionality to prepare streams for different types of live
 ### What Changes
 - Stream status must update to 'live' when OBS connects
 - Playback URL must be set (from Cloudflare Stream)
-- Memorial page automatically picks up status change
+- Event page automatically picks up status change
 
 **No changes needed to countdown/display logic - already handles this!**
 
@@ -209,7 +209,7 @@ Alternative: Poll Cloudflare API periodically to check stream status
 
 ### Phase 3: Status Integration
 - [ ] Implement stream status updates (manual or webhook)
-- [ ] Test memorial page countdown → live transition
+- [ ] Test event page countdown → live transition
 - [ ] Verify playback URL population
 
 ### Phase 4: Mobile Input
@@ -236,7 +236,7 @@ Alternative: Poll Cloudflare API periodically to check stream status
 - [ ] Stream manager sees RTMP URL and Stream Key
 - [ ] OBS can connect using credentials
 - [ ] Stream status updates to 'live' when OBS connects
-- [ ] Memorial page shows live player (not countdown)
+- [ ] Event page shows live player (not countdown)
 - [ ] Viewers can watch live stream
 - [ ] Stream ends properly, status updates to 'completed'
 
@@ -244,12 +244,12 @@ Alternative: Poll Cloudflare API periodically to check stream status
 - [ ] Admin can arm stream with "Mobile Input"
 - [ ] Stream manager sees WHIP URL
 - [ ] Browser streaming works
-- [ ] Stream goes live on memorial page
+- [ ] Stream goes live on event page
 
 ### Mobile Streaming Flow
 - [ ] Admin can arm stream with "Mobile Streaming"
 - [ ] Additional mobile features work as expected
-- [ ] Stream goes live on memorial page
+- [ ] Stream goes live on event page
 
 ### General
 - [ ] Can edit start time while unarmed

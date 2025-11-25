@@ -561,10 +561,10 @@ git push backup main
 # Health check
 curl https://yourdomain.com/api/health
 
-# Test memorial creation
+# Test event creation
 curl -X POST https://yourdomain.com/api/memorials \
   -H "Content-Type: application/json" \
-  -d '{"lovedOneName": "Test Memorial"}'
+  -d '{"lovedOneName": "Test Event"}'
 
 # Test livestream API
 curl https://yourdomain.com/api/streams

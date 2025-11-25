@@ -94,7 +94,7 @@
 	async function createItem(type: string) {
 		console.log(`➕ [ADMIN MVP] Creating new ${type}`);
 		
-		if (type === 'memorial') {
+		if (type === 'event') {
 			await createMemorial();
 		} else if (type === 'user') {
 			await createUser();
@@ -115,15 +115,15 @@
 			});
 
 			if (response.ok) {
-				console.log('✅ [ADMIN MVP] Memorial created successfully');
+				console.log('✅ [ADMIN MVP] Event created successfully');
 				await loadMemorials(); // Refresh list
 			} else {
 				const error = await response.json();
-				alert(`Error creating memorial: ${error.error}`);
+				alert(`Error creating event: ${error.error}`);
 			}
 		} catch (error) {
-			console.error('❌ [ADMIN MVP] Error creating memorial:', error);
-			alert('Failed to create memorial');
+			console.error('❌ [ADMIN MVP] Error creating event:', error);
+			alert('Failed to create event');
 		}
 	}
 
@@ -164,7 +164,7 @@
 		
 		try {
 			let endpoint = '';
-			if (type === 'memorial') endpoint = '/api/admin/mvp/memorials';
+			if (type === 'event') endpoint = '/api/admin/mvp/memorials';
 			if (type === 'user') endpoint = '/api/admin/mvp/users';
 			
 			const response = await fetch(`${endpoint}?id=${id}`, {
@@ -174,7 +174,7 @@
 			if (response.ok) {
 				console.log(`✅ [ADMIN MVP] ${type} deleted successfully`);
 				// Refresh the appropriate list
-				if (type === 'memorial') await loadMemorials();
+				if (type === 'event') await loadMemorials();
 				if (type === 'user') await loadUsers();
 			} else {
 				const error = await response.json();
@@ -288,7 +288,7 @@
 					<Card theme="minimal" title="Quick Actions">
 						<div class="flex flex-wrap gap-4">
 							<Button theme="minimal" onclick={() => switchTab('memorials')}>
-								Create Memorial
+								Create Event
 							</Button>
 							<Button theme="minimal" onclick={() => switchTab('users')}>
 								Manage Users
@@ -305,9 +305,9 @@
 			{#if activeTab === 'memorials'}
 				<div class="p-6">
 					<div class="flex justify-between items-center mb-6">
-						<h2 class="text-xl font-semibold text-gray-900">Memorial Management</h2>
-						<Button theme="minimal" onclick={() => createItem('memorial')}>
-							Create Memorial
+						<h2 class="text-xl font-semibold text-gray-900">Event Management</h2>
+						<Button theme="minimal" onclick={() => createItem('event')}>
+							Create Event
 						</Button>
 					</div>
 					
@@ -341,42 +341,42 @@
 									{#if memorials.length === 0}
 										<tr>
 											<td colspan="5" class="px-6 py-8 text-center text-gray-500">
-												No memorials found. Click "Create Memorial" to add one.
+												No memorials found. Click "Create Event" to add one.
 											</td>
 										</tr>
 									{:else}
-										{#each memorials as memorial}
+										{#each memorials as event}
 											<tr class="hover:bg-gray-50">
 												<td class="px-6 py-4 whitespace-nowrap">
-													<div class="text-sm font-medium text-gray-900">{memorial.lovedOneName}</div>
-													<div class="text-sm text-gray-500">{memorial.fullSlug}</div>
+													<div class="text-sm font-medium text-gray-900">{event.lovedOneName}</div>
+													<div class="text-sm text-gray-500">{event.fullSlug}</div>
 												</td>
 												<td class="px-6 py-4 whitespace-nowrap">
-													<div class="text-sm text-gray-900">{memorial.creatorEmail}</div>
-													{#if memorial.creatorName}
-														<div class="text-sm text-gray-500">{memorial.creatorName}</div>
+													<div class="text-sm text-gray-900">{event.creatorEmail}</div>
+													{#if event.creatorName}
+														<div class="text-sm text-gray-500">{event.creatorName}</div>
 													{/if}
 												</td>
 												<td class="px-6 py-4 whitespace-nowrap">
-													{#if memorial.isPublic}
+													{#if event.isPublic}
 														<Badge theme="minimal" class="bg-green-100 text-green-800">Public</Badge>
 													{:else}
 														<Badge theme="minimal" class="bg-gray-100 text-gray-800">Private</Badge>
 													{/if}
 												</td>
 												<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-													{memorial.createdAt ? new Date(memorial.createdAt).toLocaleDateString() : 'Unknown'}
+													{event.createdAt ? new Date(event.createdAt).toLocaleDateString() : 'Unknown'}
 												</td>
 												<td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
 													<div class="flex space-x-2">
 														<button
-															onclick={() => editItem('memorial', memorial.id)}
+															onclick={() => editItem('event', event.id)}
 															class="text-indigo-600 hover:text-indigo-900"
 														>
 															Edit
 														</button>
 														<button
-															onclick={() => deleteItem('memorial', memorial.id)}
+															onclick={() => deleteItem('event', event.id)}
 															class="text-red-600 hover:text-red-900"
 														>
 															Delete
@@ -535,7 +535,7 @@
 							<thead class="bg-gray-50">
 								<tr>
 									<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-										Memorial
+										Event
 									</th>
 									<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
 										Status

@@ -16,15 +16,15 @@
 
 	const faqItems = [
 		{ 
-			q: "How quickly can I set up a memorial?", 
+			q: "How quickly can I set up a event?", 
 			a: "Most memorials can be set up within minutes. Our team is also available to help with setup if needed." 
 		},
 		{ 
 			q: "Do you offer technical support during services?", 
-			a: "Yes, we provide live technical support during memorial services to ensure everything runs smoothly." 
+			a: "Yes, we provide live technical support during event services to ensure everything runs smoothly." 
 		},
 		{ 
-			q: "Can I customize the memorial page?", 
+			q: "Can I customize the event page?", 
 			a: "Absolutely! You can add photos, videos, stories, and customize the design to reflect your loved one's personality." 
 		}
 	];
@@ -83,7 +83,7 @@
 	<title>Contact Us - Tributestream</title>
 	<meta
 		name="description"
-		content="Get in touch with Tributestream. We're here to help with your memorial services and answer any questions you may have."
+		content="Get in touch with Tributestream. We're here to help with your event services and answer any questions you may have."
 	/>
 </svelte:head>
 

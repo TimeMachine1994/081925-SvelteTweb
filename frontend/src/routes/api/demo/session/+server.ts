@@ -76,12 +76,12 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 			const seedResult = await seedDemoScenario(
 				scenario,
 				sessionId,
-				demoUsers.owner.uid // Memorial owned by the demo owner user
+				demoUsers.owner.uid // Event owned by the demo owner user
 			);
 			memorialSlug = seedResult.slug;
-			console.log('[DEMO_SESSION] Demo data seeded successfully. Memorial slug:', memorialSlug);
+			console.log('[DEMO_SESSION] Demo data seeded successfully. Event slug:', memorialSlug);
 			
-			// Update session with memorial info
+			// Update session with event info
 			await adminDb.collection('demoSessions').doc(sessionId).update({
 				memorialId: seedResult.memorialId,
 				memorialSlug: memorialSlug
@@ -107,7 +107,7 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 			customToken,
 			expiresAt: expiresAt.toISOString(),
 			initialRole: 'funeral_director',
-			memorialSlug: memorialSlug || undefined // Include memorial slug for redirect
+			memorialSlug: memorialSlug || undefined // Include event slug for redirect
 		};
 
 		console.log('[DEMO_SESSION] ✅ Session created successfully');

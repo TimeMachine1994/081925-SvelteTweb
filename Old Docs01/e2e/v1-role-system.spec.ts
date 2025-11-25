@@ -77,7 +77,7 @@ test.describe('V1 Role System - Core Functionality', () => {
 });
 
 test.describe('V1 Role System - Access Control', () => {
-  test('Owner should have memorial access', async ({ page }) => {
+  test('Owner should have event access', async ({ page }) => {
     // Switch to owner role
     const ownerButton = page.locator('button[data-role="owner"]').first();
     if (await ownerButton.isVisible()) {
