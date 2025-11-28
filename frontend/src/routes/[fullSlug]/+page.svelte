@@ -301,12 +301,14 @@
 					</div>
 				</div>
 				
-				<!-- Legacy Custom HTML Content -->
-				<div class="memorial-content-container">
-					<div class="legacy-content">
-						{@html (memorial as any).custom_html}
+				<!-- Legacy Custom HTML Content - Only show if no emergency embed -->
+				{#if !memorial.emergencyEmbed}
+					<div class="memorial-content-container">
+						<div class="legacy-content">
+							{@html (memorial as any).custom_html}
+						</div>
 					</div>
-				</div>
+				{/if}
 			</div>
 		{:else}
 			<!-- Standard Memorial Layout -->
