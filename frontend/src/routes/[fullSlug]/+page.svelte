@@ -537,6 +537,11 @@
 		flex-direction: column;
 		gap: 2rem;
 	}
+	
+	/* Remove bottom padding when emergency embed is active */
+	.memorial-body:has(.emergency-active) {
+		padding-bottom: 0;
+	}
 
 	.memorial-description {
 		max-width: 800px;

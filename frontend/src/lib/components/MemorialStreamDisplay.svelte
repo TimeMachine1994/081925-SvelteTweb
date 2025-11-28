@@ -236,7 +236,7 @@
 
 {#if emergencyEmbed}
 	<!-- Emergency Embed Override - Takes Priority -->
-	<div class="memorial-streams">
+	<div class="memorial-streams emergency-active">
 		<div class="stream-section">
 			<div class="stream-item">
 				<div class="embed-container">
@@ -758,5 +758,14 @@
 		.placeholder-description {
 			font-size: 0.875rem;
 		}
+	}
+	
+	/* Emergency embed: Remove all gaps for flush appearance */
+	.memorial-streams.emergency-active .stream-section {
+		margin-bottom: 0;
+	}
+	
+	.memorial-streams.emergency-active .stream-item {
+		margin-bottom: 0;
 	}
 </style>
