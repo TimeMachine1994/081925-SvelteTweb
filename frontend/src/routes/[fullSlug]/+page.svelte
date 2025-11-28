@@ -531,7 +531,6 @@
 	}
 
 	.memorial-body {
-		flex: 1;
 		padding: 3rem 2rem;
 		background: #0a0a1a;
 		display: flex;
