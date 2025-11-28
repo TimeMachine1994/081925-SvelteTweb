@@ -290,12 +290,20 @@
 						/>
 					</div>
 				</div>
-				<!-- Legacy Custom HTML Content Only -->
+				<!-- Stream Section - MemorialStreamDisplay handles emergency embeds -->
+				<div class="memorial-body">
+					<div class="streaming-section">
+						<MemorialStreamDisplay 
+							streams={streams || []} 
+							memorialName={memorial.lovedOneName}
+							emergencyEmbed={memorial.emergencyEmbed}
+						/>
+					</div>
+				</div>
+				
+				<!-- Legacy Custom HTML Content -->
 				<div class="memorial-content-container">
 					<div class="legacy-content">
-						{#if memorial.emergencyEmbed}
-							{@html memorial.emergencyEmbed}
-						{/if}
 						{@html (memorial as any).custom_html}
 					</div>
 				</div>
