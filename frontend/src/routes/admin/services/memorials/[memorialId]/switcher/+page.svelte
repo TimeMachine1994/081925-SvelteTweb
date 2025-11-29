@@ -25,14 +25,28 @@
 	// Program monitor video element
 	let programVideoEl: HTMLVideoElement;
 	
+	// Debug state
+	let showDebug = $state(false);
+	let debugLogs = $state<string[]>([]);
+
+	function debugLog(message: string, data?: any) {
+		const timestamp = new Date().toLocaleTimeString();
+		const logEntry = data 
+			? `[${timestamp}] ${message}: ${JSON.stringify(data, null, 2)}`
+			: `[${timestamp}] ${message}`;
+		debugLogs = [...debugLogs.slice(-50), logEntry]; // Keep last 50 logs
+		console.log(`🔧 ${message}`, data || '');
+	}
+	
 	// Svelte action to attach video track to element
 	function attachTrack(node: HTMLVideoElement, participant: any) {
 		function update(p: any) {
 			if (p?.videoTrack) {
-				const currentTrack = (node.srcObject as MediaStream)?.getVideoTracks()[0];
-				if (currentTrack?.id !== p.videoTrack.id) {
-					node.srcObject = new MediaStream([p.videoTrack]);
-				}
+				const stream = new MediaStream([p.videoTrack]);
+				node.srcObject = stream;
+				node.play().catch(err => console.log('Autoplay blocked:', err));
+			} else {
+				node.srcObject = null;
 			}
 		}
 		update(participant);
@@ -64,18 +78,53 @@
 
 		// Event Listeners
 		daily
-			.on('joined-meeting', updateParticipants)
-			.on('participant-joined', updateParticipants)
-			.on('participant-updated', updateParticipants)
-			.on('participant-left', updateParticipants)
-			.on('track-started', updateParticipants) // Important: update when tracks become available
-			.on('track-stopped', updateParticipants)
+			.on('joined-meeting', (e: any) => {
+				debugLog('✅ Joined meeting', { participants: Object.keys(daily.participants()).length });
+				updateParticipants();
+			})
+			.on('participant-joined', (e: any) => {
+				debugLog('👤 Participant joined', { 
+					name: e.participant?.user_name, 
+					id: e.participant?.session_id 
+				});
+				updateParticipants();
+			})
+			.on('participant-updated', (e: any) => {
+				debugLog('🔄 Participant updated', { 
+					name: e.participant?.user_name,
+					video: e.participant?.tracks?.video?.state,
+					audio: e.participant?.tracks?.audio?.state
+				});
+				updateParticipants();
+			})
+			.on('participant-left', (e: any) => {
+				debugLog('👋 Participant left', { name: e.participant?.user_name });
+				updateParticipants();
+			})
+			.on('track-started', (e: any) => {
+				debugLog('🎥 Track started', { 
+					participant: e.participant?.user_name,
+					kind: e.track?.kind,
+					state: e.participant?.tracks?.[e.track?.kind]?.state
+				});
+				updateParticipants();
+			})
+			.on('track-stopped', (e: any) => {
+				debugLog('⏹️ Track stopped', { 
+					participant: e.participant?.user_name,
+					kind: e.track?.kind 
+				});
+				updateParticipants();
+			})
 			.on('active-speaker-change', (e: any) => {
 				// If we haven't manually overridden, follow the active speaker
 				// activeSpeakerId = e.activeSpeaker.peerId; 
 				// actually we want to control it manually usually
 			})
-			.on('error', (e: any) => console.error('Daily Error:', e));
+			.on('error', (e: any) => {
+				debugLog('❌ Daily Error', e);
+				console.error('Daily Error:', e);
+			});
 
 		// Join the room
 		await daily.join();
@@ -85,17 +134,37 @@
 	function updateParticipants() {
 		if (!daily) return;
 		const p = daily.participants();
-		participants = Object.values(p).map((participant: any) => ({
-			id: participant.session_id,
-			name: participant.user_name || 'Guest',
-			type: participant.local ? 'admin' : 'camera',
-			hasVideo: participant.video,
-			hasAudio: participant.audio,
-			local: participant.local,
-			// We need the track for rendering
-			videoTrack: participant.tracks?.video?.persistentTrack || null,
-			audioTrack: participant.tracks?.audio?.persistentTrack || null
-		}));
+		
+		debugLog('📊 Raw participants', Object.keys(p).map(key => ({
+			id: p[key].session_id,
+			name: p[key].user_name,
+			videoState: p[key].tracks?.video?.state,
+			audioState: p[key].tracks?.audio?.state,
+			hasTrack: !!p[key].tracks?.video?.persistentTrack
+		})));
+		
+		participants = Object.values(p).map((participant: any) => {
+			const videoTrackInfo = participant.tracks?.video;
+			const audioTrackInfo = participant.tracks?.audio;
+			
+			return {
+				id: participant.session_id,
+				name: participant.user_name || 'Guest',
+				type: participant.local ? 'admin' : 'camera',
+				hasVideo: videoTrackInfo?.state === 'playable',
+				hasAudio: audioTrackInfo?.state === 'playable',
+				local: participant.local,
+				// Only use track if it's playable
+				videoTrack: videoTrackInfo?.state === 'playable' ? videoTrackInfo.persistentTrack : null,
+				audioTrack: audioTrackInfo?.state === 'playable' ? audioTrackInfo.persistentTrack : null
+			};
+		});
+		
+		debugLog('✅ Processed participants', participants.map(p => ({
+			name: p.name,
+			hasVideo: p.hasVideo,
+			hasTrack: !!p.videoTrack
+		})));
 		
 		// Update program monitor if active speaker has new track
 		requestAnimationFrame(() => updateProgramMonitor());
@@ -414,6 +483,52 @@
 		</div>
 
 	</main>
+	
+	<!-- DEBUG PANEL -->
+	<div class="fixed bottom-20 right-4 z-50">
+		<button 
+			class="bg-gray-800 text-white px-3 py-2 rounded-lg shadow-lg text-sm font-mono hover:bg-gray-700 transition-colors"
+			onclick={() => showDebug = !showDebug}
+		>
+			🔧 Debug {showDebug ? '▼' : '▲'}
+		</button>
+		
+		{#if showDebug}
+			<div class="absolute bottom-12 right-0 w-96 max-h-96 bg-gray-900 text-green-400 rounded-lg shadow-2xl overflow-hidden">
+				<div class="p-2 bg-gray-800 text-white text-xs font-bold flex justify-between items-center">
+					<span>Debug Console ({debugLogs.length} logs)</span>
+					<button 
+						onclick={() => debugLogs = []} 
+						class="text-red-400 hover:text-red-300 px-2 py-1 rounded transition-colors"
+					>
+						Clear
+					</button>
+				</div>
+				<div class="p-2 overflow-y-auto max-h-64 font-mono text-xs">
+					{#each debugLogs as log}
+						<pre class="whitespace-pre-wrap mb-1 border-b border-gray-700 pb-1 text-green-300">{log}</pre>
+					{/each}
+					{#if debugLogs.length === 0}
+						<p class="text-gray-500">No logs yet...</p>
+					{/if}
+				</div>
+				<div class="p-2 bg-gray-800 text-xs space-y-1">
+					<div class="text-white flex justify-between">
+						<span>Participants:</span>
+						<span class="font-bold">{participants.length}</span>
+					</div>
+					<div class="text-white flex justify-between">
+						<span>Active:</span>
+						<span class="font-bold">{activeSpeakerId ? participants.find(p => p.id === activeSpeakerId)?.name || 'Unknown' : 'None'}</span>
+					</div>
+					<div class="text-white flex justify-between">
+						<span>Live:</span>
+						<span class="font-bold {isLive ? 'text-red-400' : 'text-gray-400'}">{isLive ? 'YES' : 'NO'}</span>
+					</div>
+				</div>
+			</div>
+		{/if}
+	</div>
 </div>
 
 <style>

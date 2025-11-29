@@ -274,6 +274,12 @@
 		<div class="section-header">
 			<h2>📹 Livestreams ({streams.length})</h2>
 			<div class="button-group">
+				<button 
+					class="switcher-btn" 
+					onclick={() => goto(`/admin/services/memorials/${memorial.id}/switcher`)}
+				>
+					🎬 Open Video Switcher
+				</button>
 				<button class="create-btn" onclick={() => showStreamForm = !showStreamForm}>
 					{showStreamForm ? '✖ Cancel' : '➕ Create Livestream'}
 				</button>
@@ -498,6 +504,8 @@ https://player.vimeo.com/video/123456789'
 	button.primary-btn:hover { background: #2c5282; }
 	button.emergency-btn { background: #e53e3e; color: white; border-color: #e53e3e; font-weight: 600; }
 	button.emergency-btn:hover { background: #c53030; }
+	button.switcher-btn { background: #805ad5; color: white; border-color: #805ad5; font-weight: 600; }
+	button.switcher-btn:hover { background: #6b46c1; }
 	button.danger-btn-small { background: #e53e3e; color: white; border-color: #e53e3e; padding: 0.375rem 0.75rem; font-size: 0.875rem; }
 	button.danger-btn-small:hover { background: #c53030; }
 
