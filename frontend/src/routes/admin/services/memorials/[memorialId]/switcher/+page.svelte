@@ -21,9 +21,15 @@
 	
 	// Derived - Filter out blocked/duplicate participants
 	let validParticipants = $derived(participants.filter(p => {
-		// Filter out blocked sessions (duplicates with no usable tracks)
-		// Keep participants that have video, audio, or are the local admin
-		return p.hasVideo || p.hasAudio || p.local;
+		// Show all participants EXCEPT those with explicitly blocked tracks
+		// This allows cameras to appear even if tracks haven't started yet
+		// Only filter out if we know both video AND audio are blocked (duplicate sessions)
+		const videoBlocked = p.videoTrack === null && !p.hasVideo && !p.local;
+		const audioBlocked = p.audioTrack === null && !p.hasAudio && !p.local;
+		
+		// Keep everyone except confirmed blocked duplicates
+		// (Blocked duplicates have no tracks AND aren't local admin AND are named the same as another participant)
+		return !(videoBlocked && audioBlocked && participants.filter(other => other.name === p.name).length > 1);
 	}));
 	let participantCount = $derived(validParticipants.length);
 	

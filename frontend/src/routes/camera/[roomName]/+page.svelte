@@ -89,16 +89,58 @@
 			
 			// Show local video preview
 			const localParticipant = daily.participants().local;
+			debugLog('📹 Local participant state', {
+				video: localParticipant?.video,
+				audio: localParticipant?.audio,
+				videoTrack: !!localParticipant?.tracks?.video?.persistentTrack,
+				audioTrack: !!localParticipant?.tracks?.audio?.persistentTrack,
+				videoState: localParticipant?.tracks?.video?.state,
+				audioState: localParticipant?.tracks?.audio?.state
+			});
+			
 			if (localParticipant?.tracks?.video?.persistentTrack) {
 				const stream = new MediaStream([localParticipant.tracks.video.persistentTrack]);
 				localVideoEl.srcObject = stream;
+				debugLog('✅ Video preview attached');
+			} else {
+				debugLog('⚠️ No video track available yet - explicitly enabling');
+				// Explicitly enable video and audio
+				try {
+					await daily.setLocalVideo(true);
+					await daily.setLocalAudio(true);
+					debugLog('✅ Explicitly enabled video/audio');
+					
+					// Wait a moment and check again
+					setTimeout(() => {
+						const updatedParticipant = daily.participants().local;
+						debugLog('📹 After explicit enable', {
+							video: updatedParticipant?.video,
+							audio: updatedParticipant?.audio,
+							videoTrack: !!updatedParticipant?.tracks?.video?.persistentTrack,
+							audioTrack: !!updatedParticipant?.tracks?.audio?.persistentTrack
+						});
+					}, 1000);
+				} catch (err) {
+					debugLog('❌ Failed to enable tracks', err);
+				}
 			}
 			
-			// Update video when track changes
-			daily.on('track-started', (event: any) => {
-				if (event.participant?.local && event.track?.kind === 'video') {
-					const stream = new MediaStream([event.track]);
-					localVideoEl.srcObject = stream;
+			// Update video when track changes (this event listener is in addition to the one in the event setup)
+			daily.on('participant-updated', (event: any) => {
+				if (event.participant?.local) {
+					debugLog('🔄 Local participant updated', {
+						video: event.participant?.video,
+						audio: event.participant?.audio,
+						videoTrack: !!event.participant?.tracks?.video?.persistentTrack,
+						audioTrack: !!event.participant?.tracks?.audio?.persistentTrack
+					});
+					
+					// Update video preview if track is now available
+					if (event.participant?.tracks?.video?.persistentTrack && !localVideoEl.srcObject) {
+						const stream = new MediaStream([event.participant.tracks.video.persistentTrack]);
+						localVideoEl.srcObject = stream;
+						debugLog('✅ Video preview attached via participant-updated');
+					}
 				}
 			});
 			
@@ -121,7 +163,9 @@
 	
 	function toggleCamera() {
 		if (daily) {
-			const newState = !daily.localVideo();
+			const currentState = daily.localVideo();
+			const newState = !currentState;
+			debugLog('📹 Toggling camera', { from: currentState, to: newState });
 			daily.setLocalVideo(newState);
 			isVideoOff = !newState;
 		}
@@ -129,7 +173,9 @@
 	
 	function toggleMic() {
 		if (daily) {
-			const newState = !daily.localAudio();
+			const currentState = daily.localAudio();
+			const newState = !currentState;
+			debugLog('🎤 Toggling mic', { from: currentState, to: newState });
 			daily.setLocalAudio(newState);
 			isMuted = !newState;
 		}
