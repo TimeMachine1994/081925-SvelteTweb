@@ -11,6 +11,19 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	const { memorialId } = params;
 
+	// DEBUG: Allow test ID
+	if (memorialId === 'test-memorial-id') {
+		return {
+			memorial: {
+				id: 'test-memorial-id',
+				name: 'Test Memorial Service',
+				lovedOneName: 'John Doe'
+			},
+			streamData: null,
+			DAILY_API_KEY: PRIVATE_DAILY_API_KEY ? 'present' : 'missing'
+		};
+	}
+
 	// 2. Fetch Memorial
 	const memorialDoc = await adminDb.collection('memorials').doc(memorialId).get();
 	if (!memorialDoc.exists) {
