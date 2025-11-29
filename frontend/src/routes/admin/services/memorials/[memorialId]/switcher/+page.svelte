@@ -19,8 +19,13 @@
 	let liveTimer: ReturnType<typeof setInterval> | null = null;
 	let isLoading = $state(false);
 	
-	// Derived
-	let participantCount = $derived(participants.length);
+	// Derived - Filter out blocked/duplicate participants
+	let validParticipants = $derived(participants.filter(p => {
+		// Filter out blocked sessions (duplicates with no usable tracks)
+		// Keep participants that have video, audio, or are the local admin
+		return p.hasVideo || p.hasAudio || p.local;
+	}));
+	let participantCount = $derived(validParticipants.length);
 	
 	// Program monitor video element
 	let programVideoEl: HTMLVideoElement;
@@ -440,7 +445,7 @@
 			</button>
 
 			<!-- CAMERA PREVIEWS -->
-			{#each participants as p (p.id)}
+			{#each validParticipants as p (p.id)}
 				<button 
 					class="flex-shrink-0 w-64 bg-black rounded-lg border-2 overflow-hidden relative transition-all
 					{activeSpeakerId === p.id 
@@ -514,8 +519,12 @@
 				</div>
 				<div class="p-2 bg-gray-800 text-xs space-y-1">
 					<div class="text-white flex justify-between">
-						<span>Participants:</span>
-						<span class="font-bold">{participants.length}</span>
+						<span>Valid Sources:</span>
+						<span class="font-bold">{validParticipants.length}</span>
+					</div>
+					<div class="text-white flex justify-between">
+						<span>Total Participants:</span>
+						<span class="font-bold text-gray-400">{participants.length}</span>
 					</div>
 					<div class="text-white flex justify-between">
 						<span>Active:</span>
