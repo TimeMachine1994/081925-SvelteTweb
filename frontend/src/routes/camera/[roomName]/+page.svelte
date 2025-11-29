@@ -101,8 +101,14 @@
 			if (mediaStream.getVideoTracks().length > 0) {
 				localVideoEl.srcObject = mediaStream;
 				await localVideoEl.play().catch(err => debugLog('⚠️ Autoplay issue', err));
-				debugLog('✅ Local preview attached');
+				debugLog('✅ Local preview attached (temporary)');
 			}
+			
+			// CRITICAL: Stop our MediaStream so Daily.co can access the camera
+			debugLog('🔄 Releasing camera for Daily.co');
+			mediaStream.getTracks().forEach(track => track.stop());
+			localVideoEl.srcObject = null;
+			debugLog('✅ Camera released');
 			
 			await daily.join({
 				url: data.roomUrl,
@@ -126,20 +132,37 @@
 				audioState: localParticipant?.tracks?.audio?.state
 			});
 			
-			// If Daily doesn't have tracks yet, explicitly enable them
-			if (!localParticipant?.tracks?.video?.persistentTrack) {
+			// Attach Daily.co's tracks to our video element for local preview
+			if (localParticipant?.tracks?.video?.persistentTrack) {
+				const dailyStream = new MediaStream([localParticipant.tracks.video.persistentTrack]);
+				localVideoEl.srcObject = dailyStream;
+				await localVideoEl.play().catch(err => debugLog('⚠️ Play error', err));
+				debugLog('✅ Daily.co video preview attached');
+			} else {
+				// If tracks aren't ready yet, explicitly enable them
 				debugLog('⚠️ Daily.co missing tracks - explicitly enabling');
 				try {
 					await daily.setLocalVideo(true);
 					await daily.setLocalAudio(true);
 					debugLog('✅ Explicitly enabled in Daily.co');
+					
+					// Wait for tracks to become available
+					setTimeout(async () => {
+						const updatedParticipant = daily.participants().local;
+						if (updatedParticipant?.tracks?.video?.persistentTrack) {
+							const dailyStream = new MediaStream([updatedParticipant.tracks.video.persistentTrack]);
+							localVideoEl.srcObject = dailyStream;
+							await localVideoEl.play().catch(err => debugLog('⚠️ Play error', err));
+							debugLog('✅ Daily.co video preview attached (delayed)');
+						}
+					}, 500);
 				} catch (err) {
 					debugLog('❌ Failed to enable in Daily.co', err);
 				}
 			}
 			
-			// Monitor for track state changes
-			daily.on('participant-updated', (event: any) => {
+			// Monitor for track state changes and attach video when available
+			daily.on('participant-updated', async (event: any) => {
 				if (event.participant?.local) {
 					debugLog('🔄 Local participant updated', {
 						video: event.participant?.video,
@@ -147,6 +170,14 @@
 						videoState: event.participant?.tracks?.video?.state,
 						audioState: event.participant?.tracks?.audio?.state
 					});
+					
+					// Attach video preview if track just became available
+					if (event.participant?.tracks?.video?.persistentTrack && !localVideoEl.srcObject) {
+						const dailyStream = new MediaStream([event.participant.tracks.video.persistentTrack]);
+						localVideoEl.srcObject = dailyStream;
+						await localVideoEl.play().catch(err => debugLog('⚠️ Play error', err));
+						debugLog('✅ Video attached via participant-updated');
+					}
 				}
 			});
 			
