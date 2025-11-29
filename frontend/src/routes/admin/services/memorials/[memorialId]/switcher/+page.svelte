@@ -21,6 +21,23 @@
 	
 	// Derived
 	let participantCount = $derived(participants.length);
+	
+	// Program monitor video element
+	let programVideoEl: HTMLVideoElement;
+	
+	// Svelte action to attach video track to element
+	function attachTrack(node: HTMLVideoElement, participant: any) {
+		function update(p: any) {
+			if (p?.videoTrack) {
+				const currentTrack = (node.srcObject as MediaStream)?.getVideoTracks()[0];
+				if (currentTrack?.id !== p.videoTrack.id) {
+					node.srcObject = new MediaStream([p.videoTrack]);
+				}
+			}
+		}
+		update(participant);
+		return { update };
+	}
 
 	onMount(async () => {
 		// Check if Daily is configured
@@ -51,6 +68,8 @@
 			.on('participant-joined', updateParticipants)
 			.on('participant-updated', updateParticipants)
 			.on('participant-left', updateParticipants)
+			.on('track-started', updateParticipants) // Important: update when tracks become available
+			.on('track-stopped', updateParticipants)
 			.on('active-speaker-change', (e: any) => {
 				// If we haven't manually overridden, follow the active speaker
 				// activeSpeakerId = e.activeSpeaker.peerId; 
@@ -66,17 +85,31 @@
 	function updateParticipants() {
 		if (!daily) return;
 		const p = daily.participants();
-		participants = Object.values(p).map((p: any) => ({
-			id: p.session_id,
-			name: p.user_name || 'Guest',
-			type: p.local ? 'admin' : 'camera',
-			hasVideo: p.video,
-			hasAudio: p.audio,
-			local: p.local,
+		participants = Object.values(p).map((participant: any) => ({
+			id: participant.session_id,
+			name: participant.user_name || 'Guest',
+			type: participant.local ? 'admin' : 'camera',
+			hasVideo: participant.video,
+			hasAudio: participant.audio,
+			local: participant.local,
 			// We need the track for rendering
-			videoTrack: p.tracks.video.persistentTrack,
-			audioTrack: p.tracks.audio.persistentTrack
+			videoTrack: participant.tracks?.video?.persistentTrack || null,
+			audioTrack: participant.tracks?.audio?.persistentTrack || null
 		}));
+		
+		// Update program monitor if active speaker has new track
+		requestAnimationFrame(() => updateProgramMonitor());
+	}
+	
+	function updateProgramMonitor() {
+		if (!programVideoEl || !activeSpeakerId) return;
+		const activeParticipant = participants.find(p => p.id === activeSpeakerId);
+		if (activeParticipant?.videoTrack) {
+			const currentTrack = (programVideoEl.srcObject as MediaStream)?.getVideoTracks()[0];
+			if (currentTrack?.id !== activeParticipant.videoTrack.id) {
+				programVideoEl.srcObject = new MediaStream([activeParticipant.videoTrack]);
+			}
+		}
 	}
 	
 	// --- Actions ---
@@ -170,6 +203,9 @@
 	function switchCamera(id: string) {
 		console.log('Switching to camera:', id);
 		activeSpeakerId = id;
+		
+		// Update program monitor video
+		requestAnimationFrame(() => updateProgramMonitor());
 		
 		// Per Daily docs: Use updateLiveStreaming to change layout mid-stream
 		// preset: 'single-participant' focuses on one participant
@@ -289,22 +325,33 @@
 		<!-- PROGRAM MONITOR (Top) -->
 		<div class="flex-1 flex justify-center min-h-0">
 			<div class="aspect-video bg-black rounded-lg border border-gray-800 shadow-2xl relative w-full max-w-5xl overflow-hidden group">
-				<!-- Placeholder for Active Video -->
-				<div class="absolute inset-0 flex items-center justify-center text-gray-600">
-					{#if activeSpeakerId}
-						<div class="text-center">
-							<VideoIcon size={64} class="mx-auto mb-4 opacity-50" />
-							<p>Active Feed: {participants.find(p => p.id === activeSpeakerId)?.name || 'Unknown'}</p>
-						</div>
-					{:else}
+				<!-- Active Video Feed -->
+				<video 
+					bind:this={programVideoEl}
+					autoplay 
+					playsinline
+					muted
+					class="absolute inset-0 w-full h-full object-contain bg-black"
+				></video>
+				
+				<!-- Placeholder when no source selected -->
+				{#if !activeSpeakerId}
+					<div class="absolute inset-0 flex items-center justify-center text-gray-600">
 						<p>Select a source below to preview</p>
-					{/if}
-				</div>
+					</div>
+				{/if}
 				
 				<!-- Program Badge -->
 				<div class="absolute top-4 right-4 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded shadow-sm">
 					PROGRAM OUT
 				</div>
+				
+				<!-- Active Source Name -->
+				{#if activeSpeakerId}
+					<div class="absolute bottom-4 left-4 bg-black/70 text-white text-sm px-3 py-1 rounded">
+						{participants.find(p => p.id === activeSpeakerId)?.name || 'Unknown'}
+					</div>
+				{/if}
 			</div>
 		</div>
 
@@ -324,7 +371,7 @@
 			</button>
 
 			<!-- CAMERA PREVIEWS -->
-			{#each participants as p}
+			{#each participants as p (p.id)}
 				<button 
 					class="flex-shrink-0 w-64 bg-black rounded-lg border-2 overflow-hidden relative transition-all
 					{activeSpeakerId === p.id 
@@ -332,10 +379,21 @@
 						: 'border-gray-700 hover:border-gray-500'}"
 					onclick={() => switchCamera(p.id)}
 				>
-					<!-- Mock Video Feed (Real video would go here) -->
-					<div class="absolute inset-0 bg-gray-800 flex items-center justify-center">
-						<Smartphone size={32} class="text-gray-600" />
-					</div>
+					<!-- Real Video Feed -->
+					<video 
+						use:attachTrack={p}
+						autoplay 
+						playsinline
+						muted
+						class="absolute inset-0 w-full h-full object-cover"
+					></video>
+					
+					<!-- Fallback if no video -->
+					{#if !p.hasVideo}
+						<div class="absolute inset-0 bg-gray-800 flex items-center justify-center">
+							<VideoOff size={32} class="text-gray-600" />
+						</div>
+					{/if}
 
 					<!-- Label Overlay -->
 					<div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 pt-8 flex justify-between items-end">
