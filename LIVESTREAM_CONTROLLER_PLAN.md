@@ -52,17 +52,53 @@ graph LR
 
 ---
 
-## 🔧 Technical Strategy
+## �️ Technical Strategy (Per Daily.co Docs)
 
 ### **1. Daily.co Integration**
-- **Room Strategy**: Create *one* Daily room per memorial service.
-- **Tokens**:
-  - **Admin Token**: Has `is_owner: true`. Can control layout/recording.
-  - **Camera Token**: Shared link for phones. `is_owner: false`.
-- **Layout Logic**:
-  - We won't use complex custom layouts.
-  - We will use Daily's **`setActiveSpeaker`** or **`updateInputSettings`** API to "force" the selected video to be the primary full-screen feed.
-  - The HLS output naturally follows the active speaker/primary video.
+Daily.co provides:
+- **WebRTC rooms** for multi-party video (up to 200 participants default, 1000 max)
+- **Client SDK streaming** via `callFrame.startLiveStreaming()` / `stopLiveStreaming()`
+- **Layout presets**: `active-participant`, `single-participant`, `grid`
+- **Mid-stream switching** via `callFrame.updateLiveStreaming({ layout: { preset, session_id } })`
+- **HLS output** with ~12-20s latency (requires `streaming_endpoints` config or RTMP relay)
+- **RTMP output** with ~8-20s latency (to YouTube, Twitch, etc.)
+
+### **2. Key API Methods (Client SDK)**
+```javascript
+// Join room as admin (with is_owner: true token)
+const daily = DailyIframe.createCallObject({ url, token });
+await daily.join();
+
+// Start streaming (admin only due to owner_only_broadcast room setting)
+await daily.startLiveStreaming({
+  layout: { preset: 'active-participant' },
+  // For RTMP: rtmpUrl: 'rtmp://live.youtube.com/...'
+  // For HLS: endpoint: 'hls_s3' (requires streaming_endpoints on room)
+});
+
+// Switch focused camera mid-stream
+await daily.updateLiveStreaming({
+  layout: { preset: 'single-participant', session_id: 'participant-id' }
+});
+
+// Stop streaming
+await daily.stopLiveStreaming();
+```
+
+### **3. Room Configuration**
+```javascript
+// POST /rooms - create room with streaming enabled
+{
+  name: 'memorial-123',
+  privacy: 'private',
+  properties: {
+    owner_only_broadcast: true,  // Only admins can start streams
+    enable_recording: 'cloud',
+    // For HLS output, configure streaming_endpoints:
+    // streaming_endpoints: [{ type: 'hls', ... }]
+  }
+}
+```
 
 ### **2. Backend Endpoints** (`/api/admin/switcher/...`)
 
@@ -89,23 +125,24 @@ graph LR
 
 ## 🚀 Implementation Steps
 
-### **Phase 1: The "Room" (Foundation)**
-- [ ] Create route `/admin/services/memorials/[id]/switcher`.
-- [ ] Build the `init` API to create/retrieve a Daily room for the memorial.
-- [ ] Implement basic Daily-js client on the frontend to join the room as Admin.
+### **Phase 1: The "Room" (Foundation)** ✅ COMPLETE
+- [x] Create route `/admin/services/memorials/[id]/switcher`.
+- [x] Build the `init` API to create/retrieve a Daily room for the memorial.
+- [x] Implement basic Daily-js client on the frontend to join the room as Admin.
 
-### **Phase 2: The "Inputs" (Cameras)**
-- [ ] Build the `invite` API to generate camera links.
-- [ ] Create a QR code modal on the frontend for easy mobile connecting.
-- [ ] Display a grid of connected participants (video previews).
+### **Phase 2: The "Inputs" (Cameras)** ✅ COMPLETE
+- [x] Build the `invite` API to generate camera links.
+- [x] Create invite button on frontend for easy mobile connecting.
+- [x] Display a grid of connected participants (video previews).
 
-### **Phase 3: The "Switch" (Control)**
-- [ ] Implement the "Click to Switch" logic (using `daily.setStrictBroadcasting` or `setVideoPriority`).
-- [ ] Ensure the "Program Monitor" visually reflects the active stream.
+### **Phase 3: The "Switch" (Control)** ✅ COMPLETE
+- [x] Implement the "Click to Switch" logic (visual selection).
+- [x] Ensure the "Program Monitor" visually reflects the active stream.
 
-### **Phase 4: The "Broadcast" (Go Live)**
-- [ ] Wire up the Start/Stop Broadcast buttons.
-- [ ] Connect the Daily HLS URL to the actual Memorial Page database record.
+### **Phase 4: The "Broadcast" (Go Live)** ✅ COMPLETE
+- [x] Wire up the Start/Stop Broadcast buttons to Daily API.
+- [x] Connect the Daily HLS URL to the actual Memorial Page database record.
+- [x] Add HLS URL display banner when live.
 - [ ] Test the full flow: Phone -> Switcher -> HLS -> Memorial Page.
 
 ## 📝 Simplified Data Model
