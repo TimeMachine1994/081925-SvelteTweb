@@ -40,30 +40,7 @@
 		try {
 			debugLog('🎬 Starting camera setup');
 			
-			// Step 1: Request camera/mic permissions explicitly
-			// This ensures the browser prompts the user properly on mobile
-			debugLog('📷 Requesting camera/mic permissions from browser');
-			let mediaStream: MediaStream;
-			try {
-				mediaStream = await navigator.mediaDevices.getUserMedia({ 
-					video: { 
-						facingMode: 'user', // Default to front camera on mobile
-						width: { ideal: 1280 },
-						height: { ideal: 720 }
-					}, 
-					audio: true 
-				});
-				hasPermissions = true;
-				debugLog('✅ Permissions granted', {
-					videoTracks: mediaStream.getVideoTracks().length,
-					audioTracks: mediaStream.getAudioTracks().length
-				});
-			} catch (permErr: any) {
-				debugLog('❌ Permission denied', permErr);
-				throw permErr;
-			}
-			
-			// Step 2: Create Daily call object
+			// Create Daily call object - it will handle permissions
 			debugLog('🔧 Creating Daily call object');
 			const DailyIframe = (await import('@daily-co/daily-js')).default;
 			daily = DailyIframe.createCallObject({
@@ -89,26 +66,11 @@
 				debugLog('❌ Daily error', e);
 			});
 			
-			// Step 3: Join the room with our media stream
-			debugLog('🚪 Joining room with media tracks', { 
+			// Join the room - Daily.co will prompt for camera/mic
+			debugLog('🚪 Joining room (Daily.co will request permissions)', { 
 				roomUrl: data.roomUrl, 
-				label: cameraLabel,
-				hasVideoTrack: mediaStream.getVideoTracks().length > 0,
-				hasAudioTrack: mediaStream.getAudioTracks().length > 0
+				label: cameraLabel
 			});
-			
-			// Immediately attach local preview BEFORE joining
-			if (mediaStream.getVideoTracks().length > 0) {
-				localVideoEl.srcObject = mediaStream;
-				await localVideoEl.play().catch(err => debugLog('⚠️ Autoplay issue', err));
-				debugLog('✅ Local preview attached (temporary)');
-			}
-			
-			// CRITICAL: Stop our MediaStream so Daily.co can access the camera
-			debugLog('🔄 Releasing camera for Daily.co');
-			mediaStream.getTracks().forEach(track => track.stop());
-			localVideoEl.srcObject = null;
-			debugLog('✅ Camera released');
 			
 			await daily.join({
 				url: data.roomUrl,
@@ -117,6 +79,8 @@
 				startVideoOff: false,
 				startAudioOff: false,
 			});
+			
+			hasPermissions = true;
 			
 			isConnected = true;
 			debugLog('✅ Connected successfully');
@@ -184,11 +148,16 @@
 		} catch (err: any) {
 			debugLog('❌ Camera setup failed', err);
 			console.error('Camera setup error:', err);
-			if (err.name === 'NotAllowedError' || err.errorMsg?.includes('permission')) {
+			
+			// Handle Daily.co specific errors
+			if (err.errorMsg?.includes('permission') || err.errorMsg?.includes('devices') || err.action === 'error') {
 				errorMessage = 'Camera/microphone permission denied. Please allow access and refresh.';
+			} else if (err.errorMsg?.includes('network') || err.errorMsg?.includes('connection')) {
+				errorMessage = 'Network connection failed. Please check your connection and try again.';
 			} else {
-				errorMessage = err.message || err.errorMsg || 'Failed to connect';
+				errorMessage = err.errorMsg || err.message || 'Failed to connect to camera';
 			}
+			hasPermissions = false;
 		}
 	});
 	
