@@ -40,22 +40,35 @@
 		try {
 			debugLog('🎬 Starting camera setup');
 			
-			// Dynamically import Daily
-			const DailyIframe = (await import('@daily-co/daily-js')).default;
+			// Step 1: Request camera/mic permissions explicitly
+			// This ensures the browser prompts the user properly on mobile
+			debugLog('📷 Requesting camera/mic permissions from browser');
+			let mediaStream: MediaStream;
+			try {
+				mediaStream = await navigator.mediaDevices.getUserMedia({ 
+					video: { 
+						facingMode: 'user', // Default to front camera on mobile
+						width: { ideal: 1280 },
+						height: { ideal: 720 }
+					}, 
+					audio: true 
+				});
+				hasPermissions = true;
+				debugLog('✅ Permissions granted', {
+					videoTracks: mediaStream.getVideoTracks().length,
+					audioTracks: mediaStream.getAudioTracks().length
+				});
+			} catch (permErr: any) {
+				debugLog('❌ Permission denied', permErr);
+				throw permErr;
+			}
 			
-			// Create call object
+			// Step 2: Create Daily call object
 			debugLog('🔧 Creating Daily call object');
+			const DailyIframe = (await import('@daily-co/daily-js')).default;
 			daily = DailyIframe.createCallObject({
-				subscribeToTracksAutomatically: false, // We don't need to see others
+				subscribeToTracksAutomatically: false,
 			});
-			
-			// Use Daily's preAuth to request permissions - this ensures Daily gets the media tracks
-			debugLog('📷 Pre-authorizing camera/mic with Daily.co');
-			await daily.preAuth({
-				url: data.roomUrl
-			});
-			hasPermissions = true;
-			debugLog('✅ Permissions granted via Daily.co');
 			
 			// Add event listeners
 			daily.on('joined-meeting', (e: any) => {
@@ -76,8 +89,21 @@
 				debugLog('❌ Daily error', e);
 			});
 			
-			// Join the room
-			debugLog('🚪 Joining room', { roomUrl: data.roomUrl, label: cameraLabel });
+			// Step 3: Join the room with our media stream
+			debugLog('🚪 Joining room with media tracks', { 
+				roomUrl: data.roomUrl, 
+				label: cameraLabel,
+				hasVideoTrack: mediaStream.getVideoTracks().length > 0,
+				hasAudioTrack: mediaStream.getAudioTracks().length > 0
+			});
+			
+			// Immediately attach local preview BEFORE joining
+			if (mediaStream.getVideoTracks().length > 0) {
+				localVideoEl.srcObject = mediaStream;
+				await localVideoEl.play().catch(err => debugLog('⚠️ Autoplay issue', err));
+				debugLog('✅ Local preview attached');
+			}
+			
 			await daily.join({
 				url: data.roomUrl,
 				token: token || undefined,
@@ -89,9 +115,9 @@
 			isConnected = true;
 			debugLog('✅ Connected successfully');
 			
-			// Show local video preview
+			// Step 4: Verify Daily.co has our tracks
 			const localParticipant = daily.participants().local;
-			debugLog('📹 Local participant state', {
+			debugLog('📹 Daily.co participant state', {
 				video: localParticipant?.video,
 				audio: localParticipant?.audio,
 				videoTrack: !!localParticipant?.tracks?.video?.persistentTrack,
@@ -100,49 +126,27 @@
 				audioState: localParticipant?.tracks?.audio?.state
 			});
 			
-			if (localParticipant?.tracks?.video?.persistentTrack) {
-				const stream = new MediaStream([localParticipant.tracks.video.persistentTrack]);
-				localVideoEl.srcObject = stream;
-				debugLog('✅ Video preview attached');
-			} else {
-				debugLog('⚠️ No video track available yet - explicitly enabling');
-				// Explicitly enable video and audio
+			// If Daily doesn't have tracks yet, explicitly enable them
+			if (!localParticipant?.tracks?.video?.persistentTrack) {
+				debugLog('⚠️ Daily.co missing tracks - explicitly enabling');
 				try {
 					await daily.setLocalVideo(true);
 					await daily.setLocalAudio(true);
-					debugLog('✅ Explicitly enabled video/audio');
-					
-					// Wait a moment and check again
-					setTimeout(() => {
-						const updatedParticipant = daily.participants().local;
-						debugLog('📹 After explicit enable', {
-							video: updatedParticipant?.video,
-							audio: updatedParticipant?.audio,
-							videoTrack: !!updatedParticipant?.tracks?.video?.persistentTrack,
-							audioTrack: !!updatedParticipant?.tracks?.audio?.persistentTrack
-						});
-					}, 1000);
+					debugLog('✅ Explicitly enabled in Daily.co');
 				} catch (err) {
-					debugLog('❌ Failed to enable tracks', err);
+					debugLog('❌ Failed to enable in Daily.co', err);
 				}
 			}
 			
-			// Update video when track changes (this event listener is in addition to the one in the event setup)
+			// Monitor for track state changes
 			daily.on('participant-updated', (event: any) => {
 				if (event.participant?.local) {
 					debugLog('🔄 Local participant updated', {
 						video: event.participant?.video,
 						audio: event.participant?.audio,
-						videoTrack: !!event.participant?.tracks?.video?.persistentTrack,
-						audioTrack: !!event.participant?.tracks?.audio?.persistentTrack
+						videoState: event.participant?.tracks?.video?.state,
+						audioState: event.participant?.tracks?.audio?.state
 					});
-					
-					// Update video preview if track is now available
-					if (event.participant?.tracks?.video?.persistentTrack && !localVideoEl.srcObject) {
-						const stream = new MediaStream([event.participant.tracks.video.persistentTrack]);
-						localVideoEl.srcObject = stream;
-						debugLog('✅ Video preview attached via participant-updated');
-					}
 				}
 			});
 			
