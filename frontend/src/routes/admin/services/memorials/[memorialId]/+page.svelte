@@ -28,10 +28,6 @@
 	const publicUrl = memorial.fullSlug ? `https://tributestream.com/${memorial.fullSlug}` : '';
 
 	// Stream creation state
-	let showStreamForm = $state(false);
-	let streamTitle = $state('');
-	let streamDate = $state('');
-	let streamTime = $state('');
 	let isCreatingStream = $state(false);
 
 	// Emergency embed state
@@ -86,54 +82,51 @@
 		}
 	}
 
-	async function handleCreateStream() {
-		if (!streamTitle.trim()) {
-			alert('Please enter a stream title');
-			return;
-		}
-
-		if (!streamDate || !streamTime) {
-			alert('Please select a date and time');
-			return;
-		}
-
+	async function handleQuickCreateStream() {
 		isCreatingStream = true;
 
 		try {
-			// Combine date and time into ISO format
-			const scheduledStartTime = `${streamDate}T${streamTime}:00`;
+			// Auto-generate title with date
+			const timestamp = new Date().toLocaleDateString('en-US', { 
+				month: 'short', 
+				day: 'numeric', 
+				year: 'numeric' 
+			});
+			const title = `${memorial.lovedOneName} - Livestream ${timestamp}`;
+
+			console.log('🎬 Creating quick livestream:', title);
 
 			const response = await fetch(`/api/memorials/${memorial.id}/streams`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					title: streamTitle,
-					scheduledStartTime,
-					description: ''
+					title: title,
+					description: 'Multi-camera livestream',
+					status: 'ready'
+					// No streaming method - switcher handles it
 				})
 			});
 
 			if (response.ok) {
-				alert('Stream created successfully!');
-				// Reload the page to show the new stream
-				location.reload();
+				const result = await response.json();
+				const newStreamId = result.stream.id;
+				console.log('✅ Stream created:', newStreamId);
+				
+				// Immediately launch switcher
+				window.open(`/memorials/${memorial.id}/switcher/${newStreamId}`, '_blank');
+				
+				// Reload to show new stream in list
+				setTimeout(() => location.reload(), 500);
 			} else {
 				const error = await response.json();
-				alert(`Failed to create stream: ${error.message || 'Unknown error'}`);
+				alert(`Failed to create livestream: ${error.message || 'Unknown error'}`);
 			}
 		} catch (error) {
-			console.error('Error creating stream:', error);
-			alert('An error occurred while creating the stream.');
+			console.error('Error creating livestream:', error);
+			alert('An error occurred while creating the livestream.');
 		} finally {
 			isCreatingStream = false;
 		}
-	}
-
-	function cancelStreamForm() {
-		showStreamForm = false;
-		streamTitle = '';
-		streamDate = '';
-		streamTime = '';
 	}
 
 	async function handleDeleteStream(streamId: string, streamTitle: string) {
@@ -272,16 +265,21 @@
 
 	<div class="card">
 		<div class="section-header">
-			<h2>📹 Livestreams ({streams.length})</h2>
+			<h2>📹 Video Switcher</h2>
 			<div class="button-group">
-				<button class="create-btn" onclick={() => showStreamForm = !showStreamForm}>
-					{showStreamForm ? '✖ Cancel' : '➕ Create Livestream'}
+				<button 
+					class="create-btn" 
+					onclick={handleQuickCreateStream}
+					disabled={isCreatingStream}
+				>
+					{isCreatingStream ? '⏳ Creating...' : '🎬 Create Livestream & Launch Switcher'}
 				</button>
 				<button class="emergency-btn" onclick={() => showEmergencyEmbed = !showEmergencyEmbed}>
-					{showEmergencyEmbed ? '✖ Cancel' : '🚨 Create Emergency Embed'}
+					{showEmergencyEmbed ? '✖ Cancel' : '🚨 Emergency Embed'}
 				</button>
 			</div>
 		</div>
+		<p class="section-description">Create multi-camera livestreams with the video switcher</p>
 
 		{#if memorial.emergencyEmbed}
 			<div class="emergency-embed-active">
@@ -350,62 +348,8 @@ https://player.vimeo.com/video/123456789'
 			</div>
 		{/if}
 
-		{#if showStreamForm}
-			<div class="stream-form">
-				<h3>Create New Livestream</h3>
-				<div class="form-group">
-					<label for="stream-title">Title *</label>
-					<input
-						id="stream-title"
-						type="text"
-						bind:value={streamTitle}
-						placeholder="Enter stream title (e.g., Memorial Service for {memorial.lovedOneName})"
-						disabled={isCreatingStream}
-					/>
-				</div>
-
-				<div class="form-row">
-					<div class="form-group">
-						<label for="stream-date">Date *</label>
-						<input
-							id="stream-date"
-							type="date"
-							bind:value={streamDate}
-							disabled={isCreatingStream}
-						/>
-					</div>
-
-					<div class="form-group">
-						<label for="stream-time">Time *</label>
-						<input
-							id="stream-time"
-							type="time"
-							bind:value={streamTime}
-							disabled={isCreatingStream}
-						/>
-					</div>
-				</div>
-
-				<div class="form-actions">
-					<button 
-						class="primary-btn" 
-						onclick={handleCreateStream}
-						disabled={isCreatingStream}
-					>
-						{isCreatingStream ? '⏳ Creating...' : '📅 Schedule Stream'}
-					</button>
-					<button 
-						onclick={cancelStreamForm}
-						disabled={isCreatingStream}
-					>
-						Cancel
-					</button>
-				</div>
-			</div>
-		{/if}
-
-		{#if streams.length === 0 && !showStreamForm}
-			<p class="empty-message">No livestreams yet. Click "Create Livestream" to add one.</p>
+		{#if streams.length === 0}
+			<p class="empty-message">No livestreams yet. Click "Create Livestream & Launch Switcher" to get started.</p>
 		{/if}
 
 		<div class="streams-grid">
