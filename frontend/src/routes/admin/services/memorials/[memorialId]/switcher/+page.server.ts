@@ -36,7 +36,27 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	if (!memorialDoc.exists) {
 		throw error(404, 'Memorial not found');
 	}
-	const memorial = memorialDoc.data();
+	const memorialData = memorialDoc.data() || {};
+
+	// Helper to convert Firestore Timestamp to ISO string
+	const toISOString = (val: any): string | null => {
+		if (!val) return null;
+		if (val.toDate) return val.toDate().toISOString(); // Firestore Timestamp
+		if (val instanceof Date) return val.toISOString();
+		if (typeof val === 'string') return val;
+		return null;
+	};
+
+	// Only include serializable fields - explicitly avoid spreading raw Firestore data
+	const memorial = {
+		id: memorialId,
+		name: memorialData.lovedOneName || 'Unknown Memorial',
+		lovedOneName: memorialData.lovedOneName || null,
+		fullSlug: memorialData.fullSlug || null,
+		createdAt: toISOString(memorialData.createdAt),
+		updatedAt: toISOString(memorialData.updatedAt),
+		scheduledDate: toISOString(memorialData.scheduledDate),
+	};
 
 	// 3. Fetch or Create Daily Room
 	// Check if we already have a Daily room for this memorial
@@ -104,11 +124,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	}
 
 	return {
-		memorial: {
-			id: memorialId,
-			name: memorial?.lovedOneName || 'Unknown Memorial',
-			...memorial
-		},
+		memorial,
 		dailyConfig: {
 			roomUrl: dailyRoomUrl,
 			token: token,
