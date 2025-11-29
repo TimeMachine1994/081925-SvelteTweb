@@ -13,6 +13,19 @@
 	let isMuted = $state(false);
 	let isVideoOff = $state(false);
 	
+	// Debug state
+	let showDebug = $state(false);
+	let debugLogs = $state<string[]>([]);
+	
+	function debugLog(message: string, data?: any) {
+		const timestamp = new Date().toLocaleTimeString();
+		const logEntry = data 
+			? `[${timestamp}] ${message}: ${JSON.stringify(data, null, 2)}`
+			: `[${timestamp}] ${message}`;
+		debugLogs = [...debugLogs.slice(-30), logEntry]; // Keep last 30 logs
+		console.log(`📱 ${message}`, data || '');
+	}
+	
 	onMount(async () => {
 		// Get camera label from URL params
 		const urlParams = new URLSearchParams(window.location.search);
@@ -25,19 +38,44 @@
 		}
 
 		try {
+			debugLog('🎬 Starting camera setup');
+			
 			// Request camera/mic permissions first
+			debugLog('📷 Requesting camera/mic permissions');
 			await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
 			hasPermissions = true;
+			debugLog('✅ Permissions granted');
 			
 			// Dynamically import Daily
 			const DailyIframe = (await import('@daily-co/daily-js')).default;
 			
 			// Create call object
+			debugLog('🔧 Creating Daily call object');
 			daily = DailyIframe.createCallObject({
 				subscribeToTracksAutomatically: false, // We don't need to see others
 			});
 			
+			// Add event listeners
+			daily.on('joined-meeting', (e: any) => {
+				debugLog('✅ Joined meeting', { 
+					localParticipant: e.participants?.local?.user_name 
+				});
+			});
+			
+			daily.on('track-started', (e: any) => {
+				debugLog('🎥 Track started', {
+					kind: e.track?.kind,
+					isLocal: e.participant?.local,
+					trackState: e.participant?.tracks?.[e.track?.kind]?.state
+				});
+			});
+			
+			daily.on('error', (e: any) => {
+				debugLog('❌ Daily error', e);
+			});
+			
 			// Join the room
+			debugLog('🚪 Joining room', { roomUrl: data.roomUrl, label: cameraLabel });
 			await daily.join({
 				url: data.roomUrl,
 				token: token || undefined,
@@ -47,6 +85,7 @@
 			});
 			
 			isConnected = true;
+			debugLog('✅ Connected successfully');
 			
 			// Show local video preview
 			const localParticipant = daily.participants().local;
@@ -212,6 +251,52 @@
 		<p class="text-center text-gray-500 text-xs mt-3">
 			Keep this page open • Your video is being sent to the switcher
 		</p>
+	</div>
+	
+	<!-- DEBUG PANEL -->
+	<div class="fixed bottom-24 right-4 z-50">
+		<button 
+			class="bg-gray-800 text-white px-3 py-2 rounded-lg shadow-lg text-xs font-mono hover:bg-gray-700 transition-colors"
+			onclick={() => showDebug = !showDebug}
+		>
+			🔧 {showDebug ? '▼' : '▲'}
+		</button>
+		
+		{#if showDebug}
+			<div class="absolute bottom-12 right-0 w-80 max-h-80 bg-gray-900 text-green-400 rounded-lg shadow-2xl overflow-hidden">
+				<div class="p-2 bg-gray-800 text-white text-xs font-bold flex justify-between items-center">
+					<span>Camera Debug ({debugLogs.length})</span>
+					<button 
+						onclick={() => debugLogs = []} 
+						class="text-red-400 hover:text-red-300 px-2 py-1 rounded transition-colors"
+					>
+						Clear
+					</button>
+				</div>
+				<div class="p-2 overflow-y-auto max-h-56 font-mono text-xs">
+					{#each debugLogs as log}
+						<pre class="whitespace-pre-wrap mb-1 border-b border-gray-700 pb-1 text-green-300">{log}</pre>
+					{/each}
+					{#if debugLogs.length === 0}
+						<p class="text-gray-500">No logs yet...</p>
+					{/if}
+				</div>
+				<div class="p-2 bg-gray-800 text-xs space-y-1">
+					<div class="text-white flex justify-between">
+						<span>Connected:</span>
+						<span class="font-bold {isConnected ? 'text-green-400' : 'text-gray-400'}">{isConnected ? 'YES' : 'NO'}</span>
+					</div>
+					<div class="text-white flex justify-between">
+						<span>Video:</span>
+						<span class="font-bold {!isVideoOff ? 'text-green-400' : 'text-red-400'}">{!isVideoOff ? 'ON' : 'OFF'}</span>
+					</div>
+					<div class="text-white flex justify-between">
+						<span>Audio:</span>
+						<span class="font-bold {!isMuted ? 'text-green-400' : 'text-red-400'}">{!isMuted ? 'ON' : 'OFF'}</span>
+					</div>
+				</div>
+			</div>
+		{/if}
 	</div>
 </div>
 

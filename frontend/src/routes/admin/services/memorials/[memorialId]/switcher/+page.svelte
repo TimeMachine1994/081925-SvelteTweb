@@ -33,6 +33,12 @@
 	// Debug state
 	let showDebug = $state(false);
 	let debugLogs = $state<string[]>([]);
+	
+	// QR Code modal state
+	let showQRModal = $state(false);
+	let qrCodeUrl = $state<string | null>(null);
+	let cameraJoinUrl = $state<string | null>(null);
+	let cameraLabel = $state<string>('');
 
 	function debugLog(message: string, data?: any) {
 		const timestamp = new Date().toLocaleTimeString();
@@ -307,9 +313,29 @@
 		});
 		const json = await res.json();
 		if (json.joinUrl) {
-			navigator.clipboard.writeText(json.joinUrl);
-			alert(`Copied Link for ${label}`);
+			// Generate QR code URL using QR code API
+			const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(json.joinUrl)}`;
+			
+			// Set state and show modal
+			cameraJoinUrl = json.joinUrl;
+			qrCodeUrl = qrApiUrl;
+			cameraLabel = label;
+			showQRModal = true;
 		}
+	}
+	
+	function copyToClipboard() {
+		if (cameraJoinUrl) {
+			navigator.clipboard.writeText(cameraJoinUrl);
+			alert('Link copied to clipboard!');
+		}
+	}
+	
+	function closeQRModal() {
+		showQRModal = false;
+		qrCodeUrl = null;
+		cameraJoinUrl = null;
+		cameraLabel = '';
 	}
 
 </script>
@@ -488,6 +514,56 @@
 		</div>
 
 	</main>
+	
+	<!-- QR CODE MODAL -->
+	{#if showQRModal}
+		<div class="fixed inset-0 bg-black/80 flex items-center justify-center z-50" onclick={closeQRModal}>
+			<div class="bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 border border-gray-700" onclick={(e) => e.stopPropagation()}>
+				<!-- Header -->
+				<div class="flex justify-between items-center mb-4">
+					<h3 class="text-xl font-bold text-white">Connect {cameraLabel}</h3>
+					<button onclick={closeQRModal} class="text-gray-400 hover:text-white text-2xl leading-none">×</button>
+				</div>
+				
+				<!-- QR Code -->
+				<div class="bg-white p-4 rounded-lg mb-4 flex justify-center">
+					{#if qrCodeUrl}
+						<img src={qrCodeUrl} alt="QR Code" class="w-64 h-64" />
+					{:else}
+						<div class="w-64 h-64 flex items-center justify-center text-gray-400">Loading...</div>
+					{/if}
+				</div>
+				
+				<!-- Instructions -->
+				<div class="mb-4">
+					<p class="text-sm text-gray-300 mb-2">📱 Scan with your phone camera to join</p>
+					<p class="text-xs text-gray-400">Or copy the link below and open in a mobile browser</p>
+				</div>
+				
+				<!-- Link -->
+				<div class="bg-gray-900 rounded p-3 mb-4">
+					<p class="text-xs text-gray-400 mb-1">Join URL:</p>
+					<p class="text-sm text-green-400 break-all font-mono">{cameraJoinUrl}</p>
+				</div>
+				
+				<!-- Actions -->
+				<div class="flex gap-2">
+					<button 
+						onclick={copyToClipboard}
+						class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+					>
+						📋 Copy Link
+					</button>
+					<button 
+						onclick={closeQRModal}
+						class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+					>
+						Close
+					</button>
+				</div>
+			</div>
+		</div>
+	{/if}
 	
 	<!-- DEBUG PANEL -->
 	<div class="fixed bottom-20 right-4 z-50">
