@@ -12,6 +12,7 @@
 	let localVideoEl: HTMLVideoElement;
 	let isMuted = $state(false);
 	let isVideoOff = $state(false);
+	let waitingForUserAction = $state(true); // Show "Start Camera" button
 	
 	// Debug state
 	let showDebug = $state(false);
@@ -26,10 +27,10 @@
 		console.log(`📱 ${message}`, data || '');
 	}
 	
-	onMount(async () => {
-		// Get camera label from URL params
+	async function startCamera() {
+		waitingForUserAction = false;
+		
 		const urlParams = new URLSearchParams(window.location.search);
-		cameraLabel = urlParams.get('label') || 'Camera';
 		const token = urlParams.get('t');
 		
 		if (!data.roomUrl) {
@@ -158,7 +159,14 @@
 				errorMessage = err.errorMsg || err.message || 'Failed to connect to camera';
 			}
 			hasPermissions = false;
+			waitingForUserAction = true; // Show button again if error
 		}
+	}
+	
+	onMount(() => {
+		// Get camera label from URL params
+		const urlParams = new URLSearchParams(window.location.search);
+		cameraLabel = urlParams.get('label') || 'Camera';
 	});
 	
 	onDestroy(() => {
@@ -247,13 +255,27 @@
 			</div>
 		{/if}
 		
-		<!-- Permissions Prompt -->
-		{#if !hasPermissions && !errorMessage}
+		<!-- Start Camera Button -->
+		{#if waitingForUserAction && !errorMessage}
 			<div class="absolute inset-0 flex items-center justify-center bg-black/80">
 				<div class="text-center p-6 max-w-sm">
 					<div class="text-6xl mb-4">📷</div>
-					<p class="text-xl font-medium mb-2">Camera Access Needed</p>
-					<p class="text-gray-400 text-sm">Please allow camera and microphone access to stream.</p>
+					<p class="text-xl font-medium mb-4">Ready to Start</p>
+					<p class="text-gray-400 text-sm mb-6">Tap the button below to connect your camera and join the stream.</p>
+					<button 
+						class="px-8 py-4 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold text-lg shadow-lg transition-colors"
+						onclick={startCamera}
+					>
+						Start Camera
+					</button>
+				</div>
+			</div>
+		{:else if !hasPermissions && !errorMessage}
+			<div class="absolute inset-0 flex items-center justify-center bg-black/80">
+				<div class="text-center p-6 max-w-sm">
+					<div class="text-6xl mb-4">📷</div>
+					<p class="text-xl font-medium mb-2">Requesting Access...</p>
+					<p class="text-gray-400 text-sm">Please allow camera and microphone access when prompted.</p>
 				</div>
 			</div>
 		{/if}
