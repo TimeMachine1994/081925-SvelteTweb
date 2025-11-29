@@ -36,7 +36,9 @@ export async function POST({ request, locals }) {
 			expiresIn: 86400 * 7 // 7 days validity for helper links
 		});
 
-		const joinUrl = `${dailyRoomUrl}?t=${tokenData.token}`;
+		// Build URL to our dedicated camera page (mobile-friendly)
+		const baseUrl = request.headers.get('origin') || 'https://tributestream.com';
+		const joinUrl = `${baseUrl}/camera/${dailyRoomName}?t=${tokenData.token}&label=${encodeURIComponent(cameraLabel)}`;
 
 		return json({ joinUrl, token: tokenData.token });
 
