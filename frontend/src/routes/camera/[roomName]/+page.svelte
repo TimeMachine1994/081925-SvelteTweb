@@ -40,12 +40,6 @@
 		try {
 			debugLog('🎬 Starting camera setup');
 			
-			// Request camera/mic permissions first
-			debugLog('📷 Requesting camera/mic permissions');
-			await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-			hasPermissions = true;
-			debugLog('✅ Permissions granted');
-			
 			// Dynamically import Daily
 			const DailyIframe = (await import('@daily-co/daily-js')).default;
 			
@@ -54,6 +48,14 @@
 			daily = DailyIframe.createCallObject({
 				subscribeToTracksAutomatically: false, // We don't need to see others
 			});
+			
+			// Use Daily's preAuth to request permissions - this ensures Daily gets the media tracks
+			debugLog('📷 Pre-authorizing camera/mic with Daily.co');
+			await daily.preAuth({
+				url: data.roomUrl
+			});
+			hasPermissions = true;
+			debugLog('✅ Permissions granted via Daily.co');
 			
 			// Add event listeners
 			daily.on('joined-meeting', (e: any) => {
@@ -145,11 +147,12 @@
 			});
 			
 		} catch (err: any) {
+			debugLog('❌ Camera setup failed', err);
 			console.error('Camera setup error:', err);
-			if (err.name === 'NotAllowedError') {
+			if (err.name === 'NotAllowedError' || err.errorMsg?.includes('permission')) {
 				errorMessage = 'Camera/microphone permission denied. Please allow access and refresh.';
 			} else {
-				errorMessage = err.message || 'Failed to connect';
+				errorMessage = err.message || err.errorMsg || 'Failed to connect';
 			}
 		}
 	});
