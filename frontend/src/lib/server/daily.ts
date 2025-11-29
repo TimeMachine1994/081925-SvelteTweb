@@ -1,9 +1,13 @@
-import { PRIVATE_DAILY_API_KEY } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 
 const DAILY_API_BASE = 'https://api.daily.co/v1';
 
-if (!PRIVATE_DAILY_API_KEY) {
-	console.warn('⚠️ PRIVATE_DAILY_API_KEY is missing. Daily.co integration will fail.');
+function getApiKey() {
+	const key = env.PRIVATE_DAILY_API_KEY;
+	if (!key) {
+		throw new Error('PRIVATE_DAILY_API_KEY is not configured. Add it to your .env file.');
+	}
+	return key;
 }
 
 interface CreateRoomOptions {
@@ -21,7 +25,7 @@ export async function createDailyRoom(options: CreateRoomOptions = {}) {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
-			Authorization: `Bearer ${PRIVATE_DAILY_API_KEY}`
+			Authorization: `Bearer ${getApiKey()}`
 		},
 		body: JSON.stringify({
 			name: options.name, // Optional: Daily generates one if empty
@@ -59,7 +63,7 @@ export async function createDailyRoom(options: CreateRoomOptions = {}) {
 export async function getDailyRoom(name: string) {
 	const response = await fetch(`${DAILY_API_BASE}/rooms/${name}`, {
 		headers: {
-			Authorization: `Bearer ${PRIVATE_DAILY_API_KEY}`
+			Authorization: `Bearer ${getApiKey()}`
 		}
 	});
 
@@ -91,7 +95,7 @@ export async function createDailyToken(roomName: string, options: {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
-			Authorization: `Bearer ${PRIVATE_DAILY_API_KEY}`
+			Authorization: `Bearer ${getApiKey()}`
 		},
 		body: JSON.stringify(body)
 	});

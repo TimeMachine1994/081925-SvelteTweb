@@ -1,8 +1,7 @@
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
-import { createDailyRoom, createDailyToken } from '$lib/server/daily';
-import { PRIVATE_DAILY_API_KEY } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	// 1. Security Check
@@ -11,6 +10,10 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	}
 
 	const { memorialId } = params;
+
+	// Check if Daily API key is configured
+	const dailyApiKey = env.PRIVATE_DAILY_API_KEY;
+	const isDailyConfigured = !!dailyApiKey;
 
 	// DEBUG: Allow test ID
 	if (memorialId === 'test-memorial-id') {
@@ -22,9 +25,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			},
 			dailyConfig: {
 				roomUrl: 'https://demo.daily.co/test-room', // Mock URL
-				token: 'mock-token'
-			},
-			DAILY_API_KEY: PRIVATE_DAILY_API_KEY ? 'present' : 'missing'
+				token: 'mock-token',
+				configured: isDailyConfigured
+			}
 		};
 	}
 
@@ -45,8 +48,11 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	let dailyRoomName = streamDoc.exists ? streamDoc.data()?.dailyRoomName : null;
 	let dailyRoomUrl = streamDoc.exists ? streamDoc.data()?.dailyRoomUrl : null;
 
-	// If no room exists, create one
-	if (!dailyRoomName) {
+	// If no room exists and Daily is configured, create one
+	if (!dailyRoomName && isDailyConfigured) {
+		// Dynamically import daily helper only when needed
+		const { createDailyRoom } = await import('$lib/server/daily');
+		
 		// Create unique room name: "mem-{memorialId short hash}"
 		const uniqueSuffix = memorialId.substring(0, 8);
 		const roomName = `mem-${uniqueSuffix}-${Date.now().toString().slice(-4)}`; // Ensure uniqueness
@@ -57,7 +63,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 				privacy: 'private',
 				properties: {
 					enable_recording: 'cloud',
-					enable_hls: true,
 					max_participants: 10,
 					exp: Math.floor(Date.now() / 1000) + 86400 * 30 // 30 days expiry for the room
 				}
@@ -78,19 +83,24 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 		} catch (err) {
 			console.error('Error creating Daily room:', err);
-			// Fallback or error
+			// Continue without Daily - page will show unconfigured state
 		}
 	}
 
 	// 4. Generate Admin Token (Owner)
 	let token = null;
-	if (dailyRoomName) {
-		const tokenData = await createDailyToken(dailyRoomName, {
-			isOwner: true,
-			userName: `Admin (${locals.user.displayName || 'Staff'})`,
-			expiresIn: 86400 // 24 hours
-		});
-		token = tokenData.token;
+	if (dailyRoomName && isDailyConfigured) {
+		const { createDailyToken } = await import('$lib/server/daily');
+		try {
+			const tokenData = await createDailyToken(dailyRoomName, {
+				isOwner: true,
+				userName: `Admin (${locals.user.displayName || 'Staff'})`,
+				expiresIn: 86400 // 24 hours
+			});
+			token = tokenData.token;
+		} catch (err) {
+			console.error('Error creating Daily token:', err);
+		}
 	}
 
 	return {
@@ -101,8 +111,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		},
 		dailyConfig: {
 			roomUrl: dailyRoomUrl,
-			token: token
-		},
-		DAILY_API_KEY: PRIVATE_DAILY_API_KEY ? 'present' : 'missing'
+			token: token,
+			configured: isDailyConfigured
+		}
 	};
 };

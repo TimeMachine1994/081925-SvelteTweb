@@ -23,6 +23,12 @@
 	let participantCount = $derived(participants.length);
 
 	onMount(async () => {
+		// Check if Daily is configured
+		if (!data.dailyConfig?.configured) {
+			console.warn('⚠️ Daily.co is not configured. Add PRIVATE_DAILY_API_KEY to .env');
+			return;
+		}
+
 		// Dynamically import DailyIframe
 		const DailyIframe = (await import('@daily-co/daily-js')).default;
 		
@@ -200,6 +206,17 @@
 
 <div class="min-h-screen bg-gray-900 text-white flex flex-col">
 	
+	<!-- Configuration Warning -->
+	{#if !data.dailyConfig?.configured}
+		<div class="bg-yellow-900/50 border-b border-yellow-700 px-4 py-3 flex items-center gap-3">
+			<span class="text-yellow-400 text-xl">⚠️</span>
+			<div>
+				<p class="text-yellow-300 font-medium">Daily.co Not Configured</p>
+				<p class="text-yellow-400/70 text-sm">Add <code class="bg-black/30 px-1 rounded">PRIVATE_DAILY_API_KEY</code> to your .env file to enable livestreaming.</p>
+			</div>
+		</div>
+	{/if}
+
 	<!-- 1. HEADER -->
 	<header class="bg-gray-800 border-b border-gray-700 p-4 flex justify-between items-center">
 		<div class="flex items-center gap-4">
