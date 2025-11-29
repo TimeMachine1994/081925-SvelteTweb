@@ -22,16 +22,57 @@ import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import QRCode from 'qrcode';
 
+// ============================================================================
+// ENVIRONMENT VARIABLE DEBUGGING
+// ============================================================================
+console.log('\n' + '🔧'.repeat(40));
+console.log('🔧 [SWITCHER MODULE] Loading switcher server module...');
+console.log('🔧'.repeat(40));
+
+// Log ALL environment variables (be careful in production!)
+console.log('\n📦 [ENV DEBUG] Available environment variables:');
+console.log('   NODE_ENV:', process.env.NODE_ENV || '❌ NOT SET');
+console.log('   DAILY_API_KEY:', process.env.DAILY_API_KEY ? '✅ SET (' + process.env.DAILY_API_KEY.substring(0, 10) + '...)' : '❌ NOT SET');
+console.log('   DAILY_DOMAIN:', process.env.DAILY_DOMAIN ? '✅ SET (' + process.env.DAILY_DOMAIN + ')' : '❌ NOT SET');
+
+// Log process.env keys to see what's available
+console.log('\n🔑 [ENV DEBUG] All environment variable keys:');
+const envKeys = Object.keys(process.env);
+console.log('   Total variables:', envKeys.length);
+console.log('   Daily-related:', envKeys.filter(k => k.includes('DAILY')));
+
 // Environment variable validation
+console.log('\n📋 [ENV DEBUG] Extracting Daily.co configuration...');
 const DAILY_API_KEY = process.env.DAILY_API_KEY;
 const DAILY_DOMAIN = process.env.DAILY_DOMAIN;
 
+console.log('   DAILY_API_KEY extracted:', DAILY_API_KEY ? '✅ YES' : '❌ NO');
+console.log('   DAILY_DOMAIN extracted:', DAILY_DOMAIN ? '✅ YES' : '❌ NO');
+
+if (DAILY_API_KEY) {
+	console.log('   API Key length:', DAILY_API_KEY.length, 'characters');
+	console.log('   API Key preview:', DAILY_API_KEY.substring(0, 20) + '...');
+}
+
+if (DAILY_DOMAIN) {
+	console.log('   Domain value:', DAILY_DOMAIN);
+}
+
 // Validate Daily.co configuration on module load
 if (!DAILY_API_KEY || !DAILY_DOMAIN) {
-	console.error('❌ [SWITCHER] Missing Daily.co configuration in environment variables');
+	console.error('\n❌ [SWITCHER MODULE] Missing Daily.co configuration in environment variables');
+	console.error('   DAILY_API_KEY:', DAILY_API_KEY ? '✅ SET' : '❌ MISSING');
+	console.error('   DAILY_DOMAIN:', DAILY_DOMAIN ? '✅ SET' : '❌ MISSING');
 	console.error('   Required: DAILY_API_KEY and DAILY_DOMAIN');
 	console.error('   Get your API key from: https://dashboard.daily.co/developers');
+	console.error('\n   ⚠️  THE SWITCHER WILL NOT WORK WITHOUT THESE VARIABLES!');
+} else {
+	console.log('\n✅ [SWITCHER MODULE] Daily.co configuration loaded successfully!');
+	console.log('   API Key: CONFIGURED');
+	console.log('   Domain:', DAILY_DOMAIN);
 }
+
+console.log('🔧'.repeat(40) + '\n');
 
 /**
  * DAILY.CO API HELPER FUNCTIONS
@@ -61,6 +102,11 @@ async function createDailyRoom(memorialId: string, streamId: string) {
 	const roomName = `memorial-${memorialId}-stream-${streamId}-${Date.now()}`;
 	console.log(`   Room Name: ${roomName}`);
 
+	console.log('   📡 Making API request to Daily.co...');
+	console.log('      URL: https://api.daily.co/v1/rooms');
+	console.log('      Method: POST');
+	console.log('      Authorization: Bearer ' + DAILY_API_KEY?.substring(0, 20) + '...');
+
 	try {
 		const response = await fetch('https://api.daily.co/v1/rooms', {
 			method: 'POST',
@@ -82,22 +128,37 @@ async function createDailyRoom(memorialId: string, streamId: string) {
 			})
 		});
 
+		console.log('   📥 Response received');
+		console.log('      Status:', response.status);
+		console.log('      OK:', response.ok);
+
 		if (!response.ok) {
 			const errorData = await response.json();
-			console.error('❌ [SWITCHER] Daily.co room creation failed');
-			console.error('   Status:', response.status);
-			console.error('   Error:', errorData);
+			console.error('\n❌ [SWITCHER] Daily.co room creation FAILED!');
+			console.error('   Status Code:', response.status);
+			console.error('   Status Text:', response.statusText);
+			console.error('   Error Data:', JSON.stringify(errorData, null, 2));
+			console.error('   API Key being used:', DAILY_API_KEY?.substring(0, 20) + '...');
 			throw new Error(`Daily.co API error: ${response.status}`);
 		}
 
 		const roomData = await response.json();
-		console.log('✅ [SWITCHER] Room created successfully');
-		console.log(`   Room URL: ${roomData.url}`);
-		console.log(`   Room expires in 4 hours`);
+		console.log('\n✅ [SWITCHER] Room created successfully!');
+		console.log('   Room Name:', roomData.name);
+		console.log('   Room URL:', roomData.url);
+		console.log('   Privacy:', roomData.privacy);
+		console.log('   Max Participants:', roomData.config?.max_participants);
+		console.log('   Room expires in 4 hours');
+		console.log('   Full response:', JSON.stringify(roomData, null, 2));
 
 		return roomData;
 	} catch (err) {
-		console.error('❌ [SWITCHER] Exception during room creation:', err);
+		console.error('\n❌❌❌ [SWITCHER] EXCEPTION during room creation! ❌❌❌');
+		console.error('   Error type:', err instanceof Error ? err.constructor.name : typeof err);
+		console.error('   Error message:', err instanceof Error ? err.message : String(err));
+		console.error('   Error stack:', err instanceof Error ? err.stack : 'No stack trace');
+		console.error('   API Key status:', DAILY_API_KEY ? 'SET' : 'NOT SET');
+		console.error('   Domain status:', DAILY_DOMAIN ? 'SET' : 'NOT SET');
 		throw err;
 	}
 }
@@ -123,6 +184,11 @@ async function generateDailyToken(
 	console.log(`\n🎫 [SWITCHER] Generating ${tokenType} token...`);
 	console.log(`   Room: ${roomName}`);
 	console.log(`   User: ${userName || 'Anonymous'}`);
+
+	console.log('   📡 Making token request to Daily.co...');
+	console.log('      URL: https://api.daily.co/v1/meeting-tokens');
+	console.log('      Room:', roomName);
+	console.log('      Is Owner:', isOwner);
 
 	try {
 		const response = await fetch('https://api.daily.co/v1/meeting-tokens', {
@@ -241,17 +307,43 @@ export const load: PageServerLoad = async ({ params, locals, fetch }) => {
 	// STEP 2: VALIDATE DAILY.CO CONFIGURATION
 	// ============================================================================
 	console.log('\n📋 [SWITCHER] Step 2: Validating Daily.co configuration');
+	console.log('   🔍 Checking DAILY_API_KEY...');
+	console.log('      Value:', DAILY_API_KEY ? '✅ EXISTS' : '❌ UNDEFINED/EMPTY');
+	if (DAILY_API_KEY) {
+		console.log('      Type:', typeof DAILY_API_KEY);
+		console.log('      Length:', DAILY_API_KEY.length);
+		console.log('      Preview:', DAILY_API_KEY.substring(0, 15) + '...');
+	}
+
+	console.log('   🔍 Checking DAILY_DOMAIN...');
+	console.log('      Value:', DAILY_DOMAIN ? '✅ EXISTS' : '❌ UNDEFINED/EMPTY');
+	if (DAILY_DOMAIN) {
+		console.log('      Type:', typeof DAILY_DOMAIN);
+		console.log('      Value:', DAILY_DOMAIN);
+	}
 
 	if (!DAILY_API_KEY || !DAILY_DOMAIN) {
-		console.error('❌ [SWITCHER] Daily.co is not configured');
-		console.error('   Please set DAILY_API_KEY and DAILY_DOMAIN in environment variables');
+		console.error('\n❌❌❌ [SWITCHER] Daily.co is NOT CONFIGURED! ❌❌❌');
+		console.error('   DAILY_API_KEY:', DAILY_API_KEY ? '✅ SET' : '❌ MISSING');
+		console.error('   DAILY_DOMAIN:', DAILY_DOMAIN ? '✅ SET' : '❌ MISSING');
+		console.error('   ');
+		console.error('   📝 TO FIX THIS:');
+		console.error('   1. Create/edit frontend/.env file');
+		console.error('   2. Add these lines:');
+		console.error('      DAILY_API_KEY=your_api_key_here');
+		console.error('      DAILY_DOMAIN=your-domain.daily.co');
+		console.error('   3. Restart the dev server');
+		console.error('   ');
+		console.error('   Get your API key from: https://dashboard.daily.co/developers');
+		console.error('\n   ⚠️  THROWING 500 ERROR NOW...');
 		throw error(500, {
 			message: 'Video switcher is not configured. Please contact support.'
 		});
 	}
 
-	console.log('✅ [SWITCHER] Daily.co configuration validated');
-	console.log(`   Domain: ${DAILY_DOMAIN}`);
+	console.log('\n✅ [SWITCHER] Daily.co configuration validated successfully!');
+	console.log('   Domain: ' + DAILY_DOMAIN);
+	console.log('   API Key: CONFIGURED (length: ' + DAILY_API_KEY.length + ')');
 
 	// ============================================================================
 	// STEP 3: LOAD MEMORIAL DATA
