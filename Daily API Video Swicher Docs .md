@@ -1,0 +1,384 @@
+Gemini
+
+G
+Pinned chat
+Pinned chat
+Pinned chat
+Building a Media Switcher Component
+Switcher Component Research Plan
+Daily API Video Switcher Documentation
+Understanding HLS Streaming Protocol
+How Google Apps Script Works
+Image Editing: People Removed
+Image Editing: People Removed
+Game of Thrones Image Remake
+Slicing Pie Founder Equity Model
+Photo Upload For Realistic Image
+Syncing Social Media with SEO
+Video Campaign for Memorial Livestream
+Futuristic Digital Funeral Interactive Features
+Animation Request: Rising Sun Text Reveal
+ONCue Fine-Tuning Documentation Research
+Cloudflare WHIP Stream to Mux
+Mux vs. Cloudflare Stream Comparison
+Responding to a 5-Star Google Review
+Google Sheets Wiki App
+Live Streaming App Development Confusion
+Designing Dual-Themed Buttons
+AI Identification and Privacy Concerns
+Logo Variations Provided
+Synonym for "Spend Money"
+Building a Local AI Assistant
+AI's Lack of Personal Memory
+Preventing Video Downloads: Beyond `controlslist`
+Slideshow Editor Feature Outline
+Website Theming Demo with Svelte
+Nature Video Matrix Viewer Ad
+Vimeo API: Search and Embed Videos
+Optimizing Transcript Line Highlighting
+Smoker's Throat Clearing Explained
+Understanding HLS Streaming Protocol
+Conversation with Gemini
+I need you to create a comprehensive documentation for Daily, so we can use it as a video switcher via the api.
+
+Here's the plan I've put together. Let me know if you need any changes before I start researching.
+Daily API Video Switcher Documentation
+Research Websites
+(1) Search for the official developer documentation of Daily.co to understand its core architecture, specifically focusing on the REST API and Client SDKs relevant to video control.
+(2) Investigate Daily's capabilities regarding 'Cloud Composition' and the 'Video Component System' (VCS) to understand how to manipulate video layouts and render streams server-side.
+(3) Identify specific API methods or SDK functions for 'pinning', 'spotlighting', and 'participant track subscription' that allow controlling which video feed is prioritized or visible.
+(4) Research how to manage permissions and roles to create a 'Director' or 'Producer' client that has the authority to update the layout for all viewers or the recording feed.
+(5) Find information on updating RTMP streams and Cloud Recordings in real-time, specifically looking for endpoints that modify the composition or active layout during a session.
+(6) Look for tutorials, blog posts, or GitHub repositories demonstrating the construction of a custom video studio, broadcast tool, or switcher using Daily.
+(7) Synthesize the findings into a documentation structure that includes: Introduction to Daily for Broadcasting, Authentication & Setup, Managing Rooms, Implementing Video Switching Logic (Compositing vs. Client-side), and Handling Output (Live Streaming/Recording).
+Analyze Results
+Create Report
+Ready in a few mins
+
+Start research
+
+I've completed your research. Feel free to ask me follow-up questions or request changes.
+Daily API Video Switcher Documentation
+Completed
+Nov 29, 10:48 AM
+
+You stopped this response
+
+
+
+Gemini can make mistakes, so double-check it
+
+Daily API Video Switcher Documentation
+Architecting Software-Defined Video Production: A Comprehensive Guide to Building Video Switchers with Daily.co
+1. Executive Summary and Theoretical Framework
+The paradigm of live video production has historically relied on dedicated hardware: vision mixers, matrix switchers, and hardware encoders. These systems, while robust, impose significant logistical and financial constraints, tethering production to specific physical locations and proprietary hardware stacks. The emergence of WebRTC (Web Real-Time Communication) combined with cloud-native composition engines has enabled a shift toward "Software-Defined Production" (SDP). In this architecture, the video switcher is no longer a physical desk but a logical application state managed via Application Programming Interfaces (APIs).
+
+This report provides an exhaustive technical analysis of how to leverage the Daily.co platform to construct a fully programmable, cloud-native video switcher. Unlike standard video conferencing implementations, where the platform dictates the layout and logic (e.g., active speaker detection), a video switcher application requires deterministic control over media routing, layout composition, and participant state. To achieve this, a systems architect must bypass the abstractions of Daily’s prebuilt user interfaces and interact directly with the core infrastructure primitives: the Client SDK (daily-js or daily-react) for local state management, and the Video Component System (VCS) for server-side composition.
+
+The analysis that follows serves as a definitive documentation source for engineering teams tasked with building "Director Mode" interfaces. It dissects the dual-pipeline architecture of modern WebRTC streaming—separating the low-latency control plane used by the director from the high-fidelity broadcast plane viewed by the audience. By synthesizing data from Daily’s REST API, client instance methods, and VCS cloud composition logic, this document establishes a blueprint for emulating the functionality of a professional broadcast switcher—input selection, multi-view monitoring, graphics overlay, and transition management—entirely within a software environment.   
+
+2. System Architecture: The Dual-Pipeline Topology
+To build a video switcher on Daily, one must first understand the underlying network topology. A standard video call acts as a mesh or SFU (Selective Forwarding Unit) interaction where every participant is both a source and a destination. However, a broadcast switcher workflow imposes a strict separation between "contribution" (inputs) and "distribution" (program output). This necessitates a dual-pipeline architecture.
+
+2.1 The Contribution Pipeline (WebRTC)
+The contribution layer is where "Talent" (cameras/microphones) and "Directors" (operators) interact. This layer operates on Daily’s SFU infrastructure.
+
+Protocol: WebRTC (UDP/TCP).
+
+Latency: Sub-second (< 200ms).
+
+Characteristics: Adaptive bitrate, fluctuating quality based on network conditions, intended for real-time interaction.
+
+Director’s Role: The Director joins this layer not necessarily to be seen, but to monitor all incoming feeds and issue control commands. The Director’s client acts as the "Multiview" monitor.   
+
+2.2 The Distribution Pipeline (RTMP/HLS)
+The distribution layer is the output of the switcher. This is generated by Daily’s media processors, which act as a "virtual participant" in the room. This virtual participant subscribes to the streams dictated by the switcher logic, composites them into a single video frame (using VCS), mixes the audio, and pushes the result to an ingestion endpoint.
+
+Protocol: RTMP (Real-Time Messaging Protocol) to CDN, converted to HLS (HTTP Live Streaming) for viewers.
+
+Latency: High (10–30 seconds typically).
+
+Characteristics: Constant bitrate (CBR), high fidelity, fixed layout.
+
+Switching Logic: The "switching" happens here, at the point of composition. When a Director selects "Camera 1," they are instructing the cloud compositor to render Camera 1’s WebRTC stream into the program output.   
+
+2.3 The Architectural Disconnect and Synchronization
+A critical insight for developers is that these two pipelines are asynchronous. The Director sees a change on their WebRTC monitor instantly, but the RTMP feed reflects that change seconds later. Furthermore, the layout the Director sees on their screen (the control surface) is distinct from the layout the audience sees (the program output). The application logic must bridge this gap, sending commands to the cloud to update the program output while simultaneously updating the local DOM to reflect the new state to the operator.   
+
+3. Authentication and Access Control: The Studio Security Model
+A production environment requires a stricter security model than a casual meeting. Unauthorized entry into a "switcher" room can disrupt a broadcast. Therefore, the foundation of the switcher application lies in the precise configuration of Room settings and Meeting Tokens.
+
+3.1 Room Configuration Strategy
+The room acts as the "Studio." Using the REST API, specific properties must be enforced to support a production workflow.
+
+Table 1: Recommended Room Configurations for Switcher Applications
+
+Property	Value	Rationale	Impact on Workflow
+privacy	"private"	Mandatory. Prevents public access via URL alone. Requires tokens for all users.	
+Ensures only authenticated Talent and Directors can enter the contribution pipeline.
+
+enable_knocking	true	Allows users without tokens (or with specific "guest" roles) to request entry.	
+Facilitates a "Green Room" workflow where the Director admits talent only when ready.
+
+max_participants	10-20	Limits the load on the SFU and the Director's client.	
+Prevents bandwidth saturation. Broadcasts usually involve limited inputs; 100k viewers watch the output, not join the room.
+
+enable_recording	"cloud"	Enables the cloud recording engine.	
+Pre-authorizes the room for server-side composition, a prerequisite for VCS.
+
+  
+3.2 The Director Token (The "Owner")
+The distinction between a "Participant" and a "Director" is enforced via the is_owner property in the meeting token. This is not merely a label; it is a permission key that unlocks specific API methods.
+
+Privileged Methods: Functions such as startLiveStreaming, updateLiveStreaming, startRecording, and updateParticipant (for remote muting) will throw authorization errors if invoked by a client without an owner token.
+
+Token Generation: Tokens should be generated server-side using the POST /meeting-tokens endpoint. The Director's token must have is_owner: true.
+
+Expiration (exp) & Not Before (nbf): For scheduled productions, these claims ensure the Director cannot enter the studio too early (wasting credits) or stay too long (security risk).   
+
+3.3 The Talent Token
+Talent tokens should explicitly disable administrative privileges.
+
+is_owner: false
+
+start_cloud_recording: false
+
+Permissions Object: The permissions object in the token payload allows for granular control.
+
+canSend: true (They act as a source).
+
+canAdmin: false (They cannot mute others or change layouts).
+
+canReceive: true (They can hear/see others, e.g., for panel discussions).   
+
+4. The Control Surface: Client-Side Implementation with daily-js
+The Director's interface—the actual "switcher" software running in the browser—is built upon the daily-js Client SDK. While Daily offers a "Prebuilt" UI, it is unsuitable for a custom switcher because it enforces specific behaviors (like active speaker switching) that a Director needs to override. Therefore, the implementation must use the Call Object mode (Daily.createCallObject()), which provides a headless engine, allowing the developer to render video elements manually.   
+
+4.1 Instantiation and Factory Methods
+The switcher application initializes the call object without injecting any UI.
+
+JavaScript
+const call = Daily.createCallObject({
+  subscribeToTracksAutomatically: false, // CRITICAL for bandwidth management
+  audioSource: false, // Director usually doesn't send audio
+  videoSource: false  // Director usually doesn't send video
+});
+This configuration creates a "stealth" participant. The subscribeToTracksAutomatically: false setting is the single most important configuration for a multiview monitor. By default, Daily tries to subscribe to high-quality video for every participant. In a room with 12 cameras, this would instantly saturate the Director's downstream bandwidth, causing lag and interface unresponsiveness. Disabling this allows the application to manually request video only when needed.   
+
+4.2 Building the Multiview: Track Subscription Logic
+A physical video switcher displays a "Multiview"—a grid of small preview monitors showing every available camera. To replicate this in the browser without crushing the CPU and network, the application must utilize Daily’s Track Subscription API.
+
+The updateParticipant method allows the client to dictate the "subscription state" for every remote peer.
+
+Table 2: Subscription States for Switcher UI Elements
+
+UI Element	Video Subscription State	Audio Subscription State	Bandwidth Implications
+Program (Live)	true (High/Auto)	true	Highest. Receives full resolution for quality verification.
+Preview (Next)	'staged' or Low Layer	true	Minimal. 'Staged' keeps the connection ready but sends no bits until switched to live.
+Multiview Tile	true (Simulcast Low)	true	Moderate. Requires requesting specific simulcast layers to keep total bitrate under control.
+Off-Screen	false	false	Zero. Essential for participants in the "Green Room" or otherwise not active.
+The setSubscribedTracks Mechanism: To implement a multiview, the application iterates through the list of participants and applies a subscription topology.
+
+JavaScript
+// Example: Subscribing to a grid of thumbnails
+call.updateParticipant(sessionId, {
+  setSubscribedTracks: {
+    audio: true,
+    video: true,
+    screenVideo: false
+  }
+});
+For "staged" participants (those not currently visible but might be switched to instantly), the 'staged' value is used. This instructs the SFU to establish the media path but pause the packet flow, allowing for an instant "un-pause" when the Director cuts to that camera, eliminating the buffering delay associated with a fresh subscription.   
+
+4.3 Monitoring Participant Health
+The Director needs to know if a camera is viable before putting it live. The participants() object contains real-time metadata crucial for this decision-making.
+
+video: 'off' / 'interrupted': The application should visually gray out any tile where the track state is not 'playable'.
+
+networkQualityState: Using the network-quality-change event, the UI should overlay a warning icon on any participant with bad or warning quality. A Director should never switch a bad quality feed to the Program output.   
+
+5. The Composition Engine: Daily VCS (Video Component System)
+While the daily-js SDK manages the local view, the Video Component System (VCS) manages the broadcast view. VCS is Daily’s cloud-native composition engine. It runs a React-based rendering environment on Daily's servers, ingesting the video feeds and compositing them into the final RTMP stream or recording.   
+
+Understanding VCS is central to "Software-Defined Production." It decouples the rendering from the client. The Director’s laptop does not render the composite stream; the cloud does. The Director simply sends small JSON configuration objects (composition_params) to the cloud to instruct it on how to render the frame.
+
+5.1 The Baseline Composition (daily:baseline)
+Daily provides a standard "firmware" for its cloud renderer called the Baseline Composition. This pre-built React application handles standard layouts (Grid, Active Speaker, PIP) and supports programmable graphics overlays. For 90% of switcher use cases, the Baseline Composition is sufficient and requires no custom code deployment.   
+
+To activate VCS, the startLiveStreaming or startRecording method must be called with the layout preset set to 'custom'.
+
+JavaScript
+call.startLiveStreaming({
+  rtmpUrl: "rtmp://...",
+  layout: {
+    preset: "custom",
+    composition_id: "daily:baseline",
+    composition_params: {... }
+  }
+});
+This command spins up the VCS instance. From this point forward, the visual state of the stream is controlled entirely by modifying composition_params via updateLiveStreaming.   
+
+5.2 Deterministic Switching with preferredParticipantIds
+The core function of a switcher is Input Selection. In a standard video call, the layout logic is often "Active Speaker" (whoever talks gets the big tile). In a broadcast, this is unacceptable; the Director determines who is on screen, regardless of who is coughing.
+
+VCS enables this deterministic control via the videoSettings.preferredParticipantIds parameter. This parameter accepts an ordered array of session IDs.
+
+Mechanism: When the Director selects "Camera 1" and "Camera 2" for a split-screen interview, the application sends an array `` to the cloud.
+
+Layout Mapping:
+
+If mode: 'split', the first ID goes Left, the second goes Right.
+
+If mode: 'dominant', the first ID is the Main tile, the others are thumbnails.
+
+If mode: 'single', the first ID is Full Screen.
+
+This allows for precise "A/B Cutting." To switch from Camera 1 to Camera 3, the Director’s client simply sends a new composition_params object with the array updated to ``. The cloud renderer applies this change in the next rendered frame.   
+
+5.3 Graphics and Overlays
+A switcher also acts as a Character Generator (CG). The VCS Baseline composition includes support for text, images, and "toast" notifications, controlled via the same parameter object.
+
+Table 3: Key VCS Baseline Composition Parameters for Switchers
+
+Parameter Group	Parameter Key	Data Type	Function
+Layout Control	mode	String	
+'grid', 'single', 'split', 'dominant', 'pip'.
+
+Input Routing	videoSettings.preferredParticipantIds	Array	
+Ordered list of Session IDs to display. The "Program Bus" of the switcher.
+
+Graphics	showTextOverlay	Boolean	
+Toggles the lower-third text visibility.
+
+Graphics Content	text.content	String	The actual text string (e.g., "John Doe - CEO").
+Graphics Style	text.align_vertical	String	
+'top', 'center', 'bottom' positioning.
+
+Branding	showImageOverlay	Boolean	
+Toggles a watermark or logo overlay.
+
+Assets	session_assets	Map	
+Maps logical names (e.g., 'logo') to external URLs. Loaded at start.
+
+  
+5.4 Advanced Asset Management (session_assets)
+Unlike composition_params which can be updated instantly, session_assets are heavy resources (images, fonts) that should be pre-loaded. The best practice is to define all potential assets (logos, background images, placeholder slates) in the startLiveStreaming call.
+
+Syntax: Keys must often follow a path-like structure, e.g., 'images/background'.
+
+Usage: Once loaded, an asset is referenced by its key in the params. For example, to show a specific logo, one might toggle showImageOverlay: true and ensure the internal mapping points to the correct asset key.   
+
+6. Streaming and Recording Pipelines: Output Management
+The Director must manage not just the visual composition but the destinations of the signal. Daily allows for simultaneous recording and streaming, managed as separate instances.
+
+6.1 The Live Streaming Lifecycle
+The transition from "Dark" to "Live" is handled via the REST API or instance methods.
+
+Start: call.startLiveStreaming() initializes the encoder. It connects to the RTMP server provided (e.g., YouTube Live or Twitch).
+
+Latency Note: The RTMP stream introduces 10-30 seconds of latency. The Director cannot switch based on watching the YouTube output. They must trust the multiview (WebRTC) and the system state.   
+
+Update: call.updateLiveStreaming() is the workhorse method. It is used for every cut, graphic change, or layout shift.
+
+Rate Limiting: Daily imposes rate limits on API calls (typically 20 req/s). While switching logic rarely hits this, rapid-fire automation scripts should be debounced.   
+
+Stop: call.stopLiveStreaming() severs the connection to the RTMP server.
+
+6.2 Multi-Destination Streaming
+For complex productions requiring a "Clean Feed" (no graphics) and a "Program Feed" (with graphics), Daily supports Multi-Instance Live Streaming.
+
+Implementation: The Director can start two streams. Each startLiveStreaming call returns a unique instanceId.
+
+Independent Switching: The Director can send an updateLiveStreaming command targeting specifically instanceId_A to add a "Breaking News" graphic, while leaving instanceId_B (the clean feed being recorded for archive) untouched. This emulates the "Aux Bus" functionality of hardware switchers.   
+
+6.3 Recording Considerations
+Cloud recording uses the same VCS engine. If mode: cloud is selected, the recording will capture the exact layout transitions performed by the Director.
+
+VOD vs. Live: It is possible to have a recording layout that differs from the stream layout if they are managed as separate instances.
+
+Raw Tracks: For post-production flexibility, the Director might enable raw-tracks recording in addition to the cloud composition. This saves ISO (isolated) feeds of every camera, allowing an editor to fix a bad switch later. However, raw tracks do not include the overlays or layout logic.   
+
+7. Signal Synchronization and State Management
+A "Director Mode" application is a distributed system. The Director has a state (who is pinned), the Cloud has a state (what is rendering), and the Talent might need to know this state (e.g., "You are on air"). Synchronizing these states requires a signaling layer.
+
+7.1 The Side-Channel: sendAppMessage
+Daily provides a data channel via sendAppMessage that allows broadcasting JSON objects to all participants. This is essential for synchronization.
+
+Scenario: The Director pins "Participant A."
+
+Action 1 (Cloud): Director client calls updateLiveStreaming to tell VCS to render Participant A full screen.
+
+Action 2 (Signal): Director client calls sendAppMessage({ type: 'ON_AIR', target: 'session_id_A' }).
+
+Result: Participant A’s client receives the message. Their UI updates to show a "Tally Light" (a red border or "ON AIR" indicator), letting the talent know they are live. This digital tally light is a crucial feature for professional talent coordination.   
+
+7.2 Synchronizing Viewers in the Room
+If there are passive viewers inside the Daily room (e.g., a virtual audience), the Director might want to force their layout to match the broadcast.
+
+Mechanism: The sendAppMessage can broadcast the current layout state (e.g., mode: 'split', focus: ['id1', 'id2']).
+
+Client Logic: All viewer clients listen for this message. Upon receipt, they execute local updateParticipant or CSS logic to mirror the Director’s layout. This ensures that the "in-room" experience aligns with the "broadcast" experience.   
+
+8. Audio Engineering in the Cloud
+While VCS handles video efficiently, audio mixing in a software-defined environment presents unique challenges. Unlike video, which is strictly "switched" (Camera A OR Camera B), audio is "mixed" (Mic A AND Mic B).
+
+8.1 The "Mix-Minus" and Default Behavior
+By default, Daily mixes all open microphones. If 5 people are unmuted, all 5 are heard in the stream. VCS does not currently offer a "fader" API to adjust volume levels (e.g., "Mic A at 50%") via composition_params.
+
+8.2 Muting Logic (Audio Follows Video)
+To simulate "Audio Follows Video" (AFV)—where only the visible person is heard—the Director must utilize the updateParticipant method to remotely mute/unmute microphones.
+
+The Problem: Using updateParticipant to mute a user mutes them for everyone, including themselves. This can be disorienting.
+
+The Solution: The Director app should maintain a logical state of "Active Audio Sources." When switching video, the app logic should potentially leave the previous speaker open for a few seconds (L-cut) before muting, or keep all key talent unmuted and rely on them to manage their own silence.
+
+Audio-Only Exclusion: VCS supports videoSettings.omitAudioOnly. If a participant is purely a producer (audio only, no video), setting this to true prevents their audio from leaking into the broadcast, effectively creating a "Talkback" channel that only people in the WebRTC room can hear, but the stream cannot.   
+
+9. Operational Resilience and Telemetry
+Running a broadcast requires monitoring system health. If the Director's connection drops, the show must go on.
+
+9.1 Handling Director Disconnection
+Since the switcher logic runs on the Director's client, a disconnection stops the switching.
+
+Persisted State: The updateLiveStreaming changes are persistent in the cloud. If the Director disconnects, the stream continues with the last known layout. It does not go black.
+
+Redundancy: A second "Co-Director" can join the room. Since is_owner tokens grant privileges to any holder, a secondary client can inspect the room state and take over switching duties immediately.
+
+9.2 Network Telemetry
+The Director's dashboard should visualize the getNetworkStats() data.
+
+Packet Loss: High packet loss on an input indicates it will look blocky on the stream. The Switcher UI should flag this.
+
+Bitrate: Monitoring the bitsReceivedPerSecond allows the Director to verify that the "Staged" tracks are indeed low bandwidth and the "Program" tracks are high bandwidth.   
+
+10. Implementation Roadmap for Developers
+To summarize the architectural requirements for a functional Daily-based Video Switcher, developers should follow this implementation hierarchy:
+
+Phase 1: Foundation
+
+Implement createCallObject with manual track subscription.
+
+Implement is_owner token generation.
+
+Build a grid UI that renders video elements based on participants() state.
+
+Phase 2: The Switcher Engine
+
+Integrate startLiveStreaming with preset: 'custom' and daily:baseline.
+
+Map UI buttons ("Cut to Cam 1") to updateLiveStreaming calls modifying preferredParticipantIds.
+
+Implement sendAppMessage for Tally Lights.
+
+Phase 3: Production Polish
+
+Add session_assets for logos and backgrounds.
+
+Build "Lower Third" form inputs that update text.content.
+
+Implement Audio-Follows-Video logic via remote muting (with caution).
+
+11. Conclusion
+The transition to API-driven video switching represents a fundamental change in production economics. By utilizing Daily.co’s split-pipeline architecture—leveraging daily-js for the control plane and VCS for the media plane—developers can build broadcast-grade switching solutions that run entirely in the browser. The power of this architecture lies in its flexibility: the ability to reconfigure the "hardware" (the composition engine) via a JSON payload in milliseconds. While it demands a rigorous approach to state management and bandwidth optimization, the result is a production studio that is as scalable, accessible, and programmable as the web itself.
+
+ 

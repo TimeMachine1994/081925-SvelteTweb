@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Stream, StreamArmType } from '$lib/types/stream';
-	import { Video, Eye, EyeOff, Archive, StopCircle, Copy, Check, ChevronDown, Calendar, ExternalLink } from 'lucide-svelte';
+	import { Video, Eye, EyeOff, Archive, StopCircle, Copy, Check, ChevronDown, Calendar, ExternalLink, Grid3x3 } from 'lucide-svelte';
 	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
 
@@ -500,6 +500,20 @@
 						<ExternalLink class="h-4 w-4" />
 						Open Stream
 					</button>
+				{/if}
+
+				<!-- Launch Video Switcher (Admin only, for armed or ready streams) -->
+				{#if stream.armStatus?.isArmed || stream.status === 'ready'}
+					<a
+						href="/memorials/{memorialId}/switcher/{stream.id}"
+						target="_blank"
+						rel="noopener noreferrer"
+						class="flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700 shadow-lg"
+						title="Launch professional video switcher for multi-camera streaming"
+					>
+						<Grid3x3 class="h-4 w-4" />
+						🎛️ Launch Switcher
+					</a>
 				{/if}
 
 				{#if stream.status === 'live'}

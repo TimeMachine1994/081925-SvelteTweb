@@ -74,6 +74,7 @@
 					<li>• <strong>Arm streams</strong> before they go live to generate streaming credentials</li>
 					<li>• <strong>Mobile Input:</strong> For browser-based streaming from phones/tablets</li>
 					<li>• <strong>Stream Key:</strong> For professional OBS/encoder streaming</li>
+					<li>• <strong>Video Switcher:</strong> Use the "🎛️ Launch Switcher" button for professional multi-camera mixing with phone sources</li>
 					<li>• Streams automatically appear on the memorial page when they go live</li>
 				</ul>
 			</div>
