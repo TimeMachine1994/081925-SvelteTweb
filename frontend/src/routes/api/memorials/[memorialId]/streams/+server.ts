@@ -115,6 +115,7 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			title, 
 			description, 
 			scheduledStartTime,
+			streamingMethod,
 			calculatorServiceType, 
 			calculatorServiceIndex,
 			serviceHash,
@@ -152,43 +153,50 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 		let streamKey = '';
 		let rtmpUrl = '';
 		let cloudflareInputId = '';
+		let methodConfig: any = null;
 
-		try {
-			if (streamingMethod === 'obs') {
-				// OBS Method: Single RTMP stream
-				const config = await setupOBSMethod();
-				streamKey = config.streamKey;
-				rtmpUrl = config.rtmpUrl;
-				cloudflareInputId = config.cloudflareInputId;
-				methodConfig = { type: 'obs', cloudflareInputId };
-			} else if (streamingMethod === 'phone-to-obs') {
-				// Phone to OBS Method: Two streams (phone + OBS)
-				const config = await setupPhoneToOBSMethod();
-				streamKey = config.obsDestination.streamKey;
-				rtmpUrl = config.obsDestination.rtmpUrl;
-				cloudflareInputId = config.obsDestination.cloudflareInputId;
-				methodConfig = {
-					type: 'phone-to-obs',
-					obsDestination: config.obsDestination,
-					phoneSource: config.phoneSource
-				};
-			} else if (streamingMethod === 'phone-to-mux') {
-				// Phone to MUX Method: Phone + restreaming
-				const config = await setupPhoneToMUXMethod();
-				// This will throw an error until Phase 5
-				cloudflareInputId = config.cloudflare.inputId;
-				methodConfig = {
-					type: 'phone-to-mux',
-					cloudflare: config.cloudflare,
-					mux: config.mux,
-					restreamingConfigured: config.restreamingConfigured
-				};
+		// Only setup streaming method if explicitly provided
+		// Scheduled streams from calculator don't need credentials until armed
+		if (streamingMethod) {
+			try {
+				if (streamingMethod === 'obs') {
+					// OBS Method: Single RTMP stream
+					const config = await setupOBSMethod();
+					streamKey = config.streamKey;
+					rtmpUrl = config.rtmpUrl;
+					cloudflareInputId = config.cloudflareInputId;
+					methodConfig = { type: 'obs', cloudflareInputId };
+				} else if (streamingMethod === 'phone-to-obs') {
+					// Phone to OBS Method: Two streams (phone + OBS)
+					const config = await setupPhoneToOBSMethod();
+					streamKey = config.obsDestination.streamKey;
+					rtmpUrl = config.obsDestination.rtmpUrl;
+					cloudflareInputId = config.obsDestination.cloudflareInputId;
+					methodConfig = {
+						type: 'phone-to-obs',
+						obsDestination: config.obsDestination,
+						phoneSource: config.phoneSource
+					};
+				} else if (streamingMethod === 'phone-to-mux') {
+					// Phone to MUX Method: Phone + restreaming
+					const config = await setupPhoneToMUXMethod();
+					// This will throw an error until Phase 5
+					cloudflareInputId = config.cloudflare.inputId;
+					methodConfig = {
+						type: 'phone-to-mux',
+						cloudflare: config.cloudflare,
+						mux: config.mux,
+						restreamingConfigured: config.restreamingConfigured
+					};
+				}
+
+				console.log('✅ [STREAMS API] Streaming method configured successfully');
+			} catch (error) {
+				console.error('❌ [STREAMS API] Failed to setup streaming method:', error);
+				throw SvelteKitError(500, `Failed to configure ${streamingMethod} streaming: ${error instanceof Error ? error.message : 'Unknown error'}`);
 			}
-
-			console.log('✅ [STREAMS API] Streaming method configured successfully');
-		} catch (error) {
-			console.error('❌ [STREAMS API] Failed to setup streaming method:', error);
-			throw SvelteKitError(500, `Failed to configure ${streamingMethod} streaming: ${error instanceof Error ? error.message : 'Unknown error'}`);
+		} else {
+			console.log('ℹ️ [STREAMS API] No streaming method specified - stream will be armed later');
 		}
 
 		// Create stream object (avoiding undefined values for Firestore)
@@ -224,18 +232,20 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			streamData.lastSyncedAt = lastSyncedAt;
 		}
 
-		// Add method-specific fields
-		if (streamingMethod === 'phone-to-obs') {
-			streamData.phoneSourceStreamId = methodConfig.phoneSource.cloudflareInputId;
-			streamData.phoneSourcePlaybackUrl = methodConfig.phoneSource.playbackUrl;
-			streamData.phoneSourceWhipUrl = methodConfig.phoneSource.whipUrl;
-		} else if (streamingMethod === 'phone-to-mux') {
-			streamData.muxStreamId = methodConfig.mux.streamId;
-			streamData.muxStreamKey = methodConfig.mux.streamKey;
-			streamData.muxPlaybackId = methodConfig.mux.playbackId;
-			// Only add restreamingEnabled if it has a value (avoid undefined for Firestore)
-			if (methodConfig.restreamingConfigured !== undefined) {
-				streamData.restreamingEnabled = methodConfig.restreamingConfigured;
+		// Add method-specific fields only if streaming method was configured
+		if (methodConfig) {
+			if (streamingMethod === 'phone-to-obs') {
+				streamData.phoneSourceStreamId = methodConfig.phoneSource.cloudflareInputId;
+				streamData.phoneSourcePlaybackUrl = methodConfig.phoneSource.playbackUrl;
+				streamData.phoneSourceWhipUrl = methodConfig.phoneSource.whipUrl;
+			} else if (streamingMethod === 'phone-to-mux') {
+				streamData.muxStreamId = methodConfig.mux.streamId;
+				streamData.muxStreamKey = methodConfig.mux.streamKey;
+				streamData.muxPlaybackId = methodConfig.mux.playbackId;
+				// Only add restreamingEnabled if it has a value (avoid undefined for Firestore)
+				if (methodConfig.restreamingConfigured !== undefined) {
+					streamData.restreamingEnabled = methodConfig.restreamingConfigured;
+				}
 			}
 		}
 

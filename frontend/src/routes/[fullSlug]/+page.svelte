@@ -5,7 +5,7 @@
 	import BookingReminderBanner from '$lib/components/BookingReminderBanner.svelte';
 	import { shouldShowBookingBanner, markBannerAsSeen, debugBannerState } from '$lib/utils/bookingBanner';
 	import { onMount } from 'svelte';
-	import { Facebook, Twitter, Linkedin, Share2, X } from 'lucide-svelte';
+	import { Facebook, Twitter, Linkedin, Share2, X, Video } from 'lucide-svelte';
 	import { browser } from '$app/environment';
 
 	let { data }: { data: PageData } = $props();
@@ -18,6 +18,17 @@
 	
 	// Determine if user can edit slideshows
 	let canEditSlideshows = $derived(() => {
+		if (!user || !memorial) return false;
+		
+		return (
+			user.role === 'admin' ||
+			memorial.ownerUid === user.uid ||
+			memorial.funeralDirectorUid === user.uid
+		);
+	});
+	
+	// Determine if user can manage streams (same permissions as slideshow editing)
+	let canManageStreams = $derived(() => {
 		if (!user || !memorial) return false;
 		
 		return (
@@ -245,36 +256,51 @@
 						</h1>
 					</div>
 					
-					<!-- Share Button with Popup -->
-					<div class="share-container">
-						<button 
-							class="share-button"
-							onclick={toggleSharePopup}
-							title="Share memorial"
-							aria-label="Share memorial"
-						>
-							<Share2 size={18} />
-						</button>
+					<!-- Action Buttons Container -->
+					<div class="memorial-actions">
+						<!-- Share Button with Popup -->
+						<div class="share-container">
+							<button 
+								class="share-button"
+								onclick={toggleSharePopup}
+								title="Share memorial"
+								aria-label="Share memorial"
+							>
+								<Share2 size={18} />
+							</button>
+							
+							{#if showSharePopup}
+								<div class="share-popup">
+									<button onclick={shareOnFacebook} class="share-option facebook" title="Share on Facebook">
+										<Facebook size={18} />
+										<span>Facebook</span>
+									</button>
+									<button onclick={shareOnTwitter} class="share-option twitter" title="Share on X (Twitter)">
+										<Twitter size={18} />
+										<span>Twitter</span>
+									</button>
+									<button onclick={shareOnLinkedIn} class="share-option linkedin" title="Share on LinkedIn">
+										<Linkedin size={18} />
+										<span>LinkedIn</span>
+									</button>
+									<button onclick={copyLink} class="share-option copy" title="Copy link">
+										<Share2 size={18} />
+										<span>Copy Link</span>
+									</button>
+								</div>
+							{/if}
+						</div>
 						
-						{#if showSharePopup}
-							<div class="share-popup">
-								<button onclick={shareOnFacebook} class="share-option facebook" title="Share on Facebook">
-									<Facebook size={18} />
-									<span>Facebook</span>
-								</button>
-								<button onclick={shareOnTwitter} class="share-option twitter" title="Share on X (Twitter)">
-									<Twitter size={18} />
-									<span>Twitter</span>
-								</button>
-								<button onclick={shareOnLinkedIn} class="share-option linkedin" title="Share on LinkedIn">
-									<Linkedin size={18} />
-									<span>LinkedIn</span>
-								</button>
-								<button onclick={copyLink} class="share-option copy" title="Copy link">
-									<Share2 size={18} />
-									<span>Copy Link</span>
-								</button>
-							</div>
+						<!-- Manage Streams Button (for owners/admins/funeral directors) -->
+						{#if canManageStreams()}
+							<a 
+								href="/memorials/{memorial.id}/streams"
+								class="manage-streams-button"
+								title="Manage livestreams"
+								aria-label="Manage livestreams"
+							>
+								<Video size={18} />
+							</a>
 						{/if}
 					</div>
 					
@@ -321,36 +347,51 @@
 						</div>
 					{/if}
 					
-					<!-- Share Button with Popup -->
-					<div class="share-container">
-						<button 
-							class="share-button"
-							onclick={toggleSharePopup}
-							title="Share memorial"
-							aria-label="Share memorial"
-						>
-							<Share2 size={18} />
-						</button>
+					<!-- Action Buttons Container -->
+					<div class="memorial-actions">
+						<!-- Share Button with Popup -->
+						<div class="share-container">
+							<button 
+								class="share-button"
+								onclick={toggleSharePopup}
+								title="Share memorial"
+								aria-label="Share memorial"
+							>
+								<Share2 size={18} />
+							</button>
+							
+							{#if showSharePopup}
+								<div class="share-popup">
+									<button onclick={shareOnFacebook} class="share-option facebook" title="Share on Facebook">
+										<Facebook size={18} />
+										<span>Facebook</span>
+									</button>
+									<button onclick={shareOnTwitter} class="share-option twitter" title="Share on X (Twitter)">
+										<Twitter size={18} />
+										<span>Twitter</span>
+									</button>
+									<button onclick={shareOnLinkedIn} class="share-option linkedin" title="Share on LinkedIn">
+										<Linkedin size={18} />
+										<span>LinkedIn</span>
+									</button>
+									<button onclick={copyLink} class="share-option copy" title="Copy link">
+										<Share2 size={18} />
+										<span>Copy Link</span>
+									</button>
+								</div>
+							{/if}
+						</div>
 						
-						{#if showSharePopup}
-							<div class="share-popup">
-								<button onclick={shareOnFacebook} class="share-option facebook" title="Share on Facebook">
-									<Facebook size={18} />
-									<span>Facebook</span>
-								</button>
-								<button onclick={shareOnTwitter} class="share-option twitter" title="Share on X (Twitter)">
-									<Twitter size={18} />
-									<span>Twitter</span>
-								</button>
-								<button onclick={shareOnLinkedIn} class="share-option linkedin" title="Share on LinkedIn">
-									<Linkedin size={18} />
-									<span>LinkedIn</span>
-								</button>
-								<button onclick={copyLink} class="share-option copy" title="Copy link">
-									<Share2 size={18} />
-									<span>Copy Link</span>
-								</button>
-							</div>
+						<!-- Manage Streams Button (for owners/admins/funeral directors) -->
+						{#if canManageStreams()}
+							<a 
+								href="/memorials/{memorial.id}/streams"
+								class="manage-streams-button"
+								title="Manage livestreams"
+								aria-label="Manage livestreams"
+							>
+								<Video size={18} />
+							</a>
 						{/if}
 					</div>
 					
@@ -675,12 +716,20 @@
 	}
 	
 
-	/* Social Share Styles */
-	.share-container {
+	/* Action Buttons Container */
+	.memorial-actions {
 		position: absolute;
 		bottom: 1.5rem;
 		right: 1.5rem;
 		z-index: 100;
+		display: flex;
+		gap: 0.75rem;
+		align-items: flex-end;
+	}
+
+	/* Social Share Styles */
+	.share-container {
+		position: relative;
 	}
 
 	.share-button {
@@ -705,6 +754,33 @@
 		color: white;
 		transform: translateY(-2px) scale(1.05);
 		box-shadow: 0 6px 20px rgba(213, 186, 127, 0.4);
+		border-color: rgba(255, 255, 255, 0.5);
+	}
+
+	/* Manage Streams Button */
+	.manage-streams-button {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 48px;
+		height: 48px;
+		padding: 0;
+		background: rgba(147, 51, 234, 0.95); /* Purple color */
+		backdrop-filter: blur(10px);
+		color: white;
+		border: 2px solid rgba(255, 255, 255, 0.3);
+		border-radius: 50%;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+		text-decoration: none;
+	}
+
+	.manage-streams-button:hover {
+		background: rgba(147, 51, 234, 1);
+		color: white;
+		transform: translateY(-2px) scale(1.05);
+		box-shadow: 0 6px 20px rgba(147, 51, 234, 0.4);
 		border-color: rgba(255, 255, 255, 0.5);
 	}
 
@@ -778,12 +854,14 @@
 
 	/* Mobile Responsive */
 	@media (max-width: 768px) {
-		.share-container {
+		.memorial-actions {
 			bottom: 1rem;
 			right: 1rem;
+			gap: 0.5rem;
 		}
 
-		.share-button {
+		.share-button,
+		.manage-streams-button {
 			width: 44px;
 			height: 44px;
 		}

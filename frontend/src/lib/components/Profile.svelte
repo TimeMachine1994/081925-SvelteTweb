@@ -327,15 +327,13 @@
 													<Clock class="mr-1 h-3 w-3" />
 													Schedule
 												</a>
-												{#if userRole === 'funeral_director' || userRole === 'admin'}
-													<a
-														href={`/memorials/${memorial.id}/streams`}
-														class="flex items-center justify-center rounded-xl bg-purple-600 px-4 py-3 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg min-h-[44px]"
-													>
-														<Play class="mr-1 h-3 w-3" />
-														Manage Streams
-													</a>
-												{/if}
+												<a
+													href={`/memorials/${memorial.id}/streams`}
+													class="flex items-center justify-center rounded-xl bg-purple-600 px-4 py-3 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg min-h-[44px]"
+												>
+													<Video class="mr-1 h-3 w-3" />
+													Streams
+												</a>
 											</div>
 										</div>
 									</div>
