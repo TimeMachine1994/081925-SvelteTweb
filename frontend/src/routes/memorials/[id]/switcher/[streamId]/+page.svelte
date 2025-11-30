@@ -61,15 +61,6 @@
 	// Props from server load function
 	let { data }: { data: PageData } = $props();
 
-	console.log('\n🎬 [SWITCHER PAGE] Page mounted');
-	console.log('=====================================');
-	console.log('📦 Data received from server:', data);
-	console.log('   Memorial:', data.memorial.lovedOneName);
-	console.log('   Stream:', data.stream.title);
-	console.log('   Room URL:', data.room.url);
-	console.log('   Sources available:', data.sources.length);
-	console.log('=====================================\n');
-
 	// Component state
 	let mounted = $state(false);
 	let showQRModal = $state(false);
@@ -80,6 +71,15 @@
 	 * Initializes Daily.co and joins the room
 	 */
 	onMount(async () => {
+		console.log('\n🎬 [SWITCHER PAGE] Page mounted');
+		console.log('=====================================');
+		console.log('📦 Data received from server:', data);
+		console.log('   Memorial:', data.memorial.lovedOneName);
+		console.log('   Stream:', data.stream.title);
+		console.log('   Room URL:', data.room.url);
+		console.log('   Sources available:', data.sources.length);
+		console.log('=====================================\n');
+		
 		console.log('🚀 [SWITCHER PAGE] Component mounted');
 		mounted = true;
 
