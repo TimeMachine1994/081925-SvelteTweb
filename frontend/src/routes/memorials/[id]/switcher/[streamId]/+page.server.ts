@@ -34,20 +34,23 @@ console.log('\n📦 [ENV DEBUG] Available environment variables:');
 console.log('   NODE_ENV:', process.env.NODE_ENV || '❌ NOT SET');
 console.log('   DAILY_API_KEY:', process.env.DAILY_API_KEY ? '✅ SET (' + process.env.DAILY_API_KEY.substring(0, 10) + '...)' : '❌ NOT SET');
 console.log('   DAILY_DOMAIN:', process.env.DAILY_DOMAIN ? '✅ SET (' + process.env.DAILY_DOMAIN + ')' : '❌ NOT SET');
+console.log('   PRIVATE_DAILY_API_KEY:', process.env.PRIVATE_DAILY_API_KEY ? '✅ SET (' + process.env.PRIVATE_DAILY_API_KEY.substring(0, 10) + '...)' : '❌ NOT SET');
+console.log('   PRIVATE_DAILY_DOMAIN:', process.env.PRIVATE_DAILY_DOMAIN ? '✅ SET (' + process.env.PRIVATE_DAILY_DOMAIN + ')' : '❌ NOT SET');
 
 // Log process.env keys to see what's available
 console.log('\n🔑 [ENV DEBUG] All environment variable keys:');
 const envKeys = Object.keys(process.env);
 console.log('   Total variables:', envKeys.length);
-console.log('   Daily-related:', envKeys.filter(k => k.includes('DAILY')));
+console.log('   Daily-related keys:', envKeys.filter(k => k.includes('DAILY')));
+console.log('   PRIVATE_ keys:', envKeys.filter(k => k.startsWith('PRIVATE_')));
 
 // Environment variable validation
 console.log('\n📋 [ENV DEBUG] Extracting Daily.co configuration...');
-const DAILY_API_KEY = process.env.DAILY_API_KEY;
-const DAILY_DOMAIN = process.env.DAILY_DOMAIN;
+const DAILY_API_KEY = process.env.PRIVATE_DAILY_API_KEY;
+const DAILY_DOMAIN = process.env.PRIVATE_DAILY_DOMAIN;
 
-console.log('   DAILY_API_KEY extracted:', DAILY_API_KEY ? '✅ YES' : '❌ NO');
-console.log('   DAILY_DOMAIN extracted:', DAILY_DOMAIN ? '✅ YES' : '❌ NO');
+console.log('   PRIVATE_DAILY_API_KEY extracted:', DAILY_API_KEY ? '✅ YES' : '❌ NO');
+console.log('   PRIVATE_DAILY_DOMAIN extracted:', DAILY_DOMAIN ? '✅ YES' : '❌ NO');
 
 if (DAILY_API_KEY) {
 	console.log('   API Key length:', DAILY_API_KEY.length, 'characters');
@@ -61,15 +64,15 @@ if (DAILY_DOMAIN) {
 // Validate Daily.co configuration on module load
 if (!DAILY_API_KEY || !DAILY_DOMAIN) {
 	console.error('\n❌ [SWITCHER MODULE] Missing Daily.co configuration in environment variables');
-	console.error('   DAILY_API_KEY:', DAILY_API_KEY ? '✅ SET' : '❌ MISSING');
-	console.error('   DAILY_DOMAIN:', DAILY_DOMAIN ? '✅ SET' : '❌ MISSING');
-	console.error('   Required: DAILY_API_KEY and DAILY_DOMAIN');
+	console.error('   PRIVATE_DAILY_API_KEY:', DAILY_API_KEY ? '✅ SET' : '❌ MISSING');
+	console.error('   PRIVATE_DAILY_DOMAIN:', DAILY_DOMAIN ? '✅ SET' : '❌ MISSING');
+	console.error('   Required: PRIVATE_DAILY_API_KEY and PRIVATE_DAILY_DOMAIN');
 	console.error('   Get your API key from: https://dashboard.daily.co/developers');
 	console.error('\n   ⚠️  THE SWITCHER WILL NOT WORK WITHOUT THESE VARIABLES!');
 } else {
 	console.log('\n✅ [SWITCHER MODULE] Daily.co configuration loaded successfully!');
-	console.log('   API Key: CONFIGURED');
-	console.log('   Domain:', DAILY_DOMAIN);
+	console.log('   Domain: ' + DAILY_DOMAIN);
+	console.log('   API Key: CONFIGURED (first 15 chars: ' + DAILY_API_KEY.substring(0, 15) + '...)');
 }
 
 console.log('🔧'.repeat(40) + '\n');
@@ -307,7 +310,7 @@ export const load: PageServerLoad = async ({ params, locals, fetch }) => {
 	// STEP 2: VALIDATE DAILY.CO CONFIGURATION
 	// ============================================================================
 	console.log('\n📋 [SWITCHER] Step 2: Validating Daily.co configuration');
-	console.log('   🔍 Checking DAILY_API_KEY...');
+	console.log('   🔍 Checking PRIVATE_DAILY_API_KEY...');
 	console.log('      Value:', DAILY_API_KEY ? '✅ EXISTS' : '❌ UNDEFINED/EMPTY');
 	if (DAILY_API_KEY) {
 		console.log('      Type:', typeof DAILY_API_KEY);
@@ -315,7 +318,7 @@ export const load: PageServerLoad = async ({ params, locals, fetch }) => {
 		console.log('      Preview:', DAILY_API_KEY.substring(0, 15) + '...');
 	}
 
-	console.log('   🔍 Checking DAILY_DOMAIN...');
+	console.log('   🔍 Checking PRIVATE_DAILY_DOMAIN...');
 	console.log('      Value:', DAILY_DOMAIN ? '✅ EXISTS' : '❌ UNDEFINED/EMPTY');
 	if (DAILY_DOMAIN) {
 		console.log('      Type:', typeof DAILY_DOMAIN);
@@ -324,15 +327,15 @@ export const load: PageServerLoad = async ({ params, locals, fetch }) => {
 
 	if (!DAILY_API_KEY || !DAILY_DOMAIN) {
 		console.error('\n❌❌❌ [SWITCHER] Daily.co is NOT CONFIGURED! ❌❌❌');
-		console.error('   DAILY_API_KEY:', DAILY_API_KEY ? '✅ SET' : '❌ MISSING');
-		console.error('   DAILY_DOMAIN:', DAILY_DOMAIN ? '✅ SET' : '❌ MISSING');
+		console.error('   PRIVATE_DAILY_API_KEY:', DAILY_API_KEY ? '✅ SET' : '❌ MISSING');
+		console.error('   PRIVATE_DAILY_DOMAIN:', DAILY_DOMAIN ? '✅ SET' : '❌ MISSING');
 		console.error('   ');
 		console.error('   📝 TO FIX THIS:');
-		console.error('   1. Create/edit frontend/.env file');
-		console.error('   2. Add these lines:');
-		console.error('      DAILY_API_KEY=your_api_key_here');
-		console.error('      DAILY_DOMAIN=your-domain.daily.co');
-		console.error('   3. Restart the dev server');
+		console.error('   1. Add environment variables in Vercel Dashboard');
+		console.error('   2. Or create/edit frontend/.env file:');
+		console.error('      PRIVATE_DAILY_API_KEY=your_api_key_here');
+		console.error('      PRIVATE_DAILY_DOMAIN=your-domain.daily.co');
+		console.error('   3. Restart the dev server / Redeploy to Vercel');
 		console.error('   ');
 		console.error('   Get your API key from: https://dashboard.daily.co/developers');
 		console.error('\n   ⚠️  THROWING 500 ERROR NOW...');
