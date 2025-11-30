@@ -21,6 +21,7 @@
 
 import { writable, derived, type Writable } from 'svelte/store';
 import type Daily from '@daily-co/daily-js';
+import { browser } from '$app/environment';
 
 /**
  * TYPE DEFINITIONS
@@ -74,50 +75,52 @@ export type SubscriptionQuality = 'off' | 'low' | 'high' | 'staged';
  * ====================
  */
 
-// Initialize stores with default values and logging
-console.log('🏪 [DAILY STORES] Initializing Svelte stores...');
+// Initialize stores with default values and logging (browser-only logging)
+if (browser) {
+	console.log('🏪 [DAILY STORES] Initializing Svelte stores...');
+}
 
 /**
  * Daily Call Object Store
  * Holds the main Daily.co connection instance
  */
 export const dailyCallStore: Writable<any | null> = writable(null);
-console.log('   ✓ dailyCallStore initialized');
+if (browser) console.log('   ✓ dailyCallStore initialized');
 
 /**
  * Participants Store
  * Array of all participants in the room
  */
 export const participantsStore: Writable<DailyParticipant[]> = writable([]);
-console.log('   ✓ participantsStore initialized');
+if (browser) console.log('   ✓ participantsStore initialized');
 
 /**
  * Connection State Store
  * Tracks the current connection status
  */
 export const connectionStateStore: Writable<ConnectionState> = writable('idle');
-console.log('   ✓ connectionStateStore initialized');
+if (browser) console.log('   ✓ connectionStateStore initialized');
 
 /**
  * Active Source Store
  * Session ID of the currently active (on program) source
  */
 export const activeSourceStore: Writable<string | null> = writable(null);
-console.log('   ✓ activeSourceStore initialized');
+if (browser) console.log('   ✓ activeSourceStore initialized');
 
 /**
  * Active Audio Store
  * Session ID of the source currently providing audio
  */
 export const activeAudioStore: Writable<string | null> = writable(null);
-console.log('   ✓ activeAudioStore initialized');
+if (browser) console.log('   ✓ activeAudioStore initialized');
 
 /**
  * Pinned Audio Store
  * Session ID of pinned audio source (overrides audio-follows-video)
  */
 export const pinnedAudioStore: Writable<string | null> = writable(null);
-console.log('   ✓ pinnedAudioStore initialized');
+if (browser) console.log('   ✓ pinnedAudioStore initialized');
 
 /**
  * Mute Map Store
@@ -125,23 +128,23 @@ console.log('   ✓ pinnedAudioStore initialized');
  * Key: session_id, Value: boolean (true = muted)
  */
 export const muteMapStore: Writable<Record<string, boolean>> = writable({});
-console.log('   ✓ muteMapStore initialized');
+if (browser) console.log('   ✓ muteMapStore initialized');
 
 /**
  * Error Store
  * Holds any connection or operational errors
  */
 export const errorStore: Writable<string | null> = writable(null);
-console.log('   ✓ errorStore initialized');
+if (browser) console.log('   ✓ errorStore initialized');
 
 /**
  * Streaming State Store
  * Indicates whether we're currently streaming to WHIP
  */
 export const isStreamingStore: Writable<boolean> = writable(false);
-console.log('   ✓ isStreamingStore initialized');
+if (browser) console.log('   ✓ isStreamingStore initialized');
 
-console.log('✅ [DAILY STORES] All stores initialized successfully\n');
+if (browser) console.log('✅ [DAILY STORES] All stores initialized successfully\n');
 
 /**
  * DERIVED STORES
@@ -157,7 +160,7 @@ export const remoteParticipantsStore = derived(
 	participantsStore,
 	($participants) => {
 		const remote = $participants.filter(p => !p.local);
-		console.log(`📊 [DAILY STORES] Remote participants: ${remote.length}`);
+		if (browser) console.log(`📊 [DAILY STORES] Remote participants: ${remote.length}`);
 		return remote;
 	}
 );
@@ -172,7 +175,7 @@ export const activeParticipantsStore = derived(
 		const active = $participants.filter(p => 
 			p.tracks?.video?.state === 'playable' && !p.local
 		);
-		console.log(`📊 [DAILY STORES] Active participants: ${active.length}`);
+		if (browser) console.log(`📊 [DAILY STORES] Active participants: ${active.length}`);
 		return active;
 	}
 );
@@ -205,7 +208,7 @@ export const connectionStatusStore = derived(
  * Sets the Daily call object
  */
 export function setDailyCall(call: any) {
-	console.log('🔧 [DAILY STORES] Setting Daily call object');
+	if (browser) console.log('🔧 [DAILY STORES] Setting Daily call object');
 	dailyCallStore.set(call);
 }
 
@@ -214,17 +217,19 @@ export function setDailyCall(call: any) {
  * Logs changes for debugging
  */
 export function updateParticipants(participants: DailyParticipant[]) {
-	console.log(`🔧 [DAILY STORES] Updating participants list`);
-	console.log(`   Total participants: ${participants.length}`);
-	
-	// Log each participant for debugging
-	participants.forEach((p, index) => {
-		console.log(`   ${index + 1}. ${p.user_name} (${p.session_id})`);
-		console.log(`      - Local: ${p.local}`);
-		console.log(`      - Owner: ${p.owner}`);
-		console.log(`      - Video: ${p.tracks?.video?.state || 'unknown'}`);
-		console.log(`      - Audio: ${p.tracks?.audio?.state || 'unknown'}`);
-	});
+	if (browser) {
+		console.log(`🔧 [DAILY STORES] Updating participants list`);
+		console.log(`   Total participants: ${participants.length}`);
+		
+		// Log each participant for debugging
+		participants.forEach((p, index) => {
+			console.log(`   ${index + 1}. ${p.user_name} (${p.session_id})`);
+			console.log(`      - Local: ${p.local}`);
+			console.log(`      - Owner: ${p.owner}`);
+			console.log(`      - Video: ${p.tracks?.video?.state || 'unknown'}`);
+			console.log(`      - Audio: ${p.tracks?.audio?.state || 'unknown'}`);
+		});
+	}
 	
 	participantsStore.set(participants);
 }
@@ -234,7 +239,7 @@ export function updateParticipants(participants: DailyParticipant[]) {
  * Logs state transitions
  */
 export function setConnectionState(state: ConnectionState) {
-	console.log(`🔧 [DAILY STORES] Connection state: ${state}`);
+	if (browser) console.log(`🔧 [DAILY STORES] Connection state: ${state}`);
 	connectionStateStore.set(state);
 }
 
@@ -242,7 +247,7 @@ export function setConnectionState(state: ConnectionState) {
  * Sets the active source (program output)
  */
 export function setActiveSource(sessionId: string | null) {
-	console.log(`🔧 [DAILY STORES] Active source set to: ${sessionId || 'none'}`);
+	if (browser) console.log(`🔧 [DAILY STORES] Active source set to: ${sessionId || 'none'}`);
 	activeSourceStore.set(sessionId);
 }
 
@@ -250,7 +255,7 @@ export function setActiveSource(sessionId: string | null) {
  * Sets the active audio source
  */
 export function setActiveAudio(sessionId: string | null) {
-	console.log(`🔧 [DAILY STORES] Active audio set to: ${sessionId || 'none'}`);
+	if (browser) console.log(`🔧 [DAILY STORES] Active audio set to: ${sessionId || 'none'}`);
 	activeAudioStore.set(sessionId);
 }
 
@@ -259,14 +264,14 @@ export function setActiveAudio(sessionId: string | null) {
  * Pinned audio overrides audio-follows-video behavior
  */
 export function toggleAudioPin(sessionId: string) {
-	console.log(`🔧 [DAILY STORES] Toggling audio pin for: ${sessionId}`);
+	if (browser) console.log(`🔧 [DAILY STORES] Toggling audio pin for: ${sessionId}`);
 	
 	pinnedAudioStore.update(current => {
 		if (current === sessionId) {
-			console.log(`   → Audio unpinned`);
+			if (browser) console.log(`   → Audio unpinned`);
 			return null;
 		} else {
-			console.log(`   → Audio pinned to ${sessionId}`);
+			if (browser) console.log(`   → Audio pinned to ${sessionId}`);
 			return sessionId;
 		}
 	});
@@ -276,11 +281,11 @@ export function toggleAudioPin(sessionId: string) {
  * Toggles mute state for a source
  */
 export function toggleMute(sessionId: string) {
-	console.log(`🔧 [DAILY STORES] Toggling mute for: ${sessionId}`);
+	if (browser) console.log(`🔧 [DAILY STORES] Toggling mute for: ${sessionId}`);
 	
 	muteMapStore.update(current => {
 		const newState = !current[sessionId];
-		console.log(`   → Muted: ${newState}`);
+		if (browser) console.log(`   → Muted: ${newState}`);
 		return {
 			...current,
 			[sessionId]: newState
@@ -292,10 +297,12 @@ export function toggleMute(sessionId: string) {
  * Sets an error message
  */
 export function setError(error: string | null) {
-	if (error) {
-		console.error(`❌ [DAILY STORES] Error: ${error}`);
-	} else {
-		console.log(`✅ [DAILY STORES] Error cleared`);
+	if (browser) {
+		if (error) {
+			console.error(`❌ [DAILY STORES] Error: ${error}`);
+		} else {
+			console.log(`✅ [DAILY STORES] Error cleared`);
+		}
 	}
 	errorStore.set(error);
 }
@@ -304,7 +311,7 @@ export function setError(error: string | null) {
  * Sets streaming state
  */
 export function setStreaming(streaming: boolean) {
-	console.log(`🔧 [DAILY STORES] Streaming: ${streaming ? 'ON' : 'OFF'}`);
+	if (browser) console.log(`🔧 [DAILY STORES] Streaming: ${streaming ? 'ON' : 'OFF'}`);
 	isStreamingStore.set(streaming);
 }
 
@@ -313,7 +320,7 @@ export function setStreaming(streaming: boolean) {
  * Used when leaving the room
  */
 export function resetStores() {
-	console.log('🔄 [DAILY STORES] Resetting all stores to initial state');
+	if (browser) console.log('🔄 [DAILY STORES] Resetting all stores to initial state');
 	
 	dailyCallStore.set(null);
 	participantsStore.set([]);
@@ -325,7 +332,7 @@ export function resetStores() {
 	errorStore.set(null);
 	isStreamingStore.set(false);
 	
-	console.log('✅ [DAILY STORES] All stores reset');
+	if (browser) console.log('✅ [DAILY STORES] All stores reset');
 }
 
-console.log('✅ [DAILY STORES] Module loaded successfully');
+if (browser) console.log('✅ [DAILY STORES] Module loaded successfully');

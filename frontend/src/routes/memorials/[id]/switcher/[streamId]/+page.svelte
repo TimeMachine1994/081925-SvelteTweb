@@ -19,6 +19,7 @@
 
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
+	import { browser } from '$app/environment';
 	import type { PageData } from './$types';
 	import type { DailyCall } from '@daily-co/daily-js';
 	
@@ -349,13 +350,15 @@
 	}
 
 	/**
-	 * Derived values for UI
+	 * Derived values for UI (browser-safe)
 	 */
 	const activeSourceName = $derived(() => {
+		if (!browser) return 'No Source';
 		const activeSource = $participantsStore.find(p => p.session_id === $activeSourceStore);
 		return activeSource?.user_name || 'No Source';
 	});
 	const audioSourceName = $derived(() => {
+		if (!browser) return 'No Audio';
 		// Use pinned audio if set, otherwise follow active video
 		const audioId = $pinnedAudioStore || $activeSourceStore;
 		const audioSource = $participantsStore.find(p => p.session_id === audioId);
@@ -368,47 +371,57 @@
   =================================
   Component-based architecture matching SwitcherMockup.html design
 -->
-<div class="h-screen w-screen bg-black text-white flex flex-col overflow-hidden select-none">
-	
-	<!-- Switcher Header Component -->
-	<SwitcherHeader
-		sessionId={data.room.name}
-		isLive={$isStreamingStore}
-		onQRClick={openQRModal}
-		onGoLive={handleGoLive}
-		onStopLive={handleStopLive}
-	/>
-
-	<!-- Program Monitor with Audio Overlay -->
-	<div class="relative flex-1">
-		<ProgramMonitor
-			videoElementId="program-video"
-			sourceName={activeSourceName()}
-		/>
+{#if browser}
+	<div class="h-screen w-screen bg-black text-white flex flex-col overflow-hidden select-none">
 		
-		<!-- Audio Monitor Overlay -->
-		<AudioMonitor
-			sourceName={audioSourceName()}
-			isPinned={$pinnedAudioStore !== null}
-			level={70}
+		<!-- Switcher Header Component -->
+		<SwitcherHeader
+			sessionId={data.room.name}
+			isLive={$isStreamingStore}
+			onQRClick={openQRModal}
+			onGoLive={handleGoLive}
+			onStopLive={handleStopLive}
+		/>
+
+		<!-- Program Monitor with Audio Overlay -->
+		<div class="relative flex-1">
+			<ProgramMonitor
+				videoElementId="program-video"
+				sourceName={activeSourceName()}
+			/>
+			
+			<!-- Audio Monitor Overlay -->
+			<AudioMonitor
+				sourceName={audioSourceName()}
+				isPinned={$pinnedAudioStore !== null}
+				level={70}
+			/>
+		</div>
+
+		<!-- Source Bus (Bottom Rail) -->
+		<SourceBus
+			participants={$participantsStore}
+			activeSourceId={$activeSourceStore}
+			pinnedAudioId={$pinnedAudioStore}
+			muteMap={$muteMapStore}
+			onSourceSwitch={handleSourceSwitch}
+			onAudioPin={handleAudioPin}
+			onMute={handleMute}
+		/>
+
+		<!-- QR Code Modal -->
+		<QRModal
+			isOpen={showQRModal}
+			sources={data.sources}
+			onClose={closeQRModal}
 		/>
 	</div>
-
-	<!-- Source Bus (Bottom Rail) -->
-	<SourceBus
-		participants={$participantsStore}
-		activeSourceId={$activeSourceStore}
-		pinnedAudioId={$pinnedAudioStore}
-		muteMap={$muteMapStore}
-		onSourceSwitch={handleSourceSwitch}
-		onAudioPin={handleAudioPin}
-		onMute={handleMute}
-	/>
-
-	<!-- QR Code Modal -->
-	<QRModal
-		isOpen={showQRModal}
-		sources={data.sources}
-		onClose={closeQRModal}
-	/>
-</div>
+{:else}
+	<!-- SSR Loading State -->
+	<div class="h-screen w-screen bg-black text-white flex items-center justify-center">
+		<div class="text-center">
+			<div class="text-2xl font-bold mb-2">Loading Video Switcher...</div>
+			<div class="text-gray-400">Initializing WebRTC connection</div>
+		</div>
+	</div>
+{/if}
