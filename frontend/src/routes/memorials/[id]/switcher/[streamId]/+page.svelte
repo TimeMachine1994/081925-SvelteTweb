@@ -98,6 +98,9 @@
 	 * Runs reactively when participantsStore updates
 	 */
 	$effect(() => {
+		// Only run in browser
+		if (typeof window === 'undefined') return;
+		
 		const call = dailyCall;
 		if (!call) return;
 
