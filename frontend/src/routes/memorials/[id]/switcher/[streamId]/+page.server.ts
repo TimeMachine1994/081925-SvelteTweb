@@ -379,12 +379,17 @@ export const load: PageServerLoad = async ({ params, locals, fetch }) => {
 			throw error(500, { message: 'Failed to load stream data' });
 		}
 
-		const streams = await streamsResponse.json();
-		const stream = streams.find((s: any) => s.id === params.streamId);
+		const streamsData = await streamsResponse.json();
+		console.log('   API Response structure:', typeof streamsData);
+		console.log('   Has streams property:', 'streams' in streamsData);
+		console.log('   Streams count:', streamsData.streams?.length || 0);
+		
+		const stream = streamsData.streams?.find((s: any) => s.id === params.streamId);
 
 		if (!stream) {
 			console.error('❌ [SWITCHER] Stream not found');
 			console.error(`   Stream ID: ${params.streamId}`);
+			console.error(`   Available stream IDs:`, streamsData.streams?.map((s: any) => s.id) || []);
 			throw error(404, { message: 'Stream not found' });
 		}
 
