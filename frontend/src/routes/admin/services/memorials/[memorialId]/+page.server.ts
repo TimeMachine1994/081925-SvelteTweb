@@ -168,11 +168,11 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 				description: data.description || '',
 				status: data.status || 'scheduled',
 				visibility: data.visibility || 'public',
-				scheduledStartTime: data.scheduledStartTime || null,
-				startedAt: data.startedAt || null,
-				endedAt: data.endedAt || null,
-				liveStartedAt: data.liveStartedAt || null,
-				liveEndedAt: data.liveEndedAt || null,
+				scheduledStartTime: convertTimestamp(data.scheduledStartTime),
+				startedAt: convertTimestamp(data.startedAt),
+				endedAt: convertTimestamp(data.endedAt),
+				liveStartedAt: convertTimestamp(data.liveStartedAt),
+				liveEndedAt: convertTimestamp(data.liveEndedAt),
 				
 				// Stream Arming (NEW)
 				armStatus: data.armStatus || null,
@@ -206,8 +206,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 				calculatorServiceType: data.calculatorServiceType || null,
 				calculatorServiceIndex: data.calculatorServiceIndex || null,
 				
-				createdAt: data.createdAt || null,
-				updatedAt: data.updatedAt || null
+				createdAt: convertTimestamp(data.createdAt),
+				updatedAt: convertTimestamp(data.updatedAt)
 			};
 		});
 
@@ -224,8 +224,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 				audio: data.audio || null,
 				settings: data.settings || {},
 				createdBy: data.createdBy || '',
-				createdAt: data.createdAt || null,
-				updatedAt: data.updatedAt || null
+				createdAt: convertTimestamp(data.createdAt),
+				updatedAt: convertTimestamp(data.updatedAt)
 			};
 		});
 
