@@ -1,6 +1,6 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { adminDb } from '$lib/server/firebase-admin';
+import { adminDb } from '$lib/server/firebase';
 import type { CustomPricing } from '$lib/config/pricing';
 
 /**
