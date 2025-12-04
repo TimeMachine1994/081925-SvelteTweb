@@ -1,7 +1,9 @@
 <script lang="ts">
 	import AdminLayout from '$lib/components/admin/AdminLayout.svelte';
 	import StreamCard from '$lib/components/streaming/StreamCard.svelte';
+	import CustomPricingEditor from '$lib/components/admin/CustomPricingEditor.svelte';
 	import { goto } from '$app/navigation';
+	import { invalidateAll } from '$app/navigation';
 	
 	let { data } = $props();
 	const { memorial, streams, slideshows, followerCount } = data;
@@ -39,7 +41,12 @@
 	let embedCode = $state('');
 	let embedTitle = $state('');
 	let isCreatingEmbed = $state(false);
-	
+
+	// Handle custom pricing updates
+	async function handlePricingUpdate() {
+		console.log('💰 [PRICING] Custom pricing updated, reloading page data...');
+		await invalidateAll();
+	}
 
 	async function handleDelete() {
 		const confirmMessage = `Are you sure you want to delete "${memorial.lovedOneName}"?\n\nThis will mark it as deleted and hide it from the admin list.`;
@@ -269,6 +276,9 @@
 			<div><strong>Updated:</strong> {formatDate(memorial.updatedAt)} ({formatRelativeTime(memorial.updatedAt)})</div>
 		</div>
 	</div>
+
+	<!-- Custom Pricing Editor -->
+	<CustomPricingEditor memorial={memorial} onUpdate={handlePricingUpdate} />
 
 	<div class="card">
 		<div class="section-header">

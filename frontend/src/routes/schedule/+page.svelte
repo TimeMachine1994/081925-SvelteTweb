@@ -24,6 +24,12 @@
 	} from '$lib/types/livestream';
 	import { useAutoSave } from '$lib/composables/useAutoSave';
 	import { createStreamsFromSchedule } from '$lib/utils/streamMapper';
+	import {
+		TIER_PRICES,
+		ADDON_PRICES,
+		HOURLY_OVERAGE_RATE,
+		ADDITIONAL_SERVICE_FEE
+	} from '$lib/config/pricing';
 
 	let { data } = $props();
 
@@ -102,23 +108,6 @@
 				})
 			: null
 	);
-
-	// Original pricing constants
-	const TIER_PRICES = {
-		record: 699,
-		live: 1299,
-		legacy: 1599
-	};
-
-	const ADDON_PRICES = {
-		photography: 400,
-		audioVisualSupport: 200,
-		liveMusician: 500,
-		woodenUsbDrives: 300 // First one, then $100 each
-	};
-
-	const HOURLY_OVERAGE_RATE = 125;
-	const ADDITIONAL_SERVICE_FEE = 325;
 
 	// Reactive calculations using SvelteKit 5 runes
 	const bookingItems = $derived(calculateBookingItems());

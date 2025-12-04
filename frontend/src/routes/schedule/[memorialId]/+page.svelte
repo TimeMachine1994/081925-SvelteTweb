@@ -19,11 +19,22 @@
 	import type { CalculatorFormData, Tier } from '$lib/types/livestream';
 	import ScheduleReceipt from './_components/ScheduleReceipt.svelte';
 	import EditRequestModal from './_components/EditRequestModal.svelte';
+	import {
+		TIER_PRICES,
+		ADDON_PRICES,
+		HOURLY_OVERAGE_RATE,
+		ADDITIONAL_SERVICE_FEE,
+		TIER_FEATURES,
+		getPricingForMemorial
+	} from '$lib/config/pricing';
 
 	let { data } = $props();
 
 	// Check if memorial is paid
 	const isPaid = $derived(data?.memorial?.isPaid || false);
+
+	// Get memorial-specific pricing (merges custom with defaults)
+	const memorialPricing = $derived(getPricingForMemorial(data?.memorial?.customPricing));
 
 	// Edit request modal state
 	let showEditModal = $state(false);
@@ -136,23 +147,6 @@
 		}
 	});
 
-	// Pricing constants
-	const TIER_PRICES = {
-		record: 699,
-		live: 1299,
-		legacy: 1599
-	};
-
-	const ADDON_PRICES = {
-		photography: 400,
-		audioVisualSupport: 200,
-		liveMusician: 500,
-		woodenUsbDrives: 300
-	};
-
-	const HOURLY_OVERAGE_RATE = 125;
-	const ADDITIONAL_SERVICE_FEE = 325;
-
 	// Reactive calculations
 	const bookingItems = $derived(calculateBookingItems());
 	const totalPrice = $derived(bookingItems.reduce((acc, item) => acc + item.total, 0));
@@ -162,7 +156,7 @@
 
 		// Base Package
 		if (calculatorData.selectedTier) {
-			const price = TIER_PRICES[calculatorData.selectedTier as keyof typeof TIER_PRICES];
+			const price = memorialPricing.tiers[calculatorData.selectedTier as Tier];
 			items.push({
 				name: `Tributestream ${calculatorData.selectedTier.charAt(0).toUpperCase() + calculatorData.selectedTier.slice(1)}`,
 				price: price,
@@ -176,9 +170,9 @@
 		if (mainOverageHours > 0) {
 			items.push({
 				name: 'Main Location Overage',
-				price: HOURLY_OVERAGE_RATE,
+				price: memorialPricing.hourlyOverage,
 				quantity: mainOverageHours,
-				total: HOURLY_OVERAGE_RATE * mainOverageHours
+				total: memorialPricing.hourlyOverage * mainOverageHours
 			});
 		}
 
@@ -186,17 +180,17 @@
 		if (additionalLocation.enabled) {
 			items.push({
 				name: 'Additional Location Fee',
-				price: ADDITIONAL_SERVICE_FEE,
+				price: memorialPricing.additionalService,
 				quantity: 1,
-				total: ADDITIONAL_SERVICE_FEE
+				total: memorialPricing.additionalService
 			});
 			const addlLocationOverage = Math.max(0, additionalLocation.hours - 2);
 			if (addlLocationOverage > 0) {
 				items.push({
 					name: 'Add. Location Overage',
-					price: HOURLY_OVERAGE_RATE,
+					price: memorialPricing.hourlyOverage,
 					quantity: addlLocationOverage,
-					total: HOURLY_OVERAGE_RATE * addlLocationOverage
+					total: memorialPricing.hourlyOverage * addlLocationOverage
 				});
 			}
 		}
@@ -205,17 +199,17 @@
 		if (additionalDay.enabled) {
 			items.push({
 				name: 'Additional Day Fee',
-				price: ADDITIONAL_SERVICE_FEE,
+				price: memorialPricing.additionalService,
 				quantity: 1,
-				total: ADDITIONAL_SERVICE_FEE
+				total: memorialPricing.additionalService
 			});
 			const addlDayOverage = Math.max(0, additionalDay.hours - 2);
 			if (addlDayOverage > 0) {
 				items.push({
 					name: 'Add. Day Overage',
-					price: HOURLY_OVERAGE_RATE,
+					price: memorialPricing.hourlyOverage,
 					quantity: addlDayOverage,
-					total: HOURLY_OVERAGE_RATE * addlDayOverage
+					total: memorialPricing.hourlyOverage * addlDayOverage
 				});
 			}
 		}
@@ -224,25 +218,25 @@
 		if (calculatorData.addons.photography) {
 			items.push({
 				name: 'Photography',
-				price: ADDON_PRICES.photography,
+				price: memorialPricing.addons.photography,
 				quantity: 1,
-				total: ADDON_PRICES.photography
+				total: memorialPricing.addons.photography
 			});
 		}
 		if (calculatorData.addons.audioVisualSupport) {
 			items.push({
 				name: 'Audio/Visual Support',
-				price: ADDON_PRICES.audioVisualSupport,
+				price: memorialPricing.addons.audioVisualSupport,
 				quantity: 1,
-				total: ADDON_PRICES.audioVisualSupport
+				total: memorialPricing.addons.audioVisualSupport
 			});
 		}
 		if (calculatorData.addons.liveMusician) {
 			items.push({
 				name: 'Live Musician',
-				price: ADDON_PRICES.liveMusician,
+				price: memorialPricing.addons.liveMusician,
 				quantity: 1,
-				total: ADDON_PRICES.liveMusician
+				total: memorialPricing.addons.liveMusician
 			});
 		}
 		if (calculatorData.addons.woodenUsbDrives > 0) {
@@ -255,9 +249,9 @@
 				if (billableDrives > 0 && includedDrives === 0) {
 					items.push({
 						name: 'Wooden USB Drive',
-						price: ADDON_PRICES.woodenUsbDrives,
+						price: memorialPricing.addons.woodenUsbDrives,
 						quantity: 1,
-						total: ADDON_PRICES.woodenUsbDrives
+						total: memorialPricing.addons.woodenUsbDrives
 					});
 					if (billableDrives > 1) {
 						items.push({
@@ -541,48 +535,26 @@
 		}
 	});
 
-	const tiers = [
+	const tiers = $derived([
 		{
 			name: 'Tributestream Record',
-			alias: 'record',
-			price: 699,
-			features: [
-				'2 Hours of Record Time',
-				'Custom Link',
-				'Complimentary Download',
-				'One Year Hosting',
-				'Posted Online within 24 Hours'
-			]
+			alias: 'record' as Tier,
+			price: memorialPricing.tiers.record,
+			features: memorialPricing.features.record
 		},
 		{
 			name: 'Tributestream Live',
-			alias: 'live',
-			price: 1299,
-			features: [
-				'2 Hours of Broadcast Time',
-				'Custom Link',
-				'Complimentary Download',
-				'One Year Hosting',
-				'Professional Videographer',
-				'Professional Livestream Tech'
-			]
+			alias: 'live' as Tier,
+			price: memorialPricing.tiers.live,
+			features: memorialPricing.features.live
 		},
 		{
 			name: 'Tributestream Legacy',
-			alias: 'legacy',
-			price: 1599,
-			features: [
-				'2 Hours of Broadcast Time',
-				'Custom Link',
-				'Complimentary Download',
-				'One Year Hosting',
-				'Professional Videographer',
-				'Professional Livestream Tech',
-				'Video Editing',
-				'Engraved USB Drive and Wooden Keepsake Box'
-			]
+			alias: 'legacy' as Tier,
+			price: memorialPricing.tiers.legacy,
+			features: memorialPricing.features.legacy
 		}
-	];
+	]);
 
 	// Handle edit request submission
 	async function handleEditRequest(requestDetails: string) {
@@ -664,6 +636,16 @@
 			>
 				Tributestream Pricing Calculator
 			</h1>
+			
+			<!-- Custom Pricing Indicator -->
+			{#if data?.memorial?.customPricing?.enabled}
+				<div class="mt-3 inline-flex items-center gap-2 rounded-full bg-amber-500/20 px-4 py-1.5 text-sm font-medium text-amber-300 ring-1 ring-amber-500/30">
+					<svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+						<path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+					</svg>
+					Special Pricing Applied
+				</div>
+			{/if}
 		</div>
 		<p class="mx-auto max-w-2xl text-xl text-gray-300">
 			Configure your memorial service livestream package for {lovedOneName || 'your loved one'}

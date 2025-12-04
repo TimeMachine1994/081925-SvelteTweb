@@ -1,4 +1,5 @@
 import type { Timestamp } from 'firebase/firestore';
+import type { CustomPricing } from '$lib/config/pricing';
 
 export interface Embed {
 	id: string;
@@ -115,6 +116,9 @@ export interface Memorial {
 	paidAt?: Timestamp | string;
 	manualPayment?: ManualPaymentInfo;
 	calculatorConfig?: CalculatorConfig;
+
+	// Custom pricing override (admin only)
+	customPricing?: CustomPricing;
 }
 
 export interface ManualPaymentInfo {
