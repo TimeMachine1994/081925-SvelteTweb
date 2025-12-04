@@ -409,8 +409,28 @@ Remove custom pricing, revert to defaults.
 - ✅ Confirmation before deletion
 - ✅ Professional admin UI styling
 
+## 🐛 Bug Fix: Schedule Page Custom Pricing
+
+### Issue Discovered (Dec 4, 2025)
+- **Problem**: Custom pricing set in admin panel not showing on schedule/calculator page
+- **Root Cause**: Server load function not passing `customPricing` field to client
+
+### Fix Applied
+- ✅ Added `customPricing: memorial?.customPricing || null` to schedule page server load
+- ✅ Added comprehensive console logging throughout the entire flow
+- ✅ Verified data flows from Firestore → Server → Client → Display
+
+### Files Updated
+- `src/routes/schedule/[memorialId]/+page.server.ts` - Pass customPricing field
+- `src/routes/schedule/[memorialId]/+page.svelte` - Log received data
+- `src/lib/config/pricing.ts` - Log pricing resolution
+
+**See**: `CUSTOM_PRICING_SCHEDULE_FIX.md` for detailed fix documentation
+
 ---
 
-**Status**: COMPLETE - ALL 3 PHASES ✅  
+**Status**: COMPLETE - ALL 3 PHASES + BUG FIX ✅  
 **Ready For**: Production Testing & Deployment  
-**See Also**: `CUSTOM_PRICING_ADMIN_UI_COMPLETE.md` for UI details
+**See Also**: 
+- `CUSTOM_PRICING_ADMIN_UI_COMPLETE.md` for UI details
+- `CUSTOM_PRICING_SCHEDULE_FIX.md` for schedule page fix

@@ -247,13 +247,23 @@ export interface CustomPricing {
  * // Returns: { tiers: { record: 699, live: 1000, legacy: 1599, ... }, ... }
  */
 export function getPricingForMemorial(customPricing?: CustomPricing | null) {
+	console.log('🔧 [PRICING CONFIG] getPricingForMemorial called');
+	console.log('   - Has customPricing:', !!customPricing);
+	console.log('   - Is enabled:', customPricing?.enabled);
+
 	// If no custom pricing or not enabled, return defaults
 	if (!customPricing?.enabled) {
+		console.log('   → Returning DEFAULT pricing');
 		return PRICING;
 	}
 
+	console.log('   → Merging CUSTOM pricing with defaults');
+	console.log('   - Custom tiers:', customPricing.tiers);
+	console.log('   - Custom addons:', customPricing.addons);
+	console.log('   - Custom rates:', customPricing.rates);
+
 	// Merge custom pricing with defaults (custom takes precedence)
-	return {
+	const mergedPricing = {
 		tiers: { ...TIER_PRICES, ...customPricing.tiers },
 		addons: { ...ADDON_PRICES, ...customPricing.addons },
 		hourlyOverage: customPricing.rates?.hourlyOverage ?? HOURLY_OVERAGE_RATE,
@@ -261,4 +271,13 @@ export function getPricingForMemorial(customPricing?: CustomPricing | null) {
 		usbDrives: USB_DRIVE_PRICING, // USB drive rules don't change
 		features: TIER_FEATURES // Features don't change
 	};
+
+	console.log('   ✅ Merged pricing:', {
+		tiers: mergedPricing.tiers,
+		addons: mergedPricing.addons,
+		hourlyOverage: mergedPricing.hourlyOverage,
+		additionalService: mergedPricing.additionalService
+	});
+
+	return mergedPricing;
 }

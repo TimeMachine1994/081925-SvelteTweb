@@ -30,11 +30,37 @@
 
 	let { data } = $props();
 
+	// Console logging for debugging custom pricing
+	console.log('📅 [SCHEDULE PAGE] Data received from server:', {
+		hasMemorial: !!data?.memorial,
+		memorialId: data?.memorial?.id,
+		lovedOneName: data?.memorial?.lovedOneName,
+		hasCustomPricing: !!data?.memorial?.customPricing,
+		customPricingEnabled: data?.memorial?.customPricing?.enabled
+	});
+
+	if (data?.memorial?.customPricing) {
+		console.log('💰 [SCHEDULE PAGE] Custom Pricing Data:', data.memorial.customPricing);
+	} else {
+		console.log('💰 [SCHEDULE PAGE] No custom pricing data received - will use defaults');
+	}
+
 	// Check if memorial is paid
 	const isPaid = $derived(data?.memorial?.isPaid || false);
 
 	// Get memorial-specific pricing (merges custom with defaults)
 	const memorialPricing = $derived(getPricingForMemorial(data?.memorial?.customPricing));
+
+	// Log the resolved pricing
+	$effect(() => {
+		console.log('💰 [SCHEDULE PAGE] Pricing resolved:', {
+			isCustom: data?.memorial?.customPricing?.enabled || false,
+			tiers: memorialPricing.tiers,
+			addons: memorialPricing.addons,
+			hourlyOverage: memorialPricing.hourlyOverage,
+			additionalService: memorialPricing.additionalService
+		});
+	});
 
 	// Edit request modal state
 	let showEditModal = $state(false);
