@@ -390,28 +390,6 @@
 		goto(`/payment?data=${encodedData}`);
 	}
 
-	function handleTestPayment() {
-		// Create test booking data with $1 total for testing
-		const testBookingData = {
-			items: [
-				{
-					name: 'Test Payment',
-					price: 1,
-					quantity: 1,
-					total: 1
-				}
-			],
-			total: 1, // $1 test payment
-			calculatorData,
-			memorialId,
-			timestamp: new Date().toISOString(),
-			isTest: true // Flag to indicate test payment
-		};
-
-		const encodedData = btoa(JSON.stringify(testBookingData));
-		goto(`/payment?data=${encodedData}`);
-	}
-
 	async function handleSaveAndPayLater() {
 		// Update services.additional array based on UI toggles
 		const updatedServices = {
@@ -1128,12 +1106,6 @@
 							class="w-full rounded-lg bg-gradient-to-r from-amber-500 to-yellow-600 px-6 py-3 font-medium text-black transition-all duration-300 hover:from-amber-600 hover:to-yellow-700 hover:shadow-lg hover:shadow-amber-500/25"
 						>
 							Book Now
-						</button>
-						<button
-							onclick={handleTestPayment}
-							class="w-full rounded-lg border-2 border-green-500 bg-green-500/10 px-6 py-3 font-medium text-green-400 transition-colors hover:bg-green-500/20 hover:text-green-300"
-						>
-							$1 Test Payment
 						</button>
 						<button
 							onclick={handleSaveAndPayLater}
