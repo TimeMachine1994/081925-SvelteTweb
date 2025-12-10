@@ -5,7 +5,7 @@ import { sendEnhancedRegistrationEmail } from '$lib/server/email';
 import { indexMemorial } from '$lib/server/algolia-indexing';
 import type { Event } from '$lib/types/event';
 import { validateEmail } from '$lib/utils/email-validation';
-import { generateUniqueMemorialSlug } from '$lib/utils/event-slug';
+import { generateUniqueMemorialSlug } from '$lib/utils/memorial-slug';
 import { createStandardUserProfile } from '$lib/utils/user-profile';
 import { verifyRecaptcha, RECAPTCHA_ACTIONS, getScoreThreshold } from '$lib/utils/recaptcha';
 import { checkRateLimit, getClientIP, RATE_LIMITS, getBlockedTimeRemaining } from '$lib/server/rate-limiter';
