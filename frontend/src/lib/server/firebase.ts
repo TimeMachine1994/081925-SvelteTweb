@@ -49,7 +49,7 @@ if (admin.apps.length) {
 			process.env['FIREBASE_AUTH_EMULATOR_HOST'] = '127.0.0.1:9098';
 
 			admin.initializeApp({
-				projectId: 'fir-tweb',
+				projectId: 'tributestreamlive',
 				storageBucket: env.PRIVATE_FIREBASE_STORAGE_BUCKET
 			});
 
@@ -72,23 +72,23 @@ if (admin.apps.length) {
 					const serviceAccount = JSON.parse(serviceAccountJson);
 					admin.initializeApp({
 						credential: admin.credential.cert(serviceAccount),
-						storageBucket: env.PRIVATE_FIREBASE_STORAGE_BUCKET || 'fir-tweb.firebasestorage.app'
+						storageBucket: env.PRIVATE_FIREBASE_STORAGE_BUCKET || 'tributestreamlive.firebasestorage.app'
 					});
 					console.log('✅ [FIREBASE] Connected to production Firebase (dev mode fallback)');
 				} catch (error) {
 					console.error('❌ [FIREBASE] Service account error:', error);
 					// Final fallback
 					admin.initializeApp({
-						projectId: 'fir-tweb',
-						storageBucket: 'fir-tweb.firebasestorage.app'
+						projectId: 'tributestreamlive',
+						storageBucket: 'tributestreamlive.firebasestorage.app'
 					});
 					console.log('⚠️ [FIREBASE] Using minimal configuration fallback');
 				}
 			} else {
 				// Minimal fallback configuration
 				admin.initializeApp({
-					projectId: 'fir-tweb',
-					storageBucket: 'fir-tweb.firebasestorage.app'
+					projectId: 'tributestreamlive',
+					storageBucket: 'tributestreamlive.firebasestorage.app'
 				});
 				console.log('⚠️ [FIREBASE] Using minimal configuration (no service account)');
 			}
@@ -125,8 +125,8 @@ if (admin.apps.length) {
 				// Fallback: try to initialize with default credentials or hardcoded config
 				console.log('🔄 [FIREBASE] Attempting fallback initialization...');
 				admin.initializeApp({
-					projectId: 'fir-tweb',
-					storageBucket: storageBucket || 'fir-tweb.firebasestorage.app'
+					projectId: 'tributestreamlive',
+					storageBucket: storageBucket || 'tributestreamlive.firebasestorage.app'
 				});
 				console.log('⚠️ [FIREBASE] Firebase Admin initialized with fallback configuration.');
 			}
@@ -134,8 +134,8 @@ if (admin.apps.length) {
 			console.log('⚠️ [FIREBASE] No service account key found, using default configuration...');
 			// Fallback initialization for production
 			admin.initializeApp({
-				projectId: 'fir-tweb',
-				storageBucket: storageBucket || 'fir-tweb.firebasestorage.app'
+				projectId: 'tributestreamlive',
+				storageBucket: storageBucket || 'tributestreamlive.firebasestorage.app'
 			});
 			console.log('⚠️ [FIREBASE] Firebase Admin initialized with default configuration.');
 		}
