@@ -4,7 +4,7 @@ import type { PageServerLoad, Actions } from './$types';
 import type { Event } from '$lib/types/event';
 import { verifyRecaptcha, RECAPTCHA_ACTIONS, getScoreThreshold } from '$lib/utils/recaptcha';
 import { dev } from '$app/environment';
-import { generateUniqueMemorialSlug } from '$lib/utils/event-slug';
+import { generateUniqueMemorialSlug } from '$lib/utils/memorial-slug';
 
 // Helper function to convert Timestamps and Dates to strings
 function sanitizeData(data: any): any {
