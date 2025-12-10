@@ -4,7 +4,7 @@ import { adminDb, adminAuth } from '$lib/server/firebase';
 import { Timestamp } from 'firebase-admin/firestore';
 import { sendEnhancedRegistrationEmail } from '$lib/server/email';
 import { validateEmail } from '$lib/utils/email-validation';
-import { generateUniqueMemorialSlug } from '$lib/utils/event-slug';
+import { generateUniqueMemorialSlug } from '$lib/utils/memorial-slug';
 import { createStandardUserProfile } from '$lib/utils/user-profile';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
