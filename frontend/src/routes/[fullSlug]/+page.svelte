@@ -424,7 +424,8 @@
 		height: 66.67vh;
 		margin-left: calc(-50vw + 50%);
 		border-bottom: 1px solid #444;
-		background-image: url('https://firebasestorage.googleapis.com/v0/b/fir-tweb.firebasestorage.app/o/Background.jpg?alt=media&token=460aeba9-0879-4e88-b10f-f012dc79c0e6');
+		background-image: url('https://firebasestorage.googleapis.com/v0/b/tributestreamlive
+.firebasestorage.app/o/Background.jpg?alt=media&token=460aeba9-0879-4e88-b10f-f012dc79c0e6');
 		background-size: cover;
 		background-position: center;
 		background-repeat: no-repeat;

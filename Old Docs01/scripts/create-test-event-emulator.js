@@ -7,8 +7,10 @@ if (!admin.apps.length) {
   process.env['FIREBASE_AUTH_EMULATOR_HOST'] = '127.0.0.1:9099';
   
   admin.initializeApp({
-    projectId: 'fir-tweb',
-    storageBucket: 'fir-tweb.firebasestorage.app'
+    projectId: 'tributestreamlive
+',
+    storageBucket: 'tributestreamlive
+.firebasestorage.app'
   });
 
   // Configure Firestore emulator

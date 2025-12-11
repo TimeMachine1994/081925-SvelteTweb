@@ -111,7 +111,8 @@ The project utilizes FireCMS, a headless CMS and admin panel built for Firebase,
 
 -   **Architecture:** The FireCMS instance is a standalone React/Vite application located in the `firecms/` directory, separate from the SvelteKit frontend.
 -   **Routing:** It is configured to be served under the `/admin` path, providing a clear separation from the public-facing application.
--   **Integration:** It connects directly to the project's `fir-tweb` Firestore database and Firebase Storage instance, acting as a direct management layer for the application's backend data.
+-   **Integration:** It connects directly to the project's `tributestreamlive
+` Firestore database and Firebase Storage instance, acting as a direct management layer for the application's backend data.
 
 ### 11.3. Authentication and Authorization
 

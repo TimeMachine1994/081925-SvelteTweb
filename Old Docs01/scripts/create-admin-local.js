@@ -31,7 +31,8 @@ async function createLocalAdmin() {
     
     // Initialize Firebase Admin for emulators
     const app = initializeApp({
-      projectId: 'fir-tweb'
+      projectId: 'tributestreamlive
+'
     });
 
     const auth = getAuth(app);

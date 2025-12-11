@@ -2,7 +2,8 @@
 
 /**
  * Event Migration Script
- * Copies memorials from tributestream-lemhr to fir-tweb Firebase projects
+ * Copies memorials from tributestream-lemhr to tributestreamlive
+ Firebase projects
  */
 
 import admin from 'firebase-admin';
@@ -30,15 +31,18 @@ try {
     process.exit(1);
   }
   
-  // Load service account for destination project (fir-tweb)
+  // Load service account for destination project (tributestreamlive
+)
   let destCredential;
   try {
-    const destServiceAccountPath = join(__dirname, 'fir-tweb-service-account.json');
+    const destServiceAccountPath = join(__dirname, 'tributestreamlive
+-service-account.json');
     const destServiceAccount = JSON.parse(readFileSync(destServiceAccountPath, 'utf8'));
     destCredential = admin.credential.cert(destServiceAccount);
     console.log('✅ Destination service account loaded');
   } catch (error) {
-    console.error('❌ Could not load destination service account file: fir-tweb-service-account.json');
+    console.error('❌ Could not load destination service account file: tributestreamlive
+-service-account.json');
     console.error('Please make sure the file is in the scripts directory');
     process.exit(1);
   }
@@ -49,10 +53,12 @@ try {
     projectId: "tributestream-lemhr"
   }, 'source');
   
-  // Initialize destination app (fir-tweb)
+  // Initialize destination app (tributestreamlive
+)
   destApp = admin.initializeApp({
     credential: destCredential,
-    projectId: "fir-tweb"
+    projectId: "tributestreamlive
+"
   }, 'destination');
   
   // Get Firestore instances
@@ -293,7 +299,8 @@ function printSummary() {
 async function runMigration() {
   console.log('🚀 Starting Firebase event migration...');
   console.log(`Source: tributestream-lemhr`);
-  console.log(`Destination: fir-tweb`);
+  console.log(`Destination: tributestreamlive
+`);
   console.log('');
   
   try {

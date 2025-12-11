@@ -15,7 +15,8 @@ if (getApps().length === 0) {
 	process.env.FIRESTORE_EMULATOR_HOST = '127.0.0.1:8080';
 
 	adminApp = initializeApp({
-		projectId: 'fir-tweb' // Use the emulator project ID
+		projectId: 'tributestreamlive
+' // Use the emulator project ID
 	});
 
 	console.log('✅ Firebase Admin initialized');

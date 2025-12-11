@@ -1,6 +1,7 @@
 # Firebase Event Migration Script
 
-This script migrates all event data from the source Firebase project (`tributestream-lemhr`) to the destination project (`fir-tweb`).
+This script migrates all event data from the source Firebase project (`tributestream-lemhr`) to the destination project (`tributestreamlive
+`).
 
 ## What Gets Migrated
 
@@ -13,7 +14,8 @@ This script migrates all event data from the source Firebase project (`tributest
 
 1. **Node.js** installed (version 16 or higher)
 2. **Internet connection** for Firebase access
-3. **Firebase Admin credentials** for destination project (fir-tweb)
+3. **Firebase Admin credentials** for destination project (tributestreamlive
+)
 4. **Google Cloud credentials** for source project access
 
 ## Installation
@@ -37,12 +39,15 @@ npm install
    - Click "Generate new private key"
    - Save the downloaded file as `tributestream-lemhr-service-account.json` in the `scripts/` directory
    
-   **For Destination Project (fir-tweb):**
+   **For Destination Project (tributestreamlive
+):**
    - Go to [Firebase Console](https://console.firebase.google.com/)
-   - Select the `fir-tweb` project  
+   - Select the `tributestreamlive
+` project  
    - Go to Project Settings → Service Accounts
    - Click "Generate new private key"
-   - Save the downloaded file as `fir-tweb-service-account.json` in the parent directory (not in scripts/)
+   - Save the downloaded file as `tributestreamlive
+-service-account.json` in the parent directory (not in scripts/)
 
 ## Running the Migration
 
@@ -82,7 +87,8 @@ npm run migrate-memorials
 ```
 🚀 Starting Firebase event migration...
 Source: tributestream-lemhr
-Destination: fir-tweb
+Destination: tributestreamlive
+
 
 👥 Starting user migration...
 Found 25 users to migrate
@@ -186,7 +192,8 @@ npm install
 ```
 
 3. Make sure you have the service account file:
-   - The script uses `fir-tweb-service-account.json` from the parent directory
+   - The script uses `tributestreamlive
+-service-account.json` from the parent directory
    - See the Prerequisites section above for how to obtain this
 
 4. Run the script:

@@ -18,7 +18,8 @@ async function getMemorialsFromFirebase() {
 		console.log('📡 Connecting to Firebase emulator...');
 		
 		// Firebase emulator REST API endpoint
-		const response = await fetch('http://127.0.0.1:8080/v1/projects/fir-tweb/databases/(default)/documents/memorials');
+		const response = await fetch('http://127.0.0.1:8080/v1/projects/tributestreamlive
+/databases/(default)/documents/memorials');
 		
 		if (!response.ok) {
 			throw new Error(`Firebase API error: ${response.status} ${response.statusText}`);

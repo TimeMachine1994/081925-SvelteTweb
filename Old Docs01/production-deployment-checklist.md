@@ -64,15 +64,19 @@
 ```bash
 # Firebase Client (Public)
 PUBLIC_FIREBASE_API_KEY="AIzaSyAXmTxzYRc-LhMEW75nZjjjQCZov1gpiw0"
-PUBLIC_FIREBASE_AUTH_DOMAIN="fir-tweb.firebaseapp.com"
-PUBLIC_FIREBASE_PROJECT_ID="fir-tweb"
-PUBLIC_FIREBASE_STORAGE_BUCKET="fir-tweb.firebasestorage.app"
+PUBLIC_FIREBASE_AUTH_DOMAIN="tributestreamlive
+.firebaseapp.com"
+PUBLIC_FIREBASE_PROJECT_ID="tributestreamlive
+"
+PUBLIC_FIREBASE_STORAGE_BUCKET="tributestreamlive
+.firebasestorage.app"
 PUBLIC_FIREBASE_MESSAGING_SENDER_ID="509455146790"
 PUBLIC_FIREBASE_APP_ID="1:509455146790:web:7ec99527214b05d7b9ebe7"
 
 # Firebase Admin (Private)
 PRIVATE_FIREBASE_SERVICE_ACCOUNT_KEY="{ ... }"
-PRIVATE_FIREBASE_STORAGE_BUCKET="fir-tweb.firebasestorage.app"
+PRIVATE_FIREBASE_STORAGE_BUCKET="tributestreamlive
+.firebasestorage.app"
 
 # Other existing variables
 SENDGRID_API_KEY="..."

@@ -18,10 +18,12 @@ const SOURCE_PROJECT_CONFIG = {
     projectId: 'SOURCE_PROJECT_ID' // Replace with actual source project ID
 };
 
-// Destination is your current project (fir-tweb)
+// Destination is your current project (tributestreamlive
+)
 const DEST_PROJECT_CONFIG = {
     serviceAccount: JSON.parse(process.env.PRIVATE_FIREBASE_SERVICE_ACCOUNT_KEY),
-    projectId: 'fir-tweb'
+    projectId: 'tributestreamlive
+'
 };
 
 async function copyMemorial() {

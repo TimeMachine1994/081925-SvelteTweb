@@ -3,7 +3,8 @@ import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 // Mock SvelteKit environment
 vi.mock('$env/dynamic/private', () => ({
 	env: {
-		FIREBASE_PROJECT_ID: 'fir-tweb',
+		FIREBASE_PROJECT_ID: 'tributestreamlive
+',
 		FIREBASE_PRIVATE_KEY: 'mock-key',
 		FIREBASE_CLIENT_EMAIL: 'mock@example.com'
 	}

@@ -8,14 +8,16 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Initialize Firebase Admin with your service account
-const serviceAccountPath = join(__dirname, '..', 'fir-tweb-service-account.json');
+const serviceAccountPath = join(__dirname, '..', 'tributestreamlive
+-service-account.json');
 
 let serviceAccount;
 try {
   serviceAccount = JSON.parse(readFileSync(serviceAccountPath, 'utf8'));
 } catch (error) {
   console.error('❌ Error loading service account file:', error.message);
-  console.error('Make sure fir-tweb-service-account.json exists in the parent directory');
+  console.error('Make sure tributestreamlive
+-service-account.json exists in the parent directory');
   process.exit(1);
 }
 
