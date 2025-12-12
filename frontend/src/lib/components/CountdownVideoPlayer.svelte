@@ -74,7 +74,7 @@
 					<div class="schedule-display">
 						<div class="schedule-header">
 							<Clock class="schedule-icon" />
-							<h3 class="schedule-title">Scheduled Service</h3>
+							<h3 class="schedule-title">Scheduled Event</h3>
 						</div>
 						<div class="schedule-info">
 							<div class="schedule-date">
@@ -87,7 +87,7 @@
 						{#if streamStarted}
 										
 							<div class="schedule-status started">
-								<span class="status-text">Service should be starting shortly.</span>
+								<span class="status-text">Event should be starting shortly.</span>
 							</div>
 						{/if}
 					</div>

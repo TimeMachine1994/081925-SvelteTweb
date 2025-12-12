@@ -57,6 +57,15 @@ export interface Stream {
 	cloudflareInputId?: string;
 	cloudflareStreamId?: string;
 	
+	// Embed Override (Admin feature)
+	embedOverride?: {
+		enabled: boolean;
+		embedCode: string;
+		embedType: 'youtube' | 'vimeo' | 'iframe' | 'custom';
+		updatedAt?: string;
+		updatedBy?: string;
+	};
+	
 	// Metadata
 	isVisible?: boolean;
 	createdAt: string;

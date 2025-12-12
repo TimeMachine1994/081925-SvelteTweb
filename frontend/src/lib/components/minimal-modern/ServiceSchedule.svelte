@@ -25,7 +25,7 @@
   
   let {
     theme = 'minimal',
-    title = 'Service Schedule',
+    title = 'Event Schedule',
     date,
     events,
     class: className = '',

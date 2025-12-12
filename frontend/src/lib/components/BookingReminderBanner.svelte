@@ -59,9 +59,9 @@
 			</div>
 			
 			<div class="banner-text">
-				<h3 class="banner-title">Complete Your Service Booking</h3>
+				<h3 class="banner-title">Complete Your Event Booking</h3>
 				<p class="banner-message">
-					Continue setting up the event service for <strong>{memorialName}</strong>
+					Continue setting up the event for <strong>{memorialName}</strong>
 				</p>
 			</div>
 			

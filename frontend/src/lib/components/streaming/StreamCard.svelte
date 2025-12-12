@@ -14,6 +14,12 @@
 	let showArmDropdown = $state(false);
 	let showEditTime = $state(false);
 	let editedStartTime = $state('');
+	
+	// Embed override state
+	let showEmbedOverride = $state(false);
+	let embedCode = $state(stream.embedOverride?.embedCode || '');
+	let embedType = $state<'youtube' | 'vimeo' | 'iframe' | 'custom'>(stream.embedOverride?.embedType || 'custom');
+	let embedEnabled = $state(stream.embedOverride?.enabled || false);
 
 	// Live stream detection
 	let isStreamingLive = $state(false);
@@ -191,6 +197,34 @@
 		} catch (error) {
 			console.error('Error updating time:', error);
 			alert('Failed to update time');
+		} finally {
+			loading = false;
+		}
+	}
+
+	async function handleSaveEmbedOverride() {
+		loading = true;
+		try {
+			const response = await fetch(`/api/streams/${stream.id}/embed-override`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					enabled: embedEnabled,
+					embedCode: embedCode,
+					embedType: embedType
+				})
+			});
+
+			if (response.ok) {
+				showEmbedOverride = false;
+				window.location.reload();
+			} else {
+				const data = await response.json();
+				alert(`Failed to save embed override: ${data.error || 'Unknown error'}`);
+			}
+		} catch (error) {
+			console.error('Error saving embed override:', error);
+			alert('Failed to save embed override');
 		} finally {
 			loading = false;
 		}
@@ -511,6 +545,16 @@
 						{(stream.visibility || 'public') === 'public' ? 'Hide' : (stream.visibility || 'public') === 'hidden' ? 'Archive' : 'Show'}
 					</button>
 				{/if}
+				
+				<!-- Embed Override Button (Admin Only) -->
+				<button
+					onclick={() => (showEmbedOverride = true)}
+					disabled={loading}
+					class="flex items-center gap-2 rounded-lg {stream.embedOverride?.enabled ? 'bg-orange-100 border-orange-300 text-orange-700' : 'border border-gray-300 text-gray-700'} px-4 py-2 text-sm font-medium transition-colors hover:bg-orange-50 disabled:opacity-50"
+				>
+					<Video class="h-4 w-4" />
+					{stream.embedOverride?.enabled ? 'Edit Embed' : 'Embed Override'}
+				</button>
 			</div>
 		</div>
 	{/if}
@@ -544,6 +588,127 @@
 				</button>
 				<button
 					onclick={() => (showEditTime = false)}
+					disabled={loading}
+					class="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:opacity-50"
+				>
+					Cancel
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
+<!-- Embed Override Modal -->
+{#if showEmbedOverride}
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onclick={() => (showEmbedOverride = false)}>
+		<div class="w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl" onclick={(e) => e.stopPropagation()}>
+			<h3 class="mb-4 text-lg font-semibold text-gray-900">🎬 Embed Override</h3>
+			<p class="mb-4 text-sm text-gray-600">
+				Override the default player with a custom video embed (YouTube, Vimeo, or custom iframe).
+			</p>
+			
+			<!-- Enable Toggle -->
+			<div class="mb-4 flex items-center gap-3">
+				<label class="relative inline-flex cursor-pointer items-center">
+					<input
+						type="checkbox"
+						bind:checked={embedEnabled}
+						class="peer sr-only"
+					/>
+					<div class="peer h-6 w-11 rounded-full bg-gray-200 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-orange-500 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300"></div>
+				</label>
+				<span class="text-sm font-medium text-gray-700">
+					{embedEnabled ? 'Override Enabled' : 'Override Disabled'}
+				</span>
+			</div>
+			
+			<!-- Embed Type -->
+			<div class="mb-4">
+				<label for="embed-type" class="mb-2 block text-sm font-medium text-gray-700">
+					Embed Type
+				</label>
+				<select
+					id="embed-type"
+					bind:value={embedType}
+					class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+				>
+					<option value="youtube">YouTube</option>
+					<option value="vimeo">Vimeo</option>
+					<option value="iframe">Custom Iframe</option>
+					<option value="custom">Raw HTML</option>
+				</select>
+			</div>
+			
+			<!-- Embed Code -->
+			<div class="mb-4">
+				<label for="embed-code" class="mb-2 block text-sm font-medium text-gray-700">
+					{embedType === 'youtube' ? 'YouTube Video URL or Embed Code' : 
+					 embedType === 'vimeo' ? 'Vimeo Video URL or Embed Code' :
+					 embedType === 'iframe' ? 'Iframe URL' : 'Embed HTML Code'}
+				</label>
+				<textarea
+					id="embed-code"
+					bind:value={embedCode}
+					rows="4"
+					placeholder={embedType === 'youtube' ? 'https://www.youtube.com/watch?v=... or <iframe>...</iframe>' :
+								 embedType === 'vimeo' ? 'https://vimeo.com/... or <iframe>...</iframe>' :
+								 embedType === 'iframe' ? 'https://example.com/embed/video' :
+								 '<iframe src="..." allowfullscreen></iframe>'}
+					class="w-full rounded-lg border border-gray-300 px-4 py-2 font-mono text-sm focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500"
+				></textarea>
+			</div>
+			
+			<!-- Preview -->
+			{#if embedCode && embedEnabled}
+				<div class="mb-4">
+					<label class="mb-2 block text-sm font-medium text-gray-700">Preview</label>
+					<div class="aspect-video rounded-lg border border-gray-200 bg-gray-100 overflow-hidden">
+						{#if embedType === 'youtube' && embedCode.includes('youtube.com/watch')}
+							{@const videoId = embedCode.match(/[?&]v=([^&]+)/)?.[1]}
+							{#if videoId}
+								<iframe
+									src="https://www.youtube.com/embed/{videoId}"
+									class="h-full w-full"
+									allowfullscreen
+									title="YouTube Preview"
+								></iframe>
+							{/if}
+						{:else if embedType === 'vimeo' && embedCode.includes('vimeo.com/')}
+							{@const videoId = embedCode.match(/vimeo\.com\/([0-9]+)/)?.[1]}
+							{#if videoId}
+								<iframe
+									src="https://player.vimeo.com/video/{videoId}"
+									class="h-full w-full"
+									allowfullscreen
+									title="Vimeo Preview"
+								></iframe>
+							{/if}
+						{:else if embedType === 'iframe'}
+							<iframe
+								src={embedCode}
+								class="h-full w-full"
+								allowfullscreen
+								title="Iframe Preview"
+							></iframe>
+						{:else}
+							<div class="flex h-full items-center justify-center text-gray-500">
+								<p class="text-sm">Preview not available for raw HTML. Will render on event page.</p>
+							</div>
+						{/if}
+					</div>
+				</div>
+			{/if}
+
+			<div class="flex gap-3">
+				<button
+					onclick={handleSaveEmbedOverride}
+					disabled={loading}
+					class="flex-1 rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-orange-700 disabled:opacity-50"
+				>
+					{loading ? 'Saving...' : 'Save Embed Override'}
+				</button>
+				<button
+					onclick={() => (showEmbedOverride = false)}
 					disabled={loading}
 					class="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:opacity-50"
 				>

@@ -87,11 +87,11 @@
     </p>
   {/if}
 
-  <!-- Service Information -->
+  <!-- Event Information -->
   {#if event.serviceDate}
     <div class="mb-4 p-3 rounded-lg bg-blue-500/10 border border-[#3B82F6]/20">
       <div class="flex items-center gap-2">
-        <span class="text-sm font-medium {themeConfig.text}">Service:</span>
+        <span class="text-sm font-medium {themeConfig.text}">Event:</span>
         <span class="text-sm {themeConfig.hero.sub}">{event.serviceDate}</span>
       </div>
       {#if event.viewerCount !== undefined}

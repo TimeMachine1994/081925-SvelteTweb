@@ -216,6 +216,44 @@
 		)
 	);
 	
+	// Check if stream has an embed override enabled
+	function hasEmbedOverride(stream: Stream): boolean {
+		return !!(stream.embedOverride?.enabled && stream.embedOverride?.embedCode);
+	}
+	
+	// Get the embed HTML for a stream with override
+	function getEmbedOverrideHtml(stream: Stream): string {
+		const override = stream.embedOverride;
+		if (!override?.enabled || !override.embedCode) return '';
+		
+		const code = override.embedCode;
+		const type = override.embedType;
+		
+		// YouTube URL -> embed iframe
+		if (type === 'youtube' && code.includes('youtube.com/watch')) {
+			const videoId = code.match(/[?&]v=([^&]+)/)?.[1];
+			if (videoId) {
+				return `<iframe src="https://www.youtube.com/embed/${videoId}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%;height:100%;border:none;"></iframe>`;
+			}
+		}
+		
+		// Vimeo URL -> embed iframe
+		if (type === 'vimeo' && code.includes('vimeo.com/')) {
+			const videoId = code.match(/vimeo\.com\/([0-9]+)/)?.[1];
+			if (videoId) {
+				return `<iframe src="https://player.vimeo.com/video/${videoId}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="width:100%;height:100%;border:none;"></iframe>`;
+			}
+		}
+		
+		// Iframe URL -> wrap in iframe
+		if (type === 'iframe' && !code.includes('<iframe')) {
+			return `<iframe src="${code}" allowfullscreen style="width:100%;height:100%;border:none;"></iframe>`;
+		}
+		
+		// Already an iframe or custom HTML - return as-is
+		return code;
+	}
+	
 	// Get playback URL for a stream - prioritize live watch URL
 	function getPlaybackUrl(stream: Stream): string | null {
 		// Priority 1: Live watch URL from webhook (for active broadcasts)
@@ -284,7 +322,12 @@
 						{#if stream.description}
 							<p class="stream-description">{stream.description}</p>
 						{/if}
-						{#if getPlaybackUrl(stream)}
+						{#if hasEmbedOverride(stream)}
+							<!-- Embed Override -->
+							<div class="stream-player embed-override">
+								{@html getEmbedOverrideHtml(stream)}
+							</div>
+						{:else if getPlaybackUrl(stream)}
 							<div class="stream-player">
 								<iframe
 									src={getPlaybackUrl(stream)}
@@ -306,7 +349,7 @@
 		<!-- Scheduled Streams -->
 		{#if scheduledStreams.length > 0}
 			<div class="stream-section scheduled-section">
-				<h2 class="stream-section-title">Upcoming Service</h2>
+				<h2 class="stream-section-title">Upcoming Event</h2>
 				{#each scheduledStreams as stream (stream.id)}
 					<div class="stream-item">
 						{#if stream.scheduledStartTime}
@@ -323,7 +366,7 @@
 								{#if stream.description}
 									<p class="stream-description">{stream.description}</p>
 								{/if}
-								<p class="stream-status">Service scheduled - time to be announced</p>
+								<p class="stream-status">Event scheduled - time to be announced</p>
 							</div>
 						{/if}
 					</div>
@@ -334,14 +377,19 @@
 		<!-- Recorded Streams -->
 		{#if recordedStreams.length > 0}
 			<div class="stream-section recorded-section">
-				<h2 class="stream-section-title">Service Recording</h2>
+				<h2 class="stream-section-title">Event Recording</h2>
 				{#each recordedStreams as stream (stream.id)}
 					<div class="stream-item">
 						<h3 class="stream-title">{stream.title}</h3>
 						{#if stream.description}
 							<p class="stream-description">{stream.description}</p>
 						{/if}
-						{#if getPlaybackUrl(stream)}
+						{#if hasEmbedOverride(stream)}
+							<!-- Embed Override -->
+							<div class="stream-player embed-override">
+								{@html getEmbedOverrideHtml(stream)}
+							</div>
+						{:else if getPlaybackUrl(stream)}
 							<div class="stream-player">
 								<iframe
 									src={getPlaybackUrl(stream)}
@@ -364,7 +412,7 @@
 	<!-- Stock Placeholder Player for New Memorials -->
 	<div class="event-streams">
 		<div class="stream-section no-stream-section">
-			<h2 class="stream-section-title">Event Service</h2>
+			<h2 class="stream-section-title">Livestream</h2>
 			<div class="stream-item">
 				<div class="stock-player">
 					<div class="video-container">
@@ -389,7 +437,7 @@
 									<div class="placeholder-label">LIVESTREAM UPCOMING</div>
 									<h3 class="placeholder-title">Video Coming Soon</h3>
 									<p class="placeholder-description">
-										The event service will be livestreamed here. This page will go live automatically when the service begins.
+										The event will be livestreamed here. This page will go live automatically when the stream begins.
 									</p>
 								</div>
 							</div>
