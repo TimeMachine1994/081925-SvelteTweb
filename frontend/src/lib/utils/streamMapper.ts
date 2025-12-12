@@ -299,7 +299,7 @@ export async function syncStreamsWithSchedule(
 
 	try {
 		// Get existing streams for this event
-		const existingStreamsResponse = await fetch(`/api/memorials/${memorialId}/streams`);
+		const existingStreamsResponse = await fetch(`/api/events/${memorialId}/streams`);
 		const existingStreamsData = await existingStreamsResponse.json();
 		const existingStreams: Stream[] = existingStreamsData.streams || [];
 
@@ -409,7 +409,7 @@ export async function syncStreamsWithSchedule(
 		});
 
 		// DISABLED: Delete orphaned streams (no DELETE endpoint exists yet)
-		// TODO: Create DELETE endpoint at /api/memorials/[memorialId]/streams/[streamId]
+		// TODO: Create DELETE endpoint at /api/events/[memorialId]/streams/[streamId]
 		if (orphanedStreams.length > 0) {
 			console.log(' [SYNC] Found', orphanedStreams.length, 'orphaned streams but deletion is disabled (no API endpoint)');
 			console.log(' [SYNC] Orphaned streams will remain in database until DELETE endpoint is created');
@@ -511,7 +511,7 @@ export async function createStreamsFromSchedule(
 			console.log('📡 [STREAM_MAPPER] Creating stream:', streamRequest.title);
 			console.log('📡 [STREAM_MAPPER] Stream request data:', JSON.stringify(streamRequest, null, 2));
 
-			const response = await fetch(`/api/memorials/${memorialId}/streams`, {
+			const response = await fetch(`/api/events/${memorialId}/streams`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -573,7 +573,7 @@ function getServiceFromStream(scheduleData: ScheduleData, streamRequest: Enhance
  */
 async function createStream(memorialId: string, streamData: any): Promise<{ success: boolean; stream?: Stream; error?: string }> {
 	try {
-		const response = await fetch(`/api/memorials/${memorialId}/streams`, {
+		const response = await fetch(`/api/events/${memorialId}/streams`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(streamData)

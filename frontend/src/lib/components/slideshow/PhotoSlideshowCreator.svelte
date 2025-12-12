@@ -23,13 +23,13 @@
 
 	// Props
 	interface Props {
-		memorialId?: string;
+		eventId?: string;
 		maxPhotos?: number;
 		maxFileSize?: number; // in MB
 	}
 
 	let { 
-		memorialId, 
+		eventId, 
 		maxPhotos = 50, 
 		maxFileSize = 10 
 	}: Props = $props();
@@ -136,19 +136,19 @@
 	// Draft management
 	// Auto-load draft and check for published slideshow on component mount
 	$effect(() => {
-		console.log('🎬 PhotoSlideshowCreator mounted with memorialId:', memorialId);
-		if (memorialId) {
+		console.log('🎬 PhotoSlideshowCreator mounted with eventId:', eventId);
+		if (eventId) {
 			loadDraftAndPublished();
 		}
 	});
 	
 	// Load event data
 	async function loadMemorialData() {
-		if (!memorialId) return;
+		if (!eventId) return;
 		
 		try {
-			console.log('🔍 Loading event data for:', memorialId);
-			const response = await fetch(`/api/memorials/${memorialId}`);
+			console.log('🔍 Loading event data for:', eventId);
+			const response = await fetch(`/api/events/${eventId}`);
 			
 			if (response.ok) {
 				event = await response.json();
@@ -163,7 +163,7 @@
 
 	// Load both draft and published slideshow
 	async function loadDraftAndPublished() {
-		if (!memorialId) return;
+		if (!eventId) return;
 		
 		try {
 			// Load event data for navigation
@@ -183,16 +183,16 @@
 	
 	// Load published slideshow from event
 	async function loadPublishedSlideshow() {
-		if (!memorialId) {
-			console.log('⚠️ No memorialId provided for slideshow loading');
+		if (!eventId) {
+			console.log('⚠️ No eventId provided for slideshow loading');
 			return;
 		}
 		
 		try {
-			console.log('🔍 Checking for published slideshow for event:', memorialId);
-			console.log('🔍 Making API call to:', `/api/memorials/${memorialId}/slideshow`);
+			console.log('🔍 Checking for published slideshow for event:', eventId);
+			console.log('🔍 Making API call to:', `/api/events/${eventId}/slideshow`);
 			
-			const response = await fetch(`/api/memorials/${memorialId}/slideshow`);
+			const response = await fetch(`/api/events/${eventId}/slideshow`);
 			console.log('📡 API Response status:', response.status, response.statusText);
 			
 			if (response.ok) {
@@ -410,7 +410,7 @@
 			console.log('🔄 Unpublishing slideshow:', publishedSlideshow.id);
 			
 			// Delete the published slideshow
-			const response = await fetch(`/api/memorials/${memorialId}/slideshow`, {
+			const response = await fetch(`/api/events/${eventId}/slideshow`, {
 				method: 'DELETE'
 			});
 			
@@ -435,14 +435,14 @@
 	
 	// Save draft to database
 	async function saveDraft() {
-		if (!memorialId || photos.length === 0) {
-			console.log('⚠️ Skipping draft save - memorialId:', memorialId, 'photos:', photos.length);
+		if (!eventId || photos.length === 0) {
+			console.log('⚠️ Skipping draft save - eventId:', eventId, 'photos:', photos.length);
 			return;
 		}
 		
 		try {
 			isSavingDraft = true;
-			console.log('💾 Saving draft for event:', memorialId, 'with', photos.length, 'photos');
+			console.log('💾 Saving draft for event:', eventId, 'with', photos.length, 'photos');
 			
 			// Convert photos to simple serializable format (avoid complex nested objects)
 			const draftPhotos = photos.map((photo) => ({
@@ -466,7 +466,7 @@
 				aspectRatio: settings.aspectRatio || '16:9'
 			};
 			
-			console.log('📤 Sending draft data:', { memorialId, photoCount: draftPhotos.length, settings: cleanSettings });
+			console.log('📤 Sending draft data:', { eventId, photoCount: draftPhotos.length, settings: cleanSettings });
 			
 			const response = await fetch('/api/slideshow/draft', {
 				method: 'POST',
@@ -474,7 +474,7 @@
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify({
-					memorialId,
+					eventId,
 					photos: draftPhotos,
 					settings: cleanSettings
 				})
@@ -500,13 +500,13 @@
 	
 	// Load draft from database
 	async function loadDraft() {
-		if (!memorialId) return;
+		if (!eventId) return;
 		
 		try {
 			isLoadingDraft = true;
-			console.log('🔍 Loading draft for event:', memorialId);
+			console.log('🔍 Loading draft for event:', eventId);
 			
-			const response = await fetch(`/api/slideshow/draft?memorialId=${memorialId}`);
+			const response = await fetch(`/api/slideshow/draft?eventId=${eventId}`);
 			console.log('📡 Draft API response status:', response.status);
 			
 			if (!response.ok) {
@@ -577,10 +577,10 @@
 	
 	// Clear draft from database
 	async function clearDraft() {
-		if (!memorialId) return;
+		if (!eventId) return;
 		
 		try {
-			const response = await fetch(`/api/slideshow/draft?memorialId=${memorialId}`, {
+			const response = await fetch(`/api/slideshow/draft?eventId=${eventId}`, {
 				method: 'DELETE'
 			});
 			
@@ -777,7 +777,7 @@
 		console.log(`Photo moved from position ${fromIndex + 1} to ${toIndex + 1}`);
 		
 		// Auto-save draft after reordering
-		if (memorialId) {
+		if (eventId) {
 			saveDraft();
 		}
 	}
@@ -878,10 +878,10 @@
 				isPublished,
 				hasDraftChanges,
 				draftVideoBlob: !!draftVideoBlob,
-				memorialId,
+				eventId,
 				generatedVideoBlob: !!generatedVideoBlob,
 				shouldShowStep4: showVideoPreview && (!isPublished || (hasDraftChanges && !!draftVideoBlob)),
-				shouldShowButton: !!memorialId
+				shouldShowButton: !!eventId
 			});
 
 			// Auto-scroll to step 4 on mobile after video generation
@@ -923,7 +923,7 @@
 				
 				const audioResult = await uploadAudioToFirebaseStorage(
 					audioTrack.file,
-					memorialId || '',
+					eventId || '',
 					(progress) => {
 						generationProgress = 85 + (progress * 0.03); // 85-88%
 					}
@@ -945,7 +945,7 @@
 			
 			const videoResult = await uploadVideoToFirebaseStorage(
 				videoBlob,
-				memorialId || '',
+				eventId || '',
 				title,
 				(progress) => {
 					generationProgress = 88 + (progress * 0.05); // 88-93%
@@ -971,7 +971,7 @@
 			if (photosToUpload.length > 0) {
 				uploadedPhotos = await uploadPhotosToFirebaseStorage(
 					photosToUpload,
-					memorialId || ''
+					eventId || ''
 				);
 				console.log(`✅ [CLIENT] Uploaded ${uploadedPhotos.length} new photos`);
 			}
@@ -1002,7 +1002,7 @@
 			};
 			
 			const metadata = {
-				memorialId: memorialId || '',
+				eventId: eventId || '',
 				title,
 				videoUrl: videoResult.downloadURL,
 				videoStoragePath: videoResult.storagePath,
@@ -1034,7 +1034,7 @@
 
 	// Add slideshow to event (upload to Firebase)
 	async function addToMemorial() {
-		if (!generatedVideoBlob || !memorialId) {
+		if (!generatedVideoBlob || !eventId) {
 			console.warn('⚠️ Cannot add to event: missing video or event ID');
 			alert('Please generate a video and ensure event ID is set.');
 			return;
@@ -1102,7 +1102,7 @@
 			videoBlob: generatedVideoBlob,
 			photos,
 			settings,
-			memorialId,
+			eventId,
 			uploaded: false
 		});
 		showPreview = false;
@@ -1163,7 +1163,7 @@
 
 	// Save slideshow to event
 	async function saveToMemorial() {
-		if (!memorialId) return;
+		if (!eventId) return;
 		
 		// Check if we have a video to save
 		if (!generatedVideoBlob) {
@@ -1231,7 +1231,7 @@
 
 	// Unpublish slideshow from event
 	async function unpublishFromMemorial() {
-		if (!memorialId || !publishedSlideshow) return;
+		if (!eventId || !publishedSlideshow) return;
 
 		const confirmUnpublish = confirm('Are you sure you want to unpublish this slideshow from the event? Visitors will no longer be able to see it.');
 		if (!confirmUnpublish) return;
@@ -1240,7 +1240,7 @@
 			isUnpublishing = true;
 
 			// Call API to delete the slideshow from event
-			const response = await fetch(`/api/memorials/${memorialId}/slideshow`, {
+			const response = await fetch(`/api/events/${eventId}/slideshow`, {
 				method: 'DELETE',
 				headers: {
 					'Content-Type': 'application/json'
@@ -1390,7 +1390,7 @@
 
 	// Publish draft and replace published version
 	async function publishDraftAndReplace() {
-		if (!draftVideoBlob || !memorialId) return;
+		if (!draftVideoBlob || !eventId) return;
 
 		const confirmPublish = confirm('Are you sure you want to publish this draft and replace the current version on the event?');
 		if (!confirmPublish) return;
@@ -1479,7 +1479,7 @@
 	
 	// Save slideshow to event (with photos as base64)
 	async function saveSlideshow() {
-		if (!memorialId || photos.length === 0) {
+		if (!eventId || photos.length === 0) {
 			alert('Please add photos and ensure event ID is set.');
 			return;
 		}
@@ -1520,12 +1520,12 @@
 					aspectRatio: settings.aspectRatio
 				},
 				status: 'local_only',
-				memorialId: memorialId
+				eventId: eventId
 			};
 			
 			console.log('Saving slideshow data:', slideshowData);
 			
-			const response = await fetch(`/api/memorials/${memorialId}/slideshow`, {
+			const response = await fetch(`/api/events/${eventId}/slideshow`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -1541,7 +1541,7 @@
 					videoBlob: null, // No video blob for save-only operation
 					photos: photos,
 					settings: settings,
-					memorialId: memorialId,
+					eventId: eventId,
 					uploaded: true,
 					slideshow: slideshowData
 				});
@@ -1926,7 +1926,7 @@
 						Download Draft
 					</button>
 					
-					{#if memorialId}
+					{#if eventId}
 						<button 
 							class="primary-btn extra-large"
 							onclick={publishDraftAndReplace}
@@ -1945,7 +1945,7 @@
 							{/if}
 						</button>
 					{/if}
-				{:else if memorialId}
+				{:else if eventId}
 					<!-- Regular Publish Action - Add to Event -->
 					<div class="button-group">
 						<button 
@@ -2043,7 +2043,7 @@
 					</button>
 					<button 
 						class="secondary-btn"
-						onclick={() => window.open(`/${event?.fullSlug || `event/${memorialId}`}`, '_blank')}
+						onclick={() => window.open(`/${event?.fullSlug || `event/${eventId}`}`, '_blank')}
 					>
 						<ExternalLink class="btn-icon" />
 						View on Event

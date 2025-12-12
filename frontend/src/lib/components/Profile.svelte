@@ -31,13 +31,13 @@
 	let { data, form } = $props();
 	let displayName = $state(data.profile?.displayName || '');
 	let isEditing = $state(false);
-	let showCreateMemorialModal = $state(false);
+	let showCreateEventModal = $state(false);
 	let lovedOneName = $state('');
-	let isCreatingMemorial = $state(false);
+	let isCreatingEvent = $state(false);
 	let showScheduleModal = $state(false);
-	let selectedMemorial = $state(null);
+	let selectedEvent = $state(null);
 	let showPaymentNotification = $state(false);
-	let paymentMemorialId = $state('');
+	let paymentEventId = $state('');
 	let scheduleForm = $state({
 		serviceDate: '',
 		serviceTime: '',
@@ -99,7 +99,7 @@
 	const roleInfo = getRoleInfo(userRole);
 
 	function openScheduleModal(event: any) {
-		selectedMemorial = event;
+		selectedEvent = event;
 		// Pre-fill with existing data if available
 		scheduleForm.serviceDate = event.serviceDate
 			? new Date(event.serviceDate).toISOString().split('T')[0]
@@ -114,10 +114,10 @@
 	}
 
 	async function updateSchedule() {
-		if (!selectedMemorial) return;
+		if (!selectedEvent) return;
 
 		try {
-			const response = await fetch(`/api/memorials/${selectedMemorial.id}/schedule`, {
+			const response = await fetch(`/api/events/${selectedEvent.id}/schedule`, {
 				method: 'PATCH',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(scheduleForm)
@@ -359,7 +359,7 @@
 								{:else if userRole === 'owner'}
 									<div class="space-y-4">
 										<Button
-											onclick={() => showCreateMemorialModal = true}
+											onclick={() => showCreateEventModal = true}
 											variant="role"
 											role="owner"
 											size="lg"
@@ -411,7 +411,7 @@
 									</div>
 								{:else}
 									<Button
-										onclick={() => (showCreateMemorialModal = true)}
+										onclick={() => (showCreateEventModal = true)}
 										variant="outline"
 										role="owner"
 										size="lg"
@@ -497,7 +497,7 @@
 </div>
 
 <!-- Schedule Editing Modal -->
-{#if showScheduleModal && selectedMemorial}
+{#if showScheduleModal && selectedEvent}
 	<div class="bg-opacity-50 fixed inset-0 z-50 h-full w-full overflow-y-auto bg-gray-600">
 		<div
 			class="relative top-20 mx-auto w-96 rounded-3xl border bg-white/90 p-5 shadow-lg backdrop-blur-xl"
@@ -528,7 +528,7 @@
 					class="mb-4 rounded-2xl bg-gradient-to-r p-4 {roleInfo.bgGradient} border border-white/20"
 				>
 					<p class="font-semibold text-gray-900">
-						{selectedMemorial.lovedOneName || selectedMemorial.title}
+						{selectedEvent.lovedOneName || selectedEvent.title}
 					</p>
 					<p class="text-sm text-gray-600">Event Service Schedule</p>
 				</div>
@@ -696,7 +696,7 @@
 {/if}
 
 <!-- Create Event Modal -->
-{#if showCreateMemorialModal}
+{#if showCreateEventModal}
 	<div class="bg-opacity-50 fixed inset-0 z-50 h-full w-full overflow-y-auto bg-gray-600">
 		<div
 			class="relative top-20 mx-auto w-96 rounded-3xl border bg-white/90 p-5 shadow-lg backdrop-blur-xl"
@@ -708,7 +708,7 @@
 						Create Event
 					</h3>
 					<button
-						onclick={() => (showCreateMemorialModal = false)}
+						onclick={() => (showCreateEventModal = false)}
 						class="text-gray-400 transition-colors hover:text-gray-600"
 						aria-label="Close modal"
 					>
@@ -729,7 +729,7 @@
 					class="space-y-6"
 					use:enhance={async ({ formData }) => {
 						console.log('🎯 [PROFILE] Form submitting...');
-						isCreatingMemorial = true;
+						isCreatingEvent = true;
 
 						// Execute reCAPTCHA (skip in development mode)
 						if (dev) {
@@ -740,7 +740,7 @@
 							
 							if (!recaptchaToken) {
 								console.error('🎯 [PROFILE] reCAPTCHA failed');
-								isCreatingMemorial = false;
+								isCreatingEvent = false;
 								return;
 							}
 
@@ -749,12 +749,12 @@
 						}
 
 						return async ({ result, update }) => {
-							isCreatingMemorial = false;
+							isCreatingEvent = false;
 							
 							// Check if payment is needed
 							if (result.type === 'failure' && result.data?.needsPayment) {
-								showCreateMemorialModal = false;
-								paymentMemorialId = result.data.memorialId || '';
+								showCreateEventModal = false;
+								paymentEventId = result.data.memorialId || '';
 								showPaymentNotification = true;
 							} else {
 								await update();
@@ -811,7 +811,7 @@
 						<Button
 							variant="secondary"
 							size="md"
-							onclick={() => (showCreateMemorialModal = false)}
+							onclick={() => (showCreateEventModal = false)}
 							rounded="lg"
 						>
 							Cancel
@@ -821,11 +821,11 @@
 							variant="role"
 							role="owner"
 							size="md"
-							disabled={isCreatingMemorial}
-							loading={isCreatingMemorial}
+							disabled={isCreatingEvent}
+							loading={isCreatingEvent}
 							rounded="lg"
 						>
-							{#if isCreatingMemorial}
+							{#if isCreatingEvent}
 								Creating...
 							{:else}
 								Create Event
@@ -900,7 +900,7 @@
 						>
 							Cancel
 						</Button>
-						<a href={`/schedule/${paymentMemorialId}`}>
+						<a href={`/schedule/${paymentEventId}`}>
 							<Button
 								variant="role"
 								role="owner"

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import SlideshowSection from '$lib/components/SlideshowSection.svelte';
-	import MemorialStreamDisplay from '$lib/components/MemorialStreamDisplay.svelte';
+	import EventStreamDisplay from '$lib/components/EventStreamDisplay.svelte';
 	import BookingReminderBanner from '$lib/components/BookingReminderBanner.svelte';
 	import { shouldShowBookingBanner, markBannerAsSeen, debugBannerState } from '$lib/utils/bookingBanner';
 	import { onMount } from 'svelte';
@@ -285,7 +285,7 @@
 				<div class="event-content-container">
 					<!-- Stream Section for Legacy Layout - Always show, component handles empty state -->
 					<div class="streaming-section">
-						<MemorialStreamDisplay 
+						<EventStreamDisplay 
 							streams={streams || []} 
 							memorialName={event.lovedOneName}
 						/>
@@ -381,7 +381,7 @@
 				<div class="event-body">
 					<!-- Stream Section - Always show, component handles empty state -->
 					<div class="streaming-section">
-						<MemorialStreamDisplay 
+						<EventStreamDisplay 
 							streams={streams || []} 
 							memorialName={event.lovedOneName}
 						/>

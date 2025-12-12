@@ -1,10 +1,10 @@
 import { adminDb } from '$lib/server/firebase';
-import { fail, redirect } from '@sveltejs/kit';
+import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import type { Event } from '$lib/types/event';
 import { verifyRecaptcha, RECAPTCHA_ACTIONS, getScoreThreshold } from '$lib/utils/recaptcha';
 import { dev } from '$app/environment';
-import { generateUniqueMemorialSlug } from '$lib/utils/memorial-slug';
+import { generateUniqueEventSlug } from '$lib/utils/event-slug';
 
 // Helper function to convert Timestamps and Dates to strings
 function sanitizeData(data: any): any {
@@ -210,7 +210,7 @@ export const actions: Actions = {
 
 		try {
 			// Generate unique event slug
-			const fullSlug = await generateUniqueMemorialSlug(lovedOneName);
+			const fullSlug = await generateUniqueEventSlug(lovedOneName);
 			console.log(`[PROFILE] Creating event with unique fullSlug: ${fullSlug}`);
 
 			// Create the event
@@ -270,6 +270,10 @@ export const actions: Actions = {
 			// Redirect to the newly created event page
 			throw redirect(303, `/${fullSlug}`);
 		} catch (error) {
+			// Re-throw redirects - they're not actual errors
+			if (isRedirect(error)) {
+				throw error;
+			}
 			console.error('Error creating event:', error);
 			return fail(500, { message: 'Failed to create event. Please try again.' });
 		}

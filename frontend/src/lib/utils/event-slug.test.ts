@@ -15,7 +15,7 @@ vi.mock('$lib/server/firebase', () => ({
 import { 
 	generateBaseSlug, 
 	checkSlugExists, 
-	generateUniqueMemorialSlug,
+	generateUniqueEventSlug,
 	generateTimestampSlug,
 	isValidSlugFormat,
 	validateCustomSlug
@@ -39,18 +39,18 @@ describe('Event Slug Utilities', () => {
 
 	describe('generateBaseSlug', () => {
 		it('should generate proper slug from name', () => {
-			expect(generateBaseSlug('John Doe')).toBe('celebration-of-life-for-john-doe');
-			expect(generateBaseSlug('Mary Jane Smith')).toBe('celebration-of-life-for-mary-jane-smith');
+			expect(generateBaseSlug('John Doe')).toBe('john-doe');
+			expect(generateBaseSlug('Mary Jane Smith')).toBe('mary-jane-smith');
 		});
 
 		it('should handle special characters', () => {
-			expect(generateBaseSlug('José María')).toBe('celebration-of-life-for-jos-mara');
-			expect(generateBaseSlug('O\'Connor')).toBe('celebration-of-life-for-oconnor');
+			expect(generateBaseSlug('José María')).toBe('jos-mara');
+			expect(generateBaseSlug('O\'Connor')).toBe('oconnor');
 		});
 
 		it('should handle multiple spaces and hyphens', () => {
-			expect(generateBaseSlug('John   Doe')).toBe('celebration-of-life-for-john-doe');
-			expect(generateBaseSlug('John--Doe')).toBe('celebration-of-life-for-john-doe');
+			expect(generateBaseSlug('John   Doe')).toBe('john-doe');
+			expect(generateBaseSlug('John--Doe')).toBe('john-doe');
 		});
 
 		it('should trim and limit length', () => {
@@ -60,9 +60,9 @@ describe('Event Slug Utilities', () => {
 		});
 
 		it('should handle edge cases', () => {
-			expect(generateBaseSlug('')).toBe('celebration-of-life-for');
-			expect(generateBaseSlug('   ')).toBe('celebration-of-life-for');
-			expect(generateBaseSlug('123')).toBe('celebration-of-life-for-123');
+			expect(generateBaseSlug('')).toBe('');
+			expect(generateBaseSlug('   ')).toBe('');
+			expect(generateBaseSlug('123')).toBe('123');
 		});
 	});
 
@@ -91,12 +91,12 @@ describe('Event Slug Utilities', () => {
 		});
 	});
 
-	describe('generateUniqueMemorialSlug', () => {
+	describe('generateUniqueEventSlug', () => {
 		it('should return base slug when unique', async () => {
 			mockGet.mockResolvedValue({ empty: true });
 			
-			const result = await generateUniqueMemorialSlug('John Doe');
-			expect(result).toBe('celebration-of-life-for-john-doe');
+			const result = await generateUniqueEventSlug('John Doe');
+			expect(result).toBe('john-doe');
 		});
 
 		it('should add counter when base slug exists', async () => {
@@ -104,8 +104,8 @@ describe('Event Slug Utilities', () => {
 				.mockResolvedValueOnce({ empty: false }) // Base slug exists
 				.mockResolvedValueOnce({ empty: true });  // Counter slug is unique
 			
-			const result = await generateUniqueMemorialSlug('John Doe');
-			expect(result).toBe('celebration-of-life-for-john-doe-1');
+			const result = await generateUniqueEventSlug('John Doe');
+			expect(result).toBe('john-doe-1');
 		});
 
 		it('should increment counter until unique', async () => {
@@ -115,22 +115,22 @@ describe('Event Slug Utilities', () => {
 				.mockResolvedValueOnce({ empty: false }) // Counter 2 exists
 				.mockResolvedValueOnce({ empty: true });  // Counter 3 is unique
 			
-			const result = await generateUniqueMemorialSlug('John Doe');
-			expect(result).toBe('celebration-of-life-for-john-doe-3');
+			const result = await generateUniqueEventSlug('John Doe');
+			expect(result).toBe('john-doe-3');
 		});
 
 		it('should use timestamp fallback after max attempts', async () => {
 			mockGet.mockResolvedValue({ empty: false }); // Always exists
 			
-			const result = await generateUniqueMemorialSlug('John Doe', 3);
-			expect(result).toMatch(/celebration-of-life-for-john-doe-\d{6}$/);
+			const result = await generateUniqueEventSlug('John Doe', 3);
+			expect(result).toMatch(/john-doe-\d{6}$/);
 		});
 	});
 
 	describe('generateTimestampSlug', () => {
 		it('should generate slug with timestamp', () => {
 			const result = generateTimestampSlug('John Doe');
-			expect(result).toMatch(/^celebration-of-life-for-john-doe-\d{4}$/);
+			expect(result).toMatch(/^john-doe-\d{4}$/);
 		});
 	});
 

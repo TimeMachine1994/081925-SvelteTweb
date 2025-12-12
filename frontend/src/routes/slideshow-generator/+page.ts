@@ -1,13 +1,13 @@
 import type { PageLoad } from './$types';
-import type { MemorialSlideshow } from '$lib/types/slideshow';
+import type { EventSlideshow } from '$lib/types/slideshow';
 
 export const load: PageLoad = async ({ url }) => {
-	// Extract memorialId from URL
-	const memorialId = url.searchParams.get('memorialId');
+	// Extract eventId from URL
+	const eventId = url.searchParams.get('eventId');
 	
 	// Extract edit data from URL
 	const editParam = url.searchParams.get('edit');
-	let editData: MemorialSlideshow | null = null;
+	let editData: EventSlideshow | null = null;
 	let isEditMode = false;
 	
 	if (editParam) {
@@ -19,11 +19,11 @@ export const load: PageLoad = async ({ url }) => {
 		}
 	}
 	
-	// Use memorialId from editData if available, otherwise from URL
-	const finalMemorialId = editData?.memorialId || memorialId;
+	// Use eventId from editData if available, otherwise from URL
+	const finalMemorialId = editData?.eventId || eventId;
 	
 	return {
-		memorialId: finalMemorialId,
+		eventId: finalMemorialId,
 		editData,
 		isEditMode
 	};

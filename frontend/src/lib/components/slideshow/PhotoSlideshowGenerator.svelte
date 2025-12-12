@@ -59,7 +59,7 @@
 		isEditMode = true;
 		editingSlideshowId = slideshowData.id;
 		slideshowTitle = slideshowData.title;
-		selectedMemorial = slideshowData.memorialId;
+		selectedMemorial = slideshowData.eventId;
 		
 		// Convert base64 data back to File objects for proper editing
 		const loadedPhotos = await Promise.all(
@@ -414,7 +414,7 @@
 				updatedAt: new Date().toISOString()
 			};
 			
-			const response = await fetch(`/api/memorials/${selectedMemorial}/slideshow`, {
+			const response = await fetch(`/api/events/${selectedMemorial}/slideshow`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'

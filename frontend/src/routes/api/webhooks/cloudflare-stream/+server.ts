@@ -1,7 +1,7 @@
 import { adminDb } from '$lib/server/firebase';
 import { json, error as svelteError } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { CLOUDFLARE_WEBHOOK_SECRET } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 
 /**
  * Verify Cloudflare webhook signature
@@ -45,7 +45,7 @@ async function verifyWebhookSignature(
 	const encoder = new TextEncoder();
 	const key = await crypto.subtle.importKey(
 		'raw',
-		encoder.encode(CLOUDFLARE_WEBHOOK_SECRET),
+		encoder.encode(env.CLOUDFLARE_WEBHOOK_SECRET),
 		{ name: 'HMAC', hash: 'SHA-256' },
 		false,
 		['sign']
@@ -83,7 +83,7 @@ export const GET: RequestHandler = async () => {
 		status: 'ok',
 		endpoint: 'cloudflare-stream-webhook',
 		message: 'Webhook endpoint is active',
-		hasSecret: !!CLOUDFLARE_WEBHOOK_SECRET,
+		hasSecret: !!env.CLOUDFLARE_WEBHOOK_SECRET,
 		timestamp: new Date().toISOString()
 	});
 };
@@ -105,7 +105,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		const bodyText = await request.text();
 		
 		// Verify webhook signature if secret is configured
-		if (CLOUDFLARE_WEBHOOK_SECRET && CLOUDFLARE_WEBHOOK_SECRET.trim() !== '') {
+		if (env.CLOUDFLARE_WEBHOOK_SECRET && env.CLOUDFLARE_WEBHOOK_SECRET.trim() !== '') {
 			try {
 				const isValid = await verifyWebhookSignature(request, bodyText);
 				if (!isValid) {

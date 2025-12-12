@@ -1,9 +1,9 @@
 <script lang="ts">
 	import SlideshowPlayer from './SlideshowPlayer.svelte';
-	import type { MemorialSlideshow } from '$lib/types/slideshow';
+	import type { EventSlideshow } from '$lib/types/slideshow';
 	
 	interface Props {
-		slideshows: MemorialSlideshow[];
+		slideshows: EventSlideshow[];
 		memorialName: string;
 		memorialId: string; // Required for create slideshow link
 		editable?: boolean;

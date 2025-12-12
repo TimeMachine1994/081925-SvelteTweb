@@ -183,7 +183,7 @@ export function useMemorialData(memorialId: string, options?: OptimizedDataOptio
 	return useOptimizedData<Event>(
 		`event:${memorialId}`,
 		async () => {
-			const response = await fetch(`/api/memorials/${memorialId}`);
+			const response = await fetch(`/api/events/${memorialId}`);
 			if (!response.ok) {
 				throw new Error(`Failed to fetch event: ${response.statusText}`);
 			}
@@ -221,7 +221,7 @@ export function useFuneralDirectorMemorials(options?: OptimizedDataOptions) {
 	return useOptimizedData<Event[]>(
 		'funeral-director-memorials',
 		async () => {
-			const response = await fetch('/api/funeral-director/memorials');
+			const response = await fetch('/api/funeral-director/events');
 			if (!response.ok) {
 				throw new Error(`Failed to fetch assigned memorials: ${response.statusText}`);
 			}
@@ -257,7 +257,7 @@ export function useBatchMemorialData(memorialIds: string[], options?: OptimizedD
 
 			// Fetch missing memorials
 			if (toFetch.length > 0) {
-				const response = await fetch('/api/memorials/batch', {
+				const response = await fetch('/api/events/batch', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({ ids: toFetch })

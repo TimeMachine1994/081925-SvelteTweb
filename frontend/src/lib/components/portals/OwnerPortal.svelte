@@ -13,17 +13,17 @@
 	import { goto } from '$app/navigation';
 	import { Button } from '$lib/ui';
 
-	let { memorials, invitations }: { memorials: Event[]; invitations: [] } = $props();
+	let { events, invitations }: { events: Event[]; invitations: [] } = $props();
 
-	console.log('👑 OwnerPortal rendering with', memorials.length, 'events');
+	console.log('👑 OwnerPortal rendering with', events.length, 'events');
 
 	// State for selected event
 	let selectedMemorialId = $state('');
 
 	// Initialize with default event
 	$effect(() => {
-		if (memorials.length > 0 && !selectedMemorialId) {
-			const defaultMemorial = getDefaultMemorial(memorials);
+		if (events.length > 0 && !selectedMemorialId) {
+			const defaultMemorial = getDefaultMemorial(events);
 			if (defaultMemorial) {
 				selectedMemorialId = defaultMemorial.id;
 				console.log('🎯 Default event selected:', defaultMemorial.lovedOneName);
@@ -33,7 +33,7 @@
 
 	// Get currently selected event
 	const selectedMemorial = $derived(() => {
-		return memorials.find((m) => m.id === selectedMemorialId) || null;
+		return events.find((m) => m.id === selectedMemorialId) || null;
 	});
 
 	// Get payment status for selected event
@@ -64,7 +64,7 @@
 
 		console.log(`📨 Inviting ${email} to event ${memorialId}`);
 
-		const response = await fetch(`/api/memorials/${memorialId}/invite`, {
+		const response = await fetch(`/api/events/${memorialId}/invite`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
@@ -86,7 +86,7 @@
 <div class="mx-auto max-w-6xl px-4 py-6">
 	<h2 class="mb-6 text-3xl font-bold text-slate-900">Your Events</h2>
 
-	{#if memorials && memorials.length > 0}
+	{#if events && events.length > 0}
 		{@const currentMemorial = selectedMemorial()}
 		{@const currentPaymentStatus = paymentStatus()}
 
@@ -96,8 +96,8 @@
 				<PaymentWarningBanner event={currentMemorial} />
 			{/if}
 
-			<!-- Event Selector (only show if multiple memorials) -->
-			<MemorialSelector {memorials} {selectedMemorialId} onSelectionChange={handleMemorialChange} />
+			<!-- Event Selector (only show if multiple events) -->
+			<MemorialSelector {events} {selectedMemorialId} onSelectionChange={handleMemorialChange} />
 
 			<!-- Event Card -->
 			<MemorialCard event={currentMemorial} />

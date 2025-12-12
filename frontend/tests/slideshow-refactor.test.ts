@@ -45,10 +45,10 @@ describe('Slideshow Refactoring Tests', () => {
     });
 
     it('should generate correct slideshow navigation URL', () => {
-      const memorialId = 'event-123';
-      const expectedUrl = `/slideshow-generator?memorialId=${memorialId}`;
+      const eventId = 'event-123';
+      const expectedUrl = `/slideshow-generator?eventId=${eventId}`;
 
-      expect(expectedUrl).toBe('/slideshow-generator?memorialId=event-123');
+      expect(expectedUrl).toBe('/slideshow-generator?eventId=event-123');
     });
 
     it('should handle slideshow navigation for event owners', () => {
@@ -58,11 +58,11 @@ describe('Slideshow Refactoring Tests', () => {
       };
 
       const handleSlideshowClick = (event: any) => {
-        return `/slideshow-generator?memorialId=${event.id}`;
+        return `/slideshow-generator?eventId=${event.id}`;
       };
 
       const result = handleSlideshowClick(event);
-      expect(result).toBe('/slideshow-generator?memorialId=event-456');
+      expect(result).toBe('/slideshow-generator?eventId=event-456');
     });
 
     it('should validate user role for slideshow access', () => {
@@ -98,10 +98,10 @@ describe('Slideshow Refactoring Tests', () => {
     });
 
     it('should generate correct slideshow URL for stream management', () => {
-      const memorialId = 'event-789';
-      const expectedUrl = `/slideshow-generator?memorialId=${memorialId}`;
+      const eventId = 'event-789';
+      const expectedUrl = `/slideshow-generator?eventId=${eventId}`;
 
-      expect(expectedUrl).toBe('/slideshow-generator?memorialId=event-789');
+      expect(expectedUrl).toBe('/slideshow-generator?eventId=event-789');
     });
 
     it('should validate permissions for slideshow creation in stream management', () => {
@@ -211,12 +211,12 @@ describe('Slideshow Refactoring Tests', () => {
     });
 
     it('should handle slideshow success navigation', () => {
-      const memorialId = 'event-123';
+      const eventId = 'event-123';
       
-      const handleSlideshowSuccess = (uploaded: boolean, memorialId?: string) => {
+      const handleSlideshowSuccess = (uploaded: boolean, eventId?: string) => {
         if (uploaded) {
-          if (memorialId) {
-            return `/memorials/${memorialId}`;
+          if (eventId) {
+            return `/memorials/${eventId}`;
           } else {
             return '/profile';
           }
@@ -224,7 +224,7 @@ describe('Slideshow Refactoring Tests', () => {
         return null;
       };
 
-      expect(handleSlideshowSuccess(true, memorialId)).toBe('/memorials/event-123');
+      expect(handleSlideshowSuccess(true, eventId)).toBe('/memorials/event-123');
       expect(handleSlideshowSuccess(true)).toBe('/profile');
       expect(handleSlideshowSuccess(false)).toBe(null);
     });
@@ -239,30 +239,30 @@ describe('Slideshow Refactoring Tests', () => {
       };
 
       const generateSlideshowUrl = (event: any) => {
-        return `/slideshow-generator?memorialId=${event.id}`;
+        return `/slideshow-generator?eventId=${event.id}`;
       };
 
       const url = generateSlideshowUrl(event);
       const urlParams = new URLSearchParams(url.split('?')[1]);
       
-      expect(urlParams.get('memorialId')).toBe('event-123');
+      expect(urlParams.get('eventId')).toBe('event-123');
     });
 
     it('should handle URL parameter parsing', () => {
-      const testUrl = '/slideshow-generator?memorialId=event-456&edit=true';
+      const testUrl = '/slideshow-generator?eventId=event-456&edit=true';
       const url = new URL(testUrl, 'http://localhost');
       
-      expect(url.searchParams.get('memorialId')).toBe('event-456');
+      expect(url.searchParams.get('eventId')).toBe('event-456');
       expect(url.searchParams.get('edit')).toBe('true');
     });
 
     it('should validate back navigation paths', () => {
-      const getBackNavigationPath = (memorialId?: string, source?: string) => {
+      const getBackNavigationPath = (eventId?: string, source?: string) => {
         if (source === 'profile') {
           return '/profile';
         }
-        if (memorialId) {
-          return `/memorials/${memorialId}/streams`;
+        if (eventId) {
+          return `/memorials/${eventId}/streams`;
         }
         return '/profile';
       };
@@ -275,15 +275,15 @@ describe('Slideshow Refactoring Tests', () => {
 
   describe('Error Handling and Edge Cases', () => {
     it('should handle missing event ID gracefully', () => {
-      const generateSlideshowUrl = (memorialId?: string) => {
-        if (!memorialId) {
+      const generateSlideshowUrl = (eventId?: string) => {
+        if (!eventId) {
           return '/slideshow-generator';
         }
-        return `/slideshow-generator?memorialId=${memorialId}`;
+        return `/slideshow-generator?eventId=${eventId}`;
       };
 
       expect(generateSlideshowUrl()).toBe('/slideshow-generator');
-      expect(generateSlideshowUrl('event-123')).toBe('/slideshow-generator?memorialId=event-123');
+      expect(generateSlideshowUrl('event-123')).toBe('/slideshow-generator?eventId=event-123');
     });
 
     it('should handle scroll element not found', async () => {

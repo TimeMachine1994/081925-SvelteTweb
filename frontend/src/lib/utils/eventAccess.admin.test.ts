@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { MemorialAccessVerifier, hasPhotoUploadPermission } from './memorialAccess';
-import type { UserContext } from './memorialAccess';
+import { EventAccessVerifier, hasPhotoUploadPermission } from './eventAccess';
+import type { UserContext } from './eventAccess';
 
 describe('Admin Role Event Access', () => {
 	beforeEach(() => {
@@ -16,7 +16,7 @@ describe('Admin Role Event Access', () => {
 		};
 
 		it('should grant admin full access to any event', async () => {
-			const result = await MemorialAccessVerifier.checkViewAccess('memorial123', adminUser);
+			const result = await EventAccessVerifier.checkViewAccess('memorial123', adminUser);
 
 			expect(result).toEqual({
 				hasAccess: true,
@@ -26,7 +26,7 @@ describe('Admin Role Event Access', () => {
 		});
 
 		it('should grant admin edit access to any event', async () => {
-			const result = await MemorialAccessVerifier.checkEditAccess('memorial123', adminUser);
+			const result = await EventAccessVerifier.checkEditAccess('memorial123', adminUser);
 
 			expect(result).toEqual({
 				hasAccess: true,
@@ -36,7 +36,7 @@ describe('Admin Role Event Access', () => {
 		});
 
 		it('should deny photo upload access in V1 (feature disabled)', async () => {
-			const result = await MemorialAccessVerifier.checkPhotoUploadAccess('memorial123', adminUser);
+			const result = await EventAccessVerifier.checkPhotoUploadAccess('memorial123', adminUser);
 
 			expect(result).toEqual({
 				hasAccess: false,
@@ -58,7 +58,7 @@ describe('Admin Role Event Access', () => {
 				isAdmin: true
 			};
 
-			const result = await MemorialAccessVerifier.checkViewAccess('memorial123', adminViaFlag);
+			const result = await EventAccessVerifier.checkViewAccess('memorial123', adminViaFlag);
 
 			expect(result).toEqual({
 				hasAccess: true,
@@ -78,7 +78,7 @@ describe('Admin Role Event Access', () => {
 			};
 
 			// Even if they're not the event owner, admin should have access
-			const result = await MemorialAccessVerifier.checkViewAccess('memorial123', adminOwner);
+			const result = await EventAccessVerifier.checkViewAccess('memorial123', adminOwner);
 
 			expect(result.accessLevel).toBe('admin');
 			expect(result.reason).toBe('Admin privileges');
@@ -93,7 +93,7 @@ describe('Admin Role Event Access', () => {
 			};
 
 			// Admin should have access even to memorials they don't own
-			const result = await MemorialAccessVerifier.checkEditAccess('memorial456', adminUser);
+			const result = await EventAccessVerifier.checkEditAccess('memorial456', adminUser);
 
 			expect(result).toEqual({
 				hasAccess: true,
@@ -111,7 +111,7 @@ describe('Admin Role Event Access', () => {
 			};
 
 			// V1: Photo upload disabled for all users including admins
-			const result = await MemorialAccessVerifier.checkPhotoUploadAccess('memorial789', adminUser);
+			const result = await EventAccessVerifier.checkPhotoUploadAccess('memorial789', adminUser);
 
 			expect(result).toEqual({
 				hasAccess: false,
@@ -124,7 +124,7 @@ describe('Admin Role Event Access', () => {
 			const adminUser = { uid: 'admin-123', role: 'admin', email: 'admin@test.com' };
 			const event = { id: 'event-123', ownerUid: 'owner-123' };
 
-			const result = await MemorialAccessVerifier.checkPhotoUploadAccess('event-123', adminUser);
+			const result = await EventAccessVerifier.checkPhotoUploadAccess('event-123', adminUser);
 
 			expect(result).toEqual({
 				hasAccess: false,
@@ -225,7 +225,7 @@ describe('Admin Role Event Access', () => {
 				// isAdmin is undefined
 			};
 
-			const result = await MemorialAccessVerifier.checkViewAccess('memorial123', adminUser);
+			const result = await EventAccessVerifier.checkViewAccess('memorial123', adminUser);
 
 			expect(result).toEqual({
 				hasAccess: true,
@@ -242,7 +242,7 @@ describe('Admin Role Event Access', () => {
 				isAdmin: true // But admin flag is set
 			};
 
-			const result = await MemorialAccessVerifier.checkViewAccess('memorial123', adminUser);
+			const result = await EventAccessVerifier.checkViewAccess('memorial123', adminUser);
 
 			expect(result).toEqual({
 				hasAccess: true,

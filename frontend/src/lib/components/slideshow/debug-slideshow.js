@@ -9,7 +9,7 @@ async function debugSlideshowLoading(memorialId) {
   try {
     // Test 1: Check if event exists and has slideshow
     console.log('\n📋 Test 1: Checking event slideshow API...');
-    const slideshowResponse = await fetch(`/api/memorials/${memorialId}/slideshow`);
+    const slideshowResponse = await fetch(`/api/events/${memorialId}/slideshow`);
     console.log('📡 Slideshow API status:', slideshowResponse.status, slideshowResponse.statusText);
     
     if (slideshowResponse.ok) {

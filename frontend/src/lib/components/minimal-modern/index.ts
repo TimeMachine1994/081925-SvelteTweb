@@ -22,7 +22,7 @@ export { default as TagCloud } from './TagCloud.svelte';
 export { default as Toast } from './Toast.svelte';
 
 // Tributestream Specific Components
-export { default as MemorialCard } from './MemorialCard.svelte';
+export { default as EventCard } from './EventCard.svelte';
 export { default as ServiceSchedule } from './ServiceSchedule.svelte';
 export { default as CondolenceForm } from './CondolenceForm.svelte';
 export { default as StreamStatus } from './StreamStatus.svelte';

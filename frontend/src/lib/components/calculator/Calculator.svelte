@@ -17,10 +17,10 @@
 	import { Button } from '$lib/ui';
 
 	let {
-		memorialId,
+		eventId,
 		data
 	}: {
-		memorialId: string | null;
+		eventId: string | null;
 		data: { event: Event | null; config: LivestreamConfig | null };
 	} = $props();
 
@@ -50,7 +50,7 @@
 
 	// Calculator-specific data (booking/pricing)
 	let calculatorData = $state<CalculatorFormData>({
-		memorialId: memorialId || '',
+		eventId: eventId || '',
 		selectedTier: 'record',
 		addons: {
 			photography: false,
@@ -70,9 +70,9 @@
 	let funeralDirectorName = $state(data.event?.funeralDirectorName || '');
 	let funeralHome = $state(data.event?.funeralHome || '');
 
-	// Initialize auto-save when memorialId is available
-	const autoSave = memorialId
-		? useAutoSave(memorialId, {
+	// Initialize auto-save when eventId is available
+	const autoSave = eventId
+		? useAutoSave(eventId, {
 				delay: 3000,
 				onSave: (success, error) => {
 					showAutoSaveStatus = true;
@@ -109,7 +109,7 @@
 			}
 
 			// Try to load auto-saved data
-			if (autoSave && memorialId) {
+			if (autoSave && eventId) {
 				const autoSavedData = await autoSave.loadAutoSavedData();
 				if (autoSavedData) {
 					const shouldRestore = confirm(
@@ -131,7 +131,7 @@
 		}
 
 		// Enable auto-save after initial load
-		if (memorialId) {
+		if (eventId) {
 			autoSaveEnabled = true;
 		}
 	});
@@ -341,12 +341,12 @@
 
 	async function createStreamsFromScheduleLocal() {
 		console.log('🎬 [CALCULATOR] ========== STREAM CREATION STARTED ==========');
-		console.log('🎬 [CALCULATOR] createStreamsFromSchedule called', { memorialId });
+		console.log('🎬 [CALCULATOR] createStreamsFromSchedule called', { eventId });
 		console.log('🎬 [CALCULATOR] Event data available:', !!data?.event);
 		console.log('🎬 [CALCULATOR] Event name:', data?.event?.lovedOneName);
 		
-		if (!memorialId) {
-			console.log('❌ [CALCULATOR] No memorialId, skipping stream creation');
+		if (!eventId) {
+			console.log('❌ [CALCULATOR] No eventId, skipping stream creation');
 			return;
 		}
 
@@ -373,7 +373,7 @@
 
 			console.log('🔍 [CALCULATOR] Stream creation data being sent:', JSON.stringify(streamCreationData, null, 2));
 			
-			const streamResults = await createStreamsFromSchedule(memorialId, streamCreationData);
+			const streamResults = await createStreamsFromSchedule(eventId, streamCreationData);
 			
 			console.log('📊 [CALCULATOR] Stream creation results:', {
 				success: streamResults.success,
@@ -405,7 +405,7 @@
 
 	async function saveAndPayLater(isPayNowFlow = false) {
 		console.log('💾 [CALCULATOR] ========== SAVE AND PAY LATER STARTED ==========');
-		console.log('💾 [CALCULATOR] saveAndPayLater called', { isPayNowFlow, memorialId });
+		console.log('💾 [CALCULATOR] saveAndPayLater called', { isPayNowFlow, eventId });
 		console.log('💾 [CALCULATOR] Current selectedTier:', selectedTier);
 		console.log('💾 [CALCULATOR] Current services data:', JSON.stringify(services, null, 2));
 		console.log('💾 [CALCULATOR] Current calculatorData:', JSON.stringify(calculatorData, null, 2));
@@ -442,11 +442,11 @@
 		console.log('📦 [CALCULATOR] Payload being sent to schedule API:', JSON.stringify(payload, null, 2));
 
 		try {
-			console.log('📡 [CALCULATOR] Making API request to:', `/api/memorials/${memorialId}/schedule`);
+			console.log('📡 [CALCULATOR] Making API request to:', `/api/events/${eventId}/schedule`);
 			console.log('📡 [CALCULATOR] Request method: PATCH');
 			console.log('📡 [CALCULATOR] Request headers:', { 'Content-Type': 'application/json' });
 			
-			const response = await fetch(`/api/memorials/${memorialId}/schedule`, {
+			const response = await fetch(`/api/events/${eventId}/schedule`, {
 				method: 'PATCH',
 				headers: {
 					'Content-Type': 'application/json'
@@ -490,7 +490,7 @@
 	}
 
 	async function proceedToPayment() {
-		if (!memorialId) {
+		if (!eventId) {
 			return;
 		}
 		const payload = {
@@ -579,11 +579,11 @@
 				/>
 			{/if}
 		{:else if currentStep === 'payNow'}
-			{#if memorialId}
-				<StripeCheckout amount={total} {memorialId} {lovedOneName} />
+			{#if eventId}
+				<StripeCheckout amount={total} {eventId} {lovedOneName} />
 			{/if}
-		{:else if clientSecret && configId && memorialId}
-			<StripeCheckout amount={total} {memorialId} {lovedOneName} />
+		{:else if clientSecret && configId && eventId}
+			<StripeCheckout amount={total} {eventId} {lovedOneName} />
 		{:else}
 			<div class="card p-4 text-center">
 				<p>There was an error preparing the payment form. Please try again.</p>

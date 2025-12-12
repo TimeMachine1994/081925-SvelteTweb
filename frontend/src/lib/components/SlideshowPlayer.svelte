@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { MemorialSlideshow } from '$lib/types/slideshow';
+	import type { EventSlideshow } from '$lib/types/slideshow';
 	import { Play, Pause, SkipForward, SkipBack } from 'lucide-svelte';
 	
 	interface Props {
-		slideshow: MemorialSlideshow;
+		slideshow: EventSlideshow;
 		autoplay?: boolean;
 		controls?: boolean;
 		editable?: boolean;

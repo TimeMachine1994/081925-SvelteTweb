@@ -300,17 +300,17 @@ describe('Schedule Page - Navigation Logic', () => {
 	});
 
 	it('should extract event ID from URL params', () => {
-		const searchParams = new URLSearchParams('?memorialId=test-123');
-		const memorialId = searchParams.get('memorialId');
+		const searchParams = new URLSearchParams('?eventId=test-123');
+		const eventId = searchParams.get('eventId');
 
-		expect(memorialId).toBe('test-123');
+		expect(eventId).toBe('test-123');
 	});
 
 	it('should redirect to profile when no event ID', () => {
 		const searchParams = new URLSearchParams('');
-		const memorialId = searchParams.get('memorialId');
+		const eventId = searchParams.get('eventId');
 
-		if (!memorialId) {
+		if (!eventId) {
 			goto('/profile');
 		}
 
@@ -319,7 +319,7 @@ describe('Schedule Page - Navigation Logic', () => {
 
 	it('should handle booking navigation with payment data', () => {
 		const paymentData = {
-			memorialId: 'test-123',
+			eventId: 'test-123',
 			clientSecret: 'pi_test_secret',
 			amount: 699,
 			bookingItems: []
@@ -353,7 +353,7 @@ describe('Schedule Page - API Integration', () => {
 		(global.fetch as any).mockResolvedValue(mockResponse);
 
 		const bookingData = {
-			memorialId: 'test-123',
+			eventId: 'test-123',
 			amount: 699,
 			bookingItems: [],
 			customerInfo: { email: 'test@example.com' }

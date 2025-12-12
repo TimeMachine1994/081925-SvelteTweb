@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // This test file was moved from the API route directory to avoid SvelteKit conflicts
-// Original location: src/routes/api/memorials/[memorialId]/slideshow/+server.test.ts
+// Original location: src/routes/api/memorials/[eventId]/slideshow/+server.test.ts
 
 describe('Slideshow API Endpoints', () => {
   // Test implementation moved here to avoid SvelteKit route conflicts

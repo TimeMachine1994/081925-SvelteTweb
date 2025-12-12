@@ -587,7 +587,7 @@
 	// Handle edit request submission
 	async function handleEditRequest(requestDetails: string) {
 		try {
-			const response = await fetch(`/api/memorials/${memorialId}/schedule/request-edit`, {
+			const response = await fetch(`/api/events/${memorialId}/schedule/request-edit`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ requestDetails })

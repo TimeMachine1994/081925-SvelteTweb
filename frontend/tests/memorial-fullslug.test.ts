@@ -128,7 +128,7 @@ describe('Event FullSlug Generation', () => {
     // Verify successful result with event URL
     expect(result).toEqual({
       success: true,
-      memorialId: 'test-event-id',
+      eventId: 'test-event-id',
       memorialSlug: 'celebration-of-life-for-john-smith',
       memorialUrl: '/celebration-of-life-for-john-smith',
       message: 'Celebration of Life for John Smith created successfully! You can view it at /celebration-of-life-for-john-smith'

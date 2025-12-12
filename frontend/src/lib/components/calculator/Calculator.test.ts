@@ -23,7 +23,7 @@ vi.mock('$lib/firebase', () => ({
 
 describe('Calculator Component', () => {
 	const mockProps = {
-		memorialId: 'test-event-123',
+		eventId: 'test-event-123',
 		data: {
 			event: {
 				id: 'test-event-123',

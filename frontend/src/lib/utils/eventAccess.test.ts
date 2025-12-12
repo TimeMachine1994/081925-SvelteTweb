@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { verifyMemorialAccess, hasPhotoUploadPermission } from './memorialAccess';
+import { verifyEventAccess, hasPhotoUploadPermission } from './eventAccess';
 import type { User } from 'firebase/auth';
 
 describe('Event Access Verification', () => {
@@ -19,8 +19,8 @@ describe('Event Access Verification', () => {
 	});
 
 	// Mock checkInvitationStatus function
-	vi.mock('./memorialAccess', async () => {
-		const actual = await vi.importActual('./memorialAccess');
+	vi.mock('./eventAccess', async () => {
+		const actual = await vi.importActual('./eventAccess');
 		return {
 			...actual,
 			checkInvitationStatus: vi.fn()
@@ -31,14 +31,14 @@ describe('Event Access Verification', () => {
 		vi.clearAllMocks();
 	});
 
-	describe('verifyMemorialAccess', () => {
+	describe('verifyEventAccess', () => {
 		it('should allow owner access', async () => {
 			const userWithOwnerRole = {
 				...mockUser,
 				customClaims: { role: 'owner' }
 			};
 
-			const result = await verifyMemorialAccess(
+			const result = await verifyEventAccess(
 				userWithOwnerRole as User,
 				mockMemorial.id,
 				mockMemorial
@@ -60,7 +60,7 @@ describe('Event Access Verification', () => {
 				funeralDirectorUid: mockUser.uid
 			};
 
-			const result = await verifyMemorialAccess(userWithFDRole as User, fdMemorial.id, fdMemorial);
+			const result = await verifyEventAccess(userWithFDRole as User, fdMemorial.id, fdMemorial);
 
 			expect(result.hasAccess).toBe(true);
 			expect(result.accessLevel).toBe('admin');
@@ -80,7 +80,7 @@ describe('Event Access Verification', () => {
 				funeralDirectorUid: 'fd-789'
 			};
 
-			const result = await verifyMemorialAccess(adminUser as User, v1Memorial.id, v1Memorial);
+			const result = await verifyEventAccess(adminUser as User, v1Memorial.id, v1Memorial);
 
 			expect(result.hasAccess).toBe(true);
 			expect(result.accessLevel).toBe('admin');
@@ -93,7 +93,7 @@ describe('Event Access Verification', () => {
 				customClaims: { role: 'unknown' }
 			};
 
-			const result = await verifyMemorialAccess(
+			const result = await verifyEventAccess(
 				unauthorizedUser as User,
 				mockMemorial.id,
 				mockMemorial

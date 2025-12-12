@@ -39,7 +39,7 @@ export function useAutoSave(
 		hasUnsavedChanges = false;
 
 		try {
-			const response = await fetch(`/api/memorials/${memorialId}/schedule/auto-save`, {
+			const response = await fetch(`/api/events/${memorialId}/schedule/auto-save`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
@@ -83,7 +83,7 @@ export function useAutoSave(
 	// Load auto-saved data
 	async function loadAutoSavedData(): Promise<AutoSaveData | null> {
 		try {
-			const response = await fetch(`/api/memorials/${memorialId}/schedule/auto-save`);
+			const response = await fetch(`/api/events/${memorialId}/schedule/auto-save`);
 			const result = await response.json();
 
 			if (response.ok && result.success && result.hasAutoSave) {

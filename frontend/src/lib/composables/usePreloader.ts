@@ -86,7 +86,7 @@ export function usePreloader() {
 			case 'funeral_director':
 				await preloader.preload(
 					'funeral-director-memorials',
-					() => fetch('/api/funeral-director/memorials').then((r) => r.json()),
+					() => fetch('/api/funeral-director/events').then((r) => r.json()),
 					'high'
 				);
 				break;
@@ -95,7 +95,7 @@ export function usePreloader() {
 				if (memorialId) {
 					await preloader.preload(
 						`event:${memorialId}`,
-						() => fetch(`/api/memorials/${memorialId}`).then((r) => r.json()),
+						() => fetch(`/api/events/${memorialId}`).then((r) => r.json()),
 						'high'
 					);
 				}
@@ -119,20 +119,20 @@ export function usePreloader() {
 	) => {
 		await preloader.preload(
 			`event:${memorialId}`,
-			() => fetch(`/api/memorials/${memorialId}`).then((r) => r.json()),
+			() => fetch(`/api/events/${memorialId}`).then((r) => r.json()),
 			priority
 		);
 
 		// Preload related data
 		await preloader.preload(
 			`event-photos:${memorialId}`,
-			() => fetch(`/api/memorials/${memorialId}/photos`).then((r) => r.json()),
+			() => fetch(`/api/events/${memorialId}/photos`).then((r) => r.json()),
 			'low'
 		);
 
 		await preloader.preload(
 			`event-stream-status:${memorialId}`,
-			() => fetch(`/api/memorials/${memorialId}/stream/status`).then((r) => r.json()),
+			() => fetch(`/api/events/${memorialId}/stream/status`).then((r) => r.json()),
 			'medium'
 		);
 	};

@@ -17,7 +17,7 @@
 		if (!memorialId) return;
 		
 		try {
-			const response = await fetch(`/api/memorials/${memorialId}`);
+			const response = await fetch(`/api/events/${memorialId}`);
 			if (response.ok) {
 				event = await response.json();
 				console.log('📍 Event data loaded:', event);

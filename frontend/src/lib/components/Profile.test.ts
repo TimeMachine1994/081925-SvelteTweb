@@ -8,24 +8,24 @@ describe('Profile Component - Schedule Navigation Logic', () => {
 	});
 
 	it('should generate correct schedule URL for event', () => {
-		const memorialId = 'event-123';
-		const expectedUrl = `/schedule?memorialId=${memorialId}`;
+		const eventId = 'event-123';
+		const expectedUrl = `/schedule?eventId=${eventId}`;
 
 		// Test the URL generation logic
-		expect(expectedUrl).toBe('/schedule?memorialId=event-123');
+		expect(expectedUrl).toBe('/schedule?eventId=event-123');
 	});
 
 	it('should handle schedule navigation function', async () => {
-		const memorialId = 'event-456';
+		const eventId = 'event-456';
 
 		// Simulate the schedule navigation function
 		const handleScheduleClick = (id: string) => {
-			goto(`/schedule?memorialId=${id}`);
+			goto(`/schedule?eventId=${id}`);
 		};
 
-		handleScheduleClick(memorialId);
+		handleScheduleClick(eventId);
 
-		expect(goto).toHaveBeenCalledWith('/schedule?memorialId=event-456');
+		expect(goto).toHaveBeenCalledWith('/schedule?eventId=event-456');
 	});
 
 	it('should validate event permissions before navigation', () => {

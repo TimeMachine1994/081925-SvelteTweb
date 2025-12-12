@@ -81,7 +81,7 @@
 			// Combine date and time into ISO format
 			const scheduledStartTime = `${streamDate}T${streamTime}:00`;
 
-			const response = await fetch(`/api/memorials/${event.id}/streams`, {
+			const response = await fetch(`/api/events/${event.id}/streams`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({

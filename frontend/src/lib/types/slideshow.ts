@@ -1,7 +1,7 @@
-export interface MemorialSlideshow {
+export interface EventSlideshow {
 	id: string;
 	title: string;
-	memorialId: string;
+	eventId: string;
 	firebaseStoragePath: string; // Firebase Storage path (required)
 	playbackUrl: string; // Firebase Storage video URL (required)
 	thumbnailUrl?: string | null; // Optional thumbnail

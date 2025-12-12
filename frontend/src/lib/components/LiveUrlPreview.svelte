@@ -28,8 +28,7 @@
 	let fullUrl = $derived.by(() => {
 		if (!slug) return '';
 		const baseUrl = 'https://yoursite.com';
-		const fullSlug = `celebration-of-life-for-${slug}`;
-		const url = `${baseUrl}/${fullSlug}`;
+		const url = `${baseUrl}/${slug}`;
 		console.log('🌐 Generated full URL:', url);
 		return url;
 	});

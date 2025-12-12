@@ -2,14 +2,14 @@
 	import type { Event } from '$lib/types/event';
 	import { Heart, Eye, Calendar, Users, Search, Plus } from 'lucide-svelte';
 
-	let { memorials }: { memorials: Event[] } = $props();
+	let { events }: { events: Event[] } = $props();
 
-	console.log('👀 ViewerPortal rendering with', memorials.length, 'followed memorials');
+	console.log('👀 ViewerPortal rendering with', events.length, 'followed events');
 
 	// Unfollow event function
 	async function unfollowMemorial(memorialId: string) {
 		try {
-			const response = await fetch(`/api/memorials/${memorialId}/follow`, {
+			const response = await fetch(`/api/events/${memorialId}/follow`, {
 				method: 'DELETE'
 			});
 
@@ -36,7 +36,7 @@
 			</div>
 			<div>
 				<h1 class="text-3xl font-bold text-gray-900">My Followed Memorials</h1>
-				<p class="text-lg text-gray-600">Stay connected with the memorials you care about</p>
+				<p class="text-lg text-gray-600">Stay connected with the events you care about</p>
 			</div>
 		</div>
 
@@ -48,7 +48,7 @@
 						<Heart class="h-5 w-5 text-pink-600" />
 					</div>
 					<div>
-						<p class="text-2xl font-bold text-gray-900">{memorials.length}</p>
+						<p class="text-2xl font-bold text-gray-900">{events.length}</p>
 						<p class="text-sm text-gray-600">Following</p>
 					</div>
 				</div>
@@ -61,7 +61,7 @@
 					</div>
 					<div>
 						<p class="text-2xl font-bold text-gray-900">
-							{memorials.filter((m) => m.serviceDate && new Date(m.serviceDate) > new Date())
+							{events.filter((m) => m.serviceDate && new Date(m.serviceDate) > new Date())
 								.length}
 						</p>
 						<p class="text-sm text-gray-600">Upcoming Services</p>
@@ -76,7 +76,7 @@
 					</div>
 					<div>
 						<p class="text-2xl font-bold text-gray-900">
-							{memorials.filter((m) => m.isPublic).length}
+							{events.filter((m) => m.isPublic).length}
 						</p>
 						<p class="text-sm text-gray-600">Public</p>
 					</div>
@@ -97,7 +97,7 @@
 					<Search class="h-6 w-6" />
 					<h3 class="text-lg font-semibold">Find Memorials</h3>
 				</div>
-				<p class="text-blue-100">Search for memorials to follow and support families</p>
+				<p class="text-blue-100">Search for events to follow and support families</p>
 			</a>
 
 			<a
@@ -108,7 +108,7 @@
 					<Eye class="h-6 w-6" />
 					<h3 class="text-lg font-semibold">Browse All</h3>
 				</div>
-				<p class="text-emerald-100">Explore public memorials and tributes</p>
+				<p class="text-emerald-100">Explore public events and tributes</p>
 			</a>
 		</div>
 	</div>
@@ -117,12 +117,12 @@
 	<div class="mb-8">
 		<div class="mb-6 flex items-center justify-between">
 			<h2 class="text-xl font-semibold text-gray-900">Followed Memorials</h2>
-			<span class="text-sm text-gray-500">{memorials.length} total</span>
+			<span class="text-sm text-gray-500">{events.length} total</span>
 		</div>
 
-		{#if memorials && memorials.length > 0}
+		{#if events && events.length > 0}
 			<div class="grid gap-4">
-				{#each memorials as event}
+				{#each events as event}
 					<div
 						class="rounded-xl border border-gray-200 bg-white p-6 shadow-lg transition-all duration-300 hover:shadow-xl"
 					>
@@ -198,12 +198,12 @@
 				{/each}
 			</div>
 		{:else}
-			<!-- No followed memorials state -->
+			<!-- No followed events state -->
 			<div class="rounded-xl border border-gray-200 bg-white py-12 text-center shadow-lg">
 				<div class="mb-4 text-6xl text-gray-400">💝</div>
 				<h3 class="mb-2 text-lg font-medium text-gray-900">No Followed Memorials</h3>
 				<p class="mb-6 text-gray-600">
-					You haven't followed any memorials yet. Discover memorials to stay connected with families
+					You haven't followed any events yet. Discover events to stay connected with families
 					and their loved ones.
 				</p>
 				<div class="space-x-4">

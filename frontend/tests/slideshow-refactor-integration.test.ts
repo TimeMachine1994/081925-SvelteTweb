@@ -26,7 +26,7 @@ describe('Slideshow Refactoring Integration Tests', () => {
         expect(profileContent).not.toContain('PhotoSlideshowCreator');
         
         // Verify navigation links are present
-        expect(profileContent).toContain('/slideshow-generator?memorialId=');
+        expect(profileContent).toContain('/slideshow-generator?eventId=');
         
       } catch (error) {
         // If file doesn't exist or can't be read, skip this test
@@ -41,7 +41,7 @@ describe('Slideshow Refactoring Integration Tests', () => {
         const profileContent = readFileSync(profilePath, 'utf-8');
         
         // Should have navigation link instead of modal
-        expect(profileContent).toContain('href={`/slideshow-generator?memorialId=${event.id}`}');
+        expect(profileContent).toContain('href={`/slideshow-generator?eventId=${event.id}`}');
         
         // Should have Camera icon for slideshow button
         expect(profileContent).toContain('<Camera');
@@ -86,7 +86,7 @@ describe('Slideshow Refactoring Integration Tests', () => {
         const streamContent = readFileSync(streamPath, 'utf-8');
         
         // Should have navigation link instead of modal
-        expect(streamContent).toContain('href={`/slideshow-generator?memorialId=${memorialId}`}');
+        expect(streamContent).toContain('href={`/slideshow-generator?eventId=${eventId}`}');
         
         // Should have proper role checking for funeral directors and admins
         expect(streamContent).toContain("data.user.role === 'funeral_director'");
@@ -128,8 +128,8 @@ describe('Slideshow Refactoring Integration Tests', () => {
       try {
         const generatorContent = readFileSync(generatorPath, 'utf-8');
         
-        // Should parse memorialId from URL parameters
-        expect(generatorContent).toContain("$page.url.searchParams.get('memorialId')");
+        // Should parse eventId from URL parameters
+        expect(generatorContent).toContain("$page.url.searchParams.get('eventId')");
         
         // Should handle navigation back to event or profile
         expect(generatorContent).toContain('window.location.href');
@@ -186,29 +186,29 @@ describe('Slideshow Refactoring Integration Tests', () => {
   describe('Navigation Flow Validation', () => {
     it('should validate complete navigation flow', () => {
       const navigationFlow = {
-        profileToSlideshow: (memorialId: string) => `/slideshow-generator?memorialId=${memorialId}`,
-        streamToSlideshow: (memorialId: string) => `/slideshow-generator?memorialId=${memorialId}`,
-        slideshowToMemorial: (memorialId: string) => `/memorials/${memorialId}`,
+        profileToSlideshow: (eventId: string) => `/slideshow-generator?eventId=${eventId}`,
+        streamToSlideshow: (eventId: string) => `/slideshow-generator?eventId=${eventId}`,
+        slideshowToMemorial: (eventId: string) => `/memorials/${eventId}`,
         slideshowToProfile: () => '/profile'
       };
 
-      const memorialId = 'test-event-123';
+      const eventId = 'test-event-123';
 
-      expect(navigationFlow.profileToSlideshow(memorialId)).toBe('/slideshow-generator?memorialId=test-event-123');
-      expect(navigationFlow.streamToSlideshow(memorialId)).toBe('/slideshow-generator?memorialId=test-event-123');
-      expect(navigationFlow.slideshowToMemorial(memorialId)).toBe('/memorials/test-event-123');
+      expect(navigationFlow.profileToSlideshow(eventId)).toBe('/slideshow-generator?eventId=test-event-123');
+      expect(navigationFlow.streamToSlideshow(eventId)).toBe('/slideshow-generator?eventId=test-event-123');
+      expect(navigationFlow.slideshowToMemorial(eventId)).toBe('/memorials/test-event-123');
       expect(navigationFlow.slideshowToProfile()).toBe('/profile');
     });
 
     it('should validate URL parameter handling', () => {
       const parseMemorialId = (url: string) => {
         const urlObj = new URL(url, 'http://localhost');
-        return urlObj.searchParams.get('memorialId');
+        return urlObj.searchParams.get('eventId');
       };
 
       const testUrls = [
-        'http://localhost/slideshow-generator?memorialId=event-123',
-        'http://localhost/slideshow-generator?memorialId=event-456&edit=true',
+        'http://localhost/slideshow-generator?eventId=event-123',
+        'http://localhost/slideshow-generator?eventId=event-456&edit=true',
         'http://localhost/slideshow-generator'
       ];
 

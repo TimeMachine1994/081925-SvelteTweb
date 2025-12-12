@@ -4,7 +4,7 @@ import type { Actions, PageServerLoad } from './$types';
 import { sendFuneralDirectorRegistrationEmail } from '$lib/server/email';
 import { indexMemorial } from '$lib/server/algolia-indexing';
 import type { Event } from '$lib/types/event';
-import { generateUniqueMemorialSlug } from '$lib/utils/memorial-slug';
+import { generateUniqueEventSlug } from '$lib/utils/event-slug';
 import { createStandardUserProfile } from '$lib/utils/user-profile';
 
 /**
@@ -149,7 +149,7 @@ export const actions: Actions = {
 
 		console.log('✅ All validation passed successfully');
 
-		const fullSlug = await generateUniqueMemorialSlug(lovedOneName);
+		const fullSlug = await generateUniqueEventSlug(lovedOneName);
 		let userRecord;
 		let isExistingUser = false;
 		let password = '';

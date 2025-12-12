@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getTheme } from '$lib/design-tokens/minimal-modern-theme';
 	import {
-		MemorialCard,
+		EventCard,
 		ServiceSchedule,
 		CondolenceForm,
 		StreamStatus,
@@ -136,7 +136,7 @@
 			<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 				<!-- Event Card -->
 				<div class="lg:col-span-1">
-					<MemorialCard 
+					<EventCard 
 						theme="minimal" 
 						{event} 
 						onView={handleViewMemorial}

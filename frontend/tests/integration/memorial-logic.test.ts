@@ -232,7 +232,7 @@ describe('Event Logic Integration', () => {
   describe('Stream Integration Logic', () => {
     it('creates stream for event', async () => {
       const streamData = {
-        memorialId: mockMemorial.id,
+        eventId: mockMemorial.id,
         title: 'Event Service Stream',
         createdBy: 'funeral-director-uid',
         rtmpEnabled: true,

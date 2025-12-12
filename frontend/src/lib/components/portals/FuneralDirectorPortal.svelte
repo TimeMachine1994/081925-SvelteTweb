@@ -19,9 +19,9 @@
 	} from 'lucide-svelte';
 	import LivestreamControl from '$lib/components/LivestreamControl.svelte';
 
-	let { memorials }: { memorials: Event[] } = $props();
+	let { events }: { events: Event[] } = $props();
 
-	console.log('🏢 FuneralDirectorPortal rendering with', memorials.length, 'assigned memorials');
+	console.log('🏢 FuneralDirectorPortal rendering with', events.length, 'assigned events');
 </script>
 
 <div class="mx-auto max-w-6xl px-4 py-6">
@@ -47,7 +47,7 @@
 						<Building2 class="h-5 w-5 text-yellow-600" />
 					</div>
 					<div>
-						<p class="text-2xl font-bold text-gray-900">{memorials.length}</p>
+						<p class="text-2xl font-bold text-gray-900">{events.length}</p>
 						<p class="text-sm text-gray-600">Active Memorials</p>
 					</div>
 				</div>
@@ -60,7 +60,7 @@
 					</div>
 					<div>
 						<p class="text-2xl font-bold text-gray-900">
-							{memorials.reduce((sum, m) => sum + (m.familyMemberCount || 0), 0)}
+							{events.reduce((sum, m) => sum + (m.familyMemberCount || 0), 0)}
 						</p>
 						<p class="text-sm text-gray-600">Family Members</p>
 					</div>
@@ -74,7 +74,7 @@
 					</div>
 					<div>
 						<p class="text-2xl font-bold text-gray-900">
-							{memorials.filter((m) => m.serviceDate).length}
+							{events.filter((m) => m.serviceDate).length}
 						</p>
 						<p class="text-sm text-gray-600">Scheduled Services</p>
 					</div>
@@ -88,7 +88,7 @@
 					</div>
 					<div>
 						<p class="text-2xl font-bold text-gray-900">
-							{memorials.filter((m) => m.isPublic).length}
+							{events.filter((m) => m.isPublic).length}
 						</p>
 						<p class="text-sm text-gray-600">Public</p>
 					</div>
@@ -133,7 +133,7 @@
 					<Video class="h-6 w-6" />
 					<h3 class="text-lg font-semibold">Livestream Control</h3>
 				</div>
-				<p class="text-red-100">Start or manage livestreams for your memorials</p>
+				<p class="text-red-100">Start or manage livestreams for your events</p>
 			</a>
 		</div>
 	</div>
@@ -142,12 +142,12 @@
 	<div class="mb-8">
 		<div class="mb-6 flex items-center justify-between">
 			<h2 class="text-xl font-semibold text-gray-900">Assigned Memorials</h2>
-			<span class="text-sm text-gray-500">{memorials.length} total</span>
+			<span class="text-sm text-gray-500">{events.length} total</span>
 		</div>
 
-		{#if memorials && memorials.length > 0}
+		{#if events && events.length > 0}
 			<div class="grid gap-4">
-				{#each memorials as event}
+				{#each events as event}
 					<div
 						class="rounded-xl border border-gray-200 bg-white p-6 shadow-lg transition-all duration-300 hover:shadow-xl"
 					>
@@ -230,12 +230,12 @@
 				{/each}
 			</div>
 		{:else}
-			<!-- No memorials state -->
+			<!-- No events state -->
 			<div class="rounded-xl border border-gray-200 bg-white py-12 text-center shadow-lg">
 				<div class="mb-4 text-6xl text-gray-400">🏛️</div>
 				<h3 class="mb-2 text-lg font-medium text-gray-900">No Assigned Memorials</h3>
 				<p class="mb-6 text-gray-600">
-					You don't have any memorials assigned to you yet. Create a new event to get started.
+					You don't have any events assigned to you yet. Create a new event to get started.
 				</p>
 				<a
 					href="/register/funeral-director"
@@ -278,9 +278,9 @@
 	<div id="livestream-section" class="mb-8">
 		<h2 class="mb-6 text-xl font-semibold text-gray-900">Livestream Management</h2>
 
-		{#if memorials.length > 0}
+		{#if events.length > 0}
 			<div class="space-y-6">
-				{#each memorials as event}
+				{#each events as event}
 					<div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
 						<div class="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white px-6 py-4">
 							<div class="flex items-center justify-between">
@@ -321,7 +321,7 @@
 				<div class="mb-4 text-6xl text-gray-400">📺</div>
 				<h3 class="mb-2 text-lg font-medium text-gray-900">No Assigned Memorials</h3>
 				<p class="mb-6 text-gray-600">
-					You don't have any memorials assigned to you yet. Contact your administrator to get
+					You don't have any events assigned to you yet. Contact your administrator to get
 					started.
 				</p>
 				<a

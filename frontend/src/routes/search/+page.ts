@@ -5,7 +5,7 @@ export const load: PageLoad = async ({ url, fetch }) => {
 
 	try {
 		// Use server-side API to load memorials
-		const response = await fetch('/api/memorials/search');
+		const response = await fetch('/api/events/search');
 		
 		if (!response.ok) {
 			throw new Error(`HTTP ${response.status}: ${response.statusText}`);

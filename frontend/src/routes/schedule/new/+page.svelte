@@ -15,7 +15,7 @@
 		isCreating = true;
 
 		try {
-			const response = await fetch('/api/memorials', {
+			const response = await fetch('/api/events', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'

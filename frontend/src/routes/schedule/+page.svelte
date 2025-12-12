@@ -31,7 +31,7 @@
 	let pageLoaded = $state(true);
 
 	// Get event ID from route params or data
-	const memorialId = $page.params.memorialId || data?.event?.id || '';
+	const eventId = $page.params.eventId || data?.event?.id || '';
 	let lovedOneName = $state('');
 
 	// Event services data (new structure)
@@ -85,10 +85,10 @@
 	let autoSaveEnabled = $state(false);
 	let showAutoSaveStatus = $state(false);
 
-	// Initialize auto-save when memorialId is available
+	// Initialize auto-save when eventId is available
 	const autoSave = $derived(
-		memorialId
-			? useAutoSave(memorialId, {
+		eventId
+			? useAutoSave(eventId, {
 					delay: 3000,
 					onSave: (success, error) => {
 						showAutoSaveStatus = true;
@@ -128,7 +128,7 @@
 	const calculatorData = $derived.by(
 		() =>
 			({
-				memorialId,
+				eventId,
 				selectedTier,
 				addons,
 				createdAt: new Date(),
@@ -139,7 +139,7 @@
 
 	// Auto-save trigger when form data changes
 	$effect(() => {
-		if (autoSaveEnabled && autoSave && memorialId) {
+		if (autoSaveEnabled && autoSave && eventId) {
 			if (selectedTier || services.main.location.name || services.additional.length > 0) {
 				autoSave.triggerAutoSave({ services, calculatorData });
 			}
@@ -148,7 +148,7 @@
 
 	// Enable auto-save after component mounts
 	onMount(() => {
-		if (memorialId) {
+		if (eventId) {
 			autoSaveEnabled = true;
 		}
 	});
@@ -299,7 +299,7 @@
 	}
 
 	async function createStreamsFromScheduleLocal() {
-		if (!memorialId) return;
+		if (!eventId) return;
 
 		try {
 			console.log('🎬 [SCHEDULE] Creating streams from schedule data...');
@@ -313,7 +313,7 @@
 				memorialName: lovedOneName
 			};
 
-			const streamResults = await createStreamsFromSchedule(memorialId, streamCreationData);
+			const streamResults = await createStreamsFromSchedule(eventId, streamCreationData);
 			
 			if (streamResults.success) {
 				console.log(`✅ [SCHEDULE] Created ${streamResults.createdStreams.length} streams successfully`);
@@ -332,7 +332,7 @@
 
 	// Booking functions that integrate with our payment API
 	async function handleBookNow() {
-		if (!memorialId || !formData) {
+		if (!eventId || !formData) {
 			alert('Please ensure all required information is filled out.');
 			return;
 		}
@@ -345,7 +345,7 @@
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify({
-					memorialId,
+					eventId,
 					amount: totalPrice,
 					bookingItems,
 					customerInfo: {
@@ -363,7 +363,7 @@
 				
 				// Redirect to payment page with encoded data
 				const paymentData = {
-					memorialId,
+					eventId,
 					clientSecret: result.clientSecret,
 					paymentIntentId: result.paymentIntentId,
 					amount: totalPrice,
@@ -384,7 +384,7 @@
 	}
 
 	async function handleSaveAndPayLater() {
-		if (!memorialId) {
+		if (!eventId) {
 			goto('/profile');
 			return;
 		}
@@ -405,7 +405,7 @@
 				lastUpdated: new Date().toISOString()
 			};
 
-			const response = await fetch(`/api/memorials/${memorialId}/schedule/auto-save`, {
+			const response = await fetch(`/api/events/${eventId}/schedule/auto-save`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -454,7 +454,7 @@
 	$effect(() => {
 		if (browser) {
 			const urlParams = new URLSearchParams(window.location.search);
-			const paramMemorialId = urlParams.get('memorialId');
+			const paramMemorialId = urlParams.get('eventId');
 
 			if (!paramMemorialId) {
 				// No event ID provided, redirect to profile to select event
@@ -464,11 +464,11 @@
 	});
 
 	onMount(async () => {
-		// Load existing calculator config if available if we have a memorialId
-		if (memorialId) {
+		// Load existing calculator config if available if we have a eventId
+		if (eventId) {
 			try {
 				// Load existing data from API
-				const response = await fetch(`/api/memorials/${memorialId}/schedule/auto-save`);
+				const response = await fetch(`/api/events/${eventId}/schedule/auto-save`);
 				const result = response.ok ? await response.json() : null;
 
 				if (result && result.hasAutoSave && result.autoSave) {

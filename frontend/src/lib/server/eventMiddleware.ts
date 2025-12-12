@@ -1,19 +1,19 @@
 import { error } from '@sveltejs/kit';
 import {
-	MemorialAccessVerifier,
+	EventAccessVerifier,
 	type UserContext,
 	type AccessCheckResult,
 	logAccessAttempt
-} from '$lib/utils/memorialAccess';
+} from '$lib/utils/eventAccess';
 
-export interface MemorialRequest {
-	memorialId: string;
+export interface EventRequest {
+	eventId: string;
 	user: UserContext;
 }
 
-export async function requireViewAccess(request: MemorialRequest): Promise<AccessCheckResult> {
-	const accessResult = await MemorialAccessVerifier.checkViewAccess(
-		request.memorialId,
+export async function requireViewAccess(request: EventRequest): Promise<AccessCheckResult> {
+	const accessResult = await EventAccessVerifier.checkViewAccess(
+		request.eventId,
 		request.user
 	);
 
@@ -25,9 +25,9 @@ export async function requireViewAccess(request: MemorialRequest): Promise<Acces
 	return accessResult;
 }
 
-export async function requireEditAccess(request: MemorialRequest): Promise<AccessCheckResult> {
-	const accessResult = await MemorialAccessVerifier.checkEditAccess(
-		request.memorialId,
+export async function requireEditAccess(request: EventRequest): Promise<AccessCheckResult> {
+	const accessResult = await EventAccessVerifier.checkEditAccess(
+		request.eventId,
 		request.user
 	);
 
@@ -40,10 +40,10 @@ export async function requireEditAccess(request: MemorialRequest): Promise<Acces
 }
 
 export async function requirePhotoUploadAccess(
-	request: MemorialRequest
+	request: EventRequest
 ): Promise<AccessCheckResult> {
-	const accessResult = await MemorialAccessVerifier.checkPhotoUploadAccess(
-		request.memorialId,
+	const accessResult = await EventAccessVerifier.checkPhotoUploadAccess(
+		request.eventId,
 		request.user
 	);
 
@@ -74,11 +74,11 @@ export async function verifyMemorialPermissions(event: any): Promise<AccessCheck
 	}
 
 	const memorialId = event.params?.memorialId || 'unknown';
-	const request = createMemorialRequest(memorialId, event.locals);
+	const request = createEventRequest(memorialId, event.locals);
 
 	logAccessAttempt({
 		userId: request.user.uid,
-		memorialId: request.memorialId,
+		memorialId: request.eventId,
 		action: 'view',
 		timestamp: new Date().toISOString()
 	});
@@ -86,17 +86,17 @@ export async function verifyMemorialPermissions(event: any): Promise<AccessCheck
 	return await requireViewAccess(request);
 }
 
-export function createMemorialRequest(memorialId: string, locals: any): MemorialRequest {
+export function createEventRequest(eventId: string, locals: any): EventRequest {
 	if (!locals.user) {
 		throw error(401, 'Authentication required');
 	}
 
-	if (!memorialId) {
+	if (!eventId) {
 		throw error(400, 'Event ID is required');
 	}
 
 	return {
-		memorialId,
+		eventId,
 		user: createUserContext(locals.user)
 	};
 }

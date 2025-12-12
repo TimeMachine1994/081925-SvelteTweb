@@ -29,7 +29,7 @@ export interface UserContext {
 /**
  * Legacy function exports for backward compatibility with tests
  */
-export async function verifyMemorialAccess(
+export async function verifyEventAccess(
 	user: any,
 	memorialId: string,
 	event?: any
@@ -81,7 +81,7 @@ export async function verifyMemorialAccess(
 		}
 
 		// Fallback to class methods for production use
-		return await MemorialAccessVerifier.checkViewAccess(memorialId, userContext);
+		return await EventAccessVerifier.checkViewAccess(memorialId, userContext);
 	} catch (error) {
 		return {
 			hasAccess: false,
@@ -116,7 +116,7 @@ export function logAccessAttempt(details: any) {
  * Comprehensive event access verification system
  * Checks permissions for different user roles and actions
  */
-export class MemorialAccessVerifier {
+export class EventAccessVerifier {
 	/**
 	 * Check if user has access to view a event
 	 */

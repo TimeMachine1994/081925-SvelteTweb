@@ -1,16 +1,16 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { verifyMemorialPermissions, createMemorialRequest } from './memorialMiddleware';
-import { verifyMemorialAccess } from '$lib/utils/memorialAccess';
+import { verifyMemorialPermissions, createEventRequest } from './eventMiddleware';
+import { verifyEventAccess } from '$lib/utils/eventAccess';
 import type { RequestEvent } from '@sveltejs/kit';
 
 // Mock logAccessAttempt function
 const logAccessAttempt = vi.fn();
 
 // Mock dependencies
-vi.mock('$lib/utils/memorialAccess', () => ({
+vi.mock('$lib/utils/eventAccess', () => ({
 	verifyMemorialAccess: vi.fn(),
 	logAccessAttempt: vi.fn(),
-	MemorialAccessVerifier: {
+	EventAccessVerifier: {
 		checkViewAccess: vi.fn(),
 		checkEditAccess: vi.fn()
 	}
@@ -40,8 +40,8 @@ describe('Event Middleware', () => {
 
 	describe('verifyMemorialPermissions', () => {
 		it('should allow access for authorized users', async () => {
-			const { MemorialAccessVerifier } = await import('$lib/utils/memorialAccess');
-			vi.mocked(MemorialAccessVerifier.checkViewAccess).mockResolvedValue({
+			const { EventAccessVerifier } = await import('$lib/utils/eventAccess');
+			vi.mocked(EventAccessVerifier.checkViewAccess).mockResolvedValue({
 				hasAccess: true,
 				accessLevel: 'admin',
 				reason: 'User is event owner'
@@ -54,8 +54,8 @@ describe('Event Middleware', () => {
 		});
 
 		it('should deny access for unauthorized users', async () => {
-			const { MemorialAccessVerifier } = await import('$lib/utils/memorialAccess');
-			vi.mocked(MemorialAccessVerifier.checkViewAccess).mockResolvedValue({
+			const { EventAccessVerifier } = await import('$lib/utils/eventAccess');
+			vi.mocked(EventAccessVerifier.checkViewAccess).mockResolvedValue({
 				hasAccess: false,
 				accessLevel: 'none',
 				reason: 'User not authorized'
@@ -83,11 +83,11 @@ describe('Event Middleware', () => {
 		});
 	});
 
-	describe('createMemorialRequest', () => {
+	describe('createEventRequest', () => {
 		it('should create request object with user data', () => {
-			const result = createMemorialRequest('event-123', mockEvent.locals);
+			const result = createEventRequest('event-123', mockEvent.locals);
 
-			expect(result.memorialId).toBe('event-123');
+			expect(result.eventId).toBe('event-123');
 			expect(result.user.uid).toBe('user-123');
 			expect(result.user.role).toBe('owner');
 		});

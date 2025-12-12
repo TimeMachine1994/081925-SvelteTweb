@@ -112,7 +112,7 @@ describe('Event Creation', () => {
 		// Verify successful result
 		expect(result).toEqual({
 			success: true,
-			memorialId: 'new-event-id',
+			eventId: 'new-event-id',
 			message: 'Event created successfully! Please complete setup and payment.'
 		});
 	});

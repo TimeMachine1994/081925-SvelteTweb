@@ -55,7 +55,7 @@ describe('PhotoSlideshowCreator', () => {
       }
     };
 
-    it('should load published slideshow when memorialId is provided', async () => {
+    it('should load published slideshow when eventId is provided', async () => {
       // Mock successful API response for published slideshow
       mockFetch.mockResolvedValueOnce({
         ok: true,
@@ -73,12 +73,12 @@ describe('PhotoSlideshowCreator', () => {
 
       render(PhotoSlideshowCreator, {
         props: {
-          memorialId: 'event-123'
+          eventId: 'event-123'
         }
       });
 
       await waitFor(() => {
-        expect(mockFetch).toHaveBeenCalledWith('/api/memorials/event-123/slideshow');
+        expect(mockFetch).toHaveBeenCalledWith('/api/events/event-123/slideshow');
       });
 
       // Should show published status
@@ -113,7 +113,7 @@ describe('PhotoSlideshowCreator', () => {
 
       render(PhotoSlideshowCreator, {
         props: {
-          memorialId: 'event-123'
+          eventId: 'event-123'
         }
       });
 
@@ -140,7 +140,7 @@ describe('PhotoSlideshowCreator', () => {
 
       render(PhotoSlideshowCreator, {
         props: {
-          memorialId: 'event-123'
+          eventId: 'event-123'
         }
       });
 
@@ -172,13 +172,13 @@ describe('PhotoSlideshowCreator', () => {
 
       render(PhotoSlideshowCreator, {
         props: {
-          memorialId: 'event-123'
+          eventId: 'event-123'
         }
       });
 
       await waitFor(() => {
-        expect(mockFetch).toHaveBeenCalledWith('/api/memorials/event-123/slideshow');
-        expect(mockFetch).toHaveBeenCalledWith('/api/slideshow/draft?memorialId=event-123');
+        expect(mockFetch).toHaveBeenCalledWith('/api/events/event-123/slideshow');
+        expect(mockFetch).toHaveBeenCalledWith('/api/slideshow/draft?eventId=event-123');
       });
     });
   });
@@ -213,7 +213,7 @@ describe('PhotoSlideshowCreator', () => {
 
       render(PhotoSlideshowCreator, {
         props: {
-          memorialId: 'event-123'
+          eventId: 'event-123'
         }
       });
 
@@ -227,7 +227,7 @@ describe('PhotoSlideshowCreator', () => {
       await fireEvent.click(unpublishBtn);
 
       await waitFor(() => {
-        expect(mockFetch).toHaveBeenCalledWith('/api/memorials/event-123/slideshow', {
+        expect(mockFetch).toHaveBeenCalledWith('/api/events/event-123/slideshow', {
           method: 'DELETE'
         });
       });
@@ -252,7 +252,7 @@ describe('PhotoSlideshowCreator', () => {
 
       render(PhotoSlideshowCreator, {
         props: {
-          memorialId: 'event-123'
+          eventId: 'event-123'
         }
       });
 
@@ -279,7 +279,7 @@ describe('PhotoSlideshowCreator', () => {
 
       render(PhotoSlideshowCreator, {
         props: {
-          memorialId: 'event-123'
+          eventId: 'event-123'
         }
       });
 
@@ -297,7 +297,7 @@ describe('PhotoSlideshowCreator', () => {
 
       render(PhotoSlideshowCreator, {
         props: {
-          memorialId: 'event-123'
+          eventId: 'event-123'
         }
       });
 
@@ -329,7 +329,7 @@ describe('PhotoSlideshowCreator', () => {
 
       render(PhotoSlideshowCreator, {
         props: {
-          memorialId: 'event-123'
+          eventId: 'event-123'
         }
       });
 

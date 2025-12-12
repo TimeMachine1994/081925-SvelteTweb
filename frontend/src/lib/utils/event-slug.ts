@@ -6,13 +6,13 @@ import { adminDb } from '$lib/server/firebase';
  * @returns string - Base slug without uniqueness guarantee
  */
 export function generateBaseSlug(lovedOneName: string): string {
-	const baseSlug = `celebration-of-life-for-${lovedOneName
+	const baseSlug = lovedOneName
 		.trim()
 		.toLowerCase()
 		.replace(/[^a-z0-9\s-]/g, '') // Remove special characters
 		.replace(/\s+/g, '-') // Replace spaces with hyphens
 		.replace(/-+/g, '-') // Replace multiple hyphens with single
-		.replace(/^-|-$/g, '')}` // Remove leading/trailing hyphens
+		.replace(/^-|-$/g, '') // Remove leading/trailing hyphens
 		.substring(0, 80); // Limit length
 	
 	return baseSlug;
@@ -45,7 +45,7 @@ export async function checkSlugExists(slug: string): Promise<boolean> {
  * @param maxAttempts - Maximum number of attempts to find unique slug (default: 100)
  * @returns Promise<string> - Unique slug guaranteed to not exist in database
  */
-export async function generateUniqueMemorialSlug(
+export async function generateUniqueEventSlug(
 	lovedOneName: string, 
 	maxAttempts: number = 100
 ): Promise<string> {

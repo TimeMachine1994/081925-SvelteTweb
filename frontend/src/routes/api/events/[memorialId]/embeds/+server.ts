@@ -11,7 +11,7 @@ function requireAdmin(locals: App.Locals) {
 }
 
 export const POST: RequestHandler = async ({ locals, params, request }) => {
-	console.log('POST /api/memorials/[memorialId]/embeds called POST 🚀');
+	console.log('POST /api/events/[memorialId]/embeds called POST 🚀');
 	requireAdmin(locals);
 
 	const { memorialId } = params;
@@ -43,7 +43,7 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 };
 
 export const PUT: RequestHandler = async ({ locals, params, request }) => {
-	console.log('PUT /api/memorials/[memorialId]/embeds called PUT 🚀');
+	console.log('PUT /api/events/[memorialId]/embeds called PUT 🚀');
 	requireAdmin(locals);
 
 	const { memorialId } = params;
@@ -73,7 +73,7 @@ export const PUT: RequestHandler = async ({ locals, params, request }) => {
 };
 
 export const DELETE: RequestHandler = async ({ locals, params, request }) => {
-	console.log('DELETE /api/memorials/[memorialId]/embeds called DELETE 🚀');
+	console.log('DELETE /api/events/[memorialId]/embeds called DELETE 🚀');
 	requireAdmin(locals);
 
 	const { memorialId } = params;

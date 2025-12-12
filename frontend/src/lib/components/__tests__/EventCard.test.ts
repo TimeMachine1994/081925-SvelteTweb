@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/svelte';
-import MemorialCard from '../minimal-modern/MemorialCard.svelte';
+import EventCard from '../minimal-modern/EventCard.svelte';
 import { setupTestEnvironment } from '../../../../test-utils/test-helpers';
 
 // Mock the theme system
@@ -39,7 +39,7 @@ vi.mock('../minimal-modern/Badge.svelte', () => ({
   })
 }));
 
-describe('MemorialCard Component', () => {
+describe('EventCard Component', () => {
   const mockMemorial = {
     id: 'event-123',
     name: 'John Michael Doe',
@@ -56,7 +56,7 @@ describe('MemorialCard Component', () => {
 
   describe('Basic Rendering', () => {
     it('renders event name and dates', () => {
-      render(MemorialCard, {
+      render(EventCard, {
         props: {
           event: mockMemorial
         }
@@ -67,7 +67,7 @@ describe('MemorialCard Component', () => {
     });
 
     it('renders event description when provided', () => {
-      render(MemorialCard, {
+      render(EventCard, {
         props: {
           event: mockMemorial
         }
@@ -77,7 +77,7 @@ describe('MemorialCard Component', () => {
     });
 
     it('renders location when provided', () => {
-      render(MemorialCard, {
+      render(EventCard, {
         props: {
           event: mockMemorial
         }
@@ -87,7 +87,7 @@ describe('MemorialCard Component', () => {
     });
 
     it('renders service date when provided', () => {
-      render(MemorialCard, {
+      render(EventCard, {
         props: {
           event: mockMemorial
         }
@@ -104,7 +104,7 @@ describe('MemorialCard Component', () => {
         dates: '1960 - 2023'
       };
 
-      render(MemorialCard, {
+      render(EventCard, {
         props: {
           event: minimalMemorial
         }
@@ -118,7 +118,7 @@ describe('MemorialCard Component', () => {
 
   describe('Image Handling', () => {
     it('renders event image when provided', () => {
-      render(MemorialCard, {
+      render(EventCard, {
         props: {
           event: mockMemorial
         }
@@ -135,7 +135,7 @@ describe('MemorialCard Component', () => {
         imageUrl: undefined
       };
 
-      render(MemorialCard, {
+      render(EventCard, {
         props: {
           event: memorialWithoutImage
         }
@@ -152,7 +152,7 @@ describe('MemorialCard Component', () => {
         isLive: true
       };
 
-      render(MemorialCard, {
+      render(EventCard, {
         props: {
           event: liveMemorial
         }
@@ -168,7 +168,7 @@ describe('MemorialCard Component', () => {
         isLive: false
       };
 
-      render(MemorialCard, {
+      render(EventCard, {
         props: {
           event: regularMemorial
         }
@@ -185,7 +185,7 @@ describe('MemorialCard Component', () => {
         viewerCount: 15
       };
 
-      render(MemorialCard, {
+      render(EventCard, {
         props: {
           event: liveMemorial
         }
@@ -201,7 +201,7 @@ describe('MemorialCard Component', () => {
         viewerCount: 42
       };
 
-      render(MemorialCard, {
+      render(EventCard, {
         props: {
           event: completedMemorial
         }
@@ -217,7 +217,7 @@ describe('MemorialCard Component', () => {
         viewerCount: 1
       };
 
-      render(MemorialCard, {
+      render(EventCard, {
         props: {
           event: memorialWithOneViewer
         }
@@ -234,7 +234,7 @@ describe('MemorialCard Component', () => {
         isPrivate: true
       };
 
-      render(MemorialCard, {
+      render(EventCard, {
         props: {
           event: privateMemorial
         }
@@ -249,7 +249,7 @@ describe('MemorialCard Component', () => {
         isPrivate: false
       };
 
-      render(MemorialCard, {
+      render(EventCard, {
         props: {
           event: publicMemorial
         }
@@ -263,7 +263,7 @@ describe('MemorialCard Component', () => {
     it('renders view button and calls onView when clicked', async () => {
       const onView = vi.fn();
 
-      render(MemorialCard, {
+      render(EventCard, {
         props: {
           event: mockMemorial,
           onView
@@ -279,7 +279,7 @@ describe('MemorialCard Component', () => {
     it('renders share button when onShare provided', () => {
       const onShare = vi.fn();
 
-      render(MemorialCard, {
+      render(EventCard, {
         props: {
           event: mockMemorial,
           onShare
@@ -290,7 +290,7 @@ describe('MemorialCard Component', () => {
     });
 
     it('does not render share button when onShare not provided', () => {
-      render(MemorialCard, {
+      render(EventCard, {
         props: {
           event: mockMemorial
         }
@@ -302,7 +302,7 @@ describe('MemorialCard Component', () => {
     it('calls onShare when share button clicked', async () => {
       const onShare = vi.fn();
 
-      render(MemorialCard, {
+      render(EventCard, {
         props: {
           event: mockMemorial,
           onShare
@@ -320,7 +320,7 @@ describe('MemorialCard Component', () => {
     it('applies custom theme', () => {
       const { getTheme } = require('$lib/design-tokens/minimal-modern-theme');
 
-      render(MemorialCard, {
+      render(EventCard, {
         props: {
           event: mockMemorial,
           theme: 'elegant'
@@ -333,7 +333,7 @@ describe('MemorialCard Component', () => {
     it('uses default minimal theme when no theme specified', () => {
       const { getTheme } = require('$lib/design-tokens/minimal-modern-theme');
 
-      render(MemorialCard, {
+      render(EventCard, {
         props: {
           event: mockMemorial
         }
@@ -343,7 +343,7 @@ describe('MemorialCard Component', () => {
     });
 
     it('applies custom CSS classes', () => {
-      const { container } = render(MemorialCard, {
+      const { container } = render(EventCard, {
         props: {
           event: mockMemorial,
           class: 'custom-event-card'
@@ -357,7 +357,7 @@ describe('MemorialCard Component', () => {
 
   describe('Accessibility', () => {
     it('provides proper alt text for event image', () => {
-      render(MemorialCard, {
+      render(EventCard, {
         props: {
           event: mockMemorial
         }
@@ -368,7 +368,7 @@ describe('MemorialCard Component', () => {
     });
 
     it('uses semantic heading for event name', () => {
-      render(MemorialCard, {
+      render(EventCard, {
         props: {
           event: mockMemorial
         }
@@ -382,7 +382,7 @@ describe('MemorialCard Component', () => {
       const onView = vi.fn();
       const onShare = vi.fn();
 
-      render(MemorialCard, {
+      render(EventCard, {
         props: {
           event: mockMemorial,
           onView,
@@ -404,7 +404,7 @@ describe('MemorialCard Component', () => {
         description: 'This is a very long description that should be truncated after three lines. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
       };
 
-      const { container } = render(MemorialCard, {
+      const { container } = render(EventCard, {
         props: {
           event: memorialWithLongDescription
         }
@@ -423,7 +423,7 @@ describe('MemorialCard Component', () => {
         dates: ''
       };
 
-      render(MemorialCard, {
+      render(EventCard, {
         props: {
           event: incompleteMemorial
         }
@@ -439,7 +439,7 @@ describe('MemorialCard Component', () => {
         viewerCount: 0
       };
 
-      render(MemorialCard, {
+      render(EventCard, {
         props: {
           event: memorialWithZeroViewers
         }
@@ -454,7 +454,7 @@ describe('MemorialCard Component', () => {
         viewerCount: undefined
       };
 
-      render(MemorialCard, {
+      render(EventCard, {
         props: {
           event: memorialWithoutViewerCount
         }
@@ -472,7 +472,7 @@ describe('MemorialCard Component', () => {
         imageUrl: 'https://example.com/image.jpg'
       };
 
-      render(MemorialCard, {
+      render(EventCard, {
         props: {
           event: liveMemorial
         }
@@ -489,7 +489,7 @@ describe('MemorialCard Component', () => {
         isPrivate: true
       };
 
-      render(MemorialCard, {
+      render(EventCard, {
         props: {
           event: privateMemorial
         }

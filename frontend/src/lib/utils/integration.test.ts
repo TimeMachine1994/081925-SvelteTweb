@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { validateEmail } from './email-validation';
-import { generateUniqueMemorialSlug } from './event-slug';
+import { generateUniqueEventSlug } from './event-slug';
 import { createStandardUserProfile, validateUserProfileData } from './user-profile';
 
 // Mock Firebase
@@ -48,8 +48,8 @@ describe('Registration Flow Integration Tests', () => {
 			expect(emailValidation.isValid).toBe(true);
 
 			// 2. Generate unique event slug (for future event creation)
-			const slug = await generateUniqueMemorialSlug('John Doe');
-			expect(slug).toBe('celebration-of-life-for-john-doe');
+			const slug = await generateUniqueEventSlug('John Doe');
+			expect(slug).toBe('john-doe');
 
 			// 3. Create user profile
 			const userProfile = createStandardUserProfile({
@@ -93,8 +93,8 @@ describe('Registration Flow Integration Tests', () => {
 			expect(directorEmailValidation.isValid).toBe(true);
 
 			// 3. Generate unique event slug
-			const slug = await generateUniqueMemorialSlug('Mary Smith');
-			expect(slug).toBe('celebration-of-life-for-mary-smith');
+			const slug = await generateUniqueEventSlug('Mary Smith');
+			expect(slug).toBe('mary-smith');
 
 			// 4. Create family user profile
 			const familyProfile = createStandardUserProfile({
@@ -133,8 +133,8 @@ describe('Registration Flow Integration Tests', () => {
 				.mockResolvedValueOnce({ empty: false }) // Counter 1 exists
 				.mockResolvedValueOnce({ empty: true });  // Counter 2 is unique
 
-			const slug = await generateUniqueMemorialSlug('John Doe');
-			expect(slug).toBe('celebration-of-life-for-john-doe-2');
+			const slug = await generateUniqueEventSlug('John Doe');
+			expect(slug).toBe('john-doe-2');
 		});
 
 		it('should handle payment restriction for multiple memorials', () => {
@@ -209,10 +209,10 @@ describe('Registration Flow Integration Tests', () => {
 			// Mock database error
 			mockGet.mockRejectedValue(new Error('Database connection failed'));
 
-			const slug = await generateUniqueMemorialSlug('John Doe');
+			const slug = await generateUniqueEventSlug('John Doe');
 			
 			// Should use timestamp fallback
-			expect(slug).toMatch(/^celebration-of-life-for-john-doe-\d{6}$/);
+			expect(slug).toMatch(/^john-doe-\d{6}$/);
 		});
 	});
 
@@ -236,10 +236,10 @@ describe('Registration Flow Integration Tests', () => {
 			mockGet.mockImplementation(() => Promise.resolve(mockResponses.shift()));
 
 			const startTime = Date.now();
-			const slug = await generateUniqueMemorialSlug('John Doe');
+			const slug = await generateUniqueEventSlug('John Doe');
 			const endTime = Date.now();
 
-			expect(slug).toBe('celebration-of-life-for-john-doe-10');
+			expect(slug).toBe('john-doe-10');
 			expect(endTime - startTime).toBeLessThan(1000); // Should be fast even with many attempts
 		});
 	});
