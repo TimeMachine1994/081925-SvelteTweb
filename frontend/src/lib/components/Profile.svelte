@@ -79,7 +79,7 @@
 				};
 			case 'owner':
 				return {
-					title: 'Event Owner',
+					title: 'Family',
 					icon: Crown,
 					gradient: 'from-amber-500 via-orange-500 to-red-500',
 					bgGradient: 'from-amber-50 to-orange-50',
@@ -311,9 +311,9 @@
 													<Eye class="mr-1 h-3 w-3" />
 													View
 												</a>
-												{#if userRole === 'owner'}
+												{#if userRole === 'owner' || userRole === 'admin'}
 													<a
-														href={`/slideshow-generator?memorialId=${event.id}`}
+														href={`/slideshow-generator?eventId=${event.id}`}
 														class="flex items-center justify-center rounded-xl bg-blue-600 px-4 py-3 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg min-h-[44px]"
 													>
 														<Camera class="mr-1 h-3 w-3" />
@@ -356,30 +356,18 @@
 										<Heart class="mr-2 h-4 w-4" />
 										Create Event
 									</a>
-								{:else if userRole === 'owner'}
+								{:else if userRole === 'owner' || userRole === 'admin'}
 									<div class="space-y-4">
 										<Button
 											onclick={() => showCreateEventModal = true}
 											variant="role"
-											role="owner"
+											role={userRole === 'admin' ? 'admin' : 'owner'}
 											size="lg"
 											rounded="lg"
 										>
 											<Heart class="w-4 h-4 mr-2" />
 											Create Event
 										</Button>
-										
-										<!-- Debug Test Button -->
-										<form method="POST" action="?/testAction" class="inline">
-											<Button
-												type="submit"
-												variant="primary"
-												size="sm"
-												rounded="lg"
-											>
-												🧪 Test Server Action
-											</Button>
-										</form>
 									</div>
 								{:else}
 									<p class="text-gray-500">
@@ -390,9 +378,9 @@
 						{/if}
 
 						<!-- Create Event Button for Owners with existing memorials -->
-						{#if userRole === 'owner' && data.memorials && data.memorials.length > 0}
+						{#if (userRole === 'owner' || userRole === 'admin') && data.memorials && data.memorials.length > 0}
 							<div class="mt-6 text-center">
-								{#if data.profile?.memorialCount > 0 && !data.profile?.hasPaidForMemorial}
+								{#if userRole !== 'admin' && data.profile?.memorialCount > 0 && !data.profile?.hasPaidForMemorial}
 									<div class="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
 										<p class="text-sm text-amber-800">
 											<strong>Payment Required:</strong> Please complete payment for your existing event
@@ -413,7 +401,7 @@
 									<Button
 										onclick={() => (showCreateEventModal = true)}
 										variant="outline"
-										role="owner"
+										role={userRole === 'admin' ? 'admin' : 'owner'}
 										size="lg"
 										rounded="lg"
 										class="flex items-center justify-center gap-2 whitespace-nowrap"
