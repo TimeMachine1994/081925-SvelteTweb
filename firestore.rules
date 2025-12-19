@@ -81,6 +81,26 @@ service cloud.firestore {
 
     }
 
+    // Streams collection rules
+    match /streams/{streamId} {
+      // Allow funeral directors to create streams for their memorials
+      allow create: if request.auth != null && 
+        request.auth.uid == request.resource.data.funeralDirectorUid &&
+        exists(/databases/$(database)/documents/memorials/$(request.resource.data.memorialId));
+      
+      // Allow funeral directors to read/update their own streams
+      allow read, update: if request.auth != null &&
+        request.auth.uid == resource.data.funeralDirectorUid;
+      
+      // Allow memorial owners to read streams
+      allow read: if request.auth != null &&
+        exists(/databases/$(database)/documents/memorials/$(resource.data.memorialId)) &&
+        get(/databases/$(database)/documents/memorials/$(resource.data.memorialId)).data.ownerUid == request.auth.uid;
+      
+      // Admins have full access
+      allow read, write: if isAdmin() || isAdminEmail();
+    }
+
     // Blog collection rules - for FireCMS admin access
     match /blog/{blogId} {
       // Allow admin emails to read/write blog posts

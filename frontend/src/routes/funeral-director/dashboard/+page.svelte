@@ -43,6 +43,39 @@
 			<p class="mt-2 text-gray-600">Manage your business information and profile settings</p>
 		</div>
 
+		<!-- Quick Actions -->
+		<div class="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
+			<a
+				href="/funeral-director/stream"
+				class="group relative overflow-hidden rounded-2xl bg-gradient-to-r from-red-500 to-red-600 p-6 shadow-lg transition-all hover:shadow-2xl hover:scale-105"
+			>
+				<div class="relative z-10">
+					<div class="mb-2 flex items-center gap-2 text-white">
+						<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+						</svg>
+						<span class="text-lg font-bold">Start Livestream</span>
+					</div>
+					<p class="text-red-50 text-sm">Stream services directly from your phone</p>
+				</div>
+			</a>
+
+			<a
+				href="/register/funeral-director"
+				class="group relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 p-6 shadow-lg transition-all hover:shadow-2xl hover:scale-105"
+			>
+				<div class="relative z-10">
+					<div class="mb-2 flex items-center gap-2 text-white">
+						<svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+						</svg>
+						<span class="text-lg font-bold">Create Memorial</span>
+					</div>
+					<p class="text-amber-50 text-sm">Quick registration for families</p>
+				</div>
+			</a>
+		</div>
+
 		<!-- Debug/Error Info -->
 		{#if data.error}
 			<div class="mb-6 rounded-xl border border-yellow-200 bg-yellow-50 p-4">
