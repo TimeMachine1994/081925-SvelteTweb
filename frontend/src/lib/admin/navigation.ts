@@ -76,6 +76,14 @@ export const ADMIN_NAV: NavDomain[] = [
 				icon: '📅',
 				description: 'Schedule edit requests',
 				requiredPermission: { resource: 'memorial', action: 'read' }
+			},
+			{
+				id: 'encoders',
+				label: 'Encoders',
+				href: '/admin/services/encoders',
+				icon: '📡',
+				description: 'Streaming encoder devices',
+				requiredPermission: { resource: 'stream', action: 'read' }
 			}
 		]
 	},

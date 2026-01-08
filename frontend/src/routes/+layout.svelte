@@ -3,8 +3,6 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import Navbar from '$lib/components/Navbar.svelte';
 	import Footer from '$lib/components/Footer.svelte';
-	import DevRoleSwitcher from '$lib/components/DevRoleSwitcher.svelte';
-	import DemoModeBanner from '$lib/components/demo/DemoModeBanner.svelte';
 	import RecaptchaProvider from '$lib/components/RecaptchaProvider.svelte';
 	import { getTheme } from '$lib/design-tokens/minimal-modern-theme';
 
@@ -29,13 +27,6 @@
 
 <RecaptchaProvider>
 	<div class="app-container {theme.root}" style="font-family: {theme.font.body}">
-		<!-- Demo Mode Banner - only shown when user is in demo mode -->
-		{#if data.user?.isDemo}
-			<DemoModeBanner />
-		{/if}
-		
-		<DevRoleSwitcher />
-	
 		<!-- Hide navbar in admin panel -->
 		{#if !$page.route.id?.startsWith('/admin')}
 			<Navbar />
@@ -46,7 +37,6 @@
 			class:full-width={$page.route.id?.includes('/app/calculator')}
 			class:homepage={$page.route.id === '/'}
 			class:memorial-page={$page.route.id === '/[fullSlug]'}
-			class:demo-mode={data.user?.isDemo}
 			class:admin-panel={$page.route.id?.startsWith('/admin')}
 		>
 			{@render children?.()}
@@ -86,18 +76,6 @@
 	.main-content.memorial-page {
 		max-width: none;
 		padding: 0;
-	}
-
-	/* Add padding when demo mode banner is visible */
-	.main-content.demo-mode {
-		padding-top: 80px;
-	}
-
-	/* Adjust for mobile demo mode */
-	@media (max-width: 640px) {
-		.main-content.demo-mode {
-			padding-top: 100px;
-		}
 	}
 
 	/* Admin panel full-width styling */

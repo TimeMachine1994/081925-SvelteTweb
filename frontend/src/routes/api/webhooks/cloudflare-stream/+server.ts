@@ -202,7 +202,104 @@ export const POST: RequestHandler = async ({ request }) => {
 			});
 		}
 
-		// Handle livestream webhooks (existing logic)
+		// ========== NEW ENCODER SYSTEM ==========
+		// First, check if this is from an encoder in the new system
+		const encoderQuery = await adminDb
+			.collection('encoders')
+			.where('credentials.cloudflareInputId', '==', searchId)
+			.limit(1)
+			.get();
+
+		if (!encoderQuery.empty) {
+			const encoderDoc = encoderQuery.docs[0];
+			const encoderData = encoderDoc.data();
+			
+			console.log('📡 [CLOUDFLARE WEBHOOK] Found encoder:', encoderDoc.id, encoderData.name);
+
+			// Find memorial with this encoder assigned
+			const memorialQuery = await adminDb
+				.collection('memorials')
+				.where('encoderConfig.assignedEncoderId', '==', encoderDoc.id)
+				.limit(1)
+				.get();
+
+			if (memorialQuery.empty) {
+				console.log('⚠️ [CLOUDFLARE WEBHOOK] Encoder not assigned to any memorial');
+				return json({ 
+					success: true, 
+					message: 'Encoder stream received but not assigned to memorial',
+					encoderId: encoderDoc.id
+				});
+			}
+
+			const memorialDoc = memorialQuery.docs[0];
+			const memorialData = memorialDoc.data();
+			
+			console.log('🕊️ [CLOUDFLARE WEBHOOK] Found memorial:', memorialDoc.id, memorialData.lovedOneName);
+
+			// CHECK IF ENCODER IS ARMED
+			const isArmed = memorialData.encoderConfig?.encoderArmed === true;
+			
+			if (!isArmed) {
+				console.log('🔇 [CLOUDFLARE WEBHOOK] Encoder is NOT armed - ignoring stream');
+				return json({
+					success: true,
+					message: 'Encoder stream received but not armed - stream not shown to viewers',
+					encoderId: encoderDoc.id,
+					memorialId: memorialDoc.id,
+					armed: false
+				});
+			}
+
+			console.log('🎯 [CLOUDFLARE WEBHOOK] Encoder is ARMED - processing stream');
+
+			// Update memorial encoderConfig based on state
+			let memorialUpdates: Record<string, any> = {
+				updatedAt: new Date().toISOString()
+			};
+
+			switch (state) {
+				case 'live-inprogress':
+					memorialUpdates['encoderConfig.streamStatus'] = 'live';
+					memorialUpdates['encoderConfig.liveStartedAt'] = new Date().toISOString();
+					if (preview) {
+						memorialUpdates['encoderConfig.liveWatchUrl'] = preview;
+					}
+					if (hlsUrl) {
+						memorialUpdates['encoderConfig.hlsUrl'] = hlsUrl;
+					}
+					console.log('🔴 [CLOUDFLARE WEBHOOK] Memorial going LIVE via encoder');
+					break;
+
+				case 'ready':
+					memorialUpdates['encoderConfig.streamStatus'] = 'completed';
+					memorialUpdates['encoderConfig.liveWatchUrl'] = null;
+					console.log('✅ [CLOUDFLARE WEBHOOK] Memorial stream COMPLETED via encoder');
+					break;
+
+				case 'error':
+					memorialUpdates['encoderConfig.streamStatus'] = 'offline';
+					console.log('❌ [CLOUDFLARE WEBHOOK] Memorial stream ERROR via encoder');
+					break;
+
+				default:
+					console.log('⏳ [CLOUDFLARE WEBHOOK] Encoder stream state:', state);
+			}
+
+			await memorialDoc.ref.update(memorialUpdates);
+			console.log('💾 [CLOUDFLARE WEBHOOK] Memorial updated via encoder system');
+
+			return json({
+				success: true,
+				encoderId: encoderDoc.id,
+				memorialId: memorialDoc.id,
+				streamStatus: memorialUpdates['encoderConfig.streamStatus'] || state,
+				armed: true
+			});
+		}
+
+		// ========== LEGACY STREAM SYSTEM ==========
+		// Handle livestream webhooks (existing logic for backwards compatibility)
 		// Find stream by Cloudflare Input ID (check both new and legacy fields)
 		const newFieldQuery = adminDb
 			.collection('streams')
@@ -229,7 +326,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		}
 
 		if (!streamDoc) {
-			console.log('❌ [CLOUDFLARE WEBHOOK] Stream not found for ID:', searchId);
+			console.log('❌ [CLOUDFLARE WEBHOOK] No stream or encoder found for ID:', searchId);
 			return json({ error: 'Stream not found' }, { status: 404 });
 		}
 

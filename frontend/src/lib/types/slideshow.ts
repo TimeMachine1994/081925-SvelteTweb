@@ -14,11 +14,6 @@ export interface MemorialSlideshow {
 	createdBy: string;
 	createdAt: string;
 	updatedAt: string;
-
-	// Demo mode fields - for sandboxed demo data
-	isDemo?: boolean;
-	demoSessionId?: string;
-	demoExpiresAt?: string;
 }
 
 export interface SlideshowPhoto {

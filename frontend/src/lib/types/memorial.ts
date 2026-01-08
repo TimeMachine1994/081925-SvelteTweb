@@ -105,11 +105,6 @@ export interface Memorial {
 		licenseNumber?: string;
 	};
 
-	// Demo mode fields - for sandboxed demo data
-	isDemo?: boolean;
-	demoSessionId?: string;
-	demoExpiresAt?: string;
-
 	// Payment status fields
 	isPaid?: boolean;
 	paymentStatus?: 'paid' | 'unpaid';

@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import { Building2, User, Mail, Phone, MapPin, Save, ArrowLeft } from 'lucide-svelte';
+	import { Building2, User, Mail, Phone, MapPin, Save, ArrowLeft, Video, Calendar, ExternalLink, ChevronDown, ChevronUp } from 'lucide-svelte';
 	import type { PageData } from './$types';
+	import EncoderSelector from '$lib/components/streaming/EncoderSelector.svelte';
+	import EncoderArmControl from '$lib/components/streaming/EncoderArmControl.svelte';
 
 	let { data, form }: { data: PageData; form: any } = $props();
 
@@ -21,10 +23,32 @@
 	});
 
 	let isSubmitting = $state(false);
+	let showProfileForm = $state(false);
+	let expandedMemorials = $state<Set<string>>(new Set());
+
+	function toggleMemorialExpand(id: string) {
+		if (expandedMemorials.has(id)) {
+			expandedMemorials.delete(id);
+		} else {
+			expandedMemorials.add(id);
+		}
+		expandedMemorials = expandedMemorials;
+	}
+
+	function getStreamStatusBadge(status?: string) {
+		switch (status) {
+			case 'live':
+				return { class: 'bg-red-100 text-red-800', label: '🔴 LIVE' };
+			case 'completed':
+				return { class: 'bg-green-100 text-green-800', label: '✅ Completed' };
+			default:
+				return { class: 'bg-gray-100 text-gray-600', label: '⚫ Offline' };
+		}
+	}
 </script>
 
 <div class="min-h-screen bg-gradient-to-br from-amber-50 to-orange-50">
-	<div class="mx-auto max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
+	<div class="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
 		<!-- Header -->
 		<div class="mb-8">
 			<div class="mb-4 flex items-center">
@@ -40,7 +64,7 @@
 				<Building2 class="mr-3 h-8 w-8 text-amber-600" />
 				Funeral Director Dashboard
 			</h1>
-			<p class="mt-2 text-gray-600">Manage your business information and profile settings</p>
+			<p class="mt-2 text-gray-600">Manage your memorials, streaming, and business information</p>
 		</div>
 
 		<!-- Debug/Error Info -->
@@ -50,6 +74,157 @@
 			</div>
 		{/if}
 
+		<!-- My Memorials Section -->
+		<div class="mb-8">
+			<div class="mb-4 flex items-center justify-between">
+				<h2 class="flex items-center text-xl font-semibold text-gray-900">
+					<Video class="mr-2 h-6 w-6 text-amber-600" />
+					My Memorials
+				</h2>
+				<span class="rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-800">
+					{data.memorials?.length || 0} memorials
+				</span>
+			</div>
+
+			{#if !data.memorials || data.memorials.length === 0}
+				<div class="rounded-2xl border border-gray-200 bg-white p-8 text-center shadow-lg">
+					<div class="mb-4 text-5xl">🕊️</div>
+					<h3 class="mb-2 text-lg font-medium text-gray-900">No Memorials Yet</h3>
+					<p class="mb-4 text-gray-600">You haven't been assigned to any memorials yet.</p>
+					<a
+						href="/app/calculator"
+						class="inline-flex items-center rounded-lg bg-amber-600 px-4 py-2 text-white transition-colors hover:bg-amber-700"
+					>
+						Create Memorial
+					</a>
+				</div>
+			{:else}
+				<div class="space-y-4">
+					{#each data.memorials as memorial (memorial.id)}
+						{@const isExpanded = expandedMemorials.has(memorial.id)}
+						{@const statusBadge = getStreamStatusBadge(memorial.encoderConfig?.streamStatus)}
+						<div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg transition-all">
+							<!-- Memorial Header (always visible) -->
+							<div class="p-4">
+								<div class="flex items-center justify-between">
+									<div class="flex items-center gap-4">
+										<div class="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-500 text-xl font-bold text-white">
+											{memorial.lovedOneName?.charAt(0) || 'M'}
+										</div>
+										<div>
+											<h3 class="text-lg font-semibold text-gray-900">{memorial.lovedOneName}</h3>
+											<div class="flex items-center gap-3 text-sm text-gray-500">
+												{#if memorial.serviceDate}
+													<span class="flex items-center">
+														<Calendar class="mr-1 h-4 w-4" />
+														{new Date(memorial.serviceDate).toLocaleDateString()}
+														{#if memorial.serviceTime}
+															at {memorial.serviceTime}
+														{/if}
+													</span>
+												{:else}
+													<span>Date TBD</span>
+												{/if}
+											</div>
+										</div>
+									</div>
+
+									<div class="flex items-center gap-3">
+										<!-- Stream Status Badge -->
+										<span class="rounded-full px-3 py-1 text-xs font-medium {statusBadge.class}">
+											{statusBadge.label}
+										</span>
+
+										<!-- Encoder Armed Badge -->
+										{#if memorial.encoderConfig?.encoderArmed}
+											<span class="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800">
+												🎯 Armed
+											</span>
+										{/if}
+
+										<!-- View Memorial Link -->
+										{#if memorial.fullSlug}
+											<a
+												href="/{memorial.fullSlug}"
+												target="_blank"
+												class="flex items-center gap-1 rounded-lg bg-gray-100 px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-200"
+											>
+												<ExternalLink class="h-4 w-4" />
+												View
+											</a>
+										{/if}
+
+										<!-- Expand/Collapse Button -->
+										<button
+											class="flex items-center gap-1 rounded-lg bg-amber-100 px-3 py-1.5 text-sm font-medium text-amber-800 transition-colors hover:bg-amber-200"
+											onclick={() => toggleMemorialExpand(memorial.id)}
+										>
+											{#if isExpanded}
+												<ChevronUp class="h-4 w-4" />
+												Hide Streaming
+											{:else}
+												<ChevronDown class="h-4 w-4" />
+												Streaming
+											{/if}
+										</button>
+									</div>
+								</div>
+							</div>
+
+							<!-- Expanded Streaming Controls -->
+							{#if isExpanded}
+								<div class="border-t border-gray-100 bg-gray-50 p-4">
+									<div class="grid gap-4 md:grid-cols-2">
+										<!-- Encoder Selector -->
+										<div>
+											<EncoderSelector
+												memorialId={memorial.id}
+												currentEncoderId={memorial.encoderConfig?.assignedEncoderId}
+												currentEncoderName={memorial.encoderConfig?.assignedEncoderName}
+												onAssigned={() => location.reload()}
+												onUnassigned={() => location.reload()}
+											/>
+										</div>
+
+										<!-- Encoder Arm Control -->
+										<div>
+											<EncoderArmControl
+												memorialId={memorial.id}
+												encoderId={memorial.encoderConfig?.assignedEncoderId}
+												encoderName={memorial.encoderConfig?.assignedEncoderName}
+												isArmed={memorial.encoderConfig?.encoderArmed}
+												streamStatus={memorial.encoderConfig?.streamStatus}
+												onArmed={() => location.reload()}
+												onDisarmed={() => location.reload()}
+											/>
+										</div>
+									</div>
+								</div>
+							{/if}
+						</div>
+					{/each}
+				</div>
+			{/if}
+		</div>
+
+		<!-- Profile Settings Section (Collapsible) -->
+		<div class="mb-8">
+			<button
+				class="mb-4 flex w-full items-center justify-between rounded-xl bg-white p-4 shadow-lg transition-all hover:shadow-xl"
+				onclick={() => (showProfileForm = !showProfileForm)}
+			>
+				<h2 class="flex items-center text-xl font-semibold text-gray-900">
+					<Building2 class="mr-2 h-6 w-6 text-amber-600" />
+					Business Profile Settings
+				</h2>
+				{#if showProfileForm}
+					<ChevronUp class="h-5 w-5 text-gray-500" />
+				{:else}
+					<ChevronDown class="h-5 w-5 text-gray-500" />
+				{/if}
+			</button>
+
+			{#if showProfileForm}
 		<!-- Main Form -->
 		<div class="rounded-3xl border border-white/20 bg-white/70 p-8 shadow-2xl backdrop-blur-xl">
 			<form
@@ -243,6 +418,8 @@
 					</button>
 				</div>
 			</form>
+		</div>
+			{/if}
 		</div>
 	</div>
 </div>

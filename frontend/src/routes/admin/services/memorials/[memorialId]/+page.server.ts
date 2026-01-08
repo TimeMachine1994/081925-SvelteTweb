@@ -129,7 +129,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			// Status flags
 			isPublic: memorialData.isPublic !== false,
 			isComplete: memorialData.isComplete || false,
-			isDemo: memorialData.isDemo || false,
 			
 			// Services (new structure)
 			services: memorialData.services || null,
@@ -151,11 +150,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			isPaid: memorialData.isPaid || memorialData.calculatorConfig?.isPaid || false,
 			paymentStatus: memorialData.calculatorConfig?.status || 'draft',
 			totalPrice: memorialData.calculatorConfig?.totalPrice || 0,
-			paymentDate: convertTimestamp(memorialData.calculatorConfig?.paymentDate),
-			
-			// Demo fields
-			demoSessionId: memorialData.demoSessionId || null,
-			demoExpiresAt: memorialData.demoExpiresAt || null
+			paymentDate: convertTimestamp(memorialData.calculatorConfig?.paymentDate)
 		};
 
 		// Process streams

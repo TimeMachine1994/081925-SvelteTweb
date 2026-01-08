@@ -15,11 +15,53 @@ export const load: PageServerLoad = async ({ locals }) => {
 		throw redirect(303, '/profile');
 	}
 
+	// Helper function to convert Timestamps to strings
+	const sanitizeTimestamp = (timestamp: any) => {
+		if (timestamp && typeof timestamp.toDate === 'function') {
+			return timestamp.toDate().toISOString();
+		}
+		if (timestamp instanceof Date) {
+			return timestamp.toISOString();
+		}
+		return timestamp;
+	};
+
 	try {
 		console.log('🔍 Fetching funeral director profile for UID:', locals.user.uid);
 
 		// Fetch funeral director profile
 		const directorDoc = await adminDb.collection('funeral_directors').doc(locals.user.uid).get();
+
+		// Fetch memorials assigned to this funeral director
+		console.log('🔍 Fetching memorials for FD:', locals.user.uid);
+		const memorialsSnapshot = await adminDb
+			.collection('memorials')
+			.where('funeralDirectorUid', '==', locals.user.uid)
+			.orderBy('createdAt', 'desc')
+			.limit(50)
+			.get();
+
+		const memorials = memorialsSnapshot.docs.map((doc) => {
+			const data = doc.data();
+			return {
+				id: doc.id,
+				lovedOneName: data.lovedOneName || data.title || 'Untitled Memorial',
+				fullSlug: data.fullSlug || null,
+				serviceDate: sanitizeTimestamp(data.serviceDate),
+				serviceTime: data.serviceTime || null,
+				createdAt: sanitizeTimestamp(data.createdAt),
+				isPublic: data.isPublic || false,
+				// Encoder config
+				encoderConfig: data.encoderConfig || {
+					assignedEncoderId: null,
+					assignedEncoderName: null,
+					encoderArmed: false,
+					streamStatus: 'offline'
+				}
+			};
+		});
+
+		console.log('✅ Found', memorials.length, 'memorials for FD');
 
 		console.log('🔍 Director doc exists:', directorDoc.exists);
 
@@ -39,23 +81,13 @@ export const load: PageServerLoad = async ({ locals }) => {
 						state: '',
 						zipCode: ''
 					}
-				}
+				},
+				memorials
 			};
 		}
 
 		const directorData = directorDoc.data();
 		console.log('✅ Director data loaded:', Object.keys(directorData || {}));
-
-		// Helper function to convert Timestamps to strings
-		const sanitizeTimestamp = (timestamp: any) => {
-			if (timestamp && typeof timestamp.toDate === 'function') {
-				return timestamp.toDate().toISOString();
-			}
-			if (timestamp instanceof Date) {
-				return timestamp.toISOString();
-			}
-			return timestamp;
-		};
 
 		return {
 			funeralDirector: {
@@ -77,11 +109,12 @@ export const load: PageServerLoad = async ({ locals }) => {
 				updatedAt: sanitizeTimestamp(directorData?.updatedAt),
 				approvedAt: sanitizeTimestamp(directorData?.approvedAt),
 				approvedBy: directorData?.approvedBy || null
-			}
+			},
+			memorials
 		};
-	} catch (error) {
+	} catch (error: any) {
 		console.error('❌ Error loading funeral director dashboard:', error);
-		console.error('❌ Error details:', error.message, error.stack);
+		console.error('❌ Error details:', error?.message, error?.stack);
 		return {
 			funeralDirector: {
 				id: locals.user?.uid || '',
@@ -96,7 +129,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 					zipCode: ''
 				}
 			},
-			error: 'Failed to load dashboard data: ' + error.message
+			memorials: [],
+			error: 'Failed to load dashboard data: ' + (error?.message || 'Unknown error')
 		};
 	}
 };

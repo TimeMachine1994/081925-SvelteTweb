@@ -43,6 +43,27 @@ Based on ADMIN_REFACTOR_2_DATA_OPERATIONS.md
 					{ id: 'suspend', label: 'Suspend', icon: '🚫', variant: 'danger' }
 				];
 
+			case 'funeral_director':
+				return [
+					{ id: 'sendEmail', label: 'Email', icon: '📧', variant: 'primary' },
+					{ id: 'export', label: 'Export CSV', icon: '📥', variant: 'secondary' },
+					{ id: 'suspend', label: 'Suspend', icon: '🚫', variant: 'danger' }
+				];
+
+			case 'encoder':
+				return [
+					{ id: 'markAvailable', label: 'Mark Available', icon: '✅', variant: 'primary' },
+					{ id: 'markMaintenance', label: 'Maintenance', icon: '🔧', variant: 'secondary' },
+					{ id: 'export', label: 'Export CSV', icon: '📥', variant: 'secondary' },
+					{ id: 'delete', label: 'Delete', icon: '🗑️', variant: 'danger' }
+				];
+
+			case 'deleted_item':
+				return [
+					{ id: 'restore', label: 'Restore', icon: '🔄', variant: 'primary' },
+					{ id: 'permanent_delete', label: 'Delete Permanently', icon: '🗑️', variant: 'danger' }
+				];
+
 			default:
 				return [
 					{ id: 'export', label: 'Export', icon: '📥', variant: 'secondary' },

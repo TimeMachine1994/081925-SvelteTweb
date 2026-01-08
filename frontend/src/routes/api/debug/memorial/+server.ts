@@ -151,7 +151,6 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 				updatedAt: rawData.updatedAt?.toDate?.()?.toISOString() || null,
 				isPublic: rawData.isPublic !== false,
 				isComplete: rawData.isComplete || false,
-				isDemo: rawData.isDemo || false,
 				services: rawData.services || null,
 				calculatorConfig: rawData.calculatorConfig || null,
 				isPaid: rawData.isPaid || rawData.calculatorConfig?.isPaid || false

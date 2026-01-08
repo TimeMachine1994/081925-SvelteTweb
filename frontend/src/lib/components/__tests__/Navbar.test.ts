@@ -209,25 +209,4 @@ describe('Navbar Component', () => {
     expect(fdButton).toHaveClass('text-purple-600');
   });
 
-  it('shows dev role switcher in development', () => {
-    vi.stubEnv('NODE_ENV', 'development');
-    
-    const user = createTestUser();
-    mockUserContext(user);
-    
-    render(Navbar);
-    
-    expect(screen.getByText(/dev: switch role/i)).toBeInTheDocument();
-  });
-
-  it('hides dev role switcher in production', () => {
-    vi.stubEnv('NODE_ENV', 'production');
-    
-    const user = createTestUser();
-    mockUserContext(user);
-    
-    render(Navbar);
-    
-    expect(screen.queryByText(/dev: switch role/i)).not.toBeInTheDocument();
-  });
 });

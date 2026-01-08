@@ -52,12 +52,11 @@ Manage funeral home partners
 			width: 120,
 			formatter: (val: string) => {
 				const statusMap: Record<string, string> = {
-					pending: '🕒 Pending',
-					approved: '✅ Approved',
-					rejected: '❌ Rejected',
-					suspended: '🚫 Suspended'
+					approved: '✅ Active',
+					suspended: '🚫 Suspended',
+					inactive: '⏸️ Inactive'
 				};
-				return statusMap[val] || val;
+				return statusMap[val] || '✅ Active';
 			},
 			sortable: true
 		},
@@ -109,12 +108,6 @@ Manage funeral home partners
 			label: 'Filters',
 			icon: '🔍',
 			onclick: () => (showFilters = !showFilters)
-		},
-		{
-			label: 'Pending Approval',
-			icon: '🕒',
-			variant: 'primary',
-			onclick: () => goto('/admin/users/funeral-directors?status=pending')
 		}
 	]}
 >
@@ -130,10 +123,9 @@ Manage funeral home partners
 						label: 'Status',
 						type: 'enum',
 						options: [
-							{ value: 'pending', label: 'Pending' },
-							{ value: 'approved', label: 'Approved' },
-							{ value: 'rejected', label: 'Rejected' },
-							{ value: 'suspended', label: 'Suspended' }
+							{ value: 'approved', label: 'Active' },
+							{ value: 'suspended', label: 'Suspended' },
+							{ value: 'inactive', label: 'Inactive' }
 						]
 					},
 					{ id: 'createdAt', label: 'Registration Date', type: 'date' }
