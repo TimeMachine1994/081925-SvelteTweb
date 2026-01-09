@@ -4,6 +4,7 @@ import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	console.log('Starting session creation...');
+	console.log('FIREBASE_AUTH_EMULATOR_HOST:', process.env.FIREBASE_AUTH_EMULATOR_HOST || 'NOT SET');
 	const { idToken, fullSlug } = await request.json();
 
 	if (typeof idToken !== 'string' || !idToken) {
