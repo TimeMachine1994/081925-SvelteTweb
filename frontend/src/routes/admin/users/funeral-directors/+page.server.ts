@@ -1,5 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
+import type { QueryDocumentSnapshot, DocumentData } from 'firebase-admin/firestore';
 
 export const load = async ({ locals, url }: any) => {
 	// Auth check
@@ -36,7 +37,7 @@ export const load = async ({ locals, url }: any) => {
 	}
 
 	// Count memorials created by each director
-	const directorIds = snapshot.docs.map((doc) => doc.id);
+	const directorIds = snapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => doc.id);
 	const memorialCounts = new Map();
 
 	if (directorIds.length > 0) {
@@ -52,7 +53,7 @@ export const load = async ({ locals, url }: any) => {
 		}
 	}
 
-	const funeralDirectors = snapshot.docs.map((doc) => {
+	const funeralDirectors = snapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
 		const data = doc.data();
 
 		return {
@@ -61,7 +62,7 @@ export const load = async ({ locals, url }: any) => {
 			contactPerson: data.contactPerson || data.name || 'Unknown',
 			email: data.email || '',
 			phone: data.phone || null,
-			status: data.status || 'pending',
+			status: data.status || 'approved',
 			memorialsCreated: memorialCounts.get(doc.id) || 0,
 			createdAt: data.createdAt?.toDate?.()?.toISOString() || null,
 			address: data.address || null,

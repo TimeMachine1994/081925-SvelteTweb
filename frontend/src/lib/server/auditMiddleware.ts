@@ -94,8 +94,6 @@ function determineAuditAction(pathname: string, method: string): string | null {
 
 	// Admin routes
 	if (pathname.includes('/admin/')) {
-		if (pathname.includes('approve-funeral-director')) return 'funeral_director_approved';
-		if (pathname.includes('reject-funeral-director')) return 'funeral_director_rejected';
 		if (pathname.includes('create-memorial')) return 'admin_memorial_created';
 	}
 

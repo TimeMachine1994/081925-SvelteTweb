@@ -6,8 +6,8 @@ import type { Actions } from './$types';
  * SIMPLIFIED ADMIN DASHBOARD SERVER LOAD
  *
  * Purpose: Load essential data for admin operations:
- * 1. Pending funeral directors (for approval workflow)
- * 2. Recent memorials (for oversight)
+ * 1. Recent memorials (for oversight)
+ * 2. Funeral directors (all auto-approved)
  * 3. Basic system stats
  *
  * Follows established patterns from memorial flow analysis
@@ -123,9 +123,9 @@ export const load = async ({ locals }: any) => {
 			};
 		});
 
-		// Separate pending and approved (though all are approved in V1)
-		const pendingFuneralDirectors = allFuneralDirectors.filter(fd => fd.status === 'pending');
-		const approvedFuneralDirectors = allFuneralDirectors.filter(fd => fd.status === 'approved');
+		// All FDs are auto-approved on registration (no approval workflow)
+		const activeFuneralDirectors = allFuneralDirectors.filter(fd => fd.status === 'approved');
+		const suspendedFuneralDirectors = allFuneralDirectors.filter(fd => fd.status === 'suspended');
 
 		// === CALCULATE STATS ===
 		// Get quick stats for dashboard overview
@@ -137,7 +137,6 @@ export const load = async ({ locals }: any) => {
 		const stats = {
 			totalMemorials: totalMemorialsSnap.data().count,
 			totalFuneralDirectors: totalDirectorsSnap.data().count,
-			pendingApprovals: 0, // This is now obsolete
 			recentMemorials: recentMemorials.length
 		};
 
@@ -148,8 +147,7 @@ export const load = async ({ locals }: any) => {
 			recentMemorials: recentMemorials.length,
 			incompleteMemorials: incompleteMemorials.length,
 			allUsers: allUsers.length,
-			pendingFuneralDirectors: pendingFuneralDirectors.length,
-			approvedFuneralDirectors: approvedFuneralDirectors.length,
+			activeFuneralDirectors: activeFuneralDirectors.length,
 			stats
 		});
 
@@ -158,8 +156,8 @@ export const load = async ({ locals }: any) => {
 			incompleteMemorials, // New: show incomplete first
 			recentMemorials,
 			allUsers,
-			pendingFuneralDirectors,
-			approvedFuneralDirectors,
+			funeralDirectors: activeFuneralDirectors,
+			suspendedFuneralDirectors,
 			stats,
 			// User context
 			adminUser: {
@@ -179,12 +177,11 @@ export const load = async ({ locals }: any) => {
 			incompleteMemorials: [],
 			recentMemorials: [],
 			allUsers: [],
-			pendingFuneralDirectors: [],
-			approvedFuneralDirectors: [],
+			funeralDirectors: [],
+			suspendedFuneralDirectors: [],
 			stats: {
 				totalMemorials: 0,
 				totalFuneralDirectors: 0,
-				pendingApprovals: 0,
 				recentMemorials: 0
 			},
 			adminUser: {

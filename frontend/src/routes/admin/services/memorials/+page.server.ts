@@ -51,8 +51,8 @@ export const load = async ({ locals, url }: any) => {
 				? data.services.additional
 				: [];
 			const additionalLocationNames = additionalServices
-				.map((service: any) => service?.location?.name as string | undefined)
-				.filter((name): name is string => Boolean(name));
+				.map((service: { location?: { name?: string } }) => service?.location?.name)
+				.filter((name: string | undefined): name is string => Boolean(name));
 
 			let location: string;
 			if (mainLocationName) {

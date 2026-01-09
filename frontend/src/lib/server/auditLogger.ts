@@ -35,8 +35,8 @@ export type AuditAction =
 	| 'payment_completed'
 	| 'payment_failed'
 	// Admin actions
-	| 'funeral_director_approved'
-	| 'funeral_director_rejected'
+	| 'funeral_director_auto_approved'
+	| 'funeral_director_suspended'
 	| 'admin_memorial_created'
 	| 'system_config_changed'
 	// Admin deletion actions (soft delete system)
@@ -176,8 +176,8 @@ export async function logAdminAction(
 	userContext: ReturnType<typeof extractUserContext>,
 	action: Extract<
 		AuditAction,
-		| 'funeral_director_approved'
-		| 'funeral_director_rejected'
+		| 'funeral_director_auto_approved'
+		| 'funeral_director_suspended'
 		| 'admin_memorial_created'
 		| 'system_config_changed'
 	>,
