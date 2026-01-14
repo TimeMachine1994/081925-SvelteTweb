@@ -11,13 +11,13 @@
 	let fixedCosts = $state([
 		{ name: 'Office Rent (Real Estate)', price: 1200 },
 		{ name: 'Insurance & Utilities', price: 300 },
-		{ name: 'Software Subs', price: 150 }
+		{ name: 'Software Subs', price: 300 }
 	]);
 
 	// 3. VARIABLE COSTS (COGS per unit)
 	let variableCosts = $state([
-		{ name: 'Paper & Ink', price: 1.45 },
-		{ name: 'Labor/Handling', price: 5.00 }
+		{ name: 'Paper & Ink', price: 0.40 },
+		{ name: 'Labor/Handling', price: 0.10 }
 	]);
 
 	// TARGETS & MARGINS
