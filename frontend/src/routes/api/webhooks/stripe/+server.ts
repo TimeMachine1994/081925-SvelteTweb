@@ -13,14 +13,19 @@ if (!STRIPE_WEBHOOK_SECRET) {
 }
 
 if (!STRIPE_SECRET_KEY) {
-	throw new Error('STRIPE_SECRET_KEY is not configured');
+	console.error('⚠️ STRIPE_SECRET_KEY is not configured - Stripe webhooks will fail');
 }
 
-const stripe = new Stripe(STRIPE_SECRET_KEY, {
+const stripe = STRIPE_SECRET_KEY ? new Stripe(STRIPE_SECRET_KEY, {
 	apiVersion: '2024-10-28.acacia'
-});
+}) : null;
 
 export const POST: RequestHandler = async ({ request }) => {
+	if (!stripe) {
+		console.error('Stripe not configured - STRIPE_SECRET_KEY missing');
+		return json({ error: 'Stripe not configured' }, { status: 500 });
+	}
+
 	try {
 		const body = await request.text();
 		const signature = request.headers.get('stripe-signature');

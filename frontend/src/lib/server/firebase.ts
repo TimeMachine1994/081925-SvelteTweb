@@ -14,13 +14,10 @@ console.log('🔥 [FIREBASE] Current admin apps count:', admin.apps.length);
 
 if (admin.apps.length) {
 	console.log('🔥 [FIREBASE] Firebase Admin SDK already initialized.');
-<<<<<<< HEAD
-=======
 	console.log(
 		'🔥 [FIREBASE] Existing app names:',
 		admin.apps.filter((app): app is admin.app.App => app !== null).map((app) => app.name)
 	);
->>>>>>> 1cd3f275 (hmmm)
 } else {
 	const serviceAccountJson = env.PRIVATE_FIREBASE_SERVICE_ACCOUNT_KEY;
 	const storageBucket = env.PRIVATE_FIREBASE_STORAGE_BUCKET || 'tributestream-lemhr.firebasestorage.app';
