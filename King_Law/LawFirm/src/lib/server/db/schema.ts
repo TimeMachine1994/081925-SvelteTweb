@@ -39,12 +39,11 @@ export const cases = sqliteTable('case', {
 	updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull()
 });
 
-// Documents attached to cases
+// Documents attached to cases (caseId nullable for uncategorized uploads)
 export const documents = sqliteTable('document', {
 	id: text('id').primaryKey(),
 	caseId: text('case_id')
-		.notNull()
-		.references(() => cases.id, { onDelete: 'cascade' }),
+		.references(() => cases.id, { onDelete: 'set null' }),
 	uploadedById: text('uploaded_by_id')
 		.notNull()
 		.references(() => user.id, { onDelete: 'restrict' }),
@@ -71,12 +70,13 @@ export const invoices = sqliteTable('invoice', {
 	paidAt: integer('paid_at', { mode: 'timestamp' })
 });
 
-// Messages between clients and lawyers
+// Messages between clients and lawyers (caseId nullable for uncategorized messages)
 export const messages = sqliteTable('message', {
 	id: text('id').primaryKey(),
 	caseId: text('case_id')
-		.notNull()
-		.references(() => cases.id, { onDelete: 'cascade' }),
+		.references(() => cases.id, { onDelete: 'set null' }),
+	recipientId: text('recipient_id')
+		.references(() => user.id, { onDelete: 'restrict' }),
 	senderId: text('sender_id')
 		.notNull()
 		.references(() => user.id, { onDelete: 'restrict' }),

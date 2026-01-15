@@ -8,7 +8,7 @@ import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ params, locals }) => {
 	if (!locals.user) {
-		error(401, 'Unauthorized');
+		throw error(401, 'Unauthorized');
 	}
 
 	const [document] = await db
@@ -17,26 +17,33 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		.where(eq(table.documents.id, params.id));
 
 	if (!document) {
-		error(404, 'Document not found');
+		throw error(404, 'Document not found');
 	}
 
-	// Verify access to the case
-	const [caseRecord] = await db
-		.select()
-		.from(table.cases)
-		.where(eq(table.cases.id, document.caseId));
+	// Verify access to the case (if document has a case)
+	if (document.caseId) {
+		const [caseRecord] = await db
+			.select()
+			.from(table.cases)
+			.where(eq(table.cases.id, document.caseId));
 
-	if (!caseRecord) {
-		error(404, 'Case not found');
-	}
+		if (!caseRecord) {
+			throw error(404, 'Case not found');
+		}
 
-	const hasAccess =
-		caseRecord.clientId === locals.user.id ||
-		caseRecord.lawyerId === locals.user.id ||
-		locals.user.role === 'admin';
+		const hasAccess =
+			caseRecord.clientId === locals.user.id ||
+			caseRecord.lawyerId === locals.user.id ||
+			locals.user.role === 'admin';
 
-	if (!hasAccess) {
-		error(403, 'Access denied');
+		if (!hasAccess) {
+			throw error(403, 'Access denied');
+		}
+	} else {
+		// Uncategorized document - check if user uploaded it or is admin/lawyer
+		if (document.uploadedById !== locals.user.id && locals.user.role === 'client') {
+			throw error(403, 'Access denied');
+		}
 	}
 
 	// Read file from disk

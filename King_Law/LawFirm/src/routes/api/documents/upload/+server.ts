@@ -4,11 +4,12 @@ import { existsSync } from 'fs';
 import { join } from 'path';
 import { db } from '$lib/server/db';
 import * as table from '$lib/server/db/schema';
+import { eq } from 'drizzle-orm';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!locals.user) {
-		error(401, 'Unauthorized');
+		throw error(401, 'Unauthorized');
 	}
 
 	const formData = await request.formData();
@@ -16,17 +17,17 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	const caseId = formData.get('caseId') as string;
 
 	if (!file || !caseId) {
-		error(400, 'File and caseId are required');
+		throw error(400, 'File and caseId are required');
 	}
 
 	// Verify case access
 	const [caseRecord] = await db
 		.select()
 		.from(table.cases)
-		.where((cases) => cases.id === caseId);
+		.where(eq(table.cases.id, caseId));
 
 	if (!caseRecord) {
-		error(404, 'Case not found');
+		throw error(404, 'Case not found');
 	}
 
 	// Check if user has access to this case
@@ -36,7 +37,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		locals.user.role === 'admin';
 
 	if (!hasAccess) {
-		error(403, 'Access denied');
+		throw error(403, 'Access denied');
 	}
 
 	// Create uploads directory if it doesn't exist

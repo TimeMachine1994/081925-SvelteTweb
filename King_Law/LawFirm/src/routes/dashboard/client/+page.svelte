@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { faFolder, faFileAlt, faFileInvoiceDollar, faComments, faGavel, faCheckCircle, faClock, faTimesCircle } from '@fortawesome/free-solid-svg-icons';
 	import Icon from '$lib/components/Icon.svelte';
+	import ChatSlider from '$lib/components/ChatSlider.svelte';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -8,6 +9,9 @@
 	}
 
 	let { data }: Props = $props();
+
+	// Prepare cases for chat slider
+	const chatCases = data.cases.map(c => ({ id: c.id, title: c.title }));
 
 	function formatCurrency(cents: number): string {
 		return new Intl.NumberFormat('en-US', {
@@ -106,7 +110,7 @@
 			{:else}
 				<div class="space-y-4">
 					{#each data.cases as caseItem}
-						<div class="bg-secondary p-6 rounded-lg border border-gray-300 dark:border-gray-700 hover:border-gold transition-colors">
+						<a href="/dashboard/client/case/{caseItem.id}" class="block bg-secondary p-6 rounded-lg border border-gray-300 dark:border-gray-700 hover:border-gold transition-colors cursor-pointer">
 							<div class="flex items-start justify-between mb-4">
 								<div class="flex-1">
 									<div class="flex items-center space-x-3 mb-2">
@@ -118,7 +122,7 @@
 										<span class="font-semibold">Attorney:</span>
 										{caseItem.lawyer.firstName} {caseItem.lawyer.lastName}
 										{#if caseItem.lawyer.email}
-											• <a href="mailto:{caseItem.lawyer.email}" class="text-gold hover:underline">{caseItem.lawyer.email}</a>
+											• <span class="text-gold">{caseItem.lawyer.email}</span>
 										{/if}
 									</div>
 								</div>
@@ -131,7 +135,7 @@
 								<span>•</span>
 								<span>Updated: {formatDate(caseItem.updatedAt)}</span>
 							</div>
-						</div>
+						</a>
 					{/each}
 				</div>
 			{/if}
@@ -162,9 +166,9 @@
 												</div>
 											</div>
 										</div>
-										<button class="px-4 py-2 bg-gold text-black rounded-lg hover:bg-gold-dark transition-colors text-sm font-semibold">
+										<a href="/api/documents/{doc.id}" class="px-4 py-2 bg-gold text-black rounded-lg hover:bg-gold-dark transition-colors text-sm font-semibold">
 											Download
-										</button>
+										</a>
 									</div>
 								</div>
 							{/each}
@@ -254,3 +258,11 @@
 		</div>
 	</div>
 </div>
+
+<!-- Chat Slider -->
+<ChatSlider 
+	cases={chatCases} 
+	currentUserId={data.user.id} 
+	userRole="client"
+	defaultRecipientId={data.defaultLawyer?.id ?? null}
+/>

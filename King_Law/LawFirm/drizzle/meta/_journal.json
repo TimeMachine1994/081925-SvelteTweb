@@ -8,6 +8,13 @@
       "when": 1768432803119,
       "tag": "0000_slow_the_renegades",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1768509325002,
+      "tag": "0001_curious_golden_guardian",
+      "breakpoints": true
     }
   ]
 }
