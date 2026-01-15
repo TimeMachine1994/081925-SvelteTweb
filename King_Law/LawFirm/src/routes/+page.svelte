@@ -263,7 +263,7 @@
 							<span class="font-semibold">Closed</span>
 						</div>
 					</div>
-					<div class="mt-4 pt-4 border-t border-border">
+					<div class="mt-4 pt-4 border-t border-gray-300 dark:border-gray-700">
 						<p class="text-sm text-muted-foreground">
 							Emergency consultations available 24/7
 						</p>

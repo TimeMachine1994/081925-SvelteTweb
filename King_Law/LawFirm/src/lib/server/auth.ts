@@ -75,15 +75,15 @@ export async function invalidateSession(sessionId: string) {
 	await db.delete(table.session).where(eq(table.session.id, sessionId));
 }
 
-export function setSessionTokenCookie(event: RequestEvent, token: string, expiresAt: Date) {
-	event.cookies.set(sessionCookieName, token, {
+export function setSessionTokenCookie(cookies: any, token: string, expiresAt: Date) {
+	cookies.set(sessionCookieName, token, {
 		expires: expiresAt,
 		path: '/'
 	});
 }
 
-export function deleteSessionTokenCookie(event: RequestEvent) {
-	event.cookies.delete(sessionCookieName, {
+export function deleteSessionTokenCookie(cookies: any) {
+	cookies.delete(sessionCookieName, {
 		path: '/'
 	});
 }
