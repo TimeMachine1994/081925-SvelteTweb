@@ -14,6 +14,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 	return {};
 };
 
+const LAWYER_ACCESS_CODE = 'k1ngl4w';
+
 export const actions: Actions = {
 	default: async ({ request, cookies }) => {
 		const formData = await request.formData();
@@ -25,6 +27,7 @@ export const actions: Actions = {
 		const lastName = formData.get('lastName');
 		const phoneNumber = formData.get('phoneNumber');
 		const role = formData.get('role') as 'client' | 'lawyer';
+		const lawyerCode = formData.get('lawyerCode');
 
 		// Validation
 		if (!username || !email || !password || !firstName || !lastName) {
@@ -37,6 +40,11 @@ export const actions: Actions = {
 
 		if ((password as string).length < 8) {
 			return fail(400, { message: 'Password must be at least 8 characters long' });
+		}
+
+		// Validate lawyer access code
+		if (role === 'lawyer' && lawyerCode !== LAWYER_ACCESS_CODE) {
+			return fail(400, { message: 'Invalid firm access code' });
 		}
 
 		// Check if username exists
