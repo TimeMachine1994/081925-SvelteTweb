@@ -20,7 +20,7 @@
 	];
 </script>
 
-<nav class="bg-background border-b border-border sticky top-0 z-50 shadow-sm">
+<nav class="bg-background border-b border-gray-300 dark:border-gray-700 sticky top-0 z-50 shadow-sm">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 		<div class="flex justify-between items-center h-16">
 			<!-- Logo -->
@@ -113,7 +113,7 @@
 
 	<!-- Mobile Menu -->
 	{#if mobileMenuOpen}
-		<div class="md:hidden border-t border-border bg-background">
+		<div class="md:hidden border-t border-gray-300 dark:border-gray-700 bg-background">
 			<div class="px-4 py-4 space-y-3">
 				<!-- Services -->
 				<div class="space-y-2">
