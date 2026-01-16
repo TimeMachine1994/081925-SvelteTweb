@@ -45,20 +45,25 @@ export const load: PageServerLoad = async ({ locals }) => {
 				.where(eq(table.invoices.caseId, caseIds[0]))
 		: [];
 
-	// Fetch recent messages
+	// Fetch recent messages with full sender details
 	const messages = caseIds.length > 0
 		? await db
 				.select({
-					message: table.messages,
-					sender: {
-						firstName: table.user.firstName,
-						lastName: table.user.lastName
-					}
+					id: table.messages.id,
+					caseId: table.messages.caseId,
+					senderId: table.messages.senderId,
+					content: table.messages.content,
+					attachmentDocumentId: table.messages.attachmentDocumentId,
+					createdAt: table.messages.createdAt,
+					readAt: table.messages.readAt,
+					senderName: table.user.firstName,
+					senderLastName: table.user.lastName,
+					senderRole: table.user.role
 				})
 				.from(table.messages)
 				.innerJoin(table.user, eq(table.messages.senderId, table.user.id))
 				.where(eq(table.messages.caseId, caseIds[0]))
-				.limit(10)
+				.orderBy(table.messages.createdAt)
 		: [];
 
 	return {
@@ -66,6 +71,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		cases: cases.map(c => ({ ...c.case, lawyer: c.lawyer })),
 		documents,
 		invoices,
-		messages: messages.map(m => ({ ...m.message, sender: m.sender }))
+		messages,
+		activeCaseId: caseIds[0] || null
 	};
 };

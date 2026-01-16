@@ -14,6 +14,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	const formData = await request.formData();
 	const file = formData.get('file') as File;
 	const caseId = formData.get('caseId') as string;
+	const messageId = formData.get('messageId') as string | null;
 
 	if (!file || !caseId) {
 		error(400, 'File and caseId are required');
@@ -39,6 +40,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		error(403, 'Access denied');
 	}
 
+	// Determine document direction based on uploader role
+	// Client uploading = outgoing (to attorney)
+	// Lawyer uploading = incoming (to client)
+	const direction = locals.user.role === 'client' ? 'outgoing' : 'incoming';
+	const sharedVia = messageId ? 'message' : 'upload';
+
 	// Create uploads directory if it doesn't exist
 	const uploadsDir = join(process.cwd(), 'uploads');
 	if (!existsSync(uploadsDir)) {
@@ -55,7 +62,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	const buffer = Buffer.from(await file.arrayBuffer());
 	await writeFile(filepath, buffer);
 
-	// Create document record
+	// Create document record with Phase Two metadata
 	const documentId = crypto.randomUUID();
 	await db.insert(table.documents).values({
 		id: documentId,
@@ -65,12 +72,18 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		filePath: filename,
 		fileSize: file.size,
 		mimeType: file.type,
-		uploadedAt: new Date()
+		uploadedAt: new Date(),
+		direction: direction as 'incoming' | 'outgoing',
+		sharedVia: sharedVia as 'upload' | 'message',
+		messageId: messageId || null,
+		viewedAt: null
 	});
 
 	return json({
 		success: true,
 		documentId,
-		fileName: file.name
+		fileName: file.name,
+		direction,
+		sharedVia
 	});
 };

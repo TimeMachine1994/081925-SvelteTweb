@@ -52,7 +52,12 @@ export const documents = sqliteTable('document', {
 	filePath: text('file_path').notNull(),
 	fileSize: integer('file_size').notNull(),
 	mimeType: text('mime_type').notNull(),
-	uploadedAt: integer('uploaded_at', { mode: 'timestamp' }).notNull()
+	uploadedAt: integer('uploaded_at', { mode: 'timestamp' }).notNull(),
+	// Phase Two enhancements
+	direction: text('direction', { enum: ['incoming', 'outgoing'] }).notNull().default('outgoing'),
+	messageId: text('message_id').references(() => messages.id, { onDelete: 'set null' }),
+	viewedAt: integer('viewed_at', { mode: 'timestamp' }),
+	sharedVia: text('shared_via', { enum: ['upload', 'message'] }).notNull().default('upload')
 });
 
 // Invoices for legal services

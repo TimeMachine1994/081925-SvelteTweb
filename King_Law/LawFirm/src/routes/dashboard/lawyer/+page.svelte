@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { faFolder, faFileAlt, faFileInvoiceDollar, faComments, faUsers, faCheckCircle, faClock, faTimesCircle, faGavel } from '@fortawesome/free-solid-svg-icons';
 	import Icon from '$lib/components/Icon.svelte';
+	import MessagePanel from '$lib/components/MessagePanel.svelte';
 	import type { PageData } from './$types';
 
 	interface Props {
@@ -8,6 +9,27 @@
 	}
 
 	let { data }: Props = $props();
+	let messages = $state(data.messages || []);
+
+	async function handleSendMessage(content: string) {
+		if (!data.activeCaseId) return;
+
+		const response = await fetch('/api/messages', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				caseId: data.activeCaseId,
+				content
+			})
+		});
+
+		if (response.ok) {
+			const { message } = await response.json();
+			messages = [...messages, message];
+		} else {
+			throw new Error('Failed to send message');
+		}
+	}
 
 	function formatCurrency(cents: number): string {
 		return new Intl.NumberFormat('en-US', {
@@ -51,7 +73,8 @@
 </svelte:head>
 
 <div class="min-h-screen bg-background py-8">
-	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+	<div class="flex gap-0">
+		<div class="flex-1 px-4 sm:px-6 lg:px-8 max-w-7xl">
 		<!-- Welcome Header -->
 		<div class="mb-8">
 			<h1 class="font-title text-4xl font-bold mb-2">
@@ -279,5 +302,19 @@
 				{/if}
 			</div>
 		</div>
+	</div>
+		</div>
+
+		<!-- Message Panel - Right Side -->
+		{#if data.activeCaseId}
+			<div class="hidden lg:block h-screen sticky top-0">
+				<MessagePanel
+					caseId={data.activeCaseId}
+					currentUserId={data.user.id}
+					bind:messages={messages}
+					onSendMessage={handleSendMessage}
+				/>
+			</div>
+		{/if}
 	</div>
 </div>
