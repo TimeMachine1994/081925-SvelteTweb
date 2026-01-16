@@ -3,6 +3,7 @@ import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
 import { messages, cases } from '$lib/server/db/schema';
 import { eq, and, isNull, ne } from 'drizzle-orm';
+import { broadcastMessageRead } from '$lib/server/websocket';
 
 // POST /api/messages/mark-read - Mark all messages in a case as read
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -35,6 +36,18 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		throw error(403, 'Access denied');
 	}
 
+	// Get unread messages before marking as read (to notify senders)
+	const unreadMessages = await db
+		.select({ id: messages.id, senderId: messages.senderId })
+		.from(messages)
+		.where(
+			and(
+				eq(messages.caseId, caseId),
+				ne(messages.senderId, locals.user.id),
+				isNull(messages.readAt)
+			)
+		);
+
 	// Mark all unread messages (not sent by current user) as read
 	await db
 		.update(messages)
@@ -46,6 +59,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				isNull(messages.readAt)
 			)
 		);
+
+	// Broadcast read receipts to message senders
+	const uniqueSenders = new Set(unreadMessages.map(m => m.senderId));
+	unreadMessages.forEach(msg => {
+		broadcastMessageRead(msg.senderId, msg.id);
+	});
 
 	return json({ success: true });
 };

@@ -1,11 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-<<<<<<< HEAD
-  "id": "c6e5a232-e558-4695-84e3-99b4944b5883",
-=======
   "id": "2bad5913-e3d2-40e7-964d-d40da4ee4047",
->>>>>>> 12d6d5035b4dfe72b47c33d55eb1be392370c567
   "prevId": "2ac52a73-f9ed-4324-b4a4-04f5b0bf3995",
   "tables": {
     "case": {
@@ -164,7 +160,6 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
-<<<<<<< HEAD
         },
         "direction": {
           "name": "direction",
@@ -195,8 +190,6 @@
           "notNull": true,
           "autoincrement": false,
           "default": "'upload'"
-=======
->>>>>>> 12d6d5035b4dfe72b47c33d55eb1be392370c567
         }
       },
       "indexes": {},
@@ -230,7 +223,6 @@
           ],
           "onDelete": "restrict",
           "onUpdate": "no action"
-<<<<<<< HEAD
         },
         "document_message_id_message_id_fk": {
           "name": "document_message_id_message_id_fk",
@@ -244,8 +236,6 @@
           ],
           "onDelete": "set null",
           "onUpdate": "no action"
-=======
->>>>>>> 12d6d5035b4dfe72b47c33d55eb1be392370c567
         }
       },
       "compositePrimaryKeys": {},
@@ -424,9 +414,6 @@
           "columnsTo": [
             "id"
           ],
-<<<<<<< HEAD
-          "onDelete": "cascade",
-=======
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -441,7 +428,6 @@
             "id"
           ],
           "onDelete": "restrict",
->>>>>>> 12d6d5035b4dfe72b47c33d55eb1be392370c567
           "onUpdate": "no action"
         },
         "message_sender_id_user_id_fk": {

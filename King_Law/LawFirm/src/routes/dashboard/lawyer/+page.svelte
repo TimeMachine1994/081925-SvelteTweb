@@ -1,11 +1,7 @@
 <script lang="ts">
 	import { faFolder, faFileAlt, faFileInvoiceDollar, faComments, faUsers, faCheckCircle, faClock, faTimesCircle, faGavel, faTimes, faPaperPlane, faSpinner, faPlus, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 	import Icon from '$lib/components/Icon.svelte';
-<<<<<<< HEAD
-	import MessagePanel from '$lib/components/MessagePanel.svelte';
-=======
 	import ChatSlider from '$lib/components/ChatSlider.svelte';
->>>>>>> 12d6d5035b4dfe72b47c33d55eb1be392370c567
 	import type { PageData } from './$types';
 	import { invalidateAll } from '$app/navigation';
 
@@ -600,19 +596,6 @@
 			</div>
 		</div>
 	</div>
-		</div>
-
-		<!-- Message Panel - Right Side -->
-		{#if data.activeCaseId}
-			<div class="hidden lg:block h-screen sticky top-0">
-				<MessagePanel
-					caseId={data.activeCaseId}
-					currentUserId={data.user.id}
-					bind:messages={messages}
-					onSendMessage={handleSendMessage}
-				/>
-			</div>
-		{/if}
 	</div>
 </div>
 
