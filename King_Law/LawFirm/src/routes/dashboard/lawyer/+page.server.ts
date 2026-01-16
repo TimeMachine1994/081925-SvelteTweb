@@ -60,25 +60,26 @@ export const load: PageServerLoad = async ({ locals }) => {
 				.where(eq(table.cases.lawyerId, locals.user.id))
 		: [];
 
-	// Fetch recent messages
-	const messages = caseIds.length > 0
+	// Fetch recent messages with full details for MessagePanel
+	const activeCaseId = caseIds.length > 0 ? caseIds[0] : null;
+	const messages = activeCaseId
 		? await db
 				.select({
-					message: table.messages,
-					sender: {
-						firstName: table.user.firstName,
-						lastName: table.user.lastName
-					},
-					case: {
-						id: table.cases.id,
-						title: table.cases.title
-					}
+					id: table.messages.id,
+					caseId: table.messages.caseId,
+					senderId: table.messages.senderId,
+					content: table.messages.content,
+					attachmentDocumentId: table.messages.attachmentDocumentId,
+					createdAt: table.messages.createdAt,
+					readAt: table.messages.readAt,
+					senderName: table.user.firstName,
+					senderLastName: table.user.lastName,
+					senderRole: table.user.role
 				})
 				.from(table.messages)
 				.innerJoin(table.user, eq(table.messages.senderId, table.user.id))
-				.innerJoin(table.cases, eq(table.messages.caseId, table.cases.id))
-				.where(eq(table.cases.lawyerId, locals.user.id))
-				.limit(10)
+				.where(eq(table.messages.caseId, activeCaseId))
+				.orderBy(table.messages.createdAt)
 		: [];
 
 	return {
@@ -86,6 +87,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		cases: cases.map(c => ({ ...c.case, client: c.client })),
 		documents: documents.map(d => ({ ...d.document, case: d.case })),
 		invoices: invoices.map(i => ({ ...i.invoice, case: i.case })),
-		messages: messages.map(m => ({ ...m.message, sender: m.sender, case: m.case }))
+		messages,
+		activeCaseId
 	};
 };

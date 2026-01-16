@@ -25,7 +25,7 @@
 		<div class="flex justify-between items-center h-16">
 			<!-- Logo -->
 			<a href="/" class="flex items-center space-x-3">
-				<Icon icon={faScaleBalanced} size="lg" class="text-gold" />
+				<Icon icon={faScaleBalanced} size="lg" class="!text-gold" />
 				<span class="font-title text-2xl font-bold">King Law</span>
 			</a>
 
@@ -33,7 +33,7 @@
 			<div class="hidden md:flex items-center space-x-8">
 				<!-- Services Dropdown -->
 				<div class="relative group">
-					<button class="flex items-center space-x-1 hover:text-gold transition-colors">
+					<button class="flex items-center space-x-1 hover:text-gold transition-colors py-2">
 						<span>Services</span>
 						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -41,11 +41,11 @@
 					</button>
 					
 					<!-- Dropdown Menu -->
-					<div class="absolute left-0 mt-2 w-64 bg-background border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+					<div class="absolute left-0 mt-2 w-72 bg-white dark:bg-grey-900 border border-gray-300 dark:border-gray-700 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden">
 						{#each services as service}
 							<a
 								href={service.href}
-								class="block px-4 py-3 hover:bg-secondary transition-colors first:rounded-t-lg last:rounded-b-lg"
+								class="block px-4 py-3 text-black dark:text-white hover:bg-gold hover:text-black transition-colors border-b border-gray-200 dark:border-gray-700 last:border-b-0"
 							>
 								{service.name}
 							</a>
