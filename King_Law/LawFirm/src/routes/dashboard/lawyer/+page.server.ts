@@ -1,5 +1,5 @@
 import { redirect } from '@sveltejs/kit';
-import { eq } from 'drizzle-orm';
+import { eq, isNull, and, sql } from 'drizzle-orm';
 import { db } from '$lib/server/db';
 import * as table from '$lib/server/db/schema';
 import type { PageServerLoad } from './$types';
@@ -28,6 +28,57 @@ export const load: PageServerLoad = async ({ locals }) => {
 		.from(table.cases)
 		.innerJoin(table.user, eq(table.cases.clientId, table.user.id))
 		.where(eq(table.cases.lawyerId, locals.user.id));
+
+	// Get unique clients from cases
+	const clientMap = new Map();
+	cases.forEach(c => {
+		if (!clientMap.has(c.client.id)) {
+			clientMap.set(c.client.id, {
+				...c.client,
+				caseCount: 1
+			});
+		} else {
+			clientMap.get(c.client.id).caseCount++;
+		}
+	});
+	const clients = Array.from(clientMap.values());
+
+	// Fetch uncategorized messages (messages with no case, sent to this lawyer)
+	const uncategorizedMessages = await db
+		.select({
+			message: table.messages,
+			sender: {
+				id: table.user.id,
+				firstName: table.user.firstName,
+				lastName: table.user.lastName,
+				email: table.user.email
+			}
+		})
+		.from(table.messages)
+		.innerJoin(table.user, eq(table.messages.senderId, table.user.id))
+		.where(and(
+			isNull(table.messages.caseId),
+			eq(table.messages.recipientId, locals.user.id)
+		))
+		.orderBy(table.messages.createdAt);
+
+	// Group uncategorized messages by sender
+	const uncategorizedByClient = new Map();
+	uncategorizedMessages.forEach(m => {
+		const senderId = m.sender.id;
+		if (!uncategorizedByClient.has(senderId)) {
+			uncategorizedByClient.set(senderId, {
+				client: m.sender,
+				messages: [],
+				unreadCount: 0
+			});
+		}
+		uncategorizedByClient.get(senderId).messages.push(m.message);
+		if (!m.message.readAt) {
+			uncategorizedByClient.get(senderId).unreadCount++;
+		}
+	});
+	const uncategorizedThreads = Array.from(uncategorizedByClient.values());
 
 	// Fetch all documents
 	const caseIds = cases.map(c => c.case.id);
@@ -85,9 +136,15 @@ export const load: PageServerLoad = async ({ locals }) => {
 	return {
 		user: locals.user,
 		cases: cases.map(c => ({ ...c.case, client: c.client })),
+		clients,
 		documents: documents.map(d => ({ ...d.document, case: d.case })),
 		invoices: invoices.map(i => ({ ...i.invoice, case: i.case })),
+<<<<<<< HEAD
 		messages,
 		activeCaseId
+=======
+		messages: messages.map(m => ({ ...m.message, sender: m.sender, case: m.case })),
+		uncategorizedThreads
+>>>>>>> 12d6d5035b4dfe72b47c33d55eb1be392370c567
 	};
 };

@@ -10,6 +10,7 @@
 
 	let { form }: Props = $props();
 	let isSubmitting = $state(false);
+	let selectedRole = $state('client');
 </script>
 
 <svelte:head>
@@ -113,12 +114,31 @@
 				<select
 					id="role"
 					name="role"
+					bind:value={selectedRole}
 					class="w-full px-4 py-3 bg-secondary border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
 				>
 					<option value="client">Client (seeking legal services)</option>
 					<option value="lawyer">Lawyer (joining the firm)</option>
 				</select>
 			</div>
+
+			{#if selectedRole === 'lawyer'}
+				<div>
+					<label for="lawyerCode" class="block text-sm font-semibold mb-2">
+						<Icon icon={faLock} size="sm" class="inline mr-2" />
+						Firm Access Code
+					</label>
+					<input
+						type="password"
+						id="lawyerCode"
+						name="lawyerCode"
+						required
+						placeholder="Enter the firm access code"
+						class="w-full px-4 py-3 bg-secondary border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
+					/>
+					<p class="text-xs text-muted-foreground mt-1">Contact the firm administrator for the access code</p>
+				</div>
+			{/if}
 
 			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 				<div>

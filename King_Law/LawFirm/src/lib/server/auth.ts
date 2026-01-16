@@ -15,6 +15,11 @@ export function generateSessionToken() {
 	return token;
 }
 
+export function generateId() {
+	const bytes = crypto.getRandomValues(new Uint8Array(15));
+	return encodeBase64url(bytes);
+}
+
 export async function createSession(token: string, userId: string) {
 	const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
 	const session: table.Session = {

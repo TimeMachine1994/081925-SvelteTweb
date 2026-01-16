@@ -57,6 +57,7 @@
 	},
 	"dependencies": {
 		"@node-rs/argon2": "^2.0.2",
-		"@tursodatabase/database": "^0.4.3"
+		"@tursodatabase/database": "^0.4.3",
+		"dotenv": "^17.2.3"
 	}
 }
