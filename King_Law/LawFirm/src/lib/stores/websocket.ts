@@ -2,8 +2,10 @@ import { writable, derived } from 'svelte/store';
 import { browser } from '$app/environment';
 
 interface WebSocketMessage {
-	type: 'message' | 'document' | 'invoice' | 'case_update' | 'notification';
-	data: any;
+	type: 'connected' | 'new-message' | 'message-read' | 'document-uploaded' | 'document-viewed' | 'ping' | 'pong';
+	data?: any;
+	userId?: string;
+	messageId?: string;
 }
 
 interface WebSocketStore {
@@ -27,7 +29,7 @@ function createWebSocketStore() {
 	let eventHandlers: Map<string, Set<(data: any) => void>> = new Map();
 	let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
 
-	function connect(userId: string) {
+	function connect() {
 		if (!browser) return;
 
 		// Clear any existing reconnect timeout
@@ -37,7 +39,7 @@ function createWebSocketStore() {
 		}
 
 		const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-		const wsUrl = `${protocol}//${window.location.host}/ws?userId=${userId}`;
+		const wsUrl = `${protocol}//${window.location.host}/ws`;
 
 		try {
 			const socket = new WebSocket(wsUrl);
@@ -92,7 +94,7 @@ function createWebSocketStore() {
 						
 						reconnectTimeout = setTimeout(() => {
 							newState.reconnectAttempts++;
-							connect(userId);
+							connect();
 						}, RECONNECT_INTERVAL);
 					} else {
 						console.log('[WebSocket] Max reconnection attempts reached');

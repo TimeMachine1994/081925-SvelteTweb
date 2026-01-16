@@ -87,12 +87,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		cases: cases.map(c => ({ ...c.case, lawyer: c.lawyer })),
 		documents,
 		invoices,
-<<<<<<< HEAD
-		messages,
-		activeCaseId: caseIds[0] || null
-=======
-		messages: messages.map(m => ({ ...m.message, sender: m.sender })),
+		messages: messages.map(m => ({ ...m, sender: { firstName: m.senderName, lastName: m.senderLastName, role: m.senderRole } })),
 		defaultLawyer
->>>>>>> 12d6d5035b4dfe72b47c33d55eb1be392370c567
 	};
 };

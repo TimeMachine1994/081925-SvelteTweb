@@ -139,12 +139,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		clients,
 		documents: documents.map(d => ({ ...d.document, case: d.case })),
 		invoices: invoices.map(i => ({ ...i.invoice, case: i.case })),
-<<<<<<< HEAD
-		messages,
-		activeCaseId
-=======
 		messages: messages.map(m => ({ ...m.message, sender: m.sender, case: m.case })),
 		uncategorizedThreads
->>>>>>> 12d6d5035b4dfe72b47c33d55eb1be392370c567
 	};
 };
