@@ -1,8 +1,23 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
-	import type { ActionData } from './$types';
+	import { authStore } from '$lib/stores/auth.svelte';
+	import { goto } from '$app/navigation';
 
-	let { form }: { form: ActionData } = $props();
+	let username = $state('');
+	let password = $state('');
+	let error = $state('');
+
+	async function handleSubmit(e: Event) {
+		e.preventDefault();
+		error = '';
+		
+		const result = await authStore.login(username, password);
+		
+		if (result.success) {
+			goto(authStore.dashboardRoute);
+		} else {
+			error = result.error || 'Login failed';
+		}
+	}
 </script>
 
 <div class="min-h-screen flex items-center justify-center bg-background p-4">
@@ -13,10 +28,10 @@
 		</div>
 
 		<div class="bg-card border border-border rounded-lg p-6 shadow-lg">
-			<form method="POST" use:enhance>
-				{#if form?.error}
+			<form onsubmit={handleSubmit}>
+				{#if error}
 					<div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 px-4 py-3 rounded mb-4">
-						{form.error}
+						{error}
 					</div>
 				{/if}
 
@@ -25,7 +40,7 @@
 					<input
 						type="text"
 						id="username"
-						name="username"
+						bind:value={username}
 						required
 						class="w-full px-3 py-2 border border-input rounded-md bg-background"
 					/>
@@ -36,7 +51,7 @@
 					<input
 						type="password"
 						id="password"
-						name="password"
+						bind:value={password}
 						required
 						class="w-full px-3 py-2 border border-input rounded-md bg-background"
 					/>
@@ -44,9 +59,10 @@
 
 				<button
 					type="submit"
-					class="w-full bg-gold hover:bg-gold-dark text-black font-semibold py-2 px-4 rounded-md transition-colors"
+					disabled={authStore.loading}
+					class="w-full bg-gold hover:bg-gold-dark text-black font-semibold py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 				>
-					Sign In
+					{authStore.loading ? 'Signing in...' : 'Sign In'}
 				</button>
 
 				<p class="text-center mt-4 text-sm">

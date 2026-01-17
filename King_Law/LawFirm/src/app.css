@@ -4,8 +4,7 @@
 	/* Custom Fonts */
 	@font-face {
 		font-family: 'Junction Regular';
-		src: url('/fonts/Junction-regular.woff2') format('woff2'),
-			url('/fonts/Junction-regular.woff') format('woff');
+		src: url('/fonts/junction-regular.woff') format('woff');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
@@ -13,8 +12,7 @@
 
 	@font-face {
 		font-family: 'Goudy Bookletter 1911';
-		src: url('/fonts/GoudyBookletter1911.woff2') format('woff2'),
-			url('/fonts/GoudyBookletter1911.woff') format('woff');
+		src: url('/fonts/goudy_bookletter_1911-webfont.woff') format('woff');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;
@@ -22,8 +20,7 @@
 
 	@font-face {
 		font-family: 'League Script';
-		src: url('/fonts/LeagueScript-Regular.woff2') format('woff2'),
-			url('/fonts/LeagueScript-Regular.woff') format('woff');
+		src: url('/fonts/LeagueScriptNumberOne-webfont.woff') format('woff');
 		font-weight: normal;
 		font-style: normal;
 		font-display: swap;

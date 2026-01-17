@@ -1,7 +1,18 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { casesStore } from '$lib/stores/cases.svelte';
+	import { documentsStore } from '$lib/stores/documents.svelte';
+	import { messagesStore } from '$lib/stores/messages.svelte';
+	import CreateCaseModal from '$lib/components/CreateCaseModal.svelte';
 
 	let { data }: { data: PageData } = $props();
+
+	let showCreateCaseModal = $state(false);
+
+	function handleCaseCreated(event: CustomEvent) {
+		showCreateCaseModal = false;
+		casesStore.fetchCases();
+	}
 
 	function formatCurrency(cents: number): string {
 		return new Intl.NumberFormat('en-US', {
