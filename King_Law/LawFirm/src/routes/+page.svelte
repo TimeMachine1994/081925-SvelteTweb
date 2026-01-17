@@ -1,275 +1,135 @@
-<script lang="ts">
-	import { faGavel, faHandshake, faUsers, faShieldHalved, faPhone, faEnvelope } from '@fortawesome/free-solid-svg-icons';
-	import Icon from '$lib/components/Icon.svelte';
+<div class="min-h-screen">
+	<!-- Hero Section -->
+	<section class="relative bg-gradient-to-br from-background to-muted py-20 md:py-32">
+		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+			<div class="text-center max-w-3xl mx-auto">
+				<h1 class="font-title text-5xl md:text-6xl lg:text-7xl mb-6">
+					Justice Through Excellence
+				</h1>
+				<p class="text-xl md:text-2xl text-muted-foreground mb-8">
+					Trusted legal representation serving Central Florida with integrity, expertise, and unwavering dedication to your case.
+				</p>
+				<div class="flex flex-col sm:flex-row gap-4 justify-center">
+					<a href="/contact" class="bg-gold hover:bg-gold-dark text-black font-semibold px-8 py-3 rounded-md transition-colors">
+						Schedule Consultation
+					</a>
+					<a href="/about" class="border-2 border-gold text-gold hover:bg-gold hover:text-black font-semibold px-8 py-3 rounded-md transition-colors">
+						Learn More
+					</a>
+				</div>
+			</div>
+		</div>
+	</section>
 
-	let formData = $state({
-		name: '',
-		email: '',
-		phone: '',
-		message: ''
-	});
-	let formSubmitting = $state(false);
+	<!-- About Section -->
+	<section class="py-16 md:py-24 bg-background">
+		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+			<div class="grid md:grid-cols-2 gap-12 items-center">
+				<div>
+					<h2 class="font-title text-4xl md:text-5xl mb-6">About King Law Firm</h2>
+					<p class="text-lg text-muted-foreground mb-4">
+						For over 20 years, King Law Firm has been a pillar of legal excellence in Central Florida. 
+						Our commitment to justice and client advocacy has earned us a reputation as one of the most 
+						trusted law firms in the region.
+					</p>
+					<p class="text-lg text-muted-foreground mb-6">
+						We believe every client deserves exceptional legal representation. Our experienced attorneys 
+						combine legal expertise with personalized attention to achieve the best possible outcomes.
+					</p>
+					<blockquote class="font-quote text-2xl text-gold border-l-4 border-gold pl-6 py-2">
+						"Justice is the constant and perpetual will to render to every person their due."
+					</blockquote>
+				</div>
+				<div class="bg-muted rounded-lg p-8 border border-border">
+					<h3 class="font-title text-2xl mb-4">Why Choose Us</h3>
+					<ul class="space-y-4">
+						<li class="flex items-start">
+							<span class="text-gold mr-3">⚖️</span>
+							<div>
+								<strong>Experienced Attorneys</strong>
+								<p class="text-muted-foreground">Over 50 years of combined legal experience</p>
+							</div>
+						</li>
+						<li class="flex items-start">
+							<span class="text-gold mr-3">🏆</span>
+							<div>
+								<strong>Proven Track Record</strong>
+								<p class="text-muted-foreground">Successful outcomes in thousands of cases</p>
+							</div>
+						</li>
+						<li class="flex items-start">
+							<span class="text-gold mr-3">🤝</span>
+							<div>
+								<strong>Client-Focused</strong>
+								<p class="text-muted-foreground">Personalized attention to every case</p>
+							</div>
+						</li>
+						<li class="flex items-start">
+							<span class="text-gold mr-3">💼</span>
+							<div>
+								<strong>Full-Service Practice</strong>
+								<p class="text-muted-foreground">Comprehensive legal solutions under one roof</p>
+							</div>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</section>
 
-	const services = [
-		{
-			icon: faGavel,
-			title: 'Personal Injury & Civil Suits',
-			description: 'Expert representation for accident victims and civil litigation matters.',
-			href: '/services/personal-injury'
-		},
-		{
-			icon: faHandshake,
-			title: 'Business & Intellectual Property',
-			description: 'Protecting your business interests and intellectual assets.',
-			href: '/services/business-intellectual-property'
-		},
-		{
-			icon: faUsers,
-			title: 'Family & Estate Law',
-			description: 'Compassionate guidance through family matters and estate planning.',
-			href: '/services/family-estate-law'
-		},
-		{
-			icon: faShieldHalved,
-			title: 'Criminal Defense',
-			description: 'Aggressive defense to protect your rights and freedom.',
-			href: '/services/criminal-defense'
-		}
-	];
+	<!-- Services Section -->
+	<section class="py-16 md:py-24 bg-muted">
+		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+			<div class="text-center mb-12">
+				<h2 class="font-title text-4xl md:text-5xl mb-4">Our Practice Areas</h2>
+				<p class="text-xl text-muted-foreground max-w-2xl mx-auto">
+					Comprehensive legal services tailored to your needs
+				</p>
+			</div>
 
-	async function handleSubmit(e: Event) {
-		e.preventDefault();
-		formSubmitting = true;
-		
-		// TODO: Implement contact form submission
-		await new Promise(resolve => setTimeout(resolve, 1000));
-		
-		alert('Thank you for your message. We will contact you soon.');
-		formData = { name: '', email: '', phone: '', message: '' };
-		formSubmitting = false;
-	}
-</script>
+			<div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+				<a href="/services/personal-injury" class="bg-background border border-border rounded-lg p-6 hover:border-gold transition-all hover:shadow-lg group">
+					<div class="text-4xl mb-4">⚔️</div>
+					<h3 class="font-title text-xl mb-2 group-hover:text-gold transition-colors">Personal Injury & Civil Suits</h3>
+					<p class="text-muted-foreground">Car accidents, slip & fall, medical malpractice, and wrongful death claims.</p>
+				</a>
 
-<svelte:head>
-	<title>King Law Firm - Professional Legal Services</title>
-</svelte:head>
+				<a href="/services/business-intellectual-property" class="bg-background border border-border rounded-lg p-6 hover:border-gold transition-all hover:shadow-lg group">
+					<div class="text-4xl mb-4">🏢</div>
+					<h3 class="font-title text-xl mb-2 group-hover:text-gold transition-colors">Business & Intellectual Property</h3>
+					<p class="text-muted-foreground">Contracts, trademarks, patents, business formation, and disputes.</p>
+				</a>
 
-<!-- Hero Section -->
-<section class="relative bg-gradient-to-br from-background via-secondary to-background py-20 md:py-32">
-	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-		<div class="text-center">
-			<h1 class="font-title text-5xl md:text-7xl font-bold mb-6">
-				Excellence in Legal Representation
-			</h1>
-			<p class="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-				Dedicated attorneys committed to protecting your rights and securing justice
+				<a href="/services/family-estate-law" class="bg-background border border-border rounded-lg p-6 hover:border-gold transition-all hover:shadow-lg group">
+					<div class="text-4xl mb-4">👨‍👩‍👧‍👦</div>
+					<h3 class="font-title text-xl mb-2 group-hover:text-gold transition-colors">Family & Estate Law</h3>
+					<p class="text-muted-foreground">Divorce, custody, wills, trusts, probate, and estate planning.</p>
+				</a>
+
+				<a href="/services/criminal-defense" class="bg-background border border-border rounded-lg p-6 hover:border-gold transition-all hover:shadow-lg group">
+					<div class="text-4xl mb-4">🛡️</div>
+					<h3 class="font-title text-xl mb-2 group-hover:text-gold transition-colors">Criminal Defense</h3>
+					<p class="text-muted-foreground">DUI, misdemeanors, felonies, expungement, and appeals.</p>
+				</a>
+			</div>
+		</div>
+	</section>
+
+	<!-- CTA Section -->
+	<section class="py-16 md:py-24 bg-background">
+		<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+			<h2 class="font-title text-4xl md:text-5xl mb-6">Ready to Get Started?</h2>
+			<p class="text-xl text-muted-foreground mb-8">
+				Schedule a free consultation to discuss your legal needs. We're here to help.
 			</p>
 			<div class="flex flex-col sm:flex-row gap-4 justify-center">
-				<a
-					href="/contact"
-					class="px-8 py-4 bg-gold text-black font-semibold rounded-lg hover:bg-gold-dark transition-colors text-lg"
-				>
-					Schedule Consultation
+				<a href="/contact" class="bg-gold hover:bg-gold-dark text-black font-semibold px-8 py-3 rounded-md transition-colors">
+					Contact Us Today
 				</a>
-				<a
-					href="/about"
-					class="px-8 py-4 bg-secondary text-foreground font-semibold rounded-lg hover:bg-muted transition-colors text-lg"
-				>
-					Learn More
+				<a href="/register" class="border-2 border-gold text-gold hover:bg-gold hover:text-black font-semibold px-8 py-3 rounded-md transition-colors">
+					Client Portal
 				</a>
 			</div>
 		</div>
-	</div>
-</section>
-
-<!-- About Section -->
-<section class="py-20 bg-background">
-	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-			<div>
-				<h2 class="font-title text-4xl font-bold mb-6">About King Law Firm</h2>
-				<p class="text-lg text-muted-foreground mb-4">
-					For over two decades, King Law Firm has been a pillar of legal excellence in our community. 
-					Our team of experienced attorneys combines deep legal knowledge with a genuine commitment to 
-					our clients' success.
-				</p>
-				<p class="text-lg text-muted-foreground mb-6">
-					We believe that everyone deserves access to quality legal representation, and we fight 
-					tirelessly to ensure that justice prevails in every case we handle.
-				</p>
-				<blockquote class="font-quote text-2xl text-gold italic border-l-4 border-gold pl-6">
-					"Justice delayed is justice denied."
-				</blockquote>
-			</div>
-			<div class="bg-secondary rounded-lg p-8">
-				<h3 class="font-title text-2xl font-bold mb-4">Why Choose Us</h3>
-				<ul class="space-y-4">
-					<li class="flex items-start space-x-3">
-						<span class="text-gold text-xl">✓</span>
-						<span class="text-muted-foreground">Over 20 years of combined legal experience</span>
-					</li>
-					<li class="flex items-start space-x-3">
-						<span class="text-gold text-xl">✓</span>
-						<span class="text-muted-foreground">Personalized attention to every client</span>
-					</li>
-					<li class="flex items-start space-x-3">
-						<span class="text-gold text-xl">✓</span>
-						<span class="text-muted-foreground">Proven track record of successful outcomes</span>
-					</li>
-					<li class="flex items-start space-x-3">
-						<span class="text-gold text-xl">✓</span>
-						<span class="text-muted-foreground">Available 24/7 for urgent matters</span>
-					</li>
-				</ul>
-			</div>
-		</div>
-	</div>
-</section>
-
-<!-- Services Section -->
-<section class="py-20 bg-secondary">
-	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-		<div class="text-center mb-12">
-			<h2 class="font-title text-4xl font-bold mb-4">Our Practice Areas</h2>
-			<p class="text-lg text-muted-foreground">
-				Comprehensive legal services tailored to your needs
-			</p>
-		</div>
-
-		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-			{#each services as service}
-				<a
-					href={service.href}
-					class="bg-background p-6 rounded-lg border border-gray-300 dark:border-gray-700 hover:border-gold hover:shadow-lg transition-all group"
-				>
-					<div class="mb-4">
-						<Icon icon={service.icon} size="2xl" class="text-gold group-hover:scale-110 transition-transform" />
-					</div>
-					<h3 class="font-title text-xl font-bold mb-3">{service.title}</h3>
-					<p class="text-muted-foreground mb-4">{service.description}</p>
-					<span class="text-gold font-semibold group-hover:underline">Learn More →</span>
-				</a>
-			{/each}
-		</div>
-	</div>
-</section>
-
-<!-- Contact Section -->
-<section id="contact" class="py-20 bg-background">
-	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-		<div class="text-center mb-12">
-			<h2 class="font-title text-4xl font-bold mb-4">Get in Touch</h2>
-			<p class="text-lg text-muted-foreground">
-				Schedule a free consultation to discuss your legal needs
-			</p>
-		</div>
-
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-			<!-- Contact Form -->
-			<form onsubmit={handleSubmit} class="space-y-6">
-				<div>
-					<label for="name" class="block text-sm font-semibold mb-2">Name</label>
-					<input
-						type="text"
-						id="name"
-						bind:value={formData.name}
-						required
-						class="w-full px-4 py-3 bg-secondary border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
-					/>
-				</div>
-
-				<div>
-					<label for="email" class="block text-sm font-semibold mb-2">Email</label>
-					<input
-						type="email"
-						id="email"
-						bind:value={formData.email}
-						required
-						class="w-full px-4 py-3 bg-secondary border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
-					/>
-				</div>
-
-				<div>
-					<label for="phone" class="block text-sm font-semibold mb-2">Phone</label>
-					<input
-						type="tel"
-						id="phone"
-						bind:value={formData.phone}
-						class="w-full px-4 py-3 bg-secondary border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
-					/>
-				</div>
-
-				<div>
-					<label for="message" class="block text-sm font-semibold mb-2">Message</label>
-					<textarea
-						id="message"
-						bind:value={formData.message}
-						required
-						rows="4"
-						class="w-full px-4 py-3 bg-secondary border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
-					></textarea>
-				</div>
-
-				<button
-					type="submit"
-					disabled={formSubmitting}
-					class="w-full px-8 py-4 bg-gold text-black font-semibold rounded-lg hover:bg-gold-dark transition-colors disabled:opacity-50"
-				>
-					{formSubmitting ? 'Sending...' : 'Send Message'}
-				</button>
-			</form>
-
-			<!-- Contact Information -->
-			<div class="space-y-8">
-				<div>
-					<h3 class="font-title text-2xl font-bold mb-6">Contact Information</h3>
-					
-					<div class="space-y-4">
-						<div class="flex items-start space-x-4">
-							<Icon icon={faPhone} size="lg" class="text-gold mt-1" />
-							<div>
-								<div class="font-semibold mb-1">Phone</div>
-								<a href="tel:555-0100" class="text-muted-foreground hover:text-gold transition-colors">
-									(555) 010-0100
-								</a>
-							</div>
-						</div>
-
-						<div class="flex items-start space-x-4">
-							<Icon icon={faEnvelope} size="lg" class="text-gold mt-1" />
-							<div>
-								<div class="font-semibold mb-1">Email</div>
-								<a href="mailto:info@kinglaw.com" class="text-muted-foreground hover:text-gold transition-colors">
-									info@kinglaw.com
-								</a>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<div class="bg-secondary p-6 rounded-lg">
-					<h4 class="font-title text-xl font-bold mb-4">Office Hours</h4>
-					<div class="space-y-2 text-muted-foreground">
-						<div class="flex justify-between">
-							<span>Monday - Friday:</span>
-							<span class="font-semibold">9:00 AM - 6:00 PM</span>
-						</div>
-						<div class="flex justify-between">
-							<span>Saturday:</span>
-							<span class="font-semibold">10:00 AM - 2:00 PM</span>
-						</div>
-						<div class="flex justify-between">
-							<span>Sunday:</span>
-							<span class="font-semibold">Closed</span>
-						</div>
-					</div>
-					<div class="mt-4 pt-4 border-t border-gray-300 dark:border-gray-700">
-						<p class="text-sm text-muted-foreground">
-							Emergency consultations available 24/7
-						</p>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-</section>
+	</section>
+</div>

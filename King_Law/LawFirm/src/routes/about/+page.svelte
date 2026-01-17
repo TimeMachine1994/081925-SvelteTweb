@@ -1,92 +1,121 @@
-<script lang="ts">
-	import { faScaleBalanced, faGavel, faUsers, faAward } from '@fortawesome/free-solid-svg-icons';
-	import Icon from '$lib/components/Icon.svelte';
-</script>
+<div class="py-16 md:py-24 bg-background">
+	<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+		<h1 class="font-title text-4xl md:text-5xl mb-6">About King Law Firm</h1>
+		<p class="text-xl text-muted-foreground mb-12">
+			A legacy of legal excellence serving Central Florida since 2003
+		</p>
 
-<svelte:head>
-	<title>About Us - King Law Firm</title>
-</svelte:head>
+		<div class="prose prose-lg max-w-none">
+			<div class="bg-muted p-8 rounded-lg border border-border mb-12">
+				<h2 class="font-title text-3xl mb-4">Our Story</h2>
+				<p class="text-muted-foreground mb-4">
+					Founded over two decades ago, King Law Firm has grown from a small practice to one of Central 
+					Florida's most respected legal firms. Our success is built on a simple principle: every client 
+					deserves exceptional legal representation delivered with integrity, expertise, and unwavering dedication.
+				</p>
+				<p class="text-muted-foreground">
+					What started as a solo practice has evolved into a full-service law firm with experienced attorneys 
+					specializing in personal injury, business law, family law, and criminal defense. Despite our growth, 
+					we've maintained the personalized attention and client-focused approach that defined our early years.
+				</p>
+			</div>
 
-<section class="bg-gradient-to-br from-background via-secondary to-background py-16">
-	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-		<div class="text-center mb-12">
-			<Icon icon={faScaleBalanced} size="2xl" class="text-gold mx-auto mb-4" />
-			<h1 class="font-title text-5xl font-bold mb-4">About King Law Firm</h1>
-			<p class="text-xl text-muted-foreground max-w-3xl mx-auto">
-				Dedicated to Excellence in Legal Representation Since 2003
+			<h2 class="font-title text-3xl mb-6">Our Values</h2>
+			<div class="grid md:grid-cols-2 gap-6 mb-12">
+				<div class="bg-background border border-border rounded-lg p-6">
+					<h3 class="font-semibold text-xl mb-3 flex items-center">
+						<span class="text-gold text-2xl mr-3">⚖️</span>
+						Integrity
+					</h3>
+					<p class="text-muted-foreground">
+						We uphold the highest ethical standards in all our dealings, ensuring transparency 
+						and honesty with every client.
+					</p>
+				</div>
+
+				<div class="bg-background border border-border rounded-lg p-6">
+					<h3 class="font-semibold text-xl mb-3 flex items-center">
+						<span class="text-gold text-2xl mr-3">💪</span>
+						Excellence
+					</h3>
+					<p class="text-muted-foreground">
+						We strive for the best possible outcomes through meticulous preparation and 
+						aggressive advocacy.
+					</p>
+				</div>
+
+				<div class="bg-background border border-border rounded-lg p-6">
+					<h3 class="font-semibold text-xl mb-3 flex items-center">
+						<span class="text-gold text-2xl mr-3">🤝</span>
+						Compassion
+					</h3>
+					<p class="text-muted-foreground">
+						We understand that legal issues are often stressful, and we provide supportive 
+						guidance throughout the process.
+					</p>
+				</div>
+
+				<div class="bg-background border border-border rounded-lg p-6">
+					<h3 class="font-semibold text-xl mb-3 flex items-center">
+						<span class="text-gold text-2xl mr-3">⚡</span>
+						Results
+					</h3>
+					<p class="text-muted-foreground">
+						Our track record speaks for itself - thousands of successful cases and millions 
+						recovered for our clients.
+					</p>
+				</div>
+			</div>
+
+			<h2 class="font-title text-3xl mb-6">Our Team</h2>
+			<p class="text-muted-foreground mb-8">
+				Our attorneys bring over 50 years of combined legal experience across multiple practice areas. 
+				Each member of our team is committed to providing exceptional service and achieving the best 
+				possible outcomes for our clients.
 			</p>
-		</div>
-	</div>
-</section>
 
-<section class="py-16 bg-background">
-	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
-			<div>
-				<h2 class="font-title text-3xl font-bold mb-6">Our Story</h2>
-				<p class="text-muted-foreground mb-4">
-					Founded in 2003, King Law Firm has grown from a small practice to one of the most
-					respected legal firms in the region. Our commitment to client satisfaction and legal
-					excellence has remained unwavering throughout our journey.
-				</p>
-				<p class="text-muted-foreground mb-4">
-					We believe that every client deserves personalized attention and aggressive
-					representation. Our team of experienced attorneys brings decades of combined experience
-					across multiple practice areas.
-				</p>
+			<div class="bg-background border border-border rounded-lg p-8 mb-12">
+				<h3 class="font-title text-2xl mb-4">What Our Clients Say</h3>
+				<blockquote class="font-quote text-xl text-gold mb-4 border-l-4 border-gold pl-6">
+					"King Law Firm fought tirelessly for my case. Their expertise and dedication made all 
+					the difference. I couldn't have asked for better representation."
+				</blockquote>
+				<p class="text-muted-foreground">— Sarah M., Personal Injury Client</p>
 			</div>
-			<div class="bg-secondary p-8 rounded-lg">
-				<h3 class="font-title text-2xl font-bold mb-6">Our Values</h3>
-				<ul class="space-y-4">
-					<li class="flex items-start space-x-3">
-						<Icon icon={faGavel} class="text-gold mt-1" />
-						<div>
-							<div class="font-semibold mb-1">Integrity</div>
-							<p class="text-sm text-muted-foreground">
-								We maintain the highest ethical standards in all our dealings
-							</p>
-						</div>
-					</li>
-					<li class="flex items-start space-x-3">
-						<Icon icon={faUsers} class="text-gold mt-1" />
-						<div>
-							<div class="font-semibold mb-1">Client Focus</div>
-							<p class="text-sm text-muted-foreground">
-								Your needs and goals drive everything we do
-							</p>
-						</div>
-					</li>
-					<li class="flex items-start space-x-3">
-						<Icon icon={faAward} class="text-gold mt-1" />
-						<div>
-							<div class="font-semibold mb-1">Excellence</div>
-							<p class="text-sm text-muted-foreground">
-								We strive for outstanding results in every case
-							</p>
-						</div>
-					</li>
-				</ul>
+
+			<h2 class="font-title text-3xl mb-6">Community Involvement</h2>
+			<p class="text-muted-foreground mb-4">
+				We believe in giving back to the Central Florida community that has supported us. Our firm 
+				actively participates in:
+			</p>
+			<ul class="space-y-2 mb-12">
+				<li class="flex items-start">
+					<span class="text-gold mr-3">•</span>
+					<span>Pro bono legal services for low-income families</span>
+				</li>
+				<li class="flex items-start">
+					<span class="text-gold mr-3">•</span>
+					<span>Local charity fundraising and sponsorships</span>
+				</li>
+				<li class="flex items-start">
+					<span class="text-gold mr-3">•</span>
+					<span>Educational programs on legal rights and responsibilities</span>
+				</li>
+				<li class="flex items-start">
+					<span class="text-gold mr-3">•</span>
+					<span>Mentorship programs for aspiring attorneys</span>
+				</li>
+			</ul>
+
+			<div class="bg-gold/10 border-2 border-gold rounded-lg p-8 text-center">
+				<h3 class="font-title text-2xl mb-4">Ready to Work With Us?</h3>
+				<p class="text-muted-foreground mb-6">
+					Experience the King Law Firm difference. Schedule your free consultation today.
+				</p>
+				<a href="/contact" class="inline-block bg-gold hover:bg-gold-dark text-black font-semibold px-8 py-3 rounded-md transition-colors">
+					Contact Us Today
+				</a>
 			</div>
 		</div>
-
-		<div class="text-center bg-secondary p-12 rounded-lg">
-			<blockquote class="font-quote text-3xl text-gold italic mb-4">
-				"The good lawyer is not the man who has an eye to every side and angle of contingency,
-				but who throws himself on your part so heartily that he can get you out of a scrape."
-			</blockquote>
-			<p class="text-muted-foreground">- Ralph Waldo Emerson</p>
-		</div>
 	</div>
-</section>
-
-<section class="py-16 bg-secondary">
-	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-		<h2 class="font-title text-3xl font-bold mb-8">Ready to Work With Us?</h2>
-		<a
-			href="/contact"
-			class="inline-block px-8 py-4 bg-gold text-black font-semibold rounded-lg hover:bg-gold-dark transition-colors"
-		>
-			Schedule Your Free Consultation
-		</a>
-	</div>
-</section>
+</div>

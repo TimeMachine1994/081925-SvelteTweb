@@ -1,77 +1,58 @@
-import { redirect, error } from '@sveltejs/kit';
-import { eq, and } from 'drizzle-orm';
-import { db } from '$lib/server/db';
-import * as table from '$lib/server/db/schema';
+import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
+import { db } from '$lib/server/db';
+import { cases, documents, invoices, messages, user } from '$lib/server/db/schema';
+import { eq, and } from 'drizzle-orm';
 
-export const load: PageServerLoad = async ({ locals, params }) => {
+export const load: PageServerLoad = async ({ params, locals }) => {
 	if (!locals.user) {
-		redirect(302, '/login');
-	}
-
-	if (locals.user.role !== 'client') {
-		redirect(302, '/dashboard/lawyer');
+		throw redirect(303, '/login');
 	}
 
 	const caseId = params.id;
 
-	// Fetch the case with lawyer info
-	const caseResult = await db
+	// Get case with lawyer info
+	const [caseData] = await db
 		.select({
-			case: table.cases,
-			lawyer: {
-				id: table.user.id,
-				firstName: table.user.firstName,
-				lastName: table.user.lastName,
-				email: table.user.email,
-				phoneNumber: table.user.phoneNumber
-			}
+			case: cases,
+			lawyer: user
 		})
-		.from(table.cases)
-		.innerJoin(table.user, eq(table.cases.lawyerId, table.user.id))
-		.where(and(
-			eq(table.cases.id, caseId),
-			eq(table.cases.clientId, locals.user.id)
-		));
+		.from(cases)
+		.innerJoin(user, eq(cases.lawyerId, user.id))
+		.where(and(eq(cases.id, caseId), eq(cases.clientId, locals.user.id)))
+		.limit(1);
 
-	if (caseResult.length === 0) {
-		throw error(404, 'Case not found');
+	if (!caseData) {
+		throw error(404, 'Case not found or access denied');
 	}
 
-	const caseData = { ...caseResult[0].case, lawyer: caseResult[0].lawyer };
-
-	// Fetch documents for this case
-	const documents = await db
+	// Get case documents
+	const caseDocuments = await db
 		.select()
-		.from(table.documents)
-		.where(eq(table.documents.caseId, caseId));
+		.from(documents)
+		.where(eq(documents.caseId, caseId));
 
-	// Fetch invoices for this case
-	const invoices = await db
+	// Get case invoices
+	const caseInvoices = await db
 		.select()
-		.from(table.invoices)
-		.where(eq(table.invoices.caseId, caseId));
+		.from(invoices)
+		.where(eq(invoices.caseId, caseId));
 
-	// Fetch messages for this case
-	const messages = await db
+	// Get case messages
+	const caseMessages = await db
 		.select({
-			message: table.messages,
-			sender: {
-				firstName: table.user.firstName,
-				lastName: table.user.lastName,
-				role: table.user.role
-			}
+			message: messages,
+			sender: user
 		})
-		.from(table.messages)
-		.innerJoin(table.user, eq(table.messages.senderId, table.user.id))
-		.where(eq(table.messages.caseId, caseId))
-		.orderBy(table.messages.createdAt);
+		.from(messages)
+		.innerJoin(user, eq(messages.senderId, user.id))
+		.where(eq(messages.caseId, caseId));
 
 	return {
-		user: locals.user,
-		case: caseData,
-		documents,
-		invoices,
-		messages: messages.map(m => ({ ...m.message, sender: m.sender }))
+		case: caseData.case,
+		lawyer: caseData.lawyer,
+		documents: caseDocuments,
+		invoices: caseInvoices,
+		messages: caseMessages
 	};
 };

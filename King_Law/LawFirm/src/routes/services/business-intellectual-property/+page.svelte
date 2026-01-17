@@ -1,31 +1,89 @@
-<script lang="ts">
-	import ServicePageTemplate from '$lib/components/ServicePageTemplate.svelte';
-	import { faHandshake } from '@fortawesome/free-solid-svg-icons';
+<div class="py-16 md:py-24 bg-background">
+	<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+		<h1 class="font-title text-4xl md:text-5xl mb-6">Business & Intellectual Property Law</h1>
+		<p class="text-xl text-muted-foreground mb-12">
+			Protecting your business interests and creative innovations
+		</p>
 
-	const whatWeHandle = [
-		'Business formation and structuring',
-		'Contract drafting and negotiation',
-		'Trademark and copyright registration',
-		'Patent applications and protection',
-		'Trade secret protection',
-		'Business disputes and litigation',
-		'Partnership agreements',
-		'Mergers and acquisitions'
-	];
+		<div class="bg-muted p-6 rounded-lg border border-border mb-8">
+			<h2 class="font-title text-2xl mb-4">Strategic Legal Counsel for Growing Businesses</h2>
+			<p class="text-muted-foreground">
+				Whether you're launching a startup, expanding your enterprise, or protecting your intellectual 
+				property, our business attorneys provide the strategic guidance you need to succeed.
+			</p>
+		</div>
 
-	const whyChooseUs = [
-		'Deep understanding of business law',
-		'Proactive protection of intellectual assets',
-		'Experience with startups and established businesses',
-		'Strategic legal counsel for growth',
-		'Cost-effective legal solutions'
-	];
-</script>
+		<h2 class="font-title text-3xl mb-6">Business Law Services</h2>
+		<div class="grid md:grid-cols-2 gap-6 mb-12">
+			<div class="bg-background border border-border rounded-lg p-6">
+				<h3 class="font-semibold text-xl mb-3">🏢 Business Formation</h3>
+				<p class="text-muted-foreground">
+					LLCs, corporations, partnerships, and sole proprietorships. We help you choose the right 
+					structure for your business goals.
+				</p>
+			</div>
 
-<ServicePageTemplate
-	title="Business & Intellectual Property"
-	icon={faHandshake}
-	description="Protect your business interests and intellectual assets with comprehensive legal counsel. We help businesses navigate complex legal landscapes with confidence."
-	{whatWeHandle}
-	{whyChooseUs}
-/>
+			<div class="bg-background border border-border rounded-lg p-6">
+				<h3 class="font-semibold text-xl mb-3">📄 Contract Drafting & Review</h3>
+				<p class="text-muted-foreground">
+					Commercial agreements, vendor contracts, employment agreements, and non-compete clauses.
+				</p>
+			</div>
+
+			<div class="bg-background border border-border rounded-lg p-6">
+				<h3 class="font-semibold text-xl mb-3">🤝 Mergers & Acquisitions</h3>
+				<p class="text-muted-foreground">
+					Due diligence, negotiation, and transaction management for business sales and purchases.
+				</p>
+			</div>
+
+			<div class="bg-background border border-border rounded-lg p-6">
+				<h3 class="font-semibold text-xl mb-3">⚖️ Business Disputes</h3>
+				<p class="text-muted-foreground">
+					Partnership disputes, breach of contract, shareholder conflicts, and commercial litigation.
+				</p>
+			</div>
+		</div>
+
+		<h2 class="font-title text-3xl mb-6">Intellectual Property Protection</h2>
+		<div class="grid md:grid-cols-2 gap-6 mb-12">
+			<div class="bg-background border border-border rounded-lg p-6">
+				<h3 class="font-semibold text-xl mb-3">™ Trademark Registration</h3>
+				<p class="text-muted-foreground">
+					Protect your brand name, logo, and slogans through federal and state trademark registration.
+				</p>
+			</div>
+
+			<div class="bg-background border border-border rounded-lg p-6">
+				<h3 class="font-semibold text-xl mb-3">© Copyright Protection</h3>
+				<p class="text-muted-foreground">
+					Secure your creative works, software, and original content with comprehensive copyright coverage.
+				</p>
+			</div>
+
+			<div class="bg-background border border-border rounded-lg p-6">
+				<h3 class="font-semibold text-xl mb-3">💡 Patent Applications</h3>
+				<p class="text-muted-foreground">
+					Utility patents, design patents, and provisional applications for your inventions.
+				</p>
+			</div>
+
+			<div class="bg-background border border-border rounded-lg p-6">
+				<h3 class="font-semibold text-xl mb-3">🛡️ IP Enforcement</h3>
+				<p class="text-muted-foreground">
+					Cease and desist letters, infringement litigation, and defense against IP claims.
+				</p>
+			</div>
+		</div>
+
+		<div class="bg-gold/10 border-2 border-gold rounded-lg p-8 text-center mb-8">
+			<h3 class="font-title text-2xl mb-4">Business Legal Consultation</h3>
+			<p class="text-muted-foreground mb-6">
+				Schedule a consultation to discuss your business needs and IP protection strategy.
+			</p>
+			<a href="/contact" class="inline-block bg-gold hover:bg-gold-dark text-black font-semibold px-8 py-3 rounded-md transition-colors">
+				Contact Our Business Attorneys
+			</a>
+		</div>
+	</div>
+</div>

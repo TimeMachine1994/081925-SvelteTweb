@@ -1,94 +1,124 @@
-import type { RequestEvent } from '@sveltejs/kit';
-import { eq } from 'drizzle-orm';
+import { Lucia } from 'lucia';
+import { DrizzleSQLiteAdapter } from '@lucia-auth/adapter-drizzle';
+import { db } from './db';
+import { session, user } from './db/schema';
+import { encodeBase32LowerCaseNoPadding, encodeHexLowerCase } from '@oslojs/encoding';
 import { sha256 } from '@oslojs/crypto/sha2';
-import { encodeBase64url, encodeHexLowerCase } from '@oslojs/encoding';
-import { db } from '$lib/server/db';
-import * as table from '$lib/server/db/schema';
+import { hash, verify } from '@node-rs/argon2';
+import { eq } from 'drizzle-orm';
 
-const DAY_IN_MS = 1000 * 60 * 60 * 24;
+const adapter = new DrizzleSQLiteAdapter(db, session, user);
 
-export const sessionCookieName = 'auth-session';
+export const lucia = new Lucia(adapter, {
+	sessionCookie: {
+		attributes: {
+			secure: process.env.NODE_ENV === 'production'
+		}
+	},
+	getUserAttributes: (attributes) => {
+		return {
+			username: attributes.username,
+			email: attributes.email,
+			firstName: attributes.firstName,
+			lastName: attributes.lastName,
+			role: attributes.role,
+			phoneNumber: attributes.phoneNumber
+		};
+	}
+});
 
-export function generateSessionToken() {
-	const bytes = crypto.getRandomValues(new Uint8Array(18));
-	const token = encodeBase64url(bytes);
-	return token;
+declare module 'lucia' {
+	interface Register {
+		Lucia: typeof lucia;
+		DatabaseUserAttributes: DatabaseUserAttributes;
+	}
 }
 
-export function generateId() {
-	const bytes = crypto.getRandomValues(new Uint8Array(15));
-	return encodeBase64url(bytes);
+interface DatabaseUserAttributes {
+	username: string;
+	email: string;
+	firstName: string;
+	lastName: string;
+	role: 'client' | 'lawyer' | 'admin';
+	phoneNumber: string | null;
 }
 
+// Generate random session ID
+export function generateId(length: number = 15): string {
+	const bytes = new Uint8Array(length);
+	crypto.getRandomValues(bytes);
+	return encodeBase32LowerCaseNoPadding(bytes);
+}
+
+// Generate session token
+export function generateSessionToken(): string {
+	const bytes = new Uint8Array(20);
+	crypto.getRandomValues(bytes);
+	return encodeBase32LowerCaseNoPadding(bytes);
+}
+
+// Create session
 export async function createSession(token: string, userId: string) {
 	const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
-	const session: table.Session = {
+	const sessionData = {
 		id: sessionId,
 		userId,
-		expiresAt: new Date(Date.now() + DAY_IN_MS * 30)
+		expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30) // 30 days
 	};
-	await db.insert(table.session).values(session);
-	return session;
+	await db.insert(session).values(sessionData);
+	return sessionData;
 }
 
+// Validate session
 export async function validateSessionToken(token: string) {
 	const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
-	const [result] = await db
-		.select({
-			// Return full user data for role-based access
-			user: {
-				id: table.user.id,
-				username: table.user.username,
-				role: table.user.role,
-				email: table.user.email,
-				firstName: table.user.firstName,
-				lastName: table.user.lastName,
-				phoneNumber: table.user.phoneNumber
-			},
-			session: table.session
-		})
-		.from(table.session)
-		.innerJoin(table.user, eq(table.session.userId, table.user.id))
-		.where(eq(table.session.id, sessionId));
+	const result = await db
+		.select({ user, session })
+		.from(session)
+		.innerJoin(user, eq(session.userId, user.id))
+		.where(eq(session.id, sessionId));
 
-	if (!result) {
-		return { session: null, user: null };
-	}
-	const { session, user } = result;
-
-	const sessionExpired = Date.now() >= session.expiresAt.getTime();
-	if (sessionExpired) {
-		await db.delete(table.session).where(eq(table.session.id, session.id));
+	if (result.length < 1) {
 		return { session: null, user: null };
 	}
 
-	const renewSession = Date.now() >= session.expiresAt.getTime() - DAY_IN_MS * 15;
-	if (renewSession) {
-		session.expiresAt = new Date(Date.now() + DAY_IN_MS * 30);
+	const { user: dbUser, session: dbSession } = result[0];
+
+	if (Date.now() >= dbSession.expiresAt.getTime()) {
+		await db.delete(session).where(eq(session.id, sessionId));
+		return { session: null, user: null };
+	}
+
+	// Extend session if it's past halfway through its lifetime
+	if (Date.now() >= dbSession.expiresAt.getTime() - 1000 * 60 * 60 * 24 * 15) {
+		dbSession.expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
 		await db
-			.update(table.session)
-			.set({ expiresAt: session.expiresAt })
-			.where(eq(table.session.id, session.id));
+			.update(session)
+			.set({ expiresAt: dbSession.expiresAt })
+			.where(eq(session.id, sessionId));
 	}
 
-	return { session, user };
+	return { session: dbSession, user: dbUser };
 }
 
-export type SessionValidationResult = Awaited<ReturnType<typeof validateSessionToken>>;
-
+// Invalidate session
 export async function invalidateSession(sessionId: string) {
-	await db.delete(table.session).where(eq(table.session.id, sessionId));
+	await db.delete(session).where(eq(session.id, sessionId));
 }
 
-export function setSessionTokenCookie(cookies: any, token: string, expiresAt: Date) {
-	cookies.set(sessionCookieName, token, {
-		expires: expiresAt,
-		path: '/'
+// Hash password
+export async function hashPassword(password: string): Promise<string> {
+	return await hash(password, {
+		memoryCost: 19456,
+		timeCost: 2,
+		outputLen: 32,
+		parallelism: 1
 	});
 }
 
-export function deleteSessionTokenCookie(cookies: any) {
-	cookies.delete(sessionCookieName, {
-		path: '/'
-	});
+// Verify password
+export async function verifyPassword(hash: string, password: string): Promise<boolean> {
+	return await verify(hash, password);
 }
+
+export const SESSION_COOKIE_NAME = 'auth_session';

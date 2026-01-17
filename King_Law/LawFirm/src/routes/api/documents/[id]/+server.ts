@@ -1,59 +1,64 @@
 import { error } from '@sveltejs/kit';
-import { readFile } from 'fs/promises';
-import { join } from 'path';
-import { db } from '$lib/server/db';
-import * as table from '$lib/server/db/schema';
-import { eq } from 'drizzle-orm';
 import type { RequestHandler } from './$types';
+import { db } from '$lib/server/db';
+import { documents, cases } from '$lib/server/db/schema';
+import { eq } from 'drizzle-orm';
+import { readFile } from 'fs/promises';
 
 export const GET: RequestHandler = async ({ params, locals }) => {
 	if (!locals.user) {
 		throw error(401, 'Unauthorized');
 	}
 
+	const documentId = params.id;
+
+	// Get document from database
 	const [document] = await db
 		.select()
-		.from(table.documents)
-		.where(eq(table.documents.id, params.id));
+		.from(documents)
+		.where(eq(documents.id, documentId))
+		.limit(1);
 
 	if (!document) {
 		throw error(404, 'Document not found');
 	}
 
-	// Verify access to the case (if document has a case)
-	if (document.caseId) {
-		const [caseRecord] = await db
+	// Check permissions
+	const canAccess =
+		document.uploadedById === locals.user.id ||
+		locals.user.role === 'admin' ||
+		locals.user.role === 'lawyer';
+
+	// If it's a client, check if they own the case
+	if (!canAccess && locals.user.role === 'client' && document.caseId) {
+		const [caseData] = await db
 			.select()
-			.from(table.cases)
-			.where(eq(table.cases.id, document.caseId));
+			.from(cases)
+			.where(eq(cases.id, document.caseId))
+			.limit(1);
 
-		if (!caseRecord) {
-			throw error(404, 'Case not found');
-		}
-
-		const hasAccess =
-			caseRecord.clientId === locals.user.id ||
-			caseRecord.lawyerId === locals.user.id ||
-			locals.user.role === 'admin';
-
-		if (!hasAccess) {
-			throw error(403, 'Access denied');
-		}
-	} else {
-		// Uncategorized document - check if user uploaded it or is admin/lawyer
-		if (document.uploadedById !== locals.user.id && locals.user.role === 'client') {
-			throw error(403, 'Access denied');
+		if (caseData && caseData.clientId === locals.user.id) {
+			canAccess = true;
 		}
 	}
 
-	// Read file from disk
-	const filepath = join(process.cwd(), 'uploads', document.filePath);
-	const fileBuffer = await readFile(filepath);
+	if (!canAccess) {
+		throw error(403, 'Access denied');
+	}
 
-	return new Response(fileBuffer, {
-		headers: {
-			'Content-Type': document.mimeType,
-			'Content-Disposition': `attachment; filename="${document.fileName}"`
-		}
-	});
+	try {
+		// Read file from disk
+		const fileBuffer = await readFile(document.filePath);
+
+		return new Response(fileBuffer, {
+			headers: {
+				'Content-Type': document.mimeType,
+				'Content-Disposition': `attachment; filename="${document.fileName}"`,
+				'Content-Length': document.fileSize.toString()
+			}
+		});
+	} catch (err) {
+		console.error('Error reading file:', err);
+		throw error(500, 'Failed to retrieve document');
+	}
 };

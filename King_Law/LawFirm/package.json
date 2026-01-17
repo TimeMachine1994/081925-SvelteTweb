@@ -56,8 +56,10 @@
 		"vite": "^7.2.6"
 	},
 	"dependencies": {
+		"@lucia-auth/adapter-drizzle": "^1.1.0",
 		"@node-rs/argon2": "^2.0.2",
 		"@tursodatabase/database": "^0.4.3",
-		"dotenv": "^17.2.3"
+		"dotenv": "^17.2.3",
+		"lucia": "^3.2.2"
 	}
 }

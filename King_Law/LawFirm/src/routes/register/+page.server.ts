@@ -1,104 +1,96 @@
-import { hash } from '@node-rs/argon2';
 import { fail, redirect } from '@sveltejs/kit';
-import { eq } from 'drizzle-orm';
+import type { Actions } from './$types';
 import { db } from '$lib/server/db';
-import * as table from '$lib/server/db/schema';
-import * as auth from '$lib/server/auth';
-import { getDashboardRoute } from '$lib/utils/auth-helpers';
-import type { Actions, PageServerLoad } from './$types';
-
-export const load: PageServerLoad = async ({ locals }) => {
-	if (locals.user) {
-		redirect(302, getDashboardRoute(locals.user));
-	}
-	return {};
-};
+import { user } from '$lib/server/db/schema';
+import { hashPassword, generateSessionToken, createSession, SESSION_COOKIE_NAME } from '$lib/server/auth';
+import { generateId } from '$lib/server/auth';
+import { eq } from 'drizzle-orm';
 
 const LAWYER_ACCESS_CODE = 'k1ngl4w';
 
 export const actions: Actions = {
 	default: async ({ request, cookies }) => {
-		const formData = await request.formData();
-		const username = formData.get('username');
-		const email = formData.get('email');
-		const password = formData.get('password');
-		const confirmPassword = formData.get('confirmPassword');
-		const firstName = formData.get('firstName');
-		const lastName = formData.get('lastName');
-		const phoneNumber = formData.get('phoneNumber');
-		const role = formData.get('role') as 'client' | 'lawyer';
-		const lawyerCode = formData.get('lawyerCode');
+		const data = await request.formData();
+		const username = data.get('username')?.toString();
+		const email = data.get('email')?.toString();
+		const password = data.get('password')?.toString();
+		const confirmPassword = data.get('confirmPassword')?.toString();
+		const firstName = data.get('firstName')?.toString();
+		const lastName = data.get('lastName')?.toString();
+		const phoneNumber = data.get('phoneNumber')?.toString() || null;
+		const role = data.get('role')?.toString() as 'client' | 'lawyer';
+		const accessCode = data.get('accessCode')?.toString();
 
-		// Validation
-		if (!username || !email || !password || !firstName || !lastName) {
-			return fail(400, { message: 'All required fields must be filled' });
+		if (!username || !email || !password || !confirmPassword || !firstName || !lastName) {
+			return fail(400, { error: 'All required fields must be filled' });
+		}
+
+		if (password.length < 8) {
+			return fail(400, { error: 'Password must be at least 8 characters' });
 		}
 
 		if (password !== confirmPassword) {
-			return fail(400, { message: 'Passwords do not match' });
+			return fail(400, { error: 'Passwords do not match' });
 		}
 
-		if ((password as string).length < 8) {
-			return fail(400, { message: 'Password must be at least 8 characters long' });
+		if (role === 'lawyer' && accessCode !== LAWYER_ACCESS_CODE) {
+			return fail(400, { error: 'Invalid lawyer access code' });
 		}
 
-		// Validate lawyer access code
-		if (role === 'lawyer' && lawyerCode !== LAWYER_ACCESS_CODE) {
-			return fail(400, { message: 'Invalid firm access code' });
+		try {
+			const existingUser = await db
+				.select()
+				.from(user)
+				.where(eq(user.username, username))
+				.limit(1);
+
+			if (existingUser.length > 0) {
+				return fail(400, { error: 'Username already exists' });
+			}
+
+			const existingEmail = await db
+				.select()
+				.from(user)
+				.where(eq(user.email, email))
+				.limit(1);
+
+			if (existingEmail.length > 0) {
+				return fail(400, { error: 'Email already exists' });
+			}
+
+			const passwordHash = await hashPassword(password);
+			const userId = generateId();
+
+			await db.insert(user).values({
+				id: userId,
+				username,
+				email,
+				passwordHash,
+				firstName,
+				lastName,
+				phoneNumber,
+				role: role || 'client',
+				createdAt: new Date(),
+				updatedAt: new Date()
+			});
+
+			const sessionToken = generateSessionToken();
+			await createSession(sessionToken, userId);
+
+			cookies.set(SESSION_COOKIE_NAME, sessionToken, {
+				path: '/',
+				httpOnly: true,
+				secure: process.env.NODE_ENV === 'production',
+				sameSite: 'lax',
+				maxAge: 60 * 60 * 24 * 30
+			});
+
+			const redirectPath = role === 'lawyer' ? '/dashboard/lawyer' : '/dashboard/client';
+			throw redirect(303, redirectPath);
+		} catch (error) {
+			if (error instanceof Response) throw error;
+			console.error('Registration error:', error);
+			return fail(500, { error: 'An error occurred during registration' });
 		}
-
-		// Check if username exists
-		const [existingUsername] = await db
-			.select()
-			.from(table.user)
-			.where(eq(table.user.username, username as string));
-
-		if (existingUsername) {
-			return fail(400, { message: 'Username already taken' });
-		}
-
-		// Check if email exists
-		const [existingEmail] = await db
-			.select()
-			.from(table.user)
-			.where(eq(table.user.email, email as string));
-
-		if (existingEmail) {
-			return fail(400, { message: 'Email already registered' });
-		}
-
-		// Hash password
-		const passwordHash = await hash(password as string, {
-			memoryCost: 19456,
-			timeCost: 2,
-			outputLen: 32,
-			parallelism: 1
-		});
-
-		// Create user
-		const userId = crypto.randomUUID();
-		const now = new Date();
-
-		await db.insert(table.user).values({
-			id: userId,
-			username: username as string,
-			passwordHash,
-			role: role || 'client',
-			email: email as string,
-			firstName: firstName as string,
-			lastName: lastName as string,
-			phoneNumber: phoneNumber as string | null,
-			createdAt: now,
-			updatedAt: now
-		});
-
-		// Create session
-		const sessionToken = auth.generateSessionToken();
-		const session = await auth.createSession(sessionToken, userId);
-		auth.setSessionTokenCookie(cookies, sessionToken, session.expiresAt);
-
-		// Redirect to appropriate dashboard
-		const user = { id: userId, role: role || 'client' } as table.User;
-		redirect(302, getDashboardRoute(user));
 	}
 };
