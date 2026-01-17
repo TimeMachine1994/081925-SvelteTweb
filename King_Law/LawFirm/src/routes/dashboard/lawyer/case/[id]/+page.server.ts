@@ -1,94 +1,109 @@
-import { redirect, error } from '@sveltejs/kit';
-import { eq, and } from 'drizzle-orm';
+import { error, redirect, fail } from '@sveltejs/kit';
+import type { PageServerLoad, Actions } from './$types';
 import { db } from '$lib/server/db';
-import * as table from '$lib/server/db/schema';
-import type { PageServerLoad } from './$types';
+import { cases, documents, invoices, messages, user } from '$lib/server/db/schema';
+import { eq } from 'drizzle-orm';
+import { generateId } from '$lib/server/auth';
 
-export const load: PageServerLoad = async ({ locals, params }) => {
-	if (!locals.user) {
-		redirect(302, '/login');
-	}
-
-	if (locals.user.role !== 'lawyer' && locals.user.role !== 'admin') {
-		redirect(302, '/dashboard/client');
+export const load: PageServerLoad = async ({ params, locals }) => {
+	if (!locals.user || (locals.user.role !== 'lawyer' && locals.user.role !== 'admin')) {
+		throw redirect(303, '/login');
 	}
 
 	const caseId = params.id;
 
-	// Fetch the case with client info
-	const caseResult = await db
+	const [caseData] = await db
 		.select({
-			case: table.cases,
-			client: {
-				id: table.user.id,
-				firstName: table.user.firstName,
-				lastName: table.user.lastName,
-				email: table.user.email,
-				phoneNumber: table.user.phoneNumber
-			}
+			case: cases,
+			client: user
 		})
-		.from(table.cases)
-		.innerJoin(table.user, eq(table.cases.clientId, table.user.id))
-		.where(and(
-			eq(table.cases.id, caseId),
-			eq(table.cases.lawyerId, locals.user.id)
-		));
+		.from(cases)
+		.innerJoin(user, eq(cases.clientId, user.id))
+		.where(eq(cases.id, caseId))
+		.limit(1);
 
-	if (caseResult.length === 0) {
+	if (!caseData) {
 		throw error(404, 'Case not found');
 	}
 
-	const caseData = { ...caseResult[0].case, client: caseResult[0].client };
+	if (caseData.case.lawyerId !== locals.user.id && locals.user.role !== 'admin') {
+		throw error(403, 'Access denied');
+	}
 
-	// Fetch documents for this case
-	const documents = await db
-		.select({
-			document: table.documents,
-			uploader: {
-				firstName: table.user.firstName,
-				lastName: table.user.lastName
-			}
-		})
-		.from(table.documents)
-		.innerJoin(table.user, eq(table.documents.uploadedById, table.user.id))
-		.where(eq(table.documents.caseId, caseId));
-
-	// Fetch invoices for this case
-	const invoices = await db
+	const caseDocuments = await db
 		.select()
-		.from(table.invoices)
-		.where(eq(table.invoices.caseId, caseId));
+		.from(documents)
+		.where(eq(documents.caseId, caseId));
 
-	// Fetch messages for this case
-	const messages = await db
-		.select({
-			message: table.messages,
-			sender: {
-				firstName: table.user.firstName,
-				lastName: table.user.lastName,
-				role: table.user.role
-			}
-		})
-		.from(table.messages)
-		.innerJoin(table.user, eq(table.messages.senderId, table.user.id))
-		.where(eq(table.messages.caseId, caseId))
-		.orderBy(table.messages.createdAt);
+	const caseInvoices = await db
+		.select()
+		.from(invoices)
+		.where(eq(invoices.caseId, caseId));
 
-	// Get all cases for this lawyer (for move/copy dropdown)
-	const allCases = await db
+	const caseMessages = await db
 		.select({
-			id: table.cases.id,
-			title: table.cases.title
+			message: messages,
+			sender: user
 		})
-		.from(table.cases)
-		.where(eq(table.cases.lawyerId, locals.user.id));
+		.from(messages)
+		.innerJoin(user, eq(messages.senderId, user.id))
+		.where(eq(messages.caseId, caseId));
 
 	return {
-		user: locals.user,
-		case: caseData,
-		documents: documents.map(d => ({ ...d.document, uploader: d.uploader })),
-		invoices,
-		messages: messages.map(m => ({ ...m.message, sender: m.sender })),
-		allCases
+		case: caseData.case,
+		client: caseData.client,
+		documents: caseDocuments,
+		invoices: caseInvoices,
+		messages: caseMessages
 	};
+};
+
+export const actions: Actions = {
+	updateStatus: async ({ request, params, locals }) => {
+		if (!locals.user || (locals.user.role !== 'lawyer' && locals.user.role !== 'admin')) {
+			return fail(401, { error: 'Unauthorized' });
+		}
+
+		const data = await request.formData();
+		const status = data.get('status')?.toString() as 'active' | 'pending' | 'closed';
+
+		if (!status || !['active', 'pending', 'closed'].includes(status)) {
+			return fail(400, { error: 'Invalid status' });
+		}
+
+		await db
+			.update(cases)
+			.set({ status, updatedAt: new Date() })
+			.where(eq(cases.id, params.id));
+
+		return { success: true };
+	},
+
+	createInvoice: async ({ request, params, locals }) => {
+		if (!locals.user || (locals.user.role !== 'lawyer' && locals.user.role !== 'admin')) {
+			return fail(401, { error: 'Unauthorized' });
+		}
+
+		const data = await request.formData();
+		const description = data.get('description')?.toString();
+		const amount = parseFloat(data.get('amount')?.toString() || '0');
+		const dueDate = data.get('dueDate')?.toString();
+
+		if (!description || !amount || !dueDate) {
+			return fail(400, { error: 'All fields are required' });
+		}
+
+		await db.insert(invoices).values({
+			id: generateId(),
+			caseId: params.id,
+			description,
+			amount: Math.round(amount * 100),
+			dueDate: new Date(dueDate),
+			status: 'unpaid',
+			paidAmount: 0,
+			createdAt: new Date()
+		});
+
+		return { success: true };
+	}
 };

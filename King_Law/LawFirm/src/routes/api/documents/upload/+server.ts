@@ -1,77 +1,64 @@
 import { json, error } from '@sveltejs/kit';
-import { writeFile, mkdir } from 'fs/promises';
-import { existsSync } from 'fs';
-import { join } from 'path';
-import { db } from '$lib/server/db';
-import * as table from '$lib/server/db/schema';
-import { eq } from 'drizzle-orm';
 import type { RequestHandler } from './$types';
+import { db } from '$lib/server/db';
+import { documents } from '$lib/server/db/schema';
+import { generateId } from '$lib/server/auth';
+import { writeFile, mkdir } from 'fs/promises';
+import { join } from 'path';
+
+const UPLOAD_DIR = 'uploads/documents';
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!locals.user) {
 		throw error(401, 'Unauthorized');
 	}
 
-	const formData = await request.formData();
-	const file = formData.get('file') as File;
-	const caseId = formData.get('caseId') as string;
+	try {
+		const formData = await request.formData();
+		const file = formData.get('file') as File;
+		const caseId = formData.get('caseId')?.toString() || null;
 
-	if (!file || !caseId) {
-		throw error(400, 'File and caseId are required');
+		if (!file) {
+			throw error(400, 'No file provided');
+		}
+
+		if (file.size > MAX_FILE_SIZE) {
+			throw error(400, 'File size exceeds 10MB limit');
+		}
+
+		// Generate unique file path
+		const fileId = generateId();
+		const fileExt = file.name.split('.').pop();
+		const fileName = file.name;
+		const filePath = join(UPLOAD_DIR, `${fileId}.${fileExt}`);
+
+		// Ensure upload directory exists
+		await mkdir(UPLOAD_DIR, { recursive: true });
+
+		// Save file to disk
+		const buffer = Buffer.from(await file.arrayBuffer());
+		await writeFile(filePath, buffer);
+
+		// Save metadata to database
+		const [document] = await db
+			.insert(documents)
+			.values({
+				id: fileId,
+				caseId,
+				uploadedById: locals.user.id,
+				fileName,
+				filePath,
+				fileSize: file.size,
+				mimeType: file.type,
+				uploadedAt: new Date()
+			})
+			.returning();
+
+		return json({ success: true, document });
+	} catch (err) {
+		console.error('Document upload error:', err);
+		if (err instanceof Response) throw err;
+		throw error(500, 'Failed to upload document');
 	}
-
-	// Verify case access
-	const [caseRecord] = await db
-		.select()
-		.from(table.cases)
-		.where(eq(table.cases.id, caseId));
-
-	if (!caseRecord) {
-		throw error(404, 'Case not found');
-	}
-
-	// Check if user has access to this case
-	const hasAccess =
-		caseRecord.clientId === locals.user.id ||
-		caseRecord.lawyerId === locals.user.id ||
-		locals.user.role === 'admin';
-
-	if (!hasAccess) {
-		throw error(403, 'Access denied');
-	}
-
-	// Create uploads directory if it doesn't exist
-	const uploadsDir = join(process.cwd(), 'uploads');
-	if (!existsSync(uploadsDir)) {
-		await mkdir(uploadsDir, { recursive: true });
-	}
-
-	// Generate unique filename
-	const timestamp = Date.now();
-	const safeFilename = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-	const filename = `${timestamp}-${safeFilename}`;
-	const filepath = join(uploadsDir, filename);
-
-	// Write file to disk
-	const buffer = Buffer.from(await file.arrayBuffer());
-	await writeFile(filepath, buffer);
-
-	// Create document record
-	const documentId = crypto.randomUUID();
-	await db.insert(table.documents).values({
-		id: documentId,
-		caseId,
-		uploadedById: locals.user.id,
-		fileName: file.name,
-		filePath: filename,
-		fileSize: file.size,
-		mimeType: file.type,
-		uploadedAt: new Date()
-	});
-
-	return json({
-		success: true,
-		documentId,
-		fileName: file.name
-	});
 };

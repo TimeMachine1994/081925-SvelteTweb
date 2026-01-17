@@ -1,17 +1,7 @@
 <script lang="ts">
-	import { faFolder, faFileAlt, faFileInvoiceDollar, faComments, faGavel, faCheckCircle, faClock, faTimesCircle } from '@fortawesome/free-solid-svg-icons';
-	import Icon from '$lib/components/Icon.svelte';
-	import ChatSlider from '$lib/components/ChatSlider.svelte';
 	import type { PageData } from './$types';
 
-	interface Props {
-		data: PageData;
-	}
-
-	let { data }: Props = $props();
-
-	// Prepare cases for chat slider
-	const chatCases = data.cases.map(c => ({ id: c.id, title: c.title }));
+	let { data }: { data: PageData } = $props();
 
 	function formatCurrency(cents: number): string {
 		return new Intl.NumberFormat('en-US', {
@@ -21,248 +11,197 @@
 	}
 
 	function formatDate(date: Date): string {
-		return new Intl.DateTimeFormat('en-US', {
+		return new Date(date).toLocaleDateString('en-US', {
 			year: 'numeric',
 			month: 'short',
 			day: 'numeric'
-		}).format(new Date(date));
-	}
-
-	function getStatusIcon(status: string) {
-		switch (status) {
-			case 'active': return faCheckCircle;
-			case 'pending': return faClock;
-			case 'closed': return faTimesCircle;
-			default: return faGavel;
-		}
-	}
-
-	function getStatusColor(status: string) {
-		switch (status) {
-			case 'active': return 'text-green-600 dark:text-green-400';
-			case 'pending': return 'text-yellow-600 dark:text-yellow-400';
-			case 'closed': return 'text-gray-600 dark:text-gray-400';
-			default: return 'text-gold';
-		}
+		});
 	}
 </script>
 
-<svelte:head>
-	<title>Client Dashboard - King Law Firm</title>
-</svelte:head>
+<div>
+	<h1 class="font-title text-4xl mb-8">Client Dashboard</h1>
 
-<div class="min-h-screen bg-background py-8">
-	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-		<!-- Welcome Header -->
-		<div class="mb-8">
-			<h1 class="font-title text-4xl font-bold mb-2">
-				Welcome, {data.user.firstName}!
-			</h1>
-			<p class="text-muted-foreground">
-				Manage your cases, documents, and communications with your attorney
-			</p>
+	<!-- Stats Overview -->
+	<div class="grid md:grid-cols-4 gap-6 mb-8">
+		<div class="bg-background border border-border rounded-lg p-6">
+			<div class="text-3xl mb-2">📁</div>
+			<div class="text-2xl font-bold">{data.stats.activeCases}</div>
+			<div class="text-sm text-muted-foreground">Active Cases</div>
 		</div>
 
-		<!-- Quick Stats -->
-		<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-			<div class="bg-secondary p-6 rounded-lg border border-gray-300 dark:border-gray-700">
-				<div class="flex items-center justify-between mb-2">
-					<Icon icon={faFolder} class="text-gold" size="lg" />
-					<span class="text-3xl font-bold">{data.cases.length}</span>
-				</div>
-				<div class="text-sm text-muted-foreground">Active Cases</div>
-			</div>
-
-			<div class="bg-secondary p-6 rounded-lg border border-gray-300 dark:border-gray-700">
-				<div class="flex items-center justify-between mb-2">
-					<Icon icon={faFileAlt} class="text-gold" size="lg" />
-					<span class="text-3xl font-bold">{data.documents.length}</span>
-				</div>
-				<div class="text-sm text-muted-foreground">Documents</div>
-			</div>
-
-			<div class="bg-secondary p-6 rounded-lg border border-gray-300 dark:border-gray-700">
-				<div class="flex items-center justify-between mb-2">
-					<Icon icon={faFileInvoiceDollar} class="text-gold" size="lg" />
-					<span class="text-3xl font-bold">{data.invoices.filter(i => i.status !== 'paid').length}</span>
-				</div>
-				<div class="text-sm text-muted-foreground">Pending Invoices</div>
-			</div>
-
-			<div class="bg-secondary p-6 rounded-lg border border-gray-300 dark:border-gray-700">
-				<div class="flex items-center justify-between mb-2">
-					<Icon icon={faComments} class="text-gold" size="lg" />
-					<span class="text-3xl font-bold">{data.messages.filter(m => !m.readAt && m.senderId !== data.user.id).length}</span>
-				</div>
-				<div class="text-sm text-muted-foreground">Unread Messages</div>
-			</div>
+		<div class="bg-background border border-border rounded-lg p-6">
+			<div class="text-3xl mb-2">💰</div>
+			<div class="text-2xl font-bold">{formatCurrency(data.stats.totalUnpaid)}</div>
+			<div class="text-sm text-muted-foreground">Unpaid Invoices</div>
 		</div>
 
-		<!-- Cases Section -->
-		<div class="mb-8">
-			<h2 class="font-title text-2xl font-bold mb-4">Your Cases</h2>
-			
-			{#if data.cases.length === 0}
-				<div class="bg-secondary p-8 rounded-lg border border-gray-300 dark:border-gray-700 text-center">
-					<Icon icon={faFolder} size="2xl" class="text-muted-foreground mx-auto mb-4" />
-					<p class="text-muted-foreground">No cases yet. Contact us to get started.</p>
-				</div>
-			{:else}
-				<div class="space-y-4">
-					{#each data.cases as caseItem}
-						<a href="/dashboard/client/case/{caseItem.id}" class="block bg-secondary p-6 rounded-lg border border-gray-300 dark:border-gray-700 hover:border-gold transition-colors cursor-pointer">
-							<div class="flex items-start justify-between mb-4">
-								<div class="flex-1">
-									<div class="flex items-center space-x-3 mb-2">
-										<Icon icon={getStatusIcon(caseItem.status)} class={getStatusColor(caseItem.status)} />
-										<h3 class="font-title text-xl font-bold">{caseItem.title}</h3>
-									</div>
-									<p class="text-muted-foreground mb-2">{caseItem.description || 'No description provided'}</p>
-									<div class="text-sm text-muted-foreground">
-										<span class="font-semibold">Attorney:</span>
-										{caseItem.lawyer.firstName} {caseItem.lawyer.lastName}
-										{#if caseItem.lawyer.email}
-											• <span class="text-gold">{caseItem.lawyer.email}</span>
-										{/if}
-									</div>
-								</div>
-								<span class="px-3 py-1 bg-background rounded-lg text-sm font-semibold capitalize">
-									{caseItem.status}
-								</span>
-							</div>
-							<div class="flex space-x-4 text-sm text-muted-foreground">
-								<span>Created: {formatDate(caseItem.createdAt)}</span>
-								<span>•</span>
-								<span>Updated: {formatDate(caseItem.updatedAt)}</span>
-							</div>
-						</a>
-					{/each}
-				</div>
-			{/if}
+		<div class="bg-background border border-border rounded-lg p-6">
+			<div class="text-3xl mb-2">💬</div>
+			<div class="text-2xl font-bold">{data.stats.unreadMessages}</div>
+			<div class="text-sm text-muted-foreground">Unread Messages</div>
 		</div>
 
-		<!-- Documents & Invoices Grid -->
-		<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-			<!-- Recent Documents -->
-			<div>
-				<h2 class="font-title text-2xl font-bold mb-4">Recent Documents</h2>
-				<div class="bg-secondary rounded-lg border border-gray-300 dark:border-gray-700 overflow-hidden">
-					{#if data.documents.length === 0}
-						<div class="p-8 text-center">
-							<Icon icon={faFileAlt} size="2xl" class="text-muted-foreground mx-auto mb-4" />
-							<p class="text-muted-foreground">No documents yet</p>
-						</div>
-					{:else}
-						<div class="divide-y divide-border">
-							{#each data.documents.slice(0, 5) as doc}
-								<div class="p-4 hover:bg-background transition-colors">
-									<div class="flex items-center justify-between">
-										<div class="flex items-center space-x-3">
-											<Icon icon={faFileAlt} class="text-gold" />
-											<div>
-												<div class="font-semibold">{doc.fileName}</div>
-												<div class="text-sm text-muted-foreground">
-													{formatDate(doc.uploadedAt)}
-												</div>
-											</div>
-										</div>
-										<a href="/api/documents/{doc.id}" class="px-4 py-2 bg-gold text-black rounded-lg hover:bg-gold-dark transition-colors text-sm font-semibold">
-											Download
-										</a>
-									</div>
-								</div>
-							{/each}
-						</div>
-					{/if}
-				</div>
-			</div>
-
-			<!-- Invoices -->
-			<div>
-				<h2 class="font-title text-2xl font-bold mb-4">Invoices</h2>
-				<div class="bg-secondary rounded-lg border border-gray-300 dark:border-gray-700 overflow-hidden">
-					{#if data.invoices.length === 0}
-						<div class="p-8 text-center">
-							<Icon icon={faFileInvoiceDollar} size="2xl" class="text-muted-foreground mx-auto mb-4" />
-							<p class="text-muted-foreground">No invoices yet</p>
-						</div>
-					{:else}
-						<div class="divide-y divide-border">
-							{#each data.invoices as invoice}
-								<div class="p-4 hover:bg-background transition-colors">
-									<div class="flex items-center justify-between mb-2">
-										<div class="flex-1">
-											<div class="font-semibold">{invoice.description}</div>
-											<div class="text-sm text-muted-foreground">
-												Due: {formatDate(invoice.dueDate)}
-											</div>
-										</div>
-										<div class="text-right">
-											<div class="text-2xl font-bold">{formatCurrency(invoice.amount)}</div>
-											<span class={`text-sm font-semibold capitalize ${
-												invoice.status === 'paid' ? 'text-green-600' :
-												invoice.status === 'partial' ? 'text-yellow-600' :
-												'text-red-600'
-											}`}>
-												{invoice.status}
-											</span>
-										</div>
-									</div>
-									{#if invoice.status !== 'paid'}
-										<button class="w-full mt-2 px-4 py-2 bg-gold text-black rounded-lg hover:bg-gold-dark transition-colors text-sm font-semibold">
-											Pay Now
-										</button>
-									{/if}
-								</div>
-							{/each}
-						</div>
-					{/if}
-				</div>
-			</div>
-		</div>
-
-		<!-- Recent Messages -->
-		<div class="mt-8">
-			<h2 class="font-title text-2xl font-bold mb-4">Recent Messages</h2>
-			<div class="bg-secondary rounded-lg border border-gray-300 dark:border-gray-700 overflow-hidden">
-				{#if data.messages.length === 0}
-					<div class="p-8 text-center">
-						<Icon icon={faComments} size="2xl" class="text-muted-foreground mx-auto mb-4" />
-						<p class="text-muted-foreground">No messages yet</p>
-					</div>
-				{:else}
-					<div class="divide-y divide-border">
-						{#each data.messages.slice(0, 5) as message}
-							<div class="p-4 hover:bg-background transition-colors {!message.readAt && message.senderId !== data.user.id ? 'bg-gold/5' : ''}">
-								<div class="flex items-start space-x-3">
-									<div class="flex-1">
-										<div class="flex items-center space-x-2 mb-1">
-											<span class="font-semibold">
-												{message.sender.firstName} {message.sender.lastName}
-											</span>
-											{#if !message.readAt && message.senderId !== data.user.id}
-												<span class="px-2 py-0.5 bg-gold text-black text-xs font-semibold rounded">New</span>
-											{/if}
-										</div>
-										<p class="text-muted-foreground">{message.content}</p>
-										<div class="text-xs text-muted-foreground mt-1">
-											{formatDate(message.createdAt)}
-										</div>
-									</div>
-								</div>
-							</div>
-						{/each}
-					</div>
-				{/if}
-			</div>
+		<div class="bg-background border border-border rounded-lg p-6">
+			<div class="text-3xl mb-2">📄</div>
+			<div class="text-2xl font-bold">{data.stats.documentsCount}</div>
+			<div class="text-sm text-muted-foreground">Documents</div>
 		</div>
 	</div>
-</div>
 
-<!-- Chat Slider -->
-<ChatSlider 
-	cases={chatCases} 
-	currentUserId={data.user.id} 
-	userRole="client"
-	defaultRecipientId={data.defaultLawyer?.id ?? null}
-/>
+	<!-- Your Cases -->
+	<div class="mb-8">
+		<div class="flex justify-between items-center mb-4">
+			<h2 class="font-title text-2xl">Your Cases</h2>
+		</div>
+
+		{#if data.cases.length > 0}
+			<div class="grid md:grid-cols-2 gap-4">
+				{#each data.cases as caseItem}
+					<a
+						href="/dashboard/client/case/{caseItem.id}"
+						class="bg-background border border-border rounded-lg p-6 hover:border-gold transition-all hover:shadow-lg group"
+					>
+						<div class="flex justify-between items-start mb-2">
+							<h3 class="font-semibold text-lg group-hover:text-gold transition-colors">
+								{caseItem.title}
+							</h3>
+							<span
+								class="text-xs px-2 py-1 rounded-full {caseItem.status === 'active'
+									? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+									: caseItem.status === 'pending'
+										? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
+										: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'}"
+							>
+								{caseItem.status}
+							</span>
+						</div>
+						{#if caseItem.description}
+							<p class="text-sm text-muted-foreground mb-4 line-clamp-2">
+								{caseItem.description}
+							</p>
+						{/if}
+						<div class="text-xs text-muted-foreground">
+							Updated: {formatDate(caseItem.updatedAt)}
+						</div>
+					</a>
+				{/each}
+			</div>
+		{:else}
+			<div class="bg-background border border-border rounded-lg p-8 text-center">
+				<div class="text-4xl mb-4">📋</div>
+				<h3 class="font-semibold text-lg mb-2">No Active Cases</h3>
+				<p class="text-muted-foreground mb-4">
+					You don't have any cases yet. Contact us to get started.
+				</p>
+				<a
+					href="/contact"
+					class="inline-block bg-gold hover:bg-gold-dark text-black font-semibold px-6 py-2 rounded-md transition-colors"
+				>
+					Contact Us
+				</a>
+			</div>
+		{/if}
+	</div>
+
+	<!-- Recent Documents -->
+	<div class="mb-8">
+		<div class="flex justify-between items-center mb-4">
+			<h2 class="font-title text-2xl">Recent Documents</h2>
+		</div>
+
+		{#if data.documents.length > 0}
+			<div class="bg-background border border-border rounded-lg overflow-hidden">
+				<table class="w-full">
+					<thead class="bg-muted">
+						<tr>
+							<th class="text-left px-6 py-3 text-sm font-semibold">File Name</th>
+							<th class="text-left px-6 py-3 text-sm font-semibold">Size</th>
+							<th class="text-left px-6 py-3 text-sm font-semibold">Uploaded</th>
+							<th class="text-right px-6 py-3 text-sm font-semibold">Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						{#each data.documents as doc}
+							<tr class="border-t border-border hover:bg-muted/50">
+								<td class="px-6 py-4">{doc.fileName}</td>
+								<td class="px-6 py-4 text-sm text-muted-foreground">
+									{(doc.fileSize / 1024).toFixed(1)} KB
+								</td>
+								<td class="px-6 py-4 text-sm text-muted-foreground">
+									{formatDate(doc.uploadedAt)}
+								</td>
+								<td class="px-6 py-4 text-right">
+									<a
+										href="/api/documents/{doc.id}"
+										class="text-gold hover:underline text-sm"
+									>
+										Download
+									</a>
+								</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
+		{:else}
+			<div class="bg-background border border-border rounded-lg p-8 text-center">
+				<p class="text-muted-foreground">No documents uploaded yet</p>
+			</div>
+		{/if}
+	</div>
+
+	<!-- Invoices -->
+	<div>
+		<div class="flex justify-between items-center mb-4">
+			<h2 class="font-title text-2xl">Invoices</h2>
+		</div>
+
+		{#if data.invoices.length > 0}
+			<div class="bg-background border border-border rounded-lg overflow-hidden">
+				<table class="w-full">
+					<thead class="bg-muted">
+						<tr>
+							<th class="text-left px-6 py-3 text-sm font-semibold">Description</th>
+							<th class="text-left px-6 py-3 text-sm font-semibold">Amount</th>
+							<th class="text-left px-6 py-3 text-sm font-semibold">Due Date</th>
+							<th class="text-left px-6 py-3 text-sm font-semibold">Status</th>
+							<th class="text-right px-6 py-3 text-sm font-semibold">Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						{#each data.invoices as invoice}
+							<tr class="border-t border-border hover:bg-muted/50">
+								<td class="px-6 py-4">{invoice.description}</td>
+								<td class="px-6 py-4 font-semibold">{formatCurrency(invoice.amount)}</td>
+								<td class="px-6 py-4 text-sm text-muted-foreground">
+									{formatDate(invoice.dueDate)}
+								</td>
+								<td class="px-6 py-4">
+									<span
+										class="text-xs px-2 py-1 rounded-full {invoice.status === 'paid'
+											? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+											: invoice.status === 'partial'
+												? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
+												: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'}"
+									>
+										{invoice.status}
+									</span>
+								</td>
+								<td class="px-6 py-4 text-right">
+									{#if invoice.status !== 'paid'}
+										<button class="text-gold hover:underline text-sm">Pay Now</button>
+									{/if}
+								</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
+		{:else}
+			<div class="bg-background border border-border rounded-lg p-8 text-center">
+				<p class="text-muted-foreground">No invoices yet</p>
+			</div>
+		{/if}
+	</div>
+</div>

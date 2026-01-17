@@ -1,177 +1,88 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { faScaleBalanced, faGavel, faShieldHalved, faBars, faTimes, faUser, faRightToBracket } from '@fortawesome/free-solid-svg-icons';
-	import Icon from './Icon.svelte';
-	import ThemeToggle from './ThemeToggle.svelte';
-	import type { User } from '$lib/server/db/schema';
 
-	interface Props {
-		user: User | null;
-	}
-
-	let { user }: Props = $props();
+	let { user = null } = $props<{ user: any }>();
 	let mobileMenuOpen = $state(false);
-
-	const services = [
-		{ name: 'Personal Injury & Civil Suits', href: '/services/personal-injury' },
-		{ name: 'Business & Intellectual Property', href: '/services/business-intellectual-property' },
-		{ name: 'Family & Estate Law', href: '/services/family-estate-law' },
-		{ name: 'Criminal Defense', href: '/services/criminal-defense' }
-	];
 </script>
 
-<nav class="bg-background border-b border-gray-300 dark:border-gray-700 sticky top-0 z-50 shadow-sm">
+<nav class="bg-background border-b border-border sticky top-0 z-50">
 	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 		<div class="flex justify-between items-center h-16">
-			<!-- Logo -->
-			<a href="/" class="flex items-center space-x-3">
-				<Icon icon={faScaleBalanced} size="lg" class="text-gold" />
-				<span class="font-title text-2xl font-bold">King Law</span>
-			</a>
+			<div class="flex items-center">
+				<a href="/" class="font-title text-2xl text-gold">King Law Firm</a>
+			</div>
 
 			<!-- Desktop Navigation -->
 			<div class="hidden md:flex items-center space-x-8">
-				<!-- Services Dropdown -->
+				<a href="/" class="hover:text-gold transition-colors">Home</a>
+				
 				<div class="relative group">
-					<button class="flex items-center space-x-1 hover:text-gold transition-colors">
-						<span>Services</span>
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<button class="hover:text-gold transition-colors flex items-center">
+						Services
+						<svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
 						</svg>
 					</button>
-					
-					<!-- Dropdown Menu -->
-					<div class="absolute left-0 mt-2 w-64 bg-background border border-gray-300 dark:border-gray-700 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-						{#each services as service}
-							<a
-								href={service.href}
-								class="block px-4 py-3 hover:bg-secondary transition-colors first:rounded-t-lg last:rounded-b-lg"
-							>
-								{service.name}
-							</a>
-						{/each}
+					<div class="absolute left-0 mt-2 w-64 bg-background border border-border rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+						<a href="/services/personal-injury" class="block px-4 py-2 hover:bg-muted">Personal Injury & Civil Suits</a>
+						<a href="/services/business-intellectual-property" class="block px-4 py-2 hover:bg-muted">Business & Intellectual Property</a>
+						<a href="/services/family-estate-law" class="block px-4 py-2 hover:bg-muted">Family & Estate Law</a>
+						<a href="/services/criminal-defense" class="block px-4 py-2 hover:bg-muted">Criminal Defense</a>
 					</div>
 				</div>
 
 				<a href="/about" class="hover:text-gold transition-colors">About</a>
 				<a href="/contact" class="hover:text-gold transition-colors">Contact</a>
-				
+
 				{#if user}
-					<a
-						href={user.role === 'lawyer' ? '/dashboard/lawyer' : '/dashboard/client'}
-						class="flex items-center space-x-2 hover:text-gold transition-colors"
+					<a 
+						href={user.role === 'lawyer' || user.role === 'admin' ? '/dashboard/lawyer' : '/dashboard/client'} 
+						class="bg-gold hover:bg-gold-dark text-black px-4 py-2 rounded-md font-semibold transition-colors"
 					>
-						<Icon icon={faUser} size="sm" />
-						<span>Dashboard</span>
+						Dashboard
 					</a>
-					<form method="POST" action="/logout" class="inline">
-						<button
-							type="submit"
-							class="hover:text-gold transition-colors"
-						>
-							Logout
-						</button>
-					</form>
 				{:else}
-					<a
-						href="/login"
-						class="flex items-center space-x-2 hover:text-gold transition-colors"
-					>
-						<Icon icon={faRightToBracket} size="sm" />
-						<span>Login</span>
+					<a href="/login" class="hover:text-gold transition-colors">Login</a>
+					<a href="/contact" class="bg-gold hover:bg-gold-dark text-black px-4 py-2 rounded-md font-semibold transition-colors">
+						Schedule Consultation
 					</a>
 				{/if}
-
-				<ThemeToggle />
-
-				<!-- Contact Button -->
-				<a
-					href="/contact"
-					class="px-6 py-2 bg-gold text-black font-semibold rounded-lg hover:bg-gold-dark transition-colors"
-				>
-					Free Consultation
-				</a>
 			</div>
 
-			<!-- Mobile Menu Button -->
-			<div class="md:hidden flex items-center space-x-4">
-				<ThemeToggle />
-				<button
-					onclick={() => (mobileMenuOpen = !mobileMenuOpen)}
-					class="p-2 rounded-lg hover:bg-secondary transition-colors"
-					aria-label="Toggle menu"
-				>
-					{#if mobileMenuOpen}
-						<Icon icon={faTimes} size="lg" />
-					{:else}
-						<Icon icon={faBars} size="lg" />
-					{/if}
-				</button>
-			</div>
+			<!-- Mobile menu button -->
+			<button 
+				class="md:hidden"
+				onclick={() => mobileMenuOpen = !mobileMenuOpen}
+			>
+				<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+				</svg>
+			</button>
 		</div>
 	</div>
 
-	<!-- Mobile Menu -->
+	<!-- Mobile Navigation -->
 	{#if mobileMenuOpen}
-		<div class="md:hidden border-t border-gray-300 dark:border-gray-700 bg-background">
-			<div class="px-4 py-4 space-y-3">
-				<!-- Services -->
-				<div class="space-y-2">
-					<div class="font-semibold text-gold">Services</div>
-					{#each services as service}
-						<a
-							href={service.href}
-							class="block pl-4 py-2 hover:bg-secondary rounded-lg transition-colors"
-							onclick={() => (mobileMenuOpen = false)}
-						>
-							{service.name}
-						</a>
-					{/each}
-				</div>
-
-				<a
-					href="/about"
-					class="block py-2 hover:text-gold transition-colors"
-					onclick={() => (mobileMenuOpen = false)}
-				>
-					About
-				</a>
-				
-				<a
-					href="/contact"
-					class="block py-2 hover:text-gold transition-colors"
-					onclick={() => (mobileMenuOpen = false)}
-				>
-					Contact
-				</a>
-
+		<div class="md:hidden border-t border-border">
+			<div class="px-2 pt-2 pb-3 space-y-1">
+				<a href="/" class="block px-3 py-2 hover:bg-muted rounded-md">Home</a>
+				<div class="px-3 py-2 font-semibold">Services</div>
+				<a href="/services/personal-injury" class="block px-6 py-2 hover:bg-muted rounded-md">Personal Injury</a>
+				<a href="/services/business-intellectual-property" class="block px-6 py-2 hover:bg-muted rounded-md">Business & IP</a>
+				<a href="/services/family-estate-law" class="block px-6 py-2 hover:bg-muted rounded-md">Family & Estate</a>
+				<a href="/services/criminal-defense" class="block px-6 py-2 hover:bg-muted rounded-md">Criminal Defense</a>
+				<a href="/about" class="block px-3 py-2 hover:bg-muted rounded-md">About</a>
+				<a href="/contact" class="block px-3 py-2 hover:bg-muted rounded-md">Contact</a>
 				{#if user}
-					<a
+					<a 
 						href={user.role === 'lawyer' ? '/dashboard/lawyer' : '/dashboard/client'}
-						class="flex items-center space-x-2 py-2 hover:text-gold transition-colors"
-						onclick={() => (mobileMenuOpen = false)}
+						class="block px-3 py-2 bg-gold text-black rounded-md font-semibold"
 					>
-						<Icon icon={faUser} size="sm" />
-						<span>Dashboard</span>
+						Dashboard
 					</a>
 				{:else}
-					<a
-						href="/login"
-						class="flex items-center space-x-2 py-2 hover:text-gold transition-colors"
-						onclick={() => (mobileMenuOpen = false)}
-					>
-						<Icon icon={faRightToBracket} size="sm" />
-						<span>Login</span>
-					</a>
+					<a href="/login" class="block px-3 py-2 hover:bg-muted rounded-md">Login</a>
 				{/if}
-
-				<a
-					href="/contact"
-					class="block w-full text-center px-6 py-3 bg-gold text-black font-semibold rounded-lg hover:bg-gold-dark transition-colors"
-					onclick={() => (mobileMenuOpen = false)}
-				>
-					Free Consultation
-				</a>
 			</div>
 		</div>
 	{/if}

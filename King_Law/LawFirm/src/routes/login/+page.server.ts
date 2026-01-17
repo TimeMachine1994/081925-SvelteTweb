@@ -1,53 +1,58 @@
-import { hash, verify } from '@node-rs/argon2';
 import { fail, redirect } from '@sveltejs/kit';
-import { eq } from 'drizzle-orm';
+import type { Actions } from './$types';
 import { db } from '$lib/server/db';
-import * as table from '$lib/server/db/schema';
-import * as auth from '$lib/server/auth';
-import { getDashboardRoute } from '$lib/utils/auth-helpers';
-import type { Actions, PageServerLoad } from './$types';
-
-export const load: PageServerLoad = async ({ locals }) => {
-	if (locals.user) {
-		redirect(302, getDashboardRoute(locals.user));
-	}
-	return {};
-};
+import { user } from '$lib/server/db/schema';
+import { verifyPassword, generateSessionToken, createSession, SESSION_COOKIE_NAME } from '$lib/server/auth';
+import { eq } from 'drizzle-orm';
 
 export const actions: Actions = {
 	default: async ({ request, cookies }) => {
-		const formData = await request.formData();
-		const username = formData.get('username');
-		const password = formData.get('password');
+		const data = await request.formData();
+		const username = data.get('username')?.toString();
+		const password = data.get('password')?.toString();
 
 		if (!username || !password) {
-			return fail(400, { message: 'Username and password are required' });
+			return fail(400, { error: 'Username and password are required' });
 		}
 
-		const [existingUser] = await db
-			.select()
-			.from(table.user)
-			.where(eq(table.user.username, username as string));
+		try {
+			const existingUser = await db
+				.select()
+				.from(user)
+				.where(eq(user.username, username))
+				.limit(1);
 
-		if (!existingUser) {
-			return fail(400, { message: 'Invalid username or password' });
+			if (existingUser.length === 0) {
+				return fail(400, { error: 'Invalid username or password' });
+			}
+
+			const dbUser = existingUser[0];
+			const validPassword = await verifyPassword(dbUser.passwordHash, password);
+
+			if (!validPassword) {
+				return fail(400, { error: 'Invalid username or password' });
+			}
+
+			const sessionToken = generateSessionToken();
+			await createSession(sessionToken, dbUser.id);
+
+			cookies.set(SESSION_COOKIE_NAME, sessionToken, {
+				path: '/',
+				httpOnly: true,
+				secure: process.env.NODE_ENV === 'production',
+				sameSite: 'lax',
+				maxAge: 60 * 60 * 24 * 30
+			});
+
+			const redirectPath =
+				dbUser.role === 'lawyer' || dbUser.role === 'admin'
+					? '/dashboard/lawyer'
+					: '/dashboard/client';
+			throw redirect(303, redirectPath);
+		} catch (error) {
+			if (error instanceof Response) throw error;
+			console.error('Login error:', error);
+			return fail(500, { error: 'An error occurred during login' });
 		}
-
-		const validPassword = await verify(existingUser.passwordHash, password as string, {
-			memoryCost: 19456,
-			timeCost: 2,
-			outputLen: 32,
-			parallelism: 1
-		});
-
-		if (!validPassword) {
-			return fail(400, { message: 'Invalid username or password' });
-		}
-
-		const sessionToken = auth.generateSessionToken();
-		const session = await auth.createSession(sessionToken, existingUser.id);
-		auth.setSessionTokenCookie(cookies, sessionToken, session.expiresAt);
-
-		redirect(302, getDashboardRoute(existingUser));
 	}
 };

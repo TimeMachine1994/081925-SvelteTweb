@@ -1,144 +1,74 @@
-import { redirect } from '@sveltejs/kit';
-import { eq, isNull, and, sql } from 'drizzle-orm';
 import { db } from '$lib/server/db';
-import * as table from '$lib/server/db/schema';
+import { cases, documents, invoices, messages, user } from '$lib/server/db/schema';
+import { eq, isNull, and } from 'drizzle-orm';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
-	if (!locals.user) {
-		redirect(302, '/login');
-	}
+	const lawyerId = locals.user!.id;
 
-	if (locals.user.role !== 'lawyer' && locals.user.role !== 'admin') {
-		redirect(302, '/dashboard/client');
-	}
-
-	// Fetch lawyer's cases with client information
-	const cases = await db
+	// Load all lawyer's cases with client info
+	const lawyerCases = await db
 		.select({
-			case: table.cases,
-			client: {
-				id: table.user.id,
-				firstName: table.user.firstName,
-				lastName: table.user.lastName,
-				email: table.user.email,
-				phoneNumber: table.user.phoneNumber
-			}
+			case: cases,
+			client: user
 		})
-		.from(table.cases)
-		.innerJoin(table.user, eq(table.cases.clientId, table.user.id))
-		.where(eq(table.cases.lawyerId, locals.user.id));
+		.from(cases)
+		.innerJoin(user, eq(cases.clientId, user.id))
+		.where(eq(cases.lawyerId, lawyerId));
 
-	// Get unique clients from cases
-	const clientMap = new Map();
-	cases.forEach(c => {
-		if (!clientMap.has(c.client.id)) {
-			clientMap.set(c.client.id, {
-				...c.client,
-				caseCount: 1
-			});
-		} else {
-			clientMap.get(c.client.id).caseCount++;
-		}
-	});
-	const clients = Array.from(clientMap.values());
+	// Load all documents
+	const allDocuments = await db
+		.select()
+		.from(documents)
+		.limit(10);
 
-	// Fetch uncategorized messages (messages with no case, sent to this lawyer)
+	// Load all invoices
+	const allInvoices = await db
+		.select()
+		.from(invoices)
+		.limit(10);
+
+	// Load uncategorized messages (messages without a case)
 	const uncategorizedMessages = await db
 		.select({
-			message: table.messages,
-			sender: {
-				id: table.user.id,
-				firstName: table.user.firstName,
-				lastName: table.user.lastName,
-				email: table.user.email
-			}
+			message: messages,
+			sender: user
 		})
-		.from(table.messages)
-		.innerJoin(table.user, eq(table.messages.senderId, table.user.id))
-		.where(and(
-			isNull(table.messages.caseId),
-			eq(table.messages.recipientId, locals.user.id)
-		))
-		.orderBy(table.messages.createdAt);
+		.from(messages)
+		.innerJoin(user, eq(messages.senderId, user.id))
+		.where(isNull(messages.caseId))
+		.limit(20);
 
-	// Group uncategorized messages by sender
-	const uncategorizedByClient = new Map();
-	uncategorizedMessages.forEach(m => {
-		const senderId = m.sender.id;
-		if (!uncategorizedByClient.has(senderId)) {
-			uncategorizedByClient.set(senderId, {
-				client: m.sender,
-				messages: [],
-				unreadCount: 0
-			});
+	// Calculate stats
+	const totalCases = lawyerCases.length;
+	const activeCases = lawyerCases.filter((c) => c.case.status === 'active').length;
+	const totalDocuments = allDocuments.length;
+	const paidInvoices = allInvoices.filter((i) => i.status === 'paid');
+	const totalRevenue = paidInvoices.reduce((sum, inv) => sum + inv.paidAmount, 0);
+
+	// Group uncategorized messages by client
+	const messagesByClient = uncategorizedMessages.reduce((acc, { message, sender }) => {
+		const clientId = message.senderId;
+		if (!acc[clientId]) {
+			acc[clientId] = {
+				client: sender,
+				messages: []
+			};
 		}
-		uncategorizedByClient.get(senderId).messages.push(m.message);
-		if (!m.message.readAt) {
-			uncategorizedByClient.get(senderId).unreadCount++;
-		}
-	});
-	const uncategorizedThreads = Array.from(uncategorizedByClient.values());
-
-	// Fetch all documents
-	const caseIds = cases.map(c => c.case.id);
-	const documents = caseIds.length > 0
-		? await db
-				.select({
-					document: table.documents,
-					case: {
-						id: table.cases.id,
-						title: table.cases.title
-					}
-				})
-				.from(table.documents)
-				.innerJoin(table.cases, eq(table.documents.caseId, table.cases.id))
-				.where(eq(table.cases.lawyerId, locals.user.id))
-		: [];
-
-	// Fetch all invoices
-	const invoices = caseIds.length > 0
-		? await db
-				.select({
-					invoice: table.invoices,
-					case: {
-						id: table.cases.id,
-						title: table.cases.title
-					}
-				})
-				.from(table.invoices)
-				.innerJoin(table.cases, eq(table.invoices.caseId, table.cases.id))
-				.where(eq(table.cases.lawyerId, locals.user.id))
-		: [];
-
-	// Fetch recent messages
-	const messages = caseIds.length > 0
-		? await db
-				.select({
-					message: table.messages,
-					sender: {
-						firstName: table.user.firstName,
-						lastName: table.user.lastName
-					},
-					case: {
-						id: table.cases.id,
-						title: table.cases.title
-					}
-				})
-				.from(table.messages)
-				.innerJoin(table.user, eq(table.messages.senderId, table.user.id))
-				.innerJoin(table.cases, eq(table.messages.caseId, table.cases.id))
-				.where(eq(table.cases.lawyerId, locals.user.id))
-				.limit(10)
-		: [];
+		acc[clientId].messages.push(message);
+		return acc;
+	}, {} as Record<string, { client: any; messages: any[] }>);
 
 	return {
-		user: locals.user,
-		cases: cases.map(c => ({ ...c.case, client: c.client })),
-		clients,
-		documents: documents.map(d => ({ ...d.document, case: d.case })),
-		invoices: invoices.map(i => ({ ...i.invoice, case: i.case })),
-		messages: messages.map(m => ({ ...m.message, sender: m.sender, case: m.case })),
-		uncategorizedThreads
+		cases: lawyerCases,
+		documents: allDocuments,
+		invoices: allInvoices,
+		uncategorizedThreads: Object.values(messagesByClient),
+		stats: {
+			totalCases,
+			activeCases,
+			totalDocuments,
+			totalRevenue
+		}
 	};
 };
