@@ -1,5 +1,7 @@
 <script lang="ts">
 	import type { LayoutData } from './$types';
+	import ChatSlider from '$lib/components/ChatSlider.svelte';
+	import { authStore } from '$lib/stores/auth.svelte';
 
 	let { data, children }: { data: LayoutData; children: any } = $props();
 </script>
@@ -15,13 +17,17 @@
 
 				<div class="flex items-center space-x-4">
 					<span class="text-sm text-muted-foreground">
-						Welcome, {data.user.firstName} {data.user.lastName}
+						Welcome, {authStore.user?.firstName} {authStore.user?.lastName}
 					</span>
-					<form method="POST" action="/logout">
-						<button type="submit" class="text-sm hover:text-gold transition-colors">
-							Logout
-						</button>
-					</form>
+					<button 
+						onclick={async () => {
+							await authStore.logout();
+							window.location.href = '/login';
+						}}
+						class="text-sm hover:text-gold transition-colors"
+					>
+						Logout
+					</button>
 				</div>
 			</div>
 		</div>
@@ -30,4 +36,7 @@
 	<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 		{@render children()}
 	</main>
+
+	<!-- Chat Interface -->
+	<ChatSlider />
 </div>

@@ -6,13 +6,14 @@ import { encodeBase32LowerCaseNoPadding, encodeHexLowerCase } from '@oslojs/enco
 import { sha256 } from '@oslojs/crypto/sha2';
 import { hash, verify } from '@node-rs/argon2';
 import { eq } from 'drizzle-orm';
+import { dev } from '$app/environment';
 
 const adapter = new DrizzleSQLiteAdapter(db, session, user);
 
 export const lucia = new Lucia(adapter, {
 	sessionCookie: {
 		attributes: {
-			secure: process.env.NODE_ENV === 'production'
+			secure: !dev
 		}
 	},
 	getUserAttributes: (attributes) => {
@@ -59,19 +60,25 @@ export function generateSessionToken(): string {
 
 // Create session
 export async function createSession(token: string, userId: string) {
+	console.log('📝 createSession called for userId:', userId);
 	const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
+	console.log('Generated sessionId:', sessionId.substring(0, 10) + '...');
 	const sessionData = {
 		id: sessionId,
 		userId,
 		expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30) // 30 days
 	};
+	console.log('Session expires at:', sessionData.expiresAt.toISOString());
 	await db.insert(session).values(sessionData);
+	console.log('✅ Session inserted into database');
 	return sessionData;
 }
 
 // Validate session
 export async function validateSessionToken(token: string) {
+	console.log('🔍 validateSessionToken called');
 	const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
+	console.log('Looking for sessionId:', sessionId.substring(0, 10) + '...');
 	const result = await db
 		.select({ user, session })
 		.from(session)
@@ -79,23 +86,31 @@ export async function validateSessionToken(token: string) {
 		.where(eq(session.id, sessionId));
 
 	if (result.length < 1) {
+		console.log('❌ No session found in database');
 		return { session: null, user: null };
 	}
+	console.log('✅ Session found in database');
 
 	const { user: dbUser, session: dbSession } = result[0];
+	console.log('Session user:', { id: dbUser.id, username: dbUser.username, role: dbUser.role });
+	console.log('Session expires:', new Date(dbSession.expiresAt).toISOString());
 
 	if (Date.now() >= dbSession.expiresAt.getTime()) {
+		console.log('❌ Session expired, deleting...');
 		await db.delete(session).where(eq(session.id, sessionId));
 		return { session: null, user: null };
 	}
+	console.log('✅ Session is valid');
 
 	// Extend session if it's past halfway through its lifetime
 	if (Date.now() >= dbSession.expiresAt.getTime() - 1000 * 60 * 60 * 24 * 15) {
+		console.log('🔄 Extending session expiration...');
 		dbSession.expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
 		await db
 			.update(session)
 			.set({ expiresAt: dbSession.expiresAt })
 			.where(eq(session.id, sessionId));
+		console.log('✅ Session extended to:', dbSession.expiresAt.toISOString());
 	}
 
 	return { session: dbSession, user: dbUser };
@@ -103,22 +118,30 @@ export async function validateSessionToken(token: string) {
 
 // Invalidate session
 export async function invalidateSession(sessionId: string) {
+	console.log('🗑️ Invalidating session:', sessionId.substring(0, 10) + '...');
 	await db.delete(session).where(eq(session.id, sessionId));
+	console.log('✅ Session deleted');
 }
 
 // Hash password
 export async function hashPassword(password: string): Promise<string> {
-	return await hash(password, {
+	console.log('🔐 Hashing password with Argon2...');
+	const hashed = await hash(password, {
 		memoryCost: 19456,
 		timeCost: 2,
 		outputLen: 32,
 		parallelism: 1
 	});
+	console.log('✅ Password hash generated');
+	return hashed;
 }
 
 // Verify password
 export async function verifyPassword(hash: string, password: string): Promise<boolean> {
-	return await verify(hash, password);
+	console.log('🔍 Verifying password against hash...');
+	const isValid = await verify(hash, password);
+	console.log('Password verification result:', isValid ? '✅ MATCH' : '❌ NO MATCH');
+	return isValid;
 }
 
 export const SESSION_COOKIE_NAME = 'auth_session';

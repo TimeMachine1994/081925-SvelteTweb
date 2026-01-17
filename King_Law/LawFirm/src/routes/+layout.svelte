@@ -1,14 +1,19 @@
 <script lang="ts">
 	import '../app.css';
+	import { authStore } from '$lib/stores/auth.svelte';
+	import { onMount } from 'svelte';
 	import Navigation from '$lib/components/Navigation.svelte';
 	import Footer from '$lib/components/Footer.svelte';
-	import type { LayoutData } from './$types';
 
-	let { data, children }: { data: LayoutData; children: any } = $props();
+	let { children }: { children: any } = $props();
+
+	onMount(() => {
+		authStore.fetchUser();
+	});
 </script>
 
 <div class="flex flex-col min-h-screen">
-	<Navigation user={data.user} />
+	<Navigation user={authStore.user} />
 	
 	<main class="flex-grow">
 		{@render children()}

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { PageData, ActionData } from './$types';
+	import ChatSlider from '$lib/components/ChatSlider.svelte';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -187,10 +188,10 @@
 				<div class="flex justify-between items-center mb-4">
 					<h2 class="font-title text-2xl">Invoices</h2>
 					<button
-						onclick={() => (showInvoiceForm = !showInvoiceForm)}
+						onclick={() => (showInvoiceModal = true)}
 						class="bg-gold hover:bg-gold-dark text-black font-semibold px-4 py-2 rounded-md transition-colors"
 					>
-						{showInvoiceForm ? 'Cancel' : 'Create Invoice'}
+						Create Invoice
 					</button>
 				</div>
 
@@ -331,3 +332,12 @@
 		</div>
 	</div>
 </div>
+
+<!-- Create Invoice Modal -->
+<CreateInvoiceModal 
+	open={showInvoiceModal} 
+	caseId={data.case.id} 
+	caseName={data.case.title}
+	oncreated={handleInvoiceCreated} 
+	onclose={() => (showInvoiceModal = false)} 
+/>

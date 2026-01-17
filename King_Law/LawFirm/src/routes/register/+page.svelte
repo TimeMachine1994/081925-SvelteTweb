@@ -1,14 +1,49 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
-	import type { ActionData } from './$types';
+	import { authStore } from '$lib/stores/auth.svelte';
+	import { goto } from '$app/navigation';
 
-	let { form }: { form: ActionData } = $props();
 	let role = $state<'client' | 'lawyer'>('client');
+	let firstName = $state('');
+	let lastName = $state('');
+	let username = $state('');
+	let email = $state('');
+	let phoneNumber = $state('');
+	let password = $state('');
+	let confirmPassword = $state('');
+	let accessCode = $state('');
+	let error = $state('');
 	let showAccessCode = $state(false);
 
 	$effect(() => {
 		showAccessCode = role === 'lawyer';
 	});
+
+	async function handleSubmit(e: Event) {
+		e.preventDefault();
+		error = '';
+
+		if (password !== confirmPassword) {
+			error = 'Passwords do not match';
+			return;
+		}
+
+		const result = await authStore.register({
+			username,
+			email,
+			password,
+			firstName,
+			lastName,
+			phoneNumber: phoneNumber || undefined,
+			role,
+			accessCode: role === 'lawyer' ? accessCode : undefined
+		});
+
+		if (result.success) {
+			goto(authStore.dashboardRoute);
+		} else {
+			error = result.error || 'Registration failed';
+		}
+	}
 </script>
 
 <div class="min-h-screen flex items-center justify-center bg-background p-4">
@@ -19,15 +54,15 @@
 		</div>
 
 		<div class="bg-card border border-border rounded-lg p-6 shadow-lg">
-			<form method="POST" use:enhance>
-				{#if form?.error}
+			<form onsubmit={handleSubmit}>
+				{#if error}
 					<div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 px-4 py-3 rounded mb-4">
-						{form.error}
+						{error}
 					</div>
 				{/if}
 
-				<div class="mb-4">
-					<label class="block text-sm font-medium mb-2">I am registering as a:</label>
+				<fieldset class="mb-4">
+					<legend class="block text-sm font-medium mb-2">I am registering as a:</legend>
 					<div class="flex gap-4">
 						<label class="flex items-center">
 							<input
@@ -50,7 +85,7 @@
 							<span>Lawyer</span>
 						</label>
 					</div>
-				</div>
+				</fieldset>
 
 				<div class="grid grid-cols-2 gap-4 mb-4">
 					<div>
@@ -58,7 +93,7 @@
 						<input
 							type="text"
 							id="firstName"
-							name="firstName"
+							bind:value={firstName}
 							required
 							class="w-full px-3 py-2 border border-input rounded-md bg-background"
 						/>
@@ -68,7 +103,7 @@
 						<input
 							type="text"
 							id="lastName"
-							name="lastName"
+							bind:value={lastName}
 							required
 							class="w-full px-3 py-2 border border-input rounded-md bg-background"
 						/>
@@ -80,7 +115,7 @@
 					<input
 						type="text"
 						id="username"
-						name="username"
+						bind:value={username}
 						required
 						class="w-full px-3 py-2 border border-input rounded-md bg-background"
 					/>
@@ -91,7 +126,7 @@
 					<input
 						type="email"
 						id="email"
-						name="email"
+						bind:value={email}
 						required
 						class="w-full px-3 py-2 border border-input rounded-md bg-background"
 					/>
@@ -102,7 +137,7 @@
 					<input
 						type="tel"
 						id="phoneNumber"
-						name="phoneNumber"
+						bind:value={phoneNumber}
 						class="w-full px-3 py-2 border border-input rounded-md bg-background"
 					/>
 				</div>
@@ -112,7 +147,7 @@
 					<input
 						type="password"
 						id="password"
-						name="password"
+						bind:value={password}
 						required
 						minlength="8"
 						class="w-full px-3 py-2 border border-input rounded-md bg-background"
@@ -125,7 +160,7 @@
 					<input
 						type="password"
 						id="confirmPassword"
-						name="confirmPassword"
+						bind:value={confirmPassword}
 						required
 						class="w-full px-3 py-2 border border-input rounded-md bg-background"
 					/>
@@ -137,7 +172,7 @@
 						<input
 							type="text"
 							id="accessCode"
-							name="accessCode"
+							bind:value={accessCode}
 							required
 							class="w-full px-3 py-2 border border-input rounded-md bg-background"
 						/>
@@ -147,9 +182,10 @@
 
 				<button
 					type="submit"
-					class="w-full bg-gold hover:bg-gold-dark text-black font-semibold py-2 px-4 rounded-md transition-colors"
+					disabled={authStore.loading}
+					class="w-full bg-gold hover:bg-gold-dark text-black font-semibold py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 				>
-					Create Account
+					{authStore.loading ? 'Creating Account...' : 'Create Account'}
 				</button>
 
 				<p class="text-center mt-4 text-sm">

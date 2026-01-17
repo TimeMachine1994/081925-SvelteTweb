@@ -1,0 +1,106 @@
+import { json, error } from '@sveltejs/kit';
+import type { RequestHandler } from './$types';
+import { db } from '$lib/server/db';
+import { cases, user as userTable } from '$lib/server/db/schema';
+import { eq, or } from 'drizzle-orm';
+import { generateId } from '$lib/server/auth';
+
+export const GET: RequestHandler = async ({ locals, url }) => {
+	if (!locals.user) {
+		throw error(401, 'Unauthorized');
+	}
+
+	try {
+		const caseId = url.searchParams.get('id');
+
+		if (caseId) {
+			const [caseData] = await db
+				.select({
+					case: cases,
+					client: userTable,
+					lawyer: userTable
+				})
+				.from(cases)
+				.leftJoin(userTable, eq(cases.clientId, userTable.id))
+				.where(eq(cases.id, caseId))
+				.limit(1);
+
+			if (!caseData) {
+				throw error(404, 'Case not found');
+			}
+
+			if (
+				locals.user.role !== 'admin' &&
+				caseData.case.clientId !== locals.user.id &&
+				caseData.case.lawyerId !== locals.user.id
+			) {
+				throw error(403, 'Access denied');
+			}
+
+			return json({ case: caseData });
+		}
+
+		let userCases;
+		if (locals.user.role === 'client') {
+			userCases = await db
+				.select({
+					case: cases,
+					lawyer: userTable
+				})
+				.from(cases)
+				.leftJoin(userTable, eq(cases.lawyerId, userTable.id))
+				.where(eq(cases.clientId, locals.user.id));
+		} else {
+			userCases = await db
+				.select({
+					case: cases,
+					client: userTable
+				})
+				.from(cases)
+				.leftJoin(userTable, eq(cases.clientId, userTable.id))
+				.where(
+					or(eq(cases.lawyerId, locals.user.id), eq(userTable.role, 'admin'))
+				);
+		}
+
+		return json({ cases: userCases });
+	} catch (err) {
+		console.error('Get cases error:', err);
+		if (err instanceof Response) throw err;
+		throw error(500, 'Failed to fetch cases');
+	}
+};
+
+export const POST: RequestHandler = async ({ request, locals }) => {
+	if (!locals.user || locals.user.role === 'client') {
+		throw error(403, 'Only lawyers can create cases');
+	}
+
+	try {
+		const { clientId, title, description, status } = await request.json();
+
+		if (!clientId || !title) {
+			throw error(400, 'Client ID and title are required');
+		}
+
+		const [newCase] = await db
+			.insert(cases)
+			.values({
+				id: generateId(),
+				clientId,
+				lawyerId: locals.user.id,
+				title,
+				description: description || null,
+				status: status || 'pending',
+				createdAt: new Date(),
+				updatedAt: new Date()
+			})
+			.returning();
+
+		return json({ success: true, case: newCase });
+	} catch (err) {
+		console.error('Create case error:', err);
+		if (err instanceof Response) throw err;
+		throw error(500, 'Failed to create case');
+	}
+};

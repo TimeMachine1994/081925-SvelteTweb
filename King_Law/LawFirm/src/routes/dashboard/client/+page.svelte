@@ -1,7 +1,11 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	import { casesStore } from '$lib/stores/cases.svelte';
+	import { documentsStore } from '$lib/stores/documents.svelte';
+	import { messagesStore } from '$lib/stores/messages.svelte';
 
-	let { data }: { data: PageData } = $props();
+	let activeCases = $derived(casesStore.cases.filter(c => c.case.status === 'active').length);
+	let documentsCount = $derived(documentsStore.documents.length);
+	let unreadMessages = $derived(messagesStore.messages.filter(m => !m.message.readAt).length);
 
 	function formatCurrency(cents: number): string {
 		return new Intl.NumberFormat('en-US', {
@@ -26,25 +30,25 @@
 	<div class="grid md:grid-cols-4 gap-6 mb-8">
 		<div class="bg-background border border-border rounded-lg p-6">
 			<div class="text-3xl mb-2">📁</div>
-			<div class="text-2xl font-bold">{data.stats.activeCases}</div>
+			<div class="text-2xl font-bold">{activeCases}</div>
 			<div class="text-sm text-muted-foreground">Active Cases</div>
 		</div>
 
 		<div class="bg-background border border-border rounded-lg p-6">
 			<div class="text-3xl mb-2">💰</div>
-			<div class="text-2xl font-bold">{formatCurrency(data.stats.totalUnpaid)}</div>
+			<div class="text-2xl font-bold">{formatCurrency(0)}</div>
 			<div class="text-sm text-muted-foreground">Unpaid Invoices</div>
 		</div>
 
 		<div class="bg-background border border-border rounded-lg p-6">
 			<div class="text-3xl mb-2">💬</div>
-			<div class="text-2xl font-bold">{data.stats.unreadMessages}</div>
+			<div class="text-2xl font-bold">{unreadMessages}</div>
 			<div class="text-sm text-muted-foreground">Unread Messages</div>
 		</div>
 
 		<div class="bg-background border border-border rounded-lg p-6">
 			<div class="text-3xl mb-2">📄</div>
-			<div class="text-2xl font-bold">{data.stats.documentsCount}</div>
+			<div class="text-2xl font-bold">{documentsCount}</div>
 			<div class="text-sm text-muted-foreground">Documents</div>
 		</div>
 	</div>
@@ -55,34 +59,34 @@
 			<h2 class="font-title text-2xl">Your Cases</h2>
 		</div>
 
-		{#if data.cases.length > 0}
+		{#if casesStore.cases.length > 0}
 			<div class="grid md:grid-cols-2 gap-4">
-				{#each data.cases as caseItem}
+				{#each casesStore.cases as caseItem}
 					<a
-						href="/dashboard/client/case/{caseItem.id}"
+						href="/dashboard/client/case/{caseItem.case.id}"
 						class="bg-background border border-border rounded-lg p-6 hover:border-gold transition-all hover:shadow-lg group"
 					>
 						<div class="flex justify-between items-start mb-2">
 							<h3 class="font-semibold text-lg group-hover:text-gold transition-colors">
-								{caseItem.title}
+								{caseItem.case.title}
 							</h3>
 							<span
-								class="text-xs px-2 py-1 rounded-full {caseItem.status === 'active'
+								class="text-xs px-2 py-1 rounded-full {caseItem.case.status === 'active'
 									? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-									: caseItem.status === 'pending'
+									: caseItem.case.status === 'pending'
 										? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
 										: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'}"
 							>
-								{caseItem.status}
+								{caseItem.case.status}
 							</span>
 						</div>
-						{#if caseItem.description}
+						{#if caseItem.case.description}
 							<p class="text-sm text-muted-foreground mb-4 line-clamp-2">
-								{caseItem.description}
+								{caseItem.case.description}
 							</p>
 						{/if}
 						<div class="text-xs text-muted-foreground">
-							Updated: {formatDate(caseItem.updatedAt)}
+							Updated: {formatDate(caseItem.case.updatedAt)}
 						</div>
 					</a>
 				{/each}
