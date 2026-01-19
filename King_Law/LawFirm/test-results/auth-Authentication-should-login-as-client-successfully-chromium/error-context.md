@@ -1,0 +1,70 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - generic [ref=e6]:
+      - link "King Law Firm" [ref=e8] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e9]:
+        - link "Home" [ref=e10] [cursor=pointer]:
+          - /url: /
+        - button "Services" [ref=e12]:
+          - text: Services
+          - img [ref=e13]
+        - link "About" [ref=e15] [cursor=pointer]:
+          - /url: /about
+        - link "Contact" [ref=e16] [cursor=pointer]:
+          - /url: /contact
+        - link "Login" [ref=e17] [cursor=pointer]:
+          - /url: /login
+        - link "Schedule Consultation" [ref=e18] [cursor=pointer]:
+          - /url: /contact
+  - main [ref=e19]:
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - heading "Welcome Back" [level=1] [ref=e23]
+        - paragraph [ref=e24]: Sign in to your account
+      - generic [ref=e26]:
+        - generic [ref=e27]:
+          - generic [ref=e28]: Username
+          - textbox "Username" [ref=e29]
+        - generic [ref=e30]:
+          - generic [ref=e31]: Password
+          - textbox "Password" [ref=e32]
+        - button "Sign In" [ref=e33]
+        - paragraph [ref=e34]:
+          - text: Don't have an account?
+          - link "Create one" [ref=e35] [cursor=pointer]:
+            - /url: /register
+  - contentinfo [ref=e36]:
+    - generic [ref=e37]:
+      - generic [ref=e38]:
+        - generic [ref=e39]:
+          - heading "King Law Firm" [level=3] [ref=e40]
+          - paragraph [ref=e41]: Providing exceptional legal services with integrity, expertise, and dedication to our clients.
+          - paragraph [ref=e42]: © 2026 King Law Firm. All rights reserved.
+        - generic [ref=e43]:
+          - heading "Quick Links" [level=4] [ref=e44]
+          - list [ref=e45]:
+            - listitem [ref=e46]:
+              - link "Home" [ref=e47] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=e48]:
+              - link "About" [ref=e49] [cursor=pointer]:
+                - /url: /about
+            - listitem [ref=e50]:
+              - link "Contact" [ref=e51] [cursor=pointer]:
+                - /url: /contact
+            - listitem [ref=e52]:
+              - link "Client Portal" [ref=e53] [cursor=pointer]:
+                - /url: /login
+        - generic [ref=e54]:
+          - heading "Contact" [level=4] [ref=e55]
+          - list [ref=e56]:
+            - listitem [ref=e57]: 123 Legal Street
+            - listitem [ref=e58]: Orlando, FL 32801
+            - listitem [ref=e59]: "Phone: (407) 555-0100"
+            - listitem [ref=e60]: "Email: info@kinglawfirm.com"
+      - paragraph [ref=e62]: This website is for informational purposes only and does not constitute legal advice.
+```

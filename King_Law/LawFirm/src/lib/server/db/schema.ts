@@ -14,10 +14,10 @@ export const user = sqliteTable('user', {
 	firstName: text('first_name').notNull(),
 	lastName: text('last_name').notNull(),
 	phoneNumber: text('phone_number'),
-	createdAt: integer('created_at', { mode: 'timestamp' })
+	createdAt: integer('created_at')
 		.notNull()
 		.default(sql`(unixepoch())`),
-	updatedAt: integer('updated_at', { mode: 'timestamp' })
+	updatedAt: integer('updated_at')
 		.notNull()
 		.default(sql`(unixepoch())`)
 });
@@ -55,7 +55,7 @@ export const documents = sqliteTable('documents', {
 	filePath: text('file_path').notNull(),
 	fileSize: integer('file_size').notNull(),
 	mimeType: text('mime_type').notNull(),
-	uploadedAt: integer('uploaded_at', { mode: 'timestamp' })
+	uploadedAt: integer('uploaded_at')
 		.notNull()
 		.default(sql`(unixepoch())`)
 });
@@ -71,13 +71,13 @@ export const invoices = sqliteTable('invoices', {
 	status: text('status', { enum: ['unpaid', 'partial', 'paid'] })
 		.notNull()
 		.default('unpaid'),
-	dueDate: integer('due_date', { mode: 'timestamp' }).notNull(),
+	dueDate: integer('due_date').notNull(),
 	paidAmount: integer('paid_amount').notNull().default(0),
 	stripePaymentIntentId: text('stripe_payment_intent_id'),
-	createdAt: integer('created_at', { mode: 'timestamp' })
+	createdAt: integer('created_at')
 		.notNull()
 		.default(sql`(unixepoch())`),
-	paidAt: integer('paid_at', { mode: 'timestamp' })
+	paidAt: integer('paid_at')
 });
 
 // Messages Table
@@ -92,10 +92,10 @@ export const messages = sqliteTable('messages', {
 	attachmentDocumentId: text('attachment_document_id').references(() => documents.id, {
 		onDelete: 'set null'
 	}),
-	createdAt: integer('created_at', { mode: 'timestamp' })
+	createdAt: integer('created_at')
 		.notNull()
 		.default(sql`(unixepoch())`),
-	readAt: integer('read_at', { mode: 'timestamp' })
+	readAt: integer('read_at')
 });
 
 // Session Table (for Lucia auth)
@@ -104,7 +104,7 @@ export const session = sqliteTable('session', {
 	userId: text('user_id')
 		.notNull()
 		.references(() => user.id, { onDelete: 'cascade' }),
-	expiresAt: integer('expires_at', { mode: 'timestamp' }).notNull()
+	expiresAt: integer('expires_at').notNull()
 });
 
 // Relations

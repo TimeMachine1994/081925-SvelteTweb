@@ -103,17 +103,17 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			throw error(403, 'You can only create invoices for your own cases');
 		}
 
+		const invoiceId = generateId();
 		const [newInvoice] = await db
 			.insert(invoices)
 			.values({
-				id: generateId(),
+				id: invoiceId,
 				caseId,
 				description,
 				amount: parseInt(amount),
-				dueDate: new Date(dueDate),
+				dueDate: Math.floor(new Date(dueDate).getTime() / 1000),
 				status: 'unpaid',
-				paidAmount: 0,
-				createdAt: new Date()
+				paidAmount: 0
 			})
 			.returning();
 

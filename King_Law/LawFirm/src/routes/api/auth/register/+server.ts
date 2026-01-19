@@ -53,16 +53,14 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 				role: role || 'client',
 				firstName,
 				lastName,
-				phoneNumber: phoneNumber || null,
-				createdAt: new Date(),
-				updatedAt: new Date()
+				phoneNumber: phoneNumber || null
 			})
 			.returning();
 
 		const session = await lucia.createSession(userId, {});
 		const sessionCookie = lucia.createSessionCookie(session.id);
 		cookies.set(sessionCookie.name, sessionCookie.value, {
-			path: '.',
+			path: '/',
 			...sessionCookie.attributes
 		});
 

@@ -32,8 +32,7 @@ export const PATCH: RequestHandler = async ({ request, locals, params }) => {
 			.set({
 				...(title && { title }),
 				...(description !== undefined && { description }),
-				...(status && { status }),
-				updatedAt: new Date()
+				...(status && { status })
 			})
 			.where(eq(cases.id, caseId))
 			.returning();
