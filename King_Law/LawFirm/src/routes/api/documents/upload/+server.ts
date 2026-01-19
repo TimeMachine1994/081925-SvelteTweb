@@ -50,8 +50,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				fileName,
 				filePath,
 				fileSize: file.size,
-				mimeType: file.type,
-				uploadedAt: new Date()
+				mimeType: file.type
 			})
 			.returning();
 

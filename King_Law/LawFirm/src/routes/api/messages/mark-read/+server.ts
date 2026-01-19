@@ -19,7 +19,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		// Mark messages as read (only if user is recipient and not already read)
 		await db
 			.update(messages)
-			.set({ readAt: new Date() })
+			.set({ readAt: Math.floor(Date.now() / 1000) })
 			.where(
 				and(
 					inArray(messages.id, messageIds),

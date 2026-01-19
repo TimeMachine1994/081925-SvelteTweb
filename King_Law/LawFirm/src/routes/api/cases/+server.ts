@@ -91,9 +91,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				lawyerId: locals.user.id,
 				title,
 				description: description || null,
-				status: status || 'pending',
-				createdAt: new Date(),
-				updatedAt: new Date()
+				status: status || 'pending'
 			})
 			.returning();
 

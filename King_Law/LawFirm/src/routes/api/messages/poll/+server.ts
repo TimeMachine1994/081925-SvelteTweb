@@ -22,9 +22,12 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 			throw error(400, 'Invalid since timestamp');
 		}
 
+		// Convert to Unix timestamp for comparison
+		const sinceTimestamp = Math.floor(sinceDate.getTime() / 1000);
+
 		// Build query conditions
 		const conditions = [
-			gt(messages.createdAt, sinceDate),
+			gt(messages.createdAt, sinceTimestamp),
 			or(
 				eq(messages.senderId, locals.user.id),
 				eq(messages.recipientId, locals.user.id)

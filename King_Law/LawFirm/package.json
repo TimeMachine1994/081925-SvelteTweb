@@ -18,7 +18,11 @@
 		"db:studio": "drizzle-kit studio",
 		"db:seed": "tsx src/lib/server/db/seed.ts",
 		"list-users": "tsx scripts/list-users.ts",
-		"reset-password": "tsx scripts/reset-password.ts"
+		"reset-password": "tsx scripts/reset-password.ts",
+		"test": "playwright test",
+		"test:ui": "playwright test --ui",
+		"test:debug": "playwright test --debug",
+		"test:report": "playwright show-report"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.4.0",
@@ -29,6 +33,7 @@
 		"@libsql/client": "^0.15.15",
 		"@oslojs/crypto": "^1.0.1",
 		"@oslojs/encoding": "^1.1.0",
+		"@playwright/test": "^1.57.0",
 		"@sveltejs/adapter-auto": "^7.0.0",
 		"@sveltejs/adapter-static": "^3.0.10",
 		"@sveltejs/kit": "^2.49.1",
