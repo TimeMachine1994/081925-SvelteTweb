@@ -4,6 +4,7 @@ import { db } from '$lib/server/db';
 import { cases, user as userTable } from '$lib/server/db/schema';
 import { eq, or } from 'drizzle-orm';
 import { generateId } from '$lib/server/auth';
+import { alias } from 'drizzle-orm/sqlite-core';
 
 export const GET: RequestHandler = async ({ locals, url }) => {
 	if (!locals.user) {
@@ -14,14 +15,19 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 		const caseId = url.searchParams.get('id');
 
 		if (caseId) {
+			// Create aliases for client and lawyer joins
+			const clientTable = alias(userTable, 'client');
+			const lawyerTable = alias(userTable, 'lawyer');
+
 			const [caseData] = await db
 				.select({
 					case: cases,
-					client: userTable,
-					lawyer: userTable
+					client: clientTable,
+					lawyer: lawyerTable
 				})
 				.from(cases)
-				.leftJoin(userTable, eq(cases.clientId, userTable.id))
+				.leftJoin(clientTable, eq(cases.clientId, clientTable.id))
+				.leftJoin(lawyerTable, eq(cases.lawyerId, lawyerTable.id))
 				.where(eq(cases.id, caseId))
 				.limit(1);
 
