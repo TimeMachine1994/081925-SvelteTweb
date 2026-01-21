@@ -3,6 +3,7 @@ import { createClient } from '@libsql/client';
 import { user, cases, invoices } from './schema';
 import { hash } from '@node-rs/argon2';
 import { encodeBase32LowerCaseNoPadding } from '@oslojs/encoding';
+import { eq } from 'drizzle-orm';
 import * as dotenv from 'dotenv';
 
 // Load environment variables
@@ -34,38 +35,52 @@ async function seed() {
 	console.log('🌱 Starting database seed...');
 
 	try {
-		// Create test lawyer
-		const lawyerId = generateId();
-		const lawyerPasswordHash = await hash('TestPassword123!', ARGON2_OPTIONS);
+		// Check if lawyer exists, create if not
+		let lawyerId: string;
+		const existingLawyer = await db.select().from(user).where(eq(user.email, 'lawyer@test.com')).limit(1);
 		
-		const now = Math.floor(Date.now() / 1000); // Unix epoch in seconds
-		
-		await db.insert(user).values({
-			id: lawyerId,
-			username: 'lawyer@test.com',
-			email: 'lawyer@test.com',
-			passwordHash: lawyerPasswordHash,
-			firstName: 'Ben',
-			lastName: 'King',
-			role: 'lawyer'
-		});
-		console.log('✅ Created lawyer: lawyer@test.com / TestPassword123!');
+		if (existingLawyer.length > 0) {
+			lawyerId = existingLawyer[0].id;
+			console.log('ℹ️  Lawyer already exists: lawyer@test.com / TestPassword123!');
+		} else {
+			lawyerId = generateId();
+			const lawyerPasswordHash = await hash('TestPassword123!', ARGON2_OPTIONS);
+			
+			await db.insert(user).values({
+				id: lawyerId,
+				username: 'lawyer@test.com',
+				email: 'lawyer@test.com',
+				passwordHash: lawyerPasswordHash,
+				firstName: 'Ben',
+				lastName: 'King',
+				role: 'lawyer'
+			});
+			console.log('✅ Created lawyer: lawyer@test.com / TestPassword123!');
+		}
 
-		// Create test client
-		const clientId = generateId();
-		const clientPasswordHash = await hash('TestPassword123!', ARGON2_OPTIONS);
+		// Check if client exists, create if not
+		let clientId: string;
+		const existingClient = await db.select().from(user).where(eq(user.email, 'client@test.com')).limit(1);
 		
-		await db.insert(user).values({
-			id: clientId,
-			username: 'client@test.com',
-			email: 'client@test.com',
-			passwordHash: clientPasswordHash,
-			firstName: 'John',
-			lastName: 'Doe',
-			role: 'client',
-			phoneNumber: '555-1234'
-		});
-		console.log('✅ Created client: client@test.com / TestPassword123!');
+		if (existingClient.length > 0) {
+			clientId = existingClient[0].id;
+			console.log('ℹ️  Client already exists: client@test.com / TestPassword123!');
+		} else {
+			clientId = generateId();
+			const clientPasswordHash = await hash('TestPassword123!', ARGON2_OPTIONS);
+			
+			await db.insert(user).values({
+				id: clientId,
+				username: 'client@test.com',
+				email: 'client@test.com',
+				passwordHash: clientPasswordHash,
+				firstName: 'John',
+				lastName: 'Doe',
+				role: 'client',
+				phoneNumber: '555-1234'
+			});
+			console.log('✅ Created client: client@test.com / TestPassword123!');
+		}
 
 		// Create a sample case
 		const caseId = generateId();

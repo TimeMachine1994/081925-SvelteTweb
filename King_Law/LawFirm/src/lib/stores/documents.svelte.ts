@@ -18,6 +18,7 @@ class DocumentsStore {
 	documents = $state<DocumentWithUploader[]>([]);
 	loading = $state(false);
 	error = $state<string | null>(null);
+	uploadProgress = $state(0);
 
 	async fetchDocuments(caseId?: string) {
 		this.loading = true;
@@ -40,32 +41,52 @@ class DocumentsStore {
 		}
 	}
 
-	async uploadDocument(file: File, caseId?: string) {
+	async uploadDocument(file: File, caseId?: string): Promise<{ success: boolean; document?: any; error?: string }> {
 		this.loading = true;
 		this.error = null;
-		try {
+		this.uploadProgress = 0;
+
+		return new Promise((resolve) => {
 			const formData = new FormData();
 			formData.append('file', file);
 			if (caseId) {
 				formData.append('caseId', caseId);
 			}
 
-			const response = await fetch('/api/documents/upload', {
-				method: 'POST',
-				body: formData
+			const xhr = new XMLHttpRequest();
+
+			xhr.upload.addEventListener('progress', (e) => {
+				if (e.lengthComputable) {
+					this.uploadProgress = Math.round((e.loaded / e.total) * 100);
+				}
 			});
 
-			if (!response.ok) throw new Error('Failed to upload document');
-			
-			const data = await response.json();
-			await this.fetchDocuments(caseId);
-			return { success: true, document: data.document };
-		} catch (err) {
-			this.error = err instanceof Error ? err.message : 'Failed to upload document';
-			return { success: false, error: this.error };
-		} finally {
-			this.loading = false;
-		}
+			xhr.addEventListener('load', async () => {
+				this.loading = false;
+				if (xhr.status >= 200 && xhr.status < 300) {
+					try {
+						const data = JSON.parse(xhr.responseText);
+						await this.fetchDocuments(caseId);
+						this.uploadProgress = 100;
+						resolve({ success: true, document: data.document });
+					} catch {
+						resolve({ success: false, error: 'Invalid response from server' });
+					}
+				} else {
+					this.error = 'Failed to upload document';
+					resolve({ success: false, error: this.error });
+				}
+			});
+
+			xhr.addEventListener('error', () => {
+				this.loading = false;
+				this.error = 'Network error during upload';
+				resolve({ success: false, error: this.error });
+			});
+
+			xhr.open('POST', '/api/documents/upload');
+			xhr.send(formData);
+		});
 	}
 
 	getDownloadUrl(documentId: string) {

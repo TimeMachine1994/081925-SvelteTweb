@@ -1,5 +1,8 @@
 # King Law Firm - Consolidated Master Implementation Plan
 
+> **Last Updated**: January 20, 2026
+> **Recent Changes**: SPA Migration complete for Lawyer Dashboard, Modal infrastructure implemented, Svelte 5 stores created
+
 ## Project Overview
 Complete law firm web application with client portal, lawyer dashboard, case management, document handling, messaging system, invoicing, and payment processing. Built from scratch with all Phase One and Phase Two features integrated.
 
@@ -518,7 +521,7 @@ session:
 ## SECTION 6: LAWYER DASHBOARD
 
 ### 6.1: Create Lawyer Dashboard Layout
-- [ ] Create `/routes/dashboard/lawyer/+layout.svelte`:
+- [x] Create `/routes/dashboard/lawyer/+layout.svelte`:
   - Top navigation bar
   - Logout button
   - Theme toggle
@@ -529,8 +532,8 @@ session:
   - Load lawyer data
 
 ### 6.2: Build Dashboard Home
-- [ ] Create `/routes/dashboard/lawyer/+page.svelte`
-- [ ] Create `/routes/dashboard/lawyer/+page.server.ts`:
+- [x] Create `/routes/dashboard/lawyer/+page.svelte` (SPA refactored - uses client-side stores)
+- [x] ~~Create `/routes/dashboard/lawyer/+page.server.ts`~~ (REMOVED - SPA migration):
   - Load all lawyer's cases (with client info)
   - Load all documents
   - Load all invoices
@@ -539,7 +542,7 @@ session:
   - Load uncategorized messages (grouped by client)
 
 **Stats Overview**:
-- [ ] Cards displaying:
+- [x] Cards displaying:
   - Total cases
   - Active cases
   - Total documents
@@ -547,27 +550,27 @@ session:
   - Unread messages count
 
 **Cases Section**:
-- [ ] Display cases as cards/rows:
+- [x] Display cases as cards/rows:
   - Case title and status
   - Client name and email
   - Created/updated dates
   - Click to open case detail
-- [ ] "New Case" button (opens modal)
-- [ ] Filter by status (All/Active/Pending/Closed)
+- [x] "New Case" button (opens modal)
+- [x] Filter by status (All/Active/Pending/Closed)
 - [ ] Search by client name or case title
 
 **Uncategorized Messages Section**:
-- [ ] Display threads from clients without cases:
+- [x] Display threads from clients without cases:
   - Client name and email
   - Message count and preview
   - Unread badge
-  - "View & Reply" button
-  - "Create Case" button
-- [ ] Highlighted/pulsing indicator if new
-- [ ] Only show if uncategorized messages exist
+- [x] "View & Reply" button (UncategorizedThreadModal)
+- [x] "Create Case" button (CreateCaseFromThreadModal)
+- [x] Highlighted/pulsing indicator if new
+- [x] Only show if uncategorized messages exist
 
 **Clients Section**:
-- [ ] Display client cards:
+- [x] Display client cards:
   - Client name
   - Email
   - Number of cases
@@ -617,8 +620,8 @@ session:
 - [ ] "Send Message" button (opens chat)
 
 ### 6.4: Build Case Detail Page (Lawyer)
-- [ ] Create `/routes/dashboard/lawyer/case/[id]/+page.svelte`
-- [ ] Create `/routes/dashboard/lawyer/case/[id]/+page.server.ts`:
+- [x] Create `/routes/dashboard/lawyer/case/[id]/+page.svelte` (SPA refactored - uses client-side stores)
+- [x] ~~Create `/routes/dashboard/lawyer/case/[id]/+page.server.ts`~~ (REMOVED - SPA migration):
   - Load case by ID
   - Verify lawyer owns this case
   - Load client info
@@ -627,44 +630,44 @@ session:
   - Load case messages
 
 **Page Layout** (similar to client view with additional controls):
-- [ ] Case header with edit controls:
+- [x] Case header with edit controls:
   - Title (editable)
   - Status selector (Active/Pending/Closed)
   - Client info display
-  - Delete case button (with confirmation)
-- [ ] Tabs or sections:
+  - Delete case button (with ConfirmDialog)
+- [x] Tabs or sections:
   - **Overview**: Case description (editable)
   - **Documents**: List with upload/download/delete
   - **Invoices**: List with create/edit
   - **Messages**: Thread view with reply
-- [ ] Action buttons:
-  - "Create Invoice"
-  - "Upload Document"
-  - "Update Case Status"
+- [x] Action buttons:
+  - "Create Invoice" (CreateInvoiceModal)
+  - "Upload Document" (UploadDocumentModal)
+  - "Update Case Status" (EditCaseModal)
 
 ### 6.5: Build Case Creation Modal
-- [ ] Create case creation modal component:
+- [x] Create case creation modal component (CreateCaseModal.svelte):
   - Client selector (dropdown of all clients)
   - Case title input
   - Description textarea
   - Status selector (Active/Pending)
   - Submit button
-- [ ] POST to `/api/cases`
-- [ ] Redirect to new case detail page
-- [ ] Option to create from uncategorized thread
+- [x] POST to `/api/cases`
+- [x] Redirect to new case detail page
+- [x] Option to create from uncategorized thread (CreateCaseFromThreadModal.svelte)
 
 ### 6.6: Build Invoice Creation Modal
-- [ ] Create invoice modal component:
+- [x] Create invoice modal component (InvoiceModal.svelte - supports Create/Edit):
   - Case selector (dropdown)
   - Amount input (in dollars)
   - Description textarea
   - Due date picker
   - Submit button
-- [ ] POST to `/api/invoices`
-- [ ] Refresh data on success
+- [x] POST to `/api/invoices`
+- [x] Refresh data on success
 
 ### 6.7: Build Uncategorized Thread Modal
-- [ ] Create thread view modal:
+- [x] Create thread view modal (UncategorizedThreadModal.svelte):
   - Display all messages in thread
   - Client info at top
   - Reply input at bottom
@@ -679,8 +682,55 @@ session:
 
 ## SECTION 7: MESSAGING SYSTEM
 
+### 7.0: Messaging Stores & Infrastructure (NEW - SPA)
+- [x] Create `src/lib/stores/messages.svelte.ts` (Svelte 5 runes store):
+  - [x] Messages state with loading/error
+  - [x] `fetchMessages(caseId?, uncategorized?)` method
+  - [x] `sendMessage()` and `sendMessageWithAttachment()` methods
+  - [x] `markAsRead()` method
+  - [x] `fetchUnreadCounts()` method
+  - [x] `startPolling()` / `stopPolling()` methods
+- [x] Create `src/lib/stores/cases.svelte.ts`:
+  - [x] Cases list and currentCase state
+  - [x] `fetchCases()`, `fetchCase(id)`, `createCase()`, `updateCase()`, `deleteCase()`
+- [x] Create `src/lib/stores/documents.svelte.ts`:
+  - [x] Documents state with loading/error
+  - [x] `fetchDocuments(caseId)`, `uploadDocument()`, `getDownloadUrl()`
+- [x] Create `src/lib/stores/invoices.svelte.ts`:
+  - [x] Invoices state with loading/error
+  - [x] `fetchInvoices()`, `createInvoice()`, `updateInvoice()`, `deleteInvoice()`
+- [x] Create `src/lib/stores/toast.svelte.ts`:
+  - [x] Toast notifications array
+  - [x] `success()`, `error()`, `warning()`, `info()` methods
+  - [x] Auto-dismiss functionality
+
+### 7.0.1: UI Component Infrastructure (NEW)
+- [x] Create `src/lib/components/ui/Modal.svelte`:
+  - [x] Backdrop with click-to-close
+  - [x] Keyboard support (Escape to close)
+  - [x] Focus trap
+  - [x] Configurable sizes (sm, md, lg, xl)
+  - [x] Transitions
+- [x] Create `src/lib/components/ui/ConfirmDialog.svelte`:
+  - [x] Built on Modal component
+  - [x] Configurable title, message, confirm/cancel text
+  - [x] Variant support (danger, warning)
+  - [x] Loading state
+- [x] Create `src/lib/components/ui/Toast.svelte`:
+  - [x] Toast container with positioning
+  - [x] Type-specific icons and colors
+  - [x] Close button
+  - [x] Animation
+- [x] Create `src/lib/components/UnreadBadge.svelte`:
+  - [x] Configurable size (sm, md, lg)
+  - [x] Count display with 99+ truncation
+- [x] Create `src/lib/components/DocumentPreviewModal.svelte`:
+  - [x] Document metadata display
+  - [x] Image/PDF preview
+  - [x] Download button
+
 ### 7.1: Create Message API Endpoints
-- [ ] Create `/routes/api/messages/+server.ts`:
+- [x] Create `/routes/api/messages/+server.ts`:
 
 **GET Handler**:
 - [ ] Accept query params: `caseId` OR `uncategorized=true&clientId={id}`

@@ -1,3 +1,5 @@
+import { fetchWithRetry, getErrorMessage } from '$lib/utils/fetchWithRetry';
+
 type Case = {
 	id: string;
 	clientId: string;
@@ -25,13 +27,16 @@ class CasesStore {
 		this.loading = true;
 		this.error = null;
 		try {
-			const response = await fetch('/api/cases');
+			const response = await fetchWithRetry('/api/cases', {}, {
+				maxRetries: 2,
+				onRetry: (attempt) => console.log(`Retrying fetchCases (attempt ${attempt})...`)
+			});
 			if (!response.ok) throw new Error('Failed to fetch cases');
 			
 			const data = await response.json();
 			this.cases = data.cases || [];
 		} catch (err) {
-			this.error = err instanceof Error ? err.message : 'Unknown error';
+			this.error = getErrorMessage(err);
 		} finally {
 			this.loading = false;
 		}
@@ -41,14 +46,17 @@ class CasesStore {
 		this.loading = true;
 		this.error = null;
 		try {
-			const response = await fetch(`/api/cases?id=${id}`);
+			const response = await fetchWithRetry(`/api/cases?id=${id}`, {}, {
+				maxRetries: 2,
+				onRetry: (attempt) => console.log(`Retrying fetchCase (attempt ${attempt})...`)
+			});
 			if (!response.ok) throw new Error('Failed to fetch case');
 			
 			const data = await response.json();
 			this.currentCase = data.case;
 			return data.case;
 		} catch (err) {
-			this.error = err instanceof Error ? err.message : 'Unknown error';
+			this.error = getErrorMessage(err);
 			return null;
 		} finally {
 			this.loading = false;
@@ -129,6 +137,14 @@ class CasesStore {
 		} finally {
 			this.loading = false;
 		}
+	}
+
+	async archiveCase(id: string) {
+		return this.updateCase(id, { status: 'closed' as const });
+	}
+
+	async reopenCase(id: string) {
+		return this.updateCase(id, { status: 'active' as const });
 	}
 }
 

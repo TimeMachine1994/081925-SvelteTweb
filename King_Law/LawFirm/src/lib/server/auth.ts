@@ -63,12 +63,14 @@ export async function createSession(token: string, userId: string) {
 	console.log('📝 createSession called for userId:', userId);
 	const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
 	console.log('Generated sessionId:', sessionId.substring(0, 10) + '...');
+	// Store expiresAt as unix timestamp (seconds)
+	const expiresAt = Math.floor((Date.now() + 1000 * 60 * 60 * 24 * 30) / 1000); // 30 days
 	const sessionData = {
 		id: sessionId,
 		userId,
-		expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30) // 30 days
+		expiresAt
 	};
-	console.log('Session expires at:', sessionData.expiresAt.toISOString());
+	console.log('Session expires at:', new Date(expiresAt * 1000).toISOString());
 	await db.insert(session).values(sessionData);
 	console.log('✅ Session inserted into database');
 	return sessionData;
@@ -95,22 +97,26 @@ export async function validateSessionToken(token: string) {
 	console.log('Session user:', { id: dbUser.id, username: dbUser.username, role: dbUser.role });
 	console.log('Session expires:', new Date(dbSession.expiresAt).toISOString());
 
-	if (Date.now() >= dbSession.expiresAt.getTime()) {
+	// expiresAt is stored as unix timestamp (seconds) in the database
+	const expiresAtMs = dbSession.expiresAt * 1000;
+	
+	if (Date.now() >= expiresAtMs) {
 		console.log('❌ Session expired, deleting...');
 		await db.delete(session).where(eq(session.id, sessionId));
 		return { session: null, user: null };
 	}
 	console.log('✅ Session is valid');
 
-	// Extend session if it's past halfway through its lifetime
-	if (Date.now() >= dbSession.expiresAt.getTime() - 1000 * 60 * 60 * 24 * 15) {
+	// Extend session if it's past halfway through its lifetime (15 days)
+	const fifteenDaysMs = 1000 * 60 * 60 * 24 * 15;
+	if (Date.now() >= expiresAtMs - fifteenDaysMs) {
 		console.log('🔄 Extending session expiration...');
-		dbSession.expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
+		const newExpiresAt = Math.floor((Date.now() + 1000 * 60 * 60 * 24 * 30) / 1000);
 		await db
 			.update(session)
-			.set({ expiresAt: dbSession.expiresAt })
+			.set({ expiresAt: newExpiresAt })
 			.where(eq(session.id, sessionId));
-		console.log('✅ Session extended to:', dbSession.expiresAt.toISOString());
+		console.log('✅ Session extended to:', new Date(newExpiresAt * 1000).toISOString());
 	}
 
 	return { session: dbSession, user: dbUser };
