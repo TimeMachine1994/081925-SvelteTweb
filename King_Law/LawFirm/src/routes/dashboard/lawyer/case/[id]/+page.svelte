@@ -69,7 +69,7 @@
 		if (!currentCase) return;
 
 		const result = await casesStore.updateCase(caseId!, { 
-			status: newStatus as 'active' | 'pending' | 'closed' 
+			status: newStatus as 'open' | 'closed' | 'archived' 
 		});
 
 		if (result.success) {
@@ -195,15 +195,15 @@
 					<select
 						value={currentCase.status}
 						onchange={handleStatusChange}
-						class="px-3 py-1 rounded-full border-2 bg-background cursor-pointer {currentCase.status === 'active'
+						class="px-3 py-1 rounded-full border-2 bg-background cursor-pointer {currentCase.status === 'open'
 							? 'border-green-500 text-green-800 dark:text-green-400'
-							: currentCase.status === 'pending'
-								? 'border-yellow-500 text-yellow-800 dark:text-yellow-400'
+							: currentCase.status === 'archived'
+								? 'border-amber-500 text-amber-800 dark:text-amber-400'
 								: 'border-gray-500 text-gray-800 dark:text-gray-400'}"
 					>
-						<option value="pending">Pending</option>
-						<option value="active">Active</option>
+						<option value="open">Open</option>
 						<option value="closed">Closed</option>
+						<option value="archived">Archived</option>
 					</select>
 
 					<button
@@ -216,7 +216,7 @@
 						</svg>
 					</button>
 
-					{#if currentCase.status !== 'closed'}
+					{#if currentCase.status !== 'archived'}
 						<button
 							onclick={async () => {
 								const result = await casesStore.archiveCase(currentCase.id);

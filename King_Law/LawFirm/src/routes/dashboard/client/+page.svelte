@@ -7,10 +7,11 @@
 	import { toastStore } from '$lib/stores/toast.svelte';
 	import Toast from '$lib/components/ui/Toast.svelte';
 	import DashboardSkeleton from '$lib/components/ui/DashboardSkeleton.svelte';
+	import MessageComposer from '$lib/components/MessageComposer.svelte';
 
 	let loading = $state(true);
 
-	let activeCases = $derived(casesStore.cases.filter(c => c.case.status === 'active').length);
+	let openCases = $derived(casesStore.cases.filter(c => c.case.status === 'open').length);
 	let totalUnpaid = $derived(
 		invoicesStore.invoices
 			.filter(i => i.invoice.status !== 'paid')
@@ -63,8 +64,8 @@
 	<div class="grid md:grid-cols-4 gap-6 mb-8">
 		<div class="bg-background border border-border rounded-lg p-6">
 			<div class="text-3xl mb-2">📁</div>
-			<div class="text-2xl font-bold">{activeCases}</div>
-			<div class="text-sm text-muted-foreground">Active Cases</div>
+			<div class="text-2xl font-bold">{openCases}</div>
+			<div class="text-sm text-muted-foreground">Open Cases</div>
 		</div>
 
 		<div class="bg-background border border-border rounded-lg p-6">
@@ -104,10 +105,10 @@
 								{caseItem.case.title}
 							</h3>
 							<span
-								class="text-xs px-2 py-1 rounded-full {caseItem.case.status === 'active'
+								class="text-xs px-2 py-1 rounded-full {caseItem.case.status === 'open'
 									? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-									: caseItem.case.status === 'pending'
-										? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
+									: caseItem.case.status === 'archived'
+										? 'bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-400'
 										: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'}"
 							>
 								{caseItem.case.status}
@@ -125,18 +126,21 @@
 				{/each}
 			</div>
 		{:else}
-			<div class="bg-background border border-border rounded-lg p-8 text-center">
-				<div class="text-4xl mb-4">📋</div>
-				<h3 class="font-semibold text-lg mb-2">No Active Cases</h3>
-				<p class="text-muted-foreground mb-4">
-					You don't have any cases yet. Contact us to get started.
-				</p>
-				<a
-					href="/contact"
-					class="inline-block bg-gold hover:bg-gold-dark text-black font-semibold px-6 py-2 rounded-md transition-colors"
-				>
-					Contact Us
-				</a>
+			<div class="bg-background border border-border rounded-lg p-8">
+				<div class="text-center mb-6">
+					<div class="text-4xl mb-4">👋</div>
+					<h3 class="font-semibold text-xl mb-2">Welcome to King Law Firm</h3>
+					<p class="text-muted-foreground">
+						You don't have any active cases yet. Send us a message to get started, and you can attach any relevant documents.
+					</p>
+				</div>
+				
+				<MessageComposer 
+					caseId={null}
+					placeholder="Tell us about your legal matter..."
+					showHistory={true}
+					onMessageSent={() => messagesStore.fetchMessages(undefined, true)}
+				/>
 			</div>
 		{/if}
 	</div>

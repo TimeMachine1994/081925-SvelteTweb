@@ -43,7 +43,7 @@ export const GET: RequestHandler = async ({ locals }) => {
 
 		// Calculate stats
 		const totalCases = lawyerCases.length;
-		const activeCases = lawyerCases.filter((c) => c.status === 'active').length;
+		const openCases = lawyerCases.filter((c) => c.status === 'open').length;
 		const totalDocuments = allDocuments.length;
 		const paidInvoices = allInvoices.filter((i) => i.status === 'paid');
 		const totalRevenue = paidInvoices.reduce((sum, inv) => sum + inv.paidAmount, 0);
@@ -60,7 +60,7 @@ export const GET: RequestHandler = async ({ locals }) => {
 		return json({
 			stats: {
 				totalCases,
-				activeCases,
+				activeCases: openCases,
 				totalDocuments,
 				totalRevenue,
 				uncategorizedMessages: uncategorizedCount.length

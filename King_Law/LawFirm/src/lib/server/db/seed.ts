@@ -90,7 +90,7 @@ async function seed() {
 			lawyerId: lawyerId,
 			title: 'Sample Case',
 			description: 'This is a sample case for testing purposes',
-			status: 'active'
+			status: 'open'
 		});
 		console.log('✅ Created sample case');
 

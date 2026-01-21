@@ -6,10 +6,17 @@
 	import { messagesStore } from '$lib/stores/messages.svelte';
 	import { toastStore } from '$lib/stores/toast.svelte';
 	import CreateCaseModal from '$lib/components/CreateCaseModal.svelte';
+	import AssignToCaseModal from '$lib/components/AssignToCaseModal.svelte';
+	import InboxMessage from '$lib/components/InboxMessage.svelte';
 	import Toast from '$lib/components/ui/Toast.svelte';
 	import DashboardSkeleton from '$lib/components/ui/DashboardSkeleton.svelte';
 
+	let { data } = $props();
+
 	let showCreateCaseModal = $state(false);
+	let showAssignModal = $state(false);
+	let selectedMessage = $state<any>(null);
+	let uncategorizedMessages = $derived(data.uncategorizedMessages || []);
 	let loading = $state(true);
 	let searchQuery = $state('');
 	let statusFilter = $state('all');
@@ -91,6 +98,26 @@
 	function clearSearch() {
 		searchQuery = '';
 	}
+
+	function handleAssignMessage(e: CustomEvent<any>) {
+		selectedMessage = e.detail;
+		showAssignModal = true;
+	}
+
+	async function handleAssignmentComplete() {
+		showAssignModal = false;
+		selectedMessage = null;
+		toastStore.success('Message assigned to case successfully');
+		// Refresh uncategorized messages
+		try {
+			const response = await fetch('/dashboard/lawyer');
+			const html = await response.text();
+			// Reload the page data by invalidating
+			window.location.reload();
+		} catch (error) {
+			console.error('Failed to refresh:', error);
+		}
+	}
 </script>
 
 <Toast />
@@ -109,6 +136,29 @@
 			+ New Case
 		</button>
 	</div>
+
+	<!-- New Client Inquiries Section -->
+	{#if uncategorizedMessages.length > 0}
+		<div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-6">
+			<div class="flex items-center justify-between mb-4">
+				<h2 class="font-title text-xl flex items-center gap-2">
+					<span class="text-2xl">📬</span>
+					New Client Inquiries
+					<span class="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+						{uncategorizedMessages.length}
+					</span>
+				</h2>
+			</div>
+			<p class="text-sm text-muted-foreground mb-4">
+				These messages are from clients without an assigned case. Assign them to create or link to a case.
+			</p>
+			<div class="space-y-3">
+				{#each uncategorizedMessages as msg}
+					<InboxMessage message={msg} on:assign={handleAssignMessage} />
+				{/each}
+			</div>
+		</div>
+	{/if}
 
 	<!-- Stats Cards -->
 	<div class="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -171,9 +221,9 @@
 					class="px-3 py-2 border border-input rounded-md bg-background"
 				>
 					<option value="all">All Status</option>
-					<option value="active">Active</option>
-					<option value="pending">Pending</option>
+					<option value="open">Open</option>
 					<option value="closed">Closed</option>
+					<option value="archived">Archived</option>
 				</select>
 			</div>
 		</div>
@@ -188,10 +238,10 @@
 						<div class="flex justify-between items-start mb-2">
 							<h3 class="font-semibold truncate flex-1 mr-2">{caseItem.case.title}</h3>
 							<span
-								class="text-xs px-2 py-1 rounded-full border shrink-0 {caseItem.case.status === 'active'
+								class="text-xs px-2 py-1 rounded-full border shrink-0 {caseItem.case.status === 'open'
 									? 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800'
-									: caseItem.case.status === 'pending'
-										? 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800'
+									: caseItem.case.status === 'archived'
+										? 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800'
 										: 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800'}"
 							>
 								{caseItem.case.status}
@@ -243,4 +293,11 @@
 	open={showCreateCaseModal} 
 	onclose={() => showCreateCaseModal = false}
 	oncreated={handleCaseCreated}
+/>
+
+<AssignToCaseModal
+	open={showAssignModal}
+	message={selectedMessage}
+	onclose={() => { showAssignModal = false; selectedMessage = null; }}
+	onassigned={handleAssignmentComplete}
 />

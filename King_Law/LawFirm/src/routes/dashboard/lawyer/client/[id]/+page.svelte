@@ -152,9 +152,9 @@
 			</div>
 			<div class="bg-background border border-border rounded-lg p-4 shadow-sm">
 				<div class="text-2xl font-bold text-green-600">
-					{cases.filter(c => c.case.status === 'active').length}
+					{cases.filter(c => c.case.status === 'open').length}
 				</div>
-				<div class="text-sm text-muted-foreground">Active Cases</div>
+				<div class="text-sm text-muted-foreground">Open Cases</div>
 			</div>
 			<div class="bg-background border border-border rounded-lg p-4 shadow-sm">
 				<div class="text-2xl font-bold text-gold">{formatCurrency(totalPaid)}</div>
@@ -179,10 +179,10 @@
 							<div class="flex justify-between items-start mb-2">
 								<h3 class="font-semibold truncate flex-1 mr-2">{caseItem.case.title}</h3>
 								<span
-									class="text-xs px-2 py-1 rounded-full border shrink-0 {caseItem.case.status === 'active'
+									class="text-xs px-2 py-1 rounded-full border shrink-0 {caseItem.case.status === 'open'
 										? 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800'
-										: caseItem.case.status === 'pending'
-											? 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400 dark:border-yellow-800'
+										: caseItem.case.status === 'archived'
+											? 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800'
 											: 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800'}"
 								>
 									{caseItem.case.status}

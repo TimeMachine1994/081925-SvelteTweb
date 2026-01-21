@@ -36,7 +36,7 @@
 	let formData = $state({
 		title: '',
 		description: '',
-		status: 'active' as 'pending' | 'active' | 'closed',
+		status: 'open' as 'open' | 'closed' | 'archived',
 		linkMessages: true
 	});
 
@@ -110,7 +110,7 @@
 		formData = {
 			title: '',
 			description: '',
-			status: 'active',
+			status: 'open',
 			linkMessages: true
 		};
 		error = null;
@@ -208,8 +208,8 @@
 				bind:value={formData.status}
 				class="w-full px-3 py-2 border border-input rounded-md bg-background"
 			>
-				<option value="pending">Pending</option>
-				<option value="active">Active</option>
+				<option value="open">Open</option>
+				<option value="closed">Closed</option>
 			</select>
 		</div>
 

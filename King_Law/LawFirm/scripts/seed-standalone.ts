@@ -110,7 +110,7 @@ async function seed() {
 			lawyerId: lawyerId,
 			title: caseTitles[i],
 			description: `Sample case for ${clients[i].firstName} ${clients[i].lastName}`,
-			status: 'active',
+			status: 'open',
 			createdAt: new Date(),
 			updatedAt: new Date()
 		});

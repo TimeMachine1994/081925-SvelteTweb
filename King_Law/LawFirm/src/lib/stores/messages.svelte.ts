@@ -210,6 +210,43 @@ class MessagesStore {
 		if (!caseId) return this.unreadCounts.uncategorized;
 		return this.unreadCounts.byCaseId[caseId] || 0;
 	}
+
+	async assignToCase(
+		messageId: string,
+		caseId?: string,
+		createNewCase?: boolean,
+		caseTitle?: string,
+		caseDescription?: string
+	): Promise<{ success: boolean; error?: string }> {
+		try {
+			const response = await fetch('/api/messages/assign', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					messageId,
+					caseId,
+					createNewCase,
+					caseTitle,
+					caseDescription
+				})
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => ({}));
+				throw new Error(errorData.message || 'Failed to assign message');
+			}
+
+			// Refresh uncategorized messages
+			await this.fetchMessages(undefined, true);
+
+			return { success: true };
+		} catch (err: any) {
+			return {
+				success: false,
+				error: err.message || 'Failed to assign message to case'
+			};
+		}
+	}
 }
 
 export const messagesStore = new MessagesStore();

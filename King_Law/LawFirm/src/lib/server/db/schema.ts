@@ -33,9 +33,9 @@ export const cases = sqliteTable('cases', {
 		.references(() => user.id, { onDelete: 'restrict' }),
 	title: text('title').notNull(),
 	description: text('description'),
-	status: text('status', { enum: ['active', 'pending', 'closed'] })
+	status: text('status', { enum: ['open', 'closed', 'archived'] })
 		.notNull()
-		.default('pending'),
+		.default('open'),
 	createdAt: integer('created_at', { mode: 'timestamp' })
 		.notNull()
 		.default(sql`(unixepoch())`),

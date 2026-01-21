@@ -32,7 +32,7 @@ export const GET = async ({ locals }: RequestEvent) => {
 				const caseStats = await db
 					.select({
 						total: sql<number>`count(*)`,
-						active: sql<number>`sum(case when ${casesTable.status} = 'active' then 1 else 0 end)`
+						active: sql<number>`sum(case when ${casesTable.status} = 'open' then 1 else 0 end)`
 					})
 					.from(casesTable)
 					.where(eq(casesTable.clientId, client.id));

@@ -6,7 +6,7 @@ type Case = {
 	lawyerId: string;
 	title: string;
 	description: string | null;
-	status: 'active' | 'pending' | 'closed';
+	status: 'open' | 'closed' | 'archived';
 	createdAt: Date;
 	updatedAt: Date;
 };
@@ -140,11 +140,15 @@ class CasesStore {
 	}
 
 	async archiveCase(id: string) {
-		return this.updateCase(id, { status: 'closed' as const });
+		return this.updateCase(id, { status: 'archived' as const });
 	}
 
 	async reopenCase(id: string) {
-		return this.updateCase(id, { status: 'active' as const });
+		return this.updateCase(id, { status: 'open' as const });
+	}
+
+	async closeCase(id: string) {
+		return this.updateCase(id, { status: 'closed' as const });
 	}
 }
 

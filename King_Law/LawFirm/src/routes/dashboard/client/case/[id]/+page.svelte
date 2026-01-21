@@ -130,10 +130,10 @@
 				</p>
 			</div>
 			<span
-				class="text-xs px-3 py-1 rounded-full {currentCase.status === 'active'
+				class="text-xs px-3 py-1 rounded-full {currentCase.status === 'open'
 					? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-					: currentCase.status === 'pending'
-						? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
+					: currentCase.status === 'archived'
+						? 'bg-amber-100 text-amber-800 dark:bg-amber-900/20 dark:text-amber-400'
 						: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'}"
 			>
 				{currentCase.status}

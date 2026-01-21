@@ -29,7 +29,7 @@
 		clientId: '',
 		title: '',
 		description: '',
-		status: 'pending' as 'pending' | 'active' | 'closed'
+		status: 'open' as 'open' | 'closed' | 'archived'
 	});
 
 	let searchQuery = $state('');
@@ -109,7 +109,7 @@
 			clientId: '',
 			title: '',
 			description: '',
-			status: 'pending'
+			status: 'open'
 		};
 		searchQuery = '';
 		error = null;
@@ -122,6 +122,14 @@
 	}
 
 	let selectedClient = $derived(clients.find((c) => c.id === formData.clientId));
+
+	// Derived state for form validation - ensures proper reactivity
+	let canSubmit = $derived(
+		!submitting && 
+		formData.clientId !== '' && 
+		formData.title.trim() !== '' && 
+		formData.description.trim().length >= 20
+	);
 </script>
 
 <Modal {open} title="Create New Case" size="lg" onclose={handleClose}>
@@ -236,8 +244,8 @@
 				bind:value={formData.status}
 				class="w-full px-3 py-2 border border-input rounded-md bg-background"
 			>
-				<option value="pending">Pending</option>
-				<option value="active">Active</option>
+				<option value="open">Open</option>
+				<option value="closed">Closed</option>
 			</select>
 		</div>
 
@@ -253,7 +261,7 @@
 			</button>
 			<button
 				type="submit"
-				disabled={submitting || !formData.clientId || !formData.title || formData.description.length < 20}
+				disabled={!canSubmit}
 				class="px-6 py-2 bg-gold hover:bg-gold-dark text-black font-semibold rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 			>
 				{submitting ? 'Creating...' : 'Create Case'}

@@ -7,7 +7,7 @@
 		id: string;
 		title: string;
 		description: string | null;
-		status: 'pending' | 'active' | 'closed';
+		status: 'open' | 'closed' | 'archived';
 	};
 
 	let { 
@@ -28,7 +28,7 @@
 	let formData = $state({
 		title: '',
 		description: '',
-		status: 'pending' as 'pending' | 'active' | 'closed'
+		status: 'open' as 'open' | 'closed' | 'archived'
 	});
 
 	$effect(() => {
@@ -135,9 +135,9 @@
 				bind:value={formData.status}
 				class="w-full px-3 py-2 border border-input rounded-md bg-background"
 			>
-				<option value="pending">Pending</option>
-				<option value="active">Active</option>
+				<option value="open">Open</option>
 				<option value="closed">Closed</option>
+				<option value="archived">Archived</option>
 			</select>
 		</div>
 

@@ -219,7 +219,7 @@
 | Feature | Status | Notes |
 |---------|--------|-------|
 | ChatSlider in client layout | ✅ READY | Fixed position |
-| ChatSlider in lawyer layout | ⚠️ PARTIAL | Needs verification |
+| ChatSlider in lawyer layout | ✅ READY | Integrated with message polling |
 | Case-specific chat in detail pages | ✅ READY | Filters by caseId |
 
 ---
