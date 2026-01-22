@@ -16,7 +16,7 @@ import { adminDb } from '$lib/server/firebase';
 import { error as svelteKitError, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { verifyMuxWebhookSignature } from '$lib/server/mux';
-import { MUX_WEBHOOK_SECRET } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 
 console.log('🔔 [MUX WEBHOOK] Webhook handler loaded and ready');
 
@@ -38,7 +38,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		// Verify webhook signature
 		console.log('🔐 [MUX WEBHOOK] Verifying webhook signature...');
-		const isValid = verifyMuxWebhookSignature(body, signature, MUX_WEBHOOK_SECRET);
+		const isValid = verifyMuxWebhookSignature(body, signature, env.MUX_WEBHOOK_SECRET);
 
 		if (!isValid) {
 			console.error('❌ [MUX WEBHOOK] Invalid webhook signature');

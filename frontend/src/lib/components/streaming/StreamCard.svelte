@@ -467,7 +467,6 @@
 					<p class="mt-4 text-xs text-green-700 italic">
 						💡 These credentials are permanent and will work anytime you're ready to stream.
 					</p>
-				</div>
 			{/if}
 
 			<!-- Arming Controls (Admin Only) -->

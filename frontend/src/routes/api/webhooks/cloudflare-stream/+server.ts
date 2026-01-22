@@ -1,7 +1,7 @@
 import { adminDb } from '$lib/server/firebase';
 import { json, error as svelteError } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { CLOUDFLARE_WEBHOOK_SECRET } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 
 /**
  * Verify Cloudflare webhook signature
@@ -45,7 +45,7 @@ async function verifyWebhookSignature(
 	const encoder = new TextEncoder();
 	const key = await crypto.subtle.importKey(
 		'raw',
-		encoder.encode(CLOUDFLARE_WEBHOOK_SECRET),
+		encoder.encode(env.CLOUDFLARE_WEBHOOK_SECRET),
 		{ name: 'HMAC', hash: 'SHA-256' },
 		false,
 		['sign']

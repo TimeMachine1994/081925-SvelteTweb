@@ -1,9 +1,11 @@
 // Cloudflare Stream API Client
 // Handles Live Input creation and Live Output configuration
 
-import { CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 
-const CLOUDFLARE_API_BASE = `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/stream`;
+function getApiBase() {
+	return `https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCOUNT_ID}/stream`;
+}
 
 interface CloudflareAPIResponse<T> {
 	result: T;
@@ -49,13 +51,13 @@ export async function createLiveInput(name: string): Promise<{
 	rtmpsStreamKey: string;
 }> {
 	console.log('🎬 [Cloudflare] Creating Live Input:', name);
-	console.log('🔑 [Cloudflare] Account ID:', CLOUDFLARE_ACCOUNT_ID ? 'SET' : 'MISSING');
-	console.log('🔑 [Cloudflare] API Token:', CLOUDFLARE_API_TOKEN ? `SET (${CLOUDFLARE_API_TOKEN.substring(0, 10)}...)` : 'MISSING');
+	console.log('🔑 [Cloudflare] Account ID:', env.CLOUDFLARE_ACCOUNT_ID ? 'SET' : 'MISSING');
+	console.log('🔑 [Cloudflare] API Token:', env.CLOUDFLARE_API_TOKEN ? `SET (${env.CLOUDFLARE_API_TOKEN.substring(0, 10)}...)` : 'MISSING');
 
-	const response = await fetch(`${CLOUDFLARE_API_BASE}/live_inputs`, {
+	const response = await fetch(`${getApiBase()}/live_inputs`, {
 		method: 'POST',
 		headers: {
-			Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`,
+			Authorization: `Bearer ${env.CLOUDFLARE_API_TOKEN}`,
 			'Content-Type': 'application/json'
 		},
 		body: JSON.stringify({
@@ -104,10 +106,10 @@ export async function getLiveInputStatus(liveInputId: string): Promise<{
 }> {
 	console.log('🔍 [Cloudflare] Checking Live Input status:', liveInputId);
 
-	const response = await fetch(`${CLOUDFLARE_API_BASE}/live_inputs/${liveInputId}`, {
+	const response = await fetch(`${getApiBase()}/live_inputs/${liveInputId}`, {
 		method: 'GET',
 		headers: {
-			Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`
+			Authorization: `Bearer ${env.CLOUDFLARE_API_TOKEN}`
 		}
 	});
 
@@ -150,10 +152,10 @@ export async function getStreamPlaybackUrl(videoUid: string): Promise<{
 }> {
 	console.log('🎥 [Cloudflare] Getting playback URL for video:', videoUid);
 
-	const response = await fetch(`${CLOUDFLARE_API_BASE}/${videoUid}`, {
+	const response = await fetch(`${getApiBase()}/${videoUid}`, {
 		method: 'GET',
 		headers: {
-			Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`
+			Authorization: `Bearer ${env.CLOUDFLARE_API_TOKEN}`
 		}
 	});
 
@@ -172,7 +174,7 @@ export async function getStreamPlaybackUrl(videoUid: string): Promise<{
 	return {
 		hlsUrl: data.result.playback?.hls,
 		dashUrl: data.result.playback?.dash,
-		embedUrl: `https://customer-${CLOUDFLARE_ACCOUNT_ID}.cloudflarestream.com/${videoUid}/iframe`
+		embedUrl: `https://customer-${env.CLOUDFLARE_ACCOUNT_ID}.cloudflarestream.com/${videoUid}/iframe`
 	};
 }
 
@@ -201,10 +203,10 @@ export async function getLiveInputVideos(liveInputId: string): Promise<{
 }> {
 	console.log('🎬 [Cloudflare] Getting videos for Live Input:', liveInputId);
 
-	const response = await fetch(`${CLOUDFLARE_API_BASE}/live_inputs/${liveInputId}/videos`, {
+	const response = await fetch(`${getApiBase()}/live_inputs/${liveInputId}/videos`, {
 		method: 'GET',
 		headers: {
-			Authorization: `Bearer ${CLOUDFLARE_API_TOKEN}`
+			Authorization: `Bearer ${env.CLOUDFLARE_API_TOKEN}`
 		}
 	});
 

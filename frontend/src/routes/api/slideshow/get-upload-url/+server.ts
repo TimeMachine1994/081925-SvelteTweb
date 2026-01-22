@@ -1,6 +1,6 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 
 /**
  * Generate a signed upload URL for direct Cloudflare Stream upload
@@ -16,7 +16,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	// Configuration check
-	if (!CLOUDFLARE_ACCOUNT_ID || !CLOUDFLARE_API_TOKEN) {
+	if (!env.CLOUDFLARE_ACCOUNT_ID || !env.CLOUDFLARE_API_TOKEN) {
 		console.error('❌ [GET UPLOAD URL API] Cloudflare credentials not configured');
 		return error(500, 'Cloudflare Stream not configured');
 	}
@@ -32,11 +32,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		// Request a signed upload URL from Cloudflare Stream
 		const response = await fetch(
-			`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/stream/direct_upload`,
+			`https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCOUNT_ID}/stream/direct_upload`,
 			{
 				method: 'POST',
 				headers: {
-					'Authorization': `Bearer ${CLOUDFLARE_API_TOKEN}`,
+					'Authorization': `Bearer ${env.CLOUDFLARE_API_TOKEN}`,
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify({

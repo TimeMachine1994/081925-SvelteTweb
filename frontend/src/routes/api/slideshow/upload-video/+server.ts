@@ -1,6 +1,6 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 
 /**
  * Upload slideshow video to Cloudflare Stream (server-side to avoid CORS)
@@ -17,7 +17,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	// Configuration check
-	if (!CLOUDFLARE_ACCOUNT_ID || !CLOUDFLARE_API_TOKEN) {
+	if (!env.CLOUDFLARE_ACCOUNT_ID || !env.CLOUDFLARE_API_TOKEN) {
 		console.error('❌ [UPLOAD VIDEO API] Cloudflare credentials not configured');
 		return error(500, 'Cloudflare Stream not configured');
 	}
@@ -59,11 +59,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		// Upload to Cloudflare Stream
 		const response = await fetch(
-			`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/stream`,
+			`https://api.cloudflare.com/client/v4/accounts/${env.CLOUDFLARE_ACCOUNT_ID}/stream`,
 			{
 				method: 'POST',
 				headers: {
-					'Authorization': `Bearer ${CLOUDFLARE_API_TOKEN}`,
+					'Authorization': `Bearer ${env.CLOUDFLARE_API_TOKEN}`,
 				},
 				body: cloudflareFormData
 			}

@@ -258,7 +258,7 @@
 
 		<!-- Chat Input Form (only if not archived) -->
 		{#if !archived}
-			<form class="chat-input" on:submit|preventDefault={sendMessage}>
+			<form class="chat-input" onsubmit={(e) => { e.preventDefault(); sendMessage(); }}>
 				<div class="input-row">
 					<input
 						type="text"

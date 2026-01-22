@@ -10,15 +10,28 @@
  */
 
 import Mux from '@mux/mux-node';
-import { MUX_TOKEN_ID, MUX_TOKEN_SECRET } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 
-// Initialize Mux client with credentials
-const mux = new Mux({
-	tokenId: MUX_TOKEN_ID,
-	tokenSecret: MUX_TOKEN_SECRET
-});
+// Lazy-initialized Mux client
+let muxClient: Mux | null = null;
 
-console.log('🎬 [MUX SERVICE] Mux client initialized');
+function getMux(): Mux {
+	if (!muxClient) {
+		muxClient = new Mux({
+			tokenId: env.MUX_TOKEN_ID,
+			tokenSecret: env.MUX_TOKEN_SECRET
+		});
+		console.log('🎬 [MUX SERVICE] Mux client initialized');
+	}
+	return muxClient;
+}
+
+// Proxy for backwards compatibility - exposes all Mux client properties
+const mux = {
+	get video() { return getMux().video; },
+	get chat() { return getMux().chat; },
+	get data() { return getMux().data; }
+};
 
 /**
  * Create a new Mux Live Stream
