@@ -1,7 +1,7 @@
 import { json, error as svelteError } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { adminDb } from '$lib/server/firebase';
-import { createLiveInput } from '$lib/server/cloudflare-stream';
+import { createMuxLiveStream } from '$lib/server/mux';
 import type { Encoder, CreateEncoderRequest } from '$lib/types/encoder';
 
 /**
@@ -72,21 +72,20 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 
 		console.log('🎬 [ENCODERS API] Creating encoder:', body.name);
 
-		// Create Cloudflare Live Input (persistent credentials)
-		const liveInput = await createLiveInput(body.name);
+		// Create Mux Live Stream (persistent credentials)
+		const muxStream = await createMuxLiveStream(body.name);
 
-		console.log('✅ [ENCODERS API] Cloudflare Live Input created:', liveInput.liveInputId);
+		console.log('✅ [ENCODERS API] Mux Live Stream created:', muxStream.id);
 
 		// Create encoder document
 		const encoderData = {
 			name: body.name.trim(),
 			description: body.description?.trim() || '',
 			credentials: {
-				cloudflareInputId: liveInput.liveInputId,
-				rtmpUrl: liveInput.rtmpsUrl,
-				streamKey: liveInput.rtmpsStreamKey,
-				whipUrl: liveInput.whipUrl,
-				whepUrl: liveInput.whepUrl || null
+				muxLiveStreamId: muxStream.id,
+				muxPlaybackId: muxStream.playbackId,
+				rtmpUrl: muxStream.rtmpUrl,
+				streamKey: muxStream.streamKey
 			},
 			status: 'available',
 			currentAssignment: null,

@@ -1,7 +1,7 @@
 import { adminDb } from '$lib/server/firebase';
 import { error as SvelteKitError, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { getLiveInputStatus, getStreamPlaybackUrl } from '$lib/server/cloudflare-stream';
+import { getMuxLiveStream } from '$lib/server/mux';
 
 /**
  * Manual endpoint to check and update stream status
@@ -22,54 +22,47 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		}
 
 		const streamData = streamDoc.data()!;
-		const cloudflareInputId = streamData.streamCredentials?.cloudflareInputId;
+		const muxLiveStreamId = streamData.mux?.liveStreamId;
 
-		if (!cloudflareInputId) {
-			console.log('⚠️ [CHECK STATUS] No Cloudflare Input ID found');
+		if (!muxLiveStreamId) {
+			console.log('⚠️ [CHECK STATUS] No Mux Live Stream ID found');
 			return json({
 				success: true,
 				streamId,
 				status: streamData.status,
-				message: 'Stream not armed or missing Cloudflare Input ID'
+				message: 'Stream not created with Mux or missing Live Stream ID'
 			});
 		}
 
-		// Check Cloudflare status
-		const cloudflareStatus = await getLiveInputStatus(cloudflareInputId);
-		console.log('📊 [CHECK STATUS] Cloudflare status:', cloudflareStatus);
+		// Check Mux status
+		const muxStream = await getMuxLiveStream(muxLiveStreamId);
+		const muxStatus = { status: muxStream.status };
+		console.log('📊 [CHECK STATUS] Mux status:', muxStatus);
 
-		// Determine new status
+		// Determine new status based on Mux status
 		let newStatus = streamData.status;
 		let updates: any = {
 			updatedAt: new Date().toISOString()
 		};
 
-		if (cloudflareStatus.isLive && streamData.status !== 'live') {
+		const isLive = muxStatus.status === 'active';
+
+		if (isLive && streamData.status !== 'live') {
 			// Stream just went live
 			newStatus = 'live';
 			updates.status = 'live';
 			updates.liveStartedAt = new Date().toISOString();
+			updates['mux.streamingStatus'] = 'active';
 			console.log('🔴 [CHECK STATUS] Stream is now LIVE');
-		} else if (!cloudflareStatus.isLive && streamData.status === 'live') {
+		} else if (!isLive && streamData.status === 'live') {
 			// Stream ended
 			newStatus = 'completed';
 			updates.status = 'completed';
 			updates.liveEndedAt = new Date().toISOString();
+			updates['mux.streamingStatus'] = 'idle';
 			console.log('⚪ [CHECK STATUS] Stream ENDED');
 
-			// Get recording playback URL if available
-			if (cloudflareStatus.videoUid) {
-				try {
-					const playbackUrls = await getStreamPlaybackUrl(cloudflareStatus.videoUid);
-					updates.playbackUrl = playbackUrls.hlsUrl;
-					updates.embedUrl = playbackUrls.embedUrl;
-					updates.recordingReady = true;
-					updates.cloudflareStreamId = cloudflareStatus.videoUid;
-					console.log('🎥 [CHECK STATUS] Recording available:', playbackUrls.hlsUrl);
-				} catch (err) {
-					console.error('❌ [CHECK STATUS] Failed to get playback URL:', err);
-				}
-			}
+			// Recording info will be updated via Mux webhooks
 		}
 
 		// Update if status changed
@@ -82,8 +75,8 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 			success: true,
 			streamId,
 			status: newStatus,
-			isLive: cloudflareStatus.isLive,
-			cloudflareStatus: cloudflareStatus.status,
+			isLive,
+			muxStatus: muxStatus.status,
 			updated: Object.keys(updates).length > 1
 		});
 	} catch (err: any) {

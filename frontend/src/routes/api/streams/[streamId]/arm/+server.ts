@@ -1,7 +1,7 @@
 import { adminDb } from '$lib/server/firebase';
 import { error as SvelteKitError, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { createLiveInput } from '$lib/server/cloudflare-stream';
+import { createMuxLiveStream } from '$lib/server/mux';
 import type { StreamArmType, StreamArmStatus, StreamCredentials } from '$lib/types/stream';
 
 export const POST: RequestHandler = async ({ locals, params, request }) => {
@@ -53,32 +53,30 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			throw SvelteKitError(403, 'Permission denied');
 		}
 
-		// Create Cloudflare Live Input based on arm type
+		// Create Mux Live Stream
 		let credentials: StreamCredentials = {};
+		let muxData: any = {};
 
-		console.log('📡 [ARM API] Creating Cloudflare Live Input...');
-		const liveInput = await createLiveInput(streamData.title);
+		console.log('📡 [ARM API] Creating Mux Live Stream...');
+		const muxStream = await createMuxLiveStream(streamData.title);
 
-		if (armType === 'mobile_input' || armType === 'mobile_streaming') {
-			// WHIP-based streaming
-			credentials = {
-				whipUrl: liveInput.whipUrl,
-				whepUrl: liveInput.whepUrl,
-				cloudflareInputId: liveInput.liveInputId
-			};
-			console.log('✅ [ARM API] WHIP credentials created');
-		} else if (armType === 'stream_key') {
-			// RTMP-based streaming (OBS)
-			credentials = {
-				rtmpUrl: liveInput.rtmpsUrl,
-				streamKey: liveInput.rtmpsStreamKey,
-				cloudflareInputId: liveInput.liveInputId,
-				whepUrl: liveInput.whepUrl // For playback
-			};
-			console.log('✅ [ARM API] RTMPS credentials created');
-			console.log('📺 [ARM API] RTMPS URL:', liveInput.rtmpsUrl);
-			console.log('🔑 [ARM API] Stream Key:', liveInput.rtmpsStreamKey);
-		}
+		// All arm types now use Mux RTMP
+		credentials = {
+			rtmpUrl: muxStream.rtmpUrl,
+			streamKey: muxStream.streamKey
+		};
+		
+		muxData = {
+			liveStreamId: muxStream.id,
+			playbackId: muxStream.playbackId,
+			rtmpUrl: muxStream.rtmpUrl,
+			streamKey: muxStream.streamKey,
+			streamingStatus: 'idle'
+		};
+
+		console.log('✅ [ARM API] Mux credentials created');
+		console.log('📺 [ARM API] RTMP URL:', muxStream.rtmpUrl);
+		console.log('🔑 [ARM API] Stream Key:', muxStream.streamKey);
 
 		// Create arm status
 		const armStatus: StreamArmStatus = {
@@ -92,6 +90,7 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 		await streamDoc.ref.update({
 			armStatus,
 			streamCredentials: credentials,
+			mux: muxData,
 			updatedAt: new Date().toISOString()
 		});
 

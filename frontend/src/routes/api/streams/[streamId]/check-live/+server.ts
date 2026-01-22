@@ -1,7 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { adminDb } from '$lib/server/firebase';
-import { getLiveInputVideos } from '$lib/server/cloudflare-stream';
+import { getMuxLiveStream } from '$lib/server/mux';
 
 /**
  * Check if a stream is actively broadcasting from OBS
@@ -28,32 +28,31 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 			throw error(404, 'Stream data not found');
 		}
 
-		// Get the cloudflareInputId from either new or legacy structure
-		const cloudflareInputId =
-			streamData.streamCredentials?.cloudflareInputId ||
-			streamData.cloudflareInputId;
+		// Get the Mux live stream ID
+		const muxLiveStreamId = streamData.mux?.liveStreamId;
+		const muxPlaybackId = streamData.mux?.playbackId;
 
-		if (!cloudflareInputId) {
+		if (!muxLiveStreamId) {
 			return json({
 				isLive: false,
-				message: 'No Cloudflare Input ID found for this stream'
+				message: 'No Mux Live Stream ID found for this stream'
 			});
 		}
 
-		console.log('🔍 [CHECK-LIVE] Checking stream:', streamId, 'Input ID:', cloudflareInputId);
+		console.log('🔍 [CHECK-LIVE] Checking stream:', streamId, 'Mux ID:', muxLiveStreamId);
 
-		// Get videos from Cloudflare
-		const { activeVideo } = await getLiveInputVideos(cloudflareInputId);
+		// Get status from Mux
+		const muxStream = await getMuxLiveStream(muxLiveStreamId);
+		const isLive = muxStream.status === 'active';
 
-		if (activeVideo) {
-			console.log('✅ [CHECK-LIVE] Stream is LIVE! Video UID:', activeVideo.uid);
+		if (isLive && muxPlaybackId) {
+			console.log('✅ [CHECK-LIVE] Stream is LIVE! Playback ID:', muxPlaybackId);
 			
 			return json({
 				isLive: true,
-				watchUrl: activeVideo.preview,
-				videoUid: activeVideo.uid,
-				hlsUrl: activeVideo.hlsUrl,
-				dashUrl: activeVideo.dashUrl
+				watchUrl: `https://stream.mux.com/${muxPlaybackId}.m3u8`,
+				playbackId: muxPlaybackId,
+				hlsUrl: `https://stream.mux.com/${muxPlaybackId}.m3u8`
 			});
 		}
 
@@ -66,8 +65,8 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 	} catch (err: any) {
 		console.error('❌ [CHECK-LIVE] Error:', err);
 		
-		// If it's a Cloudflare API error, return more details
-		if (err.message?.includes('Cloudflare API error')) {
+		// If it's a Mux API error, return more details
+		if (err.message?.includes('Mux') || err.message?.includes('mux')) {
 			return json({
 				isLive: false,
 				error: err.message
