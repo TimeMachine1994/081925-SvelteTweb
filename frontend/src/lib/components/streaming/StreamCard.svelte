@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Stream, StreamArmType } from '$lib/types/stream';
-	import { Video, Eye, EyeOff, Archive, StopCircle, Copy, Check, ChevronDown, Calendar, ExternalLink } from 'lucide-svelte';
+	import { Video, Eye, EyeOff, Archive, StopCircle, Copy, Check, ChevronDown, Calendar, ExternalLink, MessageCircle, MessageCircleOff } from 'lucide-svelte';
 	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
 
@@ -14,6 +14,10 @@
 	let showArmDropdown = $state(false);
 	let showEditTime = $state(false);
 	let editedStartTime = $state('');
+	
+	// Chat toggle state
+	let chatEnabled = $state(stream.chat?.enabled ?? true);
+	let togglingChat = $state(false);
 
 	// Live stream detection
 	let isStreamingLive = $state(false);
@@ -242,6 +246,32 @@
 			clearInterval(liveCheckInterval);
 		}
 	});
+
+	// Toggle chat enabled/disabled
+	async function handleChatToggle() {
+		togglingChat = true;
+		try {
+			const newState = !chatEnabled;
+			const response = await fetch(`/api/streams/${stream.id}/chat/toggle`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ enabled: newState })
+			});
+
+			if (response.ok) {
+				chatEnabled = newState;
+				console.log('💬 [StreamCard] Chat toggled to:', newState);
+			} else {
+				const data = await response.json();
+				alert(`Failed to toggle chat: ${data.message || 'Unknown error'}`);
+			}
+		} catch (error) {
+			console.error('❌ [StreamCard] Error toggling chat:', error);
+			alert('Failed to toggle chat');
+		} finally {
+			togglingChat = false;
+		}
+	}
 </script>
 
 <div
@@ -579,6 +609,24 @@
 					>
 						<svelte:component this={visibilityIcon} class="h-4 w-4" />
 						{(stream.visibility || 'public') === 'public' ? 'Hide' : (stream.visibility || 'public') === 'hidden' ? 'Archive' : 'Show'}
+					</button>
+				{/if}
+
+				<!-- Chat Toggle Button -->
+				{#if stream.mux?.playbackId}
+					<button
+						onclick={handleChatToggle}
+						disabled={togglingChat}
+						class="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50 {chatEnabled ? 'border border-green-300 bg-green-50 text-green-700 hover:bg-green-100' : 'border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100'}"
+						title="{chatEnabled ? 'Disable' : 'Enable'} chat for viewers"
+					>
+						{#if chatEnabled}
+							<MessageCircle class="h-4 w-4" />
+							Chat On
+						{:else}
+							<MessageCircleOff class="h-4 w-4" />
+							Chat Off
+						{/if}
 					</button>
 				{/if}
 			</div>

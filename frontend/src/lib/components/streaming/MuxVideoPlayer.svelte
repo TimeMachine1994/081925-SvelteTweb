@@ -14,11 +14,25 @@
 	 */
 
 	import '@mux/mux-player';
-	import type { Stream } from '$lib/types';
+
+	// Flexible stream interface for MuxVideoPlayer
+	// Accepts both the global Stream type and local component stream interfaces
+	interface MuxPlayerStream {
+		id: string;
+		title?: string;
+		status: string;
+		mux?: {
+			liveStreamId?: string;
+			playbackId?: string;
+			vodPlaybackId?: string;
+			streamingStatus?: 'idle' | 'active' | 'disconnected';
+			recordingReady?: boolean;
+		};
+	}
 
 	// Props interface with TypeScript
 	interface Props {
-		stream: Stream;
+		stream: MuxPlayerStream;
 		autoplay?: boolean;
 		muted?: boolean;
 		showTitle?: boolean;

@@ -12,6 +12,7 @@
 		title: string;
 		description?: string;
 		status: string;
+		memorialId?: string;
 		scheduledStartTime?: string;
 		cloudflareInputId?: string;
 		cloudflareStreamId?: string;
@@ -20,6 +21,8 @@
 		isVisible?: boolean;
 		recordingReady?: boolean;
 		createdAt: string;
+		updatedAt: string;
+		createdBy: string;
 		streamCredentials?: {
 			cloudflareInputId?: string;
 			whepUrl?: string;
@@ -350,8 +353,22 @@
 				{#each recordedStreams as stream (stream.id)}
 					<div class="stream-item">
 						{#if stream.mux?.recordingReady && stream.mux?.vodPlaybackId}
-							<!-- MUX PLATFORM - Recorded video player -->
-							<MuxVideoPlayer stream={stream} autoplay={false} showTitle={true} />
+							<!-- MUX PLATFORM - Recorded video player with archived chat -->
+							<div class="mux-stream-container">
+								<div class="video-column">
+									<MuxVideoPlayer stream={stream} autoplay={false} showTitle={true} />
+								</div>
+								
+								{#if stream.chat?.enabled}
+									<div class="chat-column">
+										<LiveChatWidget 
+											streamId={stream.id} 
+											enabled={stream.chat.enabled}
+											archived={true}
+										/>
+									</div>
+								{/if}
+							</div>
 						{:else}
 							<!-- LEGACY CLOUDFLARE - Fallback iframe player -->
 							<h3 class="stream-title">{stream.title}</h3>
