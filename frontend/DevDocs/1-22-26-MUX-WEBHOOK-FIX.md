@@ -108,6 +108,38 @@ When OBS streams to Mux:
 
 ---
 
+---
+
+# Stream Delete Not Reflecting in UI Fix
+
+**Issue:** Deleting a stream shows "success" but stream remains visible in admin page.
+
+## Root Cause
+
+The delete API uses **soft delete** (`isDeleted: true`) but queries didn't filter deleted streams.
+
+## Files Changed
+
+| File | Change |
+|------|--------|
+| `src/routes/admin/services/memorials/[memorialId]/+page.server.ts` | Added `.where('isDeleted', '!=', true)` to streams query |
+| `src/routes/[fullSlug]/+page.server.ts` | Added `.where('isDeleted', '!=', true)` to streams query |
+
+## Query Fix
+
+```typescript
+// Before (shows deleted streams)
+adminDb.collection('streams').where('memorialId', '==', memorialId).get()
+
+// After (filters out deleted streams)
+adminDb.collection('streams')
+    .where('memorialId', '==', memorialId)
+    .where('isDeleted', '!=', true)
+    .get()
+```
+
+---
+
 ## Reference
 
 - [Mux SDK Webhook Docs](https://github.com/muxinc/mux-node-sdk#verifying-webhook-signatures)

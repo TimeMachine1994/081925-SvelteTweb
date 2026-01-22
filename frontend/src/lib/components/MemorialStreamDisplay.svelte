@@ -162,13 +162,17 @@
 	// Categorize streams based on REAL-TIME status from liveStreams
 	// Live stream detection (respects scheduled times):
 	// 1. Status is explicitly 'live' (set by webhook when broadcast starts), OR
-	// 2. Stream is 'scheduled'/'ready' AND past scheduled start time (fallback if webhook delayed)
+	// 2. Mux streamingStatus is 'active' (immediate Mux webhook update), OR
+	// 3. Stream is 'scheduled'/'ready' AND past scheduled start time (fallback if webhook delayed)
 	let categorizedLiveStreams = $derived(
 		liveStreams.filter(s => {
 			if (s.isVisible === false) return false;
 			
 			// Explicitly marked as live by webhook
 			if (s.status === 'live') return true;
+			
+			// Mux platform: Check if streamingStatus is active (FIX: ensures Mux streams show as live)
+			if (s.mux?.streamingStatus === 'active') return true;
 			
 			// Fallback: If scheduled/ready BUT past the scheduled start time,
 			// treat as live (handles cases where webhook is delayed)
@@ -213,7 +217,7 @@
 	let recordedStreams = $derived(
 		liveStreams.filter(s => 
 			s.isVisible !== false && 
-			(s.status === 'completed' || s.recordingReady === true)
+			(s.status === 'completed' || s.recordingReady === true || s.mux?.recordingReady === true)
 		)
 	);
 	

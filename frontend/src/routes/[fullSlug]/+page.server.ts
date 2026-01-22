@@ -101,6 +101,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			const streamsSnapshot = await adminDb
 				.collection('streams')
 				.where('memorialId', '==', memorial.id)
+				.where('isDeleted', '!=', true)
 				.get();
 			
 			streams = streamsSnapshot.docs

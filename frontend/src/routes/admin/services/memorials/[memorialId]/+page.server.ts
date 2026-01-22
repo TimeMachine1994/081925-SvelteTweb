@@ -25,7 +25,10 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		// Load all data in parallel for performance
 		const [memorialDoc, streamsSnap, slideshowsSnap, followersSnap] = await Promise.all([
 			adminDb.collection('memorials').doc(memorialId).get(),
-			adminDb.collection('streams').where('memorialId', '==', memorialId).get(),
+			adminDb.collection('streams')
+				.where('memorialId', '==', memorialId)
+				.where('isDeleted', '!=', true)
+				.get(),
 			adminDb.collection('memorials').doc(memorialId).collection('slideshows').get(),
 			adminDb.collection('memorials').doc(memorialId).collection('followers').get()
 		]);
