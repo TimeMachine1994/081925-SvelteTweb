@@ -24,6 +24,9 @@
 	let targets = $state([1000, 10000, 100000]);
 	const margins = [0.10, 0.20, 0.30];
 
+	// CUSTOM PRICE ANALYSIS (state must be at top level)
+	let customPrices = $state([2.00, 5.00, 10.00]);
+
 	// REVENUE RUNES
 	const totalStartup = $derived(startupCosts.reduce((acc, item) => acc + item.price, 0));
 	const totalFixed = $derived(fixedCosts.reduce((acc, item) => acc + item.price, 0));
@@ -185,10 +188,10 @@
 		<p class="text-xs text-orange-700 mb-4">Set your own price and see what margin you'll actually get. Perfect for competitive pricing or testing specific price points.</p>
 		
 		<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-			{#each [2.00, 5.00, 10.00] as defaultPrice, idx}
-				{@const customPrice = $state(defaultPrice)}
-				{@const calculatedMargin = $derived((customPrice - unitCogs) / customPrice)}
-				{@const marginPercent = $derived(calculatedMargin * 100)}
+			{#each customPrices as _, idx}
+				{@const customPrice = customPrices[idx]}
+				{@const calculatedMargin = (customPrice - unitCogs) / unitCogs > 0 ? (customPrice - unitCogs) / customPrice : 0}
+				{@const marginPercent = calculatedMargin * 100}
 				
 				<div class="bg-white p-5 rounded-lg border border-orange-200 shadow-sm">
 					<div class="mb-4">
@@ -198,7 +201,7 @@
 							<input 
 								type="number" 
 								step="0.01" 
-								bind:value={customPrice}
+								bind:value={customPrices[idx]}
 								class="flex-1 text-2xl font-mono font-bold border-b-2 border-orange-300 text-right focus:border-orange-500 outline-none"
 							/>
 						</div>
