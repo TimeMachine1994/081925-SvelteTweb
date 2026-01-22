@@ -169,40 +169,34 @@ export async function getMuxAnalytics(assetId: string) {
 }
 
 /**
- * Verify Mux webhook signature
+ * Verify Mux webhook signature (Updated for @mux/mux-node v12+)
  * 
- * @param body - Raw request body
- * @param signature - Mux-Signature header value
- * @param secret - Webhook secret
+ * @param body - Raw request body string
+ * @param headers - Full request headers object
+ * @param secret - Webhook signing secret from Mux Dashboard
  * @returns True if signature is valid
  */
 export function verifyMuxWebhookSignature(
 	body: string,
-	signature: string | null,
+	headers: Headers,
 	secret: string
 ): boolean {
-	console.log('🔐 [MUX SERVICE] Verifying webhook signature');
-	console.log('🔐 [MUX SERVICE] Signature present:', !!signature);
+	console.log('🔐 [MUX SERVICE] Verifying webhook signature (v12+ API)');
 	console.log('🔐 [MUX SERVICE] Body length:', body.length);
-
-	if (!signature) {
-		console.warn('⚠️ [MUX SERVICE] No signature provided');
-		return false;
-	}
+	console.log('🔐 [MUX SERVICE] Has mux-signature header:', headers.has('mux-signature'));
 
 	try {
-		// Mux.Webhooks.verifyHeader for newer SDK versions
-		const isValid = Mux.Webhooks.verifyHeader(body, signature, secret);
+		// Create Mux instance with webhook secret for verification
+		const muxInstance = new Mux({ webhookSecret: secret });
 		
-		if (isValid) {
-			console.log('✅ [MUX SERVICE] Webhook signature valid');
-		} else {
-			console.warn('⚠️ [MUX SERVICE] Webhook signature invalid');
-		}
-
-		return isValid;
-	} catch (error) {
-		console.error('❌ [MUX SERVICE] Error verifying webhook signature:', error);
+		// v12+ API: verifySignature takes body, headers object, and secret
+		// This method THROWS on invalid signature, doesn't return boolean
+		muxInstance.webhooks.verifySignature(body, headers, secret);
+		
+		console.log('✅ [MUX SERVICE] Webhook signature valid');
+		return true;
+	} catch (error: any) {
+		console.error('❌ [MUX SERVICE] Webhook signature verification failed:', error?.message || error);
 		return false;
 	}
 }

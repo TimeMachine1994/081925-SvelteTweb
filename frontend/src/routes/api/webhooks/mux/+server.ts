@@ -29,20 +29,26 @@ export const POST: RequestHandler = async ({ request }) => {
 	console.log('🔔 [MUX WEBHOOK] Timestamp:', new Date().toISOString());
 
 	try {
-		// Get raw body and signature
+		// Get raw body and full headers for v12+ signature verification
 		const body = await request.text();
-		const signature = request.headers.get('mux-signature');
+		const headers = request.headers;
 
 		console.log('🔔 [MUX WEBHOOK] Body length:', body.length);
-		console.log('🔔 [MUX WEBHOOK] Signature present:', !!signature);
+		console.log('🔔 [MUX WEBHOOK] Has mux-signature header:', headers.has('mux-signature'));
 
-		// Verify webhook signature
+		// Verify webhook signature (v12+ API uses full headers object)
 		console.log('🔐 [MUX WEBHOOK] Verifying webhook signature...');
-		const isValid = verifyMuxWebhookSignature(body, signature, env.MUX_WEBHOOK_SECRET);
+		
+		if (!env.MUX_WEBHOOK_SECRET) {
+			console.error('❌ [MUX WEBHOOK] MUX_WEBHOOK_SECRET not configured');
+			throw svelteKitError(500, 'Webhook secret not configured');
+		}
+		
+		const isValid = verifyMuxWebhookSignature(body, headers, env.MUX_WEBHOOK_SECRET);
 
 		if (!isValid) {
 			console.error('❌ [MUX WEBHOOK] Invalid webhook signature');
-			console.error('❌ [MUX WEBHOOK] This may be a malicious request');
+			console.error('❌ [MUX WEBHOOK] This may be a malicious request or secret mismatch');
 			throw svelteKitError(401, 'Invalid webhook signature');
 		}
 
