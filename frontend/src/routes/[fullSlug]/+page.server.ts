@@ -109,6 +109,10 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 					const stream = {
 						id: doc.id,
 						...data,
+						// Mux streaming platform data (explicit for serialization)
+						mux: data.mux || null,
+						chat: data.chat || null,
+						// Timestamp conversions
 						createdAt: convertTimestamp(data.createdAt),
 						updatedAt: convertTimestamp(data.updatedAt),
 						scheduledStartTime: convertTimestamp(data.scheduledStartTime),

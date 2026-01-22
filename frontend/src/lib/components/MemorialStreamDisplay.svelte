@@ -33,6 +33,25 @@
 		dashUrl?: string;
 		liveStartedAt?: string;
 		liveEndedAt?: string;
+		
+		// Mux streaming platform data (FIX-C)
+		mux?: {
+			liveStreamId: string;
+			playbackId: string;
+			rtmpUrl: string;
+			streamKey: string;
+			streamingStatus?: 'idle' | 'active' | 'disconnected';
+			assetId?: string;
+			vodPlaybackId?: string;
+			recordingReady?: boolean;
+			duration?: number;
+		};
+		
+		// Chat configuration (FIX-C)
+		chat?: {
+			enabled: boolean;
+			archived: boolean;
+		};
 	}
 	
 	interface EmergencyEmbed {

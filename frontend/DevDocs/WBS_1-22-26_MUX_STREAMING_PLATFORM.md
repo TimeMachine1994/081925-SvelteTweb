@@ -638,4 +638,139 @@ This blocks the primary admin workflow for setting up OBS streaming.
 
 ---
 
+## 15. FIX C: MEMORIAL PAGE LIVE/RECORDING DISPLAY (Jan 22, 2026)
+
+### Objective
+When a Mux stream goes live, replace the placeholder with the live video player on the memorial page. When the stream ends, show the recording in its place.
+
+### Current State Analysis
+
+#### What's Already Built ✅
+1. **MuxVideoPlayer.svelte** - Handles both live (`mux.playbackId`) and VOD (`mux.vodPlaybackId`) playback
+2. **MemorialStreamDisplay.svelte** - Has Mux integration:
+   - Line 256: Checks `stream.mux?.playbackId` for live streams
+   - Line 333: Checks `stream.mux?.recordingReady && stream.mux?.vodPlaybackId` for recordings
+3. **Mux Webhook Handler** - Updates Firestore when:
+   - Stream goes live: `status: 'live'`, `mux.streamingStatus: 'active'`
+   - Recording ready: `status: 'completed'`, `mux.vodPlaybackId`, `mux.recordingReady: true`
+4. **Real-time Firestore Listeners** - MemorialStreamDisplay subscribes to stream updates
+
+#### Potential Gaps Identified
+1. `/[fullSlug]/+page.server.ts` - Uses `...data` spread but `mux` may need explicit handling
+2. `MemorialStreamDisplay.svelte` - Stream interface doesn't include `mux` type definition
+3. Initial page load may not include `mux` data from Firestore
+
+### Data Flow (Expected)
+
+```
+1. ADMIN ARMS STREAM
+   └─ API saves: mux.liveStreamId, mux.playbackId, mux.rtmpUrl, mux.streamKey
+
+2. ADMIN STREAMS VIA OBS
+   └─ OBS sends RTMP to Mux
+
+3. MUX FIRES WEBHOOK: video.live_stream.active
+   └─ Webhook handler updates: status='live', mux.streamingStatus='active'
+
+4. MEMORIAL PAGE DETECTS CHANGE
+   └─ Firestore listener triggers update
+   └─ categorizedLiveStreams includes the stream
+   └─ MuxVideoPlayer renders with mux.playbackId
+
+5. VIEWER WATCHES LIVE
+
+6. ADMIN STOPS STREAM
+   └─ Mux fires: video.live_stream.idle
+
+7. MUX PROCESSES RECORDING
+   └─ Mux fires: video.asset.ready
+   └─ Webhook handler updates: status='completed', mux.vodPlaybackId, mux.recordingReady=true
+
+8. MEMORIAL PAGE SHOWS RECORDING
+   └─ recordedStreams includes the stream
+   └─ MuxVideoPlayer renders with mux.vodPlaybackId
+```
+
+### TODO List
+
+#### Phase 1: Data Layer Fixes
+- [ ] **FIX-C-1:** Add explicit `mux` property to stream mapping in `/[fullSlug]/+page.server.ts`
+- [ ] **FIX-C-2:** Update Stream interface in `MemorialStreamDisplay.svelte` to include `mux` type
+
+#### Phase 2: Component Verification
+- [ ] **FIX-C-3:** Verify MuxVideoPlayer correctly determines playbackId (live vs VOD)
+- [ ] **FIX-C-4:** Verify MemorialStreamDisplay categorization logic works with Mux streams
+- [ ] **FIX-C-5:** Ensure Firestore real-time listeners update UI when webhook fires
+
+#### Phase 3: Testing
+- [ ] **FIX-C-6:** Test live stream detection (OBS → Mux → Memorial page shows video)
+- [ ] **FIX-C-7:** Test recording playback (stream ends → recording appears on memorial page)
+- [ ] **FIX-C-8:** Test placeholder behavior (no stream armed → shows placeholder)
+
+### Files Involved
+
+| File | Change Required |
+|------|-----------------|
+| `src/routes/[fullSlug]/+page.server.ts` | Add explicit `mux` property to stream mapping |
+| `src/lib/components/MemorialStreamDisplay.svelte` | Update Stream interface with `mux` type |
+| `src/lib/components/streaming/MuxVideoPlayer.svelte` | Verify playbackId logic (may be correct) |
+| `src/routes/api/webhooks/mux/+server.ts` | Verify field updates (likely correct) |
+
+### Implementation Steps
+
+#### Step 1: Fix /[fullSlug]/+page.server.ts
+Add explicit `mux` property to ensure it's serialized to the client:
+
+```typescript
+// In stream mapping (around line 109)
+const stream = {
+    id: doc.id,
+    ...data,
+    // Explicit Mux data (ensure serialization)
+    mux: data.mux || null,
+    // ... existing timestamp conversions
+};
+```
+
+#### Step 2: Update MemorialStreamDisplay Stream Interface
+Add `mux` type to the Stream interface:
+
+```typescript
+interface Stream {
+    // ... existing fields ...
+    
+    // Mux platform data
+    mux?: {
+        liveStreamId: string;
+        playbackId: string;
+        rtmpUrl: string;
+        streamKey: string;
+        streamingStatus?: 'idle' | 'active' | 'disconnected';
+        assetId?: string;
+        vodPlaybackId?: string;
+        recordingReady?: boolean;
+        duration?: number;
+    };
+    
+    // Chat configuration
+    chat?: {
+        enabled: boolean;
+        archived: boolean;
+    };
+}
+```
+
+#### Step 3: Verify Webhook Updates
+Ensure webhook updates these exact field paths:
+- `status: 'live'` (when stream active)
+- `mux.streamingStatus: 'active'` (when stream active)
+- `status: 'completed'` (when recording ready)
+- `mux.vodPlaybackId: <playback_id>` (when recording ready)
+- `mux.recordingReady: true` (when recording ready)
+
+### Priority: HIGH
+This is the core user-facing feature - viewers need to see live streams and recordings.
+
+---
+
 **END OF WBS**
