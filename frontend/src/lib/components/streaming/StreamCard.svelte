@@ -313,12 +313,70 @@
 	<!-- Body -->
 	<div class="p-6">
 		<div class="space-y-4">
-			<!-- OBS Streaming Credentials (Show Immediately) -->
-			{#if stream.streamCredentials?.rtmpUrl && stream.streamCredentials?.streamKey}
+			<!-- OBS Streaming Credentials - Mux Platform (NEW) or Cloudflare (Legacy) -->
+			{#if stream.mux?.rtmpUrl && stream.mux?.streamKey}
+				<!-- MUX CREDENTIALS -->
+				<div class="rounded-lg border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50 p-5">
+					<h3 class="mb-4 flex items-center gap-2 text-base font-semibold text-purple-900">
+						<Video class="h-5 w-5" />
+						OBS Streaming Setup (Mux Platform)
+					</h3>
+					
+					<p class="mb-4 text-sm text-purple-800">
+						Use these credentials in OBS Studio to stream to this memorial service:
+					</p>
+					
+					<div class="space-y-3">
+						<div>
+							<label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-purple-800">RTMP Server URL</label>
+							<div class="flex items-center gap-2">
+								<code class="flex-1 rounded-lg bg-white px-4 py-3 text-sm text-purple-900 border border-purple-200 font-mono break-all">
+									{stream.mux.rtmpUrl}
+								</code>
+								<button
+									onclick={() => copyToClipboard(stream.mux!.rtmpUrl, 'rtmp')}
+									class="flex items-center gap-1.5 rounded-lg bg-purple-600 px-4 py-3 text-sm font-medium text-white transition-all hover:bg-purple-700 hover:shadow-md"
+									title="Copy RTMP URL"
+								>
+									{#if copiedRtmp}
+										<Check class="h-4 w-4" />
+										<span>Copied!</span>
+									{:else}
+										<Copy class="h-4 w-4" />
+										<span>Copy</span>
+									{/if}
+								</button>
+							</div>
+						</div>
+
+						<div>
+							<label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-purple-800">Stream Key</label>
+							<div class="flex items-center gap-2">
+								<code class="flex-1 rounded-lg bg-white px-4 py-3 text-sm text-purple-900 border border-purple-200 font-mono break-all">
+									{stream.mux.streamKey}
+								</code>
+								<button
+									onclick={() => copyToClipboard(stream.mux!.streamKey, 'streamKey')}
+									class="flex items-center gap-1.5 rounded-lg bg-purple-600 px-4 py-3 text-sm font-medium text-white transition-all hover:bg-purple-700 hover:shadow-md"
+									title="Copy Stream Key"
+								>
+									{#if copiedStreamKey}
+										<Check class="h-4 w-4" />
+										<span>Copied!</span>
+									{:else}
+										<Copy class="h-4 w-4" />
+										<span>Copy</span>
+									{/if}
+								</button>
+							</div>
+						</div>
+					</div>
+			{:else if stream.streamCredentials?.rtmpUrl && stream.streamCredentials?.streamKey}
+				<!-- LEGACY CLOUDFLARE CREDENTIALS -->
 				<div class="rounded-lg border-2 border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 p-5">
 					<h3 class="mb-4 flex items-center gap-2 text-base font-semibold text-green-900">
 						<Video class="h-5 w-5" />
-						OBS Streaming Setup
+						OBS Streaming Setup (Legacy)
 					</h3>
 					
 					<p class="mb-4 text-sm text-green-800">
@@ -370,6 +428,9 @@
 							</div>
 						</div>
 					</div>
+			{/if}
+			
+			{#if stream.mux?.rtmpUrl || stream.streamCredentials?.rtmpUrl}
 
 					<div class="mt-4 rounded-lg bg-white border border-green-200 p-4">
 						<p class="mb-2 text-sm font-semibold text-green-900">📋 Setup Instructions:</p>

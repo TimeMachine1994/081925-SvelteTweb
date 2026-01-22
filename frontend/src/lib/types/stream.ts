@@ -1,8 +1,12 @@
-// Stream Types for TributeStream
+// Stream Types for Tributestream
+// Updated: January 22, 2026 - Added Mux platform integration
 
 export type StreamStatus = 'scheduled' | 'ready' | 'live' | 'completed' | 'error';
 export type StreamArmType = 'mobile_input' | 'mobile_streaming' | 'stream_key';
 export type StreamVisibility = 'public' | 'hidden' | 'archived';
+
+// Mux-specific streaming status
+export type MuxStreamingStatus = 'idle' | 'active' | 'disconnected';
 
 export interface StreamArmStatus {
 	isArmed: boolean;
@@ -25,6 +29,62 @@ export interface StreamCredentials {
 	cloudflareStreamId?: string;
 }
 
+/**
+ * Mux Live Stream Configuration
+ * Contains all Mux-specific stream data including RTMP credentials,
+ * playback IDs, and recording information
+ */
+export interface MuxStreamConfig {
+	// Mux identifiers
+	liveStreamId: string;        // Mux live stream ID
+	playbackId: string;           // HLS playback ID for live viewing
+	
+	// RTMP ingestion credentials
+	rtmpUrl: string;              // RTMP ingest URL
+	streamKey: string;            // RTMP stream key for OBS
+	
+	// Recording (populated after stream ends)
+	assetId?: string;             // Mux VOD asset ID
+	vodPlaybackId?: string;       // VOD playback ID for recordings
+	recordingReady: boolean;      // Is recording processed and ready?
+	duration?: number;            // Recording duration in seconds
+	
+	// Stream status from Mux
+	reconnectWindow?: number;     // Seconds before stream times out
+	streamingStatus: MuxStreamingStatus; // Current streaming status
+}
+
+/**
+ * Mux Chat Configuration
+ * Contains chat space configuration and moderation settings
+ */
+export interface MuxChatConfig {
+	spaceId: string;              // Mux chat space ID
+	enabled: boolean;             // Is chat enabled for this stream?
+	archived: boolean;            // Is chat archived (read-only)?
+	messageCount: number;         // Total messages sent
+	participantCount: number;     // Unique participants
+	moderationMode?: 'off' | 'auto' | 'manual'; // Moderation mode
+}
+
+/**
+ * Stream Analytics Data
+ * Cached analytics from Mux Data API
+ */
+export interface StreamAnalytics {
+	lastUpdated: string;          // ISO timestamp of last update
+	viewerCount: number;          // Current concurrent viewers
+	peakViewerCount: number;      // Peak viewers during stream
+	totalViews: number;           // Total view sessions
+	averageWatchTime: number;     // Average watch time (seconds)
+	totalWatchTime: number;       // Total watch time (seconds)
+	engagement?: {
+		playbackQuality: number;  // Average quality score (0-100)
+		bufferingRate: number;    // % of time buffering
+		seekingRate: number;      // % of time seeking
+	};
+}
+
 export interface Stream {
 	id: string;
 	title: string;
@@ -38,9 +98,14 @@ export interface Stream {
 	// Scheduling
 	scheduledStartTime?: string;
 	
-	// Arming system
+	// Arming system (legacy - keeping for backward compatibility)
 	armStatus?: StreamArmStatus;
 	streamCredentials?: StreamCredentials;
+	
+	// Mux Platform Integration (NEW)
+	mux?: MuxStreamConfig;        // Mux live stream configuration
+	chat?: MuxChatConfig;          // Mux chat configuration
+	analytics?: StreamAnalytics;   // Cached analytics data
 	
 	// Playback
 	playbackUrl?: string;
@@ -51,11 +116,12 @@ export interface Stream {
 	liveStartedAt?: string;
 	liveEndedAt?: string;
 	
-	// Legacy OBS fields (for backward compatibility)
+	// Legacy Cloudflare fields (for backward compatibility during migration)
 	streamKey?: string;
 	rtmpUrl?: string;
 	cloudflareInputId?: string;
 	cloudflareStreamId?: string;
+	legacyCloudflareInputId?: string; // Preserved during migration
 	
 	// Metadata
 	isVisible?: boolean;

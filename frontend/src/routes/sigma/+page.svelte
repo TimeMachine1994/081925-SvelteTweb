@@ -78,6 +78,67 @@
 		</div>
 	</header>
 
+	<!-- HELP & EXPLANATION SECTION -->
+	<div class="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-6 mb-8 shadow-sm">
+		<h2 class="text-xl font-bold text-blue-900 mb-4 flex items-center gap-2">
+			<span>📚</span> How This Calculator Works
+		</h2>
+		
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+			<div class="bg-white p-4 rounded-lg shadow-sm">
+				<h3 class="font-bold text-slate-800 mb-2 flex items-center gap-2">
+					<span class="text-blue-600">💰</span> Cost Structure
+				</h3>
+				<ul class="space-y-2 text-slate-600">
+					<li><strong class="text-blue-700">Startup Costs:</strong> One-time capital needed to launch (equipment, legal, setup)</li>
+					<li><strong class="text-slate-700">Fixed Costs:</strong> Monthly recurring expenses regardless of sales (rent, insurance, software)</li>
+					<li><strong class="text-green-700">Unit COGS:</strong> Cost to produce each unit (materials, labor). Variable costs that scale with production.</li>
+				</ul>
+			</div>
+
+			<div class="bg-white p-4 rounded-lg shadow-sm">
+				<h3 class="font-bold text-slate-800 mb-2 flex items-center gap-2">
+					<span class="text-purple-600">🎯</span> Pricing Logic
+				</h3>
+				<ul class="space-y-2 text-slate-600">
+					<li><strong>Margin Target:</strong> Desired profit percentage. Formula: <code class="bg-slate-100 px-1 rounded">Price = COGS ÷ (1 - Margin)</code></li>
+					<li><strong>Example:</strong> $0.50 COGS with 20% margin = $0.625 price (you keep $0.125 profit per unit)</li>
+					<li><strong>Higher margins</strong> = higher prices but fewer units needed to hit revenue targets</li>
+				</ul>
+			</div>
+
+			<div class="bg-white p-4 rounded-lg shadow-sm">
+				<h3 class="font-bold text-slate-800 mb-2 flex items-center gap-2">
+					<span class="text-red-600">📊</span> Key Metrics
+				</h3>
+				<ul class="space-y-2 text-slate-600">
+					<li><strong>Breakeven:</strong> Units/month needed to cover fixed costs (profit = $0)</li>
+					<li><strong>Units Needed:</strong> Sales required to hit MRR target + cover all costs</li>
+					<li><strong>Monthly Profit:</strong> Revenue - (Unit COGS × Units) - Fixed Costs</li>
+					<li><strong>Payback Period:</strong> Months to recover startup investment from monthly profit</li>
+				</ul>
+			</div>
+
+			<div class="bg-white p-4 rounded-lg shadow-sm">
+				<h3 class="font-bold text-slate-800 mb-2 flex items-center gap-2">
+					<span class="text-green-600">🤝</span> Contribution Model
+				</h3>
+				<ul class="space-y-2 text-slate-600">
+					<li><strong>Contribution Rate:</strong> 50% of your margin target goes to contributions/partnerships</li>
+					<li><strong>Example:</strong> 20% margin = 10% contribution rate</li>
+					<li><strong>Post-Contribution Profit:</strong> What you keep after paying partners/contributions</li>
+				</ul>
+			</div>
+		</div>
+
+		<div class="mt-4 bg-blue-100 border border-blue-300 rounded p-3">
+			<p class="text-xs text-blue-900">
+				<strong>💡 How to Use:</strong> Edit the costs in the boxes below. The calculator will automatically show profitability at 10%, 20%, and 30% margin targets. 
+				Adjust MRR targets to model different growth scenarios. All fields are editable—experiment to find your optimal pricing strategy!
+			</p>
+		</div>
+	</div>
+
 	<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
 		<div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
 			<h2 class="font-bold text-blue-700 mb-4 flex justify-between">Startup Costs <button onclick={() => addItem(startupCosts)} class="text-xs bg-blue-50 px-2 py-1 rounded">+</button></h2>
@@ -104,7 +165,7 @@
 	<!-- Editable MRR Targets -->
 	<div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6">
 		<h2 class="font-bold text-purple-700 mb-3 text-sm uppercase">MRR Targets (Editable)</h2>
-		<div class="flex gap-4">
+		<div class="flex flex-wrap gap-4">
 			{#each targets as t, i}
 				<div class="flex items-center gap-1">
 					<span class="text-slate-400 text-sm">$</span>
@@ -112,6 +173,100 @@
 				</div>
 			{/each}
 			<button onclick={() => targets.push(50000)} class="text-xs bg-purple-50 text-purple-700 px-2 py-1 rounded">+ Add</button>
+		</div>
+		<p class="text-xs text-purple-600 mt-2">💡 These are monthly recurring revenue goals. Adjust to model different business scales.</p>
+	</div>
+
+	<!-- Custom Price Analysis -->
+	<div class="bg-gradient-to-r from-orange-50 to-amber-50 p-6 rounded-xl shadow-sm border-2 border-orange-200 mb-6">
+		<h2 class="font-bold text-orange-800 mb-2 text-lg flex items-center gap-2">
+			<span>💰</span> Custom Price Analysis
+		</h2>
+		<p class="text-xs text-orange-700 mb-4">Set your own price and see what margin you'll actually get. Perfect for competitive pricing or testing specific price points.</p>
+		
+		<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+			{#each [2.00, 5.00, 10.00] as defaultPrice, idx}
+				{@const customPrice = $state(defaultPrice)}
+				{@const calculatedMargin = $derived((customPrice - unitCogs) / customPrice)}
+				{@const marginPercent = $derived(calculatedMargin * 100)}
+				
+				<div class="bg-white p-5 rounded-lg border border-orange-200 shadow-sm">
+					<div class="mb-4">
+						<label class="text-xs font-bold text-slate-500 uppercase block mb-2">Set Your Price</label>
+						<div class="flex items-center gap-1">
+							<span class="text-slate-400">$</span>
+							<input 
+								type="number" 
+								step="0.01" 
+								bind:value={customPrice}
+								class="flex-1 text-2xl font-mono font-bold border-b-2 border-orange-300 text-right focus:border-orange-500 outline-none"
+							/>
+						</div>
+					</div>
+					
+					<div class="space-y-3 pt-3 border-t border-orange-100">
+						<div>
+							<p class="text-xs font-bold text-orange-600 uppercase">Resulting Margin</p>
+							<p class="text-3xl font-black {marginPercent > 0 ? 'text-green-600' : 'text-red-500'}">
+								{marginPercent.toFixed(1)}%
+							</p>
+							<p class="text-[10px] text-slate-500 mt-1">
+								{#if marginPercent < 0}
+									⚠️ Losing money per unit!
+								{:else if marginPercent < 10}
+									Low margin - high volume needed
+								{:else if marginPercent < 30}
+									Balanced margin strategy
+								{:else}
+									Premium pricing strategy
+								{/if}
+							</p>
+						</div>
+						
+						<div>
+							<p class="text-xs font-bold text-slate-400 uppercase">Profit Per Unit</p>
+							<p class="text-xl font-mono {(customPrice - unitCogs) > 0 ? 'text-green-600' : 'text-red-500'}">
+								${(customPrice - unitCogs).toFixed(2)}
+							</p>
+						</div>
+						
+						<div>
+							<p class="text-xs font-bold text-slate-400 uppercase">Breakeven Units/mo</p>
+							<p class="text-xl font-mono text-blue-600">
+								{customPrice > unitCogs ? Math.ceil(totalFixed / (customPrice - unitCogs)).toLocaleString() : '∞'}
+							</p>
+						</div>
+						
+						<!-- MRR Target Scenarios -->
+						<div class="pt-3 border-t border-slate-100">
+							<p class="text-xs font-bold text-purple-600 uppercase mb-2">Quick MRR Scenarios</p>
+							{#each targets.slice(0, 2) as t}
+								{@const unitsNeeded = Math.ceil((t + totalFixed) / customPrice)}
+								{@const monthlyProfit = (unitsNeeded * customPrice) - (unitsNeeded * unitCogs) - totalFixed}
+								<div class="mb-2">
+									<div class="flex justify-between text-xs mb-1">
+										<span class="text-slate-500">${t.toLocaleString()} MRR:</span>
+										<span class="font-mono font-bold">{unitsNeeded.toLocaleString()} units</span>
+									</div>
+									<div class="text-[10px] text-slate-400">
+										Profit: <span class="{monthlyProfit > 0 ? 'text-green-600' : 'text-red-500'} font-bold">
+											${Math.abs(monthlyProfit).toLocaleString(undefined, {maximumFractionDigits: 0})}
+										</span>
+									</div>
+								</div>
+							{/each}
+						</div>
+					</div>
+				</div>
+			{/each}
+		</div>
+		
+		<div class="mt-4 bg-orange-100 border border-orange-300 rounded p-3">
+			<p class="text-xs text-orange-800">
+				<strong>💡 Use Case:</strong> If competitors charge $5, what's your margin? Type it in above! 
+				Or if you need 25% margin minimum, find the lowest price that works. This works backwards from price → margin, 
+				while the sections below work margin → price.
+			</p>
 		</div>
 	</div>
 

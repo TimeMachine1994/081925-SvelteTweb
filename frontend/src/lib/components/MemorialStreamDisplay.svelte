@@ -2,6 +2,10 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
 	import CountdownVideoPlayer from './CountdownVideoPlayer.svelte';
+	import MuxVideoPlayer from './streaming/MuxVideoPlayer.svelte';
+	import LiveChatWidget from './streaming/LiveChatWidget.svelte';
+	
+	console.log('🎬 [MEMORIAL STREAM DISPLAY] Component loaded - Mux integration active');
 	
 	interface Stream {
 		id: string;
@@ -249,23 +253,43 @@
 				</h2>
 				{#each categorizedLiveStreams as stream (stream.id)}
 					<div class="stream-item">
-						<h3 class="stream-title">{stream.title}</h3>
-						{#if stream.description}
-							<p class="stream-description">{stream.description}</p>
-						{/if}
-						{#if getPlaybackUrl(stream)}
-							<div class="stream-player">
-								<iframe
-									src={getPlaybackUrl(stream)}
-									allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
-									allowfullscreen={true}
-									title={stream.title}
-								></iframe>
+						{#if stream.mux?.playbackId}
+							<!-- MUX PLATFORM - New integrated player with chat -->
+							<div class="mux-stream-container">
+								<div class="video-column">
+									<MuxVideoPlayer stream={stream} autoplay={true} showTitle={true} />
+								</div>
+								
+								{#if stream.chat?.enabled}
+									<div class="chat-column">
+										<LiveChatWidget 
+											streamId={stream.id} 
+											enabled={stream.chat.enabled}
+											archived={stream.chat.archived || false}
+										/>
+									</div>
+								{/if}
 							</div>
 						{:else}
-							<div class="stream-placeholder">
-								<p>Stream is live. Please refresh the page if video doesn't appear.</p>
-							</div>
+							<!-- LEGACY CLOUDFLARE - Fallback iframe player -->
+							<h3 class="stream-title">{stream.title}</h3>
+							{#if stream.description}
+								<p class="stream-description">{stream.description}</p>
+							{/if}
+							{#if getPlaybackUrl(stream)}
+								<div class="stream-player">
+									<iframe
+										src={getPlaybackUrl(stream)}
+										allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+										allowfullscreen={true}
+										title={stream.title}
+									></iframe>
+								</div>
+							{:else}
+								<div class="stream-placeholder">
+									<p>Stream is live. Please refresh the page if video doesn't appear.</p>
+								</div>
+							{/if}
 						{/if}
 					</div>
 				{/each}
@@ -306,23 +330,29 @@
 				<h2 class="stream-section-title">Service Recording</h2>
 				{#each recordedStreams as stream (stream.id)}
 					<div class="stream-item">
-						<h3 class="stream-title">{stream.title}</h3>
-						{#if stream.description}
-							<p class="stream-description">{stream.description}</p>
-						{/if}
-						{#if getPlaybackUrl(stream)}
-							<div class="stream-player">
-								<iframe
-									src={getPlaybackUrl(stream)}
-									allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
-									allowfullscreen={true}
-									title={stream.title}
-								></iframe>
-							</div>
+						{#if stream.mux?.recordingReady && stream.mux?.vodPlaybackId}
+							<!-- MUX PLATFORM - Recorded video player -->
+							<MuxVideoPlayer stream={stream} autoplay={false} showTitle={true} />
 						{:else}
-							<div class="stream-placeholder">
-								<p>Recording is being processed. Please check back later.</p>
-							</div>
+							<!-- LEGACY CLOUDFLARE - Fallback iframe player -->
+							<h3 class="stream-title">{stream.title}</h3>
+							{#if stream.description}
+								<p class="stream-description">{stream.description}</p>
+							{/if}
+							{#if getPlaybackUrl(stream)}
+								<div class="stream-player">
+									<iframe
+										src={getPlaybackUrl(stream)}
+										allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+										allowfullscreen={true}
+										title={stream.title}
+									></iframe>
+								</div>
+							{:else}
+								<div class="stream-placeholder">
+									<p>Recording is being processed. Please check back later.</p>
+								</div>
+							{/if}
 						{/if}
 					</div>
 				{/each}
@@ -717,6 +747,22 @@
 		min-width: 45px;
 	}
 	
+	/* Mux Stream Container - Video + Chat Layout */
+	.mux-stream-container {
+		display: grid;
+		grid-template-columns: 1fr 400px;
+		gap: 1.5rem;
+		margin-top: 1rem;
+	}
+	
+	.video-column {
+		min-width: 0; /* Prevent grid overflow */
+	}
+	
+	.chat-column {
+		min-width: 0; /* Prevent grid overflow */
+	}
+	
 	/* Responsive Design */
 	@media (max-width: 768px) {
 		.stream-section {
@@ -729,6 +775,15 @@
 		
 		.stream-title {
 			font-size: 1.1rem;
+		}
+		
+		.mux-stream-container {
+			grid-template-columns: 1fr;
+			gap: 1rem;
+		}
+		
+		.chat-column {
+			max-height: 500px;
 		}
 		
 		.stream-description {

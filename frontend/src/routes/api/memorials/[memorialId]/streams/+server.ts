@@ -1,15 +1,23 @@
+/**
+ * Stream Creation API - Mux Platform Integration
+ * 
+ * Updated: January 22, 2026
+ * Migrated from Cloudflare Stream to Mux Video Platform
+ * 
+ * This endpoint handles:
+ * - Creating new live streams via Mux
+ * - Creating chat spaces for real-time viewer interaction
+ * - Storing stream credentials and metadata in Firestore
+ * - Managing stream permissions and visibility
+ */
+
 import { adminAuth, adminDb, FieldValue } from '$lib/server/firebase';
 import { error as SvelteKitError, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import type { Stream } from '$lib/types/stream';
-import { createLiveInput } from '$lib/server/cloudflare-stream';
+import { createMuxLiveStream, createMuxChatSpace } from '$lib/server/mux';
 
-// DEPRECATED: This endpoint uses the old OBS streaming system
-// New streams should use /api/live-streams/create instead
-// Keeping this for backward compatibility with existing integrations
-async function setupOBSStreaming(title: string) {
-	throw new Error('OBS streaming via this endpoint is deprecated. Please use /api/live-streams/create for new WHIP streams.');
-}
+console.log('🎬 [STREAMS API] Module loaded - Mux platform integration active');
 
 // GET - Fetch all streams for a memorial
 export const GET: RequestHandler = async ({ locals, params }) => {
@@ -148,51 +156,88 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			throw SvelteKitError(403, 'Permission denied');
 		}
 
-		// Create Cloudflare Live Input immediately for OBS streaming
-		console.log('🎬 [STREAMS API] Creating Cloudflare Live Input for stream:', title.trim());
+		// === MUX INTEGRATION: Create Live Stream ===
+		console.log('🎬 [STREAMS API - MUX] Creating Mux live stream for:', title.trim());
+		console.log('🎬 [STREAMS API - MUX] Scheduled start time:', scheduledStartTime || 'Not scheduled');
 		
-		let streamKey = '';
-		let rtmpUrl = '';
-		let cloudflareInputId = '';
-		let whepUrl = '';
+		let muxLiveStream;
+		let muxChatSpace;
 
 		try {
-			const liveInput = await createLiveInput(title.trim());
-			
-			streamKey = liveInput.rtmpsStreamKey;
-			rtmpUrl = liveInput.rtmpsUrl;
-			cloudflareInputId = liveInput.liveInputId;
-			whepUrl = liveInput.whepUrl || '';
+			// Step 1: Create Mux Live Stream with RTMP credentials
+			console.log('🎬 [STREAMS API - MUX] Step 1/2: Creating Mux live stream...');
+			muxLiveStream = await createMuxLiveStream(title.trim(), {
+				reconnectWindow: 60,    // 60 seconds before timeout
+				reducedLatency: true    // Low latency mode
+			});
 
-			console.log('✅ [STREAMS API] Cloudflare Live Input created:', cloudflareInputId);
-			console.log('📺 [STREAMS API] RTMP URL:', rtmpUrl);
-			console.log('🔑 [STREAMS API] Stream Key:', streamKey ? 'SET' : 'MISSING');
+			console.log('✅ [STREAMS API - MUX] Mux live stream created successfully');
+			console.log('🎬 [STREAMS API - MUX] Live Stream ID:', muxLiveStream.id);
+			console.log('🎬 [STREAMS API - MUX] Playback ID:', muxLiveStream.playbackId);
+			console.log('📺 [STREAMS API - MUX] RTMP URL:', muxLiveStream.rtmpUrl);
+			console.log('🔑 [STREAMS API - MUX] Stream Key length:', muxLiveStream.streamKey?.length || 0);
+
+			// Step 2: Create Mux Chat Space for real-time interaction
+			console.log('💬 [STREAMS API - MUX] Step 2/2: Creating Mux chat space...');
+			muxChatSpace = await createMuxChatSpace(
+				`Stream: ${title.trim()}`,
+				description?.trim() || `Chat for ${title.trim()}`
+			);
+
+			console.log('✅ [STREAMS API - MUX] Mux chat space created successfully');
+			console.log('💬 [STREAMS API - MUX] Chat Space ID:', muxChatSpace.id);
+
 		} catch (error) {
-			console.error('❌ [STREAMS API] Failed to create Cloudflare Live Input:', error);
-			throw SvelteKitError(500, `Failed to create streaming credentials: ${error instanceof Error ? error.message : 'Unknown error'}`);
+			console.error('❌ [STREAMS API - MUX] Failed to create Mux resources:', error);
+			console.error('❌ [STREAMS API - MUX] Error details:', {
+				message: error instanceof Error ? error.message : 'Unknown error',
+				stack: error instanceof Error ? error.stack : undefined
+			});
+			throw SvelteKitError(500, `Failed to create streaming platform resources: ${error instanceof Error ? error.message : 'Unknown error'}`);
 		}
 
-		// Create stream object (avoiding undefined values for Firestore)
+		// === BUILD STREAM DOCUMENT ===
+		console.log('💾 [STREAMS API - MUX] Building Firestore stream document...');
+		
 		const streamData: any = {
 			title: title.trim(),
 			description: description?.trim() || '',
 			memorialId,
 			status: scheduledStartTime ? 'scheduled' : 'ready',
-			isVisible: true,
-			streamKey,
-			rtmpUrl,
-			cloudflareInputId,
-			streamCredentials: {
-				rtmpUrl,
-				streamKey,
-				cloudflareInputId,
-				whepUrl
+			visibility: 'public',
+			
+			// Mux Platform Configuration
+			mux: {
+				liveStreamId: muxLiveStream.id,
+				playbackId: muxLiveStream.playbackId,
+				rtmpUrl: muxLiveStream.rtmpUrl,
+				streamKey: muxLiveStream.streamKey,
+				recordingReady: false,
+				streamingStatus: 'idle',
+				reconnectWindow: 60
 			},
+			
+			// Mux Chat Configuration
+			chat: {
+				spaceId: muxChatSpace.id,
+				enabled: true,  // Chat enabled by default
+				archived: false,
+				messageCount: 0,
+				participantCount: 0,
+				moderationMode: 'manual'
+			},
+			
+			// Metadata
 			createdBy: userId,
 			createdAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
+			isVisible: true,
 			syncStatus: syncStatus || 'synced'
 		};
+
+		console.log('💾 [STREAMS API - MUX] Stream data structure complete');
+		console.log('💾 [STREAMS API - MUX] Contains Mux config:', !!streamData.mux);
+		console.log('💾 [STREAMS API - MUX] Contains Chat config:', !!streamData.chat);
 
 		// Only add optional fields if they have values (avoid undefined)
 		if (scheduledStartTime) {

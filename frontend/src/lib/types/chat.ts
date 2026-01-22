@@ -92,3 +92,43 @@ export interface SerializedChatMessage extends Omit<ChatMessage, 'timestamp' | '
 	editedAt?: string;
 	deletedAt?: string;
 }
+
+/**
+ * Mux Stream Chat Message
+ * Messages sent during live streams via Mux Chat API
+ */
+export interface StreamChatMessage {
+	/** Unique message ID */
+	id: string;
+	
+	/** Stream this message belongs to */
+	streamId: string;
+	
+	/** Mux chat message ID (for API operations) */
+	muxMessageId: string;
+	
+	/** User ID (if authenticated) */
+	userId?: string;
+	
+	/** Display name */
+	userName: string;
+	
+	/** User avatar URL */
+	userAvatar?: string;
+	
+	/** Is this an anonymous viewer? */
+	isAnonymous: boolean;
+	
+	/** Message content */
+	message: string;
+	
+	/** When the message was sent */
+	timestamp: string;
+	
+	/** Moderation status */
+	deleted: boolean;
+	deletedBy?: string;
+	deletedAt?: string;
+	flagged: boolean;
+	flagReason?: string;
+}
