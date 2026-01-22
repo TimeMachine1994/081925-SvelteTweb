@@ -627,10 +627,10 @@ The `page.server.ts` file that loads stream data for the admin memorial detail p
 - `src/lib/components/streaming/StreamCard.svelte` - Expects `stream.mux.rtmpUrl` and `stream.mux.streamKey`
 
 ### TODO List
-- [ ] **FIX-B-1:** Add `mux` property to stream mapping in `page.server.ts`
+- [x] **FIX-B-1:** Add `mux` property to stream mapping in `page.server.ts` ✅ DONE
 - [ ] **FIX-B-2:** Verify StreamCard displays RTMP credentials after fix
 - [ ] **FIX-B-3:** Test arm workflow end-to-end (arm → reload → see credentials)
-- [ ] **FIX-B-4:** Check other page loaders that fetch streams for same issue
+- [x] **FIX-B-4:** Check other page loaders that fetch streams for same issue ✅ Only 1 file uses this pattern
 - [ ] **FIX-B-5:** Update stream TypeScript interface if needed
 
 ### Priority: HIGH

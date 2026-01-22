@@ -173,6 +173,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 				armStatus: data.armStatus || null,
 				streamCredentials: data.streamCredentials || null,
 				
+				// Mux streaming platform data
+				mux: data.mux || null,
+				
 				// Legacy streaming config
 				streamingMethod: data.streamingMethod || null,
 				cloudflareStreamId: data.cloudflareStreamId || null,
