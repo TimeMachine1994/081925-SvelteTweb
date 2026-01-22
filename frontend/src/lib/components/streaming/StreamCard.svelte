@@ -371,6 +371,7 @@
 							</div>
 						</div>
 					</div>
+				</div>
 			{:else if stream.streamCredentials?.rtmpUrl && stream.streamCredentials?.streamKey}
 				<!-- LEGACY CLOUDFLARE CREDENTIALS -->
 				<div class="rounded-lg border-2 border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 p-5">
@@ -428,6 +429,7 @@
 							</div>
 						</div>
 					</div>
+				</div>
 			{/if}
 			
 			{#if stream.mux?.rtmpUrl || stream.streamCredentials?.rtmpUrl}
