@@ -32,7 +32,13 @@
 
 ---
 
-## 2. Documentation (`/Documentation/`)
+## 2. DevDocs (`/DevDocs/`)
+
+| File | Description |
+|------|-------------|
+| `WBS_1-21-26_SIMPLIFIED_STREAM_SCHEDULING.md` | Stream scheduling WBS |
+| `WBS_1-22-26_MUX_STREAMING_PLATFORM.md` | Mux platform integration WBS |
+| `WBS_ADMIN_MEMORIAL_DETAILS_SVELTE5_AUDIT.md` | Svelte 5 audit for admin |
 
 | File | Description |
 |------|-------------|
@@ -43,16 +49,6 @@
 | `ENCODER_SYSTEM_REUSABLE_CODE.md` | Encoder reusable components |
 | `FD_LIVESTREAM_JOURNEY.md` | Funeral director livestream flow |
 | `ProjectOverview.md` | High-level project overview |
-
----
-
-## 3. DevDocs (`/DevDocs/`)
-
-| File | Description |
-|------|-------------|
-| `WBS_1-21-26_SIMPLIFIED_STREAM_SCHEDULING.md` | Stream scheduling WBS |
-| `WBS_1-22-26_MUX_STREAMING_PLATFORM.md` | Mux platform integration WBS |
-| `WBS_ADMIN_MEMORIAL_DETAILS_SVELTE5_AUDIT.md` | Svelte 5 audit for admin |
 
 ---
 
@@ -156,6 +152,7 @@
 | Component | Purpose |
 |-----------|---------|
 | `AdminLayout.svelte` | Admin page layout |
+| `AdminChatPanel.svelte` | Stream chat moderation panel |
 | `BulkActionBar.svelte` | Bulk operations UI |
 | `CustomPricingEditor.svelte` | Custom pricing management |
 | `DataGrid.svelte` | Data table component |
@@ -179,6 +176,10 @@
 | `ChatMessage.svelte` | Chat message display |
 | `ChatPanel.svelte` | Chat panel UI |
 | `ChatToggleButton.svelte` | Chat toggle button |
+| `GuestNamePrompt.svelte` | Guest name entry modal for stream chat |
+| `ChatMessageList.svelte` | Message list with auto-scroll |
+| `ChatInput.svelte` | Message input with validation (500 char limit) |
+| `StreamChat.svelte` | Main stream chat container (Firestore-based) |
 | `index.ts` | Component exports |
 
 #### 4.3.5 Streaming Components (`/src/lib/components/streaming/`)
@@ -256,7 +257,7 @@
 | `auditLogger.ts` | Audit logging system |
 | `auditLogger.test.ts` | Audit logger tests |
 | `auditMiddleware.ts` | Audit middleware |
-| `cloudflare-stream.ts` | Cloudflare Stream API |
+| ~~`cloudflare-stream.ts`~~ | ~~Cloudflare Stream API~~ (DELETED - migrated to Mux) |
 | `daily.ts` | Daily.co integration |
 | `email.ts` | Email sending (25KB) |
 | `emailConfirmation.ts` | Email confirmation |
