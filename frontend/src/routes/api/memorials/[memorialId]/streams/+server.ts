@@ -2,6 +2,7 @@ import { adminAuth, adminDb, FieldValue } from '$lib/server/firebase';
 import { error as SvelteKitError, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import type { Stream } from '$lib/types/stream';
+import { createLiveInput } from '$lib/server/cloudflare-stream';
 
 // DEPRECATED: This endpoint uses the old OBS streaming system
 // New streams should use /api/live-streams/create instead
@@ -147,48 +148,28 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			throw SvelteKitError(403, 'Permission denied');
 		}
 
-		// For scheduled streams, OBS streaming setup is deferred until the actual start time
-		// Only immediate live streams need streaming credentials right away
+		// Create Cloudflare Live Input immediately for OBS streaming
+		console.log('🎬 [STREAMS API] Creating Cloudflare Live Input for stream:', title.trim());
+		
 		let streamKey = '';
 		let rtmpUrl = '';
 		let cloudflareInputId = '';
+		let whepUrl = '';
 
 		try {
-			if (streamingMethod === 'obs') {
-				// OBS Method: Single RTMP stream
-				const config = await setupOBSMethod();
-				streamKey = config.streamKey;
-				rtmpUrl = config.rtmpUrl;
-				cloudflareInputId = config.cloudflareInputId;
-				methodConfig = { type: 'obs', cloudflareInputId };
-			} else if (streamingMethod === 'phone-to-obs') {
-				// Phone to OBS Method: Two streams (phone + OBS)
-				const config = await setupPhoneToOBSMethod();
-				streamKey = config.obsDestination.streamKey;
-				rtmpUrl = config.obsDestination.rtmpUrl;
-				cloudflareInputId = config.obsDestination.cloudflareInputId;
-				methodConfig = {
-					type: 'phone-to-obs',
-					obsDestination: config.obsDestination,
-					phoneSource: config.phoneSource
-				};
-			} else if (streamingMethod === 'phone-to-mux') {
-				// Phone to MUX Method: Phone + restreaming
-				const config = await setupPhoneToMUXMethod();
-				// This will throw an error until Phase 5
-				cloudflareInputId = config.cloudflare.inputId;
-				methodConfig = {
-					type: 'phone-to-mux',
-					cloudflare: config.cloudflare,
-					mux: config.mux,
-					restreamingConfigured: config.restreamingConfigured
-				};
-			}
+			const liveInput = await createLiveInput(title.trim());
+			
+			streamKey = liveInput.rtmpsStreamKey;
+			rtmpUrl = liveInput.rtmpsUrl;
+			cloudflareInputId = liveInput.liveInputId;
+			whepUrl = liveInput.whepUrl || '';
 
-			console.log('✅ [STREAMS API] Streaming method configured successfully');
+			console.log('✅ [STREAMS API] Cloudflare Live Input created:', cloudflareInputId);
+			console.log('📺 [STREAMS API] RTMP URL:', rtmpUrl);
+			console.log('🔑 [STREAMS API] Stream Key:', streamKey ? 'SET' : 'MISSING');
 		} catch (error) {
-			console.error('❌ [STREAMS API] Failed to setup streaming method:', error);
-			throw SvelteKitError(500, `Failed to configure ${streamingMethod} streaming: ${error instanceof Error ? error.message : 'Unknown error'}`);
+			console.error('❌ [STREAMS API] Failed to create Cloudflare Live Input:', error);
+			throw SvelteKitError(500, `Failed to create streaming credentials: ${error instanceof Error ? error.message : 'Unknown error'}`);
 		}
 
 		// Create stream object (avoiding undefined values for Firestore)
@@ -201,6 +182,12 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			streamKey,
 			rtmpUrl,
 			cloudflareInputId,
+			streamCredentials: {
+				rtmpUrl,
+				streamKey,
+				cloudflareInputId,
+				whepUrl
+			},
 			createdBy: userId,
 			createdAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
@@ -222,21 +209,6 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 		}
 		if (lastSyncedAt) {
 			streamData.lastSyncedAt = lastSyncedAt;
-		}
-
-		// Add method-specific fields
-		if (streamingMethod === 'phone-to-obs') {
-			streamData.phoneSourceStreamId = methodConfig.phoneSource.cloudflareInputId;
-			streamData.phoneSourcePlaybackUrl = methodConfig.phoneSource.playbackUrl;
-			streamData.phoneSourceWhipUrl = methodConfig.phoneSource.whipUrl;
-		} else if (streamingMethod === 'phone-to-mux') {
-			streamData.muxStreamId = methodConfig.mux.streamId;
-			streamData.muxStreamKey = methodConfig.mux.streamKey;
-			streamData.muxPlaybackId = methodConfig.mux.playbackId;
-			// Only add restreamingEnabled if it has a value (avoid undefined for Firestore)
-			if (methodConfig.restreamingConfigured !== undefined) {
-				streamData.restreamingEnabled = methodConfig.restreamingConfigured;
-			}
 		}
 
 		console.log('💾 [STREAMS API] Stream data to save:', JSON.stringify(streamData, null, 2));

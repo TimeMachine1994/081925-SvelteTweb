@@ -313,6 +313,100 @@
 	<!-- Body -->
 	<div class="p-6">
 		<div class="space-y-4">
+			<!-- OBS Streaming Credentials (Show Immediately) -->
+			{#if stream.streamCredentials?.rtmpUrl && stream.streamCredentials?.streamKey}
+				<div class="rounded-lg border-2 border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 p-5">
+					<h3 class="mb-4 flex items-center gap-2 text-base font-semibold text-green-900">
+						<Video class="h-5 w-5" />
+						OBS Streaming Setup
+					</h3>
+					
+					<p class="mb-4 text-sm text-green-800">
+						Use these credentials in OBS Studio to stream to this memorial service:
+					</p>
+					
+					<div class="space-y-3">
+						<div>
+							<label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-green-800">RTMP Server URL</label>
+							<div class="flex items-center gap-2">
+								<code class="flex-1 rounded-lg bg-white px-4 py-3 text-sm text-green-900 border border-green-200 font-mono break-all">
+									{stream.streamCredentials.rtmpUrl}
+								</code>
+								<button
+									onclick={() => copyToClipboard(stream.streamCredentials!.rtmpUrl!, 'rtmp')}
+									class="flex items-center gap-1.5 rounded-lg bg-green-600 px-4 py-3 text-sm font-medium text-white transition-all hover:bg-green-700 hover:shadow-md"
+									title="Copy RTMP URL"
+								>
+									{#if copiedRtmp}
+										<Check class="h-4 w-4" />
+										<span>Copied!</span>
+									{:else}
+										<Copy class="h-4 w-4" />
+										<span>Copy</span>
+									{/if}
+								</button>
+							</div>
+						</div>
+
+						<div>
+							<label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-green-800">Stream Key</label>
+							<div class="flex items-center gap-2">
+								<code class="flex-1 rounded-lg bg-white px-4 py-3 text-sm text-green-900 border border-green-200 font-mono break-all">
+									{stream.streamCredentials.streamKey}
+								</code>
+								<button
+									onclick={() => copyToClipboard(stream.streamCredentials!.streamKey!, 'streamKey')}
+									class="flex items-center gap-1.5 rounded-lg bg-green-600 px-4 py-3 text-sm font-medium text-white transition-all hover:bg-green-700 hover:shadow-md"
+									title="Copy Stream Key"
+								>
+									{#if copiedStreamKey}
+										<Check class="h-4 w-4" />
+										<span>Copied!</span>
+									{:else}
+										<Copy class="h-4 w-4" />
+										<span>Copy</span>
+									{/if}
+								</button>
+							</div>
+						</div>
+					</div>
+
+					<div class="mt-4 rounded-lg bg-white border border-green-200 p-4">
+						<p class="mb-2 text-sm font-semibold text-green-900">📋 Setup Instructions:</p>
+						<ol class="space-y-1.5 text-sm text-green-800">
+							<li class="flex gap-2">
+								<span class="font-semibold">1.</span>
+								<span>Open OBS Studio on your computer</span>
+							</li>
+							<li class="flex gap-2">
+								<span class="font-semibold">2.</span>
+								<span>Go to <strong>Settings → Stream</strong></span>
+							</li>
+							<li class="flex gap-2">
+								<span class="font-semibold">3.</span>
+								<span>Set Service to <strong>"Custom"</strong></span>
+							</li>
+							<li class="flex gap-2">
+								<span class="font-semibold">4.</span>
+								<span>Paste the RTMP Server URL above</span>
+							</li>
+							<li class="flex gap-2">
+								<span class="font-semibold">5.</span>
+								<span>Paste the Stream Key above</span>
+							</li>
+							<li class="flex gap-2">
+								<span class="font-semibold">6.</span>
+								<span>Click <strong>"Start Streaming"</strong> when ready</span>
+							</li>
+						</ol>
+					</div>
+
+					<p class="mt-4 text-xs text-green-700 italic">
+						💡 These credentials are permanent and will work anytime you're ready to stream.
+					</p>
+				</div>
+			{/if}
+
 			<!-- Arming Controls (Admin Only) -->
 			{#if canManage && !stream.armStatus?.isArmed}
 				<div class="rounded-lg border-2 border-purple-200 bg-purple-50 p-4">
