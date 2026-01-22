@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Stream, StreamArmType } from '$lib/types/stream';
+	import type { Stream } from '$lib/types/stream';
 	import { Video, Eye, EyeOff, Archive, StopCircle, Copy, Check, ChevronDown, Calendar, ExternalLink, MessageCircle, MessageCircleOff } from 'lucide-svelte';
 	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
@@ -10,8 +10,6 @@
 	let copiedWhip = $state(false);
 	let copiedRtmp = $state(false);
 	let copiedStreamKey = $state(false);
-	let selectedArmType = $state<StreamArmType>('mobile_input');
-	let showArmDropdown = $state(false);
 	let showEditTime = $state(false);
 	let editedStartTime = $state('');
 	
@@ -110,49 +108,6 @@
 		}
 	}
 
-	async function handleArm() {
-		console.log('🎯 Arming stream with type:', selectedArmType);
-		
-		if (!confirm(`Arm this stream for ${selectedArmType.replace(/_/g, ' ')}?`)) {
-			console.log('❌ User cancelled arm');
-			return;
-		}
-
-		loading = true;
-		try {
-			console.log('📡 Calling arm API:', `/api/streams/${stream.id}/arm`);
-			const response = await fetch(`/api/streams/${stream.id}/arm`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ armType: selectedArmType })
-			});
-
-			console.log('📥 Response status:', response.status);
-			const data = await response.json();
-			console.log('📥 Response data:', data);
-
-			if (response.ok) {
-				console.log('✅ Stream armed successfully, reloading...');
-				window.location.reload();
-			} else {
-				console.error('❌ Failed to arm stream:', data);
-				alert(`Failed to arm stream: ${data.error || data.message || 'Unknown error'}`);
-			}
-		} catch (error) {
-			console.error('❌ Error arming stream:', error);
-			alert(`Failed to arm stream: ${error}`);
-		} finally {
-			loading = false;
-		}
-	}
-
-	function getArmTypeLabel(armType: StreamArmType): string {
-		return {
-			mobile_input: 'Mobile Input',
-			mobile_streaming: 'Mobile Streaming',
-			stream_key: 'Stream Key'
-		}[armType];
-	}
 
 	function openEditTime() {
 		// Format existing time for datetime-local input
@@ -232,8 +187,8 @@
 
 	// Check if stream is live on mount and periodically
 	onMount(() => {
-		// Only check if stream is armed with stream key (OBS)
-		if (stream.armStatus?.isArmed && stream.armStatus.armType === 'stream_key') {
+		// Check if stream has Mux credentials (ready for streaming)
+		if (stream.mux?.liveStreamId) {
 			checkIfLive(); // Initial check
 			
 			// Check every 15 seconds
@@ -298,11 +253,6 @@
 					<span class="rounded-full px-3 py-1 text-xs font-medium {statusColor}">
 						{stream.status.toUpperCase()}
 					</span>
-					{#if stream.armStatus?.isArmed}
-						<span class="rounded-full bg-purple-100 px-3 py-1 text-xs font-medium text-purple-800">
-							ARMED: {getArmTypeLabel(stream.armStatus.armType!)}
-						</span>
-					{/if}
 					</div>
 					{#if memorialName}
 						<a
@@ -441,114 +391,7 @@
 					</p>
 			{/if}
 
-			<!-- Arming Controls (Admin Only) -->
-			{#if canManage && !stream.armStatus?.isArmed}
-				<div class="rounded-lg border-2 border-purple-200 bg-purple-50 p-4">
-					<h3 class="mb-3 text-sm font-semibold text-purple-900">Arm Stream</h3>
-					<div class="flex items-center gap-2">
-						<div class="relative flex-1">
-							<button
-								onclick={() => (showArmDropdown = !showArmDropdown)}
-								class="flex w-full items-center justify-between rounded-lg border border-purple-300 bg-white px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-purple-50"
-							>
-								<span>{getArmTypeLabel(selectedArmType)}</span>
-								<ChevronDown class="h-4 w-4" />
-							</button>
-							{#if showArmDropdown}
-								<div
-									class="absolute z-10 mt-1 w-full rounded-lg border border-gray-200 bg-white shadow-lg"
-								>
-									<button
-										onclick={() => {
-											selectedArmType = 'mobile_input';
-											showArmDropdown = false;
-										}}
-										class="block w-full px-4 py-2 text-left text-sm hover:bg-purple-50"
-									>
-										Mobile Input
-									</button>
-									<button
-										onclick={() => {
-											selectedArmType = 'mobile_streaming';
-											showArmDropdown = false;
-										}}
-										class="block w-full px-4 py-2 text-left text-sm hover:bg-purple-50"
-									>
-										Mobile Streaming
-									</button>
-									<button
-										onclick={() => {
-											selectedArmType = 'stream_key';
-											showArmDropdown = false;
-										}}
-										class="block w-full px-4 py-2 text-left text-sm hover:bg-purple-50"
-									>
-										Stream Key
-									</button>
-								</div>
-							{/if}
-						</div>
-						<button
-							onclick={handleArm}
-							disabled={loading}
-							class="rounded-lg bg-purple-600 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700 disabled:opacity-50"
-						>
-							Arm
-						</button>
-					</div>
-				</div>
-			{/if}
-
-			<!-- Stream Credentials (When Armed) -->
-			{#if stream.armStatus?.isArmed}
-				<!-- Mobile Input/Streaming - Show Link to Mobile Page -->
-				{#if (stream.armStatus.armType === 'mobile_input' || stream.armStatus.armType === 'mobile_streaming')}
-					<div class="rounded-lg bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-200 p-4">
-						<h3 class="mb-3 text-sm font-semibold text-purple-900">📱 Mobile Camera Streaming</h3>
-						
-						<p class="mb-3 text-sm text-purple-800">
-							Send this link to the person who will stream from their phone/tablet:
-						</p>
-						
-						<div class="mb-3 rounded-lg bg-white p-3 border border-purple-200">
-							<code class="block text-xs text-purple-900 break-all">
-								{$page.url.origin}/stream/mobile/{stream.id}
-							</code>
-						</div>
-						
-						<div class="flex gap-2">
-							<button
-								onclick={() => copyToClipboard(`${$page.url.origin}/stream/mobile/${stream.id}`, 'whip')}
-								class="flex-1 flex items-center justify-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700"
-							>
-								{#if copiedWhip}
-									<Check class="h-4 w-4" />
-									Copied!
-								{:else}
-									<Copy class="h-4 w-4" />
-									Copy Link
-								{/if}
-							</button>
-							<a
-								href="/stream/mobile/{stream.id}"
-								target="_blank"
-								class="flex items-center justify-center gap-2 rounded-lg border-2 border-purple-600 px-4 py-2 text-sm font-medium text-purple-600 transition-colors hover:bg-purple-50"
-							>
-								<ExternalLink class="h-4 w-4" />
-								Open
-							</a>
-						</div>
-						
-						<div class="mt-3 pt-3 border-t border-purple-200">
-							<p class="text-xs text-purple-700">
-								<strong>For OBS:</strong> The mobile page will display an HLS URL that you can add as a Media Source in OBS.
-							</p>
-						</div>
-					</div>
-				{/if}
-
-			{/if}
-
+	
 			<!-- Status Info -->
 			{#if stream.status === 'live'}
 				<div class="rounded-lg bg-red-50 p-4">

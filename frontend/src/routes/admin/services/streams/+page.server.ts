@@ -36,8 +36,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 				visibility: data.visibility || 'public',
 				scheduledStartTime: data.scheduledStartTime || null,
 				
-				// Stream Arming
-				armStatus: data.armStatus || null,
+				// Legacy credentials
 				streamCredentials: data.streamCredentials || null,
 				
 				// Timestamps

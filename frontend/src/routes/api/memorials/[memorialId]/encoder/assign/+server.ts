@@ -85,9 +85,6 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			encoderConfig: {
 				assignedEncoderId: body.encoderId,
 				assignedEncoderName: encoder.name,
-				encoderArmed: false,
-				armedAt: null,
-				armedBy: null,
 				streamStatus: 'offline'
 			},
 			updatedAt: new Date()
@@ -140,11 +137,6 @@ export const DELETE: RequestHandler = async ({ locals, params }) => {
 			throw svelteError(400, 'No encoder assigned to this memorial');
 		}
 
-		// Check if encoder is armed
-		if (memorial.encoderConfig?.encoderArmed) {
-			throw svelteError(400, 'Please disarm the encoder before unassigning');
-		}
-
 		// Update encoder
 		await adminDb.collection('encoders').doc(encoderId).update({
 			status: 'available',
@@ -157,9 +149,6 @@ export const DELETE: RequestHandler = async ({ locals, params }) => {
 			encoderConfig: {
 				assignedEncoderId: null,
 				assignedEncoderName: null,
-				encoderArmed: false,
-				armedAt: null,
-				armedBy: null,
 				streamStatus: 'offline'
 			},
 			updatedAt: new Date()

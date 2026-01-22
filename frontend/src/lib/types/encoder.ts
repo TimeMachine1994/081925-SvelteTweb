@@ -47,9 +47,6 @@ export interface Encoder {
 export interface MemorialEncoderConfig {
 	assignedEncoderId?: string;
 	assignedEncoderName?: string;
-	encoderArmed: boolean;
-	armedAt?: string;
-	armedBy?: string;
 	scheduledStartTime?: string;
 
 	// Live stream state (updated by webhook)

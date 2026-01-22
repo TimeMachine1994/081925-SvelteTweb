@@ -2,18 +2,10 @@
 // Updated: January 22, 2026 - Added Mux platform integration
 
 export type StreamStatus = 'scheduled' | 'ready' | 'live' | 'completed' | 'error';
-export type StreamArmType = 'mobile_input' | 'mobile_streaming' | 'stream_key';
 export type StreamVisibility = 'public' | 'hidden' | 'archived';
 
 // Mux-specific streaming status
 export type MuxStreamingStatus = 'idle' | 'active' | 'disconnected';
-
-export interface StreamArmStatus {
-	isArmed: boolean;
-	armType: StreamArmType | null;
-	armedAt?: string;
-	armedBy?: string; // user uid
-}
 
 export interface StreamCredentials {
 	// For WHIP (Mobile Input & Mobile Streaming)
@@ -100,8 +92,7 @@ export interface Stream {
 	// Scheduling
 	scheduledStartTime?: string;
 	
-	// Arming system (legacy - keeping for backward compatibility)
-	armStatus?: StreamArmStatus;
+	// Legacy stream credentials (keeping for backward compatibility)
 	streamCredentials?: StreamCredentials;
 	
 	// Mux Platform Integration (NEW)

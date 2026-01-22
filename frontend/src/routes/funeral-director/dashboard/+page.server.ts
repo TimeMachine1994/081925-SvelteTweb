@@ -55,7 +55,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 				encoderConfig: data.encoderConfig || {
 					assignedEncoderId: null,
 					assignedEncoderName: null,
-					encoderArmed: false,
 					streamStatus: 'offline'
 				}
 			};

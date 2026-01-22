@@ -19,18 +19,9 @@ export const load: PageServerLoad = async ({ params }) => {
 
 		const streamData = streamDoc.data()!;
 
-		// Verify stream is armed for mobile input
-		if (!streamData.armStatus?.isArmed) {
-			throw svelteError(400, 'Stream is not armed. Please arm the stream first.');
-		}
-
-		if (streamData.armStatus.armType !== 'mobile_input' && streamData.armStatus.armType !== 'mobile_streaming') {
-			throw svelteError(400, 'Stream is not armed for mobile input/streaming.');
-		}
-
-		// Verify WHIP URL exists
+		// Verify WHIP URL exists for mobile streaming
 		if (!streamData.streamCredentials?.whipUrl) {
-			throw svelteError(500, 'WHIP URL not found. Please re-arm the stream.');
+			throw svelteError(400, 'Mobile streaming not available for this stream.');
 		}
 
 		// Get memorial info for context

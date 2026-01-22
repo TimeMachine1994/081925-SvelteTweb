@@ -169,8 +169,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 				liveStartedAt: data.liveStartedAt || null,
 				liveEndedAt: data.liveEndedAt || null,
 				
-				// Stream Arming (NEW)
-				armStatus: data.armStatus || null,
+				// Legacy credentials
 				streamCredentials: data.streamCredentials || null,
 				
 				// Mux streaming platform data

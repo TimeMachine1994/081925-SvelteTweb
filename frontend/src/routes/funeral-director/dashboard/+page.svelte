@@ -3,7 +3,6 @@
 	import { Building2, User, Mail, Phone, MapPin, Save, ArrowLeft, Video, Calendar, ExternalLink, ChevronDown, ChevronUp } from 'lucide-svelte';
 	import type { PageData } from './$types';
 	import EncoderSelector from '$lib/components/streaming/EncoderSelector.svelte';
-	import EncoderArmControl from '$lib/components/streaming/EncoderArmControl.svelte';
 
 	let { data, form }: { data: PageData; form: any } = $props();
 
@@ -135,13 +134,6 @@
 											{statusBadge.label}
 										</span>
 
-										<!-- Encoder Armed Badge -->
-										{#if memorial.encoderConfig?.encoderArmed}
-											<span class="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800">
-												🎯 Armed
-											</span>
-										{/if}
-
 										<!-- View Memorial Link -->
 										{#if memorial.fullSlug}
 											<a
@@ -186,19 +178,7 @@
 											/>
 										</div>
 
-										<!-- Encoder Arm Control -->
-										<div>
-											<EncoderArmControl
-												memorialId={memorial.id}
-												encoderId={memorial.encoderConfig?.assignedEncoderId}
-												encoderName={memorial.encoderConfig?.assignedEncoderName}
-												isArmed={memorial.encoderConfig?.encoderArmed}
-												streamStatus={memorial.encoderConfig?.streamStatus}
-												onArmed={() => location.reload()}
-												onDisarmed={() => location.reload()}
-											/>
-										</div>
-									</div>
+																			</div>
 								</div>
 							{/if}
 						</div>
