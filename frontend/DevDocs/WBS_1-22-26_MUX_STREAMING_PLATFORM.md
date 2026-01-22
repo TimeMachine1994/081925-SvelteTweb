@@ -614,4 +614,28 @@ If issues arise:
 
 ---
 
+## 14. FIX B: RTMP CREDENTIALS NOT DISPLAYING (Jan 22, 2026)
+
+### Problem Statement
+After arming a stream for "Stream Key" mode, the RTMP credentials are not displayed in the StreamCard component. The arm API correctly stores credentials in Firestore under the `mux` field, but the page loader doesn't include this field when fetching streams.
+
+### Root Cause
+The `page.server.ts` file that loads stream data for the admin memorial detail page does not include the `mux` property in the stream object mapping.
+
+### Affected Files
+- `src/routes/admin/services/memorials/[memorialId]/+page.server.ts` - Missing `mux` property
+- `src/lib/components/streaming/StreamCard.svelte` - Expects `stream.mux.rtmpUrl` and `stream.mux.streamKey`
+
+### TODO List
+- [ ] **FIX-B-1:** Add `mux` property to stream mapping in `page.server.ts`
+- [ ] **FIX-B-2:** Verify StreamCard displays RTMP credentials after fix
+- [ ] **FIX-B-3:** Test arm workflow end-to-end (arm → reload → see credentials)
+- [ ] **FIX-B-4:** Check other page loaders that fetch streams for same issue
+- [ ] **FIX-B-5:** Update stream TypeScript interface if needed
+
+### Priority: HIGH
+This blocks the primary admin workflow for setting up OBS streaming.
+
+---
+
 **END OF WBS**
