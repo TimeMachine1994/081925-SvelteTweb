@@ -372,67 +372,9 @@
 						</div>
 					</div>
 				</div>
-			{:else if stream.streamCredentials?.rtmpUrl && stream.streamCredentials?.streamKey}
-				<!-- LEGACY CLOUDFLARE CREDENTIALS -->
-				<div class="rounded-lg border-2 border-green-200 bg-gradient-to-r from-green-50 to-emerald-50 p-5">
-					<h3 class="mb-4 flex items-center gap-2 text-base font-semibold text-green-900">
-						<Video class="h-5 w-5" />
-						OBS Streaming Setup (Legacy)
-					</h3>
-					
-					<p class="mb-4 text-sm text-green-800">
-						Use these credentials in OBS Studio to stream to this memorial service:
-					</p>
-					
-					<div class="space-y-3">
-						<div>
-							<label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-green-800">RTMP Server URL</label>
-							<div class="flex items-center gap-2">
-								<code class="flex-1 rounded-lg bg-white px-4 py-3 text-sm text-green-900 border border-green-200 font-mono break-all">
-									{stream.streamCredentials.rtmpUrl}
-								</code>
-								<button
-									onclick={() => copyToClipboard(stream.streamCredentials!.rtmpUrl!, 'rtmp')}
-									class="flex items-center gap-1.5 rounded-lg bg-green-600 px-4 py-3 text-sm font-medium text-white transition-all hover:bg-green-700 hover:shadow-md"
-									title="Copy RTMP URL"
-								>
-									{#if copiedRtmp}
-										<Check class="h-4 w-4" />
-										<span>Copied!</span>
-									{:else}
-										<Copy class="h-4 w-4" />
-										<span>Copy</span>
-									{/if}
-								</button>
-							</div>
-						</div>
-
-						<div>
-							<label class="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-green-800">Stream Key</label>
-							<div class="flex items-center gap-2">
-								<code class="flex-1 rounded-lg bg-white px-4 py-3 text-sm text-green-900 border border-green-200 font-mono break-all">
-									{stream.streamCredentials.streamKey}
-								</code>
-								<button
-									onclick={() => copyToClipboard(stream.streamCredentials!.streamKey!, 'streamKey')}
-									class="flex items-center gap-1.5 rounded-lg bg-green-600 px-4 py-3 text-sm font-medium text-white transition-all hover:bg-green-700 hover:shadow-md"
-									title="Copy Stream Key"
-								>
-									{#if copiedStreamKey}
-										<Check class="h-4 w-4" />
-										<span>Copied!</span>
-									{:else}
-										<Copy class="h-4 w-4" />
-										<span>Copy</span>
-									{/if}
-								</button>
-							</div>
-						</div>
-					</div>
-				</div>
 			{/if}
 			
-			{#if stream.mux?.rtmpUrl || stream.streamCredentials?.rtmpUrl}
+			{#if stream.mux?.rtmpUrl}
 
 					<div class="mt-4 rounded-lg bg-white border border-green-200 p-4">
 						<p class="mb-2 text-sm font-semibold text-green-900">📋 Setup Instructions:</p>
@@ -575,56 +517,6 @@
 					</div>
 				{/if}
 
-				<!-- RTMP Credentials (Stream Key) -->
-				{#if stream.armStatus.armType === 'stream_key' && stream.streamCredentials?.rtmpUrl}
-					<div class="rounded-lg bg-green-50 p-4">
-						<h3 class="mb-3 text-sm font-semibold text-green-900">OBS Streaming Credentials</h3>
-						
-						<div class="mb-3">
-							<label class="mb-1 block text-xs font-medium text-green-800">RTMP URL</label>
-							<div class="flex items-center gap-2">
-								<code class="flex-1 truncate rounded bg-white px-3 py-2 text-xs text-green-800">
-									{stream.streamCredentials.rtmpUrl}
-								</code>
-								<button
-									onclick={() => copyToClipboard(stream.streamCredentials!.rtmpUrl!, 'rtmp')}
-									class="rounded-lg bg-green-600 p-2 text-white transition-colors hover:bg-green-700"
-									title="Copy RTMP URL"
-								>
-									{#if copiedRtmp}
-										<Check class="h-4 w-4" />
-									{:else}
-										<Copy class="h-4 w-4" />
-									{/if}
-								</button>
-							</div>
-						</div>
-
-						<div>
-							<label class="mb-1 block text-xs font-medium text-green-800">Stream Key</label>
-							<div class="flex items-center gap-2">
-								<code class="flex-1 truncate rounded bg-white px-3 py-2 text-xs text-green-800">
-									{stream.streamCredentials.streamKey}
-								</code>
-								<button
-									onclick={() => copyToClipboard(stream.streamCredentials!.streamKey!, 'streamKey')}
-									class="rounded-lg bg-green-600 p-2 text-white transition-colors hover:bg-green-700"
-									title="Copy Stream Key"
-								>
-									{#if copiedStreamKey}
-										<Check class="h-4 w-4" />
-									{:else}
-										<Copy class="h-4 w-4" />
-									{/if}
-								</button>
-							</div>
-						</div>
-
-						<p class="mt-3 text-xs text-green-700">
-							Use these credentials in OBS Studio or any RTMP encoder to start streaming.
-						</p>
-					</div>
-				{/if}
 			{/if}
 
 			<!-- Status Info -->

@@ -2,6 +2,7 @@
 	import AdminLayout from '$lib/components/admin/AdminLayout.svelte';
 	import StreamCard from '$lib/components/streaming/StreamCard.svelte';
 	import CustomPricingEditor from '$lib/components/admin/CustomPricingEditor.svelte';
+	import AdminChatPanel from '$lib/components/admin/AdminChatPanel.svelte';
 	import { goto } from '$app/navigation';
 	import { invalidateAll } from '$app/navigation';
 	
@@ -440,6 +441,26 @@ https://player.vimeo.com/video/123456789'
 		</div>
 	</div>
 
+	<!-- Chat Moderation Section -->
+	{#if streams.length > 0}
+		<div class="card">
+			<div class="section-header">
+				<h2>💬 Chat Moderation</h2>
+			</div>
+			<div class="chat-panels">
+				{#each streams as stream}
+					<div class="chat-panel-wrapper">
+						<h3 class="stream-chat-title">{stream.title}</h3>
+						<AdminChatPanel 
+							streamId={stream.id} 
+							chatEnabled={stream.chat?.enabled ?? true}
+						/>
+					</div>
+				{/each}
+			</div>
+		</div>
+	{/if}
+
 	<div class="card">
 		<div class="section-header">
 			<h2>🖼️ Slideshows ({slideshows.length})</h2>
@@ -591,6 +612,26 @@ https://player.vimeo.com/video/123456789'
 	
 	.delete-stream-btn:active { 
 		transform: translateY(0); 
+	}
+	
+	/* Chat panels */
+	.chat-panels {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+	
+	.chat-panel-wrapper {
+		border: 1px solid #e2e8f0;
+		border-radius: 0.5rem;
+		padding: 1rem;
+		background: #f7fafc;
+	}
+	
+	.stream-chat-title {
+		margin: 0 0 0.75rem 0;
+		font-size: 1rem;
+		color: #4a5568;
 	}
 	
 	/* Slideshows list */

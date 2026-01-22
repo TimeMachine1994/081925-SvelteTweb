@@ -1,5 +1,5 @@
 /**
- * Chat Message Moderation API - Mux Integration
+ * Chat Message Moderation API - Firestore-based
  * 
  * Created: January 22, 2026
  * Handles deletion of individual chat messages for moderation
@@ -11,9 +11,8 @@
 import { adminDb } from '$lib/server/firebase';
 import { error as svelteKitError, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { deleteMuxChatMessage } from '$lib/server/mux';
 
-console.log('💬 [CHAT MODERATION API] Message moderation endpoint loaded');
+console.log('💬 [CHAT MODERATION API] Message moderation endpoint loaded - Firestore-based');
 
 /**
  * DELETE - Remove a chat message (soft delete + Mux deletion)
@@ -86,7 +85,7 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
 		}
 
 		const messageData = messageDoc.data();
-		console.log('✅ [CHAT MODERATION API] Message found, Mux ID:', messageData?.muxMessageId);
+		console.log('✅ [CHAT MODERATION API] Message found');
 
 		// Check if already deleted
 		if (messageData?.deleted) {
@@ -95,17 +94,6 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
 				success: true,
 				message: 'Message already deleted'
 			});
-		}
-
-		// Delete from Mux Chat
-		console.log('💬 [CHAT MODERATION API - MUX] Deleting message from Mux...');
-		try {
-			await deleteMuxChatMessage(messageData?.muxMessageId);
-			console.log('✅ [CHAT MODERATION API - MUX] Message deleted from Mux');
-		} catch (muxError) {
-			// Log error but continue - Firestore soft delete is most important
-			console.error('⚠️ [CHAT MODERATION API - MUX] Failed to delete from Mux:', muxError);
-			console.error('⚠️ [CHAT MODERATION API - MUX] Continuing with Firestore soft delete...');
 		}
 
 		// Soft delete in Firestore

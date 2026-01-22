@@ -55,17 +55,19 @@ export interface MuxStreamConfig {
 }
 
 /**
- * Mux Chat Configuration
- * Contains chat space configuration and moderation settings
+ * Stream Chat Configuration
+ * Contains chat settings and stats (stored in Firestore, not Mux)
+ * Note: Mux does not have a native chat API
  */
-export interface MuxChatConfig {
-	spaceId: string;              // Mux chat space ID
+export interface StreamChatConfig {
 	enabled: boolean;             // Is chat enabled for this stream?
-	archived: boolean;            // Is chat archived (read-only)?
 	messageCount: number;         // Total messages sent
 	participantCount: number;     // Unique participants
 	moderationMode?: 'off' | 'auto' | 'manual'; // Moderation mode
 }
+
+// Alias for backward compatibility
+export type MuxChatConfig = StreamChatConfig;
 
 /**
  * Stream Analytics Data

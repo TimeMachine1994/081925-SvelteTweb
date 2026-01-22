@@ -94,8 +94,9 @@ export interface SerializedChatMessage extends Omit<ChatMessage, 'timestamp' | '
 }
 
 /**
- * Mux Stream Chat Message
- * Messages sent during live streams via Mux Chat API
+ * Stream Chat Message
+ * Messages sent during live streams, stored in Firestore
+ * Note: Mux does not have a native chat API, so we use Firestore
  */
 export interface StreamChatMessage {
 	/** Unique message ID */
@@ -103,9 +104,6 @@ export interface StreamChatMessage {
 	
 	/** Stream this message belongs to */
 	streamId: string;
-	
-	/** Mux chat message ID (for API operations) */
-	muxMessageId: string;
 	
 	/** User ID (if authenticated) */
 	userId?: string;
@@ -116,7 +114,10 @@ export interface StreamChatMessage {
 	/** User avatar URL */
 	userAvatar?: string;
 	
-	/** Is this an anonymous viewer? */
+	/** User role for badge display */
+	userRole?: 'admin' | 'guest';
+	
+	/** Is this an anonymous viewer (guest)? */
 	isAnonymous: boolean;
 	
 	/** Message content */

@@ -15,7 +15,7 @@ import { adminAuth, adminDb, FieldValue } from '$lib/server/firebase';
 import { error as SvelteKitError, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import type { Stream } from '$lib/types/stream';
-import { createMuxLiveStream, createMuxChatSpace } from '$lib/server/mux';
+import { createMuxLiveStream } from '$lib/server/mux';
 
 console.log('🎬 [STREAMS API] Module loaded - Mux platform integration active');
 
@@ -161,11 +161,10 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 		console.log('🎬 [STREAMS API - MUX] Scheduled start time:', scheduledStartTime || 'Not scheduled');
 		
 		let muxLiveStream;
-		let muxChatSpace;
 
 		try {
-			// Step 1: Create Mux Live Stream with RTMP credentials
-			console.log('🎬 [STREAMS API - MUX] Step 1/2: Creating Mux live stream...');
+			// Create Mux Live Stream with RTMP credentials
+			console.log('🎬 [STREAMS API - MUX] Creating Mux live stream...');
 			muxLiveStream = await createMuxLiveStream(title.trim(), {
 				reconnectWindow: 60,    // 60 seconds before timeout
 				reducedLatency: true    // Low latency mode
@@ -177,23 +176,16 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			console.log('📺 [STREAMS API - MUX] RTMP URL:', muxLiveStream.rtmpUrl);
 			console.log('🔑 [STREAMS API - MUX] Stream Key length:', muxLiveStream.streamKey?.length || 0);
 
-			// Step 2: Create Mux Chat Space for real-time interaction
-			console.log('💬 [STREAMS API - MUX] Step 2/2: Creating Mux chat space...');
-			muxChatSpace = await createMuxChatSpace(
-				`Stream: ${title.trim()}`,
-				description?.trim() || `Chat for ${title.trim()}`
-			);
-
-			console.log('✅ [STREAMS API - MUX] Mux chat space created successfully');
-			console.log('💬 [STREAMS API - MUX] Chat Space ID:', muxChatSpace.id);
+			// Note: Chat is handled via Firestore, not Mux (Mux doesn't have chat API)
+			console.log('💬 [STREAMS API] Chat will be handled via Firestore subcollection');
 
 		} catch (error) {
-			console.error('❌ [STREAMS API - MUX] Failed to create Mux resources:', error);
+			console.error('❌ [STREAMS API - MUX] Failed to create Mux live stream:', error);
 			console.error('❌ [STREAMS API - MUX] Error details:', {
 				message: error instanceof Error ? error.message : 'Unknown error',
 				stack: error instanceof Error ? error.stack : undefined
 			});
-			throw SvelteKitError(500, `Failed to create streaming platform resources: ${error instanceof Error ? error.message : 'Unknown error'}`);
+			throw SvelteKitError(500, `Failed to create Mux live stream: ${error instanceof Error ? error.message : 'Unknown error'}`);
 		}
 
 		// === BUILD STREAM DOCUMENT ===
@@ -217,11 +209,9 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 				reconnectWindow: 60
 			},
 			
-			// Mux Chat Configuration
+			// Firestore Chat Configuration (Mux doesn't have native chat)
 			chat: {
-				spaceId: muxChatSpace.id,
 				enabled: true,  // Chat enabled by default
-				archived: false,
 				messageCount: 0,
 				participantCount: 0,
 				moderationMode: 'manual'
@@ -237,7 +227,7 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 
 		console.log('💾 [STREAMS API - MUX] Stream data structure complete');
 		console.log('💾 [STREAMS API - MUX] Contains Mux config:', !!streamData.mux);
-		console.log('💾 [STREAMS API - MUX] Contains Chat config:', !!streamData.chat);
+		console.log('💾 [STREAMS API] Chat enabled:', streamData.chat.enabled);
 
 		// Only add optional fields if they have values (avoid undefined)
 		if (scheduledStartTime) {

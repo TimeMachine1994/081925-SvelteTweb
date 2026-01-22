@@ -3,8 +3,9 @@
  * 
  * Provides wrapper functions for Mux API operations including:
  * - Live stream creation and management
- * - Chat space creation and management
  * - Video analytics retrieval
+ * 
+ * Note: Mux does not have a native chat API. Chat is implemented via Firestore.
  * 
  * All functions include comprehensive logging for debugging and monitoring.
  */
@@ -29,7 +30,6 @@ function getMux(): Mux {
 // Proxy for backwards compatibility - exposes all Mux client properties
 const mux = {
 	get video() { return getMux().video; },
-	get chat() { return getMux().chat; },
 	get data() { return getMux().data; }
 };
 
@@ -87,8 +87,7 @@ export async function createMuxLiveStream(
 			rtmpUrl,
 			streamKey,
 			reconnectWindow: liveStream.reconnect_window,
-			status: liveStream.status,
-			streamKey: liveStream.stream_key || ''
+			status: liveStream.status
 		};
 	} catch (error) {
 		console.error('❌ [MUX SERVICE] Failed to create live stream:', error);
@@ -96,36 +95,9 @@ export async function createMuxLiveStream(
 	}
 }
 
-/**
- * Create a new Mux Chat Space
- * 
- * @param name - Chat space name
- * @param description - Optional description
- * @returns Mux chat space object
- */
-export async function createMuxChatSpace(name: string, description?: string) {
-	console.log('💬 [MUX SERVICE] Creating new chat space:', name);
-	console.log('💬 [MUX SERVICE] Description:', description);
-
-	try {
-		const chatSpace = await mux.chat.spaces.create({
-			name,
-			description: description || `Chat for ${name}`
-		});
-
-		console.log('✅ [MUX SERVICE] Chat space created successfully');
-		console.log('💬 [MUX SERVICE] Space ID:', chatSpace.id);
-
-		return {
-			id: chatSpace.id,
-			name: chatSpace.name,
-			description: chatSpace.description
-		};
-	} catch (error) {
-		console.error('❌ [MUX SERVICE] Failed to create chat space:', error);
-		throw error;
-	}
-}
+// NOTE: Mux does not have a native chat API.
+// Chat functionality is implemented via Firestore.
+// See: /api/streams/[streamId]/chat/messages/+server.ts
 
 /**
  * Get live stream details from Mux
@@ -167,58 +139,6 @@ export async function deleteMuxLiveStream(liveStreamId: string) {
 	}
 }
 
-/**
- * Send a message to a Mux chat space
- * 
- * @param spaceId - Mux chat space ID
- * @param message - Message content
- * @param senderId - Sender user ID
- * @param senderName - Sender display name
- * @returns Created message object
- */
-export async function sendMuxChatMessage(
-	spaceId: string,
-	message: string,
-	senderId: string,
-	senderName: string
-) {
-	console.log('💬 [MUX SERVICE] Sending chat message to space:', spaceId);
-	console.log('💬 [MUX SERVICE] Sender:', senderName, '(' + senderId + ')');
-	console.log('💬 [MUX SERVICE] Message:', message.substring(0, 50) + (message.length > 50 ? '...' : ''));
-
-	try {
-		const chatMessage = await mux.chat.spaces.sendMessage(spaceId, {
-			message,
-			sender_id: senderId,
-			sender_name: senderName
-		});
-
-		console.log('✅ [MUX SERVICE] Message sent successfully');
-		console.log('💬 [MUX SERVICE] Message ID:', chatMessage.id);
-
-		return chatMessage;
-	} catch (error) {
-		console.error('❌ [MUX SERVICE] Failed to send chat message:', error);
-		throw error;
-	}
-}
-
-/**
- * Delete a message from a Mux chat space
- * 
- * @param messageId - Mux message ID
- */
-export async function deleteMuxChatMessage(messageId: string) {
-	console.log('💬 [MUX SERVICE] Deleting chat message:', messageId);
-
-	try {
-		await mux.chat.messages.delete(messageId);
-		console.log('✅ [MUX SERVICE] Message deleted successfully');
-	} catch (error) {
-		console.error('❌ [MUX SERVICE] Failed to delete message:', error);
-		throw error;
-	}
-}
 
 /**
  * Get analytics metrics for a stream
@@ -230,29 +150,17 @@ export async function getMuxAnalytics(assetId: string) {
 	console.log('📊 [MUX SERVICE] Fetching analytics for:', assetId);
 
 	try {
-		// Get concurrent viewers metric
-		const viewerMetrics = await mux.data.metrics.get('concurrent-viewers', {
-			filters: [`asset_id:${assetId}`]
-		});
-
-		console.log('✅ [MUX SERVICE] Analytics retrieved');
-		console.log('📊 [MUX SERVICE] Data points:', viewerMetrics.data?.length || 0);
-
-		// Get breakdown metrics for quality
-		const qualityMetrics = await mux.data.metrics.breakdown('viewer-os', {
-			filters: [`asset_id:${assetId}`],
-			timeframe: ['now']
-		});
-
-		console.log('📊 [MUX SERVICE] Quality metrics retrieved');
+		// Note: Mux Data API requires a separate subscription
+		// For now, return placeholder values
+		// TODO: Implement when Mux Data is configured
+		console.log('📊 [MUX SERVICE] Analytics not yet configured for asset:', assetId);
 
 		return {
-			viewerCount: viewerMetrics.data?.[0]?.value || 0,
-			qualityData: qualityMetrics.data || []
+			viewerCount: 0,
+			qualityData: []
 		};
 	} catch (error) {
 		console.error('❌ [MUX SERVICE] Failed to get analytics:', error);
-		// Return default values instead of throwing
 		return {
 			viewerCount: 0,
 			qualityData: []
@@ -283,7 +191,8 @@ export function verifyMuxWebhookSignature(
 	}
 
 	try {
-		const isValid = Mux.webhooks.verifyHeader(body, signature, secret);
+		// Mux.Webhooks.verifyHeader for newer SDK versions
+		const isValid = Mux.Webhooks.verifyHeader(body, signature, secret);
 		
 		if (isValid) {
 			console.log('✅ [MUX SERVICE] Webhook signature valid');

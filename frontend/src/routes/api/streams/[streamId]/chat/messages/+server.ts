@@ -1,21 +1,23 @@
 /**
- * Stream Chat Messages API - Mux Integration
+ * Stream Chat Messages API - Firestore-based
  * 
  * Created: January 22, 2026
- * Handles real-time chat messaging for live streams via Mux Chat API
+ * Handles real-time chat messaging for live streams via Firestore
+ * 
+ * Note: Mux does not have a native chat API, so chat is stored in Firestore
+ * as a subcollection under each stream document.
  * 
  * Endpoints:
  * - GET: Retrieve chat messages for a stream
- * - POST: Send a new message to the chat
+ * - POST: Send a new message to the chat (guests can provide userName)
  */
 
 import { adminDb } from '$lib/server/firebase';
 import { error as svelteKitError, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { sendMuxChatMessage } from '$lib/server/mux';
 import type { StreamChatMessage } from '$lib/types/chat';
 
-console.log('💬 [CHAT API] Chat messages endpoint loaded - Mux integration active');
+console.log('💬 [CHAT API] Chat messages endpoint loaded - Firestore-based');
 
 /**
  * GET - Retrieve chat messages for a stream
@@ -180,30 +182,20 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 			throw svelteKitError(403, 'Chat is disabled for this stream');
 		}
 
-		console.log('✅ [CHAT API] Chat is enabled, space ID:', stream.chat.spaceId);
+		console.log('✅ [CHAT API] Chat is enabled for this stream');
 
-		// Send message to Mux Chat
-		console.log('💬 [CHAT API - MUX] Sending message to Mux chat space...');
-		const muxMessage = await sendMuxChatMessage(
-			stream.chat.spaceId,
-			message.trim(),
-			userId || 'anonymous',
-			finalUserName
-		);
+		// Determine user role for display
+		const userRole = locals.user?.role || 'guest';
+		const isAdmin = userRole === 'admin';
 
-		console.log('✅ [CHAT API - MUX] Message sent to Mux successfully');
-		console.log('💬 [CHAT API - MUX] Mux message ID:', muxMessage.id);
-
-		// Mirror message to Firestore for persistence and moderation
-		console.log('💾 [CHAT API] Mirroring message to Firestore...');
-		const chatMessage: StreamChatMessage = {
-			id: '', // Will be set by Firestore
+		// Save message to Firestore
+		console.log('💾 [CHAT API] Saving message to Firestore...');
+		const chatMessage: Omit<StreamChatMessage, 'id'> = {
 			streamId,
-			muxMessageId: muxMessage.id,
-			userId: userId || undefined,
+			userId: userId || locals.user?.uid || undefined,
 			userName: finalUserName,
-			userAvatar: locals.user?.photoURL || undefined,
-			isAnonymous: !userId,
+			userRole: isAdmin ? 'admin' : 'guest',
+			isAnonymous: !userId && !locals.user,
 			message: message.trim(),
 			timestamp: new Date().toISOString(),
 			deleted: false,
