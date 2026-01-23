@@ -147,6 +147,10 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			// Emergency embed override
 			emergencyEmbed: memorialData.emergencyEmbed || null,
 			
+			// Admin display overrides
+			customTitle: memorialData.customTitle || null,
+			publicNote: memorialData.publicNote || null,
+			
 			// Calculator/Payment - properly cleaned
 			calculatorConfig: cleanCalculatorConfig(memorialData.calculatorConfig),
 			isPaid: memorialData.isPaid || memorialData.calculatorConfig?.isPaid || false,

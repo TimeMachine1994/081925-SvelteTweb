@@ -185,6 +185,7 @@ async function handleStreamEnded(event: any) {
 		
 		console.log('💾 [MUX WEBHOOK] Updating stream status...');
 		await streamDoc.ref.update({
+			status: 'ended',  // Mark as ended so UI shows recording section
 			'mux.streamingStatus': streamingStatus,
 			liveEndedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString()

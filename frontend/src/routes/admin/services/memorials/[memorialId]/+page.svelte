@@ -43,6 +43,14 @@
 	let embedTitle = $state('');
 	let isCreatingEmbed = $state(false);
 
+	// Display settings state
+	let isEditingDisplay = $state(false);
+	let isSavingDisplay = $state(false);
+	let displayError = $state<string | null>(null);
+	let displaySuccess = $state<string | null>(null);
+	let customTitleInput = $state(memorial.customTitle || '');
+	let publicNoteInput = $state(memorial.publicNote || '');
+
 	// Handle custom pricing updates
 	async function handlePricingUpdate() {
 		console.log('💰 [PRICING] Custom pricing updated, reloading page data...');
@@ -209,6 +217,82 @@
 		embedTitle = '';
 	}
 
+	// Display settings handlers
+	async function handleSaveDisplaySettings() {
+		isSavingDisplay = true;
+		displayError = null;
+		displaySuccess = null;
+
+		try {
+			const response = await fetch(`/api/admin/memorials/${memorial.id}/display-settings`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					customTitle: customTitleInput.trim(),
+					publicNote: publicNoteInput.trim()
+				})
+			});
+
+			if (!response.ok) {
+				const data = await response.json();
+				throw new Error(data.message || 'Failed to save display settings');
+			}
+
+			displaySuccess = 'Display settings saved successfully!';
+			isEditingDisplay = false;
+			await invalidateAll();
+
+			setTimeout(() => {
+				displaySuccess = null;
+			}, 3000);
+		} catch (err: any) {
+			displayError = err.message || 'Failed to save display settings';
+		} finally {
+			isSavingDisplay = false;
+		}
+	}
+
+	function cancelDisplayEdit() {
+		isEditingDisplay = false;
+		customTitleInput = memorial.customTitle || '';
+		publicNoteInput = memorial.publicNote || '';
+		displayError = null;
+	}
+
+	async function clearDisplaySettings() {
+		if (!confirm('Clear custom title and public note? This will revert to defaults.')) {
+			return;
+		}
+
+		isSavingDisplay = true;
+		displayError = null;
+
+		try {
+			const response = await fetch(`/api/admin/memorials/${memorial.id}/display-settings`, {
+				method: 'DELETE'
+			});
+
+			if (!response.ok) {
+				const data = await response.json();
+				throw new Error(data.message || 'Failed to clear display settings');
+			}
+
+			customTitleInput = '';
+			publicNoteInput = '';
+			displaySuccess = 'Display settings cleared!';
+			isEditingDisplay = false;
+			await invalidateAll();
+
+			setTimeout(() => {
+				displaySuccess = null;
+			}, 3000);
+		} catch (err: any) {
+			displayError = err.message || 'Failed to clear display settings';
+		} finally {
+			isSavingDisplay = false;
+		}
+	}
+
 	async function handleRemoveEmergencyEmbed() {
 		if (!confirm('Are you sure you want to remove the emergency embed? Normal streams will be displayed again.')) {
 			return;
@@ -276,6 +360,100 @@
 			<div><strong>Created:</strong> {formatDate(memorial.createdAt)}</div>
 			<div><strong>Updated:</strong> {formatDate(memorial.updatedAt)} ({formatRelativeTime(memorial.updatedAt)})</div>
 		</div>
+	</div>
+
+	<!-- Display Settings Editor -->
+	<div class="card">
+		<div class="section-header">
+			<h2>🎨 Display Settings</h2>
+			{#if !isEditingDisplay}
+				<button class="edit-btn-small" onclick={() => isEditingDisplay = true}>
+					✏️ Edit
+				</button>
+			{/if}
+		</div>
+
+		{#if displaySuccess}
+			<div class="success-message">{displaySuccess}</div>
+		{/if}
+
+		{#if displayError}
+			<div class="error-message">{displayError}</div>
+		{/if}
+
+		{#if isEditingDisplay}
+			<div class="display-form">
+				<div class="form-group">
+					<label for="custom-title">Custom Title Override</label>
+					<input
+						id="custom-title"
+						type="text"
+						bind:value={customTitleInput}
+						placeholder="Override the default title (e.g., 'Celebrating the Life of John Smith')"
+						disabled={isSavingDisplay}
+						maxlength="200"
+					/>
+					<p class="help-text">Leave blank to use "{memorial.lovedOneName}" as the title</p>
+				</div>
+
+				<div class="form-group">
+					<label for="public-note">Public Note (shown below livestream)</label>
+					<textarea
+						id="public-note"
+						bind:value={publicNoteInput}
+						placeholder="Add a note that will appear below the livestream player. Supports basic HTML for formatting (bold, italic, links)."
+						rows="4"
+						disabled={isSavingDisplay}
+						maxlength="5000"
+					></textarea>
+					<p class="help-text">This note appears in a styled card below the video player on the public memorial page. Supports HTML: &lt;b&gt;, &lt;i&gt;, &lt;a href="..."&gt;</p>
+				</div>
+
+				<div class="form-actions">
+					<button 
+						class="primary-btn" 
+						onclick={handleSaveDisplaySettings}
+						disabled={isSavingDisplay}
+					>
+						{isSavingDisplay ? '⏳ Saving...' : '💾 Save Display Settings'}
+					</button>
+					<button 
+						onclick={cancelDisplayEdit}
+						disabled={isSavingDisplay}
+					>
+						Cancel
+					</button>
+					{#if memorial.customTitle || memorial.publicNote}
+						<button 
+							class="danger-btn-small"
+							onclick={clearDisplaySettings}
+							disabled={isSavingDisplay}
+						>
+							🗑️ Clear All
+						</button>
+					{/if}
+				</div>
+			</div>
+		{:else}
+			<div class="display-preview">
+				<div class="preview-row">
+					<strong>Custom Title:</strong>
+					{#if memorial.customTitle}
+						<span class="custom-value">{memorial.customTitle}</span>
+					{:else}
+						<span class="default-value">Using default: "{memorial.lovedOneName}"</span>
+					{/if}
+				</div>
+				<div class="preview-row">
+					<strong>Public Note:</strong>
+					{#if memorial.publicNote}
+						<div class="note-preview">{@html memorial.publicNote}</div>
+					{:else}
+						<span class="default-value">None set</span>
+					{/if}
+				</div>
+			</div>
+		{/if}
 	</div>
 
 	<!-- Custom Pricing Editor -->
@@ -733,6 +911,80 @@ https://player.vimeo.com/video/123456789'
 	
 	button.edit-btn-small:hover {
 		background: #2c5282;
+	}
+
+	/* Display Settings styles */
+	.display-form {
+		background: #f7fafc;
+		border: 1px solid #e2e8f0;
+		border-radius: 0.5rem;
+		padding: 1.5rem;
+	}
+
+	.display-preview {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.preview-row {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		align-items: flex-start;
+	}
+
+	.preview-row strong {
+		min-width: 120px;
+		color: #4a5568;
+	}
+
+	.custom-value {
+		color: #2d3748;
+		font-weight: 500;
+	}
+
+	.default-value {
+		color: #718096;
+		font-style: italic;
+	}
+
+	.note-preview {
+		background: #f7fafc;
+		border: 1px solid #e2e8f0;
+		border-radius: 0.375rem;
+		padding: 0.75rem;
+		font-size: 0.875rem;
+		color: #2d3748;
+		flex: 1;
+		min-width: 200px;
+	}
+
+	.success-message {
+		background: #c6f6d5;
+		border: 1px solid #9ae6b4;
+		color: #22543d;
+		padding: 0.75rem;
+		border-radius: 0.375rem;
+		margin-bottom: 1rem;
+		font-size: 0.875rem;
+	}
+
+	.error-message {
+		background: #fed7d7;
+		border: 1px solid #fc8181;
+		color: #742a2a;
+		padding: 0.75rem;
+		border-radius: 0.375rem;
+		margin-bottom: 1rem;
+		font-size: 0.875rem;
+	}
+
+	.help-text {
+		margin: 0.5rem 0 0 0;
+		font-size: 0.75rem;
+		color: #718096;
+		font-style: italic;
 	}
 	
 	/* Modal styles */

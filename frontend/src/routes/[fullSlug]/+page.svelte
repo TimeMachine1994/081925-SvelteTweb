@@ -241,7 +241,7 @@
 					<div class="glass-box">
 						<h1 class="memorial-title">
 							<span class="celebration-prefix">Celebration of Life for</span>
-							<span class="loved-one-name">{memorial.lovedOneName}</span>
+							<span class="loved-one-name">{(memorial as any).customTitle || memorial.lovedOneName}</span>
 						</h1>
 					</div>
 					
@@ -295,10 +295,19 @@
 					<div class="streaming-section">
 						<MemorialStreamDisplay 
 							streams={streams || []} 
-							memorialName={memorial.lovedOneName}
+							memorialName={(memorial as any).customTitle || memorial.lovedOneName}
 							emergencyEmbed={memorial.emergencyEmbed}
 						/>
 					</div>
+					
+					<!-- Public Note Card -->
+					{#if (memorial as any).publicNote}
+						<div class="public-note-card">
+							<div class="public-note-content">
+								{@html (memorial as any).publicNote}
+							</div>
+						</div>
+					{/if}
 				</div>
 				
 				<!-- Legacy Custom HTML Content - Only show if no emergency embed -->
@@ -359,7 +368,7 @@
 						<div class="glass-box">
 							<h1 class="memorial-title">
 								<span class="celebration-prefix">Celebration of Life for</span>
-								<span class="loved-one-name">{memorial.lovedOneName}</span>
+								<span class="loved-one-name">{(memorial as any).customTitle || memorial.lovedOneName}</span>
 							</h1>
 							
 							{#if memorial.birthDate || memorial.deathDate}
@@ -397,12 +406,19 @@
 					<div class="streaming-section">
 						<MemorialStreamDisplay 
 							streams={streams || []} 
-							memorialName={memorial.lovedOneName}
+							memorialName={(memorial as any).customTitle || memorial.lovedOneName}
 							emergencyEmbed={memorial.emergencyEmbed}
 						/>
 					</div>
 					
-					<!-- Content area for future features -->
+					<!-- Public Note Card -->
+					{#if (memorial as any).publicNote}
+						<div class="public-note-card">
+							<div class="public-note-content">
+								{@html (memorial as any).publicNote}
+							</div>
+						</div>
+					{/if}
 				</div>
 			</div>
 		{/if}
@@ -567,7 +583,58 @@
 		font-family: 'Fanwood Text', serif;
 		font-style: italic;
 	}
-	
+
+	/* Public Note Card - Gold transparent with Fanwood font */
+	.public-note-card {
+		max-width: 1000px;
+		margin: 2rem auto 0 auto;
+		padding: 1.5rem 2rem;
+		background: rgba(213, 186, 127, 0.15);
+		border: 2px solid rgba(213, 186, 127, 0.4);
+		border-radius: 12px;
+		backdrop-filter: blur(8px);
+	}
+
+	.public-note-content {
+		font-family: 'Fanwood Text', serif;
+		font-style: italic;
+		font-size: 1.1rem;
+		line-height: 1.7;
+		color: #e0e0e0;
+		text-align: center;
+	}
+
+	.public-note-content :global(a) {
+		color: #D5BA7F;
+		text-decoration: underline;
+		transition: color 0.2s ease;
+	}
+
+	.public-note-content :global(a:hover) {
+		color: #f0d998;
+	}
+
+	.public-note-content :global(b),
+	.public-note-content :global(strong) {
+		color: #f5f5f5;
+		font-weight: 600;
+	}
+
+	.public-note-content :global(i),
+	.public-note-content :global(em) {
+		font-style: italic;
+	}
+
+	@media (max-width: 768px) {
+		.public-note-card {
+			margin: 1.5rem 1rem 0 1rem;
+			padding: 1rem 1.25rem;
+		}
+
+		.public-note-content {
+			font-size: 1rem;
+		}
+	}
 
 	.loading {
 		text-align: center;

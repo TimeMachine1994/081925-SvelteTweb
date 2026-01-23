@@ -217,7 +217,10 @@
 	let recordedStreams = $derived(
 		liveStreams.filter(s => 
 			s.isVisible !== false && 
-			(s.status === 'completed' || s.recordingReady === true || s.mux?.recordingReady === true)
+			(s.status === 'completed' || 
+			 s.status === 'ended' ||  // Include ended streams (recording processing)
+			 s.recordingReady === true || 
+			 s.mux?.recordingReady === true)
 		)
 	);
 	
@@ -361,6 +364,30 @@
 							<div class="mux-stream-container">
 								<div class="video-column">
 									<MuxVideoPlayer stream={stream} autoplay={false} showTitle={true} />
+								</div>
+								
+								{#if stream.chat?.enabled}
+									<div class="chat-column">
+										<LiveChatWidget 
+											streamId={stream.id} 
+											enabled={stream.chat.enabled}
+											archived={true}
+										/>
+									</div>
+								{/if}
+							</div>
+						{:else if stream.status === 'ended' && !stream.mux?.recordingReady}
+							<!-- Stream ended but recording still processing -->
+							<div class="mux-stream-container">
+								<div class="video-column">
+									<div class="recording-processing">
+										<div class="processing-content">
+											<div class="processing-spinner"></div>
+											<h3 class="stream-title">{stream.title}</h3>
+											<p class="processing-message">The service has ended. Recording is being processed...</p>
+											<p class="processing-submessage">This usually takes a few minutes. The page will update automatically.</p>
+										</div>
+									</div>
 								</div>
 								
 								{#if stream.chat?.enabled}
@@ -785,6 +812,54 @@
 		color: rgba(255, 255, 255, 0.4);
 		font-family: monospace;
 		min-width: 45px;
+	}
+	
+	/* Recording Processing State */
+	.recording-processing {
+		position: relative;
+		width: 100%;
+		padding-bottom: 56.25%; /* 16:9 aspect ratio */
+		background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%);
+		border-radius: 8px;
+		overflow: hidden;
+	}
+	
+	.processing-content {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 2rem;
+		text-align: center;
+	}
+	
+	.processing-spinner {
+		width: 48px;
+		height: 48px;
+		border: 3px solid rgba(213, 186, 127, 0.2);
+		border-top-color: #D5BA7F;
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+		margin-bottom: 1.5rem;
+	}
+	
+	@keyframes spin {
+		to { transform: rotate(360deg); }
+	}
+	
+	.processing-message {
+		font-size: 1.1rem;
+		color: #e0e0e0;
+		margin: 0.75rem 0 0.5rem;
+	}
+	
+	.processing-submessage {
+		font-size: 0.9rem;
+		color: #a0a0a0;
+		margin: 0;
+		font-style: italic;
 	}
 	
 	/* Mux Stream Container - Video + Chat Layout */

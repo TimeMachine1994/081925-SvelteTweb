@@ -114,6 +114,10 @@ export interface Memorial {
 
 	// Custom pricing override (admin only)
 	customPricing?: CustomPricing;
+
+	// Admin display overrides
+	customTitle?: string; // Override for the memorial page title (replaces lovedOneName in display)
+	publicNote?: string; // Rich text note shown below livestream on public page
 }
 
 export interface ManualPaymentInfo {

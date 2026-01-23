@@ -74,7 +74,8 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 			field: 'lovedOneName',
 			width: 200,
 			sortable: true,
-			pinnable: true
+			pinnable: true,
+			formatter: (val: string, row: any) => row.customTitle || val
 		},
 		{
 			id: 'ownerEmail',

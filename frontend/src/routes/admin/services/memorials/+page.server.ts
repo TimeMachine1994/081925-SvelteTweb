@@ -75,6 +75,7 @@ export const load = async ({ locals, url }: any) => {
 			return {
 				id: doc.id,
 				lovedOneName: data.lovedOneName || 'Unknown',
+				customTitle: data.customTitle || null,
 				fullSlug: data.fullSlug,
 				creatorEmail: data.creatorEmail || '',
 				creatorName: data.creatorName || '',
