@@ -101,10 +101,10 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			const streamsSnapshot = await adminDb
 				.collection('streams')
 				.where('memorialId', '==', memorial.id)
-				.where('isDeleted', '!=', true)
 				.get();
-			
+		
 			streams = streamsSnapshot.docs
+				.filter(doc => doc.data().isDeleted !== true) // Filter deleted in JS (avoids Firestore index requirement)
 				.map(doc => {
 					const data = doc.data();
 					const stream = {
