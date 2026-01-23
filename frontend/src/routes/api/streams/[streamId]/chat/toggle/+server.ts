@@ -84,11 +84,12 @@ export const PATCH: RequestHandler = async ({ params, request, locals }) => {
 
 		console.log('✅ [CHAT TOGGLE API] User has permission to toggle chat');
 
-		// Check if chat exists
-		if (!stream?.chat?.spaceId) {
-			console.log('❌ [CHAT TOGGLE API] No chat space configured for this stream');
-			throw svelteKitError(400, 'No chat space configured for this stream');
-		}
+		// Log current chat state for debugging
+		console.log('💬 [CHAT TOGGLE API] Current chat config:', {
+			enabled: stream?.chat?.enabled,
+			archived: stream?.chat?.archived,
+			messageCount: stream?.chat?.messageCount
+		});
 
 		// Update chat enabled status
 		console.log('💾 [CHAT TOGGLE API] Updating chat enabled status to:', enabled);

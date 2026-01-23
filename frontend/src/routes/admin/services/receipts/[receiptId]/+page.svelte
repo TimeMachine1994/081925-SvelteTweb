@@ -195,20 +195,20 @@ View receipt details with print/PDF functionality
 							{#each receipt.calculatorConfig.items as item}
 								<tr>
 									<td>{item.name || item.description || 'Service'}</td>
-									<td class="text-right">${(item.price || item.amount || 0).toFixed(2)}</td>
+									<td class="text-right">${Number(item.price || item.amount || 0).toFixed(2)}</td>
 								</tr>
 							{/each}
 						{:else}
 							<tr>
 								<td>Memorial Livestream Service</td>
-								<td class="text-right">${receipt.amount.toFixed(2)}</td>
+								<td class="text-right">${Number(receipt.amount || 0).toFixed(2)}</td>
 							</tr>
 						{/if}
 					</tbody>
 					<tfoot>
 						<tr class="total-row">
 							<td><strong>Total Paid</strong></td>
-							<td class="text-right total-amount">${receipt.amount.toFixed(2)}</td>
+							<td class="text-right total-amount">${Number(receipt.amount || 0).toFixed(2)}</td>
 						</tr>
 					</tfoot>
 				</table>
@@ -248,7 +248,7 @@ View receipt details with print/PDF functionality
 										<span class="badge badge-warning">{payment.status}</span>
 									{/if}
 								</td>
-								<td>${(payment.amount || 0).toFixed(2)}</td>
+								<td>${Number(payment.amount || 0).toFixed(2)}</td>
 								<td class="mono">{payment.paymentIntentId || payment.checkoutSessionId || '-'}</td>
 							</tr>
 						{/each}

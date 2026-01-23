@@ -35,10 +35,14 @@
 	let messagesContainer: HTMLDivElement;
 	let pollInterval: NodeJS.Timeout;
 
+	// Enhanced debug logging for chat state diagnosis
+	console.log('═══════════════════════════════════════════════════');
 	console.log('💬 [CHAT WIDGET] Component initialized');
 	console.log('💬 [CHAT WIDGET] Stream ID:', streamId);
 	console.log('💬 [CHAT WIDGET] Chat enabled:', enabled);
 	console.log('💬 [CHAT WIDGET] Chat archived:', archived);
+	console.log('💬 [CHAT WIDGET] Props received:', { streamId, enabled, archived });
+	console.log('═══════════════════════════════════════════════════');
 
 	/**
 	 * Load chat messages from API
@@ -166,22 +170,30 @@
 
 	// Lifecycle: mount and setup polling
 	onMount(() => {
-		console.log('💬 [CHAT WIDGET] Component mounted');
+		console.log('═══════════════════════════════════════════════════');
+		console.log('💬 [CHAT WIDGET] Component MOUNTED');
+		console.log('💬 [CHAT WIDGET] Mount state:', { streamId, enabled, archived });
+		console.log('═══════════════════════════════════════════════════');
 
 		if (!enabled) {
-			console.log('💬 [CHAT WIDGET] Chat disabled, skipping message load');
+			console.log('🚫 [CHAT WIDGET] Chat DISABLED - skipping message load');
+			console.log('🚫 [CHAT WIDGET] enabled prop value:', enabled);
 			return;
 		}
 
 		// Load initial messages
+		console.log('📥 [CHAT WIDGET] Loading initial messages...');
 		loadMessages();
 
 		// Poll for new messages every 2 seconds (only if not archived)
 		if (!archived) {
-			console.log('💬 [CHAT WIDGET] Starting message polling (2s interval)');
+			console.log('🔄 [CHAT WIDGET] LIVE MODE - Starting message polling (2s interval)');
+			console.log('🔄 [CHAT WIDGET] archived prop value:', archived);
 			pollInterval = setInterval(loadMessages, 2000);
 		} else {
-			console.log('💬 [CHAT WIDGET] Chat archived, polling disabled');
+			console.log('📼 [CHAT WIDGET] ARCHIVED MODE - Polling DISABLED');
+			console.log('📼 [CHAT WIDGET] archived prop value:', archived);
+			console.log('📼 [CHAT WIDGET] Users will NOT be able to send messages');
 		}
 
 		// Cleanup on unmount
@@ -474,8 +486,7 @@
 	.chat-input textarea:focus {
 		outline: none;
 		border-color: #3b82f6;
-		ring: 2px;
-		ring-color: #93c5fd;
+		box-shadow: 0 0 0 2px #93c5fd;
 	}
 
 	.chat-input button {

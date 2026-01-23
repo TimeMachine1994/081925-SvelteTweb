@@ -53,6 +53,7 @@ export interface MuxStreamConfig {
  */
 export interface StreamChatConfig {
 	enabled: boolean;             // Is chat enabled for this stream?
+	archived: boolean;            // Is chat archived (read-only mode)?
 	messageCount: number;         // Total messages sent
 	participantCount: number;     // Unique participants
 	moderationMode?: 'off' | 'auto' | 'manual'; // Moderation mode
