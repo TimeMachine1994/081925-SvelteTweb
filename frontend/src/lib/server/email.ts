@@ -876,6 +876,7 @@ Questions? Contact us at support@tributestream.com
 
 	const msg = {
 		to: data.customerEmail,
+		cc: 'tributestream@gmail.com',
 		from: FROM_EMAIL,
 		subject: `Invoice from Tributestream - ${formatCentsToUSD(data.total)}`,
 		text: textContent,
@@ -887,7 +888,7 @@ Questions? Contact us at support@tributestream.com
 
 	try {
 		await sgMail.send(msg);
-		console.log('✅ Invoice email sent to:', data.customerEmail);
+		console.log('✅ Invoice email sent to:', data.customerEmail, '(CC: tributestream@gmail.com)');
 	} catch (error) {
 		console.error('💥 Exception sending invoice email:', error);
 		throw error;
