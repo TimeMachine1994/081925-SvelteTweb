@@ -10,6 +10,13 @@ View receipt details with print/PDF functionality
 	let { data } = $props();
 	const receipt = data.receipt;
 
+	// Note state
+	let noteContent = $state(receipt.receiptNote?.content || '');
+	let isEditingNote = $state(false);
+	let isSavingNote = $state(false);
+	let noteSaveStatus = $state<'idle' | 'saved' | 'error'>('idle');
+	let includeNoteInPrint = $state(true);
+
 	// Format date helper
 	function formatDate(dateStr: string | null): string {
 		if (!dateStr) return '-';
@@ -51,6 +58,48 @@ View receipt details with print/PDF functionality
 		const dateStr = `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`;
 		return `TS-${dateStr}-${shortId}`;
 	}
+
+	// Save note to server
+	async function saveNote() {
+		isSavingNote = true;
+		noteSaveStatus = 'idle';
+		
+		try {
+			const response = await fetch(`/api/admin/receipts/${receipt.id}/note`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ note: noteContent })
+			});
+
+			if (response.ok) {
+				noteSaveStatus = 'saved';
+				isEditingNote = false;
+				setTimeout(() => { noteSaveStatus = 'idle'; }, 3000);
+			} else {
+				noteSaveStatus = 'error';
+			}
+		} catch (e) {
+			noteSaveStatus = 'error';
+		} finally {
+			isSavingNote = false;
+		}
+	}
+
+	// Get booking items from calculatorConfig
+	function getBookingItems() {
+		if (receipt.calculatorConfig?.bookingItems?.length > 0) {
+			return receipt.calculatorConfig.bookingItems;
+		}
+		// Fallback: create single line item from total
+		return [{
+			name: 'Memorial Livestream Service',
+			price: receipt.amount || 0,
+			quantity: 1,
+			total: receipt.amount || 0
+		}];
+	}
+
+	const bookingItems = getBookingItems();
 </script>
 
 <svelte:head>
@@ -187,32 +236,37 @@ View receipt details with print/PDF functionality
 					<thead>
 						<tr>
 							<th>Description</th>
+							<th class="text-center">Qty</th>
+							<th class="text-right">Unit Price</th>
 							<th class="text-right">Amount</th>
 						</tr>
 					</thead>
 					<tbody>
-						{#if receipt.calculatorConfig?.items && receipt.calculatorConfig.items.length > 0}
-							{#each receipt.calculatorConfig.items as item}
-								<tr>
-									<td>{item.name || item.description || 'Service'}</td>
-									<td class="text-right">${Number(item.price || item.amount || 0).toFixed(2)}</td>
-								</tr>
-							{/each}
-						{:else}
+						{#each bookingItems as item}
 							<tr>
-								<td>Memorial Livestream Service</td>
-								<td class="text-right">${Number(receipt.amount || 0).toFixed(2)}</td>
+								<td>{item.name}</td>
+								<td class="text-center">{item.quantity || 1}</td>
+								<td class="text-right">${Number(item.price || 0).toFixed(2)}</td>
+								<td class="text-right">${Number(item.total || item.price || 0).toFixed(2)}</td>
 							</tr>
-						{/if}
+						{/each}
 					</tbody>
 					<tfoot>
 						<tr class="total-row">
-							<td><strong>Total Paid</strong></td>
+							<td colspan="3"><strong>Total Paid</strong></td>
 							<td class="text-right total-amount">${Number(receipt.amount || 0).toFixed(2)}</td>
 						</tr>
 					</tfoot>
 				</table>
 			</div>
+
+			<!-- Admin Note (Printable if enabled) -->
+			{#if noteContent && includeNoteInPrint}
+				<div class="receipt-note printable-note">
+					<h3>Notes</h3>
+					<p>{noteContent}</p>
+				</div>
+			{/if}
 
 			<!-- Footer -->
 			<div class="receipt-footer">
@@ -256,6 +310,60 @@ View receipt details with print/PDF functionality
 				</table>
 			</div>
 		{/if}
+
+		<!-- Admin Notes Section (Not Printed) -->
+		<div class="admin-notes-section no-print">
+			<div class="notes-header">
+				<h3>📝 Admin Notes</h3>
+				<label class="print-toggle">
+					<input type="checkbox" bind:checked={includeNoteInPrint} />
+					Include in print
+				</label>
+			</div>
+			
+			{#if isEditingNote}
+				<div class="note-editor">
+					<textarea
+						bind:value={noteContent}
+						placeholder="Add a note for this receipt (e.g., special requests, follow-up needed, payment method details...)"
+						rows="4"
+					></textarea>
+					<div class="note-actions">
+						<button class="btn btn-primary" onclick={saveNote} disabled={isSavingNote}>
+							{isSavingNote ? 'Saving...' : 'Save Note'}
+						</button>
+						<button class="btn btn-secondary" onclick={() => { isEditingNote = false; noteContent = receipt.receiptNote?.content || ''; }}>
+							Cancel
+						</button>
+					</div>
+				</div>
+			{:else}
+				<div class="note-display">
+					{#if noteContent}
+						<p class="note-content">{noteContent}</p>
+						{#if receipt.receiptNote?.updatedAt}
+							<p class="note-meta">
+								Last updated: {formatDate(receipt.receiptNote.updatedAt)}
+								{#if receipt.receiptNote.updatedByEmail}
+									by {receipt.receiptNote.updatedByEmail}
+								{/if}
+							</p>
+						{/if}
+					{:else}
+						<p class="no-note">No notes added yet.</p>
+					{/if}
+					<button class="btn btn-secondary" onclick={() => isEditingNote = true}>
+						{noteContent ? 'Edit Note' : 'Add Note'}
+					</button>
+				</div>
+			{/if}
+			
+			{#if noteSaveStatus === 'saved'}
+				<div class="save-status success">✓ Note saved successfully</div>
+			{:else if noteSaveStatus === 'error'}
+				<div class="save-status error">✗ Failed to save note</div>
+			{/if}
+		</div>
 
 		<!-- Admin Actions -->
 		<div class="admin-actions no-print">
@@ -559,6 +667,163 @@ View receipt details with print/PDF functionality
 
 	.action-link:hover {
 		text-decoration: underline;
+	}
+
+	.text-center {
+		text-align: center;
+	}
+
+	/* Receipt Note (Printable) */
+	.receipt-note {
+		margin-top: 1.5rem;
+		padding: 1rem;
+		background: #f7fafc;
+		border-radius: 0.375rem;
+		border-left: 4px solid #667eea;
+	}
+
+	.receipt-note h3 {
+		font-size: 0.75rem;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: #718096;
+		margin: 0 0 0.5rem;
+	}
+
+	.receipt-note p {
+		margin: 0;
+		color: #2d3748;
+		white-space: pre-wrap;
+	}
+
+	/* Admin Notes Section */
+	.admin-notes-section {
+		max-width: 800px;
+		margin: 2rem auto 0;
+		background: white;
+		border: 1px solid #e2e8f0;
+		border-radius: 0.5rem;
+		padding: 1.5rem;
+	}
+
+	.notes-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1rem;
+	}
+
+	.notes-header h3 {
+		margin: 0;
+		font-size: 1rem;
+		color: #2d3748;
+	}
+
+	.print-toggle {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.875rem;
+		color: #4a5568;
+		cursor: pointer;
+	}
+
+	.print-toggle input {
+		cursor: pointer;
+	}
+
+	.note-editor textarea {
+		width: 100%;
+		padding: 0.75rem;
+		border: 1px solid #e2e8f0;
+		border-radius: 0.375rem;
+		font-size: 0.875rem;
+		resize: vertical;
+		font-family: inherit;
+	}
+
+	.note-editor textarea:focus {
+		outline: none;
+		border-color: #667eea;
+		box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+	}
+
+	.note-actions {
+		display: flex;
+		gap: 0.5rem;
+		margin-top: 0.75rem;
+	}
+
+	.btn {
+		padding: 0.5rem 1rem;
+		border-radius: 0.375rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		cursor: pointer;
+		border: none;
+		transition: background 0.2s;
+	}
+
+	.btn-primary {
+		background: #667eea;
+		color: white;
+	}
+
+	.btn-primary:hover {
+		background: #5a67d8;
+	}
+
+	.btn-primary:disabled {
+		background: #a0aec0;
+		cursor: not-allowed;
+	}
+
+	.btn-secondary {
+		background: #e2e8f0;
+		color: #4a5568;
+	}
+
+	.btn-secondary:hover {
+		background: #cbd5e0;
+	}
+
+	.note-display .note-content {
+		background: #f7fafc;
+		padding: 1rem;
+		border-radius: 0.375rem;
+		margin: 0 0 0.5rem;
+		white-space: pre-wrap;
+		color: #2d3748;
+	}
+
+	.note-display .note-meta {
+		font-size: 0.75rem;
+		color: #718096;
+		margin: 0 0 0.75rem;
+	}
+
+	.note-display .no-note {
+		color: #a0aec0;
+		font-style: italic;
+		margin: 0 0 0.75rem;
+	}
+
+	.save-status {
+		margin-top: 0.75rem;
+		padding: 0.5rem;
+		border-radius: 0.25rem;
+		font-size: 0.875rem;
+		text-align: center;
+	}
+
+	.save-status.success {
+		background: #c6f6d5;
+		color: #22543d;
+	}
+
+	.save-status.error {
+		background: #fed7d7;
+		color: #742a2a;
 	}
 
 	@media (max-width: 640px) {

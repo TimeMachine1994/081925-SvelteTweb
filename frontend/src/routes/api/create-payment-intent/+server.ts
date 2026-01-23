@@ -67,11 +67,14 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			customer_email: customerInfo?.email || locals.user.email || ''
 		});
 
-		// Save checkout session info to memorial
+		// Save checkout session info AND booking details to memorial
 		await memorialRef.update({
 			'calculatorConfig.status': 'pending_payment',
 			'calculatorConfig.checkoutSessionId': session.id,
-			'calculatorConfig.lastModified': Timestamp.now()
+			'calculatorConfig.bookingItems': bookingItems, // Save line item breakdown
+			'calculatorConfig.totalPrice': amount, // Save total price
+			'calculatorConfig.lastModified': Timestamp.now(),
+			'calculatorConfig.lastModifiedBy': locals.user.uid
 		});
 
 		console.log('✅ Checkout session created successfully:', session.id);

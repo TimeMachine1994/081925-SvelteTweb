@@ -94,15 +94,35 @@ export const load = async ({ locals, params }: any) => {
 			checkoutSessionId: data.calculatorConfig?.checkoutSessionId || latestPayment.checkoutSessionId || null,
 			status: data.calculatorConfig?.status || (data.isPaid ? 'paid' : 'unknown'),
 
-			// Calculator config (line items) - extract only serializable data
+			// Calculator config (line items) - extract bookingItems if available
 			calculatorConfig: data.calculatorConfig ? {
 				status: data.calculatorConfig.status || null,
 				totalPrice: data.calculatorConfig.totalPrice || data.calculatorConfig.total || null,
-				items: Array.isArray(data.calculatorConfig.items) ? data.calculatorConfig.items.map((item: any) => ({
-					name: item.name || item.description || 'Service',
-					price: item.price || item.amount || 0,
-					quantity: item.quantity || 1
-				})) : []
+				selectedTier: data.calculatorConfig.selectedTier || null,
+				// Use bookingItems (new format) or items (old format)
+				bookingItems: Array.isArray(data.calculatorConfig.bookingItems) 
+					? data.calculatorConfig.bookingItems.map((item: any) => ({
+						name: item.name || item.description || 'Service',
+						price: item.price || 0,
+						quantity: item.quantity || 1,
+						total: item.total || item.price || 0
+					}))
+					: Array.isArray(data.calculatorConfig.items) 
+						? data.calculatorConfig.items.map((item: any) => ({
+							name: item.name || item.description || 'Service',
+							price: item.price || item.amount || 0,
+							quantity: item.quantity || 1,
+							total: item.total || item.price || item.amount || 0
+						}))
+						: []
+			} : null,
+			
+			// Admin notes for this receipt
+			receiptNote: data.receiptNote ? {
+				content: data.receiptNote.content || '',
+				updatedAt: safeToISOString(data.receiptNote.updatedAt),
+				updatedBy: data.receiptNote.updatedBy || null,
+				updatedByEmail: data.receiptNote.updatedByEmail || null
 			} : null,
 			
 			// Services breakdown - extract only what we need
