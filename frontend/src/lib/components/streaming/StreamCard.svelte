@@ -130,8 +130,11 @@
 	}
 
 	function openEditTitle() {
+		console.log('✏️ [StreamCard] openEditTitle called for stream:', stream.id);
+		console.log('✏️ [StreamCard] Current title:', stream.title);
 		editedTitle = stream.title;
 		showEditTitle = true;
+		console.log('✏️ [StreamCard] showEditTitle set to:', showEditTitle);
 	}
 
 	async function handleUpdateTitle() {
@@ -543,7 +546,7 @@
 
 <!-- Edit Start Time Modal -->
 {#if showEditTime}
-	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onclick={() => (showEditTime = false)}>
+	<div class="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50" onclick={() => (showEditTime = false)}>
 		<div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl" onclick={(e) => e.stopPropagation()}>
 			<h3 class="mb-4 text-lg font-semibold text-gray-900">Edit Start Time</h3>
 			
@@ -581,7 +584,7 @@
 
 <!-- Edit Title Modal -->
 {#if showEditTitle}
-	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onclick={() => (showEditTitle = false)}>
+	<div class="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50" onclick={() => (showEditTitle = false)}>
 		<div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl" onclick={(e) => e.stopPropagation()}>
 			<h3 class="mb-4 text-lg font-semibold text-gray-900">Edit Stream Title</h3>
 			

@@ -60,8 +60,9 @@
 			return null;
 		}
 
-		// For completed streams with recording ready, use VOD playback ID
-		if (stream.status === 'completed' && stream.mux.vodPlaybackId) {
+		// For completed/ended streams with recording ready, use VOD playback ID
+		// Check recordingReady flag OR ended/completed status to ensure we use VOD when available
+		if ((stream.mux.recordingReady || stream.status === 'completed' || stream.status === 'ended') && stream.mux.vodPlaybackId) {
 			console.log('📼 [MUX PLAYER] Using VOD playback ID:', stream.mux.vodPlaybackId);
 			return stream.mux.vodPlaybackId;
 		}
