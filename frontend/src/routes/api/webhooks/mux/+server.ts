@@ -117,21 +117,23 @@ async function handleStreamActive(event: any) {
 	console.log('🔴 [MUX WEBHOOK] Live stream ID:', liveStreamId);
 
 	try {
-		// Find stream by Mux live stream ID
+		// Find stream by Mux live stream ID (exclude deleted streams)
 		console.log('🔍 [MUX WEBHOOK] Searching for stream in Firestore...');
 		const streamSnapshot = await adminDb
 			.collection('streams')
 			.where('mux.liveStreamId', '==', liveStreamId)
-			.limit(1)
 			.get();
 
-		if (streamSnapshot.empty) {
-			console.warn('⚠️ [MUX WEBHOOK] No stream found for live stream ID:', liveStreamId);
-			console.warn('⚠️ [MUX WEBHOOK] This may be a test stream or orphaned webhook');
+		// Filter out deleted streams in JS (isDeleted field may not exist on all docs)
+		const validStreams = streamSnapshot.docs.filter(doc => doc.data().isDeleted !== true);
+
+		if (validStreams.length === 0) {
+			console.warn('⚠️ [MUX WEBHOOK] No active stream found for live stream ID:', liveStreamId);
+			console.warn('⚠️ [MUX WEBHOOK] This may be a test stream, deleted stream, or orphaned webhook');
 			return;
 		}
 
-		const streamDoc = streamSnapshot.docs[0];
+		const streamDoc = validStreams[0];
 		console.log('✅ [MUX WEBHOOK] Stream found:', streamDoc.id);
 		console.log('🔴 [MUX WEBHOOK] Current status:', streamDoc.data().status);
 
@@ -164,20 +166,22 @@ async function handleStreamEnded(event: any) {
 	console.log('⏹️ [MUX WEBHOOK] Live stream ID:', liveStreamId);
 
 	try {
-		// Find stream by Mux live stream ID
+		// Find stream by Mux live stream ID (exclude deleted streams)
 		console.log('🔍 [MUX WEBHOOK] Searching for stream in Firestore...');
 		const streamSnapshot = await adminDb
 			.collection('streams')
 			.where('mux.liveStreamId', '==', liveStreamId)
-			.limit(1)
 			.get();
 
-		if (streamSnapshot.empty) {
-			console.warn('⚠️ [MUX WEBHOOK] No stream found for live stream ID:', liveStreamId);
+		// Filter out deleted streams in JS
+		const validStreams = streamSnapshot.docs.filter(doc => doc.data().isDeleted !== true);
+
+		if (validStreams.length === 0) {
+			console.warn('⚠️ [MUX WEBHOOK] No active stream found for live stream ID:', liveStreamId);
 			return;
 		}
 
-		const streamDoc = streamSnapshot.docs[0];
+		const streamDoc = validStreams[0];
 		console.log('✅ [MUX WEBHOOK] Stream found:', streamDoc.id);
 
 		// Update stream status
@@ -213,20 +217,22 @@ async function handleRecordingReady(event: any) {
 	console.log('📼 [MUX WEBHOOK] Original live stream ID:', liveStreamId);
 
 	try {
-		// Find stream by Mux live stream ID
+		// Find stream by Mux live stream ID (exclude deleted streams)
 		console.log('🔍 [MUX WEBHOOK] Searching for stream in Firestore...');
 		const streamSnapshot = await adminDb
 			.collection('streams')
 			.where('mux.liveStreamId', '==', liveStreamId)
-			.limit(1)
 			.get();
 
-		if (streamSnapshot.empty) {
-			console.warn('⚠️ [MUX WEBHOOK] No stream found for live stream ID:', liveStreamId);
+		// Filter out deleted streams in JS
+		const validStreams = streamSnapshot.docs.filter(doc => doc.data().isDeleted !== true);
+
+		if (validStreams.length === 0) {
+			console.warn('⚠️ [MUX WEBHOOK] No active stream found for live stream ID:', liveStreamId);
 			return;
 		}
 
-		const streamDoc = streamSnapshot.docs[0];
+		const streamDoc = validStreams[0];
 		console.log('✅ [MUX WEBHOOK] Stream found:', streamDoc.id);
 
 		// Extract playback ID and duration
@@ -273,20 +279,22 @@ async function handleRecordingError(event: any) {
 	console.log('❌ [MUX WEBHOOK] Error:', errorMessage);
 
 	try {
-		// Find stream by Mux live stream ID
+		// Find stream by Mux live stream ID (exclude deleted streams)
 		console.log('🔍 [MUX WEBHOOK] Searching for stream in Firestore...');
 		const streamSnapshot = await adminDb
 			.collection('streams')
 			.where('mux.liveStreamId', '==', liveStreamId)
-			.limit(1)
 			.get();
 
-		if (streamSnapshot.empty) {
-			console.warn('⚠️ [MUX WEBHOOK] No stream found for live stream ID:', liveStreamId);
+		// Filter out deleted streams in JS
+		const validStreams = streamSnapshot.docs.filter(doc => doc.data().isDeleted !== true);
+
+		if (validStreams.length === 0) {
+			console.warn('⚠️ [MUX WEBHOOK] No active stream found for live stream ID:', liveStreamId);
 			return;
 		}
 
-		const streamDoc = streamSnapshot.docs[0];
+		const streamDoc = validStreams[0];
 		console.log('✅ [MUX WEBHOOK] Stream found:', streamDoc.id);
 
 		// Update stream with error status

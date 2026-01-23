@@ -430,8 +430,9 @@
 </div>
 
 <style>
-	/* Import Fanwood font - MUST BE FIRST */
+	/* Import fonts - MUST BE FIRST */
 	@import url('https://fonts.googleapis.com/css2?family=Fanwood+Text:ital,wght@0,400;1,400&display=swap');
+	@import url('https://fonts.googleapis.com/css2?family=ABeeZee:ital@0;1&display=swap');
 
 	/* Memorial Page Styles */
 	.memorial-page {
@@ -584,7 +585,7 @@
 		font-style: italic;
 	}
 
-	/* Public Note Card - Gold transparent with Fanwood font */
+	/* Public Note Card - Gold transparent with ABeeZee font */
 	.public-note-card {
 		max-width: 1000px;
 		margin: 2rem auto 0 auto;
@@ -596,8 +597,7 @@
 	}
 
 	.public-note-content {
-		font-family: 'Fanwood Text', serif;
-		font-style: italic;
+		font-family: 'ABeeZee', sans-serif;
 		font-size: 1.1rem;
 		line-height: 1.7;
 		color: #e0e0e0;

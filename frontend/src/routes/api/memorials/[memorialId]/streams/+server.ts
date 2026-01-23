@@ -212,6 +212,7 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			// Firestore Chat Configuration (Mux doesn't have native chat)
 			chat: {
 				enabled: true,  // Chat enabled by default
+				archived: false, // New streams have live chat, not archived
 				messageCount: 0,
 				participantCount: 0,
 				moderationMode: 'manual'

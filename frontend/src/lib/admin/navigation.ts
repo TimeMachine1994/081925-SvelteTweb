@@ -84,6 +84,14 @@ export const ADMIN_NAV: NavDomain[] = [
 				icon: '📡',
 				description: 'Streaming encoder devices',
 				requiredPermission: { resource: 'stream', action: 'read' }
+			},
+			{
+				id: 'receipts',
+				label: 'Receipts',
+				href: '/admin/services/receipts',
+				icon: '🧾',
+				description: 'Payment receipts and invoices',
+				requiredPermission: { resource: 'memorial', action: 'read' }
 			}
 		]
 	},

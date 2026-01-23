@@ -77,6 +77,18 @@ export const DELETE: RequestHandler = async ({ locals, params }) => {
 		console.log('✅ [STREAM DELETE] Stream soft-deleted successfully:', streamId);
 		console.log('ℹ️ [STREAM DELETE] Stream will be permanently deleted after 30 days');
 
+		// Disable the Mux liveStream to prevent webhooks from reactivating this stream
+		if (streamData.mux?.liveStreamId) {
+			try {
+				const { deleteMuxLiveStream } = await import('$lib/server/mux');
+				await deleteMuxLiveStream(streamData.mux.liveStreamId);
+				console.log('✅ [STREAM DELETE] Mux liveStream disabled:', streamData.mux.liveStreamId);
+			} catch (muxError: any) {
+				// Non-fatal - stream is still soft-deleted in Firestore
+				console.warn('⚠️ [STREAM DELETE] Failed to disable Mux liveStream (non-fatal):', muxError?.message);
+			}
+		}
+
 		// NOTE: Cloudflare cleanup will happen during permanent deletion
 		// This preserves the ability to restore streams within 30 days
 
