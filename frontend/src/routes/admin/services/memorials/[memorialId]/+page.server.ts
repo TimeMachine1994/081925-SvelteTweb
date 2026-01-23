@@ -27,7 +27,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			adminDb.collection('memorials').doc(memorialId).get(),
 			adminDb.collection('streams')
 				.where('memorialId', '==', memorialId)
-				.where('isDeleted', '!=', true)
 				.get(),
 			adminDb.collection('memorials').doc(memorialId).collection('slideshows').get(),
 			adminDb.collection('memorials').doc(memorialId).collection('followers').get()
@@ -156,8 +155,10 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			paymentDate: convertTimestamp(memorialData.calculatorConfig?.paymentDate)
 		};
 
-		// Process streams
-		const streams = streamsSnap.docs.map((doc) => {
+		// Process streams - filter deleted in JS to handle missing isDeleted field
+		const streams = streamsSnap.docs
+			.filter(doc => doc.data().isDeleted !== true)
+			.map((doc) => {
 			const data = doc.data();
 			return {
 				id: doc.id,
