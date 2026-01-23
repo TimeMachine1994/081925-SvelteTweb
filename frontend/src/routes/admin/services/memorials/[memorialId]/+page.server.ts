@@ -156,8 +156,17 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			calculatorConfig: cleanCalculatorConfig(memorialData.calculatorConfig),
 			isPaid: memorialData.isPaid || memorialData.calculatorConfig?.isPaid || false,
 			paymentStatus: memorialData.calculatorConfig?.status || 'draft',
-			totalPrice: memorialData.calculatorConfig?.totalPrice || 0,
-			paymentDate: convertTimestamp(memorialData.calculatorConfig?.paymentDate)
+			totalPrice: memorialData.calculatorConfig?.totalPrice || memorialData.totalPrice || 0,
+			paymentDate: convertTimestamp(memorialData.calculatorConfig?.paymentDate),
+			
+			// Schedule data for admin editor
+			schedule: memorialData.calculatorConfig?.autoSave?.formData || memorialData.calculatorConfig?.formData || null,
+			
+			// Custom pricing overrides
+			customPricing: memorialData.customPricing || null,
+			
+			// Contact info
+			funeralDirectorName: memorialData.funeralDirectorName || memorialData.calculatorConfig?.formData?.funeralDirectorName || ''
 		};
 
 		// Process streams - filter deleted in JS to handle missing isDeleted field

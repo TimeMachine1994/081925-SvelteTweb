@@ -2,6 +2,7 @@
 	import AdminLayout from '$lib/components/admin/AdminLayout.svelte';
 	import StreamCard from '$lib/components/streaming/StreamCard.svelte';
 	import CustomPricingEditor from '$lib/components/admin/CustomPricingEditor.svelte';
+	import AdminScheduleEditor from '$lib/components/admin/AdminScheduleEditor.svelte';
 	import AdminChatPanel from '$lib/components/admin/AdminChatPanel.svelte';
 	import { goto } from '$app/navigation';
 	import { invalidateAll } from '$app/navigation';
@@ -804,11 +805,8 @@ https://player.vimeo.com/video/123456789'
 		</div>
 	</div>
 
-	<div class="card">
-		<h2>💳 Payment</h2>
-		<p>Status: {memorial.isPaid ? '✅ Paid' : '❌ Unpaid'}</p>
-		<p>Amount: ${memorial.totalPrice}</p>
-	</div>
+	<!-- Schedule & Billing Editor -->
+	<AdminScheduleEditor memorial={memorial} onUpdate={handlePricingUpdate} />
 
 	<div class="card">
 		<h2>📊 Analytics</h2>

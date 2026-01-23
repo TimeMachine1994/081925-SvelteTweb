@@ -111,6 +111,38 @@ export interface Memorial {
 	paidAt?: Timestamp | string;
 	manualPayment?: ManualPaymentInfo;
 	calculatorConfig?: CalculatorConfig;
+	totalPrice?: number;
+	
+	// Schedule data (parsed from calculatorConfig for admin editor)
+	schedule?: {
+		selectedTier?: string;
+		mainService?: {
+			location?: { name?: string; address?: string };
+			time?: { date?: string; time?: string };
+			hours?: number;
+		};
+		additionalLocation?: {
+			enabled?: boolean;
+			location?: { name?: string };
+			time?: { date?: string; time?: string };
+			hours?: number;
+		};
+		additionalDay?: {
+			enabled?: boolean;
+			location?: { name?: string };
+			time?: { date?: string; time?: string };
+			hours?: number;
+		};
+		addons?: {
+			photography?: boolean;
+			audioVisualSupport?: boolean;
+			liveMusician?: boolean;
+			woodenUsbDrives?: number;
+		};
+	};
+	
+	// Contact info
+	funeralDirectorName?: string;
 
 	// Custom pricing override (admin only)
 	customPricing?: CustomPricing;
