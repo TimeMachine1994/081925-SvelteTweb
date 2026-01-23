@@ -290,14 +290,12 @@
 								</div>
 								
 								{#if stream.chat?.enabled}
-									<!-- DEBUG: Live stream chat - should NOT be archived -->
-									{@const chatArchived = stream.chat.archived || false}
-									{console.log('🟢 [STREAM DISPLAY] LIVE stream chat props:', { streamId: stream.id, status: stream.status, chatEnabled: stream.chat.enabled, chatArchived: stream.chat.archived, passedArchived: chatArchived })}
+									<!-- Live stream chat - never locked during live stream -->
 									<div class="chat-column">
 										<LiveChatWidget 
 											streamId={stream.id} 
-											enabled={stream.chat.enabled}
-											archived={chatArchived}
+											enabled={true}
+											locked={false}
 										/>
 									</div>
 								{/if}
@@ -373,8 +371,8 @@
 									<div class="chat-column">
 										<LiveChatWidget 
 											streamId={stream.id} 
-											enabled={stream.chat.enabled}
-											archived={true}
+											enabled={true}
+											locked={true}
 										/>
 									</div>
 								{/if}
@@ -397,8 +395,8 @@
 									<div class="chat-column">
 										<LiveChatWidget 
 											streamId={stream.id} 
-											enabled={stream.chat.enabled}
-											archived={true}
+											enabled={true}
+											locked={true}
 										/>
 									</div>
 								{/if}

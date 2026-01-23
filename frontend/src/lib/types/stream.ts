@@ -52,8 +52,8 @@ export interface MuxStreamConfig {
  * Note: Mux does not have a native chat API
  */
 export interface StreamChatConfig {
-	enabled: boolean;             // Is chat enabled for this stream?
-	archived: boolean;            // Is chat archived (read-only mode)?
+	enabled: boolean;             // Show/hide chat entirely
+	locked?: boolean;             // Prevent new messages (read-only mode)
 	messageCount: number;         // Total messages sent
 	participantCount: number;     // Unique participants
 	moderationMode?: 'off' | 'auto' | 'manual'; // Moderation mode

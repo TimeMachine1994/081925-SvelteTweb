@@ -19,11 +19,11 @@
 	// Props interface
 	interface Props {
 		streamId: string;
-		enabled: boolean;
-		archived?: boolean;
+		enabled?: boolean;  // Show/hide chat entirely
+		locked?: boolean;   // Prevent new messages (read-only mode)
 	}
 
-	let { streamId, enabled, archived = false }: Props = $props();
+	let { streamId, enabled = true, locked = false }: Props = $props();
 
 	// Component state
 	let messages = $state<StreamChatMessage[]>([]);
@@ -35,14 +35,8 @@
 	let messagesContainer: HTMLDivElement;
 	let pollInterval: NodeJS.Timeout;
 
-	// Enhanced debug logging for chat state diagnosis
-	console.log('═══════════════════════════════════════════════════');
-	console.log('💬 [CHAT WIDGET] Component initialized');
-	console.log('💬 [CHAT WIDGET] Stream ID:', streamId);
-	console.log('💬 [CHAT WIDGET] Chat enabled:', enabled);
-	console.log('💬 [CHAT WIDGET] Chat archived:', archived);
-	console.log('💬 [CHAT WIDGET] Props received:', { streamId, enabled, archived });
-	console.log('═══════════════════════════════════════════════════');
+	// Debug logging for chat state
+	console.log('💬 [CHAT] Init:', { streamId, enabled, locked });
 
 	/**
 	 * Load chat messages from API
@@ -170,36 +164,21 @@
 
 	// Lifecycle: mount and setup polling
 	onMount(() => {
-		console.log('═══════════════════════════════════════════════════');
-		console.log('💬 [CHAT WIDGET] Component MOUNTED');
-		console.log('💬 [CHAT WIDGET] Mount state:', { streamId, enabled, archived });
-		console.log('═══════════════════════════════════════════════════');
+		console.log('💬 [CHAT] Mounted:', { streamId, enabled, locked });
 
 		if (!enabled) {
-			console.log('🚫 [CHAT WIDGET] Chat DISABLED - skipping message load');
-			console.log('🚫 [CHAT WIDGET] enabled prop value:', enabled);
 			return;
 		}
 
 		// Load initial messages
-		console.log('📥 [CHAT WIDGET] Loading initial messages...');
 		loadMessages();
 
-		// Poll for new messages every 2 seconds (only if not archived)
-		if (!archived) {
-			console.log('🔄 [CHAT WIDGET] LIVE MODE - Starting message polling (2s interval)');
-			console.log('🔄 [CHAT WIDGET] archived prop value:', archived);
-			pollInterval = setInterval(loadMessages, 2000);
-		} else {
-			console.log('📼 [CHAT WIDGET] ARCHIVED MODE - Polling DISABLED');
-			console.log('📼 [CHAT WIDGET] archived prop value:', archived);
-			console.log('📼 [CHAT WIDGET] Users will NOT be able to send messages');
-		}
+		// Always poll for new messages (even if locked - users can still read)
+		pollInterval = setInterval(loadMessages, 2000);
 
 		// Cleanup on unmount
 		return () => {
 			if (pollInterval) {
-				console.log('💬 [CHAT WIDGET] Clearing poll interval');
 				clearInterval(pollInterval);
 			}
 		};
@@ -224,9 +203,9 @@
 				<span class="disabled-label">Disabled</span>
 			{/if}
 		</div>
-		{#if archived}
-			<div class="archived-notice">
-				<span>📼 Chat Archived</span>
+		{#if locked}
+			<div class="locked-notice">
+				<span>🔒 Chat Locked</span>
 			</div>
 		{/if}
 	</div>
@@ -268,8 +247,8 @@
 			{/if}
 		</div>
 
-		<!-- Chat Input Form (only if not archived) -->
-		{#if !archived}
+		<!-- Chat Input Form (only if not locked) -->
+		{#if !locked}
 			<form class="chat-input" onsubmit={(e) => { e.preventDefault(); sendMessage(); }}>
 				<div class="input-row">
 					<input
@@ -366,17 +345,17 @@
 		font-weight: 500;
 	}
 
-	.archived-notice {
+	.locked-notice {
 		margin-top: 0.5rem;
 		padding: 0.5rem;
-		background: #fef3c7;
+		background: #fee2e2;
 		border-radius: 0.25rem;
 		text-align: center;
 	}
 
-	.archived-notice span {
+	.locked-notice span {
 		font-size: 0.875rem;
-		color: #92400e;
+		color: #991b1b;
 		font-weight: 500;
 	}
 

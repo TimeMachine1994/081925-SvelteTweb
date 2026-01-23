@@ -137,18 +137,17 @@ async function handleStreamActive(event: any) {
 		console.log('✅ [MUX WEBHOOK] Stream found:', streamDoc.id);
 		console.log('🔴 [MUX WEBHOOK] Current status:', streamDoc.data().status);
 
-		// Update stream to live status and reset chat to live mode
+		// Update stream to live status
 		console.log('💾 [MUX WEBHOOK] Updating stream to LIVE status...');
 		await streamDoc.ref.update({
 			status: 'live',
 			'mux.streamingStatus': 'active',
-			'chat.archived': false,  // Reset chat to live mode when stream goes live
+			// NOTE: chat.locked is NOT auto-changed - admin controls chat lock status
 			liveStartedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString()
 		});
 
 		console.log('✅ [MUX WEBHOOK] Stream updated to LIVE');
-		console.log('💬 [MUX WEBHOOK] Chat reset to LIVE mode (archived: false)');
 		console.log('🔴 [MUX WEBHOOK] Stream:', streamDoc.id, 'is now broadcasting');
 
 	} catch (error) {
@@ -252,7 +251,7 @@ async function handleRecordingReady(event: any) {
 			'mux.vodPlaybackId': playbackId,
 			'mux.recordingReady': true,
 			'mux.duration': duration,
-			'chat.archived': true, // Archive chat when recording is ready
+			// NOTE: chat.locked is NOT auto-set - admin controls chat lock status
 			recordingReady: true,  // Legacy field for backward compatibility
 			updatedAt: new Date().toISOString()
 		});
