@@ -16,6 +16,27 @@ View receipt details with print/PDF functionality
 	let isSavingNote = $state(false);
 	let noteSaveStatus = $state<'idle' | 'saved' | 'error'>('idle');
 	let includeNoteInPrint = $state(true);
+	let linkCopied = $state(false);
+
+	// Copy public link to clipboard
+	async function copyPublicLink() {
+		const publicUrl = `${window.location.origin}/receipt/${receipt.id}`;
+		try {
+			await navigator.clipboard.writeText(publicUrl);
+			linkCopied = true;
+			setTimeout(() => { linkCopied = false; }, 3000);
+		} catch (e) {
+			// Fallback for older browsers
+			const input = document.createElement('input');
+			input.value = publicUrl;
+			document.body.appendChild(input);
+			input.select();
+			document.execCommand('copy');
+			document.body.removeChild(input);
+			linkCopied = true;
+			setTimeout(() => { linkCopied = false; }, 3000);
+		}
+	}
 
 	// Format date helper
 	function formatDate(dateStr: string | null): string {
@@ -130,6 +151,12 @@ View receipt details with print/PDF functionality
 	title="Receipt Details"
 	subtitle="View and print payment receipt"
 	actions={[
+		{
+			label: linkCopied ? 'Link Copied!' : 'Copy Public Link',
+			icon: linkCopied ? '✓' : '🔗',
+			variant: linkCopied ? 'success' : 'secondary',
+			onclick: copyPublicLink
+		},
 		{
 			label: 'Print Receipt',
 			icon: '🖨️',
