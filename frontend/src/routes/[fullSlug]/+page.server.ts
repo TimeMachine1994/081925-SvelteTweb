@@ -76,8 +76,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			custom_html: memorialData.custom_html || null,
 			hasCustomHtml: hasCustomHtml,
 			createdByUserId: memorialData.createdByUserId || null,
-			// Emergency embed override
+			// Emergency embed overrides
 			emergencyEmbed: memorialData.emergencyEmbed || null,
+			emergencyChatEmbed: memorialData.emergencyChatEmbed || null,
 			// Admin display overrides
 			customTitle: memorialData.customTitle || null,
 			publicNote: memorialData.publicNote || null,
@@ -124,13 +125,19 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 						endedAt: convertTimestamp(data.endedAt)
 					};
 					
-					// DEBUG: Log each stream's details
+					// DEBUG: Log each stream's details including Mux recording data
 					console.log('📺 [STREAM DEBUG]', {
 						id: stream.id,
 						title: stream.title,
 						status: stream.status,
 						isVisible: stream.isVisible,
 						scheduledStartTime: stream.scheduledStartTime,
+						// Mux recording fields
+						muxRecordingReady: stream.mux?.recordingReady,
+						muxVodPlaybackId: stream.mux?.vodPlaybackId,
+						muxAssetId: stream.mux?.assetId,
+						recordingReady: stream.recordingReady,
+						// Legacy fields
 						playbackUrl: stream.playbackUrl,
 						embedUrl: stream.embedUrl,
 						cloudflareInputId: stream.streamCredentials?.cloudflareInputId || stream.cloudflareInputId

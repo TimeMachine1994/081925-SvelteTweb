@@ -144,8 +144,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			// Livestream legacy field (mostly replaced by streams collection)
 			livestream: memorialData.livestream || null,
 			
-			// Emergency embed override
+			// Emergency embed overrides
 			emergencyEmbed: memorialData.emergencyEmbed || null,
+			emergencyChatEmbed: memorialData.emergencyChatEmbed || null,
 			
 			// Admin display overrides
 			customTitle: memorialData.customTitle || null,

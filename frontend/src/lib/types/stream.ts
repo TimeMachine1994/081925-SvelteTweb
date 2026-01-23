@@ -1,7 +1,7 @@
 // Stream Types for Tributestream
 // Updated: January 22, 2026 - Added Mux platform integration
 
-export type StreamStatus = 'scheduled' | 'ready' | 'live' | 'completed' | 'error';
+export type StreamStatus = 'scheduled' | 'ready' | 'live' | 'ended' | 'completed' | 'error';
 export type StreamVisibility = 'public' | 'hidden' | 'archived';
 
 // Mux-specific streaming status

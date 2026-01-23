@@ -43,6 +43,12 @@
 	let embedTitle = $state('');
 	let isCreatingEmbed = $state(false);
 
+	// Emergency chat embed state
+	let showEmergencyChatEmbed = $state(false);
+	let chatEmbedCode = $state('');
+	let chatEmbedTitle = $state('');
+	let isCreatingChatEmbed = $state(false);
+
 	// Display settings state
 	let isEditingDisplay = $state(false);
 	let isSavingDisplay = $state(false);
@@ -215,6 +221,71 @@
 		showEmergencyEmbed = false;
 		embedCode = '';
 		embedTitle = '';
+	}
+
+	// Emergency Chat Embed handlers
+	async function handleCreateEmergencyChatEmbed() {
+		if (!chatEmbedCode.trim()) {
+			alert('Please enter a chat embed code or iframe URL');
+			return;
+		}
+
+		isCreatingChatEmbed = true;
+		try {
+			const response = await fetch(`/api/memorials/${memorial.id}/emergency-chat-embed`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					embedCode: chatEmbedCode.trim(),
+					title: chatEmbedTitle.trim() || 'Live Chat'
+				})
+			});
+
+			if (response.ok) {
+				alert('Emergency chat embed created! It will now appear on the memorial page.');
+				showEmergencyChatEmbed = false;
+				chatEmbedCode = '';
+				chatEmbedTitle = '';
+				location.reload();
+			} else {
+				const error = await response.json();
+				alert(`Failed to create chat embed: ${error.message || 'Unknown error'}`);
+			}
+		} catch (error) {
+			console.error('Error creating emergency chat embed:', error);
+			alert('An error occurred while creating the chat embed.');
+		} finally {
+			isCreatingChatEmbed = false;
+		}
+	}
+
+	function cancelChatEmbedForm() {
+		showEmergencyChatEmbed = false;
+		chatEmbedCode = '';
+		chatEmbedTitle = '';
+	}
+
+	async function handleRemoveEmergencyChatEmbed() {
+		if (!confirm('Are you sure you want to remove the emergency chat embed? Normal chat will be displayed again.')) {
+			return;
+		}
+
+		try {
+			const response = await fetch(`/api/memorials/${memorial.id}/emergency-chat-embed`, {
+				method: 'DELETE'
+			});
+
+			if (response.ok) {
+				alert('Emergency chat embed removed.');
+				location.reload();
+			} else {
+				const error = await response.json();
+				alert(`Failed to remove chat embed: ${error.message || 'Unknown error'}`);
+			}
+		} catch (error) {
+			console.error('Error removing emergency chat embed:', error);
+			alert('An error occurred while removing the chat embed.');
+		}
 	}
 
 	// Display settings handlers
@@ -473,7 +544,10 @@
 					{showStreamForm ? '✖ Cancel' : '➕ Create Livestream'}
 				</button>
 				<button class="emergency-btn" onclick={() => showEmergencyEmbed = !showEmergencyEmbed}>
-					{showEmergencyEmbed ? '✖ Cancel' : '🚨 Create Emergency Embed'}
+					{showEmergencyEmbed ? '✖ Cancel' : '🚨 Emergency Video'}
+				</button>
+				<button class="chat-emergency-btn" onclick={() => showEmergencyChatEmbed = !showEmergencyChatEmbed}>
+					{showEmergencyChatEmbed ? '✖ Cancel' : '💬 Emergency Chat'}
 				</button>
 			</div>
 		</div>
@@ -538,6 +612,66 @@ https://player.vimeo.com/video/123456789'
 					<button 
 						onclick={cancelEmbedForm}
 						disabled={isCreatingEmbed}
+					>
+						Cancel
+					</button>
+				</div>
+			</div>
+		{/if}
+
+		{#if (memorial as any).emergencyChatEmbed}
+			<div class="emergency-embed-active chat-embed">
+				<div class="emergency-header">
+					<h3>💬 Active Emergency Chat Embed</h3>
+					<button class="danger-btn-small" onclick={handleRemoveEmergencyChatEmbed}>
+						🗑️ Remove
+					</button>
+				</div>
+				<p><strong>Title:</strong> {(memorial as any).emergencyChatEmbed.title || 'Live Chat'}</p>
+				<p class="embed-preview"><strong>Embed Code:</strong> {(memorial as any).emergencyChatEmbed.embedCode.substring(0, 100)}...</p>
+				<p class="warning-text">⚠️ This chat embed is currently overriding normal chat on the memorial page.</p>
+			</div>
+		{/if}
+
+		{#if showEmergencyChatEmbed}
+			<div class="emergency-form chat-form">
+				<h3>💬 Emergency Chat Embed</h3>
+				<p class="info-text">Use this to quickly embed an external chat (YouTube Live Chat, etc.) that will replace the normal chat widget.</p>
+				
+				<div class="form-group">
+					<label for="chat-embed-title">Title (optional)</label>
+					<input
+						id="chat-embed-title"
+						type="text"
+						bind:value={chatEmbedTitle}
+						placeholder="e.g., Live Chat"
+						disabled={isCreatingChatEmbed}
+					/>
+				</div>
+
+				<div class="form-group">
+					<label for="chat-embed-code">Chat Embed Code or iframe URL *</label>
+					<textarea
+						id="chat-embed-code"
+						bind:value={chatEmbedCode}
+						placeholder='Paste chat embed iframe. Example:
+<iframe src="https://www.youtube.com/live_chat?v=VIDEO_ID&embed_domain=YOUR_DOMAIN" ...></iframe>'
+						rows="4"
+						disabled={isCreatingChatEmbed}
+					></textarea>
+				</div>
+
+				<div class="form-actions">
+					<button 
+						class="chat-emergency-btn" 
+						onclick={handleCreateEmergencyChatEmbed}
+						disabled={isCreatingChatEmbed}
+					>
+						{isCreatingChatEmbed ? '⏳ Creating...' : '💬 Activate Chat Embed'}
+					</button>
+					<button 
+						onclick={cancelChatEmbedForm}
+						disabled={isCreatingChatEmbed}
 					>
 						Cancel
 					</button>
@@ -713,6 +847,8 @@ https://player.vimeo.com/video/123456789'
 	button.primary-btn:hover { background: #2c5282; }
 	button.emergency-btn { background: #e53e3e; color: white; border-color: #e53e3e; font-weight: 600; }
 	button.emergency-btn:hover { background: #c53030; }
+	button.chat-emergency-btn { background: #7c3aed; color: white; border-color: #7c3aed; font-weight: 600; }
+	button.chat-emergency-btn:hover { background: #6d28d9; }
 	button.switcher-btn { background: #805ad5; color: white; border-color: #805ad5; font-weight: 600; }
 	button.switcher-btn:hover { background: #6b46c1; }
 	button.danger-btn-small { background: #e53e3e; color: white; border-color: #e53e3e; padding: 0.375rem 0.75rem; font-size: 0.875rem; }

@@ -34,7 +34,12 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 				description: data.description || '',
 				status: data.status || 'scheduled',
 				visibility: data.visibility || 'public',
+				isVisible: data.isVisible !== false, // For filtering
 				scheduledStartTime: data.scheduledStartTime || null,
+				
+				// Mux platform data
+				mux: data.mux || null,
+				chat: data.chat || null,
 				
 				// Legacy credentials
 				streamCredentials: data.streamCredentials || null,

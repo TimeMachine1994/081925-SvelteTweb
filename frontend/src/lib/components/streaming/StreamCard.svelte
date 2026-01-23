@@ -28,6 +28,7 @@
 		ready: 'bg-green-100 text-green-800',
 		scheduled: 'bg-blue-100 text-blue-800',
 		live: 'bg-red-100 text-red-800 animate-pulse',
+		ended: 'bg-yellow-100 text-yellow-800',
 		completed: 'bg-gray-100 text-gray-800',
 		error: 'bg-red-100 text-red-800'
 	}[stream.status]);
@@ -399,10 +400,24 @@
 						 <strong>Live Now</strong> - Stream is currently broadcasting
 					</p>
 				</div>
-			{:else if stream.status === 'completed'}
+			{:else if stream.status === 'completed' || stream.mux?.recordingReady}
 				<div class="rounded-lg bg-green-50 p-4">
 					<p class="text-sm text-green-800">
-						 <strong>Recording Available</strong> - Stream has been saved and is ready for playback
+						 <strong>📼 Recording Available</strong> - Stream has been saved and is ready for playback
+					</p>
+					{#if stream.mux?.vodPlaybackId}
+						<div class="mt-2 text-xs text-green-700">
+							<p><strong>VOD Playback ID:</strong> <code class="bg-green-100 px-1 rounded">{stream.mux.vodPlaybackId}</code></p>
+							{#if stream.mux?.duration}
+								<p class="mt-1"><strong>Duration:</strong> {Math.floor(stream.mux.duration / 60)}m {Math.floor(stream.mux.duration % 60)}s</p>
+							{/if}
+						</div>
+					{/if}
+				</div>
+			{:else if stream.status === 'ended'}
+				<div class="rounded-lg bg-yellow-50 p-4">
+					<p class="text-sm text-yellow-800">
+						 <strong>⏳ Processing Recording</strong> - Stream ended, recording is being prepared...
 					</p>
 				</div>
 			{/if}

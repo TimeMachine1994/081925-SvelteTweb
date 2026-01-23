@@ -240,7 +240,9 @@
 					<!-- Glass box wrapper for title only -->
 					<div class="glass-box">
 						<h1 class="memorial-title">
-							<span class="celebration-prefix">Celebration of Life for</span>
+							{#if !(memorial as any).customTitle}
+								<span class="celebration-prefix">Celebration of Life for</span>
+							{/if}
 							<span class="loved-one-name">{(memorial as any).customTitle || memorial.lovedOneName}</span>
 						</h1>
 					</div>
@@ -297,6 +299,7 @@
 							streams={streams || []} 
 							memorialName={(memorial as any).customTitle || memorial.lovedOneName}
 							emergencyEmbed={memorial.emergencyEmbed}
+							emergencyChatEmbed={memorial.emergencyChatEmbed}
 						/>
 					</div>
 					
@@ -367,8 +370,7 @@
 						<!-- Glass box wrapper for title and dates only -->
 						<div class="glass-box">
 							<h1 class="memorial-title">
-								<span class="celebration-prefix">Celebration of Life for</span>
-								<span class="loved-one-name">{(memorial as any).customTitle || memorial.lovedOneName}</span>
+ 								<span class="loved-one-name">{(memorial as any).customTitle || memorial.lovedOneName}</span>
 							</h1>
 							
 							{#if memorial.birthDate || memorial.deathDate}
@@ -408,6 +410,7 @@
 							streams={streams || []} 
 							memorialName={(memorial as any).customTitle || memorial.lovedOneName}
 							emergencyEmbed={memorial.emergencyEmbed}
+							emergencyChatEmbed={memorial.emergencyChatEmbed}
 						/>
 					</div>
 					
