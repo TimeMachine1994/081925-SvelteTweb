@@ -742,3 +742,284 @@ export function validateContactFormTemplates(): { valid: boolean; missing: strin
 		missing
 	};
 }
+
+// ============================================================
+// INVOICE EMAIL FUNCTIONS (Simple HTML - No Template Required)
+// ============================================================
+
+export interface InvoiceEmailData {
+	customerEmail: string;
+	customerName?: string;
+	invoiceId: string;
+	items: Array<{ name: string; quantity: number; price: number; total: number }>;
+	total: number;
+	paymentUrl: string;
+}
+
+export interface InvoiceReceiptEmailData {
+	customerEmail: string;
+	customerName?: string;
+	invoiceId: string;
+	items: Array<{ name: string; quantity: number; price: number; total: number }>;
+	total: number;
+	paidAt: Date;
+	paymentIntentId: string;
+	receiptUrl: string;
+}
+
+function formatCentsToUSD(cents: number): string {
+	return new Intl.NumberFormat('en-US', {
+		style: 'currency',
+		currency: 'USD'
+	}).format(cents / 100);
+}
+
+/**
+ * Send invoice email with payment link (simple HTML, no template)
+ */
+export async function sendInvoiceEmail(data: InvoiceEmailData) {
+	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key') {
+		console.warn('⚠️ SendGrid client not initialized. Skipping invoice email.');
+		return;
+	}
+
+	const itemsHtml = data.items
+		.map(
+			(item) =>
+				`<tr>
+					<td style="padding: 8px; border-bottom: 1px solid #eee;">${item.name}</td>
+					<td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
+					<td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${formatCentsToUSD(item.total)}</td>
+				</tr>`
+		)
+		.join('');
+
+	const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
+	<div style="text-align: center; margin-bottom: 30px;">
+		<h1 style="color: #1e293b; margin: 0;">Tributestream</h1>
+		<p style="color: #64748b; margin: 5px 0;">Invoice</p>
+	</div>
+	
+	<p>Hi${data.customerName ? ` ${data.customerName}` : ''},</p>
+	
+	<p>You have received an invoice from Tributestream for <strong>${formatCentsToUSD(data.total)}</strong>.</p>
+	
+	<div style="background: #f8fafc; border-radius: 8px; padding: 20px; margin: 20px 0;">
+		<p style="margin: 0 0 10px; color: #64748b; font-size: 14px;">Invoice ID: ${data.invoiceId}</p>
+		
+		<table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
+			<thead>
+				<tr style="background: #e2e8f0;">
+					<th style="padding: 8px; text-align: left;">Description</th>
+					<th style="padding: 8px; text-align: center;">Qty</th>
+					<th style="padding: 8px; text-align: right;">Amount</th>
+				</tr>
+			</thead>
+			<tbody>
+				${itemsHtml}
+			</tbody>
+			<tfoot>
+				<tr>
+					<td colspan="2" style="padding: 12px 8px; font-weight: bold;">Total</td>
+					<td style="padding: 12px 8px; text-align: right; font-weight: bold; font-size: 18px;">${formatCentsToUSD(data.total)}</td>
+				</tr>
+			</tfoot>
+		</table>
+	</div>
+	
+	<div style="text-align: center; margin: 30px 0;">
+		<a href="${data.paymentUrl}" style="display: inline-block; background: #2563eb; color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+			Pay ${formatCentsToUSD(data.total)} Now
+		</a>
+	</div>
+	
+	<p style="color: #64748b; font-size: 14px;">
+		Or copy this link: <a href="${data.paymentUrl}" style="color: #2563eb;">${data.paymentUrl}</a>
+	</p>
+	
+	<hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
+	
+	<p style="color: #94a3b8; font-size: 12px; text-align: center;">
+		Thank you for choosing Tributestream.<br>
+		Questions? Contact us at support@tributestream.com
+	</p>
+</body>
+</html>
+`;
+
+	const textContent = `
+Tributestream Invoice
+
+Hi${data.customerName ? ` ${data.customerName}` : ''},
+
+You have received an invoice from Tributestream for ${formatCentsToUSD(data.total)}.
+
+Invoice ID: ${data.invoiceId}
+
+Items:
+${data.items.map((item) => `- ${item.name} (x${item.quantity}): ${formatCentsToUSD(item.total)}`).join('\n')}
+
+Total: ${formatCentsToUSD(data.total)}
+
+Pay now: ${data.paymentUrl}
+
+Thank you for choosing Tributestream.
+Questions? Contact us at support@tributestream.com
+`;
+
+	const msg = {
+		to: data.customerEmail,
+		from: FROM_EMAIL,
+		subject: `Invoice from Tributestream - ${formatCentsToUSD(data.total)}`,
+		text: textContent,
+		html: htmlContent,
+		trackingSettings: {
+			clickTracking: { enable: false }
+		}
+	};
+
+	try {
+		await sgMail.send(msg);
+		console.log('✅ Invoice email sent to:', data.customerEmail);
+	} catch (error) {
+		console.error('💥 Exception sending invoice email:', error);
+		throw error;
+	}
+}
+
+/**
+ * Send invoice receipt email after payment (simple HTML, no template)
+ */
+export async function sendInvoiceReceiptEmail(data: InvoiceReceiptEmailData) {
+	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key') {
+		console.warn('⚠️ SendGrid client not initialized. Skipping invoice receipt email.');
+		return;
+	}
+
+	const paidDate = data.paidAt.toLocaleDateString('en-US', {
+		year: 'numeric',
+		month: 'long',
+		day: 'numeric',
+		hour: '2-digit',
+		minute: '2-digit'
+	});
+
+	const itemsHtml = data.items
+		.map(
+			(item) =>
+				`<tr>
+					<td style="padding: 8px; border-bottom: 1px solid #eee;">${item.name}</td>
+					<td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
+					<td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${formatCentsToUSD(item.total)}</td>
+				</tr>`
+		)
+		.join('');
+
+	const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
+	<div style="text-align: center; margin-bottom: 30px;">
+		<h1 style="color: #1e293b; margin: 0;">Tributestream</h1>
+		<p style="color: #16a34a; margin: 5px 0;">✓ Payment Received</p>
+	</div>
+	
+	<p>Hi${data.customerName ? ` ${data.customerName}` : ''},</p>
+	
+	<p>Thank you for your payment of <strong>${formatCentsToUSD(data.total)}</strong>.</p>
+	
+	<div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 20px; margin: 20px 0;">
+		<p style="margin: 0 0 5px; color: #64748b; font-size: 14px;">Invoice ID: ${data.invoiceId}</p>
+		<p style="margin: 0 0 5px; color: #64748b; font-size: 14px;">Payment Date: ${paidDate}</p>
+		<p style="margin: 0; color: #64748b; font-size: 14px;">Reference: ${data.paymentIntentId}</p>
+	</div>
+	
+	<div style="background: #f8fafc; border-radius: 8px; padding: 20px; margin: 20px 0;">
+		<table style="width: 100%; border-collapse: collapse;">
+			<thead>
+				<tr style="background: #e2e8f0;">
+					<th style="padding: 8px; text-align: left;">Description</th>
+					<th style="padding: 8px; text-align: center;">Qty</th>
+					<th style="padding: 8px; text-align: right;">Amount</th>
+				</tr>
+			</thead>
+			<tbody>
+				${itemsHtml}
+			</tbody>
+			<tfoot>
+				<tr>
+					<td colspan="2" style="padding: 12px 8px; font-weight: bold;">Total Paid</td>
+					<td style="padding: 12px 8px; text-align: right; font-weight: bold; font-size: 18px; color: #16a34a;">${formatCentsToUSD(data.total)}</td>
+				</tr>
+			</tfoot>
+		</table>
+	</div>
+	
+	<div style="text-align: center; margin: 30px 0;">
+		<a href="${data.receiptUrl}" style="display: inline-block; background: #16a34a; color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+			View Receipt
+		</a>
+	</div>
+	
+	<hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
+	
+	<p style="color: #94a3b8; font-size: 12px; text-align: center;">
+		Thank you for choosing Tributestream.<br>
+		Questions? Contact us at support@tributestream.com
+	</p>
+</body>
+</html>
+`;
+
+	const textContent = `
+Tributestream - Payment Received
+
+Hi${data.customerName ? ` ${data.customerName}` : ''},
+
+Thank you for your payment of ${formatCentsToUSD(data.total)}.
+
+Invoice ID: ${data.invoiceId}
+Payment Date: ${paidDate}
+Reference: ${data.paymentIntentId}
+
+Items:
+${data.items.map((item) => `- ${item.name} (x${item.quantity}): ${formatCentsToUSD(item.total)}`).join('\n')}
+
+Total Paid: ${formatCentsToUSD(data.total)}
+
+View your receipt: ${data.receiptUrl}
+
+Thank you for choosing Tributestream.
+Questions? Contact us at support@tributestream.com
+`;
+
+	const msg = {
+		to: data.customerEmail,
+		from: FROM_EMAIL,
+		subject: `Payment Received - Tributestream`,
+		text: textContent,
+		html: htmlContent,
+		trackingSettings: {
+			clickTracking: { enable: false }
+		}
+	};
+
+	try {
+		await sgMail.send(msg);
+		console.log('✅ Invoice receipt email sent to:', data.customerEmail);
+	} catch (error) {
+		console.error('💥 Exception sending invoice receipt email:', error);
+		throw error;
+	}
+}

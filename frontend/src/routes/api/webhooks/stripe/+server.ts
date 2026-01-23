@@ -17,7 +17,7 @@ if (!STRIPE_SECRET_KEY) {
 }
 
 const stripe = STRIPE_SECRET_KEY ? new Stripe(STRIPE_SECRET_KEY, {
-	apiVersion: '2024-10-28.acacia'
+	apiVersion: '2025-08-27.basil'
 }) : null;
 
 export const POST: RequestHandler = async ({ request }) => {
@@ -38,7 +38,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		let event: Stripe.Event;
 
 		try {
-			event = stripe.webhooks.constructEvent(body, signature, STRIPE_WEBHOOK_SECRET);
+			event = stripe.webhooks.constructEvent(body, signature, STRIPE_WEBHOOK_SECRET!);
 		} catch (err) {
 			console.error('Webhook signature verification failed:', err);
 			return json({ error: 'Invalid signature' }, { status: 400 });
@@ -99,6 +99,12 @@ export const POST: RequestHandler = async ({ request }) => {
 async function handleCheckoutSuccess(session: Stripe.Checkout.Session) {
 	try {
 		console.log('💳 [WEBHOOK] Processing checkout session:', session.id);
+
+		// Check if this is an invoice payment
+		if (session.metadata?.type === 'invoice') {
+			await handleInvoicePaymentSuccess(session);
+			return;
+		}
 
 		const memorialId = session.metadata?.memorialId;
 		const uid = session.metadata?.uid;
@@ -380,5 +386,76 @@ async function sendActionRequiredEmail(data: any) {
 		}
 	} catch (error) {
 		console.error('Failed to send action required email:', error);
+	}
+}
+
+// ============================================================
+// INVOICE PAYMENT HANDLING
+// ============================================================
+
+async function handleInvoicePaymentSuccess(session: Stripe.Checkout.Session) {
+	try {
+		const invoiceId = session.metadata?.invoiceId;
+		const customerEmail = session.metadata?.customerEmail;
+
+		if (!invoiceId) {
+			console.error('❌ [WEBHOOK] Missing invoiceId in invoice checkout session');
+			return;
+		}
+
+		console.log(`💳 [WEBHOOK] Processing invoice payment: ${invoiceId}`);
+
+		// Extract payment intent ID
+		const paymentIntentId =
+			typeof session.payment_intent === 'string'
+				? session.payment_intent
+				: session.payment_intent?.id;
+
+		// Update invoice status in Firestore
+		const invoiceRef = adminDb.collection('invoices').doc(invoiceId);
+		const invoiceDoc = await invoiceRef.get();
+
+		if (!invoiceDoc.exists) {
+			console.error(`❌ [WEBHOOK] Invoice not found: ${invoiceId}`);
+			return;
+		}
+
+		const invoice = invoiceDoc.data();
+
+		await invoiceRef.update({
+			status: 'paid',
+			paidAt: Timestamp.now(),
+			paymentIntentId: paymentIntentId,
+			stripeSessionId: session.id
+		});
+
+		console.log(`✅ [WEBHOOK] Invoice marked as paid: ${invoiceId}`);
+
+		// Send receipt email
+		try {
+			const { sendInvoiceReceiptEmail } = await import('$lib/server/email');
+			
+			const baseUrl = process.env.PUBLIC_BASE_URL || 'https://tributestream.com';
+			const receiptUrl = `${baseUrl}/pay/${invoiceId}/receipt`;
+
+			await sendInvoiceReceiptEmail({
+				customerEmail: customerEmail || invoice?.customerEmail,
+				customerName: invoice?.customerName,
+				invoiceId: invoiceId,
+				items: invoice?.items || [],
+				total: invoice?.total || 0,
+				paidAt: new Date(),
+				paymentIntentId: paymentIntentId || 'N/A',
+				receiptUrl: receiptUrl
+			});
+
+			console.log(`📧 [WEBHOOK] Invoice receipt email sent to: ${customerEmail || invoice?.customerEmail}`);
+		} catch (emailError) {
+			console.error('❌ [WEBHOOK] Failed to send invoice receipt email:', emailError);
+			// Don't fail the webhook if email fails
+		}
+	} catch (error) {
+		console.error('❌ [WEBHOOK] Failed to handle invoice payment success:', error);
+		throw error; // Re-throw to trigger Stripe retry
 	}
 }

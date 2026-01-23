@@ -137,16 +137,18 @@ async function handleStreamActive(event: any) {
 		console.log('✅ [MUX WEBHOOK] Stream found:', streamDoc.id);
 		console.log('🔴 [MUX WEBHOOK] Current status:', streamDoc.data().status);
 
-		// Update stream to live status
+		// Update stream to live status and reset chat to live mode
 		console.log('💾 [MUX WEBHOOK] Updating stream to LIVE status...');
 		await streamDoc.ref.update({
 			status: 'live',
 			'mux.streamingStatus': 'active',
+			'chat.archived': false,  // Reset chat to live mode when stream goes live
 			liveStartedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString()
 		});
 
 		console.log('✅ [MUX WEBHOOK] Stream updated to LIVE');
+		console.log('💬 [MUX WEBHOOK] Chat reset to LIVE mode (archived: false)');
 		console.log('🔴 [MUX WEBHOOK] Stream:', streamDoc.id, 'is now broadcasting');
 
 	} catch (error) {
