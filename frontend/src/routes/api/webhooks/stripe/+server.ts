@@ -1,8 +1,8 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import Stripe from 'stripe';
-import { adminDb } from '$lib/firebase-admin';
-import { Timestamp, FieldValue } from 'firebase-admin/firestore';
+import { adminDb, FieldValue } from '$lib/server/firebase';
+import { Timestamp } from 'firebase-admin/firestore';
 import { env } from '$env/dynamic/private';
 
 const STRIPE_SECRET_KEY = env.STRIPE_SECRET_KEY;

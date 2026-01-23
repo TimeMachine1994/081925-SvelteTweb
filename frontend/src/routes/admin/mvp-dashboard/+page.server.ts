@@ -1,6 +1,6 @@
 import type { PageServerLoad } from './$types';
 import { redirect } from '@sveltejs/kit';
-import { adminAuth, adminDb } from '$lib/firebase-admin';
+import { adminAuth, adminDb } from '$lib/server/firebase';
 
 export const load: PageServerLoad = async ({ cookies }) => {
 	console.log('🏛️ [ADMIN MVP] Loading admin dashboard data');

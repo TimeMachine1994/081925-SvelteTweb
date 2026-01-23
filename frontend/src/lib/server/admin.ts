@@ -1,4 +1,4 @@
-import { adminDb, adminStorage } from '$lib/firebase-admin';
+import { adminDb, adminStorage } from '$lib/server/firebase';
 import type { UserManagementData, AdminDashboardStats } from '$lib/types/admin';
 
 // Export adminDb and adminStorage for use in other server files

@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { adminAuth, adminDb } from '$lib/firebase-admin';
+import { adminAuth, adminDb } from '$lib/server/firebase';
 
 // GET - List all users
 export const GET: RequestHandler = async ({ cookies, url }) => {

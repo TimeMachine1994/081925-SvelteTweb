@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { adminDb } from '$lib/firebase-admin';
+import { adminDb } from '$lib/server/firebase';
 import { Timestamp } from 'firebase-admin/firestore';
 import { stripe } from '$lib/server/stripe';
 

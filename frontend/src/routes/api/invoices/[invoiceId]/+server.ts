@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { adminDb } from '$lib/firebase-admin';
+import { adminDb } from '$lib/server/firebase';
 import type { InvoicePublicData } from '$lib/types/invoice';
 
 // GET - Public endpoint to fetch invoice details for checkout

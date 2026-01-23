@@ -1,5 +1,5 @@
 import type { PageServerLoad } from './$types';
-import { adminDb } from '$lib/firebase-admin';
+import { adminDb } from '$lib/server/firebase';
 import { stripe } from '$lib/server/stripe';
 
 export const load: PageServerLoad = async ({ params, url }) => {
