@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Stream } from '$lib/types/stream';
-	import { Video, Eye, EyeOff, Archive, StopCircle, Copy, Check, ChevronDown, Calendar, ExternalLink, MessageCircle, MessageCircleOff } from 'lucide-svelte';
+	import { Video, Eye, EyeOff, Archive, StopCircle, Copy, Check, ChevronDown, Calendar, ExternalLink, MessageCircle, MessageCircleOff, Pencil } from 'lucide-svelte';
 	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
 
@@ -12,6 +12,10 @@
 	let copiedStreamKey = $state(false);
 	let showEditTime = $state(false);
 	let editedStartTime = $state('');
+	
+	// Edit title state
+	let showEditTitle = $state(false);
+	let editedTitle = $state(stream.title);
 	
 	// Chat toggle state
 	let chatEnabled = $state(stream.chat?.enabled ?? true);
@@ -123,6 +127,42 @@
 			editedStartTime = `${year}-${month}-${day}T${hours}:${minutes}`;
 		}
 		showEditTime = true;
+	}
+
+	function openEditTitle() {
+		editedTitle = stream.title;
+		showEditTitle = true;
+	}
+
+	async function handleUpdateTitle() {
+		if (!editedTitle || !editedTitle.trim()) {
+			alert('Please enter a title');
+			return;
+		}
+
+		loading = true;
+		try {
+			const response = await fetch(`/api/streams/${stream.id}/title`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					title: editedTitle.trim()
+				})
+			});
+
+			if (response.ok) {
+				showEditTitle = false;
+				window.location.reload();
+			} else {
+				const data = await response.json();
+				alert(`Failed to update title: ${data.error || 'Unknown error'}`);
+			}
+		} catch (error) {
+			console.error('Error updating title:', error);
+			alert('Failed to update title');
+		} finally {
+			loading = false;
+		}
 	}
 
 	async function handleUpdateTime() {
@@ -449,6 +489,15 @@
 					</button>
 				{/if}
 
+				<button
+					onclick={openEditTitle}
+					disabled={loading}
+					class="flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:opacity-50"
+				>
+					<Pencil class="h-4 w-4" />
+					Edit Title
+				</button>
+
 				{#if stream.scheduledStartTime}
 					<button
 						onclick={openEditTime}
@@ -520,6 +569,47 @@
 				</button>
 				<button
 					onclick={() => (showEditTime = false)}
+					disabled={loading}
+					class="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:opacity-50"
+				>
+					Cancel
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
+<!-- Edit Title Modal -->
+{#if showEditTitle}
+	<div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onclick={() => (showEditTitle = false)}>
+		<div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl" onclick={(e) => e.stopPropagation()}>
+			<h3 class="mb-4 text-lg font-semibold text-gray-900">Edit Stream Title</h3>
+			
+			<div class="mb-4">
+				<label for="stream-title" class="mb-2 block text-sm font-medium text-gray-700">
+					Stream Title
+				</label>
+				<input
+					id="stream-title"
+					type="text"
+					bind:value={editedTitle}
+					placeholder="e.g., Celebration of Life"
+					maxlength="200"
+					class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+				/>
+				<p class="mt-1 text-xs text-gray-500">This title appears on the memorial page placeholder card</p>
+			</div>
+
+			<div class="flex gap-3">
+				<button
+					onclick={handleUpdateTitle}
+					disabled={loading || !editedTitle?.trim()}
+					class="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+				>
+					{loading ? 'Updating...' : 'Update Title'}
+				</button>
+				<button
+					onclick={() => (showEditTitle = false)}
 					disabled={loading}
 					class="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:opacity-50"
 				>

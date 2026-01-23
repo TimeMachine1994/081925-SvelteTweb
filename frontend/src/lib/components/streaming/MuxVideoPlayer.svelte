@@ -72,13 +72,32 @@
 	});
 
 	/**
+	 * Determine if this stream has a recording available
+	 */
+	const isRecording = $derived(() => {
+		return stream.status === 'completed' ||
+		       stream.status === 'ended' ||
+		       stream.mux?.recordingReady === true;
+	});
+
+	/**
 	 * Determine if this is a live stream or VOD
+	 * Recording state takes precedence - if recording is ready, stream is not live
 	 */
 	const isLive = $derived(() => {
-		const live = stream.status === 'live' || 
-		              (stream.status === 'ready' && stream.mux?.streamingStatus === 'active');
+		// If recording is ready or stream has ended, it's NOT live anymore
+		if (stream.mux?.recordingReady) return false;
+		if (stream.status === 'completed' || stream.status === 'ended') return false;
 		
-		console.log('🎬 [MUX PLAYER] Is live:', live);
+		// Check for active live indicators
+		const live = stream.status === 'live' || 
+		             (stream.status === 'ready' && stream.mux?.streamingStatus === 'active');
+		
+		console.log('🎬 [MUX PLAYER] Is live:', live, {
+			status: stream.status,
+			recordingReady: stream.mux?.recordingReady,
+			streamingStatus: stream.mux?.streamingStatus
+		});
 		return live;
 	});
 
@@ -131,7 +150,7 @@
 				<h3>{stream.title}</h3>
 				{#if isLive()}
 					<span class="live-badge">🔴 LIVE</span>
-				{:else if stream.status === 'completed'}
+				{:else if isRecording()}
 					<span class="recorded-badge">📼 RECORDED</span>
 				{/if}
 			</div>

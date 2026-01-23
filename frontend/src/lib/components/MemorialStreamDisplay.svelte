@@ -224,11 +224,17 @@
 	
 	let recordedStreams = $derived(
 		liveStreams.filter(s => {
-			const isRecording = s.isVisible !== false && 
-				(s.status === 'completed' || 
-				 s.status === 'ended' ||
-				 s.recordingReady === true || 
-				 s.mux?.recordingReady === true);
+			if (s.isVisible === false) return false;
+			
+			// Exclude streams that are currently showing as live (mutual exclusion)
+			const isInLiveStreams = categorizedLiveStreams.some(live => live.id === s.id);
+			if (isInLiveStreams) return false;
+			
+			const isRecording = 
+				s.status === 'completed' || 
+				s.status === 'ended' ||
+				s.recordingReady === true || 
+				s.mux?.recordingReady === true;
 			
 			// Debug logging for recording detection
 			if (s.mux?.vodPlaybackId || s.status === 'completed' || s.status === 'ended') {
@@ -236,6 +242,7 @@
 					isRecording,
 					status: s.status,
 					isVisible: s.isVisible,
+					isInLiveStreams,
 					recordingReady: s.recordingReady,
 					muxRecordingReady: s.mux?.recordingReady,
 					muxVodPlaybackId: s.mux?.vodPlaybackId
