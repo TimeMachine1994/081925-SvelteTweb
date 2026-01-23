@@ -74,7 +74,7 @@
 					<div class="schedule-display">
 						<div class="schedule-header">
 							<Clock class="schedule-icon" />
-							<h3 class="schedule-title">Scheduled Service</h3>
+							<h3 class="schedule-title">{streamTitle || 'Scheduled Service'}</h3>
 						</div>
 						<div class="schedule-info">
 							<div class="schedule-date">

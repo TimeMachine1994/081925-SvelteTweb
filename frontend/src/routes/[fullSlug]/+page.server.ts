@@ -142,8 +142,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 				.filter(stream => stream.isVisible !== false);
 			
 			console.log('🎬 [MEMORIAL_PAGE] Loaded', streams.length, 'streams after filtering');
-		} catch (streamErr) {
-			console.error('🎬 [MEMORIAL_PAGE] Error loading streams:', streamErr);
+		} catch (error) {
+			console.error('🎬 [MEMORIAL_PAGE] Error loading streams:', error);
 			// Don't fail the entire page load if streams fail
 			streams = [];
 		}
@@ -193,8 +193,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			});
 			
 			console.log('📸 [MEMORIAL_PAGE] Loaded', slideshows.length, 'slideshows');
-		} catch (slideshowErr) {
-			console.error('📸 [MEMORIAL_PAGE] Error loading slideshows:', slideshowErr);
+		} catch (error) {
+			console.error('📸 [MEMORIAL_PAGE] Error loading slideshows:', error);
 			// Don't fail the entire page load if slideshows fail
 			slideshows = [];
 		}

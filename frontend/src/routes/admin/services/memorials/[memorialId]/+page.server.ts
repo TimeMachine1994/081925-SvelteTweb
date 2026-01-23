@@ -95,9 +95,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			if (cleaned.paymentDate) {
 				cleaned.paymentDate = convertTimestamp(cleaned.paymentDate);
 			}
-			if (cleaned.paidAt) {
-				cleaned.paidAt = convertTimestamp(cleaned.paidAt);
-			}
 			
 			// Convert timestamps in autoSave
 			if (cleaned.autoSave) {
