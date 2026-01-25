@@ -241,3 +241,265 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 		throw svelteKitError(500, 'Failed to send chat message');
 	}
 };
+
+/**
+ * DELETE - Delete (soft-delete) a chat message
+ * Requires admin, owner, or funeral director permissions
+ * 
+ * Query params:
+ * - messageId: ID of message to delete (required)
+ * - permanent: If true, permanently delete instead of soft-delete (admin only)
+ */
+export const DELETE: RequestHandler = async ({ params, url, locals }) => {
+	const { streamId } = params;
+	const messageId = url.searchParams.get('messageId');
+	const permanent = url.searchParams.get('permanent') === 'true';
+	
+	console.log('🗑️ [CHAT API] DELETE - Deleting message:', messageId, 'from stream:', streamId);
+
+	// Require authentication
+	if (!locals.user) {
+		console.log('❌ [CHAT API] User not authenticated');
+		throw svelteKitError(401, 'Authentication required');
+	}
+
+	const userId = locals.user.uid;
+	console.log('🗑️ [CHAT API] User ID:', userId);
+	console.log('🗑️ [CHAT API] User role:', locals.user.role);
+
+	// Validate messageId
+	if (!messageId) {
+		console.log('❌ [CHAT API] No messageId provided');
+		throw svelteKitError(400, 'messageId query parameter is required');
+	}
+
+	try {
+		// Get stream document
+		console.log('🔍 [CHAT API] Fetching stream document:', streamId);
+		const streamDoc = await adminDb.collection('streams').doc(streamId).get();
+		
+		if (!streamDoc.exists) {
+			console.log('❌ [CHAT API] Stream not found:', streamId);
+			throw svelteKitError(404, 'Stream not found');
+		}
+
+		const stream = streamDoc.data();
+
+		// Get memorial to check permissions
+		console.log('🔍 [CHAT API] Fetching memorial document...');
+		const memorialDoc = await adminDb.collection('memorials').doc(stream?.memorialId).get();
+		
+		if (!memorialDoc.exists) {
+			console.log('❌ [CHAT API] Memorial not found');
+			throw svelteKitError(404, 'Memorial not found');
+		}
+
+		const memorial = memorialDoc.data();
+
+		// Check permissions (admin, owner, or funeral director)
+		const hasPermission =
+			locals.user.role === 'admin' ||
+			memorial?.ownerUid === userId ||
+			memorial?.funeralDirectorUid === userId;
+
+		if (!hasPermission) {
+			console.log('❌ [CHAT API] User lacks permission:', userId);
+			throw svelteKitError(403, 'Permission denied');
+		}
+
+		console.log('✅ [CHAT API] User has permission to delete messages');
+
+		// Get message document
+		const messageRef = adminDb
+			.collection('streams')
+			.doc(streamId)
+			.collection('chat_messages')
+			.doc(messageId);
+
+		const messageDoc = await messageRef.get();
+
+		if (!messageDoc.exists) {
+			console.log('❌ [CHAT API] Message not found:', messageId);
+			throw svelteKitError(404, 'Message not found');
+		}
+
+		// Permanent delete only for admins
+		if (permanent) {
+			if (locals.user.role !== 'admin') {
+				console.log('❌ [CHAT API] Only admins can permanently delete messages');
+				throw svelteKitError(403, 'Only admins can permanently delete messages');
+			}
+
+			console.log('🗑️ [CHAT API] Permanently deleting message:', messageId);
+			await messageRef.delete();
+			console.log('✅ [CHAT API] Message permanently deleted');
+
+			return json({
+				success: true,
+				messageId,
+				permanent: true,
+				message: 'Message permanently deleted'
+			});
+		}
+
+		// Soft-delete: mark as deleted
+		console.log('🗑️ [CHAT API] Soft-deleting message:', messageId);
+		await messageRef.update({
+			deleted: true,
+			deletedAt: new Date().toISOString(),
+			deletedBy: userId
+		});
+
+		console.log('✅ [CHAT API] Message soft-deleted');
+
+		return json({
+			success: true,
+			messageId,
+			permanent: false,
+			message: 'Message deleted'
+		});
+
+	} catch (error: any) {
+		console.error('❌ [CHAT API] Error deleting message:', error);
+		console.error('❌ [CHAT API] Error details:', {
+			message: error?.message,
+			stack: error?.stack
+		});
+
+		if (error && typeof error === 'object' && 'status' in error) {
+			throw error;
+		}
+
+		throw svelteKitError(500, 'Failed to delete message');
+	}
+};
+
+/**
+ * PATCH - Restore a soft-deleted message or update message flags
+ * Requires admin, owner, or funeral director permissions
+ * 
+ * Request body:
+ * - messageId: ID of message to update (required)
+ * - restore: If true, restore a soft-deleted message
+ * - flagged: Set flagged status
+ */
+export const PATCH: RequestHandler = async ({ params, request, locals }) => {
+	const { streamId } = params;
+	
+	console.log('✏️ [CHAT API] PATCH - Updating message in stream:', streamId);
+
+	// Require authentication
+	if (!locals.user) {
+		console.log('❌ [CHAT API] User not authenticated');
+		throw svelteKitError(401, 'Authentication required');
+	}
+
+	const userId = locals.user.uid;
+	console.log('✏️ [CHAT API] User ID:', userId);
+	console.log('✏️ [CHAT API] User role:', locals.user.role);
+
+	try {
+		// Parse request body
+		const body = await request.json();
+		const { messageId, restore, flagged } = body;
+
+		console.log('✏️ [CHAT API] Update request:', { messageId, restore, flagged });
+
+		// Validate messageId
+		if (!messageId) {
+			console.log('❌ [CHAT API] No messageId provided');
+			throw svelteKitError(400, 'messageId is required');
+		}
+
+		// Get stream document
+		console.log('🔍 [CHAT API] Fetching stream document:', streamId);
+		const streamDoc = await adminDb.collection('streams').doc(streamId).get();
+		
+		if (!streamDoc.exists) {
+			console.log('❌ [CHAT API] Stream not found:', streamId);
+			throw svelteKitError(404, 'Stream not found');
+		}
+
+		const stream = streamDoc.data();
+
+		// Get memorial to check permissions
+		console.log('🔍 [CHAT API] Fetching memorial document...');
+		const memorialDoc = await adminDb.collection('memorials').doc(stream?.memorialId).get();
+		
+		if (!memorialDoc.exists) {
+			console.log('❌ [CHAT API] Memorial not found');
+			throw svelteKitError(404, 'Memorial not found');
+		}
+
+		const memorial = memorialDoc.data();
+
+		// Check permissions
+		const hasPermission =
+			locals.user.role === 'admin' ||
+			memorial?.ownerUid === userId ||
+			memorial?.funeralDirectorUid === userId;
+
+		if (!hasPermission) {
+			console.log('❌ [CHAT API] User lacks permission:', userId);
+			throw svelteKitError(403, 'Permission denied');
+		}
+
+		console.log('✅ [CHAT API] User has permission to update messages');
+
+		// Get message document
+		const messageRef = adminDb
+			.collection('streams')
+			.doc(streamId)
+			.collection('chat_messages')
+			.doc(messageId);
+
+		const messageDoc = await messageRef.get();
+
+		if (!messageDoc.exists) {
+			console.log('❌ [CHAT API] Message not found:', messageId);
+			throw svelteKitError(404, 'Message not found');
+		}
+
+		// Build update object
+		const updates: Record<string, any> = {
+			updatedAt: new Date().toISOString(),
+			updatedBy: userId
+		};
+
+		if (restore === true) {
+			updates.deleted = false;
+			updates.deletedAt = null;
+			updates.deletedBy = null;
+			console.log('✏️ [CHAT API] Restoring message:', messageId);
+		}
+
+		if (typeof flagged === 'boolean') {
+			updates.flagged = flagged;
+			console.log('✏️ [CHAT API] Setting flagged to:', flagged);
+		}
+
+		// Apply updates
+		await messageRef.update(updates);
+		console.log('✅ [CHAT API] Message updated');
+
+		return json({
+			success: true,
+			messageId,
+			updates: Object.keys(updates),
+			message: 'Message updated'
+		});
+
+	} catch (error: any) {
+		console.error('❌ [CHAT API] Error updating message:', error);
+		console.error('❌ [CHAT API] Error details:', {
+			message: error?.message,
+			stack: error?.stack
+		});
+
+		if (error && typeof error === 'object' && 'status' in error) {
+			throw error;
+		}
+
+		throw svelteKitError(500, 'Failed to update message');
+	}
+};

@@ -53,9 +53,10 @@ export interface MuxStreamConfig {
  */
 export interface StreamChatConfig {
 	enabled: boolean;             // Show/hide chat entirely
-	locked?: boolean;             // Prevent new messages (read-only mode)
-	messageCount: number;         // Total messages sent
-	participantCount: number;     // Unique participants
+	locked?: boolean;             // Prevent new messages (read-only mode) - manually controlled by admin
+	archived?: boolean;           // Chat is archived (stream ended)
+	messageCount?: number;        // Total messages sent
+	participantCount?: number;    // Unique participants
 	moderationMode?: 'off' | 'auto' | 'manual'; // Moderation mode
 }
 

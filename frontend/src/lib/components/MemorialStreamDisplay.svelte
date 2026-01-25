@@ -53,7 +53,8 @@
 		// Chat configuration (FIX-C)
 		chat?: {
 			enabled: boolean;
-			archived: boolean;
+			locked?: boolean;
+			archived?: boolean;
 		};
 	}
 	
@@ -335,7 +336,7 @@
 											<LiveChatWidget 
 												streamId={stream.id} 
 												enabled={true}
-												locked={false}
+												locked={stream.chat?.locked ?? false}
 											/>
 										{/if}
 									</div>
@@ -423,7 +424,7 @@
 											<LiveChatWidget 
 												streamId={stream.id} 
 												enabled={true}
-												locked={true}
+												locked={stream.chat?.locked ?? false}
 											/>
 										{/if}
 									</div>
@@ -458,7 +459,7 @@
 											<LiveChatWidget 
 												streamId={stream.id} 
 												enabled={true}
-												locked={true}
+												locked={stream.chat?.locked ?? false}
 											/>
 										{/if}
 									</div>

@@ -56,7 +56,7 @@
 			</div>
 		{:else}
 			<div class="memorials-list">
-				{#each (data.incompleteMemorials || []) as memorial}
+				{#each (data.incompleteMemorials || []) as memorial (memorial.id)}
 					<div class="memorial-row-container">
 						<a href="/admin/services/memorials/{memorial.id}" class="memorial-row incomplete">
 							<div class="memorial-info">
