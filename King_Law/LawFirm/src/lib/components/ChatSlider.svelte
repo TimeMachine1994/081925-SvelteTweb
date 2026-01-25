@@ -6,9 +6,17 @@
 	import AttachmentUploader from './AttachmentUploader.svelte';
 	import { onMount, onDestroy } from 'svelte';
 
-	let { caseId }: { caseId?: string } = $props();
+	let { 
+		caseId,
+		open = false,
+		onclose
+	}: { 
+		caseId?: string;
+		open?: boolean;
+		onclose?: () => void;
+	} = $props();
 
-	let isOpen = $state(false);
+	let isOpen = $state(open);
 	let messageContent = $state('');
 	let selectedFile = $state<File | null>(null);
 	let messagesContainer: HTMLDivElement;
@@ -40,6 +48,9 @@
 
 	function toggleChat() {
 		isOpen = !isOpen;
+		if (!isOpen && onclose) {
+			onclose();
+		}
 	}
 
 	async function handleSend(e: Event) {
@@ -84,6 +95,24 @@
 	}
 
 	let unreadCount = $derived(messagesStore.getUnreadCount(caseId));
+
+	// Sync with external open prop
+	$effect(() => {
+		isOpen = open;
+	});
+
+	// Mark messages as read when chat opens
+	$effect(() => {
+		if (isOpen && messagesStore.messages.length > 0) {
+			const unreadIds = messagesStore.messages
+				.filter(item => !item.message.readAt && item.message.senderId !== authStore.user?.id)
+				.map(item => item.message.id);
+			
+			if (unreadIds.length > 0) {
+				messagesStore.markAsRead(unreadIds);
+			}
+		}
+	});
 </script>
 
 <!-- Toggle Button -->
