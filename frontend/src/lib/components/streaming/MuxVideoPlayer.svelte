@@ -151,8 +151,6 @@
 				<h3>{stream.title}</h3>
 				{#if isLive()}
 					<span class="live-badge">🔴 LIVE</span>
-				{:else if isRecording()}
-					<span class="recorded-badge">📼 RECORDED</span>
 				{/if}
 			</div>
 		{/if}
@@ -234,14 +232,6 @@
 		font-weight: 600;
 	}
 
-	.recorded-badge {
-		background: #6b7280;
-		color: white;
-		padding: 0.25rem 0.75rem;
-		border-radius: 0.25rem;
-		font-size: 0.875rem;
-		font-weight: 600;
-	}
 
 	/* Mux Player styling */
 	mux-player {
