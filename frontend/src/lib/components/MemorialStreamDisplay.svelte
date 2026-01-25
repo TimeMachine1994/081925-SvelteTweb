@@ -312,7 +312,7 @@
 					<div class="stream-item">
 						{#if stream.mux?.playbackId}
 							<!-- MUX PLATFORM - New integrated player with chat -->
-							<div class="mux-stream-container">
+							<div class="mux-stream-container {!stream.chat?.enabled ? 'no-chat' : ''}">
 								<div class="video-column">
 									<MuxVideoPlayer stream={stream} autoplay={true} showTitle={true} />
 								</div>
@@ -403,7 +403,7 @@
 					<div class="stream-item">
 						{#if stream.mux?.recordingReady && stream.mux?.vodPlaybackId}
 							<!-- MUX PLATFORM - Recorded video player with archived chat -->
-							<div class="mux-stream-container">
+							<div class="mux-stream-container {!stream.chat?.enabled ? 'no-chat' : ''}">
 								<div class="video-column">
 									<MuxVideoPlayer stream={stream} autoplay={false} showTitle={true} />
 								</div>
@@ -431,7 +431,7 @@
 							</div>
 						{:else if stream.status === 'ended' && !stream.mux?.recordingReady}
 							<!-- Stream ended but recording still processing -->
-							<div class="mux-stream-container">
+							<div class="mux-stream-container {!stream.chat?.enabled ? 'no-chat' : ''}">
 								<div class="video-column">
 									<div class="recording-processing">
 										<div class="processing-content">
@@ -932,6 +932,13 @@
 		grid-template-columns: 1fr 400px;
 		gap: 1.5rem;
 		margin-top: 1rem;
+	}
+	
+	.mux-stream-container.no-chat {
+		grid-template-columns: 1fr;
+		max-width: 800px;
+		margin-left: auto;
+		margin-right: auto;
 	}
 	
 	.video-column {
