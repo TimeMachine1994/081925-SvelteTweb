@@ -767,6 +767,7 @@ https://player.vimeo.com/video/123456789'
 						<AdminChatPanel 
 							streamId={stream.id} 
 							chatEnabled={stream.chat?.enabled ?? true}
+							chatLocked={stream.chat?.locked ?? false}
 						/>
 					</div>
 				{/each}
