@@ -64,6 +64,20 @@ export interface StreamChatConfig {
 export type MuxChatConfig = StreamChatConfig;
 
 /**
+ * Stream Embed Configuration
+ * Allows embedding external video content above or below the stream
+ */
+export type StreamEmbedPosition = 'above' | 'below';
+
+export interface StreamEmbed {
+	code: string;                 // iframe or embed HTML code
+	title?: string;               // Optional display title
+	position: StreamEmbedPosition; // Display position relative to video
+	createdAt: string;            // ISO timestamp
+	createdBy: string;            // User ID who created
+}
+
+/**
  * Stream Analytics Data
  * Cached analytics from Mux Data API
  */
@@ -101,6 +115,7 @@ export interface Stream {
 	mux?: MuxStreamConfig;        // Mux live stream configuration
 	chat?: MuxChatConfig;          // Mux chat configuration
 	analytics?: StreamAnalytics;   // Cached analytics data
+	embed?: StreamEmbed;           // Optional external embed (above/below video)
 	
 	// Playback
 	playbackUrl?: string;

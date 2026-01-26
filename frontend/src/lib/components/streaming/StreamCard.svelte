@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Stream } from '$lib/types/stream';
-	import { Video, Eye, EyeOff, Archive, StopCircle, Copy, Check, ChevronDown, Calendar, ExternalLink, MessageCircle, MessageCircleOff, Pencil } from 'lucide-svelte';
+	import { Video, Eye, EyeOff, Archive, StopCircle, Copy, Check, ChevronDown, Calendar, ExternalLink, MessageCircle, MessageCircleOff, Pencil, Film } from 'lucide-svelte';
 	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
 
@@ -20,6 +20,13 @@
 	// Chat toggle state
 	let chatEnabled = $state(stream.chat?.enabled ?? true);
 	let togglingChat = $state(false);
+
+	// Embed state
+	let showEmbedForm = $state(false);
+	let embedCode = $state(stream.embed?.code || '');
+	let embedTitle = $state(stream.embed?.title || '');
+	let embedPosition = $state<'above' | 'below'>(stream.embed?.position || 'below');
+	let savingEmbed = $state(false);
 
 	// Live stream detection
 	let isStreamingLive = $state(false);
@@ -269,6 +276,72 @@
 			alert('Failed to toggle chat');
 		} finally {
 			togglingChat = false;
+		}
+	}
+
+	// Embed management functions
+	function openEmbedForm() {
+		embedCode = stream.embed?.code || '';
+		embedTitle = stream.embed?.title || '';
+		embedPosition = stream.embed?.position || 'below';
+		showEmbedForm = true;
+	}
+
+	async function handleSaveEmbed() {
+		if (!embedCode.trim()) {
+			alert('Please enter an embed code');
+			return;
+		}
+
+		savingEmbed = true;
+		try {
+			const response = await fetch(`/api/streams/${stream.id}/embed`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					code: embedCode.trim(),
+					title: embedTitle.trim() || undefined,
+					position: embedPosition
+				})
+			});
+
+			if (response.ok) {
+				showEmbedForm = false;
+				console.log('📹 [StreamCard] Embed saved successfully');
+				window.location.reload();
+			} else {
+				const data = await response.json();
+				alert(`Failed to save embed: ${data.message || 'Unknown error'}`);
+			}
+		} catch (error) {
+			console.error('❌ [StreamCard] Error saving embed:', error);
+			alert('Failed to save embed');
+		} finally {
+			savingEmbed = false;
+		}
+	}
+
+	async function handleRemoveEmbed() {
+		if (!confirm('Are you sure you want to remove this embed?')) return;
+
+		savingEmbed = true;
+		try {
+			const response = await fetch(`/api/streams/${stream.id}/embed`, {
+				method: 'DELETE'
+			});
+
+			if (response.ok) {
+				console.log('🗑️ [StreamCard] Embed removed successfully');
+				window.location.reload();
+			} else {
+				const data = await response.json();
+				alert(`Failed to remove embed: ${data.message || 'Unknown error'}`);
+			}
+		} catch (error) {
+			console.error('❌ [StreamCard] Error removing embed:', error);
+			alert('Failed to remove embed');
+		} finally {
+			savingEmbed = false;
 		}
 	}
 </script>
@@ -539,7 +612,40 @@
 						{/if}
 					</button>
 				{/if}
+
+				<!-- Embed Button -->
+				<button
+					onclick={openEmbedForm}
+					disabled={savingEmbed}
+					class="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50 {stream.embed ? 'border border-purple-300 bg-purple-50 text-purple-700 hover:bg-purple-100' : 'border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100'}"
+					title="{stream.embed ? 'Edit' : 'Add'} video embed"
+				>
+					<Film class="h-4 w-4" />
+					{stream.embed ? 'Edit Embed' : 'Add Embed'}
+				</button>
 			</div>
+
+			<!-- Active Embed Display -->
+			{#if stream.embed}
+				<div class="mt-3 rounded-lg border border-purple-200 bg-purple-50 p-3">
+					<div class="flex items-center justify-between">
+						<div class="flex items-center gap-2">
+							<Film class="h-4 w-4 text-purple-600" />
+							<span class="text-sm font-medium text-purple-800">
+								{stream.embed.title || 'Video Embed'} 
+								<span class="text-purple-600">({stream.embed.position === 'above' ? '↑ Above' : '↓ Below'} video)</span>
+							</span>
+						</div>
+						<button
+							onclick={handleRemoveEmbed}
+							disabled={savingEmbed}
+							class="text-xs text-red-600 hover:text-red-800 hover:underline disabled:opacity-50"
+						>
+							Remove
+						</button>
+					</div>
+				</div>
+			{/if}
 		</div>
 	{/if}
 </div>
@@ -614,6 +720,101 @@
 				<button
 					onclick={() => (showEditTitle = false)}
 					disabled={loading}
+					class="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:opacity-50"
+				>
+					Cancel
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
+
+<!-- Embed Modal -->
+{#if showEmbedForm}
+	<div class="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50" onclick={() => (showEmbedForm = false)}>
+		<div class="w-full max-w-lg rounded-lg bg-white p-6 shadow-xl" onclick={(e) => e.stopPropagation()}>
+			<h3 class="mb-4 text-lg font-semibold text-gray-900">
+				<Film class="inline h-5 w-5 mr-2 text-purple-600" />
+				{stream.embed ? 'Edit Video Embed' : 'Add Video Embed'}
+			</h3>
+			
+			<p class="mb-4 text-sm text-gray-600">
+				Add an external video embed (YouTube, Vimeo, etc.) that will appear above or below this stream's video player.
+			</p>
+			
+			<div class="space-y-4">
+				<div>
+					<label for="embed-title-input" class="mb-2 block text-sm font-medium text-gray-700">
+						Title (optional)
+					</label>
+					<input
+						id="embed-title-input"
+						type="text"
+						bind:value={embedTitle}
+						placeholder="e.g., Funeral Service Recording"
+						maxlength="200"
+						class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+					/>
+				</div>
+
+				<div>
+					<label for="embed-code-input" class="mb-2 block text-sm font-medium text-gray-700">
+						Embed Code *
+					</label>
+					<textarea
+						id="embed-code-input"
+						bind:value={embedCode}
+						placeholder='Paste iframe embed code, e.g.:
+<iframe src="https://www.youtube.com/embed/..." ...></iframe>
+or
+<iframe src="https://player.vimeo.com/video/..." ...></iframe>'
+						rows="5"
+						class="w-full rounded-lg border border-gray-300 px-4 py-2 font-mono text-sm focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500"
+					></textarea>
+				</div>
+
+				<div>
+					<label class="mb-2 block text-sm font-medium text-gray-700">
+						Position
+					</label>
+					<div class="flex gap-4">
+						<label class="flex items-center gap-2 cursor-pointer">
+							<input
+								type="radio"
+								name="embed-position"
+								value="above"
+								checked={embedPosition === 'above'}
+								onchange={() => embedPosition = 'above'}
+								class="h-4 w-4 text-purple-600 focus:ring-purple-500"
+							/>
+							<span class="text-sm text-gray-700">↑ Above video</span>
+						</label>
+						<label class="flex items-center gap-2 cursor-pointer">
+							<input
+								type="radio"
+								name="embed-position"
+								value="below"
+								checked={embedPosition === 'below'}
+								onchange={() => embedPosition = 'below'}
+								class="h-4 w-4 text-purple-600 focus:ring-purple-500"
+							/>
+							<span class="text-sm text-gray-700">↓ Below video</span>
+						</label>
+					</div>
+				</div>
+			</div>
+
+			<div class="mt-6 flex gap-3">
+				<button
+					onclick={handleSaveEmbed}
+					disabled={savingEmbed || !embedCode.trim()}
+					class="flex-1 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-purple-700 disabled:opacity-50"
+				>
+					{savingEmbed ? 'Saving...' : 'Save Embed'}
+				</button>
+				<button
+					onclick={() => (showEmbedForm = false)}
+					disabled={savingEmbed}
 					class="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:opacity-50"
 				>
 					Cancel
