@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { MemorialBlock, LivestreamConfig, EmbedConfig, TextConfig } from '$lib/types/memorial-blocks';
 	import { getEnabledBlocks } from '$lib/utils/block-utils';
-	import StreamPlayer from '$lib/components/streaming/StreamPlayer.svelte';
+	import MemorialStreamDisplay from '$lib/components/MemorialStreamDisplay.svelte';
 	import EmbedRenderer from './EmbedRenderer.svelte';
 	import TextRenderer from './TextRenderer.svelte';
 
@@ -36,10 +36,9 @@
 			{#if block.type === 'livestream'}
 				{@const blockStreams = getBlockStreams(block)}
 				{#if blockStreams.length > 0}
-					<StreamPlayer 
+					<MemorialStreamDisplay 
 						streams={blockStreams} 
-						memorialName={memorial.lovedOneName} 
-						memorialId={memorial.id} 
+						memorialName={memorial.lovedOneName}
 					/>
 				{/if}
 			{:else if block.type === 'embed'}
