@@ -409,10 +409,10 @@
 									<MuxVideoPlayer stream={stream} autoplay={false} showTitle={true} />
 									
 									<!-- Download Master Button - Centered below video -->
-									{#if stream.mux?.assetId}
+									{#if stream.mux?.vodPlaybackId}
 										<div class="download-button-container">
 											<a 
-												href="https://stream.mux.com/{stream.mux.assetId}/high.mp4"
+												href="https://stream.mux.com/{stream.mux.vodPlaybackId}/high.mp4"
 												download
 												class="download-master-button"
 												target="_blank"
