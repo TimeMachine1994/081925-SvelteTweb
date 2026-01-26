@@ -25,7 +25,7 @@
 	let showEmbedForm = $state(false);
 	let embedCode = $state(stream.embed?.code || '');
 	let embedTitle = $state(stream.embed?.title || '');
-	let embedPosition = $state<'above' | 'below'>(stream.embed?.position || 'below');
+	let embedPosition = $state<'above' | 'below' | 'replace'>(stream.embed?.position || 'below');
 	let savingEmbed = $state(false);
 
 	// Live stream detection
@@ -633,7 +633,7 @@
 							<Film class="h-4 w-4 text-purple-600" />
 							<span class="text-sm font-medium text-purple-800">
 								{stream.embed.title || 'Video Embed'} 
-								<span class="text-purple-600">({stream.embed.position === 'above' ? '↑ Above' : '↓ Below'} video)</span>
+								<span class="text-purple-600">({stream.embed.position === 'above' ? '↑ Above' : stream.embed.position === 'below' ? '↓ Below' : '⟷ Replaces'} video)</span>
 							</span>
 						</div>
 						<button
@@ -777,7 +777,7 @@ or
 					<label class="mb-2 block text-sm font-medium text-gray-700">
 						Position
 					</label>
-					<div class="flex gap-4">
+					<div class="flex flex-wrap gap-4">
 						<label class="flex items-center gap-2 cursor-pointer">
 							<input
 								type="radio"
@@ -800,7 +800,21 @@ or
 							/>
 							<span class="text-sm text-gray-700">↓ Below video</span>
 						</label>
+						<label class="flex items-center gap-2 cursor-pointer">
+							<input
+								type="radio"
+								name="embed-position"
+								value="replace"
+								checked={embedPosition === 'replace'}
+								onchange={() => embedPosition = 'replace'}
+								class="h-4 w-4 text-purple-600 focus:ring-purple-500"
+							/>
+							<span class="text-sm text-gray-700">⟷ Replace stream</span>
+						</label>
 					</div>
+					<p class="mt-1 text-xs text-gray-500">
+						"Replace stream" shows the embed instead of the video player, keeping chat if enabled.
+					</p>
 				</div>
 			</div>
 

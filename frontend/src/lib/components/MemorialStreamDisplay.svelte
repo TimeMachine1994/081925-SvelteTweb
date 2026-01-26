@@ -57,11 +57,11 @@
 			archived?: boolean;
 		};
 		
-		// Per-stream embed (above/below video)
+		// Per-stream embed (above/below/replace video)
 		embed?: {
 			code: string;
 			title?: string;
-			position: 'above' | 'below';
+			position: 'above' | 'below' | 'replace';
 			createdAt: string;
 			createdBy: string;
 		};
@@ -377,9 +377,9 @@
 							<!-- MUX PLATFORM - New integrated player with chat -->
 							<div class="mux-stream-container {!stream.chat?.enabled ? 'no-chat' : ''}">
 								<div class="video-column">
-									<!-- Per-stream embed - ABOVE video -->
-									{#if stream.embed && stream.embed.position === 'above'}
-										<div class="stream-embed-container embed-above">
+									{#if stream.embed && stream.embed.position === 'replace'}
+										<!-- Per-stream embed - REPLACE video (keeps chat) -->
+										<div class="stream-embed-container embed-replace">
 											{#if stream.embed.title}
 												<h4 class="stream-embed-title">{stream.embed.title}</h4>
 											{/if}
@@ -387,20 +387,32 @@
 												{@html stream.embed.code}
 											</div>
 										</div>
-									{/if}
-									
-									<MuxVideoPlayer stream={stream} autoplay={true} showTitle={true} />
-									
-									<!-- Per-stream embed - BELOW video -->
-									{#if stream.embed && stream.embed.position === 'below'}
-										<div class="stream-embed-container embed-below">
-											{#if stream.embed.title}
-												<h4 class="stream-embed-title">{stream.embed.title}</h4>
-											{/if}
-											<div class="stream-embed-content">
-												{@html stream.embed.code}
+									{:else}
+										<!-- Per-stream embed - ABOVE video -->
+										{#if stream.embed && stream.embed.position === 'above'}
+											<div class="stream-embed-container embed-above">
+												{#if stream.embed.title}
+													<h4 class="stream-embed-title">{stream.embed.title}</h4>
+												{/if}
+												<div class="stream-embed-content">
+													{@html stream.embed.code}
+												</div>
 											</div>
-										</div>
+										{/if}
+										
+										<MuxVideoPlayer stream={stream} autoplay={true} showTitle={true} />
+										
+										<!-- Per-stream embed - BELOW video -->
+										{#if stream.embed && stream.embed.position === 'below'}
+											<div class="stream-embed-container embed-below">
+												{#if stream.embed.title}
+													<h4 class="stream-embed-title">{stream.embed.title}</h4>
+												{/if}
+												<div class="stream-embed-content">
+													{@html stream.embed.code}
+												</div>
+											</div>
+										{/if}
 									{/if}
 								</div>
 								
@@ -492,9 +504,9 @@
 							<!-- MUX PLATFORM - Recorded video player with archived chat -->
 							<div class="mux-stream-container {!stream.chat?.enabled ? 'no-chat' : ''}">
 								<div class="video-column">
-									<!-- Per-stream embed - ABOVE video -->
-									{#if stream.embed && stream.embed.position === 'above'}
-										<div class="stream-embed-container embed-above">
+									{#if stream.embed && stream.embed.position === 'replace'}
+										<!-- Per-stream embed - REPLACE video (keeps chat) -->
+										<div class="stream-embed-container embed-replace">
 											{#if stream.embed.title}
 												<h4 class="stream-embed-title">{stream.embed.title}</h4>
 											{/if}
@@ -502,46 +514,58 @@
 												{@html stream.embed.code}
 											</div>
 										</div>
-									{/if}
-									
-									<MuxVideoPlayer stream={stream} autoplay={false} showTitle={true} />
-									
-									<!-- Download Master Button - Centered below video -->
-									{#if stream.mux?.vodPlaybackId}
-										<div class="download-button-container">
-											<button 
-												type="button"
-												class="download-master-button"
-												disabled={downloadingStreamId === stream.id}
-												onclick={() => handleDownload(stream)}
-											>
-												{#if downloadingStreamId === stream.id}
-													<svg class="spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-														<circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="20"/>
-													</svg>
-													Downloading...
-												{:else}
-													<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-														<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-														<polyline points="7 10 12 15 17 10"/>
-														<line x1="12" y1="15" x2="12" y2="3"/>
-													</svg>
-													Download Master
+									{:else}
+										<!-- Per-stream embed - ABOVE video -->
+										{#if stream.embed && stream.embed.position === 'above'}
+											<div class="stream-embed-container embed-above">
+												{#if stream.embed.title}
+													<h4 class="stream-embed-title">{stream.embed.title}</h4>
 												{/if}
-											</button>
-										</div>
-									{/if}
-									
-									<!-- Per-stream embed - BELOW video -->
-									{#if stream.embed && stream.embed.position === 'below'}
-										<div class="stream-embed-container embed-below">
-											{#if stream.embed.title}
-												<h4 class="stream-embed-title">{stream.embed.title}</h4>
-											{/if}
-											<div class="stream-embed-content">
-												{@html stream.embed.code}
+												<div class="stream-embed-content">
+													{@html stream.embed.code}
+												</div>
 											</div>
-										</div>
+										{/if}
+										
+										<MuxVideoPlayer stream={stream} autoplay={false} showTitle={true} />
+										
+										<!-- Download Master Button - Centered below video -->
+										{#if stream.mux?.vodPlaybackId}
+											<div class="download-button-container">
+												<button 
+													type="button"
+													class="download-master-button"
+													disabled={downloadingStreamId === stream.id}
+													onclick={() => handleDownload(stream)}
+												>
+													{#if downloadingStreamId === stream.id}
+														<svg class="spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+															<circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="20"/>
+														</svg>
+														Downloading...
+													{:else}
+														<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+															<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+															<polyline points="7 10 12 15 17 10"/>
+															<line x1="12" y1="15" x2="12" y2="3"/>
+														</svg>
+														Download Master
+													{/if}
+												</button>
+											</div>
+										{/if}
+										
+										<!-- Per-stream embed - BELOW video -->
+										{#if stream.embed && stream.embed.position === 'below'}
+											<div class="stream-embed-container embed-below">
+												{#if stream.embed.title}
+													<h4 class="stream-embed-title">{stream.embed.title}</h4>
+												{/if}
+												<div class="stream-embed-content">
+													{@html stream.embed.code}
+												</div>
+											</div>
+										{/if}
 									{/if}
 								</div>
 								
@@ -1252,6 +1276,11 @@
 	.stream-embed-container.embed-below {
 		margin-top: 1rem;
 		margin-bottom: 0;
+	}
+
+	.stream-embed-container.embed-replace {
+		margin: 0;
+		min-height: 400px;
 	}
 
 	.stream-embed-title {

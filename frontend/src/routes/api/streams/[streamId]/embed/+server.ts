@@ -26,8 +26,8 @@ export const PATCH: RequestHandler = async ({ locals, params, request }: any) =>
 			throw SvelteKitError(400, 'Embed code is required');
 		}
 
-		if (!position || !['above', 'below'].includes(position)) {
-			throw SvelteKitError(400, 'Position must be "above" or "below"');
+		if (!position || !['above', 'below', 'replace'].includes(position)) {
+			throw SvelteKitError(400, 'Position must be "above", "below", or "replace"');
 		}
 
 		const sanitizedCode = code.trim();

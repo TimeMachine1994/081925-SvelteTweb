@@ -67,7 +67,7 @@ export type MuxChatConfig = StreamChatConfig;
  * Stream Embed Configuration
  * Allows embedding external video content above or below the stream
  */
-export type StreamEmbedPosition = 'above' | 'below';
+export type StreamEmbedPosition = 'above' | 'below' | 'replace';
 
 export interface StreamEmbed {
 	code: string;                 // iframe or embed HTML code
