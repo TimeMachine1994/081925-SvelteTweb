@@ -1,0 +1,108 @@
+import { adminDb } from '$lib/server/firebase';
+import { error as svelteError, json } from '@sveltejs/kit';
+import type { RequestHandler } from './$types';
+import type { MemorialBlock, CreateLivestreamBlockRequest } from '$lib/types/memorial-blocks';
+import { sortBlocksByOrder, createLivestreamBlock, insertBlockAt } from '$lib/utils/block-utils';
+
+/**
+ * Livestream Block Creation API
+ * POST - Create a new stream AND a block referencing it
+ * 
+ * This combines the stream creation with block creation for better UX.
+ */
+
+export const POST: RequestHandler = async ({ locals, params, request }) => {
+	console.log('📦 [BLOCKS] POST livestream - Creating stream + block for memorial:', params.memorialId);
+
+	// Check authentication and admin role
+	if (!locals.user || locals.user.role !== 'admin') {
+		console.log('❌ [BLOCKS] Unauthorized access attempt');
+		throw svelteError(403, 'Admin access required');
+	}
+
+	const { memorialId } = params;
+
+	try {
+		const body: CreateLivestreamBlockRequest = await request.json();
+		const { title, scheduledStartTime, description, insertAt } = body;
+
+		// Validate required fields
+		if (!title || !title.trim()) {
+			throw svelteError(400, 'Stream title is required');
+		}
+
+		// Get memorial document
+		const memorialRef = adminDb.collection('memorials').doc(memorialId);
+		const memorialDoc = await memorialRef.get();
+
+		if (!memorialDoc.exists) {
+			throw svelteError(404, 'Memorial not found');
+		}
+
+		const memorialData = memorialDoc.data();
+		let blocks: MemorialBlock[] = memorialData?.contentBlocks || [];
+
+		// Create stream document in streams subcollection
+		const streamsRef = memorialRef.collection('streams');
+		const now = new Date().toISOString();
+		
+		const streamData = {
+			title: title.trim(),
+			description: description?.trim() || '',
+			scheduledStartTime: scheduledStartTime || null,
+			status: 'scheduled',
+			memorialId,
+			createdAt: now,
+			updatedAt: now,
+			createdBy: locals.user.uid,
+			createdByEmail: locals.user.email,
+			// Chat defaults
+			chat: {
+				enabled: true,
+				locked: false
+			}
+		};
+
+		const streamDocRef = await streamsRef.add(streamData);
+		const streamId = streamDocRef.id;
+
+		console.log(`✅ [BLOCKS] Stream created: ${streamId}`);
+
+		// Create block referencing the stream
+		const order = insertAt !== undefined ? insertAt : blocks.length;
+		const newBlock = createLivestreamBlock(streamId, order);
+
+		// Insert at position
+		if (insertAt !== undefined) {
+			blocks = insertBlockAt(blocks, newBlock, insertAt);
+		} else {
+			blocks = [...blocks, newBlock];
+		}
+
+		// Update memorial document with new blocks
+		await memorialRef.update({
+			contentBlocks: blocks,
+			contentBlocksVersion: (memorialData?.contentBlocksVersion || 0) + 1,
+			updatedAt: now
+		});
+
+		console.log(`✅ [BLOCKS] Livestream block created: ${newBlock.id}`);
+
+		return json({
+			stream: {
+				id: streamId,
+				...streamData
+			},
+			block: newBlock,
+			blocks: sortBlocksByOrder(blocks)
+		});
+	} catch (err: any) {
+		console.error('❌ [BLOCKS] Error creating livestream block:', err);
+
+		if (err && typeof err === 'object' && 'status' in err) {
+			throw err;
+		}
+
+		throw svelteError(500, `Failed to create livestream block: ${err?.message || 'Unknown error'}`);
+	}
+};

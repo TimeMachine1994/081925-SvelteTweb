@@ -169,7 +169,11 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			customPricing: memorialData.customPricing || null,
 			
 			// Contact info
-			funeralDirectorName: memorialData.funeralDirectorName || memorialData.calculatorConfig?.formData?.funeralDirectorName || ''
+			funeralDirectorName: memorialData.funeralDirectorName || memorialData.calculatorConfig?.formData?.funeralDirectorName || '',
+			
+			// Content blocks for WYSIWYG editor
+			contentBlocks: memorialData.contentBlocks || [],
+			contentBlocksVersion: memorialData.contentBlocksVersion || 0
 		};
 
 		// Process streams - filter deleted in JS to handle missing isDeleted field

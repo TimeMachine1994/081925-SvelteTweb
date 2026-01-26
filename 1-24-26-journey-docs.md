@@ -1,5 +1,5 @@
 # Admin User Journey Documentation & Gap Analysis
-## Tributestream Admin Dashboard - January 24, 2026
+## Tributestream Admin Dashboard - January 26, 2026
 
 This document maps the expected user journeys for major admin workflows, identifies involved components, and highlights gaps between expected and actual behavior.
 
@@ -33,6 +33,25 @@ This document maps the expected user journeys for major admin workflows, identif
 - **/api/endpoint** - API endpoint involved
 - **→** - Navigation or flow direction
 - **↻** - Loop or return to previous step
+
+---
+
+## UPDATE NOTES (January 26, 2026)
+
+This document was refreshed to match the current merged code.
+
+### Key Changes Since January 24
+- Filtering now works (client-side) on these admin list pages:
+  - Memorials
+  - Slideshows
+  - Memorial Owners
+  - Funeral Directors
+  - Blog Posts
+  - Audit Logs
+  - Demo Sessions
+  - Deleted Items
+- Filtering remains a known gap on:
+  - Admin Users (filters UI present, but does not filter results)
 
 ---
 
@@ -87,10 +106,10 @@ Admin Dashboard → Memorials List → Create Memorial → Configure Memorial �
 **Actual Behavior:** 
 - ✅ Grid displays correctly
 - ✅ Search works
-- ⚠️ **GAP:** Filters don't actually filter (only log to console)
+- ✅ Filters work (client-side filtering)
 - ✅ Bulk actions work
 
-**Gap Impact:** Medium - Users cannot filter large datasets effectively
+**Gap Impact:** N/A
 
 ---
 
@@ -800,7 +819,7 @@ Users → Memorial Owners → View/Edit → Take Action
 **Expected Behavior:** Filter owner list  
 **Actual Behavior:** 
 - ✅ Search works
-- ⚠️ **GAP:** Filters don't actually filter (console log only)
+- ✅ Filters work (client-side filtering)
 
 ---
 
@@ -1055,7 +1074,7 @@ Content → Blog Posts → Create/Edit → Publish
 3. Apply filters
 
 **Expected Behavior:** Filter blog posts  
-**Actual Behavior:** ⚠️ **GAP:** Filters don't actually filter (console log only)
+**Actual Behavior:** ✅ Filters work (client-side filtering)
 
 ---
 
@@ -1143,7 +1162,7 @@ System → Audit Logs → Filter by Action/User → View Details → Export
 3. Apply filters
 
 **Expected Behavior:** Filter audit logs  
-**Actual Behavior:** ⚠️ **GAP:** Filters don't actually filter (console log only)
+**Actual Behavior:** ✅ Filters work (client-side filtering)
 
 ---
 
@@ -1231,7 +1250,7 @@ System → Demo Sessions → Monitor Active → Cleanup Expired
 3. Apply
 
 **Expected Behavior:** Filter demo sessions  
-**Actual Behavior:** ⚠️ **GAP:** Filters don't actually filter (console log only)
+**Actual Behavior:** ✅ Filters work (client-side filtering)
 
 ---
 
@@ -1325,7 +1344,7 @@ System → Deleted Items → Review → Restore or Permanent Delete
 3. Apply filters
 
 **Expected Behavior:** Filter deleted items  
-**Actual Behavior:** ⚠️ **GAP:** Filters don't actually filter (console log only)
+**Actual Behavior:** ✅ Filters work (client-side filtering)
 
 ---
 
@@ -1836,7 +1855,6 @@ Receipts → Filter by Date Range → View Summary → Export Report
 
 | Workflow | Missing Component | Impact | Estimated Effort |
 |----------|------------------|--------|------------------|
-| Data Filtering | FilterBuilder actual filtering logic | Cannot filter on 8+ pages | 4-8 hours |
 | Slideshow Management | Detail page for slideshows | Limited slideshow admin tools | 6-10 hours |
 | Audit Log Investigation | Expandable detail view | Cannot debug issues effectively | 4-6 hours |
 | Deleted Item Preview | Detail modal before restore | Risk of wrong restoration | 4-6 hours |
@@ -1867,31 +1885,25 @@ Receipts → Filter by Date Range → View Summary → Export Report
 
 ### Immediate Action (Week 1)
 
-**Focus:** Fix FilterBuilder to unblock 8 pages
-
-1. ✅ **Implement FilterBuilder Actual Filtering**
-   - Choose approach: Client-side or server-side (URL params)
-   - Update all 8 pages using filters
-   - Test with large datasets
-   - **Impact:** Massive UX improvement across system
-
-### Sprint 1 (Weeks 2-3)
-
 **Focus:** Complete critical missing features
 
-2. ✅ **Create Schedule Request Detail Page**
+1. ✅ **Create Schedule Request Detail Page**
    - Build detail view with diff display
    - Implement approve/deny actions
    - Add notification system
    - **Impact:** Makes schedule requests feature functional
 
-3. ✅ **Create Receipt Detail Page**
+### Sprint 1 (Weeks 2-3)
+
+**Focus:** Receipts and memorial creation
+
+2. ✅ **Create Receipt Detail Page**
    - Build receipt detail view
    - Implement PDF generation
    - Add email functionality
    - **Impact:** Fulfills promised feature
 
-4. ✅ **Create Memorial Creation Form (Admin)**
+3. ✅ **Create Memorial Creation Form (Admin)**
    - Build creation form
    - Integrate with existing validation
    - Connect to memorial creation API
@@ -1901,19 +1913,19 @@ Receipts → Filter by Date Range → View Summary → Export Report
 
 **Focus:** Complete admin tools
 
-5. ✅ **Create Admin User Creation Form**
+4. ✅ **Create Admin User Creation Form**
    - Build admin creation form
    - Implement role selection
    - Add email invitation system
    - **Impact:** Enable team management
 
-6. ✅ **Create Slideshow Detail Page**
+5. ✅ **Create Slideshow Detail Page**
    - Build slideshow detail view
    - Add photo management
    - Fix duration formatter
    - **Impact:** Complete slideshow admin workflow
 
-7. ✅ **Implement Audit Log Details**
+6. ✅ **Implement Audit Log Details**
    - Add expandable row details
    - Format request/response data
    - Add IP and user agent display
@@ -1923,13 +1935,13 @@ Receipts → Filter by Date Range → View Summary → Export Report
 
 **Focus:** Analytics and reporting
 
-8. ✅ **Build Memorial Analytics Dashboard**
+7. ✅ **Build Memorial Analytics Dashboard**
    - Implement metrics collection
    - Create charts and graphs
    - Add date range filtering
    - **Impact:** Visibility into memorial performance
 
-9. ✅ **Build Revenue Reporting**
+8. ✅ **Build Revenue Reporting**
    - Create financial dashboard
    - Implement date range reports
    - Add CSV export
@@ -1939,9 +1951,10 @@ Receipts → Filter by Date Range → View Summary → Export Report
 
 **Focus:** Enhancement and polish
 
-10. ✅ **Complete Remaining Features**
+9. ✅ **Complete Remaining Features**
     - Deleted item preview modal
     - Funeral director approval workflow
+    - Admin Users page: make FilterBuilder apply to grid
     - Export functionality verification
     - Wiki component documentation
     - **Impact:** System completeness
@@ -2015,7 +2028,7 @@ Target Time: 5 minutes (with better log details)
 ```
 Finance needs: "Send revenue report for last month"
 Admin must:
-1. Filter receipts by date (❌ filters don't work)
+1. Filter receipts by date (✅ works)
 2. Export receipt list (⚠️ functionality unclear)
 3. Calculate totals (❌ no reporting)
 4. Generate PDF report (❌ missing)
@@ -2035,20 +2048,20 @@ Target Time: 2 minutes (with proper reports)
 - ✅ Professional UI/UX
 
 ### Critical Gaps Identified
-1. **FilterBuilder** - Doesn't actually filter (affects 8 pages)
-2. **Schedule Requests** - No approval workflow (feature non-functional)
-3. **Memorial Creation** - No admin creation form (must use workarounds)
-4. **Receipt Management** - No detail pages or PDF generation
+1. **Schedule Requests** - No approval workflow (feature non-functional)
+2. **Memorial Creation** - No admin creation form (must use workarounds)
+3. **Receipt Management** - No detail pages or PDF generation
+4. **Admin Users Filtering** - Filters UI present but does not filter results
 5. **Analytics** - No metrics or reporting
 
 ### Impact Assessment
 - **18/28 pages** fully functional
-- **5/28 pages** have filtering gaps
+- **1/28 pages** have filtering gaps
 - **3 critical workflows** blocked by missing features
 - **2 financial features** promised but missing
 
 ### Recommended Timeline
-- **Weeks 1-3:** Fix filters, schedule requests, receipts
+- **Weeks 1-3:** Schedule requests, receipts, memorial creation
 - **Weeks 4-5:** Complete admin tools
 - **Weeks 6-7:** Add analytics and reporting
 - **Week 8+:** Polish and enhancements
@@ -2058,6 +2071,6 @@ Target Time: 2 minutes (with proper reports)
 ---
 
 **Document Version:** 1.0  
-**Last Updated:** January 24, 2026  
+**Last Updated:** January 26, 2026  
 **Audited By:** Development Team  
 **Next Review:** February 24, 2026

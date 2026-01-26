@@ -302,18 +302,35 @@ This document provides a comprehensive hierarchical breakdown of all UI elements
 - **5.2.2** Status filter dropdown
 - **5.2.3** Memorial filter
 
-### 5.3 Slideshows Grid
-- **5.3.1** Individual slideshow cards
-  - **5.3.1.1** Thumbnail preview
-  - **5.3.1.2** Slideshow title
-  - **5.3.1.3** Memorial name (linked)
-  - **5.3.1.4** Status badge
-  - **5.3.1.5** Created date
-  - **5.3.1.6** Photo count
-  - **5.3.1.7** Actions menu
-    - **5.3.1.7.1** View option
-    - **5.3.1.7.2** Edit option
-    - **5.3.1.7.3** Delete option
+### 5.3 Filter Panel (conditional - shown when filters toggled)
+- **5.3.1** FilterBuilder component
+  - **5.3.1.1** Memorial filter (string type)
+  - **5.3.1.2** Status filter (enum type)
+  - **5.3.1.3** Created Date filter (date type)
+
+### 5.4 Bulk Actions Bar (conditional - shown when selections exist)
+- **5.4.1** Selected count indicator
+- **5.4.2** Bulk action buttons (resource type: slideshow)
+  - **5.4.2.1** Delete action
+- **5.4.3** Clear selection button
+
+### 5.5 Slideshows Data Grid
+- **5.5.1** Column headers
+  - **5.5.1.1** Selection checkbox column (if permissions allow)
+  - **5.5.1.2** Memorial column (sortable)
+  - **5.5.1.3** Photos column (sortable)
+  - **5.5.1.4** Status column (sortable)
+  - **5.5.1.5** Duration column
+  - **5.5.1.6** Created By column
+  - **5.5.1.7** Created column (sortable)
+- **5.5.2** Data rows
+  - **5.5.2.1** Selection checkbox cell
+  - **5.5.2.2** Memorial cell
+  - **5.5.2.3** Photos count cell
+  - **5.5.2.4** Status badge cell
+  - **5.5.2.5** Duration cell
+  - **5.5.2.6** Created by cell
+  - **5.5.2.7** Created date cell
 
 ---
 
@@ -531,20 +548,34 @@ This document provides a comprehensive hierarchical breakdown of all UI elements
 - **12.1.1** Title: "Blog Posts"
 - **12.1.2** Subtitle: "Blog content management"
 - **12.1.3** Action buttons
-  - **12.1.3.1** Create Post button
+  - **12.1.3.1** Filters button
+  - **12.1.3.2** View Live Blog button
+  - **12.1.3.3** New Post button (permission-gated)
 
-### 12.2 Posts List
-- **12.2.1** Post cards
-  - **12.2.1.1** Featured image
-  - **12.2.1.2** Post title
-  - **12.2.1.3** Excerpt
-  - **12.2.1.4** Author
-  - **12.2.1.5** Published date
-  - **12.2.1.6** Status badge (draft/published)
-  - **12.2.1.7** Actions menu
-    - **12.2.1.7.1** Edit option
-    - **12.2.1.7.2** Preview option
-    - **12.2.1.7.3** Delete option
+### 12.2 Filter Panel (conditional)
+- **12.2.1** FilterBuilder component
+  - **12.2.1.1** Title filter
+  - **12.2.1.2** Author filter
+  - **12.2.1.3** Category filter (enum)
+  - **12.2.1.4** Status filter (enum)
+  - **12.2.1.5** Featured filter (boolean)
+
+### 12.3 Statistics Bar
+- **12.3.1** Published count
+- **12.3.2** Draft count
+- **12.3.3** Scheduled count
+- **12.3.4** Featured count
+
+### 12.4 Blog Posts Data Grid
+- **12.4.1** Column headers
+  - **12.4.1.1** Title (sortable)
+  - **12.4.1.2** Author (sortable)
+  - **12.4.1.3** Category
+  - **12.4.1.4** Status (sortable)
+  - **12.4.1.5** Featured
+  - **12.4.1.6** Published date (sortable)
+  - **12.4.1.7** Created date
+- **12.4.2** Data rows (clickable to post detail)
 
 ---
 
@@ -661,24 +692,36 @@ This document provides a comprehensive hierarchical breakdown of all UI elements
 - **15.1.2** Subtitle: "Soft-deleted resources"
 - **15.1.3** Action buttons
   - **15.1.3.1** Filters button
+	- **15.1.3.2** Cleanup Expired button
 
-### 15.2 Resource Type Tabs
-- **15.2.1** Memorials tab
-- **15.2.2** Streams tab
-- **15.2.3** Users tab
-- **15.2.4** Other resources tab
+### 15.2 Filter Panel (conditional)
+- **15.2.1** FilterBuilder component
+  - **15.2.1.1** Type filter (enum)
+  - **15.2.1.2** Name filter (string)
+  - **15.2.1.3** Deleted By filter (string)
+  - **15.2.1.4** Deleted Date filter (date)
 
-### 15.3 Deleted Items List
-- **15.3.1** Item cards
-  - **15.3.1.1** Resource type icon
-  - **15.3.1.2** Resource name/title
-  - **15.3.1.3** Deleted by user
-  - **15.3.1.4** Deleted date
-  - **15.3.1.5** Retention period indicator
-  - **15.3.1.6** Action buttons
-    - **15.3.1.6.1** Restore button
-    - **15.3.1.6.2** Permanent delete button
-    - **15.3.1.6.3** View details button
+### 15.3 Warning Banner
+- **15.3.1** Soft delete retention policy text
+- **15.3.2** Retention period bullets (30 days)
+
+### 15.4 Statistics Bar
+- **15.4.1** Total Deleted count
+- **15.4.2** Expiring Soon count
+- **15.4.3** Memorials count
+- **15.4.4** Streams count
+
+### 15.5 Deleted Items Data Grid
+- **15.5.1** Column headers
+  - **15.5.1.1** Type (sortable)
+  - **15.5.1.2** Name (sortable)
+  - **15.5.1.3** Deleted By
+  - **15.5.1.4** Deleted (sortable)
+  - **15.5.1.5** Days Until Permanent (sortable)
+- **15.5.2** Bulk selection
+- **15.5.3** Inline action buttons area (fixed)
+  - **15.5.3.1** Restore Selected
+  - **15.5.3.2** Permanently Delete Selected
 
 ---
 
@@ -737,7 +780,7 @@ This document provides a comprehensive hierarchical breakdown of all UI elements
   - **S.3.1.3** Date type fields
   - **S.3.1.4** Enum type fields
 - **S.3.2** Filter operators
-- **S.3.3** Apply filters button
+- **S.3.3** Filters apply immediately to list/grid data on change (no explicit apply button)
 - **S.3.4** Clear filters button
 
 ### S.4 BulkActionBar
@@ -788,5 +831,5 @@ Most interactive elements include loading states:
 ---
 
 **Document Version:** 1.0  
-**Last Updated:** January 24, 2026  
+**Last Updated:** January 26, 2026  
 **Maintained By:** Development Team

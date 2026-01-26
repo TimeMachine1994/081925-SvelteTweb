@@ -2,8 +2,10 @@
 	import type { PageData } from './$types';
 	import SlideshowSection from '$lib/components/SlideshowSection.svelte';
 	import MemorialStreamDisplay from '$lib/components/MemorialStreamDisplay.svelte';
+	import BlockRenderer from '$lib/components/memorial/BlockRenderer.svelte';
 	import BookingReminderBanner from '$lib/components/BookingReminderBanner.svelte';
 	import { shouldShowBookingBanner, markBannerAsSeen, debugBannerState } from '$lib/utils/bookingBanner';
+	import { getEnabledBlocks } from '$lib/utils/block-utils';
 	import { onMount } from 'svelte';
 	import { Facebook, Twitter, Linkedin, Share2, X } from 'lucide-svelte';
 	import { browser } from '$app/environment';
@@ -15,6 +17,12 @@
 	let streams = $derived((data.streams || []) as any);
 	let slideshows = $derived((data.slideshows || []) as any);
 	let user = $derived(data.user);
+	
+	// Check if memorial has content blocks configured
+	let hasContentBlocks = $derived(() => {
+		const blocks = (memorial as any)?.contentBlocks || [];
+		return blocks.length > 0 && getEnabledBlocks(blocks).length > 0;
+	});
 	
 	// Determine if user can edit slideshows
 	let canEditSlideshows = $derived(() => {
@@ -292,15 +300,23 @@
 						/>
 					</div>
 				</div>
-				<!-- Stream Section - MemorialStreamDisplay handles emergency embeds -->
+				<!-- Stream Section - Use BlockRenderer if blocks exist, otherwise MemorialStreamDisplay -->
 				<div class="memorial-body">
 					<div class="streaming-section">
-						<MemorialStreamDisplay 
-							streams={streams || []} 
-							memorialName={(memorial as any).customTitle || memorial.lovedOneName}
-							emergencyEmbed={memorial.emergencyEmbed}
-							emergencyChatEmbed={memorial.emergencyChatEmbed}
-						/>
+						{#if hasContentBlocks()}
+							<BlockRenderer 
+								blocks={(memorial as any).contentBlocks || []}
+								{streams}
+								{memorial}
+							/>
+						{:else}
+							<MemorialStreamDisplay 
+								streams={streams || []} 
+								memorialName={(memorial as any).customTitle || memorial.lovedOneName}
+								emergencyEmbed={memorial.emergencyEmbed}
+								emergencyChatEmbed={memorial.emergencyChatEmbed}
+							/>
+						{/if}
 					</div>
 					
 					<!-- Public Note Card -->
@@ -404,14 +420,22 @@
 
 				<!-- Body Section -->
 				<div class="memorial-body">
-					<!-- Stream Section - Always show, component handles empty state -->
+					<!-- Stream Section - Use BlockRenderer if blocks exist, otherwise MemorialStreamDisplay -->
 					<div class="streaming-section">
-						<MemorialStreamDisplay 
-							streams={streams || []} 
-							memorialName={(memorial as any).customTitle || memorial.lovedOneName}
-							emergencyEmbed={memorial.emergencyEmbed}
-							emergencyChatEmbed={memorial.emergencyChatEmbed}
-						/>
+						{#if hasContentBlocks()}
+							<BlockRenderer 
+								blocks={(memorial as any).contentBlocks || []}
+								{streams}
+								{memorial}
+							/>
+						{:else}
+							<MemorialStreamDisplay 
+								streams={streams || []} 
+								memorialName={(memorial as any).customTitle || memorial.lovedOneName}
+								emergencyEmbed={memorial.emergencyEmbed}
+								emergencyChatEmbed={memorial.emergencyChatEmbed}
+							/>
+						{/if}
 					</div>
 					
 					<!-- Public Note Card -->
