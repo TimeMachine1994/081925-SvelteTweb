@@ -407,6 +407,26 @@
 							<div class="mux-stream-container {!stream.chat?.enabled ? 'no-chat' : ''}">
 								<div class="video-column">
 									<MuxVideoPlayer stream={stream} autoplay={false} showTitle={true} />
+									
+									<!-- Download Master Button - Centered below video -->
+									{#if stream.mux?.assetId}
+										<div class="download-button-container">
+											<a 
+												href="https://stream.mux.com/{stream.mux.assetId}/high.mp4"
+												download
+												class="download-master-button"
+												target="_blank"
+												rel="noopener noreferrer"
+											>
+												<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+													<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+													<polyline points="7 10 12 15 17 10"/>
+													<line x1="12" y1="15" x2="12" y2="3"/>
+												</svg>
+												Download Master
+											</a>
+										</div>
+									{/if}
 								</div>
 								
 								{#if stream.chat?.enabled}
@@ -1044,5 +1064,44 @@
 		height: 100%;
 		min-height: 350px;
 		border: none;
+	}
+	
+	/* Download Master Button - Centered below video */
+	.download-button-container {
+		display: flex;
+		justify-content: center;
+		padding: 1rem 0;
+	}
+
+	.download-master-button {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1.5rem;
+		background: linear-gradient(135deg, #D5BA7F 0%, #c4a96e 100%);
+		color: #1a1a1a;
+		font-weight: 600;
+		font-size: 0.95rem;
+		border-radius: 8px;
+		text-decoration: none;
+		transition: all 0.2s ease;
+		box-shadow: 0 2px 8px rgba(213, 186, 127, 0.3);
+	}
+
+	.download-master-button:hover {
+		background: linear-gradient(135deg, #e5ca8f 0%, #d4b97e 100%);
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(213, 186, 127, 0.4);
+	}
+
+	.download-master-button svg {
+		flex-shrink: 0;
+	}
+
+	@media (max-width: 768px) {
+		.download-master-button {
+			padding: 0.625rem 1.25rem;
+			font-size: 0.875rem;
+		}
 	}
 </style>
