@@ -88,6 +88,48 @@
 	// Current time for countdown
 	let currentTime = $state(new Date());
 	
+	// Download state tracking
+	let downloadingStreamId = $state<string | null>(null);
+	
+	/**
+	 * Handle video download - fetches file and triggers save dialog
+	 */
+	async function handleDownload(stream: Stream) {
+		if (!stream.mux?.vodPlaybackId || downloadingStreamId) return;
+		
+		const playbackId = stream.mux.vodPlaybackId;
+		const url = `https://stream.mux.com/${playbackId}/high.mp4`;
+		const filename = `${stream.title || 'recording'}-${playbackId}.mp4`;
+		
+		try {
+			downloadingStreamId = stream.id;
+			console.log('📥 [DOWNLOAD] Starting download for:', filename);
+			
+			const response = await fetch(url);
+			if (!response.ok) throw new Error(`Download failed: ${response.status}`);
+			
+			const blob = await response.blob();
+			const blobUrl = URL.createObjectURL(blob);
+			
+			// Create temporary link and trigger download
+			const link = document.createElement('a');
+			link.href = blobUrl;
+			link.download = filename;
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+			
+			// Cleanup
+			URL.revokeObjectURL(blobUrl);
+			console.log('✅ [DOWNLOAD] Download completed:', filename);
+		} catch (error) {
+			console.error('❌ [DOWNLOAD] Failed:', error);
+			alert('Download failed. Please try right-clicking the video and selecting "Save video as..."');
+		} finally {
+			downloadingStreamId = null;
+		}
+	}
+	
 	// Firestore unsubscribe functions
 	let firestoreUnsubscribes: (() => void)[] = [];
 	
@@ -411,20 +453,26 @@
 									<!-- Download Master Button - Centered below video -->
 									{#if stream.mux?.vodPlaybackId}
 										<div class="download-button-container">
-											<a 
-												href="https://stream.mux.com/{stream.mux.vodPlaybackId}/high.mp4"
-												download
+											<button 
+												type="button"
 												class="download-master-button"
-												target="_blank"
-												rel="noopener noreferrer"
+												disabled={downloadingStreamId === stream.id}
+												onclick={() => handleDownload(stream)}
 											>
-												<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-													<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-													<polyline points="7 10 12 15 17 10"/>
-													<line x1="12" y1="15" x2="12" y2="3"/>
-												</svg>
-												Download Master
-											</a>
+												{#if downloadingStreamId === stream.id}
+													<svg class="spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+														<circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="20"/>
+													</svg>
+													Downloading...
+												{:else}
+													<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+														<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+														<polyline points="7 10 12 15 17 10"/>
+														<line x1="12" y1="15" x2="12" y2="3"/>
+													</svg>
+													Download Master
+												{/if}
+											</button>
 										</div>
 									{/if}
 								</div>
@@ -1096,6 +1144,20 @@
 
 	.download-master-button svg {
 		flex-shrink: 0;
+	}
+
+	.download-master-button:disabled {
+		opacity: 0.7;
+		cursor: wait;
+	}
+
+	.download-master-button .spinner {
+		animation: spin 1s linear infinite;
+	}
+
+	@keyframes spin {
+		from { transform: rotate(0deg); }
+		to { transform: rotate(360deg); }
 	}
 
 	@media (max-width: 768px) {
