@@ -9,6 +9,7 @@ Manage memorial slideshows across all memorials
 	import BulkActionBar from '$lib/components/admin/BulkActionBar.svelte';
 	import FilterBuilder from '$lib/components/admin/FilterBuilder.svelte';
 	import { can } from '$lib/stores/adminUser';
+	import { applyFilters, type FilterRule } from '$lib/utils/filter-utils';
 	import { goto } from '$app/navigation';
 
 	let { data } = $props();
@@ -17,6 +18,12 @@ Manage memorial slideshows across all memorials
 	let selectedSlideshows = $state<Set<string>>(new Set());
 	let showFilters = $state(false);
 	let search = $state<string>(data.searchQuery || '');
+	let activeFilters = $state<FilterRule[]>([]);
+
+	// Derived filtered data
+	let filteredSlideshows = $derived.by(() => {
+		return applyFilters(data.slideshows, activeFilters);
+	});
 
 	// Column configuration
 	const columns = [
@@ -187,19 +194,20 @@ Manage memorial slideshows across all memorials
 					},
 					{ id: 'createdAt', label: 'Created Date', type: 'date' }
 				]}
-				onFilterChange={(filters) => console.log('Filters:', filters)}
+				onFilterChange={(filters) => {
+					activeFilters = filters;
+				}}
 			/>
 		</div>
 	{/if}
 
 	<DataGrid
 		{columns}
-		data={data.slideshows}
-		selectable={true}
+		data={filteredSlideshows}
+		selectable={$can('memorial', 'update')}
+		bind:selectedMemorials={selectedSlideshows}
 		resourceType="slideshow"
-		bind:selectedRows={selectedSlideshows}
-	/>
-	<!-- onRowClick disabled - clicking will be re-enabled when detail pages exist -->
+	/><!-- onRowClick disabled - clicking will be re-enabled when detail pages exist -->
 </AdminLayout>
 
 <style>

@@ -9,12 +9,19 @@ Recovery system for soft-deleted items
 	import DataGrid from '$lib/components/admin/DataGrid.svelte';
 	import FilterBuilder from '$lib/components/admin/FilterBuilder.svelte';
 	import { can } from '$lib/stores/adminUser';
+	import { applyFilters, type FilterRule } from '$lib/utils/filter-utils';
 
 	let { data } = $props();
 
 	// State
 	let selectedItems = $state<Set<string>>(new Set());
 	let showFilters = $state(false);
+	let activeFilters = $state<FilterRule[]>([]);
+
+	// Derived filtered data
+	let filteredItems = $derived.by(() => {
+		return applyFilters(data.deletedItems, activeFilters);
+	});
 
 	// Column configuration
 	const columns = [
@@ -191,7 +198,9 @@ Recovery system for soft-deleted items
 					{ id: 'deletedByEmail', label: 'Deleted By', type: 'string' },
 					{ id: 'deletedAt', label: 'Deleted Date', type: 'date' }
 				]}
-				onFilterChange={(filters) => console.log('Filters:', filters)}
+				onFilterChange={(filters) => {
+					activeFilters = filters;
+				}}
 			/>
 		</div>
 	{/if}
@@ -230,9 +239,9 @@ Recovery system for soft-deleted items
 
 	<DataGrid
 		{columns}
-		data={data.items}
-		selectable={$can('deleted_item', 'update')}
-		selectedMemorials={selectedItems}
+		data={filteredItems}
+		selectable={$can('system', 'update')}
+		bind:selectedMemorials={selectedItems}
 		onBulkAction={handleBulkAction}
 		resourceType="deleted_item"
 	/>

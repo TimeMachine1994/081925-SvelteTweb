@@ -4,6 +4,8 @@
 	import Navbar from '$lib/components/Navbar.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import RecaptchaProvider from '$lib/components/RecaptchaProvider.svelte';
+	import DevModeBanner from '$lib/components/DevModeBanner.svelte';
+	import DevQuickLogin from '$lib/components/DevQuickLogin.svelte';
 	import { getTheme } from '$lib/design-tokens/minimal-modern-theme';
 
 	import { user } from '$lib/auth';
@@ -26,6 +28,9 @@
 </svelte:head>
 
 <RecaptchaProvider>
+	<!-- Dev Mode Banner - shows at top in development -->
+	<DevModeBanner />
+	
 	<div class="app-container {theme.root}" style="font-family: {theme.font.body}">
 		<!-- Hide navbar in admin panel -->
 		{#if !$page.route.id?.startsWith('/admin')}
@@ -47,6 +52,9 @@
 			<Footer />
 		{/if}
 	</div>
+	
+	<!-- Dev Quick Login - floating widget in development -->
+	<DevQuickLogin />
 </RecaptchaProvider>
 
 <style>

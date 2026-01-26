@@ -9,12 +9,19 @@ Manage users who own memorial pages
 	import FilterBuilder from '$lib/components/admin/FilterBuilder.svelte';
 	import { can } from '$lib/stores/adminUser';
 	import { goto } from '$app/navigation';
+	import { applyFilters, type FilterRule } from '$lib/utils/filter-utils';
 
 	let { data } = $props();
 
 	// State
 	let selectedUsers = $state<Set<string>>(new Set());
 	let showFilters = $state(false);
+	let activeFilters = $state<FilterRule[]>([]);
+
+	// Derived filtered data
+	let filteredUsers = $derived.by(() => {
+		return applyFilters(data.users, activeFilters);
+	});
 
 	// Column configuration
 	const columns = [
@@ -125,17 +132,18 @@ Manage users who own memorial pages
 					{ id: 'suspended', label: 'Suspended', type: 'boolean' },
 					{ id: 'createdAt', label: 'Join Date', type: 'date' }
 				]}
-				onFilterChange={(filters) => console.log('Filters:', filters)}
+				onFilterChange={(filters) => {
+					activeFilters = filters;
+				}}
 			/>
 		</div>
 	{/if}
 
 	<DataGrid
 		{columns}
-		data={data.users}
+		data={filteredUsers}
 		selectable={$can('user', 'update')}
 		bind:selectedMemorials={selectedUsers}
-		onBulkAction={handleBulkAction}
 		onRowClick={handleRowClick}
 		resourceType="user"
 	/>

@@ -9,12 +9,19 @@ Manage funeral home partners
 	import FilterBuilder from '$lib/components/admin/FilterBuilder.svelte';
 	import { can } from '$lib/stores/adminUser';
 	import { goto } from '$app/navigation';
+	import { applyFilters, type FilterRule } from '$lib/utils/filter-utils';
 
 	let { data } = $props();
 
 	// State
 	let selectedDirectors = $state<Set<string>>(new Set());
 	let showFilters = $state(false);
+	let activeFilters = $state<FilterRule[]>([]);
+
+	// Derived filtered data
+	let filteredDirectors = $derived.by(() => {
+		return applyFilters(data.directors, activeFilters);
+	});
 
 	// Column configuration
 	const columns = [
@@ -130,17 +137,19 @@ Manage funeral home partners
 					},
 					{ id: 'createdAt', label: 'Registration Date', type: 'date' }
 				]}
-				onFilterChange={(filters) => console.log('Filters:', filters)}
+				onFilterChange={(filters) => {
+					activeFilters = filters;
+				}}
 			/>
 		</div>
 	{/if}
 
 	<DataGrid
 		{columns}
-		data={data.funeralDirectors}
+		data={filteredDirectors}
 		selectable={$can('funeral_director', 'update')}
-		selectedMemorials={selectedDirectors}
-		onBulkAction={handleBulkAction}
+		bind:selectedMemorials={selectedDirectors}
+		onRowClick={handleRowClick}
 		resourceType="funeral_director"
 	/>
 	<!-- onRowClick disabled until detail pages are created -->

@@ -11,6 +11,7 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 	import FilterBuilder from '$lib/components/admin/FilterBuilder.svelte';
 	import { can } from '$lib/stores/adminUser';
 	import { goto } from '$app/navigation';
+	import { applyFilters, type FilterRule } from '$lib/utils/filter-utils';
 
 	let { data } = $props();
 
@@ -18,6 +19,12 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 	let selectedMemorials = $state<Set<string>>(new Set());
 	let showFilters = $state(false);
 	let search = $state<string>(data.searchQuery || '');
+	let activeFilters = $state<FilterRule[]>([]);
+
+	// Derived filtered data
+	let filteredMemorials = $derived.by(() => {
+		return applyFilters(data.memorials, activeFilters);
+	});
 
 	async function togglePayment(row: any) {
 		const action = row.isPaid ? 'markUnpaid' : 'markPaid';
@@ -237,14 +244,16 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 					{ id: 'isPublic', label: 'Visibility', type: 'boolean' },
 					{ id: 'createdAt', label: 'Created Date', type: 'date' }
 				]}
-				onFilterChange={(filters) => console.log('Filters:', filters)}
+				onFilterChange={(filters) => {
+					activeFilters = filters;
+				}}
 			/>
 		</div>
 	{/if}
 
 	<DataGrid
 		{columns}
-		data={data.memorials}
+		data={filteredMemorials}
 		selectable={$can('memorial', 'update')}
 		bind:selectedMemorials={selectedMemorials}
 		onRowClick={handleRowClick}
