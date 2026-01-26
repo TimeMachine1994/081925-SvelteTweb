@@ -1,15 +1,19 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { MessageCircle, Trash2, Shield, RefreshCw, ToggleLeft, ToggleRight } from 'lucide-svelte';
+	import { MessageCircle, Trash2, Shield, RefreshCw, ToggleLeft, ToggleRight, Lock, Unlock } from 'lucide-svelte';
 	import type { StreamChatMessage } from '$lib/types/chat';
 
 	interface Props {
 		streamId: string;
 		chatEnabled?: boolean;
+		chatLocked?: boolean;
 		onToggleChat?: (enabled: boolean) => void;
 	}
 
-	let { streamId, chatEnabled = true, onToggleChat }: Props = $props();
+	let { streamId, chatEnabled = true, chatLocked = false, onToggleChat }: Props = $props();
+
+	let isLocked = $state(chatLocked);
+	let isTogglingLock = $state(false);
 
 	let messages = $state<StreamChatMessage[]>([]);
 	let isLoading = $state(true);
@@ -104,6 +108,30 @@
 	function formatTime(timestamp: string): string {
 		return new Date(timestamp).toLocaleString();
 	}
+
+	async function toggleChatLock() {
+		isTogglingLock = true;
+		
+		try {
+			const response = await fetch(`/api/streams/${streamId}/chat/lock`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ locked: !isLocked })
+			});
+
+			if (!response.ok) {
+				const data = await response.json();
+				throw new Error(data.message || 'Failed to toggle chat lock');
+			}
+
+			isLocked = !isLocked;
+		} catch (err: any) {
+			console.error('[AdminChatPanel] Error toggling lock:', err);
+			error = err.message || 'Failed to toggle chat lock';
+		} finally {
+			isTogglingLock = false;
+		}
+	}
 </script>
 
 <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -121,6 +149,25 @@
 				title="Refresh messages"
 			>
 				<RefreshCw class="w-4 h-4" />
+			</button>
+			<!-- Lock/Unlock Chat Button -->
+			<button
+				onclick={toggleChatLock}
+				disabled={isTogglingLock}
+				class="flex items-center gap-1 px-3 py-1 rounded text-sm font-medium transition-colors
+					{isLocked ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-blue-100 text-blue-700 hover:bg-blue-200'}
+					disabled:opacity-50 disabled:cursor-not-allowed"
+				title={isLocked ? 'Unlock chat to allow new messages' : 'Lock chat to prevent new messages'}
+			>
+				{#if isTogglingLock}
+					<div class="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+				{:else if isLocked}
+					<Lock class="w-4 h-4" />
+					Locked
+				{:else}
+					<Unlock class="w-4 h-4" />
+					Unlocked
+				{/if}
 			</button>
 			{#if onToggleChat}
 				<button

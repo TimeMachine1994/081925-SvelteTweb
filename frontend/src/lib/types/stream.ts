@@ -53,14 +53,29 @@ export interface MuxStreamConfig {
  */
 export interface StreamChatConfig {
 	enabled: boolean;             // Show/hide chat entirely
-	locked?: boolean;             // Prevent new messages (read-only mode)
-	messageCount: number;         // Total messages sent
-	participantCount: number;     // Unique participants
+	locked?: boolean;             // Prevent new messages (read-only mode) - manually controlled by admin
+	archived?: boolean;           // Chat is archived (stream ended)
+	messageCount?: number;        // Total messages sent
+	participantCount?: number;    // Unique participants
 	moderationMode?: 'off' | 'auto' | 'manual'; // Moderation mode
 }
 
 // Alias for backward compatibility
 export type MuxChatConfig = StreamChatConfig;
+
+/**
+ * Stream Embed Configuration
+ * Allows embedding external video content above or below the stream
+ */
+export type StreamEmbedPosition = 'above' | 'below' | 'replace';
+
+export interface StreamEmbed {
+	code: string;                 // iframe or embed HTML code
+	title?: string;               // Optional display title
+	position: StreamEmbedPosition; // Display position relative to video
+	createdAt: string;            // ISO timestamp
+	createdBy: string;            // User ID who created
+}
 
 /**
  * Stream Analytics Data
@@ -100,6 +115,7 @@ export interface Stream {
 	mux?: MuxStreamConfig;        // Mux live stream configuration
 	chat?: MuxChatConfig;          // Mux chat configuration
 	analytics?: StreamAnalytics;   // Cached analytics data
+	embed?: StreamEmbed;           // Optional external embed (above/below video)
 	
 	// Playback
 	playbackUrl?: string;

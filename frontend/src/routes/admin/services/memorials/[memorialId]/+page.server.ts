@@ -95,6 +95,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			if (cleaned.paymentDate) {
 				cleaned.paymentDate = convertTimestamp(cleaned.paymentDate);
 			}
+			if (cleaned.paidAt) {
+				cleaned.paidAt = convertTimestamp(cleaned.paidAt);
+			}
 			
 			// Convert timestamps in autoSave
 			if (cleaned.autoSave) {
@@ -220,6 +223,15 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 				// Calculator linking
 				calculatorServiceType: data.calculatorServiceType || null,
 				calculatorServiceIndex: data.calculatorServiceIndex || null,
+				
+				// Chat configuration
+				chat: data.chat ? {
+					enabled: data.chat.enabled ?? true,
+					locked: data.chat.locked ?? false,
+					archived: data.chat.archived ?? false,
+					messageCount: data.chat.messageCount ?? 0,
+					participantCount: data.chat.participantCount ?? 0
+				} : null,
 				
 				createdAt: data.createdAt || null,
 				updatedAt: data.updatedAt || null
