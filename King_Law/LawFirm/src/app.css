@@ -1,87 +1,72 @@
 @import 'tailwindcss';
 
-@layer theme {
-	/* Custom Fonts */
-	@font-face {
-		font-family: 'Junction Regular';
-		src: url('/fonts/junction-regular.woff') format('woff');
-		font-weight: normal;
-		font-style: normal;
-		font-display: swap;
-	}
+/* Tailwind v4: Define custom colors using @theme */
+@theme {
+	/* King Law Brand Colors */
+	--color-king-blue: #1D3047;
+	--color-king-blue-light: #2d4a6b;
+	--color-king-blue-dark: #141f2e;
+	--color-gold: #F2B022;
+	--color-gold-light: #f5c04d;
+	--color-gold-dark: #d99a1a;
+	
+	/* Semantic Colors */
+	--color-primary: #1D3047;
+	--color-primary-foreground: #ffffff;
+	--color-secondary: #f0f2f5;
+	--color-secondary-foreground: #1D3047;
+	--color-accent: #F2B022;
+	--color-accent-foreground: #1D3047;
+	--color-muted: #f0f2f5;
+	--color-muted-foreground: #5a6677;
+	--color-background: #ffffff;
+	--color-foreground: #1D3047;
+	--color-border: #ccd0d5;
+	--color-input: #ccd0d5;
+	--color-ring: #F2B022;
 
-	@font-face {
-		font-family: 'Goudy Bookletter 1911';
-		src: url('/fonts/goudy_bookletter_1911-webfont.woff') format('woff');
-		font-weight: normal;
-		font-style: normal;
-		font-display: swap;
-	}
+	/* Font families */
+	--font-body: 'Junction Regular', system-ui, sans-serif;
+	--font-title: 'Goudy Bookletter 1911', Georgia, serif;
+	--font-quote: 'League Script', cursive;
 
-	@font-face {
-		font-family: 'League Script';
-		src: url('/fonts/LeagueScriptNumberOne-webfont.woff') format('woff');
-		font-weight: normal;
-		font-style: normal;
-		font-display: swap;
-	}
+	/* Border radius */
+	--radius: 0.5rem;
+	--radius-lg: 0.5rem;
+	--radius-md: calc(0.5rem - 2px);
+	--radius-sm: calc(0.5rem - 4px);
+}
 
-	:root {
-		/* Light mode colors */
-		--color-gold: 42 80% 63%;
-		--color-gold-dark: 42 75% 50%;
-		--color-black: 0 0% 0%;
-		--color-white: 0 0% 100%;
-		--color-grey-50: 0 0% 98%;
-		--color-grey-100: 0 0% 95%;
-		--color-grey-200: 0 0% 90%;
-		--color-grey-300: 0 0% 80%;
-		--color-grey-400: 0 0% 63%;
-		--color-grey-500: 0 0% 50%;
-		--color-grey-600: 0 0% 40%;
-		--color-grey-700: 0 0% 30%;
-		--color-grey-800: 0 0% 15%;
-		--color-grey-900: 0 0% 10%;
+/* Custom Fonts */
+@font-face {
+	font-family: 'Junction Regular';
+	src: url('/fonts/junction-regular.woff') format('woff');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
 
-		--background: var(--color-white);
-		--foreground: var(--color-black);
-		--primary: var(--color-gold);
-		--primary-foreground: var(--color-black);
-		--secondary: var(--color-grey-200);
-		--secondary-foreground: var(--color-black);
-		--muted: var(--color-grey-100);
-		--muted-foreground: var(--color-grey-600);
-		--accent: var(--color-gold);
-		--accent-foreground: var(--color-black);
-		--border: var(--color-grey-300);
-		--input: var(--color-grey-300);
-		--ring: var(--color-gold);
-		--radius: 0.5rem;
-	}
+@font-face {
+	font-family: 'Goudy Bookletter 1911';
+	src: url('/fonts/goudy_bookletter_1911-webfont.woff') format('woff');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
 
-	.dark {
-		/* Dark mode colors */
-		--background: var(--color-grey-900);
-		--foreground: var(--color-white);
-		--primary: var(--color-gold);
-		--primary-foreground: var(--color-black);
-		--secondary: var(--color-grey-800);
-		--secondary-foreground: var(--color-white);
-		--muted: var(--color-grey-800);
-		--muted-foreground: var(--color-grey-400);
-		--accent: var(--color-gold-dark);
-		--accent-foreground: var(--color-white);
-		--border: var(--color-grey-700);
-		--input: var(--color-grey-700);
-		--ring: var(--color-gold);
-	}
+@font-face {
+	font-family: 'League Script';
+	src: url('/fonts/LeagueScriptNumberOne-webfont.woff') format('woff');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
 }
 
 @layer base {
 	body {
-		background-color: hsl(var(--background));
-		color: hsl(var(--foreground));
-		font-family: 'Junction Regular', system-ui, sans-serif;
+		background-color: var(--color-background);
+		color: var(--color-foreground);
+		font-family: var(--font-body);
 		font-feature-settings:
 			'rlig' 1,
 			'calt' 1;
@@ -93,10 +78,10 @@
 	h4,
 	h5,
 	h6 {
-		font-family: 'Goudy Bookletter 1911', Georgia, serif;
+		font-family: var(--font-title);
 	}
 
 	.font-quote {
-		font-family: 'League Script', cursive;
+		font-family: var(--font-quote);
 	}
 }
