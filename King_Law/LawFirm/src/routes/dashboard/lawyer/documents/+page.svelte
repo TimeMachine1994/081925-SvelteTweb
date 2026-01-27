@@ -115,10 +115,10 @@
 										href="/dashboard/lawyer/case/{item.document.caseId}"
 										class="text-gold hover:underline text-sm"
 									>
-										View Case
+										📁 View Case
 									</a>
 								{:else}
-									<span class="text-muted-foreground text-sm">Uncategorized</span>
+									<span class="text-muted-foreground text-sm">💬 Message Attachment</span>
 								{/if}
 							</td>
 							<td class="px-6 py-4 text-sm text-muted-foreground hidden md:table-cell">

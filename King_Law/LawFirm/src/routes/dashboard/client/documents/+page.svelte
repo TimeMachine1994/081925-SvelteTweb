@@ -89,6 +89,7 @@
 				<thead class="bg-muted">
 					<tr>
 						<th class="text-left px-6 py-4 text-sm font-semibold">File Name</th>
+						<th class="text-left px-6 py-4 text-sm font-semibold hidden lg:table-cell">Source</th>
 						<th class="text-left px-6 py-4 text-sm font-semibold hidden md:table-cell">Size</th>
 						<th class="text-left px-6 py-4 text-sm font-semibold hidden sm:table-cell">Uploaded</th>
 						<th class="text-right px-6 py-4 text-sm font-semibold">Actions</th>
@@ -107,6 +108,13 @@
 										</p>
 									</div>
 								</div>
+							</td>
+							<td class="px-6 py-4 hidden lg:table-cell">
+								{#if item.document.caseId}
+									<span class="text-sm text-green-600 dark:text-green-400">📁 Case</span>
+								{:else}
+									<span class="text-sm text-muted-foreground">💬 Message</span>
+								{/if}
 							</td>
 							<td class="px-6 py-4 text-sm text-muted-foreground hidden md:table-cell">
 								{formatFileSize(item.document.fileSize)}

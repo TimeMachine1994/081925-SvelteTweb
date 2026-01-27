@@ -8,10 +8,8 @@
 	import Toast from '$lib/components/ui/Toast.svelte';
 	import DashboardSkeleton from '$lib/components/ui/DashboardSkeleton.svelte';
 	import MessageComposer from '$lib/components/MessageComposer.svelte';
-	import ChatSlider from '$lib/components/ChatSlider.svelte';
-
+	
 	let loading = $state(true);
-	let chatOpen = $state(false);
 
 	let openCases = $derived(casesStore.cases.filter(c => c.case.status === 'open').length);
 	let totalUnpaid = $derived(
@@ -76,14 +74,11 @@
 			<div class="text-sm text-muted-foreground">Unpaid Invoices</div>
 		</div>
 
-		<button
-			onclick={() => chatOpen = true}
-			class="bg-background border border-border rounded-lg p-6 text-left hover:border-gold hover:shadow-md transition-all cursor-pointer w-full"
-		>
+		<div class="bg-background border border-border rounded-lg p-6">
 			<div class="text-3xl mb-2">💬</div>
 			<div class="text-2xl font-bold {unreadMessages > 0 ? 'text-red-500' : ''}">{unreadMessages}</div>
 			<div class="text-sm text-muted-foreground">Unread Messages</div>
-		</button>
+		</div>
 
 		<a
 			href="/dashboard/client/documents"
@@ -209,4 +204,3 @@
 </div>
 {/if}
 
-<ChatSlider open={chatOpen} onclose={() => chatOpen = false} />

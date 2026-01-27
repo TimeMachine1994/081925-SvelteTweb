@@ -10,8 +10,7 @@
 	import InboxMessage from '$lib/components/InboxMessage.svelte';
 	import Toast from '$lib/components/ui/Toast.svelte';
 	import DashboardSkeleton from '$lib/components/ui/DashboardSkeleton.svelte';
-	import ChatSlider from '$lib/components/ChatSlider.svelte';
-
+	
 	let { data } = $props();
 
 	let showCreateCaseModal = $state(false);
@@ -21,7 +20,6 @@
 	let loading = $state(true);
 	let searchQuery = $state('');
 	let statusFilter = $state('all');
-	let chatOpen = $state(false);
 
 	// Dashboard stats
 	let stats = $state({
@@ -183,13 +181,10 @@
 			<div class="text-2xl font-bold text-gold">{formatCurrency(stats.totalRevenue)}</div>
 			<div class="text-sm text-muted-foreground">Revenue</div>
 		</div>
-		<button
-			onclick={() => chatOpen = true}
-			class="bg-background border border-border rounded-lg p-4 shadow-sm text-left hover:border-gold hover:shadow-md transition-all cursor-pointer w-full"
-		>
+		<div class="bg-background border border-border rounded-lg p-4 shadow-sm">
 			<div class="text-2xl font-bold {stats.unreadMessages > 0 ? 'text-red-500' : ''}">{stats.unreadMessages}</div>
 			<div class="text-sm text-muted-foreground">Unread Messages</div>
-		</button>
+		</div>
 	</div>
 
 	<!-- Cases Section -->
@@ -310,4 +305,3 @@
 	onassigned={handleAssignmentComplete}
 />
 
-<ChatSlider open={chatOpen} onclose={() => chatOpen = false} />

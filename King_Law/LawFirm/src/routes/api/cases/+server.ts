@@ -1,8 +1,8 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
-import { cases, user as userTable } from '$lib/server/db/schema';
-import { eq, or } from 'drizzle-orm';
+import { cases, user as userTable, messages, documents } from '$lib/server/db/schema';
+import { eq, or, isNull, and } from 'drizzle-orm';
 import { generateId } from '$lib/server/auth';
 import { alias } from 'drizzle-orm/sqlite-core';
 
@@ -100,6 +100,39 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				status: status || 'pending'
 			})
 			.returning();
+
+		// Link uncategorized messages from this client to the new case
+		await db
+			.update(messages)
+			.set({ caseId: newCase.id })
+			.where(
+				and(
+					eq(messages.senderId, clientId),
+					isNull(messages.caseId)
+				)
+			);
+
+		// Also link messages sent TO this client (from lawyers) that are uncategorized
+		await db
+			.update(messages)
+			.set({ caseId: newCase.id })
+			.where(
+				and(
+					eq(messages.recipientId, clientId),
+					isNull(messages.caseId)
+				)
+			);
+
+		// Link uncategorized documents uploaded by this client to the new case
+		await db
+			.update(documents)
+			.set({ caseId: newCase.id })
+			.where(
+				and(
+					eq(documents.uploadedById, clientId),
+					isNull(documents.caseId)
+				)
+			);
 
 		return json({ success: true, case: newCase });
 	} catch (err) {

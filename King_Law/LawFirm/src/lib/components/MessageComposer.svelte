@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { messagesStore } from '$lib/stores/messages.svelte';
 	import { toastStore } from '$lib/stores/toast.svelte';
 	import AttachmentUploader from './AttachmentUploader.svelte';
@@ -23,6 +24,24 @@
 	let selectedFile = $state<File | null>(null);
 	let sending = $state(false);
 	let showAttachment = $state(false);
+	let loadingMessages = $state(false);
+
+	onMount(async () => {
+		if (showHistory) {
+			loadingMessages = true;
+			try {
+				if (caseId) {
+					await messagesStore.fetchMessages(caseId);
+				} else {
+					await messagesStore.fetchMessages(undefined, true);
+				}
+			} catch (error) {
+				console.error('Failed to load messages:', error);
+			} finally {
+				loadingMessages = false;
+			}
+		}
+	});
 
 	async function handleSend() {
 		if (!messageText.trim() && !selectedFile) return;
@@ -50,6 +69,14 @@
 				selectedFile = null;
 				showAttachment = false;
 				toastStore.success('Message sent successfully');
+				
+				// Refresh messages to show the new message
+				if (caseId) {
+					await messagesStore.fetchMessages(caseId);
+				} else {
+					await messagesStore.fetchMessages(undefined, true);
+				}
+				
 				onMessageSent?.();
 			} else {
 				toastStore.error(result.error || 'Failed to send message');
@@ -77,8 +104,16 @@
 		}
 	}
 
-	function formatDate(date: Date | string): string {
-		return new Date(date).toLocaleString('en-US', {
+	function formatDate(date: Date | string | number): string {
+		// Handle Unix timestamps (seconds) - multiply by 1000 to get milliseconds
+		let dateObj: Date;
+		if (typeof date === 'number') {
+			// If it's a small number (Unix seconds), convert to milliseconds
+			dateObj = new Date(date < 10000000000 ? date * 1000 : date);
+		} else {
+			dateObj = new Date(date);
+		}
+		return dateObj.toLocaleString('en-US', {
 			month: 'short',
 			day: 'numeric',
 			hour: 'numeric',
@@ -90,7 +125,12 @@
 
 <div class="space-y-4">
 	<!-- Message History -->
-	{#if showHistory && messagesStore.messages.length > 0}
+	{#if showHistory && loadingMessages}
+		<div class="border border-border rounded-lg p-6 text-center">
+			<div class="animate-spin w-6 h-6 border-2 border-gold border-t-transparent rounded-full mx-auto mb-2"></div>
+			<p class="text-sm text-muted-foreground">Loading messages...</p>
+		</div>
+	{:else if showHistory && messagesStore.messages.length > 0}
 		<div class="border border-border rounded-lg divide-y divide-border max-h-64 overflow-y-auto">
 			{#each messagesStore.messages as item}
 				<div class="p-4 bg-background hover:bg-muted/50 transition-colors">
