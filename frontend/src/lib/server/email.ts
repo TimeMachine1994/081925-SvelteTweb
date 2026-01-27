@@ -1,5 +1,7 @@
 import { env } from '$env/dynamic/private';
 import sgMail from '@sendgrid/mail';
+import { shouldMockEmails } from '$lib/utils/environment';
+import { devLog } from '$lib/config/dev-mode';
 
 const SENDGRID_API_KEY = env.SENDGRID_API_KEY;
 const FROM_EMAIL = env.FROM_EMAIL || 'noreply@tributestream.com';
@@ -101,8 +103,26 @@ export interface FuneralDirectorRegistrationEmailData {
 }
 
 export async function sendEnhancedRegistrationEmail(data: EnhancedRegistrationEmailData) {
-	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key') {
-		console.warn('⚠️ SendGrid client not initialized. Skipping enhanced email.');
+	// DEV MODE MOCK: Log email to console instead of sending
+	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key' || shouldMockEmails()) {
+		devLog.mock('Email', 'Enhanced Registration Email (not sent)');
+		console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+		console.log('📧 [DEV MODE] Email Mock - Enhanced Registration');
+		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+		console.log('To:', data.email);
+		console.log('From:', FROM_EMAIL);
+		console.log('Subject: Welcome to Tributestream - Memorial Created');
+		console.log('Template ID:', SENDGRID_TEMPLATES.ENHANCED_REGISTRATION);
+		console.log('\nTemplate Data:');
+		console.log(JSON.stringify({
+			lovedOneName: data.lovedOneName,
+			ownerName: data.ownerName,
+			memorialUrl: data.memorialUrl,
+			email: data.email,
+			password: data.password,
+			magicLink: data.magicLink || '(none)'
+		}, null, 2));
+		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 		return;
 	}
 
@@ -145,8 +165,24 @@ export async function sendEnhancedRegistrationEmail(data: EnhancedRegistrationEm
 }
 
 export async function sendRegistrationEmail(data: BasicRegistrationEmailData) {
-	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key') {
-		console.warn('⚠️ SendGrid client not initialized. Skipping registration email.');
+	// DEV MODE MOCK: Log email to console instead of sending
+	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key' || shouldMockEmails()) {
+		devLog.mock('Email', 'Basic Registration Email (not sent)');
+		console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+		console.log('📧 [DEV MODE] Email Mock - Basic Registration');
+		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+		console.log('To:', data.email);
+		console.log('From:', FROM_EMAIL);
+		console.log('Subject: Welcome to Tributestream');
+		console.log('\nTemplate Data:');
+		console.log(JSON.stringify({
+			familyName: data.familyName,
+			lovedOneName: data.lovedOneName,
+			memorialUrl: data.memorialUrl,
+			email: data.email,
+			password: data.password || '(not provided)'
+		}, null, 2));
+		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 		return;
 	}
 
@@ -188,8 +224,24 @@ export async function sendRegistrationEmail(data: BasicRegistrationEmailData) {
 }
 
 	export async function sendFuneralDirectorRegistrationEmail(data: FuneralDirectorRegistrationEmailData) {
-	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key') {
-		console.warn('⚠️ SendGrid client not initialized. Skipping funeral director registration email.');
+	// DEV MODE MOCK: Log email to console instead of sending
+	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key' || shouldMockEmails()) {
+		devLog.mock('Email', 'Funeral Director Registration Email (not sent)');
+		console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+		console.log('📧 [DEV MODE] Email Mock - Funeral Director Registration');
+		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+		console.log('To:', data.email);
+		console.log('From:', FROM_EMAIL);
+		console.log('Subject: Memorial Created - Family Registration');
+		console.log('\nTemplate Data:');
+		console.log(JSON.stringify({
+			familyName: data.familyName,
+			lovedOneName: data.lovedOneName,
+			memorialUrl: data.memorialUrl,
+			email: data.email,
+			password: data.password
+		}, null, 2));
+		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 		return;
 	}
 
@@ -248,11 +300,30 @@ export async function sendRegistrationEmail(data: BasicRegistrationEmailData) {
 	}
 }
 
-
 export async function sendInvitationEmail(data: InvitationEmailData) {
-	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key') {
-		console.warn('⚠️ SendGrid client not initialized. Skipping invitation email.');
+	// DEV MODE MOCK: Log email to console instead of sending
+	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key' || shouldMockEmails()) {
+		devLog.mock('Email', 'Invitation Email (not sent)');
+		console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+		console.log('📧 [DEV MODE] Email Mock - Invitation');
+		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+		console.log('To:', data.to);
+		console.log('From:', FROM_EMAIL);
+		console.log('Subject: Invitation to Memorial');
+		console.log('\nTemplate Data:');
+		console.log(JSON.stringify({
+			fromName: data.fromName,
+			memorialName: data.memorialName,
+			invitationId: data.invitationId
+		}, null, 2));
+		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 		return;
+	}
+
+	// Check if template is configured
+	if (!SENDGRID_TEMPLATES.INVITATION || SENDGRID_TEMPLATES.INVITATION === 'placeholder') {
+		console.error('💥 Invitation template not configured. Template ID:', SENDGRID_TEMPLATES.INVITATION);
+		throw new Error('Email template not configured. Please check SENDGRID_TEMPLATE_INVITATION environment variable.');
 	}
 
 	const invitationUrl = `https://tributestream.com/invite/${data.invitationId}`;
@@ -285,9 +356,28 @@ export async function sendInvitationEmail(data: InvitationEmailData) {
 }
 
 export async function sendEmailChangeConfirmation(data: EmailChangeConfirmationData) {
-	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key') {
-		console.warn('⚠️ SendGrid client not initialized. Skipping email change confirmation.');
+	// DEV MODE MOCK: Log email to console instead of sending
+	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key' || shouldMockEmails()) {
+		devLog.mock('Email', 'Email Change Confirmation (not sent)');
+		console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+		console.log('📧 [DEV MODE] Email Mock - Email Change Confirmation');
+		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+		console.log('To:', data.to);
+		console.log('From:', FROM_EMAIL);
+		console.log('Subject: Confirm Email Change');
+		console.log('\nTemplate Data:');
+		console.log(JSON.stringify({
+			userName: data.userName,
+			confirmationUrl: data.confirmationUrl
+		}, null, 2));
+		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 		return;
+	}
+
+	// Check if template is configured
+	if (!SENDGRID_TEMPLATES.EMAIL_CHANGE_CONFIRMATION || SENDGRID_TEMPLATES.EMAIL_CHANGE_CONFIRMATION === 'placeholder') {
+		console.error('💥 Email change confirmation template not configured. Template ID:', SENDGRID_TEMPLATES.EMAIL_CHANGE_CONFIRMATION);
+		throw new Error('Email template not configured. Please check SENDGRID_TEMPLATE_EMAIL_CHANGE_CONFIRMATION environment variable.');
 	}
 
 	const msg = {
@@ -314,9 +404,29 @@ export async function sendEmailChangeConfirmation(data: EmailChangeConfirmationD
  * Send payment confirmation email using dynamic template
  */
 export async function sendPaymentConfirmationEmail(data: PaymentEmailData) {
-	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key') {
-		console.warn('⚠️ SendGrid client not initialized. Skipping payment confirmation.');
+	// DEV MODE MOCK: Log email to console instead of sending
+	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key' || shouldMockEmails()) {
+		devLog.mock('Email', 'Payment Confirmation Email (not sent)');
+		console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+		console.log('📧 [DEV MODE] Email Mock - Payment Confirmation');
+		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+		console.log('To:', data.customerEmail);
+		console.log('From:', FROM_EMAIL);
+		console.log('Subject: Payment Confirmed');
+		console.log('\nTemplate Data:');
+		console.log(JSON.stringify({
+			lovedOneName: data.lovedOneName,
+			amount: data.amount,
+			paymentIntentId: data.paymentIntentId
+		}, null, 2));
+		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 		return;
+	}
+
+	// Check if template is configured
+	if (!SENDGRID_TEMPLATES.PAYMENT_CONFIRMATION || SENDGRID_TEMPLATES.PAYMENT_CONFIRMATION === 'placeholder') {
+		console.error('💥 Payment confirmation template not configured. Template ID:', SENDGRID_TEMPLATES.PAYMENT_CONFIRMATION);
+		throw new Error('Email template not configured. Please check SENDGRID_TEMPLATE_PAYMENT_CONFIRMATION environment variable.');
 	}
 
 	const msg = {
@@ -347,8 +457,22 @@ export async function sendPaymentConfirmationEmail(data: PaymentEmailData) {
  * Send payment action required email using dynamic template
  */
 export async function sendPaymentActionRequiredEmail(data: PaymentEmailData) {
-	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key') {
-		console.warn('⚠️ SendGrid client not initialized. Skipping payment action required.');
+	// DEV MODE MOCK: Log email to console instead of sending
+	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key' || shouldMockEmails()) {
+		devLog.mock('Email', 'Payment Action Required Email (not sent)');
+		console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+		console.log('📧 [DEV MODE] Email Mock - Payment Action Required');
+		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+		console.log('To:', data.customerEmail);
+		console.log('From:', FROM_EMAIL);
+		console.log('Subject: Payment Action Required');
+		console.log('\nTemplate Data:');
+		console.log(JSON.stringify({
+			lovedOneName: data.lovedOneName,
+			paymentIntentId: data.paymentIntentId,
+			nextActionUrl: data.nextActionUrl
+		}, null, 2));
+		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 		return;
 	}
 
@@ -382,8 +506,22 @@ export async function sendPaymentActionRequiredEmail(data: PaymentEmailData) {
  * Send payment failure email using dynamic template
  */
 export async function sendPaymentFailureEmail(data: PaymentEmailData) {
-	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key') {
-		console.warn('⚠️ SendGrid client not initialized. Skipping payment failure.');
+	// DEV MODE MOCK: Log email to console instead of sending
+	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key' || shouldMockEmails()) {
+		devLog.mock('Email', 'Payment Failure Email (not sent)');
+		console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+		console.log('📧 [DEV MODE] Email Mock - Payment Failure');
+		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+		console.log('To:', data.customerEmail);
+		console.log('From:', FROM_EMAIL);
+		console.log('Subject: Payment Failed');
+		console.log('\nTemplate Data:');
+		console.log(JSON.stringify({
+			lovedOneName: data.lovedOneName,
+			paymentIntentId: data.paymentIntentId,
+			failureReason: data.failureReason
+		}, null, 2));
+		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 		return;
 	}
 
@@ -417,8 +555,23 @@ export async function sendPaymentFailureEmail(data: PaymentEmailData) {
  * Send password reset email using dynamic template
  */
 export async function sendPasswordResetEmail(data: PasswordResetEmailData) {
-	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key') {
-		console.warn('⚠️ SendGrid client not initialized. Skipping password reset email.');
+	// DEV MODE MOCK: Log email to console instead of sending
+	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key' || shouldMockEmails()) {
+		devLog.mock('Email', 'Password Reset Email (not sent)');
+		console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+		console.log('📧 [DEV MODE] Email Mock - Password Reset');
+		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+		console.log('To:', data.email);
+		console.log('From:', FROM_EMAIL);
+		console.log('Subject: Reset Your Tributestream Password');
+		console.log('Template ID:', SENDGRID_TEMPLATES.PASSWORD_RESET);
+		console.log('\nTemplate Data:');
+		console.log(JSON.stringify({
+			displayName: data.displayName,
+			email: data.email,
+			resetLink: data.resetLink
+		}, null, 2));
+		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 		return;
 	}
 
@@ -459,8 +612,21 @@ export async function sendPasswordResetEmail(data: PasswordResetEmailData) {
  * Send owner welcome email after registration
  */
 export async function sendOwnerWelcomeEmail(data: OwnerWelcomeEmailData) {
-	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key') {
-		console.warn('⚠️ SendGrid client not initialized. Skipping owner welcome email.');
+	// DEV MODE MOCK: Log email to console instead of sending
+	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key' || shouldMockEmails()) {
+		devLog.mock('Email', 'Owner Welcome Email (not sent)');
+		console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+		console.log('📧 [DEV MODE] Email Mock - Owner Welcome');
+		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+		console.log('To:', data.email);
+		console.log('From:', FROM_EMAIL);
+		console.log('Subject: Welcome to Tributestream');
+		console.log('\nTemplate Data:');
+		console.log(JSON.stringify({
+			displayName: data.displayName,
+			email: data.email
+		}, null, 2));
+		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 		return;
 	}
 
@@ -494,8 +660,21 @@ export async function sendOwnerWelcomeEmail(data: OwnerWelcomeEmailData) {
  * Send funeral director welcome email after registration
  */
 export async function sendFuneralDirectorWelcomeEmail(data: FuneralDirectorWelcomeEmailData) {
-	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key') {
-		console.warn('⚠️ SendGrid client not initialized. Skipping funeral director welcome email.');
+	// DEV MODE MOCK: Log email to console instead of sending
+	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key' || shouldMockEmails()) {
+		devLog.mock('Email', 'Funeral Director Welcome Email (not sent)');
+		console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+		console.log('📧 [DEV MODE] Email Mock - Funeral Director Welcome');
+		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+		console.log('To:', data.email);
+		console.log('From:', FROM_EMAIL);
+		console.log('Subject: Welcome to Tributestream');
+		console.log('\nTemplate Data:');
+		console.log(JSON.stringify({
+			displayName: data.displayName,
+			email: data.email
+		}, null, 2));
+		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 		return;
 	}
 
@@ -529,6 +708,27 @@ export async function sendFuneralDirectorWelcomeEmail(data: FuneralDirectorWelco
  * Send contact form emails using dynamic templates
  */
 export async function sendContactFormEmails(data: ContactFormData) {
+	// DEV MODE MOCK: Log email to console instead of sending
+	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key' || shouldMockEmails()) {
+		devLog.mock('Email', 'Contact Form Emails (not sent)');
+		console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+		console.log('📧 [DEV MODE] Email Mock - Contact Form');
+		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+		console.log('Support Email To: austinbryanfilm@gmail.com');
+		console.log('Confirmation Email To:', data.email);
+		console.log('From:', FROM_EMAIL);
+		console.log('\nForm Data:');
+		console.log(JSON.stringify({
+			name: data.name,
+			email: data.email,
+			subject: data.subject,
+			message: data.message,
+			timestamp: data.timestamp?.toLocaleString() || new Date().toLocaleString()
+		}, null, 2));
+		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+		return;
+	}
+
 	console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 	console.log('[EMAIL] 🚀 Starting sendContactFormEmails');
 	console.log('[EMAIL] 📋 Form Data:', { 

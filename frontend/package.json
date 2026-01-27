@@ -34,7 +34,8 @@
 		"test:setup": "node scripts/setup-test-data.js",
 		"test:clean": "node scripts/clean-test-data.js",
 		"test:emulator": "firebase emulators:start --only auth,firestore",
-		"create-admin": "node scripts/create-admin.js"
+		"create-admin": "node scripts/create-admin.js",
+		"seed:dev-users": "node scripts/seed-dev-users.js"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",
@@ -96,6 +97,7 @@
 		"node-fetch": "^3.3.2",
 		"shepherd.js": "^14.5.1",
 		"stripe": "^18.5.0",
+		"svelte-dnd-action": "^0.9.69",
 		"vercel": "^47.1.4"
 	}
 }

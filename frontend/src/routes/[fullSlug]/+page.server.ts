@@ -82,6 +82,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			// Admin display overrides
 			customTitle: memorialData.customTitle || null,
 			publicNote: memorialData.publicNote || null,
+			// Content blocks for WYSIWYG editor
+			contentBlocks: memorialData.contentBlocks || [],
+			contentBlocksVersion: memorialData.contentBlocksVersion || 0,
 			// Access control fields
 			ownerUid: memorialData.ownerUid || null,
 			funeralDirectorUid: memorialData.funeralDirectorUid || null,

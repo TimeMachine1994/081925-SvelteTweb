@@ -8,12 +8,19 @@ View all administrative actions and system events
 	import DataGrid from '$lib/components/admin/DataGrid.svelte';
 	import FilterBuilder from '$lib/components/admin/FilterBuilder.svelte';
 	import { can } from '$lib/stores/adminUser';
+	import { applyFilters, type FilterRule } from '$lib/utils/filter-utils';
 
 	let { data } = $props();
 
 	// State
 	let selectedLogs = $state<Set<string>>(new Set());
 	let showFilters = $state(false);
+	let activeFilters = $state<FilterRule[]>([]);
+
+	// Derived filtered data
+	let filteredLogs = $derived.by(() => {
+		return applyFilters(data.logs, activeFilters);
+	});
 
 	// Column configuration
 	const columns = [
@@ -151,7 +158,9 @@ View all administrative actions and system events
 					},
 					{ id: 'timestamp', label: 'Date', type: 'date' }
 				]}
-				onFilterChange={(filters) => console.log('Filters:', filters)}
+				onFilterChange={(filters) => {
+					activeFilters = filters;
+				}}
 			/>
 		</div>
 	{/if}
@@ -168,7 +177,7 @@ View all administrative actions and system events
 
 	<DataGrid
 		{columns}
-		data={data.logs}
+		data={filteredLogs}
 		selectable={false}
 		resourceType="audit_log"
 	/>

@@ -9,12 +9,19 @@ Manage blog posts and articles
 	import FilterBuilder from '$lib/components/admin/FilterBuilder.svelte';
 	import { can } from '$lib/stores/adminUser';
 	import { goto } from '$app/navigation';
+	import { applyFilters, type FilterRule } from '$lib/utils/filter-utils';
 
 	let { data } = $props();
 
 	// State
 	let selectedPosts = $state<Set<string>>(new Set());
 	let showFilters = $state(false);
+	let activeFilters = $state<FilterRule[]>([]);
+
+	// Derived filtered data
+	let filteredPosts = $derived.by(() => {
+		return applyFilters(data.posts, activeFilters);
+	});
 
 	// Column configuration
 	const columns = [
@@ -211,7 +218,9 @@ Manage blog posts and articles
 					},
 					{ id: 'featured', label: 'Featured', type: 'boolean' }
 				]}
-				onFilterChange={(filters) => console.log('Filters:', filters)}
+				onFilterChange={(filters) => {
+					activeFilters = filters;
+				}}
 			/>
 		</div>
 	{/if}
@@ -237,10 +246,9 @@ Manage blog posts and articles
 
 	<DataGrid
 		{columns}
-		data={data.posts}
-		selectable={$can('blog_post', 'update')}
-		selectedMemorials={selectedPosts}
-		onBulkAction={handleBulkAction}
+		data={filteredPosts}
+		selectable={$can('blog', 'update')}
+		bind:selectedMemorials={selectedPosts}
 		onRowClick={handleRowClick}
 		resourceType="blog_post"
 	/>

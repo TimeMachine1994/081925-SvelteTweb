@@ -6,14 +6,22 @@ Manage and monitor demo mode sessions
 <script lang="ts">
 	import AdminLayout from '$lib/components/admin/AdminLayout.svelte';
 	import DataGrid from '$lib/components/admin/DataGrid.svelte';
+	import BulkActionBar from '$lib/components/admin/BulkActionBar.svelte';
 	import FilterBuilder from '$lib/components/admin/FilterBuilder.svelte';
 	import { can } from '$lib/stores/adminUser';
+	import { applyFilters, type FilterRule } from '$lib/utils/filter-utils';
 
 	let { data } = $props();
 
 	// State
 	let selectedSessions = $state<Set<string>>(new Set());
 	let showFilters = $state(false);
+	let activeFilters = $state<FilterRule[]>([]);
+
+	// Derived filtered data
+	let filteredSessions = $derived.by(() => {
+		return applyFilters(data.sessions, activeFilters);
+	});
 
 	// Column configuration
 	const columns = [
@@ -164,7 +172,9 @@ Manage and monitor demo mode sessions
 					},
 					{ id: 'createdAt', label: 'Start Date', type: 'date' }
 				]}
-				onFilterChange={(filters) => console.log('Filters:', filters)}
+				onFilterChange={(filters) => {
+					activeFilters = filters;
+				}}
 			/>
 		</div>
 	{/if}
@@ -194,10 +204,9 @@ Manage and monitor demo mode sessions
 
 	<DataGrid
 		{columns}
-		data={data.sessions}
-		selectable={$can('demo_session', 'delete')}
-		selectedMemorials={selectedSessions}
-		onBulkAction={handleBulkAction}
+		data={filteredSessions}
+		selectable={$can('system', 'update')}
+		bind:selectedMemorials={selectedSessions}
 		resourceType="demo_session"
 	/>
 	<!-- onRowClick disabled - will show modal with session details when implemented -->

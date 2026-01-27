@@ -4,11 +4,15 @@
 	import CustomPricingEditor from '$lib/components/admin/CustomPricingEditor.svelte';
 	import AdminScheduleEditor from '$lib/components/admin/AdminScheduleEditor.svelte';
 	import AdminChatPanel from '$lib/components/admin/AdminChatPanel.svelte';
+	import MemorialBlockEditor from '$lib/components/admin/memorial-editor/MemorialBlockEditor.svelte';
 	import { goto } from '$app/navigation';
 	import { invalidateAll } from '$app/navigation';
 	
 	let { data } = $props();
-	const { memorial, streams, slideshows, followerCount } = data;
+	const { memorial, slideshows, followerCount } = data;
+	
+	// Mutable streams for block editor updates
+	let streams = $state(data.streams);
 
 	function formatDate(isoString: string | null) {
 		if (!isoString) return 'N/A';
@@ -609,6 +613,20 @@
 	<!-- Custom Pricing Editor -->
 	<CustomPricingEditor memorial={memorial} onUpdate={handlePricingUpdate} />
 
+	<!-- WYSIWYG Block Editor for Memorial Content -->
+	<div class="card">
+		<div class="section-header">
+			<h2>📦 Memorial Content</h2>
+			<p class="section-subtitle">Drag blocks to reorder how content appears on the public memorial page.</p>
+		</div>
+		<MemorialBlockEditor
+			memorialId={memorial.id}
+			initialBlocks={memorial.contentBlocks || []}
+			{streams}
+			onSave={() => invalidateAll()}
+		/>
+	</div>
+
 	<div class="card">
 		<div class="section-header">
 			<h2>📹 Livestreams ({streams.length})</h2>
@@ -1015,7 +1033,9 @@ https://player.vimeo.com/video/123456789'
 	button.danger-btn-small:hover { background: #c53030; }
 
 	/* Section header */
-	.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+	.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
+	.section-header h2 { margin: 0; }
+	.section-subtitle { margin: 0; font-size: 0.875rem; color: #718096; width: 100%; }
 	.button-group { display: flex; gap: 0.5rem; }
 
 	/* Stream form */

@@ -56,6 +56,15 @@
 			locked?: boolean;
 			archived?: boolean;
 		};
+		
+		// Per-stream embed (above/below/replace video)
+		embed?: {
+			code: string;
+			title?: string;
+			position: 'above' | 'below' | 'replace';
+			createdAt: string;
+			createdBy: string;
+		};
 	}
 	
 	interface EmergencyEmbed {
@@ -87,6 +96,48 @@
 	
 	// Current time for countdown
 	let currentTime = $state(new Date());
+	
+	// Download state tracking
+	let downloadingStreamId = $state<string | null>(null);
+	
+	/**
+	 * Handle video download - fetches file and triggers save dialog
+	 */
+	async function handleDownload(stream: Stream) {
+		if (!stream.mux?.vodPlaybackId || downloadingStreamId) return;
+		
+		const playbackId = stream.mux.vodPlaybackId;
+		const url = `https://stream.mux.com/${playbackId}/high.mp4`;
+		const filename = `${stream.title || 'recording'}-${playbackId}.mp4`;
+		
+		try {
+			downloadingStreamId = stream.id;
+			console.log('📥 [DOWNLOAD] Starting download for:', filename);
+			
+			const response = await fetch(url);
+			if (!response.ok) throw new Error(`Download failed: ${response.status}`);
+			
+			const blob = await response.blob();
+			const blobUrl = URL.createObjectURL(blob);
+			
+			// Create temporary link and trigger download
+			const link = document.createElement('a');
+			link.href = blobUrl;
+			link.download = filename;
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+			
+			// Cleanup
+			URL.revokeObjectURL(blobUrl);
+			console.log('✅ [DOWNLOAD] Download completed:', filename);
+		} catch (error) {
+			console.error('❌ [DOWNLOAD] Failed:', error);
+			alert('Download failed. Please try right-clicking the video and selecting "Save video as..."');
+		} finally {
+			downloadingStreamId = null;
+		}
+	}
 	
 	// Firestore unsubscribe functions
 	let firestoreUnsubscribes: (() => void)[] = [];
@@ -198,7 +249,7 @@
 		})
 	);
 	
-	// Scheduled streams: Only show if FUTURE scheduled time
+	// Scheduled streams: Show if FUTURE scheduled time OR status is 'ready'/'scheduled' without recording
 	// AND not already showing as live
 	let scheduledStreams = $derived(
 		liveStreams.filter(s => {
@@ -208,7 +259,12 @@
 			const isInLiveStreams = categorizedLiveStreams.some(live => live.id === s.id);
 			if (isInLiveStreams) return false;
 			
-			// Must have a future scheduled time
+			// If already recorded, don't show in scheduled
+			const isRecorded = s.status === 'completed' || s.status === 'ended' || 
+				s.recordingReady === true || s.mux?.recordingReady === true;
+			if (isRecorded) return false;
+			
+			// Show if future scheduled time
 			if (s.scheduledStartTime) {
 				const scheduledTime = new Date(s.scheduledStartTime).getTime();
 				const now = currentTime.getTime();
@@ -217,6 +273,12 @@
 				if (scheduledTime > now && (s.status === 'scheduled' || s.status === 'ready')) {
 					return true;
 				}
+			}
+			
+			// FALLBACK: Show 'ready' or 'scheduled' streams that have no scheduled time
+			// This catches streams created without a scheduled time that haven't gone live yet
+			if ((s.status === 'ready' || s.status === 'scheduled') && !s.scheduledStartTime) {
+				return true;
 			}
 			
 			return false;
@@ -315,7 +377,43 @@
 							<!-- MUX PLATFORM - New integrated player with chat -->
 							<div class="mux-stream-container {!stream.chat?.enabled ? 'no-chat' : ''}">
 								<div class="video-column">
-									<MuxVideoPlayer stream={stream} autoplay={true} showTitle={true} />
+									{#if stream.embed && stream.embed.position === 'replace'}
+										<!-- Per-stream embed - REPLACE video (keeps chat) -->
+										<div class="stream-embed-container embed-replace">
+											{#if stream.embed.title}
+												<h4 class="stream-embed-title">{stream.embed.title}</h4>
+											{/if}
+											<div class="stream-embed-content">
+												{@html stream.embed.code}
+											</div>
+										</div>
+									{:else}
+										<!-- Per-stream embed - ABOVE video -->
+										{#if stream.embed && stream.embed.position === 'above'}
+											<div class="stream-embed-container embed-above">
+												{#if stream.embed.title}
+													<h4 class="stream-embed-title">{stream.embed.title}</h4>
+												{/if}
+												<div class="stream-embed-content">
+													{@html stream.embed.code}
+												</div>
+											</div>
+										{/if}
+										
+										<MuxVideoPlayer stream={stream} autoplay={true} showTitle={true} />
+										
+										<!-- Per-stream embed - BELOW video -->
+										{#if stream.embed && stream.embed.position === 'below'}
+											<div class="stream-embed-container embed-below">
+												{#if stream.embed.title}
+													<h4 class="stream-embed-title">{stream.embed.title}</h4>
+												{/if}
+												<div class="stream-embed-content">
+													{@html stream.embed.code}
+												</div>
+											</div>
+										{/if}
+									{/if}
 								</div>
 								
 								{#if stream.chat?.enabled}
@@ -406,7 +504,69 @@
 							<!-- MUX PLATFORM - Recorded video player with archived chat -->
 							<div class="mux-stream-container {!stream.chat?.enabled ? 'no-chat' : ''}">
 								<div class="video-column">
-									<MuxVideoPlayer stream={stream} autoplay={false} showTitle={true} />
+									{#if stream.embed && stream.embed.position === 'replace'}
+										<!-- Per-stream embed - REPLACE video (keeps chat) -->
+										<div class="stream-embed-container embed-replace">
+											{#if stream.embed.title}
+												<h4 class="stream-embed-title">{stream.embed.title}</h4>
+											{/if}
+											<div class="stream-embed-content">
+												{@html stream.embed.code}
+											</div>
+										</div>
+									{:else}
+										<!-- Per-stream embed - ABOVE video -->
+										{#if stream.embed && stream.embed.position === 'above'}
+											<div class="stream-embed-container embed-above">
+												{#if stream.embed.title}
+													<h4 class="stream-embed-title">{stream.embed.title}</h4>
+												{/if}
+												<div class="stream-embed-content">
+													{@html stream.embed.code}
+												</div>
+											</div>
+										{/if}
+										
+										<MuxVideoPlayer stream={stream} autoplay={false} showTitle={true} />
+										
+										<!-- Download Master Button - Centered below video -->
+										{#if stream.mux?.vodPlaybackId}
+											<div class="download-button-container">
+												<button 
+													type="button"
+													class="download-master-button"
+													disabled={downloadingStreamId === stream.id}
+													onclick={() => handleDownload(stream)}
+												>
+													{#if downloadingStreamId === stream.id}
+														<svg class="spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+															<circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="20"/>
+														</svg>
+														Downloading...
+													{:else}
+														<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+															<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+															<polyline points="7 10 12 15 17 10"/>
+															<line x1="12" y1="15" x2="12" y2="3"/>
+														</svg>
+														Download Master
+													{/if}
+												</button>
+											</div>
+										{/if}
+										
+										<!-- Per-stream embed - BELOW video -->
+										{#if stream.embed && stream.embed.position === 'below'}
+											<div class="stream-embed-container embed-below">
+												{#if stream.embed.title}
+													<h4 class="stream-embed-title">{stream.embed.title}</h4>
+												{/if}
+												<div class="stream-embed-content">
+													{@html stream.embed.code}
+												</div>
+											</div>
+										{/if}
+									{/if}
 								</div>
 								
 								{#if stream.chat?.enabled}
@@ -1044,5 +1204,116 @@
 		height: 100%;
 		min-height: 350px;
 		border: none;
+	}
+	
+	/* Download Master Button - Centered below video */
+	.download-button-container {
+		display: flex;
+		justify-content: center;
+		padding: 1rem 0;
+	}
+
+	.download-master-button {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1.5rem;
+		background: linear-gradient(135deg, #D5BA7F 0%, #c4a96e 100%);
+		color: #1a1a1a;
+		font-weight: 600;
+		font-size: 0.95rem;
+		border-radius: 8px;
+		text-decoration: none;
+		transition: all 0.2s ease;
+		box-shadow: 0 2px 8px rgba(213, 186, 127, 0.3);
+	}
+
+	.download-master-button:hover {
+		background: linear-gradient(135deg, #e5ca8f 0%, #d4b97e 100%);
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(213, 186, 127, 0.4);
+	}
+
+	.download-master-button svg {
+		flex-shrink: 0;
+	}
+
+	.download-master-button:disabled {
+		opacity: 0.7;
+		cursor: wait;
+	}
+
+	.download-master-button .spinner {
+		animation: spin 1s linear infinite;
+	}
+
+	@keyframes spin {
+		from { transform: rotate(0deg); }
+		to { transform: rotate(360deg); }
+	}
+
+	@media (max-width: 768px) {
+		.download-master-button {
+			padding: 0.625rem 1.25rem;
+			font-size: 0.875rem;
+		}
+	}
+
+	/* Per-stream Embed Styles */
+	.stream-embed-container {
+		margin: 1rem 0;
+		border-radius: 8px;
+		overflow: hidden;
+		background: #1a1a1a;
+		border: 1px solid #3a3a3a;
+	}
+
+	.stream-embed-container.embed-above {
+		margin-bottom: 1rem;
+		margin-top: 0;
+	}
+
+	.stream-embed-container.embed-below {
+		margin-top: 1rem;
+		margin-bottom: 0;
+	}
+
+	.stream-embed-container.embed-replace {
+		margin: 0;
+		min-height: 400px;
+	}
+
+	.stream-embed-title {
+		margin: 0;
+		padding: 0.75rem 1rem;
+		font-size: 0.95rem;
+		font-weight: 600;
+		color: #D5BA7F;
+		background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%);
+		border-bottom: 1px solid #3a3a3a;
+	}
+
+	.stream-embed-content {
+		position: relative;
+		width: 100%;
+		background: #000;
+	}
+
+	.stream-embed-content :global(iframe) {
+		width: 100%;
+		aspect-ratio: 16 / 9;
+		border: none;
+		display: block;
+	}
+
+	@media (max-width: 768px) {
+		.stream-embed-container {
+			margin: 0.75rem 0;
+		}
+
+		.stream-embed-title {
+			font-size: 0.875rem;
+			padding: 0.625rem 0.875rem;
+		}
 	}
 </style>

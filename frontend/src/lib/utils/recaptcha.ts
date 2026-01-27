@@ -4,6 +4,8 @@
  */
 
 import { env } from '$env/dynamic/public';
+import { shouldBypassRecaptcha } from './environment';
+import { devLog } from '$lib/config/dev-mode';
 
 const PUBLIC_RECAPTCHA_SITE_KEY = env.PUBLIC_RECAPTCHA_SITE_KEY;
 
@@ -49,6 +51,12 @@ export async function executeRecaptcha(action: string): Promise<string | null> {
 	if (typeof window === 'undefined') {
 		console.error('executeRecaptcha called on server side');
 		return null;
+	}
+
+	// DEV MODE BYPASS: Return mock token in development
+	if (shouldBypassRecaptcha()) {
+		devLog.bypass('reCAPTCHA', `Client-side execution bypassed for action: ${action}`);
+		return 'dev-mode-mock-token';
 	}
 
 	// Skip reCAPTCHA if site key is not configured
@@ -106,6 +114,16 @@ export async function verifyRecaptcha(
 	action: string;
 	error?: string;
 }> {
+	// DEV MODE BYPASS: Always return success in development
+	if (shouldBypassRecaptcha()) {
+		devLog.bypass('reCAPTCHA', `Server-side verification bypassed for action: ${action}`);
+		return {
+			success: true,
+			score: 1.0,
+			action: action
+		};
+	}
+
 	// Note: This function should only be called server-side
 	// The secret key should be accessed via process.env in server context
 	const secretKey = process.env.RECAPTCHA_SECRET_KEY;
