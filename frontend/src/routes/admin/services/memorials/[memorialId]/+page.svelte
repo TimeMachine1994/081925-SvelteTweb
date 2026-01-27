@@ -58,6 +58,12 @@
 	let customTitleInput = $state(memorial.customTitle || '');
 	let publicNoteInput = $state(memorial.publicNote || '');
 
+	// Video file embed state
+	let showVideoFileForm = $state(false);
+	let videoFileUrl = $state('');
+	let videoFileTitle = $state('');
+	let isAddingVideoFile = $state(false);
+
 	// Handle custom pricing updates
 	async function handlePricingUpdate() {
 		console.log('💰 [PRICING] Custom pricing updated, reloading page data...');
@@ -388,6 +394,78 @@
 			alert('Failed to remove emergency embed. Please try again.');
 		}
 	}
+
+	// Video file embed handlers
+	async function handleAddVideoFile() {
+		if (!videoFileUrl.trim()) {
+			alert('Please enter a video URL');
+			return;
+		}
+
+		// Basic URL validation
+		if (!videoFileUrl.includes('storage.googleapis.com') && !videoFileUrl.includes('storage.cloud.google.com')) {
+			const proceed = confirm('This URL does not appear to be a Google Cloud Storage link. Continue anyway?');
+			if (!proceed) return;
+		}
+
+		isAddingVideoFile = true;
+
+		try {
+			const response = await fetch(`/api/memorials/${memorial.id}/video-file`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					url: videoFileUrl.trim(),
+					title: videoFileTitle.trim() || 'Video Recording'
+				})
+			});
+
+			if (response.ok) {
+				alert('Video file added successfully!');
+				showVideoFileForm = false;
+				videoFileUrl = '';
+				videoFileTitle = '';
+				location.reload();
+			} else {
+				const error = await response.json();
+				alert(`Failed to add video file: ${error.message || 'Unknown error'}`);
+			}
+		} catch (error) {
+			console.error('Error adding video file:', error);
+			alert('An error occurred while adding the video file.');
+		} finally {
+			isAddingVideoFile = false;
+		}
+	}
+
+	function cancelVideoFileForm() {
+		showVideoFileForm = false;
+		videoFileUrl = '';
+		videoFileTitle = '';
+	}
+
+	async function handleRemoveVideoFile() {
+		if (!confirm('Are you sure you want to remove this video file?')) {
+			return;
+		}
+
+		try {
+			const response = await fetch(`/api/memorials/${memorial.id}/video-file`, {
+				method: 'DELETE'
+			});
+
+			if (response.ok) {
+				alert('Video file removed successfully!');
+				location.reload();
+			} else {
+				const error = await response.json();
+				alert(`Failed to remove video file: ${error.message || 'Unknown error'}`);
+			}
+		} catch (error) {
+			console.error('Error removing video file:', error);
+			alert('An error occurred while removing the video file.');
+		}
+	}
 	
 </script>
 
@@ -550,6 +628,9 @@
 				<button class="chat-emergency-btn" onclick={() => showEmergencyChatEmbed = !showEmergencyChatEmbed}>
 					{showEmergencyChatEmbed ? '✖ Cancel' : '💬 Emergency Chat'}
 				</button>
+				<button class="video-file-btn" onclick={() => showVideoFileForm = !showVideoFileForm}>
+					{showVideoFileForm ? '✖ Cancel' : '📁 Add Video File'}
+				</button>
 			</div>
 		</div>
 
@@ -673,6 +754,84 @@ https://player.vimeo.com/video/123456789'
 					<button 
 						onclick={cancelChatEmbedForm}
 						disabled={isCreatingChatEmbed}
+					>
+						Cancel
+					</button>
+				</div>
+			</div>
+		{/if}
+
+		{#if (memorial as any).videoFile}
+			<div class="video-file-active">
+				<div class="emergency-header">
+					<h3>📁 Active Video File</h3>
+					<button class="danger-btn-small" onclick={handleRemoveVideoFile}>
+						🗑️ Remove
+					</button>
+				</div>
+				<p><strong>Title:</strong> {(memorial as any).videoFile.title}</p>
+				<div class="video-preview">
+					<video 
+						controls 
+						preload="metadata"
+						class="video-player"
+					>
+						<source src={(memorial as any).videoFile.url} type="video/mp4" />
+						Your browser does not support the video tag.
+					</video>
+				</div>
+				<div class="video-actions">
+					<a 
+						href={(memorial as any).videoFile.url} 
+						download 
+						target="_blank"
+						class="download-btn"
+					>
+						⬇️ Download Video
+					</a>
+				</div>
+			</div>
+		{/if}
+
+		{#if showVideoFileForm}
+			<div class="video-file-form">
+				<h3>📁 Add Video File</h3>
+				<p class="info-text">Add a video file from Google Cloud Storage. This will be displayed on the memorial page with a download button.</p>
+				
+				<div class="form-group">
+					<label for="video-title">Video Title</label>
+					<input
+						id="video-title"
+						type="text"
+						bind:value={videoFileTitle}
+						placeholder="e.g., Memorial Service Recording"
+						disabled={isAddingVideoFile}
+					/>
+				</div>
+
+				<div class="form-group">
+					<label for="video-url">Google Cloud Storage URL *</label>
+					<input
+						id="video-url"
+						type="url"
+						bind:value={videoFileUrl}
+						placeholder="https://storage.googleapis.com/bucket-name/video.mp4"
+						disabled={isAddingVideoFile}
+					/>
+					<p class="help-text">Paste the public URL of the MP4 file from Google Cloud Storage</p>
+				</div>
+
+				<div class="form-actions">
+					<button 
+						class="video-file-btn" 
+						onclick={handleAddVideoFile}
+						disabled={isAddingVideoFile}
+					>
+						{isAddingVideoFile ? '⏳ Adding...' : '📁 Add Video File'}
+					</button>
+					<button 
+						onclick={cancelVideoFileForm}
+						disabled={isAddingVideoFile}
 					>
 						Cancel
 					</button>
@@ -848,6 +1007,8 @@ https://player.vimeo.com/video/123456789'
 	button.emergency-btn:hover { background: #c53030; }
 	button.chat-emergency-btn { background: #7c3aed; color: white; border-color: #7c3aed; font-weight: 600; }
 	button.chat-emergency-btn:hover { background: #6d28d9; }
+	button.video-file-btn { background: #2563eb; color: white; border-color: #2563eb; font-weight: 600; }
+	button.video-file-btn:hover { background: #1d4ed8; }
 	button.switcher-btn { background: #805ad5; color: white; border-color: #805ad5; font-weight: 600; }
 	button.switcher-btn:hover { background: #6b46c1; }
 	button.danger-btn-small { background: #e53e3e; color: white; border-color: #e53e3e; padding: 0.375rem 0.75rem; font-size: 0.875rem; }
@@ -874,6 +1035,16 @@ https://player.vimeo.com/video/123456789'
 	.emergency-embed-active p { margin: 0.5rem 0; font-size: 0.875rem; color: #4a5568; }
 	.embed-preview { font-family: monospace; font-size: 0.75rem; background: white; padding: 0.5rem; border-radius: 0.25rem; word-break: break-all; }
 	.warning-text { font-weight: 600; color: #c53030; margin-top: 0.75rem; }
+
+	/* Video file form and display */
+	.video-file-form { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 1rem; }
+	.video-file-form h3 { margin: 0 0 0.5rem 0; font-size: 1.125rem; color: #1e40af; }
+	.video-file-active { background: #f0fdf4; border: 1px solid #86efac; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem; }
+	.video-preview { margin: 1rem 0; }
+	.video-player { width: 100%; max-width: 640px; border-radius: 0.5rem; background: #000; }
+	.video-actions { margin-top: 1rem; }
+	.download-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.25rem; background: #059669; color: white; text-decoration: none; border-radius: 0.5rem; font-weight: 600; font-size: 0.875rem; transition: background 0.2s; }
+	.download-btn:hover { background: #047857; }
 	
 	.form-group { margin-bottom: 1rem; }
 	.form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #4a5568; font-size: 0.875rem; }

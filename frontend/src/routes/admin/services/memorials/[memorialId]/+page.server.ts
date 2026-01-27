@@ -151,6 +151,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			emergencyEmbed: memorialData.emergencyEmbed || null,
 			emergencyChatEmbed: memorialData.emergencyChatEmbed || null,
 			
+			// Video file embed (GCS video with download)
+			videoFile: memorialData.videoFile || null,
+			
 			// Admin display overrides
 			customTitle: memorialData.customTitle || null,
 			publicNote: memorialData.publicNote || null,
