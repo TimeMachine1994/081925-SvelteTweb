@@ -12,7 +12,7 @@
 	function handleCaseCreated(event: CustomEvent) {
 		showCreateCaseModal = false;
 		casesStore.fetchCases();
-	}
+	} 
 
 	function formatCurrency(cents: number): string {
 		return new Intl.NumberFormat('en-US', {
