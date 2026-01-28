@@ -1,7 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
-import { invoices, cases } from '$lib/server/db/schema';
+import { invoices, cases, user as userTable } from '$lib/server/db/schema';
 import { eq, and, or } from 'drizzle-orm';
 import { generateId } from '$lib/server/auth';
 
@@ -13,7 +13,7 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 	try {
 		const caseId = url.searchParams.get('caseId');
 
-		let userInvoices;
+		let rawInvoices: typeof invoices.$inferSelect[] = [];
 		if (caseId) {
 			// Get invoices for specific case
 			const [caseData] = await db.select().from(cases).where(eq(cases.id, caseId)).limit(1);
@@ -31,7 +31,7 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 				throw error(403, 'Access denied');
 			}
 
-			userInvoices = await db.select().from(invoices).where(eq(invoices.caseId, caseId));
+			rawInvoices = await db.select().from(invoices).where(eq(invoices.caseId, caseId));
 		} else if (locals.user.role === 'client') {
 			// Get all invoices for client's cases
 			const clientCases = await db
@@ -42,12 +42,12 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 			const caseIds = clientCases.map((c) => c.id);
 
 			if (caseIds.length > 0) {
-				userInvoices = await db
+				rawInvoices = await db
 					.select()
 					.from(invoices)
 					.where(or(...caseIds.map((id) => eq(invoices.caseId, id))));
 			} else {
-				userInvoices = [];
+				rawInvoices = [];
 			}
 		} else {
 			// Get all invoices for lawyer's cases
@@ -59,16 +59,52 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 			const caseIds = lawyerCases.map((c) => c.id);
 
 			if (caseIds.length > 0) {
-				userInvoices = await db
+				rawInvoices = await db
 					.select()
 					.from(invoices)
 					.where(or(...caseIds.map((id) => eq(invoices.caseId, id))));
 			} else {
-				userInvoices = [];
+				rawInvoices = [];
 			}
 		}
 
-		return json({ invoices: userInvoices });
+		// Format invoices to match expected structure: { invoice, case?, client? }
+		const formattedInvoices = await Promise.all(
+			rawInvoices.map(async (inv) => {
+				let caseInfo = null;
+				let clientInfo = null;
+
+				if (inv.caseId) {
+					const [caseData] = await db
+						.select({
+							case: cases,
+							client: userTable
+						})
+						.from(cases)
+						.leftJoin(userTable, eq(cases.clientId, userTable.id))
+						.where(eq(cases.id, inv.caseId))
+						.limit(1);
+
+					if (caseData) {
+						caseInfo = { id: caseData.case.id, title: caseData.case.title };
+						if (caseData.client) {
+							clientInfo = {
+								firstName: caseData.client.firstName,
+								lastName: caseData.client.lastName
+							};
+						}
+					}
+				}
+
+				return {
+					invoice: inv,
+					case: caseInfo,
+					client: clientInfo
+				};
+			})
+		);
+
+		return json({ invoices: formattedInvoices });
 	} catch (err) {
 		console.error('Get invoices error:', err);
 		if (err instanceof Response) throw err;

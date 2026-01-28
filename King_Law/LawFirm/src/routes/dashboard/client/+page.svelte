@@ -2,6 +2,7 @@
 	import { casesStore } from '$lib/stores/cases.svelte';
 	import { documentsStore } from '$lib/stores/documents.svelte';
 	import { messagesStore } from '$lib/stores/messages.svelte';
+	import { invoicesStore } from '$lib/stores/invoices.svelte';
 
 	let activeCases = $derived(casesStore.cases.filter(c => c.case.status === 'active').length);
 	let documentsCount = $derived(documentsStore.documents.length);
@@ -42,15 +43,18 @@
 
 		<div class="bg-background border border-border rounded-lg p-6">
 			<div class="text-3xl mb-2">💬</div>
-			<div class="text-2xl font-bold">{unreadMessages}</div>
+			<div class="text-2xl font-bold {unreadMessages > 0 ? 'text-red-500' : ''}">{unreadMessages}</div>
 			<div class="text-sm text-muted-foreground">Unread Messages</div>
 		</div>
 
-		<div class="bg-background border border-border rounded-lg p-6">
+		<a
+			href="/dashboard/client/documents"
+			class="bg-background border border-border rounded-lg p-6 hover:border-gold hover:shadow-md transition-all block"
+		>
 			<div class="text-3xl mb-2">📄</div>
 			<div class="text-2xl font-bold">{documentsCount}</div>
 			<div class="text-sm text-muted-foreground">Documents</div>
-		</div>
+		</a>
 	</div>
 
 	<!-- Your Cases -->
@@ -108,60 +112,13 @@
 		{/if}
 	</div>
 
-	<!-- Recent Documents -->
-	<div class="mb-8">
-		<div class="flex justify-between items-center mb-4">
-			<h2 class="font-title text-2xl">Recent Documents</h2>
-		</div>
-
-		{#if data.documents.length > 0}
-			<div class="bg-background border border-border rounded-lg overflow-hidden">
-				<table class="w-full">
-					<thead class="bg-muted">
-						<tr>
-							<th class="text-left px-6 py-3 text-sm font-semibold">File Name</th>
-							<th class="text-left px-6 py-3 text-sm font-semibold">Size</th>
-							<th class="text-left px-6 py-3 text-sm font-semibold">Uploaded</th>
-							<th class="text-right px-6 py-3 text-sm font-semibold">Actions</th>
-						</tr>
-					</thead>
-					<tbody>
-						{#each data.documents as doc}
-							<tr class="border-t border-border hover:bg-muted/50">
-								<td class="px-6 py-4">{doc.fileName}</td>
-								<td class="px-6 py-4 text-sm text-muted-foreground">
-									{(doc.fileSize / 1024).toFixed(1)} KB
-								</td>
-								<td class="px-6 py-4 text-sm text-muted-foreground">
-									{formatDate(doc.uploadedAt)}
-								</td>
-								<td class="px-6 py-4 text-right">
-									<a
-										href="/api/documents/{doc.id}"
-										class="text-gold hover:underline text-sm"
-									>
-										Download
-									</a>
-								</td>
-							</tr>
-						{/each}
-					</tbody>
-				</table>
-			</div>
-		{:else}
-			<div class="bg-background border border-border rounded-lg p-8 text-center">
-				<p class="text-muted-foreground">No documents uploaded yet</p>
-			</div>
-		{/if}
-	</div>
-
 	<!-- Invoices -->
 	<div>
 		<div class="flex justify-between items-center mb-4">
 			<h2 class="font-title text-2xl">Invoices</h2>
 		</div>
 
-		{#if data.invoices.length > 0}
+		{#if invoicesStore.invoices.length > 0}
 			<div class="bg-background border border-border rounded-lg overflow-hidden">
 				<table class="w-full">
 					<thead class="bg-muted">
@@ -174,7 +131,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each data.invoices as invoice}
+						{#each invoicesStore.invoices as { invoice }}
 							<tr class="border-t border-border hover:bg-muted/50">
 								<td class="px-6 py-4">{invoice.description}</td>
 								<td class="px-6 py-4 font-semibold">{formatCurrency(invoice.amount)}</td>

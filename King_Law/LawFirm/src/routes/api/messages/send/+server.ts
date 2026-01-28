@@ -1,10 +1,11 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
-import { messages, documents } from '$lib/server/db/schema';
+import { messages, documents, user as userTable } from '$lib/server/db/schema';
 import { generateId } from '$lib/server/auth';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
+import { eq } from 'drizzle-orm';
 
 const UPLOAD_DIR = 'uploads/documents';
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -86,9 +87,33 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		const { caseId, recipientId, content } = messageData;
 
+		// Debug logging
+		console.log('📨 Message send request:', {
+			caseId,
+			recipientId,
+			content,
+			contentType: typeof content,
+			messageDataKeys: Object.keys(messageData)
+		});
+
 		// Content is optional if there's an attachment
 		if (!content?.trim() && !attachmentDocumentId) {
 			throw error(400, 'Message content or attachment is required');
+		}
+
+		// Validate recipientId if provided - must be a valid user ID or null
+		let validRecipientId: string | null = null;
+		if (recipientId && typeof recipientId === 'string' && recipientId.trim()) {
+			const [recipient] = await db
+				.select({ id: userTable.id })
+				.from(userTable)
+				.where(eq(userTable.id, recipientId))
+				.limit(1);
+			
+			if (recipient) {
+				validRecipientId = recipient.id;
+			}
+			// If recipientId doesn't match a user, we just set it to null (don't fail)
 		}
 
 		// Create message
@@ -98,7 +123,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				id: generateId(),
 				caseId: caseId || null,
 				senderId: locals.user.id,
-				recipientId: recipientId || null,
+				recipientId: validRecipientId,
 				content: content?.trim() || '',
 				attachmentDocumentId
 			})

@@ -20,9 +20,12 @@
 		"list-users": "tsx scripts/list-users.ts",
 		"reset-password": "tsx scripts/reset-password.ts",
 		"test": "playwright test",
+		"test:messaging": "playwright test uncategorized-messaging",
 		"test:ui": "playwright test --ui",
+		"test:headed": "playwright test --headed",
 		"test:debug": "playwright test --debug",
-		"test:report": "playwright show-report"
+		"test:report": "playwright show-report",
+		"seed:test-users": "tsx scripts/seed-test-user.ts"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.4.0",

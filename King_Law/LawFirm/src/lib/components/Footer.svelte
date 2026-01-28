@@ -1,39 +1,59 @@
-<footer class="bg-background border-t border-border mt-auto">
-	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-		<div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-			<div class="col-span-1 md:col-span-2">
-				<h3 class="font-title text-2xl text-gold mb-4">King Law Firm</h3>
-				<p class="text-muted-foreground mb-4">
-					Providing exceptional legal services with integrity, expertise, and dedication to our clients.
+<footer class="bg-king-blue mt-auto">
+	<!-- Main Footer -->
+	<div class="max-w-7xl mx-auto px-6 lg:px-8 py-16">
+		<div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+			<!-- Brand Column -->
+			<div class="lg:col-span-5">
+				<div class="flex items-center gap-3 mb-6">
+					<span class="text-gold text-3xl">♔</span>
+					<span class="font-title text-3xl text-white">King Law</span>
+				</div>
+				<p class="text-white/60 mb-8 leading-relaxed max-w-md">
+					Providing exceptional legal services with integrity, expertise, and unwavering dedication to achieving the best outcomes for our clients.
 				</p>
-				<p class="text-sm text-muted-foreground">
-					© {new Date().getFullYear()} King Law Firm. All rights reserved.
-				</p>
+				<div class="flex items-center gap-6">
+					<a href="tel:4075550100" class="flex items-center gap-2 text-gold hover:text-gold-light transition-colors">
+						<span>📞</span>
+						<span class="font-semibold">(407) 555-0100</span>
+					</a>
+				</div>
 			</div>
 
-			<div>
-				<h4 class="font-semibold mb-4">Quick Links</h4>
-				<ul class="space-y-2">
-					<li><a href="/" class="text-muted-foreground hover:text-gold transition-colors">Home</a></li>
-					<li><a href="/about" class="text-muted-foreground hover:text-gold transition-colors">About</a></li>
-					<li><a href="/contact" class="text-muted-foreground hover:text-gold transition-colors">Contact</a></li>
-					<li><a href="/login" class="text-muted-foreground hover:text-gold transition-colors">Client Portal</a></li>
+			<!-- Links Column -->
+			<div class="lg:col-span-3">
+				<p class="text-gold uppercase tracking-[0.2em] text-xs mb-6">Navigation</p>
+				<ul class="space-y-4">
+					<li><a href="/" class="text-white/70 hover:text-gold transition-colors">Home</a></li>
+					<li><a href="/about" class="text-white/70 hover:text-gold transition-colors">About Us</a></li>
+					<li><a href="/contact" class="text-white/70 hover:text-gold transition-colors">Contact</a></li>
+					<li><a href="/login" class="text-white/70 hover:text-gold transition-colors">Client Portal</a></li>
 				</ul>
 			</div>
 
-			<div>
-				<h4 class="font-semibold mb-4">Contact</h4>
-				<ul class="space-y-2 text-muted-foreground">
-					<li>123 Legal Street</li>
-					<li>Orlando, FL 32801</li>
-					<li class="mt-4">Phone: (407) 555-0100</li>
-					<li>Email: info@kinglawfirm.com</li>
+			<!-- Practice Areas Column -->
+			<div class="lg:col-span-4">
+				<p class="text-gold uppercase tracking-[0.2em] text-xs mb-6">Practice Areas</p>
+				<ul class="space-y-4">
+					<li><a href="/services/personal-injury" class="text-white/70 hover:text-gold transition-colors">Personal Injury & Civil Suits</a></li>
+					<li><a href="/services/business-intellectual-property" class="text-white/70 hover:text-gold transition-colors">Business & Intellectual Property</a></li>
+					<li><a href="/services/family-estate-law" class="text-white/70 hover:text-gold transition-colors">Family & Estate Law</a></li>
+					<li><a href="/services/criminal-defense" class="text-white/70 hover:text-gold transition-colors">Criminal Defense</a></li>
 				</ul>
 			</div>
 		</div>
+	</div>
 
-		<div class="mt-8 pt-8 border-t border-border text-center text-sm text-muted-foreground">
-			<p>This website is for informational purposes only and does not constitute legal advice.</p>
+	<!-- Bottom Bar -->
+	<div class="border-t border-white/10">
+		<div class="max-w-7xl mx-auto px-6 lg:px-8 py-6">
+			<div class="flex flex-col md:flex-row justify-between items-center gap-4">
+				<p class="text-white/40 text-sm">
+					© {new Date().getFullYear()} King Law Firm. All rights reserved.
+				</p>
+				<p class="text-white/40 text-sm text-center md:text-right">
+					This website is for informational purposes only and does not constitute legal advice.
+				</p>
+			</div>
 		</div>
 	</div>
 </footer>

@@ -35,6 +35,14 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 			.where(and(...conditions))
 			.orderBy(messages.createdAt);
 
+		// Debug: Log what's being returned
+		console.log('📬 Messages fetched:', messageList.map(m => ({
+			id: m.message.id,
+			content: m.message.content,
+			createdAt: m.message.createdAt,
+			senderName: m.sender?.firstName
+		})));
+
 		return json({ messages: messageList });
 	} catch (err) {
 		console.error('Get messages error:', err);

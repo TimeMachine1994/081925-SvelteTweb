@@ -11,8 +11,15 @@
 		}).format(cents / 100);
 	}
 
-	function formatDate(date: Date): string {
-		return new Date(date).toLocaleDateString('en-US', {
+	function formatDate(date: Date | string | number): string {
+		// Handle Unix timestamps (seconds) - multiply by 1000 to get milliseconds
+		let dateObj: Date;
+		if (typeof date === 'number') {
+			dateObj = new Date(date < 10000000000 ? date * 1000 : date);
+		} else {
+			dateObj = new Date(date);
+		}
+		return dateObj.toLocaleDateString('en-US', {
 			year: 'numeric',
 			month: 'short',
 			day: 'numeric',

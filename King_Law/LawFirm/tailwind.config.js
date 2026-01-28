@@ -5,8 +5,14 @@ export default {
 	theme: {
 		extend: {
 			colors: {
+				'king-blue': {
+					DEFAULT: 'hsl(var(--color-king-blue))',
+					light: 'hsl(var(--color-king-blue-light))',
+					dark: 'hsl(var(--color-king-blue-dark))'
+				},
 				gold: {
 					DEFAULT: 'hsl(var(--color-gold))',
+					light: 'hsl(var(--color-gold-light))',
 					dark: 'hsl(var(--color-gold-dark))'
 				},
 				border: 'hsl(var(--border))',
