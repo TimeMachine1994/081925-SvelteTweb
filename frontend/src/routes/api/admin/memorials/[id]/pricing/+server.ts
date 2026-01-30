@@ -33,7 +33,9 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		});
 	} catch (err: any) {
 		console.error('Error fetching custom pricing:', err);
-		throw error(err.status || 500, err.message || 'Failed to fetch custom pricing');
+		const status = err.status || 500;
+		const message = err.body?.message || err.message || 'Failed to fetch custom pricing';
+		return json({ success: false, message }, { status });
 	}
 };
 
@@ -138,7 +140,9 @@ export const POST: RequestHandler = async ({ params, locals, request }) => {
 		});
 	} catch (err: any) {
 		console.error('Error setting custom pricing:', err);
-		throw error(err.status || 500, err.message || 'Failed to set custom pricing');
+		const status = err.status || 500;
+		const message = err.body?.message || err.message || 'Failed to set custom pricing';
+		return json({ success: false, message }, { status });
 	}
 };
 
@@ -186,6 +190,8 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
 		});
 	} catch (err: any) {
 		console.error('Error removing custom pricing:', err);
-		throw error(err.status || 500, err.message || 'Failed to remove custom pricing');
+		const status = err.status || 500;
+		const message = err.body?.message || err.message || 'Failed to remove custom pricing';
+		return json({ success: false, message }, { status });
 	}
 };
