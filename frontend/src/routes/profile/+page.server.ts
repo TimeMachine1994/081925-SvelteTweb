@@ -31,6 +31,11 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 		const { uid, role } = locals.user;
 
+		// Redirect admins to admin dashboard
+		if (role === 'admin') {
+			throw redirect(303, '/admin');
+		}
+
 		// Fetch user profile
 		const userDoc = await adminDb.collection('users').doc(uid).get();
 		const profileData = userDoc.data();

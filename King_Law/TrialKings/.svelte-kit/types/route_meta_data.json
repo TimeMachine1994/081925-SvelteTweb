@@ -1,0 +1,52 @@
+{
+	"/": [
+		"src/routes/+page.server.ts"
+	],
+	"/api/auth/logout": [
+		"src/routes/api/auth/logout/+server.ts"
+	],
+	"/api/auth/magic-link": [
+		"src/routes/api/auth/magic-link/+server.ts"
+	],
+	"/api/files": [
+		"src/routes/api/files/+server.ts"
+	],
+	"/api/files/[id]": [
+		"src/routes/api/files/[id]/+server.ts"
+	],
+	"/api/files/[id]/download": [
+		"src/routes/api/files/[id]/download/+server.ts"
+	],
+	"/api/stripe/webhook": [
+		"src/routes/api/stripe/webhook/+server.ts"
+	],
+	"/api/upload": [
+		"src/routes/api/upload/+server.ts"
+	],
+	"/auth/verify": [
+		"src/routes/auth/verify/+page.server.ts"
+	],
+	"/dashboard": [
+		"src/routes/dashboard/+page.server.ts",
+		"src/routes/dashboard/+layout.server.ts",
+		"src/routes/dashboard/+layout.server.ts"
+	],
+	"/dashboard/checkout": [
+		"src/routes/dashboard/checkout/+page.server.ts",
+		"src/routes/dashboard/+layout.server.ts"
+	],
+	"/dashboard/orders": [
+		"src/routes/dashboard/orders/+page.server.ts",
+		"src/routes/dashboard/+layout.server.ts"
+	],
+	"/demo": [],
+	"/demo/lucia": [
+		"src/routes/demo/lucia/+page.server.ts"
+	],
+	"/demo/lucia/login": [
+		"src/routes/demo/lucia/login/+page.server.ts"
+	],
+	"/login": [
+		"src/routes/login/+page.server.ts"
+	]
+}
