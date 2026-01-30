@@ -42,8 +42,8 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 		const memorialData = memorialDoc.data();
 		let blocks: MemorialBlock[] = memorialData?.contentBlocks || [];
 
-		// Create stream document in streams subcollection
-		const streamsRef = memorialRef.collection('streams');
+		// Create stream document in root streams collection (not subcollection)
+		const streamsRef = adminDb.collection('streams');
 		const now = new Date().toISOString();
 		
 		const streamData = {
