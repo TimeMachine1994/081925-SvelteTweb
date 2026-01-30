@@ -71,6 +71,16 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			}
 		};
 
+		// Helper function to clean custom pricing timestamps
+		const cleanCustomPricing = (pricing: any) => {
+			if (!pricing) return null;
+			
+			return {
+				...pricing,
+				setAt: convertTimestamp(pricing.setAt)
+			};
+		};
+
 		// Helper function to clean calculator config timestamps
 		const cleanCalculatorConfig = (config: any) => {
 			if (!config) return null;
@@ -169,7 +179,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			schedule: memorialData.calculatorConfig?.autoSave?.formData || memorialData.calculatorConfig?.formData || null,
 			
 			// Custom pricing overrides
-			customPricing: memorialData.customPricing || null,
+			customPricing: cleanCustomPricing(memorialData.customPricing),
 			
 			// Contact info
 			funeralDirectorName: memorialData.funeralDirectorName || memorialData.calculatorConfig?.formData?.funeralDirectorName || '',
