@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { casesStore } from '$lib/stores/cases.svelte';
-	import { documentsStore } from '$lib/stores/documents.svelte';
-	import { messagesStore } from '$lib/stores/messages.svelte';
+	import { casesStore } from '$lib/stores/cases.svelte.ts';
+	import { documentsStore } from '$lib/stores/documents.svelte.ts';
+	import { messagesStore } from '$lib/stores/messages.svelte.ts';
 	import CreateCaseModal from '$lib/components/CreateCaseModal.svelte';
 
 	let { data }: { data: PageData } = $props();

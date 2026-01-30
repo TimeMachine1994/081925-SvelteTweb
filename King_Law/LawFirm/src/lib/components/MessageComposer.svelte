@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { messagesStore } from '$lib/stores/messages.svelte';
-	import { toastStore } from '$lib/stores/toast.svelte';
+	import { messagesStore } from '$lib/stores/messages.svelte.ts';
+	import { toastStore } from '$lib/stores/toast.svelte.ts';
 	import AttachmentUploader from './AttachmentUploader.svelte';
 
 	interface Props {

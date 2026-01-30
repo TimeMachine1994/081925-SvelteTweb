@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { documentsStore } from '$lib/stores/documents.svelte';
-	import { toastStore } from '$lib/stores/toast.svelte';
+	import { documentsStore } from '$lib/stores/documents.svelte.ts';
+	import { toastStore } from '$lib/stores/toast.svelte.ts';
 	import Toast from '$lib/components/ui/Toast.svelte';
 	import Skeleton from '$lib/components/ui/Skeleton.svelte';
 

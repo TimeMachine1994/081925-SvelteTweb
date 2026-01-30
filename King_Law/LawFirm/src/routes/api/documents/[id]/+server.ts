@@ -24,7 +24,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 	}
 
 	// Check permissions
-	const canAccess =
+	let canAccess =
 		document.uploadedById === locals.user.id ||
 		locals.user.role === 'admin' ||
 		locals.user.role === 'lawyer';

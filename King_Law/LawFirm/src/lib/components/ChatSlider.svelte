@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { messagesStore } from '$lib/stores/messages.svelte';
-	import { casesStore } from '$lib/stores/cases.svelte';
-	import { authStore } from '$lib/stores/auth.svelte';
+	import { messagesStore } from '$lib/stores/messages.svelte.ts';
+	import { casesStore } from '$lib/stores/cases.svelte.ts';
+	import { authStore } from '$lib/stores/auth.svelte.ts';
 	import MessageBubble from './MessageBubble.svelte';
 	import AttachmentUploader from './AttachmentUploader.svelte';
 	import { onMount, onDestroy } from 'svelte';

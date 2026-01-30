@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { authStore } from '$lib/stores/auth.svelte';
+	import { authStore } from '$lib/stores/auth.svelte.ts';
 	import { goto } from '$app/navigation';
 
 	let role = $state<'client' | 'lawyer'>('client');

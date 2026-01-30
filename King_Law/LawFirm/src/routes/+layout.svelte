@@ -1,6 +1,6 @@
 <script lang="ts">
 	import '../app.css';
-	import { authStore } from '$lib/stores/auth.svelte';
+	import { authStore } from '$lib/stores/auth.svelte.ts';
 	import { onMount } from 'svelte';
 	import Navigation from '$lib/components/Navigation.svelte';
 	import Footer from '$lib/components/Footer.svelte';
