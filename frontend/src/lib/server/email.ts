@@ -2,6 +2,8 @@ import { env } from '$env/dynamic/private';
 import sgMail from '@sendgrid/mail';
 import { shouldMockEmails } from '$lib/utils/environment';
 import { devLog } from '$lib/config/dev-mode';
+import { logEmailSent, logEmailFailed, logEmailMocked, buildLogParams } from './emailAudit';
+import type { EmailType } from '$lib/types/email-audit';
 
 const SENDGRID_API_KEY = env.SENDGRID_API_KEY;
 const FROM_EMAIL = env.FROM_EMAIL || 'noreply@tributestream.com';
@@ -102,7 +104,32 @@ export interface FuneralDirectorRegistrationEmailData {
 	calculatorMagicLink?: string; // Magic link for one-click calculator access
 }
 
-export async function sendEnhancedRegistrationEmail(data: EnhancedRegistrationEmailData) {
+export async function sendEnhancedRegistrationEmail(
+	data: EnhancedRegistrationEmailData,
+	context?: { memorialId?: string; userId?: string }
+) {
+	const templateData = {
+		lovedOneName: data.lovedOneName,
+		ownerName: data.ownerName,
+		memorialUrl: data.memorialUrl,
+		email: data.email,
+		password: data.password,
+		magicLink: data.magicLink || ''
+	};
+
+	const logParams = buildLogParams(
+		'enhanced_registration' as EmailType,
+		data.email,
+		templateData,
+		{
+			templateId: SENDGRID_TEMPLATES.ENHANCED_REGISTRATION,
+			templateName: 'ENHANCED_REGISTRATION',
+			triggeredBy: 'registration',
+			memorialId: context?.memorialId,
+			userId: context?.userId
+		}
+	);
+
 	// DEV MODE MOCK: Log email to console instead of sending
 	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key' || shouldMockEmails()) {
 		devLog.mock('Email', 'Enhanced Registration Email (not sent)');
@@ -123,6 +150,7 @@ export async function sendEnhancedRegistrationEmail(data: EnhancedRegistrationEm
 			magicLink: data.magicLink || '(none)'
 		}, null, 2));
 		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+		await logEmailMocked(logParams);
 		return;
 	}
 
@@ -156,15 +184,43 @@ export async function sendEnhancedRegistrationEmail(data: EnhancedRegistrationEm
 	};
 
 	try {
-		await sgMail.send(msg);
+		const [response] = await sgMail.send(msg);
+		const messageId = response?.headers?.['x-message-id'];
+		await logEmailSent(logParams, messageId);
 		console.log('✅ Enhanced registration email sent via dynamic template to:', data.email);
 	} catch (error) {
+		await logEmailFailed(logParams, error as Error);
 		console.error('💥 Exception sending enhanced registration email:', error);
 		throw error;
 	}
 }
 
-export async function sendRegistrationEmail(data: BasicRegistrationEmailData) {
+export async function sendRegistrationEmail(
+	data: BasicRegistrationEmailData,
+	context?: { memorialId?: string; userId?: string }
+) {
+	const templateData = {
+		familyName: data.familyName,
+		lovedOneName: data.lovedOneName,
+		memorialUrl: data.memorialUrl,
+		email: data.email,
+		password: data.password || '',
+		additionalNotes: data.additionalNotes || ''
+	};
+
+	const logParams = buildLogParams(
+		'basic_registration' as EmailType,
+		data.email,
+		templateData,
+		{
+			templateId: SENDGRID_TEMPLATES.BASIC_REGISTRATION,
+			templateName: 'BASIC_REGISTRATION',
+			triggeredBy: 'registration',
+			memorialId: context?.memorialId,
+			userId: context?.userId
+		}
+	);
+
 	// DEV MODE MOCK: Log email to console instead of sending
 	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key' || shouldMockEmails()) {
 		devLog.mock('Email', 'Basic Registration Email (not sent)');
@@ -183,6 +239,7 @@ export async function sendRegistrationEmail(data: BasicRegistrationEmailData) {
 			password: data.password || '(not provided)'
 		}, null, 2));
 		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+		await logEmailMocked(logParams);
 		return;
 	}
 
@@ -215,15 +272,44 @@ export async function sendRegistrationEmail(data: BasicRegistrationEmailData) {
 	};
 
 	try {
-		await sgMail.send(msg);
+		const [response] = await sgMail.send(msg);
+		const messageId = response?.headers?.['x-message-id'];
+		await logEmailSent(logParams, messageId);
 		console.log('✅ Basic registration email sent via dynamic template to:', data.email);
 	} catch (error) {
+		await logEmailFailed(logParams, error as Error);
 		console.error('💥 Exception sending registration email:', error);
 		throw error;
 	}
 }
 
-	export async function sendFuneralDirectorRegistrationEmail(data: FuneralDirectorRegistrationEmailData) {
+export async function sendFuneralDirectorRegistrationEmail(
+	data: FuneralDirectorRegistrationEmailData,
+	context?: { memorialId?: string; userId?: string }
+) {
+	const templateData = {
+		familyName: data.familyName,
+		lovedOneName: data.lovedOneName,
+		memorialUrl: data.memorialUrl,
+		email: data.email,
+		password: data.password,
+		additionalNotes: data.additionalNotes || '',
+		calculatorMagicLink: data.calculatorMagicLink || ''
+	};
+
+	const logParams = buildLogParams(
+		'funeral_director_registration' as EmailType,
+		data.email,
+		templateData,
+		{
+			templateId: SENDGRID_TEMPLATES.ENHANCED_REGISTRATION,
+			templateName: 'FUNERAL_DIRECTOR_REGISTRATION',
+			triggeredBy: 'funeral_director_registration',
+			memorialId: context?.memorialId,
+			userId: context?.userId
+		}
+	);
+
 	// DEV MODE MOCK: Log email to console instead of sending
 	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key' || shouldMockEmails()) {
 		devLog.mock('Email', 'Funeral Director Registration Email (not sent)');
@@ -242,6 +328,7 @@ export async function sendRegistrationEmail(data: BasicRegistrationEmailData) {
 			password: data.password
 		}, null, 2));
 		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+		await logEmailMocked(logParams);
 		return;
 	}
 
@@ -287,9 +374,12 @@ export async function sendRegistrationEmail(data: BasicRegistrationEmailData) {
 	};
 
 	try {
-		await sgMail.send(msg);
+		const [response] = await sgMail.send(msg);
+		const messageId = response?.headers?.['x-message-id'];
+		await logEmailSent(logParams, messageId);
 		console.log('✅ Funeral director registration email sent to:', data.email);
 	} catch (error: any) {
+		await logEmailFailed(logParams, error as Error);
 		console.error('💥 Exception sending funeral director registration email:', error);
 		// Log detailed SendGrid error information
 		if (error.response?.body?.errors) {
@@ -300,7 +390,31 @@ export async function sendRegistrationEmail(data: BasicRegistrationEmailData) {
 	}
 }
 
-export async function sendInvitationEmail(data: InvitationEmailData) {
+export async function sendInvitationEmail(
+	data: InvitationEmailData,
+	context?: { memorialId?: string; userId?: string }
+) {
+	const invitationUrl = `https://tributestream.com/invite/${data.invitationId}`;
+	const templateData = {
+		fromName: data.fromName,
+		memorialName: data.memorialName,
+		invitationUrl: invitationUrl,
+		invitationId: data.invitationId
+	};
+
+	const logParams = buildLogParams(
+		'invitation' as EmailType,
+		data.to,
+		templateData,
+		{
+			templateId: SENDGRID_TEMPLATES.INVITATION,
+			templateName: 'INVITATION',
+			triggeredBy: 'invitation',
+			memorialId: context?.memorialId,
+			userId: context?.userId
+		}
+	);
+
 	// DEV MODE MOCK: Log email to console instead of sending
 	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key' || shouldMockEmails()) {
 		devLog.mock('Email', 'Invitation Email (not sent)');
@@ -317,6 +431,7 @@ export async function sendInvitationEmail(data: InvitationEmailData) {
 			invitationId: data.invitationId
 		}, null, 2));
 		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+		await logEmailMocked(logParams);
 		return;
 	}
 
@@ -325,8 +440,6 @@ export async function sendInvitationEmail(data: InvitationEmailData) {
 		console.error('💥 Invitation template not configured. Template ID:', SENDGRID_TEMPLATES.INVITATION);
 		throw new Error('Email template not configured. Please check SENDGRID_TEMPLATE_INVITATION environment variable.');
 	}
-
-	const invitationUrl = `https://tributestream.com/invite/${data.invitationId}`;
 
 	const msg = {
 		to: data.to,
@@ -347,15 +460,38 @@ export async function sendInvitationEmail(data: InvitationEmailData) {
 	};
 
 	try {
-		await sgMail.send(msg);
+		const [response] = await sgMail.send(msg);
+		const messageId = response?.headers?.['x-message-id'];
+		await logEmailSent(logParams, messageId);
 		console.log('✅ Invitation email sent via dynamic template to:', data.to);
 	} catch (error) {
+		await logEmailFailed(logParams, error as Error);
 		console.error('💥 Exception sending invitation email:', error);
 		throw error;
 	}
 }
 
-export async function sendEmailChangeConfirmation(data: EmailChangeConfirmationData) {
+export async function sendEmailChangeConfirmation(
+	data: EmailChangeConfirmationData,
+	context?: { userId?: string }
+) {
+	const templateData = {
+		userName: data.userName,
+		confirmationUrl: data.confirmationUrl
+	};
+
+	const logParams = buildLogParams(
+		'email_change_confirmation' as EmailType,
+		data.to,
+		templateData,
+		{
+			templateId: SENDGRID_TEMPLATES.EMAIL_CHANGE_CONFIRMATION,
+			templateName: 'EMAIL_CHANGE_CONFIRMATION',
+			triggeredBy: 'email_change',
+			userId: context?.userId
+		}
+	);
+
 	// DEV MODE MOCK: Log email to console instead of sending
 	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key' || shouldMockEmails()) {
 		devLog.mock('Email', 'Email Change Confirmation (not sent)');
@@ -371,6 +507,7 @@ export async function sendEmailChangeConfirmation(data: EmailChangeConfirmationD
 			confirmationUrl: data.confirmationUrl
 		}, null, 2));
 		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+		await logEmailMocked(logParams);
 		return;
 	}
 
@@ -392,9 +529,12 @@ export async function sendEmailChangeConfirmation(data: EmailChangeConfirmationD
 	};
 
 	try {
-		await sgMail.send(msg);
+		const [response] = await sgMail.send(msg);
+		const messageId = response?.headers?.['x-message-id'];
+		await logEmailSent(logParams, messageId);
 		console.log('✅ Email change confirmation sent via dynamic template to:', data.to);
 	} catch (error) {
+		await logEmailFailed(logParams, error as Error);
 		console.error('💥 Exception sending email change confirmation:', error);
 		throw error;
 	}
@@ -404,6 +544,27 @@ export async function sendEmailChangeConfirmation(data: EmailChangeConfirmationD
  * Send payment confirmation email using dynamic template
  */
 export async function sendPaymentConfirmationEmail(data: PaymentEmailData) {
+	const templateData = {
+		lovedOneName: data.lovedOneName,
+		paymentIntentId: data.paymentIntentId,
+		amount: data.amount?.toFixed(2) || '0.00',
+		paymentDate: data.paymentDate?.toLocaleDateString() || new Date().toLocaleDateString(),
+		customerEmail: data.customerEmail,
+		memorialId: data.memorialId
+	};
+
+	const logParams = buildLogParams(
+		'payment_confirmation' as EmailType,
+		data.customerEmail,
+		templateData,
+		{
+			templateId: SENDGRID_TEMPLATES.PAYMENT_CONFIRMATION,
+			templateName: 'PAYMENT_CONFIRMATION',
+			triggeredBy: 'payment_webhook',
+			memorialId: data.memorialId
+		}
+	);
+
 	// DEV MODE MOCK: Log email to console instead of sending
 	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key' || shouldMockEmails()) {
 		devLog.mock('Email', 'Payment Confirmation Email (not sent)');
@@ -420,6 +581,7 @@ export async function sendPaymentConfirmationEmail(data: PaymentEmailData) {
 			paymentIntentId: data.paymentIntentId
 		}, null, 2));
 		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+		await logEmailMocked(logParams);
 		return;
 	}
 
@@ -445,9 +607,12 @@ export async function sendPaymentConfirmationEmail(data: PaymentEmailData) {
 	};
 
 	try {
-		await sgMail.send(msg);
+		const [response] = await sgMail.send(msg);
+		const messageId = response?.headers?.['x-message-id'];
+		await logEmailSent(logParams, messageId);
 		console.log('✅ Payment confirmation email sent via dynamic template');
 	} catch (error) {
+		await logEmailFailed(logParams, error as Error);
 		console.error('💥 Exception sending payment confirmation email:', error);
 		throw error;
 	}
@@ -457,6 +622,29 @@ export async function sendPaymentConfirmationEmail(data: PaymentEmailData) {
  * Send payment action required email using dynamic template
  */
 export async function sendPaymentActionRequiredEmail(data: PaymentEmailData) {
+	const baseUrl = process.env.PUBLIC_BASE_URL || 'https://tributestream.com';
+	const fallbackUrl = `${baseUrl}/schedule/${data.memorialId}`;
+
+	const templateData = {
+		lovedOneName: data.lovedOneName,
+		paymentIntentId: data.paymentIntentId,
+		actionDate: new Date().toLocaleDateString(),
+		nextActionUrl: data.nextActionUrl || fallbackUrl,
+		fallbackUrl: fallbackUrl
+	};
+
+	const logParams = buildLogParams(
+		'payment_action_required' as EmailType,
+		data.customerEmail,
+		templateData,
+		{
+			templateId: SENDGRID_TEMPLATES.PAYMENT_ACTION_REQUIRED,
+			templateName: 'PAYMENT_ACTION_REQUIRED',
+			triggeredBy: 'payment_webhook',
+			memorialId: data.memorialId
+		}
+	);
+
 	// DEV MODE MOCK: Log email to console instead of sending
 	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key' || shouldMockEmails()) {
 		devLog.mock('Email', 'Payment Action Required Email (not sent)');
@@ -473,11 +661,9 @@ export async function sendPaymentActionRequiredEmail(data: PaymentEmailData) {
 			nextActionUrl: data.nextActionUrl
 		}, null, 2));
 		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+		await logEmailMocked(logParams);
 		return;
 	}
-
-	const baseUrl = process.env.PUBLIC_BASE_URL || 'https://tributestream.com';
-	const fallbackUrl = `${baseUrl}/schedule/${data.memorialId}`;
 
 	const msg = {
 		to: data.customerEmail,
@@ -494,9 +680,12 @@ export async function sendPaymentActionRequiredEmail(data: PaymentEmailData) {
 	};
 
 	try {
-		await sgMail.send(msg);
+		const [response] = await sgMail.send(msg);
+		const messageId = response?.headers?.['x-message-id'];
+		await logEmailSent(logParams, messageId);
 		console.log('✅ Payment action required email sent via dynamic template');
 	} catch (error) {
+		await logEmailFailed(logParams, error as Error);
 		console.error('💥 Exception sending payment action required email:', error);
 		throw error;
 	}
@@ -506,6 +695,29 @@ export async function sendPaymentActionRequiredEmail(data: PaymentEmailData) {
  * Send payment failure email using dynamic template
  */
 export async function sendPaymentFailureEmail(data: PaymentEmailData) {
+	const baseUrl = process.env.PUBLIC_BASE_URL || 'https://tributestream.com';
+	const retryUrl = `${baseUrl}/schedule/${data.memorialId}`;
+
+	const templateData = {
+		lovedOneName: data.lovedOneName,
+		paymentIntentId: data.paymentIntentId,
+		failureReason: data.failureReason || 'Payment processing error',
+		failureDate: new Date().toLocaleDateString(),
+		retryUrl: retryUrl
+	};
+
+	const logParams = buildLogParams(
+		'payment_failure' as EmailType,
+		data.customerEmail,
+		templateData,
+		{
+			templateId: SENDGRID_TEMPLATES.PAYMENT_FAILURE,
+			templateName: 'PAYMENT_FAILURE',
+			triggeredBy: 'payment_webhook',
+			memorialId: data.memorialId
+		}
+	);
+
 	// DEV MODE MOCK: Log email to console instead of sending
 	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key' || shouldMockEmails()) {
 		devLog.mock('Email', 'Payment Failure Email (not sent)');
@@ -522,11 +734,9 @@ export async function sendPaymentFailureEmail(data: PaymentEmailData) {
 			failureReason: data.failureReason
 		}, null, 2));
 		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+		await logEmailMocked(logParams);
 		return;
 	}
-
-	const baseUrl = process.env.PUBLIC_BASE_URL || 'https://tributestream.com';
-	const retryUrl = `${baseUrl}/schedule/${data.memorialId}`;
 
 	const msg = {
 		to: data.customerEmail,
@@ -543,9 +753,12 @@ export async function sendPaymentFailureEmail(data: PaymentEmailData) {
 	};
 
 	try {
-		await sgMail.send(msg);
+		const [response] = await sgMail.send(msg);
+		const messageId = response?.headers?.['x-message-id'];
+		await logEmailSent(logParams, messageId);
 		console.log('✅ Payment failure email sent via dynamic template');
 	} catch (error) {
+		await logEmailFailed(logParams, error as Error);
 		console.error('💥 Exception sending payment failure email:', error);
 		throw error;
 	}
@@ -554,7 +767,28 @@ export async function sendPaymentFailureEmail(data: PaymentEmailData) {
 /**
  * Send password reset email using dynamic template
  */
-export async function sendPasswordResetEmail(data: PasswordResetEmailData) {
+export async function sendPasswordResetEmail(
+	data: PasswordResetEmailData,
+	context?: { userId?: string }
+) {
+	const templateData = {
+		displayName: data.displayName || 'User',
+		email: data.email,
+		resetLink: data.resetLink
+	};
+
+	const logParams = buildLogParams(
+		'password_reset' as EmailType,
+		data.email,
+		templateData,
+		{
+			templateId: SENDGRID_TEMPLATES.PASSWORD_RESET,
+			templateName: 'PASSWORD_RESET',
+			triggeredBy: 'password_reset',
+			userId: context?.userId
+		}
+	);
+
 	// DEV MODE MOCK: Log email to console instead of sending
 	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key' || shouldMockEmails()) {
 		devLog.mock('Email', 'Password Reset Email (not sent)');
@@ -572,6 +806,7 @@ export async function sendPasswordResetEmail(data: PasswordResetEmailData) {
 			resetLink: data.resetLink
 		}, null, 2));
 		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+		await logEmailMocked(logParams);
 		return;
 	}
 
@@ -600,9 +835,12 @@ export async function sendPasswordResetEmail(data: PasswordResetEmailData) {
 	};
 
 	try {
-		await sgMail.send(msg);
+		const [response] = await sgMail.send(msg);
+		const messageId = response?.headers?.['x-message-id'];
+		await logEmailSent(logParams, messageId);
 		console.log('✅ Password reset email sent via dynamic template to:', data.email);
 	} catch (error) {
+		await logEmailFailed(logParams, error as Error);
 		console.error('💥 Exception sending password reset email:', error);
 		throw error;
 	}
@@ -611,7 +849,27 @@ export async function sendPasswordResetEmail(data: PasswordResetEmailData) {
 /**
  * Send owner welcome email after registration
  */
-export async function sendOwnerWelcomeEmail(data: OwnerWelcomeEmailData) {
+export async function sendOwnerWelcomeEmail(
+	data: OwnerWelcomeEmailData,
+	context?: { userId?: string }
+) {
+	const templateData = {
+		displayName: data.displayName,
+		email: data.email
+	};
+
+	const logParams = buildLogParams(
+		'owner_welcome' as EmailType,
+		data.email,
+		templateData,
+		{
+			templateId: SENDGRID_TEMPLATES.OWNER_WELCOME,
+			templateName: 'OWNER_WELCOME',
+			triggeredBy: 'registration',
+			userId: context?.userId
+		}
+	);
+
 	// DEV MODE MOCK: Log email to console instead of sending
 	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key' || shouldMockEmails()) {
 		devLog.mock('Email', 'Owner Welcome Email (not sent)');
@@ -627,6 +885,7 @@ export async function sendOwnerWelcomeEmail(data: OwnerWelcomeEmailData) {
 			email: data.email
 		}, null, 2));
 		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+		await logEmailMocked(logParams);
 		return;
 	}
 
@@ -648,9 +907,12 @@ export async function sendOwnerWelcomeEmail(data: OwnerWelcomeEmailData) {
 	};
 
 	try {
-		await sgMail.send(msg);
+		const [response] = await sgMail.send(msg);
+		const messageId = response?.headers?.['x-message-id'];
+		await logEmailSent(logParams, messageId);
 		console.log('✅ Owner welcome email sent to:', data.email);
 	} catch (error) {
+		await logEmailFailed(logParams, error as Error);
 		console.error('💥 Exception sending owner welcome email:', error);
 		throw error;
 	}
@@ -659,7 +921,27 @@ export async function sendOwnerWelcomeEmail(data: OwnerWelcomeEmailData) {
 /**
  * Send funeral director welcome email after registration
  */
-export async function sendFuneralDirectorWelcomeEmail(data: FuneralDirectorWelcomeEmailData) {
+export async function sendFuneralDirectorWelcomeEmail(
+	data: FuneralDirectorWelcomeEmailData,
+	context?: { userId?: string }
+) {
+	const templateData = {
+		displayName: data.displayName,
+		email: data.email
+	};
+
+	const logParams = buildLogParams(
+		'funeral_director_welcome' as EmailType,
+		data.email,
+		templateData,
+		{
+			templateId: SENDGRID_TEMPLATES.FUNERAL_DIRECTOR_WELCOME,
+			templateName: 'FUNERAL_DIRECTOR_WELCOME',
+			triggeredBy: 'registration',
+			userId: context?.userId
+		}
+	);
+
 	// DEV MODE MOCK: Log email to console instead of sending
 	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key' || shouldMockEmails()) {
 		devLog.mock('Email', 'Funeral Director Welcome Email (not sent)');
@@ -675,6 +957,7 @@ export async function sendFuneralDirectorWelcomeEmail(data: FuneralDirectorWelco
 			email: data.email
 		}, null, 2));
 		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+		await logEmailMocked(logParams);
 		return;
 	}
 
@@ -696,9 +979,12 @@ export async function sendFuneralDirectorWelcomeEmail(data: FuneralDirectorWelco
 	};
 
 	try {
-		await sgMail.send(msg);
+		const [response] = await sgMail.send(msg);
+		const messageId = response?.headers?.['x-message-id'];
+		await logEmailSent(logParams, messageId);
 		console.log('✅ Funeral director welcome email sent to:', data.email);
 	} catch (error) {
+		await logEmailFailed(logParams, error as Error);
 		console.error('💥 Exception sending funeral director welcome email:', error);
 		throw error;
 	}
@@ -708,6 +994,45 @@ export async function sendFuneralDirectorWelcomeEmail(data: FuneralDirectorWelco
  * Send contact form emails using dynamic templates
  */
 export async function sendContactFormEmails(data: ContactFormData) {
+	const timestamp = data.timestamp || new Date();
+
+	const supportTemplateData = {
+		name: data.name,
+		email: data.email,
+		subject: data.subject,
+		message: data.message,
+		submittedAt: timestamp.toLocaleString()
+	};
+
+	const confirmationTemplateData = {
+		name: data.name,
+		subject: data.subject,
+		message: data.message,
+		submittedAt: timestamp.toLocaleString()
+	};
+
+	const supportLogParams = buildLogParams(
+		'contact_form_support' as EmailType,
+		'austinbryanfilm@gmail.com',
+		supportTemplateData,
+		{
+			templateId: SENDGRID_TEMPLATES.CONTACT_SUPPORT,
+			templateName: 'CONTACT_SUPPORT',
+			triggeredBy: 'contact_form'
+		}
+	);
+
+	const confirmationLogParams = buildLogParams(
+		'contact_form_confirmation' as EmailType,
+		data.email,
+		confirmationTemplateData,
+		{
+			templateId: SENDGRID_TEMPLATES.CONTACT_CONFIRMATION,
+			templateName: 'CONTACT_CONFIRMATION',
+			triggeredBy: 'contact_form'
+		}
+	);
+
 	// DEV MODE MOCK: Log email to console instead of sending
 	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key' || shouldMockEmails()) {
 		devLog.mock('Email', 'Contact Form Emails (not sent)');
@@ -726,6 +1051,8 @@ export async function sendContactFormEmails(data: ContactFormData) {
 			timestamp: data.timestamp?.toLocaleString() || new Date().toLocaleString()
 		}, null, 2));
 		console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+		await logEmailMocked(supportLogParams);
+		await logEmailMocked(confirmationLogParams);
 		return;
 	}
 
@@ -763,8 +1090,6 @@ export async function sendContactFormEmails(data: ContactFormData) {
 		throw new Error(`Contact form templates not configured: ${templateValidation.missing.join(', ')}`);
 	}
 	console.log('[EMAIL] ✅ Both templates validated successfully');
-
-	const timestamp = data.timestamp || new Date();
 
 	// Step 4: Build Support Email Message
 	console.log('[EMAIL] 📧 Step 4: Building support email message...');
@@ -852,16 +1177,21 @@ export async function sendContactFormEmails(data: ContactFormData) {
 		const supportResult = results[0];
 		const confirmationResult = results[1];
 
+		// Log results
 		if (supportResult.status === 'fulfilled') {
 			console.log('[EMAIL] ✅ Support email: SUCCESS');
+			await logEmailSent(supportLogParams);
 		} else {
 			console.error('[EMAIL] ❌ Support email: FAILED -', supportResult.reason);
+			await logEmailFailed(supportLogParams, supportResult.reason as Error);
 		}
 
 		if (confirmationResult.status === 'fulfilled') {
 			console.log('[EMAIL] ✅ Confirmation email: SUCCESS');
+			await logEmailSent(confirmationLogParams);
 		} else {
 			console.error('[EMAIL] ❌ Confirmation email: FAILED -', confirmationResult.reason);
+			await logEmailFailed(confirmationLogParams, confirmationResult.reason as Error);
 		}
 
 		// If either failed, throw error
@@ -978,8 +1308,30 @@ function formatCentsToUSD(cents: number): string {
  * Send invoice email with payment link (simple HTML, no template)
  */
 export async function sendInvoiceEmail(data: InvoiceEmailData) {
+	const templateData = {
+		customerEmail: data.customerEmail,
+		customerName: data.customerName || '',
+		invoiceId: data.invoiceId,
+		items: data.items,
+		total: formatCentsToUSD(data.total),
+		paymentUrl: data.paymentUrl
+	};
+
+	const logParams = buildLogParams(
+		'invoice' as EmailType,
+		data.customerEmail,
+		templateData,
+		{
+			subject: `Invoice from Tributestream - ${formatCentsToUSD(data.total)}`,
+			cc: ['tributestream@gmail.com'],
+			triggeredBy: 'admin_invoice',
+			invoiceId: data.invoiceId
+		}
+	);
+
 	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key') {
 		console.warn('⚠️ SendGrid client not initialized. Skipping invoice email.');
+		await logEmailMocked(logParams);
 		return;
 	}
 
@@ -1087,9 +1439,12 @@ Questions? Contact us at support@tributestream.com
 	};
 
 	try {
-		await sgMail.send(msg);
+		const [response] = await sgMail.send(msg);
+		const messageId = response?.headers?.['x-message-id'];
+		await logEmailSent(logParams, messageId);
 		console.log('✅ Invoice email sent to:', data.customerEmail, '(CC: tributestream@gmail.com)');
 	} catch (error) {
+		await logEmailFailed(logParams, error as Error);
 		console.error('💥 Exception sending invoice email:', error);
 		throw error;
 	}
@@ -1099,11 +1454,6 @@ Questions? Contact us at support@tributestream.com
  * Send invoice receipt email after payment (simple HTML, no template)
  */
 export async function sendInvoiceReceiptEmail(data: InvoiceReceiptEmailData) {
-	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key') {
-		console.warn('⚠️ SendGrid client not initialized. Skipping invoice receipt email.');
-		return;
-	}
-
 	const paidDate = data.paidAt.toLocaleDateString('en-US', {
 		year: 'numeric',
 		month: 'long',
@@ -1111,6 +1461,34 @@ export async function sendInvoiceReceiptEmail(data: InvoiceReceiptEmailData) {
 		hour: '2-digit',
 		minute: '2-digit'
 	});
+
+	const templateData = {
+		customerEmail: data.customerEmail,
+		customerName: data.customerName || '',
+		invoiceId: data.invoiceId,
+		items: data.items,
+		total: formatCentsToUSD(data.total),
+		paidAt: paidDate,
+		paymentIntentId: data.paymentIntentId,
+		receiptUrl: data.receiptUrl
+	};
+
+	const logParams = buildLogParams(
+		'invoice_receipt' as EmailType,
+		data.customerEmail,
+		templateData,
+		{
+			subject: 'Payment Received - Tributestream',
+			triggeredBy: 'payment_webhook',
+			invoiceId: data.invoiceId
+		}
+	);
+
+	if (!SENDGRID_API_KEY || SENDGRID_API_KEY === 'mock_key') {
+		console.warn('⚠️ SendGrid client not initialized. Skipping invoice receipt email.');
+		await logEmailMocked(logParams);
+		return;
+	}
 
 	const itemsHtml = data.items
 		.map(
@@ -1217,9 +1595,12 @@ Questions? Contact us at support@tributestream.com
 	};
 
 	try {
-		await sgMail.send(msg);
+		const [response] = await sgMail.send(msg);
+		const messageId = response?.headers?.['x-message-id'];
+		await logEmailSent(logParams, messageId);
 		console.log('✅ Invoice receipt email sent to:', data.customerEmail);
 	} catch (error) {
+		await logEmailFailed(logParams, error as Error);
 		console.error('💥 Exception sending invoice receipt email:', error);
 		throw error;
 	}

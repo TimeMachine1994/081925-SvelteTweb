@@ -37,15 +37,52 @@ A TributeStream staff member with full system access. Responsible for:
 
 ---
 
-## Domain 2: Services
+## Domain 2: MVP Dashboard
 
-### 2.1 Memorials
+### Route: `/admin/mvp-dashboard`
+
+**Current Status:** ✅ WORKING
+
+#### Journey 2.1: Simplified Admin Overview
+1. `<SA>` navigates to `/admin/mvp-dashboard`
+2. System displays tabbed interface with:
+   - **Overview Tab**: Stats cards (memorials, users, purchases, active streams) + quick actions
+   - **Memorials Tab**: Table with CRUD operations
+   - **Users Tab**: Table with CRUD operations
+   - **Purchases Tab**: Purchase history (placeholder)
+   - **Streams Tab**: Stream monitoring (placeholder)
+3. `<SA>` can create memorials/users via prompt dialogs
+4. `<SA>` can delete items with confirmation
+
+**Sub-journey: Create Memorial (MVP)**
+1. `<SA>` clicks "Create Memorial" button
+2. System prompts for loved one's name
+3. System prompts for creator email
+4. System creates memorial via `/api/admin/mvp/memorials`
+5. List refreshes automatically
+
+**Sub-journey: Create User (MVP)**
+1. `<SA>` clicks "Create User" button
+2. System prompts for email, name, and role
+3. System creates user via `/api/admin/mvp/users`
+4. List refreshes automatically
+
+**Issues:**
+- ⚠️ Uses `prompt()` and `confirm()` dialogs instead of proper modals
+- ⚠️ Purchases and Streams tabs are placeholder (APIs not implemented)
+- ⚠️ Edit functionality not implemented (TODO in code)
+
+---
+
+## Domain 3: Services
+
+### 3.1 Memorials
 
 #### Route: `/admin/services/memorials`
 
 **Current Status:** ✅ WORKING
 
-#### Journey 2.1.1: View All Memorials
+#### Journey 3.1.1: View All Memorials
 1. `<SA>` navigates to `/admin/services/memorials`
 2. System displays DataGrid with all memorials
 3. Columns: Name, Owner, Payment Status, Visibility, Created, Location, Service Date
@@ -72,7 +109,7 @@ A TributeStream staff member with full system access. Responsible for:
 
 **Current Status:** ✅ MOSTLY WORKING
 
-#### Journey 2.1.2: View/Edit Memorial Details
+#### Journey 3.1.2: View/Edit Memorial Details
 1. `<SA>` clicks on memorial row in list
 2. System displays memorial detail page with:
    - Basic info (name, dates, location, URL)
@@ -111,7 +148,7 @@ A TributeStream staff member with full system access. Responsible for:
 
 **Current Status:** ⚠️ PARTIAL
 
-#### Journey 2.1.3: Multi-Camera Switcher
+#### Journey 3.1.3: Multi-Camera Switcher
 1. `<SA>` navigates to switcher from memorial detail
 2. System creates/retrieves Daily.co room
 3. `<SA>` can view multiple camera inputs
@@ -123,13 +160,13 @@ A TributeStream staff member with full system access. Responsible for:
 
 ---
 
-### 2.2 Streams
+### 3.2 Streams
 
 #### Route: `/admin/services/streams`
 
 **Current Status:** ✅ WORKING
 
-#### Journey 2.2.1: View All Streams
+#### Journey 3.2.1: View All Streams
 1. `<SA>` navigates to `/admin/services/streams`
 2. System displays streams grouped by status:
    - 🔴 Live Now
@@ -150,13 +187,13 @@ A TributeStream staff member with full system access. Responsible for:
 
 ---
 
-### 2.3 Slideshows
+### 3.3 Slideshows
 
 #### Route: `/admin/services/slideshows`
 
 **Current Status:** ❓ UNKNOWN - Needs verification
 
-#### Journey 2.3.1: View All Slideshows
+#### Journey 3.3.1: View All Slideshows
 1. `<SA>` navigates to `/admin/services/slideshows`
 2. System displays all slideshows across memorials
 
@@ -167,13 +204,13 @@ A TributeStream staff member with full system access. Responsible for:
 
 ---
 
-### 2.4 Schedule Requests
+### 3.4 Schedule Requests
 
 #### Route: `/admin/services/schedule-requests`
 
 **Current Status:** ❓ UNKNOWN - Needs verification
 
-#### Journey 2.4.1: Review Schedule Edit Requests
+#### Journey 3.4.1: Review Schedule Edit Requests
 1. `<SA>` navigates to `/admin/services/schedule-requests`
 2. System displays pending schedule change requests
 3. `<SA>` can approve/reject requests
@@ -184,13 +221,13 @@ A TributeStream staff member with full system access. Responsible for:
 
 ---
 
-### 2.5 Encoders (NEW)
+### 3.5 Encoders
 
 #### Route: `/admin/services/encoders`
 
 **Current Status:** ✅ NEWLY IMPLEMENTED
 
-#### Journey 2.5.1: Manage Encoders
+#### Journey 3.5.1: Manage Encoders
 1. `<SA>` navigates to `/admin/services/encoders`
 2. System displays all encoders with stats
 3. `<SA>` can create new encoder (provisions Cloudflare credentials)
@@ -203,15 +240,40 @@ A TributeStream staff member with full system access. Responsible for:
 
 ---
 
-## Domain 3: Users
+### 3.6 Receipts
 
-### 3.1 Memorial Owners
+#### Route: `/admin/services/receipts`
+
+**Current Status:** ✅ WORKING
+
+#### Journey 3.6.1: View Payment Receipts
+1. `<SA>` navigates to `/admin/services/receipts`
+2. System displays:
+   - Stats bar showing total receipts and total revenue
+   - Search bar for filtering by name, email, payment ID
+   - DataGrid with columns: Memorial, Customer, Amount, Payment Date, Status, Payment ID
+3. `<SA>` can search receipts
+4. `<SA>` can click row to view receipt details
+
+**Sub-journey: View Receipt Detail**
+1. `<SA>` clicks on receipt row
+2. System navigates to `/admin/services/receipts/[receiptId]`
+3. Displays full payment details for that memorial
+
+**Issues:**
+- None currently identified
+
+---
+
+## Domain 4: Users
+
+### 4.1 Memorial Owners
 
 #### Route: `/admin/users/memorial-owners`
 
 **Current Status:** ✅ WORKING
 
-#### Journey 3.1.1: View All Memorial Owners
+#### Journey 4.1.1: View All Memorial Owners
 1. `<SA>` navigates to `/admin/users/memorial-owners`
 2. System displays DataGrid with all memorial owners
 3. Columns: Name, Email, Memorials count, Has Paid, Status, Joined, Last Login
@@ -228,7 +290,7 @@ A TributeStream staff member with full system access. Responsible for:
 
 **Current Status:** ⚠️ PARTIAL
 
-#### Journey 3.1.2: View/Edit User Details
+#### Journey 4.1.2: View/Edit User Details
 1. `<SA>` clicks on user row
 2. System displays user detail page
 
@@ -240,13 +302,13 @@ A TributeStream staff member with full system access. Responsible for:
 
 ---
 
-### 3.2 Funeral Directors
+### 4.2 Funeral Directors
 
 #### Route: `/admin/users/funeral-directors`
 
 **Current Status:** ✅ WORKING (Simplified)
 
-#### Journey 3.2.1: View All Funeral Directors
+#### Journey 4.2.1: View All Funeral Directors
 1. `<SA>` navigates to `/admin/users/funeral-directors`
 2. System displays DataGrid with all funeral directors
 3. Columns: Funeral Home, Contact, Email, Phone, Status, Memorials, Registered
@@ -261,13 +323,13 @@ A TributeStream staff member with full system access. Responsible for:
 
 ---
 
-### 3.3 Admin Users
+### 4.3 Admin Users
 
 #### Route: `/admin/users/admin-users`
 
 **Current Status:** ❓ UNKNOWN
 
-#### Journey 3.3.1: Manage Admin Accounts
+#### Journey 4.3.1: Manage Admin Accounts
 1. `<SA>` navigates to `/admin/users/admin-users`
 2. System displays admin users
 
@@ -278,15 +340,63 @@ A TributeStream staff member with full system access. Responsible for:
 
 ---
 
-## Domain 4: Content
+## Domain 5: Billing
 
-### 4.1 Blog Posts
+### 5.1 Invoices
+
+#### Route: `/admin/invoices`
+
+**Current Status:** ✅ WORKING
+
+#### Journey 5.1.1: View All Invoices
+1. `<SA>` navigates to `/admin/invoices`
+2. System displays:
+   - Header with "Create Invoice" button
+   - Status filter dropdown (All, Pending, Paid, Expired, Cancelled)
+   - Table with columns: Invoice ID, Customer (name/email), Amount, Status, Date, Actions
+3. `<SA>` can filter by status
+4. `<SA>` can click "View" to open payment page in new tab
+
+**Issues:**
+- None currently identified
+
+---
+
+#### Route: `/admin/invoices/create`
+
+**Current Status:** ✅ WORKING
+
+#### Journey 5.1.2: Create Invoice
+1. `<SA>` navigates to `/admin/invoices/create`
+2. System displays form with:
+   - Customer email (required)
+   - Customer name (optional)
+   - Line items editor (description, quantity, price)
+   - Running total calculation
+   - "Send invoice email" checkbox
+3. `<SA>` fills in customer info
+4. `<SA>` adds line items (can add/remove multiple)
+5. `<SA>` clicks "Create Invoice"
+6. System creates invoice via `/api/admin/invoices`
+7. System displays success state with:
+   - Confirmation message
+   - Payment link with copy button
+   - "View Invoice" and "Create Another" buttons
+
+**Issues:**
+- None currently identified
+
+---
+
+## Domain 6: Content
+
+### 6.1 Blog Posts
 
 #### Route: `/admin/content/blog`
 
 **Current Status:** ⚠️ PARTIAL
 
-#### Journey 4.1.1: Manage Blog Posts
+#### Journey 6.1.1: Manage Blog Posts
 1. `<SA>` navigates to `/admin/content/blog`
 2. System displays blog posts
 3. `<SA>` can create new post at `/admin/content/blog/create`
@@ -298,15 +408,15 @@ A TributeStream staff member with full system access. Responsible for:
 
 ---
 
-## Domain 5: System
+## Domain 7: System
 
-### 5.1 Audit Logs
+### 7.1 Audit Logs
 
 #### Route: `/admin/system/audit-logs`
 
 **Current Status:** ❓ UNKNOWN
 
-#### Journey 5.1.1: View System Activity
+#### Journey 7.1.1: View System Activity
 1. `<SA>` navigates to `/admin/system/audit-logs`
 2. System displays activity logs
 
@@ -316,13 +426,13 @@ A TributeStream staff member with full system access. Responsible for:
 
 ---
 
-### 5.2 Demo Sessions
+### 7.2 Demo Sessions
 
 #### Route: `/admin/system/demo-sessions`
 
 **Current Status:** ❓ UNKNOWN
 
-#### Journey 5.2.1: Manage Demo Environments
+#### Journey 7.2.1: Manage Demo Environments
 1. `<SA>` navigates to `/admin/system/demo-sessions`
 2. System displays active demo sessions
 
@@ -331,13 +441,54 @@ A TributeStream staff member with full system access. Responsible for:
 
 ---
 
-### 5.3 Deleted Items
+### 7.3 Email Audit Logs
+
+#### Route: `/admin/system/email-logs`
+
+**Current Status:** ✅ NEWLY IMPLEMENTED
+
+#### Journey 7.3.1: View Email Logs
+1. `<SA>` navigates to `/admin/system/email-logs`
+2. System displays paginated list of all emails sent with:
+   - Type (Registration, Password Reset, Invoice, etc.)
+   - Recipient email
+   - Sent timestamp
+   - Status (Sent, Failed, Mocked)
+   - Environment (Production, Development)
+3. `<SA>` can filter by type, status, or search by email
+4. `<SA>` clicks row to view full details
+
+**Sub-journey: View Email Detail**
+1. `<SA>` clicks on email log row
+2. Modal displays full details:
+   - Recipient and sender
+   - Template name and ID
+   - Full template data (JSON) with masked passwords
+   - Related entities (memorial, user, invoice links)
+   - Error message if failed
+   - SendGrid message ID
+3. `<SA>` can copy JSON data
+4. `<SA>` can resend the email
+
+**Sub-journey: Resend Email**
+1. `<SA>` views email detail
+2. Clicks "Resend Email" button
+3. System resends using stored template data
+4. New log entry created for the resend
+5. Success/failure message shown
+
+**Issues:**
+- None currently - newly implemented
+
+---
+
+### 7.4 Deleted Items
 
 #### Route: `/admin/system/deleted-items`
 
 **Current Status:** ✅ WORKING
 
-#### Journey 5.3.1: View Deleted Items
+#### Journey 7.3.1: View Deleted Items
 1. `<SA>` navigates to `/admin/system/deleted-items`
 2. System displays soft-deleted items with:
    - Type, Name, Deleted By, Deleted Date, Days Until Permanent
@@ -365,13 +516,13 @@ A TributeStream staff member with full system access. Responsible for:
 
 ---
 
-### 5.4 Wiki
+### 7.5 Wiki
 
 #### Route: `/admin/wiki`
 
 **Current Status:** ⚠️ PARTIAL
 
-#### Journey 5.4.1: Internal Documentation
+#### Journey 7.5.1: Internal Documentation
 1. `<SA>` navigates to `/admin/wiki`
 2. System displays wiki articles
 3. `<SA>` can create new at `/admin/wiki/new`
@@ -423,8 +574,8 @@ A TributeStream staff member with full system access. Responsible for:
 ### Phase 1: Critical Fixes
 1. Create Memorial Edit Form (inline on detail page)
 2. Create Funeral Director Detail Page
-3. Implement FD Approval Workflow
-4. Make filters actually work
+3. Make filters actually work
+4. Replace `prompt()`/`confirm()` dialogs with proper modals in MVP Dashboard
 
 ### Phase 2: Missing CRUD
 5. Create Memorial page
@@ -445,14 +596,20 @@ A TributeStream staff member with full system access. Responsible for:
 | Route | Server File | Page File |
 |-------|-------------|-----------|
 | `/admin` | `+page.server.ts` | `+page.svelte` |
+| `/admin/mvp-dashboard` | `+page.server.ts` | `+page.svelte` |
 | `/admin/services/memorials` | `+page.server.ts` | `+page.svelte` |
 | `/admin/services/memorials/[id]` | `+page.server.ts` | `+page.svelte` |
 | `/admin/services/streams` | `+page.server.ts` | `+page.svelte` |
 | `/admin/services/encoders` | `+page.server.ts` | `+page.svelte` |
+| `/admin/services/receipts` | `+page.server.ts` | `+page.svelte` |
+| `/admin/services/receipts/[id]` | - | `+page.svelte` |
+| `/admin/invoices` | - | `+page.svelte` |
+| `/admin/invoices/create` | - | `+page.svelte` |
 | `/admin/users/memorial-owners` | `+page.server.ts` | `+page.svelte` |
 | `/admin/users/funeral-directors` | `+page.server.ts` | `+page.svelte` |
+| `/admin/system/email-logs` | `+page.server.ts` | `+page.svelte` |
 | `/admin/system/deleted-items` | `+page.server.ts` | `+page.svelte` |
 
 ---
 
-*Last Updated: January 8, 2026*
+*Last Updated: January 29, 2026*
