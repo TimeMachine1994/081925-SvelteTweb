@@ -69,9 +69,14 @@
 	"dependencies": {
 		"@lucia-auth/adapter-drizzle": "^1.1.0",
 		"@node-rs/argon2": "^2.0.2",
+<<<<<<< HEAD
 		"@sveltejs/adapter-vercel": "^6.3.1",
+=======
+		"@sendgrid/mail": "^8.1.6",
+>>>>>>> 5bad34c6baf6824b6d236663c4d60a82735d9e7b
 		"@tursodatabase/database": "^0.4.3",
 		"dotenv": "^17.2.3",
+		"firebase": "^12.8.0",
 		"lucia": "^3.2.2"
 	}
 }

@@ -95,7 +95,8 @@ export async function validateSessionToken(token: string) {
 	console.log('Session user:', { id: dbUser.id, username: dbUser.username, role: dbUser.role });
 	console.log('Session expires:', new Date(dbSession.expiresAt).toISOString());
 
-	if (Date.now() >= dbSession.expiresAt.getTime()) {
+	const expiresAt = new Date(dbSession.expiresAt);
+	if (Date.now() >= expiresAt.getTime()) {
 		console.log('❌ Session expired, deleting...');
 		await db.delete(session).where(eq(session.id, sessionId));
 		return { session: null, user: null };
@@ -103,7 +104,7 @@ export async function validateSessionToken(token: string) {
 	console.log('✅ Session is valid');
 
 	// Extend session if it's past halfway through its lifetime
-	if (Date.now() >= dbSession.expiresAt.getTime() - 1000 * 60 * 60 * 24 * 15) {
+	if (Date.now() >= expiresAt.getTime() - 1000 * 60 * 60 * 24 * 15) {
 		console.log('🔄 Extending session expiration...');
 		dbSession.expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
 		await db

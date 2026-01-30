@@ -1,5 +1,11 @@
 import { fail } from '@sveltejs/kit';
 import type { Actions } from './$types';
+import sgMail from '@sendgrid/mail';
+import { SENDGRID_API_KEY } from '$env/static/private';
+
+sgMail.setApiKey(SENDGRID_API_KEY);
+
+const CONTACT_EMAIL = 'print@trialkings.law';
 
 export const actions: Actions = {
 	default: async ({ request }) => {
@@ -14,9 +20,30 @@ export const actions: Actions = {
 			return fail(400, { error: 'All required fields must be filled' });
 		}
 
-		// In production, you would send an email or save to database
-		console.log('Contact form submission:', { name, email, phone, subject, message });
+		try {
+			await sgMail.send({
+				to: CONTACT_EMAIL,
+				from: CONTACT_EMAIL, // Must be verified sender in SendGrid
+				replyTo: email,
+				subject: `[King Law Contact] ${subject}`,
+				text: `Name: ${name}\nEmail: ${email}\nPhone: ${phone || 'Not provided'}\n\nMessage:\n${message}`,
+				html: `
+					<h2>New Contact Form Submission</h2>
+					<p><strong>Name:</strong> ${name}</p>
+					<p><strong>Email:</strong> ${email}</p>
+					<p><strong>Phone:</strong> ${phone || 'Not provided'}</p>
+					<p><strong>Subject:</strong> ${subject}</p>
+					<hr />
+					<p><strong>Message:</strong></p>
+					<p>${message.replace(/\n/g, '<br />')}</p>
+				`
+			});
 
-		return { success: true };
+			console.log('Contact form email sent to:', CONTACT_EMAIL);
+			return { success: true };
+		} catch (error) {
+			console.error('SendGrid error:', error);
+			return fail(500, { error: 'Failed to send message. Please try again later.' });
+		}
 	}
 };
