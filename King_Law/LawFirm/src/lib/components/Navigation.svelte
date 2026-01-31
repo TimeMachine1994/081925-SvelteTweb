@@ -10,8 +10,9 @@
 	<div class="max-w-7xl mx-auto px-6 lg:px-8">
 		<div class="flex justify-between items-center h-20">
 			<!-- Logo -->
-			<a href="/" class="flex items-center gap-2 group">
+			<a href="/" class="flex items-center gap-3 group">
 				<img src="https://kinglawbucket.s3.us-east-2.amazonaws.com/public/King+Law+Official+Logo++No+BKG.png" alt="King Law" class="h-12 w-auto" />
+				<span class="font-title text-xl text-king-blue">King Law, P.L.L.C.</span>
 			</a>
 
 			<!-- Desktop Navigation -->
@@ -39,7 +40,7 @@
 					</div>
 				</div>
 
-				<a href="/about" class="text-king-blue/70 hover:text-king-blue transition-colors text-sm tracking-wide uppercase">About</a>
+				<a href="/meet-ben-king" class="text-king-blue/70 hover:text-king-blue transition-colors text-sm tracking-wide uppercase">Meet Ben King</a>
 				<a href="/contact" class="text-king-blue/70 hover:text-king-blue transition-colors text-sm tracking-wide uppercase">Contact</a>
 			</div>
 
@@ -107,7 +108,7 @@
 					</div>
 				{/if}
 				
-				<a href="/about" class="block py-3 text-white/80 hover:text-gold border-b border-white/10">About</a>
+				<a href="/meet-ben-king" class="block py-3 text-white/80 hover:text-gold border-b border-white/10">Meet Ben King</a>
 				<a href="/contact" class="block py-3 text-white/80 hover:text-gold border-b border-white/10">Contact</a>
 				
 				<div class="pt-4 space-y-3">

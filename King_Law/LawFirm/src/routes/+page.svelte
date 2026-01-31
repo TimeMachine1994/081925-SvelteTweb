@@ -1,3 +1,44 @@
+<script lang="ts">
+	let formStatus = $state<'idle' | 'submitting' | 'success' | 'error'>('idle');
+	let errorMessage = $state('');
+
+	async function handleSubmit(e: Event) {
+		e.preventDefault();
+		formStatus = 'submitting';
+		errorMessage = '';
+
+		const form = e.target as HTMLFormElement;
+		const formData = new FormData(form);
+		const data = {
+			firstName: formData.get('firstName'),
+			lastName: formData.get('lastName'),
+			email: formData.get('email'),
+			phone: formData.get('phone'),
+			message: formData.get('message')
+		};
+
+		try {
+			const response = await fetch('/api/consultations', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(data)
+			});
+
+			if (response.ok) {
+				formStatus = 'success';
+				form.reset();
+			} else {
+				const result = await response.json();
+				errorMessage = result.error || 'Something went wrong. Please try again.';
+				formStatus = 'error';
+			}
+		} catch (err) {
+			errorMessage = 'Failed to submit. Please try again.';
+			formStatus = 'error';
+		}
+	}
+</script>
+
 <div class="min-h-screen pt-20">
 	<!-- Hero Section - Elegant with Bold Colors -->
 	<section class="min-h-[90vh] flex items-center relative overflow-hidden">
@@ -170,14 +211,128 @@
 		</div>
 	</section>
 
-	<!-- Quote Section -->
+	<!-- Consultation Form Section -->
 	<section class="py-24 bg-white">
+		<div class="max-w-6xl mx-auto px-6 lg:px-8">
+			<div class="grid lg:grid-cols-2 gap-16 items-center">
+				<div>
+					<p class="text-gold uppercase tracking-[0.3em] text-sm mb-4">Get Started</p>
+					<h2 class="font-title text-4xl text-king-blue mb-6">Request a Free Consultation</h2>
+					<p class="text-gray-500 text-lg mb-8 leading-relaxed">
+						Take the first step toward resolving your legal matter. Fill out the form and we'll be in touch within 24 hours to discuss your case.
+					</p>
+					<div class="space-y-4">
+						<div class="flex items-center gap-3">
+							<span class="text-gold text-xl">✓</span>
+							<span class="text-gray-600">No obligation consultation</span>
+						</div>
+						<div class="flex items-center gap-3">
+							<span class="text-gold text-xl">✓</span>
+							<span class="text-gray-600">Confidential discussion</span>
+						</div>
+						<div class="flex items-center gap-3">
+							<span class="text-gold text-xl">✓</span>
+							<span class="text-gray-600">Response within 24 hours</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="bg-gray-50 rounded-2xl p-8 border border-gray-100">
+					{#if formStatus === 'success'}
+						<div class="text-center py-8">
+							<div class="text-green-500 text-5xl mb-4">✓</div>
+							<h3 class="font-title text-2xl text-king-blue mb-2">Thank You!</h3>
+							<p class="text-gray-500">We've received your request and will be in touch within 24 hours.</p>
+							<button 
+								type="button"
+								onclick={() => formStatus = 'idle'}
+								class="mt-6 text-gold hover:text-gold-dark font-medium"
+							>
+								Submit Another Request
+							</button>
+						</div>
+					{:else}
+					<form id="consultation-form" class="space-y-5" onsubmit={handleSubmit}>
+						<div class="grid sm:grid-cols-2 gap-4">
+							<div>
+								<label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+								<input 
+									type="text" 
+									id="firstName" 
+									name="firstName" 
+									required
+									class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all"
+									placeholder="John"
+								/>
+							</div>
+							<div>
+								<label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+								<input 
+									type="text" 
+									id="lastName" 
+									name="lastName" 
+									required
+									class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all"
+									placeholder="Doe"
+								/>
+							</div>
+						</div>
+						<div>
+							<label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+							<input 
+								type="email" 
+								id="email" 
+								name="email" 
+								required
+								class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all"
+								placeholder="john@example.com"
+							/>
+						</div>
+						<div>
+							<label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+							<input 
+								type="tel" 
+								id="phone" 
+								name="phone" 
+								class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all"
+								placeholder="(407) 555-0100"
+							/>
+						</div>
+						<div>
+							<label for="message" class="block text-sm font-medium text-gray-700 mb-1">How Can We Help?</label>
+							<textarea 
+								id="message" 
+								name="message" 
+								rows="4"
+								required
+								class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all resize-none"
+								placeholder="Briefly describe your legal matter..."
+							></textarea>
+						</div>
+						<button 
+							type="submit"
+							class="w-full bg-king-blue hover:bg-king-blue-light text-white py-4 rounded-lg font-semibold transition-all hover:shadow-lg"
+						>
+							Request Consultation
+						</button>
+						<p class="text-xs text-gray-400 text-center">
+							By submitting, you agree to our privacy policy. Your information is confidential.
+						</p>
+					</form>
+					{/if}
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- Quote Section -->
+	<section class="py-24 bg-gray-50">
 		<div class="max-w-4xl mx-auto px-6 lg:px-8 text-center">
 			<span class="text-gold text-6xl font-title">"</span>
 			<blockquote class="font-title text-3xl md:text-4xl text-king-blue leading-relaxed mb-8">
 				The law is not merely a profession, but a calling to serve those who need guidance through life's most challenging moments.
 			</blockquote>
-			<p class="text-gray-400">— King Law Firm</p>
+			<p class="text-gray-400">— Ben King, Founder</p>
 		</div>
 	</section>
 

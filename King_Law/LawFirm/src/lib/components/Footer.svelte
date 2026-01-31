@@ -23,7 +23,7 @@
 				<p class="text-gold uppercase tracking-[0.2em] text-xs mb-6">Navigation</p>
 				<ul class="space-y-4">
 					<li><a href="/" class="text-white/70 hover:text-gold transition-colors">Home</a></li>
-					<li><a href="/about" class="text-white/70 hover:text-gold transition-colors">About Us</a></li>
+					<li><a href="/meet-ben-king" class="text-white/70 hover:text-gold transition-colors">Meet Ben King</a></li>
 					<li><a href="/contact" class="text-white/70 hover:text-gold transition-colors">Contact</a></li>
 					<li><a href="/login" class="text-white/70 hover:text-gold transition-colors">Client Portal</a></li>
 				</ul>
