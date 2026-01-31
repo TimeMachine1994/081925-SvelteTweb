@@ -1,9 +1,7 @@
 import { fail } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import sgMail from '@sendgrid/mail';
-import { SENDGRID_API_KEY } from '$env/static/private';
-
-sgMail.setApiKey(SENDGRID_API_KEY);
+import { env } from '$env/dynamic/private';
 
 const CONTACT_EMAIL = 'print@trialkings.law';
 
@@ -20,7 +18,13 @@ export const actions: Actions = {
 			return fail(400, { error: 'All required fields must be filled' });
 		}
 
+		if (!env.SENDGRID_API_KEY) {
+			console.error('SENDGRID_API_KEY not configured');
+			return fail(500, { error: 'Email service not configured. Please contact support.' });
+		}
+
 		try {
+			sgMail.setApiKey(env.SENDGRID_API_KEY);
 			await sgMail.send({
 				to: CONTACT_EMAIL,
 				from: CONTACT_EMAIL, // Must be verified sender in SendGrid
