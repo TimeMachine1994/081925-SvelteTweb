@@ -1,16 +1,26 @@
 <script lang="ts">
 	import { authStore } from '$lib/stores/auth.svelte.ts';
-	import { casesStore } from '$lib/stores/cases.svelte.ts';
 	import { onMount } from 'svelte';
 
 	let loading = $state(true);
+	let assignedCases = $state<any[]>([]);
+	let error = $state('');
 
 	onMount(async () => {
-		await casesStore.fetchCases();
+		try {
+			const response = await fetch('/api/staff/cases');
+			if (response.ok) {
+				const data = await response.json();
+				assignedCases = data.cases || [];
+			} else {
+				error = 'Failed to load assigned cases';
+			}
+		} catch (e) {
+			error = 'Failed to load assigned cases';
+		}
 		loading = false;
 	});
 
-	const assignedCases = $derived(casesStore.cases || []);
 	const activeCases = $derived(assignedCases.filter(c => c.status === 'active'));
 </script>
 

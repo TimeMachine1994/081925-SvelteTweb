@@ -119,6 +119,23 @@ export const systemSettings = sqliteTable('system_settings', {
 		.default(sql`(unixepoch())`)
 });
 
+// Case Staff Assignments Table (staff assigned to cases)
+export const caseStaffAssignments = sqliteTable('case_staff_assignments', {
+	id: text('id').primaryKey(),
+	caseId: text('case_id')
+		.notNull()
+		.references(() => cases.id, { onDelete: 'cascade' }),
+	staffId: text('staff_id')
+		.notNull()
+		.references(() => user.id, { onDelete: 'cascade' }),
+	assignedById: text('assigned_by_id')
+		.notNull()
+		.references(() => user.id, { onDelete: 'restrict' }),
+	assignedAt: integer('assigned_at')
+		.notNull()
+		.default(sql`(unixepoch())`)
+});
+
 // Session Table (for Lucia auth)
 export const session = sqliteTable('session', {
 	id: text('id').primaryKey(),
@@ -205,5 +222,22 @@ export const staffCodesRelations = relations(staffCodes, ({ one }) => ({
 	assignedUser: one(user, {
 		fields: [staffCodes.assignedToUserId],
 		references: [user.id]
+	})
+}));
+
+export const caseStaffAssignmentsRelations = relations(caseStaffAssignments, ({ one }) => ({
+	case: one(cases, {
+		fields: [caseStaffAssignments.caseId],
+		references: [cases.id]
+	}),
+	staff: one(user, {
+		fields: [caseStaffAssignments.staffId],
+		references: [user.id],
+		relationName: 'staffAssignments'
+	}),
+	assignedBy: one(user, {
+		fields: [caseStaffAssignments.assignedById],
+		references: [user.id],
+		relationName: 'assignedByUser'
 	})
 }));

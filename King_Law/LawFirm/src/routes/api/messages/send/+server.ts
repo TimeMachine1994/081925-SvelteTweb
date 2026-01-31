@@ -24,6 +24,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		throw error(401, 'Unauthorized');
 	}
 
+	// Staff cannot send messages
+	if (locals.user.role === 'staff') {
+		throw error(403, 'Staff members cannot send messages');
+	}
+
 	try {
 		const contentType = request.headers.get('content-type') || '';
 		let messageData: any = {};
