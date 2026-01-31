@@ -40,7 +40,7 @@ interface DatabaseUserAttributes {
 	email: string;
 	firstName: string;
 	lastName: string;
-	role: 'client' | 'lawyer' | 'admin';
+	role: 'client' | 'lawyer' | 'staff' | 'admin';
 	phoneNumber: string | null;
 }
 

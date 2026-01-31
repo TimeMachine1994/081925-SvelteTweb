@@ -2,7 +2,6 @@
 	import { authStore } from '$lib/stores/auth.svelte.ts';
 	import { goto } from '$app/navigation';
 
-	let role = $state<'client' | 'lawyer'>('client');
 	let firstName = $state('');
 	let lastName = $state('');
 	let username = $state('');
@@ -10,13 +9,7 @@
 	let phoneNumber = $state('');
 	let password = $state('');
 	let confirmPassword = $state('');
-	let accessCode = $state('');
 	let error = $state('');
-	let showAccessCode = $state(false);
-
-	$effect(() => {
-		showAccessCode = role === 'lawyer';
-	});
 
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
@@ -34,8 +27,7 @@
 			firstName,
 			lastName,
 			phoneNumber: phoneNumber || undefined,
-			role,
-			accessCode: role === 'lawyer' ? accessCode : undefined
+			role: 'client'
 		});
 
 		if (result.success) {
@@ -60,32 +52,6 @@
 						{error}
 					</div>
 				{/if}
-
-				<fieldset class="mb-4">
-					<legend class="block text-sm font-medium mb-2">I am registering as a:</legend>
-					<div class="flex gap-4">
-						<label class="flex items-center">
-							<input
-								type="radio"
-								bind:group={role}
-								value="client"
-								name="role"
-								class="mr-2"
-							/>
-							<span>Client</span>
-						</label>
-						<label class="flex items-center">
-							<input
-								type="radio"
-								bind:group={role}
-								value="lawyer"
-								name="role"
-								class="mr-2"
-							/>
-							<span>Lawyer</span>
-						</label>
-					</div>
-				</fieldset>
 
 				<div class="grid grid-cols-2 gap-4 mb-4">
 					<div>
@@ -166,20 +132,6 @@
 					/>
 				</div>
 
-				{#if showAccessCode}
-					<div class="mb-6">
-						<label for="accessCode" class="block text-sm font-medium mb-2">Lawyer Access Code</label>
-						<input
-							type="text"
-							id="accessCode"
-							bind:value={accessCode}
-							required
-							class="w-full px-3 py-2 border border-input rounded-md bg-background"
-						/>
-						<p class="text-xs text-muted-foreground mt-1">Required for lawyer registration</p>
-					</div>
-				{/if}
-
 				<button
 					type="submit"
 					disabled={authStore.loading}
@@ -191,6 +143,11 @@
 				<p class="text-center mt-4 text-sm">
 					Already have an account?
 					<a href="/login" class="text-gold hover:underline">Sign in</a>
+				</p>
+
+				<p class="text-center mt-2 text-sm text-muted-foreground">
+					Staff member?
+					<a href="/staff-sign-up" class="text-gold hover:underline">Register here</a>
 				</p>
 			</form>
 		</div>

@@ -11,7 +11,8 @@ export const load = async () => {
 		return {};
 	}
 
-	if (authStore.user.role === 'client') {
+	// Only lawyers can access this dashboard
+	if (authStore.user.role !== 'lawyer') {
 		goto(authStore.dashboardRoute);
 		return {};
 	}

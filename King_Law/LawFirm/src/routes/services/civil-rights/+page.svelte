@@ -1,0 +1,116 @@
+<div class="py-16 md:py-24 bg-background">
+	<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+		<h1 class="font-title text-4xl md:text-5xl mb-6">Civil Rights Violations</h1>
+		<p class="text-xl text-muted-foreground mb-12">
+			Fighting for justice when your fundamental rights are violated
+		</p>
+
+		<div class="bg-muted p-6 rounded-lg border border-border mb-8">
+			<h2 class="font-title text-2xl mb-4">Your Rights Matter</h2>
+			<p class="text-muted-foreground">
+				The Constitution guarantees every American certain fundamental rights. When government officials, 
+				law enforcement, or institutions violate these rights, you deserve an attorney who will hold 
+				them accountable. We believe in equal justice for all—and we're not afraid to take on powerful 
+				opponents to defend your rights.
+			</p>
+		</div>
+
+		<h2 class="font-title text-3xl mb-6">Civil Rights Cases We Handle</h2>
+		<div class="grid md:grid-cols-2 gap-6 mb-12">
+			<div class="bg-background border border-border rounded-lg p-6">
+				<h3 class="font-semibold text-xl mb-3">🚔 Police Misconduct</h3>
+				<p class="text-muted-foreground">
+					Excessive force, false arrest, unlawful searches—we hold law enforcement accountable 
+					when they abuse their authority.
+				</p>
+			</div>
+
+			<div class="bg-background border border-border rounded-lg p-6">
+				<h3 class="font-semibold text-xl mb-3">⛓️ Prisoner Rights</h3>
+				<p class="text-muted-foreground">
+					Inhumane conditions, denial of medical care, and abuse—incarcerated individuals 
+					still have constitutional protections.
+				</p>
+			</div>
+
+			<div class="bg-background border border-border rounded-lg p-6">
+				<h3 class="font-semibold text-xl mb-3">🏛️ Government Misconduct</h3>
+				<p class="text-muted-foreground">
+					When government agencies overstep their bounds and violate your rights, we fight 
+					back on your behalf.
+				</p>
+			</div>
+
+			<div class="bg-background border border-border rounded-lg p-6">
+				<h3 class="font-semibold text-xl mb-3">🚫 Discrimination</h3>
+				<p class="text-muted-foreground">
+					Housing discrimination, public accommodation violations, and systemic discrimination—
+					we pursue justice for victims of bias.
+				</p>
+			</div>
+
+			<div class="bg-background border border-border rounded-lg p-6">
+				<h3 class="font-semibold text-xl mb-3">🗣️ First Amendment Rights</h3>
+				<p class="text-muted-foreground">
+					Freedom of speech, religion, and assembly are sacred. We defend your right to 
+					express yourself without government interference.
+				</p>
+			</div>
+
+			<div class="bg-background border border-border rounded-lg p-6">
+				<h3 class="font-semibold text-xl mb-3">⚖️ Due Process Violations</h3>
+				<p class="text-muted-foreground">
+					Everyone deserves fair treatment under the law. We fight back when your due 
+					process rights are denied.
+				</p>
+			</div>
+		</div>
+
+		<div class="bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-700 rounded-lg p-6 mb-8">
+			<h3 class="font-semibold text-lg mb-3">⚠️ Why Civil Rights Cases Matter</h3>
+			<p class="text-muted-foreground">
+				Civil rights cases aren't just about one person—they're about holding powerful institutions 
+				accountable and preventing future abuses. When we win, we send a message that violations 
+				of constitutional rights will not be tolerated.
+			</p>
+		</div>
+
+		<div class="bg-background border border-border rounded-lg p-8 mb-8">
+			<h3 class="font-title text-2xl mb-4">Our Approach</h3>
+			<ul class="space-y-3">
+				<li class="flex items-start">
+					<span class="text-gold mr-3">✓</span>
+					<span><strong>Fearless Representation:</strong> We're not intimidated by government agencies or institutions</span>
+				</li>
+				<li class="flex items-start">
+					<span class="text-gold mr-3">✓</span>
+					<span><strong>Thorough Investigation:</strong> We dig deep to uncover evidence of wrongdoing</span>
+				</li>
+				<li class="flex items-start">
+					<span class="text-gold mr-3">✓</span>
+					<span><strong>Compassionate Support:</strong> We understand the trauma of having your rights violated</span>
+				</li>
+				<li class="flex items-start">
+					<span class="text-gold mr-3">✓</span>
+					<span><strong>Commitment to Justice:</strong> We fight not just for compensation, but for accountability</span>
+				</li>
+			</ul>
+		</div>
+
+		<div class="bg-gold/10 border-2 border-gold rounded-lg p-8 text-center">
+			<h3 class="font-title text-2xl mb-4">Your Rights Were Violated?</h3>
+			<p class="text-muted-foreground mb-6">
+				Don't let injustice go unchallenged. Contact us for a confidential consultation 
+				about your civil rights case.
+			</p>
+			<div class="flex flex-col sm:flex-row gap-4 justify-center">
+				<a href="/contact" class="bg-gold hover:bg-gold-dark text-black font-semibold px-8 py-3 rounded-md transition-colors">
+					Schedule Consultation
+				</a>
+				<a href="tel:4075550100" class="border-2 border-gold text-gold hover:bg-gold hover:text-black font-semibold px-8 py-3 rounded-md transition-colors">
+					Call (407) 555-0100
+				</a>
+			</div>
+		</div>
+	</div>
+</div>

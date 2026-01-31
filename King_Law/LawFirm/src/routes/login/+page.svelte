@@ -25,8 +25,7 @@
 	<div class="hidden lg:flex lg:w-1/2 bg-king-blue items-center justify-center p-12">
 		<div class="max-w-md">
 			<div class="flex items-center gap-3 mb-8">
-				<span class="text-gold text-4xl">♔</span>
-				<span class="font-title text-3xl text-white">King Law</span>
+				<img src="https://kinglawbucket.s3.us-east-2.amazonaws.com/public/King+Law+Official+Logo++No+BKG.png" alt="King Law" class="h-16 w-auto" />
 			</div>
 			<h2 class="font-title text-4xl text-white leading-tight mb-6">
 				Welcome to Your<br/>Client Portal
@@ -42,8 +41,7 @@
 		<div class="w-full max-w-md">
 			<!-- Mobile Logo -->
 			<div class="lg:hidden flex items-center gap-3 mb-8 justify-center">
-				<span class="text-gold text-3xl">♔</span>
-				<span class="font-title text-2xl text-king-blue">King Law</span>
+				<img src="https://kinglawbucket.s3.us-east-2.amazonaws.com/public/King+Law+Official+Logo++No+BKG.png" alt="King Law" class="h-14 w-auto" />
 			</div>
 
 			<div class="mb-8">

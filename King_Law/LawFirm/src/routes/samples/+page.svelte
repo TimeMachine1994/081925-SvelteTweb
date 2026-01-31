@@ -51,7 +51,7 @@
 				<a href={sample.href} class="group block">
 					<div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all hover:-translate-y-2">
 						<div class="{sample.color} h-48 flex items-center justify-center">
-							<span class="text-gold text-6xl font-title">♔</span>
+							<img src="https://kinglawbucket.s3.us-east-2.amazonaws.com/public/King+Law+Official+Logo++No+BKG.png" alt="King Law" class="h-16 w-auto" />
 						</div>
 						<div class="p-6">
 							<div class="flex items-center gap-2 mb-2">

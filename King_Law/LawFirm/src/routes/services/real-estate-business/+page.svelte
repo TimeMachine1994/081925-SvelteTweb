@@ -1,0 +1,98 @@
+<div class="py-16 md:py-24 bg-background">
+	<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+		<h1 class="font-title text-4xl md:text-5xl mb-6">Real Estate & Business Transactions</h1>
+		<p class="text-xl text-muted-foreground mb-12">
+			Guiding you through complex transactions with expertise and integrity
+		</p>
+
+		<div class="bg-muted p-6 rounded-lg border border-border mb-8">
+			<h2 class="font-title text-2xl mb-4">Your Trusted Partner in Business</h2>
+			<p class="text-muted-foreground">
+				Whether you're buying property, starting a business, or navigating a complex transaction, 
+				you need an attorney who understands the stakes. We provide meticulous attention to detail 
+				and strategic guidance to protect your investments and your future.
+			</p>
+		</div>
+
+		<h2 class="font-title text-3xl mb-6">Real Estate Services</h2>
+		<div class="grid md:grid-cols-2 gap-6 mb-12">
+			<div class="bg-background border border-border rounded-lg p-6">
+				<h3 class="font-semibold text-xl mb-3">🏠 Residential Transactions</h3>
+				<p class="text-muted-foreground">
+					Buying or selling a home is one of life's biggest decisions. We ensure your interests 
+					are protected throughout the entire process.
+				</p>
+			</div>
+
+			<div class="bg-background border border-border rounded-lg p-6">
+				<h3 class="font-semibold text-xl mb-3">🏢 Commercial Real Estate</h3>
+				<p class="text-muted-foreground">
+					From acquisitions to leases to development, we handle all aspects of commercial 
+					real estate with precision and care.
+				</p>
+			</div>
+
+			<div class="bg-background border border-border rounded-lg p-6">
+				<h3 class="font-semibold text-xl mb-3">📋 Title Review & Closings</h3>
+				<p class="text-muted-foreground">
+					Thorough title searches and seamless closings—we make sure nothing falls through 
+					the cracks.
+				</p>
+			</div>
+
+			<div class="bg-background border border-border rounded-lg p-6">
+				<h3 class="font-semibold text-xl mb-3">⚖️ Real Estate Disputes</h3>
+				<p class="text-muted-foreground">
+					Boundary disputes, contract breaches, and landlord-tenant issues—we fight to 
+					protect your property rights.
+				</p>
+			</div>
+		</div>
+
+		<h2 class="font-title text-3xl mb-6">Business Transaction Services</h2>
+		<div class="grid md:grid-cols-2 gap-6 mb-12">
+			<div class="bg-background border border-border rounded-lg p-6">
+				<h3 class="font-semibold text-xl mb-3">🚀 Business Formation</h3>
+				<p class="text-muted-foreground">
+					LLCs, corporations, partnerships—we help you choose the right structure and 
+					set up your business for success.
+				</p>
+			</div>
+
+			<div class="bg-background border border-border rounded-lg p-6">
+				<h3 class="font-semibold text-xl mb-3">📝 Contract Drafting & Review</h3>
+				<p class="text-muted-foreground">
+					Protect your business with carefully crafted contracts that anticipate problems 
+					before they arise.
+				</p>
+			</div>
+
+			<div class="bg-background border border-border rounded-lg p-6">
+				<h3 class="font-semibold text-xl mb-3">🤝 Mergers & Acquisitions</h3>
+				<p class="text-muted-foreground">
+					Whether buying or selling a business, we guide you through due diligence, 
+					negotiations, and closing.
+				</p>
+			</div>
+
+			<div class="bg-background border border-border rounded-lg p-6">
+				<h3 class="font-semibold text-xl mb-3">💼 Business Disputes</h3>
+				<p class="text-muted-foreground">
+					Partnership conflicts, breach of contract, and commercial litigation—we protect 
+					what you've built.
+				</p>
+			</div>
+		</div>
+
+		<div class="bg-gold/10 border-2 border-gold rounded-lg p-8 text-center">
+			<h3 class="font-title text-2xl mb-4">Let's Discuss Your Transaction</h3>
+			<p class="text-muted-foreground mb-6">
+				Every deal is unique. Contact us today to discuss how we can help you 
+				achieve your real estate or business goals.
+			</p>
+			<a href="/contact" class="inline-block bg-gold hover:bg-gold-dark text-black font-semibold px-8 py-3 rounded-md transition-colors">
+				Schedule Consultation
+			</a>
+		</div>
+	</div>
+</div>

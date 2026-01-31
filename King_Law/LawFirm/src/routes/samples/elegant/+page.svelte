@@ -52,7 +52,7 @@
 					<div class="aspect-[4/5] bg-gradient-to-b from-gray-50 to-gray-100 rounded-sm relative overflow-hidden">
 						<div class="absolute inset-0 flex items-center justify-center">
 							<div class="text-center">
-								<span class="text-gold text-8xl font-title">♔</span>
+								<img src="https://kinglawbucket.s3.us-east-2.amazonaws.com/public/King+Law+Official+Logo++No+BKG.png" alt="King Law" class="h-24 w-auto" />
 								<p class="text-king-blue/30 text-sm mt-4 tracking-widest uppercase">Est. 1985</p>
 							</div>
 						</div>

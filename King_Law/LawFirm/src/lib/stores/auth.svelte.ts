@@ -2,7 +2,7 @@ type User = {
 	id: string;
 	username: string;
 	email: string;
-	role: 'client' | 'lawyer' | 'admin';
+	role: 'client' | 'lawyer' | 'staff' | 'admin';
 	firstName: string;
 	lastName: string;
 };
@@ -100,7 +100,30 @@ class AuthStore {
 
 	get dashboardRoute(): string {
 		if (!this.user) return '/login';
-		return this.user.role === 'client' ? '/dashboard/client' : '/dashboard/lawyer';
+		switch (this.user.role) {
+			case 'client':
+				return '/dashboard/client';
+			case 'lawyer':
+				return '/dashboard/lawyer';
+			case 'staff':
+				return '/dashboard/staff';
+			case 'admin':
+				return '/dashboard/admin';
+			default:
+				return '/dashboard/client';
+		}
+	}
+
+	get isStaff(): boolean {
+		return this.user?.role === 'staff' || this.user?.role === 'lawyer' || this.user?.role === 'admin';
+	}
+
+	get isAdmin(): boolean {
+		return this.user?.role === 'admin';
+	}
+
+	get canEditCases(): boolean {
+		return this.user?.role === 'lawyer' || this.user?.role === 'admin';
 	}
 
 	async logout(): Promise<void> {

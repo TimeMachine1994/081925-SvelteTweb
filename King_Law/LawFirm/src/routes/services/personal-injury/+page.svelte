@@ -10,8 +10,8 @@
 				<h2 class="font-title text-2xl mb-4">Our Expertise</h2>
 				<p class="text-muted-foreground">
 					When you've been injured due to someone else's negligence, you need experienced legal representation 
-					to protect your rights and secure fair compensation. Our personal injury attorneys have successfully 
-					handled thousands of cases, recovering millions of dollars for our clients.
+					to protect your rights and secure fair compensation. Our personal injury attorneys fight tirelessly 
+					for everyday people, treating every case with the dedication and respect you deserve.
 				</p>
 			</div>
 
@@ -74,7 +74,7 @@
 				<li class="flex items-start">
 					<span class="text-gold mr-3 text-xl">✓</span>
 					<div>
-						<strong>Proven Results:</strong> Over $50 million recovered for our personal injury clients
+						<strong>Proven Dedication:</strong> We fight relentlessly for every client, big case or small
 					</div>
 				</li>
 				<li class="flex items-start">

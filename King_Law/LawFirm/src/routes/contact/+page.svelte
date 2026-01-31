@@ -109,8 +109,7 @@
 				<div class="lg:col-span-5">
 					<div class="bg-king-blue rounded-2xl p-8 text-white sticky top-28">
 						<div class="flex items-center gap-3 mb-8">
-							<span class="text-gold text-3xl">♔</span>
-							<span class="font-title text-2xl">King Law</span>
+							<img src="https://kinglawbucket.s3.us-east-2.amazonaws.com/public/King+Law+Official+Logo++No+BKG.png" alt="King Law" class="h-12 w-auto" />
 						</div>
 
 						<div class="space-y-8">

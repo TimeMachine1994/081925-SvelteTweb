@@ -1,7 +1,15 @@
 <div class="min-h-screen pt-20">
 	<!-- Hero Section - Elegant with Bold Colors -->
 	<section class="min-h-[90vh] flex items-center relative overflow-hidden">
-		<div class="absolute inset-0 bg-gradient-to-br from-king-blue via-king-blue to-king-blue-dark"></div>
+		<!-- Background Image -->
+		<div class="absolute inset-0">
+			<img 
+				src="https://kinglawbucket.s3.us-east-2.amazonaws.com/public/JusticeHomeHeader.jpeg" 
+				alt="Justice" 
+				class="w-full h-full object-cover"
+			/>
+			<div class="absolute inset-0 bg-king-blue/80"></div>
+		</div>
 		<div class="absolute inset-0 opacity-5">
 			<div class="absolute top-20 right-20 w-96 h-96 border border-gold rounded-full"></div>
 			<div class="absolute bottom-20 left-20 w-64 h-64 border border-gold rounded-full"></div>
@@ -30,21 +38,30 @@
 			<div class="lg:col-span-5 hidden lg:block">
 				<div class="aspect-[4/5] bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 flex flex-col justify-between">
 					<div>
-						<div class="text-gold text-6xl mb-4">♔</div>
-						<p class="text-white/40 text-sm tracking-widest uppercase">Est. 2003</p>
+						<img src="https://kinglawbucket.s3.us-east-2.amazonaws.com/public/King+Law+Official+Logo++No+BKG.png" alt="King Law" class="h-16 w-auto mb-4" />
+						<p class="text-white/40 text-sm tracking-widest uppercase">Our Promise</p>
 					</div>
 					<div class="space-y-4">
-						<div class="flex justify-between items-center py-3 border-t border-white/10">
-							<span class="text-white/60">Years Experience</span>
-							<span class="text-gold font-bold text-2xl">20+</span>
+						<div class="flex items-start gap-3 py-3 border-t border-white/10">
+							<span class="text-gold text-xl">⚖️</span>
+							<div>
+								<span class="text-white font-semibold block">Unwavering Commitment</span>
+								<span class="text-white/50 text-sm">We stand by you from start to finish</span>
+							</div>
 						</div>
-						<div class="flex justify-between items-center py-3 border-t border-white/10">
-							<span class="text-white/60">Cases Won</span>
-							<span class="text-gold font-bold text-2xl">5,000+</span>
+						<div class="flex items-start gap-3 py-3 border-t border-white/10">
+							<span class="text-gold text-xl">🤝</span>
+							<div>
+								<span class="text-white font-semibold block">Respect for Every Client</span>
+								<span class="text-white/50 text-sm">You're never just a case number</span>
+							</div>
 						</div>
-						<div class="flex justify-between items-center py-3 border-t border-white/10">
-							<span class="text-white/60">Client Satisfaction</span>
-							<span class="text-gold font-bold text-2xl">98%</span>
+						<div class="flex items-start gap-3 py-3 border-t border-white/10">
+							<span class="text-gold text-xl">💪</span>
+							<div>
+								<span class="text-white font-semibold block">Fighting for the Underdog</span>
+								<span class="text-white/50 text-sm">Big firm results, personal attention</span>
+							</div>
 						</div>
 					</div>
 				</div>

@@ -7,7 +7,7 @@
 				A Legacy of Legal<br/>Excellence
 			</h1>
 			<p class="text-xl text-white/70 max-w-2xl">
-				Serving Central Florida with integrity, expertise, and unwavering dedication since 2003.
+				Serving Central Florida with integrity, expertise, and unwavering dedication to every client we represent.
 			</p>
 		</div>
 	</section>
@@ -18,13 +18,13 @@
 			<div class="grid md:grid-cols-12 gap-16">
 				<div class="md:col-span-5">
 					<p class="text-gold uppercase tracking-[0.3em] text-sm mb-4">Our Story</p>
-					<h2 class="font-title text-4xl text-king-blue">Two Decades of Trust</h2>
+					<h2 class="font-title text-4xl text-king-blue">Built on Trust</h2>
 				</div>
 				<div class="md:col-span-7 space-y-6">
 					<p class="text-gray-500 text-lg leading-relaxed">
-						Founded over two decades ago, King Law Firm has grown from a small practice to one of Central 
-						Florida's most respected legal firms. Our success is built on a simple principle: every client 
-						deserves exceptional legal representation delivered with integrity, expertise, and unwavering dedication.
+						King Law Firm was founded on a simple but powerful principle: every person deserves 
+						exceptional legal representation, regardless of their background or circumstances. We believe 
+						in fighting for the everyday person with the same intensity and dedication as any high-profile case.
 					</p>
 					<p class="text-gray-500 text-lg leading-relaxed">
 						What started as a solo practice has evolved into a full-service law firm with experienced attorneys 
@@ -74,33 +74,37 @@
 					<div class="w-14 h-14 bg-gold rounded-xl flex items-center justify-center text-2xl mb-6">⚡</div>
 					<h3 class="font-title text-2xl text-king-blue mb-3">Results</h3>
 					<p class="text-gray-500 leading-relaxed">
-						Our track record speaks for itself - thousands of successful cases and millions 
-						recovered for our clients.
+						We measure success not in numbers, but in the lives we've helped rebuild and the 
+						families we've supported through their toughest moments.
 					</p>
 				</div>
 			</div>
 		</div>
 	</section>
 
-	<!-- Stats Section -->
+	<!-- Our Commitment Section -->
 	<section class="py-20 bg-king-blue">
 		<div class="max-w-5xl mx-auto px-6 lg:px-8">
 			<div class="grid md:grid-cols-4 gap-8 text-center">
 				<div>
-					<div class="text-5xl font-bold text-gold mb-2">20+</div>
-					<p class="text-white/60">Years Experience</p>
+					<div class="text-5xl mb-4">⚖️</div>
+					<h3 class="text-white font-bold text-lg mb-2">Your Fight, Our Mission</h3>
+					<p class="text-white/60 text-sm">We treat every case like it's our own</p>
 				</div>
 				<div>
-					<div class="text-5xl font-bold text-gold mb-2">5,000+</div>
-					<p class="text-white/60">Cases Won</p>
+					<div class="text-5xl mb-4">🤝</div>
+					<h3 class="text-white font-bold text-lg mb-2">Respect Always</h3>
+					<p class="text-white/60 text-sm">You deserve to be heard and understood</p>
 				</div>
 				<div>
-					<div class="text-5xl font-bold text-gold mb-2">$50M+</div>
-					<p class="text-white/60">Recovered</p>
+					<div class="text-5xl mb-4">💪</div>
+					<h3 class="text-white font-bold text-lg mb-2">Relentless Advocacy</h3>
+					<p class="text-white/60 text-sm">We never back down from a challenge</p>
 				</div>
 				<div>
-					<div class="text-5xl font-bold text-gold mb-2">98%</div>
-					<p class="text-white/60">Satisfaction</p>
+					<div class="text-5xl mb-4">❤️</div>
+					<h3 class="text-white font-bold text-lg mb-2">Loyalty First</h3>
+					<p class="text-white/60 text-sm">Available when you need us most</p>
 				</div>
 			</div>
 		</div>

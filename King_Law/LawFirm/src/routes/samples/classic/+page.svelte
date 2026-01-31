@@ -17,7 +17,7 @@
 	<section class="bg-king-blue text-white py-24">
 		<div class="max-w-6xl mx-auto px-6 text-center">
 			<div class="mb-6">
-				<span class="text-gold text-6xl font-title">♔</span>
+				<img src="https://kinglawbucket.s3.us-east-2.amazonaws.com/public/King+Law+Official+Logo++No+BKG.png" alt="King Law" class="h-16 w-auto mx-auto" />
 			</div>
 			<h1 class="font-title text-5xl md:text-7xl mb-4">King Law Firm</h1>
 			<div class="w-24 h-1 bg-gold mx-auto mb-6"></div>

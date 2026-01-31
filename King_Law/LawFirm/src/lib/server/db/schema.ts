@@ -7,7 +7,7 @@ export const user = sqliteTable('user', {
 	id: text('id').primaryKey(),
 	username: text('username').notNull().unique(),
 	passwordHash: text('password_hash').notNull(),
-	role: text('role', { enum: ['client', 'lawyer', 'admin'] })
+	role: text('role', { enum: ['client', 'lawyer', 'staff', 'admin'] })
 		.notNull()
 		.default('client'),
 	email: text('email').notNull().unique(),
@@ -98,6 +98,27 @@ export const messages = sqliteTable('messages', {
 	readAt: integer('read_at')
 });
 
+// Staff Codes Table (employee number → role mapping)
+export const staffCodes = sqliteTable('staff_codes', {
+	id: text('id').primaryKey(),
+	employeeNumber: text('employee_number').notNull().unique(),
+	role: text('role', { enum: ['lawyer', 'staff', 'admin'] }).notNull(),
+	assignedToUserId: text('assigned_to_user_id').references(() => user.id, { onDelete: 'set null' }),
+	createdAt: integer('created_at')
+		.notNull()
+		.default(sql`(unixepoch())`),
+	usedAt: integer('used_at')
+});
+
+// System Settings Table (staff password, etc.)
+export const systemSettings = sqliteTable('system_settings', {
+	key: text('key').primaryKey(),
+	value: text('value').notNull(),
+	updatedAt: integer('updated_at')
+		.notNull()
+		.default(sql`(unixepoch())`)
+});
+
 // Session Table (for Lucia auth)
 export const session = sqliteTable('session', {
 	id: text('id').primaryKey(),
@@ -176,6 +197,13 @@ export const messagesRelations = relations(messages, ({ one }) => ({
 export const sessionRelations = relations(session, ({ one }) => ({
 	user: one(user, {
 		fields: [session.userId],
+		references: [user.id]
+	})
+}));
+
+export const staffCodesRelations = relations(staffCodes, ({ one }) => ({
+	assignedUser: one(user, {
+		fields: [staffCodes.assignedToUserId],
 		references: [user.id]
 	})
 }));

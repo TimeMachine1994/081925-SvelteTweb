@@ -10,9 +10,8 @@
 	<div class="max-w-7xl mx-auto px-6 lg:px-8">
 		<div class="flex justify-between items-center h-20">
 			<!-- Logo -->
-			<a href="/" class="flex items-center gap-3 group">
-				<span class="text-gold text-2xl">♔</span>
-				<span class="font-title text-2xl text-king-blue group-hover:text-gold transition-colors">King Law</span>
+			<a href="/" class="flex items-center gap-2 group">
+				<img src="https://kinglawbucket.s3.us-east-2.amazonaws.com/public/King+Law+Official+Logo++No+BKG.png" alt="King Law" class="h-12 w-auto" />
 			</a>
 
 			<!-- Desktop Navigation -->
@@ -27,11 +26,15 @@
 						</svg>
 					</button>
 					<div class="absolute left-0 top-full pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-						<div class="bg-king-blue rounded-lg shadow-xl p-2 min-w-[280px]">
-							<a href="/services/personal-injury" class="block px-4 py-3 text-white/80 hover:text-gold hover:bg-white/10 rounded transition-colors">Personal Injury & Civil Suits</a>
-							<a href="/services/business-intellectual-property" class="block px-4 py-3 text-white/80 hover:text-gold hover:bg-white/10 rounded transition-colors">Business & Intellectual Property</a>
-							<a href="/services/family-estate-law" class="block px-4 py-3 text-white/80 hover:text-gold hover:bg-white/10 rounded transition-colors">Family & Estate Law</a>
-							<a href="/services/criminal-defense" class="block px-4 py-3 text-white/80 hover:text-gold hover:bg-white/10 rounded transition-colors">Criminal Defense</a>
+						<div class="bg-king-blue rounded-lg shadow-xl p-2 min-w-[320px]">
+							<a href="/services/personal-injury" class="block px-4 py-2 text-white/80 hover:text-gold hover:bg-white/10 rounded transition-colors">Personal Injury</a>
+							<a href="/services/criminal-defense" class="block px-4 py-2 text-white/80 hover:text-gold hover:bg-white/10 rounded transition-colors">Criminal Defense</a>
+							<a href="/services/employment-law" class="block px-4 py-2 text-white/80 hover:text-gold hover:bg-white/10 rounded transition-colors">Employment Law</a>
+							<a href="/services/real-estate-business" class="block px-4 py-2 text-white/80 hover:text-gold hover:bg-white/10 rounded transition-colors">Real Estate & Business</a>
+							<a href="/services/civil-rights" class="block px-4 py-2 text-white/80 hover:text-gold hover:bg-white/10 rounded transition-colors">Civil Rights Violations</a>
+							<a href="/services/cannabis-law" class="block px-4 py-2 text-white/80 hover:text-gold hover:bg-white/10 rounded transition-colors">Medical Marijuana & Cannabis</a>
+							<a href="/services/appeals" class="block px-4 py-2 text-white/80 hover:text-gold hover:bg-white/10 rounded transition-colors">Appeals</a>
+							<a href="/services/property-damage" class="block px-4 py-2 text-white/80 hover:text-gold hover:bg-white/10 rounded transition-colors">Property Damage</a>
 						</div>
 					</div>
 				</div>
@@ -94,9 +97,13 @@
 				{#if servicesOpen}
 					<div class="pl-4 space-y-1 pb-2">
 						<a href="/services/personal-injury" class="block py-2 text-white/60 hover:text-gold text-sm">Personal Injury</a>
-						<a href="/services/business-intellectual-property" class="block py-2 text-white/60 hover:text-gold text-sm">Business & IP</a>
-						<a href="/services/family-estate-law" class="block py-2 text-white/60 hover:text-gold text-sm">Family & Estate</a>
 						<a href="/services/criminal-defense" class="block py-2 text-white/60 hover:text-gold text-sm">Criminal Defense</a>
+						<a href="/services/employment-law" class="block py-2 text-white/60 hover:text-gold text-sm">Employment Law</a>
+						<a href="/services/real-estate-business" class="block py-2 text-white/60 hover:text-gold text-sm">Real Estate & Business</a>
+						<a href="/services/civil-rights" class="block py-2 text-white/60 hover:text-gold text-sm">Civil Rights</a>
+						<a href="/services/cannabis-law" class="block py-2 text-white/60 hover:text-gold text-sm">Cannabis Law</a>
+						<a href="/services/appeals" class="block py-2 text-white/60 hover:text-gold text-sm">Appeals</a>
+						<a href="/services/property-damage" class="block py-2 text-white/60 hover:text-gold text-sm">Property Damage</a>
 					</div>
 				{/if}
 				

@@ -6,7 +6,7 @@ import { eq, or } from 'drizzle-orm';
 import { hash } from '@node-rs/argon2';
 import { lucia, generateId } from '$lib/server/auth';
 
-const LAWYER_ACCESS_CODE = 'k1ngl4w';
+// Lawyer access code removed - staff now register via /staff-sign-up
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	try {
@@ -21,8 +21,9 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			throw error(400, 'Password must be at least 8 characters');
 		}
 
-		if (role === 'lawyer' && accessCode !== LAWYER_ACCESS_CODE) {
-			throw error(400, 'Invalid lawyer access code');
+		// Staff registration must use /staff-sign-up endpoint
+		if (role && role !== 'client') {
+			throw error(400, 'Staff must register via /staff-sign-up');
 		}
 
 		const existingUsers = await db
