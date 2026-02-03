@@ -85,7 +85,7 @@
 	{#if mobileMenuOpen}
 		<div class="lg:hidden bg-king-blue">
 			<div class="px-6 py-6 space-y-1">
-				<a href="/" class="block py-3 text-white/80 hover:text-gold border-b border-white/10">Home</a>
+				<a href="/" class="block py-3 text-white/80 hover:text-gold border-b border-white/10" onclick={() => mobileMenuOpen = false}>Home</a>
 				
 				<button 
 					class="w-full flex justify-between items-center py-3 text-white/80 hover:text-gold border-b border-white/10"
@@ -98,32 +98,33 @@
 				</button>
 				{#if servicesOpen}
 					<div class="pl-4 space-y-1 pb-2">
-						<a href="/services/personal-injury" class="block py-2 text-white/60 hover:text-gold text-sm">Personal Injury</a>
-						<a href="/services/criminal-defense" class="block py-2 text-white/60 hover:text-gold text-sm">Criminal Defense</a>
-						<a href="/services/employment-law" class="block py-2 text-white/60 hover:text-gold text-sm">Employment Law</a>
-						<a href="/services/real-estate-business" class="block py-2 text-white/60 hover:text-gold text-sm">Real Estate & Business</a>
-						<a href="/services/civil-rights" class="block py-2 text-white/60 hover:text-gold text-sm">Civil Rights</a>
-						<a href="/services/cannabis-law" class="block py-2 text-white/60 hover:text-gold text-sm">Cannabis Law</a>
-						<a href="/services/appeals" class="block py-2 text-white/60 hover:text-gold text-sm">Appeals</a>
-						<a href="/services/property-damage" class="block py-2 text-white/60 hover:text-gold text-sm">Property Damage</a>
+						<a href="/services/personal-injury" class="block py-2 text-white/60 hover:text-gold text-sm" onclick={() => mobileMenuOpen = false}>Personal Injury</a>
+						<a href="/services/criminal-defense" class="block py-2 text-white/60 hover:text-gold text-sm" onclick={() => mobileMenuOpen = false}>Criminal Defense</a>
+						<a href="/services/employment-law" class="block py-2 text-white/60 hover:text-gold text-sm" onclick={() => mobileMenuOpen = false}>Employment Law</a>
+						<a href="/services/real-estate-business" class="block py-2 text-white/60 hover:text-gold text-sm" onclick={() => mobileMenuOpen = false}>Real Estate & Business</a>
+						<a href="/services/civil-rights" class="block py-2 text-white/60 hover:text-gold text-sm" onclick={() => mobileMenuOpen = false}>Civil Rights</a>
+						<a href="/services/cannabis-law" class="block py-2 text-white/60 hover:text-gold text-sm" onclick={() => mobileMenuOpen = false}>Cannabis Law</a>
+						<a href="/services/appeals" class="block py-2 text-white/60 hover:text-gold text-sm" onclick={() => mobileMenuOpen = false}>Appeals</a>
+						<a href="/services/property-damage" class="block py-2 text-white/60 hover:text-gold text-sm" onclick={() => mobileMenuOpen = false}>Property Damage</a>
 					</div>
 				{/if}
 				
-				<a href="/meet-ben-king" class="block py-3 text-white/80 hover:text-gold border-b border-white/10">Meet Ben King</a>
-				<a href="/our-team" class="block py-3 text-white/80 hover:text-gold border-b border-white/10">Our Team</a>
-				<a href="/contact" class="block py-3 text-white/80 hover:text-gold border-b border-white/10">Contact</a>
+				<a href="/meet-ben-king" class="block py-3 text-white/80 hover:text-gold border-b border-white/10" onclick={() => mobileMenuOpen = false}>Meet Ben King</a>
+				<a href="/our-team" class="block py-3 text-white/80 hover:text-gold border-b border-white/10" onclick={() => mobileMenuOpen = false}>Our Team</a>
+				<a href="/contact" class="block py-3 text-white/80 hover:text-gold border-b border-white/10" onclick={() => mobileMenuOpen = false}>Contact</a>
 				
 				<div class="pt-4 space-y-3">
 					{#if user}
 						<a 
 							href={user.role === 'lawyer' ? '/dashboard/lawyer' : '/dashboard/client'}
 							class="block text-center bg-gold text-king-blue py-3 rounded-lg font-semibold"
+							onclick={() => mobileMenuOpen = false}
 						>
 							Dashboard
 						</a>
 					{:else}
-						<a href="/login" class="block text-center text-white/80 hover:text-gold py-2">Login</a>
-						<a href="/contact" class="block text-center bg-gold text-king-blue py-3 rounded-lg font-semibold">
+						<a href="/login" class="block text-center text-white/80 hover:text-gold py-2" onclick={() => mobileMenuOpen = false}>Login</a>
+						<a href="/contact" class="block text-center bg-gold text-king-blue py-3 rounded-lg font-semibold" onclick={() => mobileMenuOpen = false}>
 							Free Consultation
 						</a>
 					{/if}
