@@ -46,10 +46,11 @@
 		<div class="bg-card border border-border rounded-lg p-6 shadow-lg">
 			<form onsubmit={handleSubmit}>
 				{#if error}
-					<div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 px-4 py-3 rounded mb-4">
-						{error}
-					</div>
-				{/if}
+				<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+					<p class="font-medium">Registration Error</p>
+					<p class="text-sm">{error}</p>
+				</div>
+			{/if}
 
 				<div class="grid grid-cols-2 gap-4 mb-4">
 					<div>

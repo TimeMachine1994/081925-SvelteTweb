@@ -1,18 +1,14 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { lucia } from '$lib/server/auth';
+import { invalidateSession, SESSION_COOKIE_NAME } from '$lib/server/auth';
 
 export const POST: RequestHandler = async ({ locals, cookies }) => {
 	if (!locals.session) {
 		return json({ success: false });
 	}
 
-	await lucia.invalidateSession(locals.session.id);
-	const sessionCookie = lucia.createBlankSessionCookie();
-	cookies.set(sessionCookie.name, sessionCookie.value, {
-		path: '.',
-		...sessionCookie.attributes
-	});
+	await invalidateSession(locals.session.id);
+	cookies.delete(SESSION_COOKIE_NAME, { path: '/' });
 
 	return json({ success: true });
 };

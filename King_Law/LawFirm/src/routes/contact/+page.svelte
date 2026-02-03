@@ -116,7 +116,7 @@
 							<div>
 								<p class="text-gold uppercase tracking-[0.2em] text-xs mb-3">Address</p>
 								<p class="text-white/80">
-									123 Legal Street<br />
+									419 N. Magnolia Ave<br />
 									Orlando, FL 32801
 								</p>
 							</div>
@@ -130,8 +130,8 @@
 
 							<div>
 								<p class="text-gold uppercase tracking-[0.2em] text-xs mb-3">Email</p>
-								<a href="mailto:info@kinglawfirm.com" class="text-white/80 hover:text-gold transition-colors">
-									info@kinglawfirm.com
+								<a href="mailto:ben@givekingaring.com" class="text-white/80 hover:text-gold transition-colors">
+									ben@givekingaring.com
 								</a>
 							</div>
 

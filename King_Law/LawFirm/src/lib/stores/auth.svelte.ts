@@ -69,22 +69,44 @@ class AuthStore {
 	}) {
 		this.loading = true;
 		this.error = null;
+		console.log('📝 [AuthStore] Starting registration...');
+		console.log('📝 [AuthStore] Registration data:', {
+			email: userData.email,
+			firstName: userData.firstName,
+			lastName: userData.lastName,
+			phoneNumber: userData.phoneNumber,
+			role: userData.role,
+			hasPassword: !!userData.password
+		});
 		try {
+			console.log('📝 [AuthStore] Sending POST to /api/auth/register...');
 			const response = await fetch('/api/auth/register', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify(userData)
 			});
 
+			console.log('📝 [AuthStore] Response status:', response.status);
+			console.log('📝 [AuthStore] Response ok:', response.ok);
+
 			if (!response.ok) {
-				const data = await response.json();
+				const text = await response.text();
+				console.error('❌ [AuthStore] Error response body:', text);
+				let data;
+				try {
+					data = JSON.parse(text);
+				} catch {
+					throw new Error(`Registration failed: ${text}`);
+				}
 				throw new Error(data.message || 'Registration failed');
 			}
 
 			const data = await response.json();
+			console.log('✅ [AuthStore] Registration successful:', data);
 			this.user = data.user;
 			return { success: true };
 		} catch (err) {
+			console.error('❌ [AuthStore] Registration error:', err);
 			this.error = err instanceof Error ? err.message : 'Registration failed';
 			return { success: false, error: this.error };
 		} finally {

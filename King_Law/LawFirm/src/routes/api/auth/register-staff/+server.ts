@@ -4,7 +4,7 @@ import { db } from '$lib/server/db';
 import { user as userTable, staffCodes } from '$lib/server/db/schema';
 import { eq, or } from 'drizzle-orm';
 import { hash } from '@node-rs/argon2';
-import { lucia, generateId } from '$lib/server/auth';
+import { generateId, createSession, generateSessionToken, SESSION_COOKIE_NAME } from '$lib/server/auth';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	try {
@@ -88,11 +88,14 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			.where(eq(staffCodes.id, staffCode.id));
 
 		// Create session
-		const session = await lucia.createSession(userId, {});
-		const sessionCookie = lucia.createSessionCookie(session.id);
-		cookies.set(sessionCookie.name, sessionCookie.value, {
+		const token = generateSessionToken();
+		await createSession(token, userId);
+		cookies.set(SESSION_COOKIE_NAME, token, {
 			path: '/',
-			...sessionCookie.attributes
+			httpOnly: true,
+			sameSite: 'lax',
+			secure: false, // set to true in production
+			maxAge: 60 * 60 * 24 * 30 // 30 days
 		});
 
 		// Clear staff verification cookie
@@ -108,9 +111,21 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 				lastName: newUser.lastName
 			}
 		});
-	} catch (err) {
+	} catch (err: any) {
 		console.error('Staff registration error:', err);
+		// Re-throw HTTP errors (like our validation errors)
 		if (err instanceof Response) throw err;
-		throw error(500, 'Failed to register');
+		if (err?.status && err?.body) throw err;
+		
+		// Check for specific database errors
+		const errMsg = err?.message || String(err);
+		if (errMsg.includes('UNIQUE constraint failed') && errMsg.includes('email')) {
+			throw error(400, 'An account with this email already exists');
+		}
+		if (errMsg.includes('UNIQUE constraint failed')) {
+			throw error(400, 'An account with this information already exists');
+		}
+		
+		throw error(500, 'Registration failed. Please try again later.');
 	}
 };

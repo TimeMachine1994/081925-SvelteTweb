@@ -17,7 +17,7 @@
 
 			<!-- Desktop Navigation -->
 			<div class="hidden lg:flex items-center gap-10">
-				<a href="/" class="text-king-blue/70 hover:text-king-blue transition-colors text-sm tracking-wide uppercase">Home</a>
+				<a href="/meet-ben-king" class="text-king-blue/70 hover:text-king-blue transition-colors text-sm tracking-wide uppercase">Meet Ben King</a>
 				
 				<div class="relative group">
 					<button class="text-king-blue/70 hover:text-king-blue transition-colors text-sm tracking-wide uppercase flex items-center gap-1">
@@ -40,7 +40,6 @@
 					</div>
 				</div>
 
-				<a href="/meet-ben-king" class="text-king-blue/70 hover:text-king-blue transition-colors text-sm tracking-wide uppercase">Meet Ben King</a>
 				<a href="/our-team" class="text-king-blue/70 hover:text-king-blue transition-colors text-sm tracking-wide uppercase">Our Team</a>
 				<a href="/contact" class="text-king-blue/70 hover:text-king-blue transition-colors text-sm tracking-wide uppercase">Contact</a>
 			</div>
@@ -85,8 +84,8 @@
 	{#if mobileMenuOpen}
 		<div class="lg:hidden bg-king-blue">
 			<div class="px-6 py-6 space-y-1">
-				<a href="/" class="block py-3 text-white/80 hover:text-gold border-b border-white/10" onclick={() => mobileMenuOpen = false}>Home</a>
-				
+				<a href="/meet-ben-king" class="block py-3 text-white/80 hover:text-gold border-b border-white/10" onclick={() => mobileMenuOpen = false}>Meet Ben King</a>
+ 				
 				<button 
 					class="w-full flex justify-between items-center py-3 text-white/80 hover:text-gold border-b border-white/10"
 					onclick={() => servicesOpen = !servicesOpen}
@@ -109,7 +108,6 @@
 					</div>
 				{/if}
 				
-				<a href="/meet-ben-king" class="block py-3 text-white/80 hover:text-gold border-b border-white/10" onclick={() => mobileMenuOpen = false}>Meet Ben King</a>
 				<a href="/our-team" class="block py-3 text-white/80 hover:text-gold border-b border-white/10" onclick={() => mobileMenuOpen = false}>Our Team</a>
 				<a href="/contact" class="block py-3 text-white/80 hover:text-gold border-b border-white/10" onclick={() => mobileMenuOpen = false}>Contact</a>
 				
