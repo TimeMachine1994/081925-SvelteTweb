@@ -71,7 +71,7 @@
 						Free Consultation →
 					</a>
 					<a href="tel:4075550100" class="border-2 border-white/30 hover:border-gold text-white px-8 py-4 rounded-lg font-semibold transition-all flex items-center gap-2">
-						<span class="text-gold">📞</span> (407) 555-0100
+						<span class="text-gold">📞</span> (689) 353-6948
 					</a>
 				</div>
 			</div>
@@ -295,7 +295,7 @@
 								id="phone" 
 								name="phone" 
 								class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all"
-								placeholder="(407) 555-0100"
+								placeholder="(689) 353-6948"
 							/>
 						</div>
 						<div>

@@ -18,12 +18,7 @@
 			bio: 'Em is committed to providing compassionate and thorough legal support, helping clients navigate complex situations with clarity and confidence.',
 			image: 'https://kinglawbucket.s3.us-east-2.amazonaws.com/public/020226-Photos-Headshots/020226-Shoot-EM.jpg'
 		},
-		{
-			name: 'Jessica',
-			title: 'Team Member',
-			bio: 'Jessica combines attention to detail with a client-first approach, ensuring every aspect of a case is handled with professionalism and care.',
-			image: null
-		},
+	 
 		{
 			name: 'Austin',
 			title: 'Team Member',

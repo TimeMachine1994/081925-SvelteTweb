@@ -9,41 +9,32 @@ import { dev } from '$app/environment';
 export const actions: Actions = {
 	default: async ({ request, cookies }) => {
 		const data = await request.formData();
-		const username = data.get('username')?.toString();
+		const email = data.get('email')?.toString();
 		const password = data.get('password')?.toString();
 
-		if (!username || !password) {
-			return fail(400, { error: 'Username and password are required' });
+		if (!email || !password) {
+			return fail(400, { error: 'Email and password are required' });
 		}
 
-		// Normalize username/email to lowercase for case-insensitive login
-		const normalizedUsername = username.toLowerCase();
+		// Normalize email to lowercase for case-insensitive login
+		const normalizedEmail = email.toLowerCase();
 
-		// Try to find user by username first
-		let existingUser = await db
+		// Find user by email
+		const existingUser = await db
 			.select()
 			.from(user)
-			.where(eq(user.username, normalizedUsername))
+			.where(eq(user.email, normalizedEmail))
 			.limit(1);
-		
-		// If not found by username, try email
-		if (existingUser.length === 0) {
-			existingUser = await db
-				.select()
-				.from(user)
-				.where(eq(user.email, normalizedUsername))
-				.limit(1);
-		}
 
 		if (existingUser.length === 0) {
-			return fail(400, { error: 'Invalid username or password' });
+			return fail(400, { error: 'Invalid email or password' });
 		}
 
 		const dbUser = existingUser[0];
 		const validPassword = await verifyPassword(dbUser.passwordHash, password);
 
 		if (!validPassword) {
-			return fail(400, { error: 'Invalid username or password' });
+			return fail(400, { error: 'Invalid email or password' });
 		}
 
 		// Create session

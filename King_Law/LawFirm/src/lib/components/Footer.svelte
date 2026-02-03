@@ -13,7 +13,7 @@
 				<div class="flex items-center gap-6">
 					<a href="tel:4075550100" class="flex items-center gap-2 text-gold hover:text-gold-light transition-colors">
 						<span>📞</span>
-						<span class="font-semibold">(407) 555-0100</span>
+						<span class="font-semibold">(689) 353-6948</span>
 					</a>
 				</div>
 			</div>

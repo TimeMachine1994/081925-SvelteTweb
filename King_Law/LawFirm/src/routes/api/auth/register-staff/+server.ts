@@ -14,11 +14,11 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			throw error(401, 'Staff verification required. Please enter the staff password first.');
 		}
 
-		const { username, email, password, firstName, lastName, phoneNumber, employeeNumber } =
+		const { email, password, firstName, lastName, phoneNumber, employeeNumber } =
 			await request.json();
 
 		// Validate required fields
-		if (!username || !email || !password || !firstName || !lastName || !employeeNumber) {
+		if (!email || !password || !firstName || !lastName || !employeeNumber) {
 			throw error(400, 'Required fields are missing');
 		}
 
@@ -48,7 +48,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		const existingUsers = await db
 			.select()
 			.from(userTable)
-			.where(or(eq(userTable.username, username), eq(userTable.email, email)))
+			.where(eq(userTable.email, email))
 			.limit(1);
 
 		if (existingUsers.length > 0) {
@@ -69,7 +69,6 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			.insert(userTable)
 			.values({
 				id: userId,
-				username,
 				email,
 				passwordHash,
 				role: staffCode.role,
@@ -103,7 +102,6 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			success: true,
 			user: {
 				id: newUser.id,
-				username: newUser.username,
 				email: newUser.email,
 				role: newUser.role,
 				firstName: newUser.firstName,

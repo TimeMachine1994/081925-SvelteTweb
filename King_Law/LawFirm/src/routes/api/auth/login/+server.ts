@@ -8,20 +8,20 @@ import { lucia } from '$lib/server/auth';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	try {
-		const { username, password } = await request.json();
+		const { email, password } = await request.json();
 
-		if (!username || !password) {
-			throw error(400, 'Username and password are required');
+		if (!email || !password) {
+			throw error(400, 'Email and password are required');
 		}
 
 		const [existingUser] = await db
 			.select()
 			.from(userTable)
-			.where(eq(userTable.username, username))
+			.where(eq(userTable.email, email.toLowerCase()))
 			.limit(1);
 
 		if (!existingUser) {
-			throw error(400, 'Invalid username or password');
+			throw error(400, 'Invalid email or password');
 		}
 
 		const validPassword = await verify(existingUser.passwordHash, password, {
@@ -32,7 +32,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		});
 
 		if (!validPassword) {
-			throw error(400, 'Invalid username or password');
+			throw error(400, 'Invalid email or password');
 		}
 
 		const session = await lucia.createSession(existingUser.id, {});
@@ -46,7 +46,6 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			success: true,
 			user: {
 				id: existingUser.id,
-				username: existingUser.username,
 				email: existingUser.email,
 				role: existingUser.role,
 				firstName: existingUser.firstName,

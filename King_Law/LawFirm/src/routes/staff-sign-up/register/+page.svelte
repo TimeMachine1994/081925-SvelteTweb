@@ -4,7 +4,6 @@
 
 	let firstName = $state('');
 	let lastName = $state('');
-	let username = $state('');
 	let email = $state('');
 	let phoneNumber = $state('');
 	let password = $state('');
@@ -34,7 +33,6 @@
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					username,
 					email,
 					password,
 					firstName,
@@ -114,17 +112,6 @@
 							class="w-full px-3 py-2 border border-input rounded-md bg-background"
 						/>
 					</div>
-				</div>
-
-				<div class="mb-4">
-					<label for="username" class="block text-sm font-medium mb-2">Username</label>
-					<input
-						type="text"
-						id="username"
-						bind:value={username}
-						required
-						class="w-full px-3 py-2 border border-input rounded-md bg-background"
-					/>
 				</div>
 
 				<div class="mb-4">

@@ -124,7 +124,7 @@
 							<div>
 								<p class="text-gold uppercase tracking-[0.2em] text-xs mb-3">Phone</p>
 								<a href="tel:4075550100" class="text-white hover:text-gold transition-colors text-xl font-semibold">
-									(407) 555-0100
+									(689) 353-6948
 								</a>
 							</div>
 

@@ -1,6 +1,5 @@
 type User = {
 	id: string;
-	username: string;
 	email: string;
 	role: 'client' | 'lawyer' | 'staff' | 'admin';
 	firstName: string;
@@ -33,14 +32,14 @@ class AuthStore {
 		}
 	}
 
-	async login(username: string, password: string) {
+	async login(email: string, password: string) {
 		this.loading = true;
 		this.error = null;
 		try {
 			const response = await fetch('/api/auth/login', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ username, password })
+				body: JSON.stringify({ email, password })
 			});
 
 			if (!response.ok) {
@@ -60,7 +59,6 @@ class AuthStore {
 	}
 
 	async register(userData: {
-		username: string;
 		email: string;
 		password: string;
 		firstName: string;

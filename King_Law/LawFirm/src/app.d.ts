@@ -5,11 +5,10 @@ declare global {
 		interface Locals {
 			user: {
 				id: string;
-				username: string;
 				email: string;
 				firstName: string;
 				lastName: string;
-				role: 'client' | 'lawyer' | 'admin';
+				role: 'client' | 'lawyer' | 'admin' | 'staff';
 				phoneNumber: string | null;
 			} | null;
 			session: {
