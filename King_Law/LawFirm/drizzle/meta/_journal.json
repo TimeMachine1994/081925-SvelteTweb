@@ -15,6 +15,13 @@
       "when": 1768509325002,
       "tag": "0001_curious_golden_guardian",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1770149350241,
+      "tag": "0002_remove-username-requirement",
+      "breakpoints": true
     }
   ]
 }
