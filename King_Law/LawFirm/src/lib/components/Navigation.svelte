@@ -41,6 +41,7 @@
 				</div>
 
 				<a href="/meet-ben-king" class="text-king-blue/70 hover:text-king-blue transition-colors text-sm tracking-wide uppercase">Meet Ben King</a>
+				<a href="/our-team" class="text-king-blue/70 hover:text-king-blue transition-colors text-sm tracking-wide uppercase">Our Team</a>
 				<a href="/contact" class="text-king-blue/70 hover:text-king-blue transition-colors text-sm tracking-wide uppercase">Contact</a>
 			</div>
 
@@ -109,6 +110,7 @@
 				{/if}
 				
 				<a href="/meet-ben-king" class="block py-3 text-white/80 hover:text-gold border-b border-white/10">Meet Ben King</a>
+				<a href="/our-team" class="block py-3 text-white/80 hover:text-gold border-b border-white/10">Our Team</a>
 				<a href="/contact" class="block py-3 text-white/80 hover:text-gold border-b border-white/10">Contact</a>
 				
 				<div class="pt-4 space-y-3">

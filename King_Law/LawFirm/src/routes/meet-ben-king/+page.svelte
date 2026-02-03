@@ -28,15 +28,11 @@
 				<!-- Profile Card -->
 				<div class="relative">
 					<div class="bg-white rounded-2xl overflow-hidden shadow-2xl">
-						<!-- Stock Image Placeholder -->
-						<div class="aspect-[4/5] bg-gradient-to-b from-gray-200 to-gray-300 flex items-center justify-center">
-							<div class="text-center">
-								<div class="w-32 h-32 bg-gray-400 rounded-full mx-auto mb-4 flex items-center justify-center">
-									<span class="text-6xl text-gray-500">👤</span>
-								</div>
-								<p class="text-gray-500 text-sm">Professional Photo</p>
-							</div>
-						</div>
+						<img 
+							src="https://kinglawbucket.s3.us-east-2.amazonaws.com/public/020226-Photos-Headshots/020226-Shoot-Ben.jpg" 
+							alt="Ben King" 
+							class="aspect-[4/5] w-full object-cover"
+						/>
 						<div class="p-6 text-center">
 							<h3 class="font-title text-2xl text-king-blue">Ben King</h3>
 							<p class="text-gold">Founder & Lead Attorney</p>
