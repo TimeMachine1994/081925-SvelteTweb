@@ -3,6 +3,7 @@
 	import { casesStore } from '$lib/stores/cases.svelte.ts';
 	import { documentsStore } from '$lib/stores/documents.svelte.ts';
 	import { messagesStore } from '$lib/stores/messages.svelte.ts';
+	import { chatUIStore } from '$lib/stores/chatUI.svelte.ts';
 	import CreateCaseModal from '$lib/components/CreateCaseModal.svelte';
 
 	let { data }: { data: PageData } = $props();
@@ -10,6 +11,13 @@
 	let showCreateCaseModal = $state(false);
 	let selectedClientId = $state<string | null>(null);
 	let selectedClientForMessages = $state<string | null>(null);
+	let hiddenClientIds = $state<Set<string>>(new Set());
+	let showAllClientsModal = $state(false);
+
+	// Filter out hidden clients
+	let visibleNewClients = $derived(
+		data.newClients?.filter((c: any) => !hiddenClientIds.has(c.id)) || []
+	);
 
 	function handleCaseCreated(event: CustomEvent) {
 		showCreateCaseModal = false;
@@ -27,6 +35,15 @@
 	function openCreateCase() {
 		selectedClientId = null;
 		showCreateCaseModal = true;
+	}
+
+	function hideClient(clientId: string) {
+		hiddenClientIds = new Set([...hiddenClientIds, clientId]);
+	}
+
+	function viewClientMessages(clientId: string, clientName: string) {
+		// Open the chat slider and set it to show this client's messages
+		chatUIStore.openForClient(clientId, clientName);
 	}
 
 	function formatFileSize(bytes: number): string {
@@ -84,17 +101,25 @@
 	</div>
 
 	<!-- New Clients Alert (clients without cases) -->
-	{#if data.newClients && data.newClients.length > 0}
+	{#if visibleNewClients.length > 0}
 		<div class="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-300 dark:border-blue-700 rounded-lg p-6 mb-8">
 			<div class="flex items-start">
 				<div class="text-3xl mr-4">👤</div>
 				<div class="flex-1">
-					<h3 class="font-semibold text-lg mb-2">New Client Registrations</h3>
+					<div class="flex justify-between items-center mb-2">
+						<h3 class="font-semibold text-lg">New Client Registrations</h3>
+						<button 
+							onclick={() => showAllClientsModal = true}
+							class="text-sm text-blue-600 hover:underline"
+						>
+							See All Clients
+						</button>
+					</div>
 					<p class="text-sm text-muted-foreground mb-4">
 						These clients have registered but don't have a case yet. Review their information and create cases as needed.
 					</p>
 					<div class="space-y-4">
-						{#each data.newClients as client}
+						{#each visibleNewClients as client}
 							<div class="bg-background border border-border rounded-lg p-4">
 								<div class="flex justify-between items-start mb-3">
 									<div>
@@ -111,12 +136,29 @@
 											Registered: {formatDate(client.createdAt)}
 										</div>
 									</div>
-									<button 
-										onclick={() => openCreateCaseForClient(client.id)}
-										class="bg-gold hover:bg-gold-dark text-black px-4 py-2 rounded font-semibold text-sm"
-									>
-										Create Case
-									</button>
+									<div class="flex gap-2 items-center">
+										<button 
+											onclick={() => viewClientMessages(client.id, `${client.firstName} ${client.lastName}`)}
+											class="text-sm text-blue-600 hover:underline"
+										>
+											View Messages
+										</button>
+										<button 
+											onclick={() => openCreateCaseForClient(client.id)}
+											class="bg-gold hover:bg-gold-dark text-black px-4 py-2 rounded font-semibold text-sm"
+										>
+											Create Case
+										</button>
+										<button 
+											onclick={() => hideClient(client.id)}
+											class="text-gray-400 hover:text-red-500 p-1"
+											title="Hide this client"
+										>
+											<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+											</svg>
+										</button>
+									</div>
 								</div>
 								
 								{#if client.files && client.files.length > 0}
@@ -168,12 +210,20 @@
 											{thread.messages.length} message{thread.messages.length !== 1 ? 's' : ''}
 										</div>
 									</div>
-									<button 
-										onclick={() => openCreateCaseForClient(thread.client.id)}
-										class="text-sm bg-gold hover:bg-gold-dark text-black px-3 py-1 rounded"
-									>
-										Create Case
-									</button>
+									<div class="flex gap-2">
+										<button 
+											onclick={() => viewClientMessages(thread.client.id, `${thread.client.firstName} ${thread.client.lastName}`)}
+											class="text-sm text-blue-600 hover:underline"
+										>
+											View Messages
+										</button>
+										<button 
+											onclick={() => openCreateCaseForClient(thread.client.id)}
+											class="text-sm bg-gold hover:bg-gold-dark text-black px-3 py-1 rounded"
+										>
+											Create Case
+										</button>
+									</div>
 								</div>
 								<!-- Show latest message preview -->
 								<div class="text-sm text-muted-foreground bg-muted/50 rounded p-2 mt-2">
@@ -256,27 +306,35 @@
 		</div>
 
 		{#if data.documents.length > 0}
-			<div class="bg-background border border-border rounded-lg overflow-hidden">
+			<div class="bg-background border border-border rounded-lg overflow-hidden overflow-x-auto">
 				<table class="w-full">
 					<thead class="bg-muted">
 						<tr>
-							<th class="text-left px-6 py-3 text-sm font-semibold">File Name</th>
-							<th class="text-left px-6 py-3 text-sm font-semibold">Size</th>
-							<th class="text-left px-6 py-3 text-sm font-semibold">Uploaded</th>
-							<th class="text-right px-6 py-3 text-sm font-semibold">Actions</th>
+							<th class="text-left px-4 py-3 text-sm font-semibold">File Name</th>
+							<th class="text-left px-4 py-3 text-sm font-semibold">Client</th>
+							<th class="text-left px-4 py-3 text-sm font-semibold">Case</th>
+							<th class="text-left px-4 py-3 text-sm font-semibold">Size</th>
+							<th class="text-left px-4 py-3 text-sm font-semibold">Uploaded</th>
+							<th class="text-right px-4 py-3 text-sm font-semibold">Actions</th>
 						</tr>
 					</thead>
 					<tbody>
 						{#each data.documents as doc}
 							<tr class="border-t border-border hover:bg-muted/50">
-								<td class="px-6 py-4">{doc.fileName}</td>
-								<td class="px-6 py-4 text-sm text-muted-foreground">
+								<td class="px-4 py-4">{doc.fileName}</td>
+								<td class="px-4 py-4 text-sm">
+									{doc.uploaderFirstName || ''} {doc.uploaderLastName || ''}
+								</td>
+								<td class="px-4 py-4 text-sm text-muted-foreground">
+									{doc.caseTitle || 'N/A'}
+								</td>
+								<td class="px-4 py-4 text-sm text-muted-foreground">
 									{(doc.fileSize / 1024).toFixed(1)} KB
 								</td>
-								<td class="px-6 py-4 text-sm text-muted-foreground">
+								<td class="px-4 py-4 text-sm text-muted-foreground">
 									{formatDate(doc.uploadedAt)}
 								</td>
-								<td class="px-6 py-4 text-right">
+								<td class="px-4 py-4 text-right">
 									<a href="/api/documents/{doc.id}" class="text-gold hover:underline text-sm">
 										Download
 									</a>
@@ -352,3 +410,64 @@
 	on:close={() => { showCreateCaseModal = false; selectedClientId = null; }}
 	on:created={handleCaseCreated}
 />
+
+<!-- All Clients Modal -->
+{#if showAllClientsModal}
+	<div
+		class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+		onclick={() => showAllClientsModal = false}
+		role="button"
+		tabindex="-1"
+	>
+		<div
+			class="bg-background border border-border rounded-lg shadow-xl max-w-3xl w-full max-h-[80vh] overflow-hidden"
+			onclick={(e) => e.stopPropagation()}
+			role="dialog"
+			aria-modal="true"
+		>
+			<div class="flex items-center justify-between p-6 border-b border-border">
+				<h2 class="font-title text-2xl">All Clients ({data.allClients?.length || 0})</h2>
+				<button
+					onclick={() => showAllClientsModal = false}
+					class="p-2 hover:bg-muted rounded-md transition-colors"
+					aria-label="Close modal"
+				>
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+					</svg>
+				</button>
+			</div>
+			<div class="p-6 overflow-y-auto max-h-[60vh]">
+				{#if data.allClients && data.allClients.length > 0}
+					<div class="space-y-3">
+						{#each data.allClients as client}
+							<div class="bg-muted/30 border border-border rounded-lg p-4 flex justify-between items-center">
+								<div>
+									<div class="font-semibold">{client.firstName} {client.lastName}</div>
+									<div class="text-sm text-muted-foreground">{client.email}</div>
+									<div class="text-xs text-muted-foreground">Registered: {formatDate(client.createdAt)}</div>
+								</div>
+								<div class="flex gap-2">
+									<button 
+										onclick={() => { viewClientMessages(client.id, `${client.firstName} ${client.lastName}`); showAllClientsModal = false; }}
+										class="text-sm text-blue-600 hover:underline"
+									>
+										Messages
+									</button>
+									<button 
+										onclick={() => { openCreateCaseForClient(client.id); showAllClientsModal = false; }}
+										class="text-sm bg-gold hover:bg-gold-dark text-black px-3 py-1 rounded"
+									>
+										Create Case
+									</button>
+								</div>
+							</div>
+						{/each}
+					</div>
+				{:else}
+					<p class="text-muted-foreground text-center">No clients registered yet</p>
+				{/if}
+			</div>
+		</div>
+	</div>
+{/if}

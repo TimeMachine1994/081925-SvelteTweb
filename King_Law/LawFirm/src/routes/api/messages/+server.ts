@@ -12,15 +12,27 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 	try {
 		const caseId = url.searchParams.get('caseId');
 		const uncategorized = url.searchParams.get('uncategorized') === 'true';
+		const isLawyer = locals.user.role === 'lawyer' || locals.user.role === 'admin';
 
-		let conditions = [
-			or(eq(messages.senderId, locals.user.id), eq(messages.recipientId, locals.user.id))
-		];
+		let conditions: any[] = [];
 
-		if (uncategorized) {
+		if (uncategorized && isLawyer) {
+			// Lawyers can see ALL uncategorized messages (from any client)
 			conditions.push(isNull(messages.caseId));
-		} else if (caseId) {
-			conditions.push(eq(messages.caseId, caseId));
+		} else if (uncategorized) {
+			// Clients only see their own uncategorized messages
+			conditions.push(isNull(messages.caseId));
+			conditions.push(
+				or(eq(messages.senderId, locals.user.id), eq(messages.recipientId, locals.user.id))
+			);
+		} else {
+			// For case messages, only show if user is sender or recipient
+			conditions.push(
+				or(eq(messages.senderId, locals.user.id), eq(messages.recipientId, locals.user.id))
+			);
+			if (caseId) {
+				conditions.push(eq(messages.caseId, caseId));
+			}
 		}
 
 		const messageList = await db

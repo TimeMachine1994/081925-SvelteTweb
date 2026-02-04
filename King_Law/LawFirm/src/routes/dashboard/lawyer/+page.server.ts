@@ -1,6 +1,6 @@
 import { db } from '$lib/server/db';
 import { cases, documents, invoices, messages, user } from '$lib/server/db/schema';
-import { eq, isNull, and, notInArray, sql } from 'drizzle-orm';
+import { eq, isNull, and, notInArray, sql, inArray } from 'drizzle-orm';
 import { listClientFiles } from '$lib/server/s3';
 import type { PageServerLoad } from './$types';
 
@@ -17,11 +17,36 @@ export const load: PageServerLoad = async ({ locals }) => {
 		.innerJoin(user, eq(cases.clientId, user.id))
 		.where(eq(cases.lawyerId, lawyerId));
 
-	// Load all documents
-	const allDocuments = await db
-		.select()
+	// Load all documents with uploader info
+	const allDocumentsRaw = await db
+		.select({
+			id: documents.id,
+			fileName: documents.fileName,
+			filePath: documents.filePath,
+			fileSize: documents.fileSize,
+			mimeType: documents.mimeType,
+			uploadedAt: documents.uploadedAt,
+			caseId: documents.caseId,
+			uploadedById: documents.uploadedById,
+			uploaderFirstName: user.firstName,
+			uploaderLastName: user.lastName
+		})
 		.from(documents)
+		.leftJoin(user, eq(documents.uploadedById, user.id))
 		.limit(10);
+
+	// Get case titles for documents
+	const docCaseIds = [...new Set(allDocumentsRaw.filter(d => d.caseId).map(d => d.caseId as string))];
+	const caseTitles = docCaseIds.length > 0
+		? await db.select({ id: cases.id, title: cases.title }).from(cases).where(inArray(cases.id, docCaseIds))
+		: [];
+	const caseTitleMap = Object.fromEntries(caseTitles.map(c => [c.id, c.title]));
+
+	// Enhance documents with case title
+	const allDocuments = allDocumentsRaw.map(doc => ({
+		...doc,
+		caseTitle: doc.caseId ? caseTitleMap[doc.caseId] || 'Unknown' : null
+	}));
 
 	// Load all invoices
 	const allInvoices = await db
@@ -125,12 +150,26 @@ export const load: PageServerLoad = async ({ locals }) => {
 		return acc;
 	}, {} as Record<string, { client: any; messages: any[] }>);
 
+	// Load ALL clients (for "See All Clients" feature)
+	const allClients = await db
+		.select({
+			id: user.id,
+			firstName: user.firstName,
+			lastName: user.lastName,
+			email: user.email,
+			phoneNumber: user.phoneNumber,
+			createdAt: user.createdAt
+		})
+		.from(user)
+		.where(eq(user.role, 'client'));
+
 	return {
 		cases: lawyerCases,
 		documents: allDocuments,
 		invoices: allInvoices,
 		uncategorizedThreads: Object.values(messagesByClient),
 		newClients: newClientsWithFiles,
+		allClients: allClients,
 		stats: {
 			totalCases,
 			activeCases,

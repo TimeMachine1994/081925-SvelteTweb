@@ -53,6 +53,15 @@
 					>
 						Dashboard
 					</a>
+					<a 
+						href="/logout"
+						class="text-king-blue/70 hover:text-red-600 transition-colors p-2 rounded-lg hover:bg-red-50"
+						title="Logout"
+					>
+						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+						</svg>
+					</a>
 				{:else}
 					<a href="/login" class="text-king-blue/70 hover:text-king-blue transition-colors text-sm">Login</a>
 					<a href="/contact" class="bg-king-blue hover:bg-king-blue-light text-white px-6 py-2.5 rounded-lg font-semibold transition-all hover:shadow-lg">
@@ -119,6 +128,16 @@
 							onclick={() => mobileMenuOpen = false}
 						>
 							Dashboard
+						</a>
+						<a 
+							href="/logout"
+							class="flex items-center justify-center gap-2 text-white/80 hover:text-red-400 py-2 transition-colors"
+							onclick={() => mobileMenuOpen = false}
+						>
+							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+							</svg>
+							Logout
 						</a>
 					{:else}
 						<a href="/login" class="block text-center text-white/80 hover:text-gold py-2" onclick={() => mobileMenuOpen = false}>Login</a>
