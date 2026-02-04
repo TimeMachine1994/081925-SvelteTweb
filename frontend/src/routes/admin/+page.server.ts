@@ -15,7 +15,7 @@ import type { Actions } from './$types';
 export const load = async ({ locals }: any) => {
 	console.log('🔐 [ADMIN LOAD] Starting admin dashboard load for:', locals.user?.email);
 
-	try {
+	try { 
 		// === AUTHENTICATION & AUTHORIZATION ===
 		// Following same pattern as memorial APIs
 		if (!locals.user) {
