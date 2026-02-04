@@ -123,8 +123,8 @@
 
 							<div>
 								<p class="text-gold uppercase tracking-[0.2em] text-xs mb-3">Phone</p>
-								<a href="tel:4075550100" class="text-white hover:text-gold transition-colors text-xl font-semibold">
-									(689) 353-6948
+								<a href="tel:6893536943" class="text-white hover:text-gold transition-colors text-xl font-semibold">
+									(689) 353-6943
 								</a>
 							</div>
 

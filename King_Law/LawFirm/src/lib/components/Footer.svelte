@@ -11,9 +11,9 @@
 					Providing exceptional legal services with integrity, expertise, and unwavering dedication to achieving the best outcomes for our clients.
 				</p>
 				<div class="flex items-center gap-6">
-					<a href="tel:4075550100" class="flex items-center gap-2 text-gold hover:text-gold-light transition-colors">
+					<a href="tel:6893536943" class="flex items-center gap-2 text-gold hover:text-gold-light transition-colors">
 						<span>📞</span>
-						<span class="font-semibold">(689) 353-6948</span>
+						<span class="font-semibold">(689) 353-6943</span>
 					</a>
 				</div>
 			</div>

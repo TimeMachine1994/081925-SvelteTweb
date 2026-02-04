@@ -19,8 +19,8 @@
 						<a href="/contact" class="bg-gold hover:bg-gold-light text-king-blue px-8 py-4 rounded-lg font-bold transition-all">
 							Schedule a Consultation
 						</a>
-						<a href="tel:4075550100" class="border-2 border-white/30 hover:border-gold text-white px-8 py-4 rounded-lg font-semibold transition-all">
-							(689) 353-6948
+						<a href="tel:6893536943" class="border-2 border-white/30 hover:border-gold text-white px-8 py-4 rounded-lg font-semibold transition-all">
+							(689) 353-6943
 						</a>
 					</div>
 				</div>

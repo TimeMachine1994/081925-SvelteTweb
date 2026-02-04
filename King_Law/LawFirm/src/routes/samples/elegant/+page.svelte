@@ -133,8 +133,8 @@
 				<a href="/contact" class="bg-king-blue hover:bg-king-blue-light text-white px-10 py-4 rounded-sm font-semibold transition-colors">
 					Request Consultation
 				</a>
-				<a href="tel:4075550100" class="border border-king-blue text-king-blue hover:bg-king-blue hover:text-white px-10 py-4 rounded-sm font-semibold transition-colors">
-					(689) 353-6948
+				<a href="tel:6893536943" class="border border-king-blue text-king-blue hover:bg-king-blue hover:text-white px-10 py-4 rounded-sm font-semibold transition-colors">
+					(689) 353-6943
 				</a>
 			</div>
 		</div>

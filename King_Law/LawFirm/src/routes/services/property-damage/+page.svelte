@@ -128,8 +128,8 @@
 				<a href="/contact" class="bg-gold hover:bg-gold-dark text-black font-semibold px-8 py-3 rounded-md transition-colors">
 					Free Claim Review
 				</a>
-				<a href="tel:4075550100" class="border-2 border-gold text-gold hover:bg-gold hover:text-black font-semibold px-8 py-3 rounded-md transition-colors">
-					Call (689) 353-6948
+				<a href="tel:6893536943" class="border-2 border-gold text-gold hover:bg-gold hover:text-black font-semibold px-8 py-3 rounded-md transition-colors">
+					Call (689) 353-6943
 				</a>
 			</div>
 		</div>
