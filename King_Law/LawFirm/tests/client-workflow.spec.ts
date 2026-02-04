@@ -47,7 +47,7 @@ test.describe('Client Workflow', () => {
 			await expect(page.locator('text=Documents')).toBeVisible();
 			await expect(page.locator('text=Invoices')).toBeVisible();
 		} else {
-			test.skip('No cases assigned to test client');
+			test.skip(true, 'No cases assigned to test client');
 		}
 	});
 
@@ -55,7 +55,7 @@ test.describe('Client Workflow', () => {
 		const firstCase = page.locator('a[href^="/dashboard/client/case/"]').first();
 		
 		if (!(await firstCase.isVisible())) {
-			test.skip('No cases available for document upload');
+			test.skip(true, 'No cases available for document upload');
 			return;
 		}
 
@@ -86,7 +86,7 @@ test.describe('Client Workflow', () => {
 		const firstCase = page.locator('a[href^="/dashboard/client/case/"]').first();
 		
 		if (!(await firstCase.isVisible())) {
-			test.skip('No cases available');
+			test.skip(true, 'No cases available');
 			return;
 		}
 
@@ -109,7 +109,7 @@ test.describe('Client Workflow', () => {
 		const firstCase = page.locator('a[href^="/dashboard/client/case/"]').first();
 		
 		if (!(await firstCase.isVisible())) {
-			test.skip('No cases available for messaging');
+			test.skip(true, 'No cases available for messaging');
 			return;
 		}
 
@@ -131,7 +131,7 @@ test.describe('Client Workflow', () => {
 			// Verify message appears in chat
 			await expect(page.locator(`text=${testMessage}`)).toBeVisible({ timeout: 5000 });
 		} else {
-			test.skip('Message input not found on case page');
+			test.skip(true, 'Message input not found on case page');
 		}
 	});
 });

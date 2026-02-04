@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { messagesStore } from '$lib/stores/messages.svelte.ts';
-	import { casesStore } from '$lib/stores/cases.svelte.ts';
-	import { authStore } from '$lib/stores/auth.svelte.ts';
-	import { chatUIStore } from '$lib/stores/chatUI.svelte.ts';
+	import { messagesStore } from '$lib/stores/messages.svelte';
+	import { casesStore } from '$lib/stores/cases.svelte';
+	import { authStore } from '$lib/stores/auth.svelte';
+	import { chatUIStore } from '$lib/stores/chatUI.svelte';
 	import MessageBubble from './MessageBubble.svelte';
 	import AttachmentUploader from './AttachmentUploader.svelte';
 	import { onMount, onDestroy } from 'svelte';
@@ -17,11 +17,16 @@
 		onclose?: () => void;
 	} = $props();
 
-	let isOpen = $state(open);
+	let isOpen = $state(false);
 	let messageContent = $state('');
 	let selectedFile = $state<File | null>(null);
-	let messagesContainer: HTMLDivElement;
+	let messagesContainer = $state<HTMLDivElement | null>(null);
 	let sending = $state(false);
+
+	// Sync with prop
+	$effect(() => {
+		isOpen = open;
+	});
 
 	// Filter messages by selected client if viewing uncategorized
 	let displayMessages = $derived(() => {
@@ -37,8 +42,11 @@
 	// Auto-scroll to bottom when new messages arrive
 	$effect(() => {
 		if (messagesStore.messages.length && messagesContainer) {
+			const container = messagesContainer;
 			setTimeout(() => {
-				messagesContainer.scrollTop = messagesContainer.scrollHeight;
+				if (container) {
+					container.scrollTop = container.scrollHeight;
+				}
 			}, 100);
 		}
 	});
@@ -109,8 +117,8 @@
 		sending = false;
 	}
 
-	function handleFileSelect(e: CustomEvent<File>) {
-		selectedFile = e.detail;
+	function handleFileSelect(file: File) {
+		selectedFile = file;
 	}
 
 	function handleFileClear() {
@@ -180,8 +188,10 @@
 	<div
 		class="fixed inset-0 bg-black/50 md:hidden z-40"
 		onclick={toggleChat}
+		onkeydown={(e) => e.key === 'Escape' && toggleChat()}
 		role="button"
 		tabindex="-1"
+		aria-label="Close chat"
 	></div>
 
 	<!-- Chat Panel -->

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { LayoutData } from './$types';
 	import ChatSlider from '$lib/components/ChatSlider.svelte';
-	import { authStore } from '$lib/stores/auth.svelte.ts';
+	import { authStore } from '$lib/stores/auth.svelte';
 
 	let { data, children }: { data: LayoutData; children: any } = $props();
 </script>

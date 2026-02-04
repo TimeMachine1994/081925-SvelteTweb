@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { messagesStore } from '$lib/stores/messages.svelte.ts';
-	import { toastStore } from '$lib/stores/toast.svelte.ts';
+	import { messagesStore } from '$lib/stores/messages.svelte';
+	import { toastStore } from '$lib/stores/toast.svelte';
 	import AttachmentUploader from './AttachmentUploader.svelte';
 
 	interface Props {
@@ -89,8 +89,8 @@
 		}
 	}
 
-	function handleFileSelect(e: CustomEvent<File>) {
-		selectedFile = e.detail;
+	function handleFileSelect(file: File) {
+		selectedFile = file;
 	}
 
 	function handleFileClear() {
@@ -175,7 +175,7 @@
 		></textarea>
 
 		{#if showAttachment}
-			<AttachmentUploader on:select={handleFileSelect} on:clear={handleFileClear} />
+			<AttachmentUploader onselect={handleFileSelect} onclear={handleFileClear} />
 		{/if}
 
 		<div class="flex items-center justify-between gap-3">

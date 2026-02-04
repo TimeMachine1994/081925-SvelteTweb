@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { casesStore } from '$lib/stores/cases.svelte.ts';
-	import { documentsStore } from '$lib/stores/documents.svelte.ts';
-	import { messagesStore } from '$lib/stores/messages.svelte.ts';
-	import { invoicesStore } from '$lib/stores/invoices.svelte.ts';
+	import { casesStore } from '$lib/stores/cases.svelte';
+	import { documentsStore } from '$lib/stores/documents.svelte';
+	import { messagesStore } from '$lib/stores/messages.svelte';
+	import { invoicesStore } from '$lib/stores/invoices.svelte';
 
 	let activeCases = $derived(casesStore.cases.filter(c => c.case.status === 'active').length);
 	let documentsCount = $derived(documentsStore.documents.length);

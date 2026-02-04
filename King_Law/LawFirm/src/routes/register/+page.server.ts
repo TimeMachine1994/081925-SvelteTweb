@@ -84,8 +84,8 @@ export const actions: Actions = {
 				lastName,
 				phoneNumber,
 				role: role || 'client',
-				createdAt: new Date(),
-				updatedAt: new Date()
+				createdAt: Math.floor(Date.now() / 1000),
+				updatedAt: Math.floor(Date.now() / 1000)
 			});
 			console.log('✅ User inserted into database');
 

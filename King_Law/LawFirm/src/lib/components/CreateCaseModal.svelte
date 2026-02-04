@@ -10,7 +10,7 @@
 		email: string;
 	};
 
-	let { open = false, initialClientId = null }: { open?: boolean; initialClientId?: string | null } = $props();
+	let { open = $bindable(false), initialClientId = null }: { open?: boolean; initialClientId?: string | null } = $props();
 
 	let clients = $state<Client[]>([]);
 	let loading = $state(false);
@@ -128,14 +128,18 @@
 	<div
 		class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
 		onclick={handleClose}
+		onkeydown={(e) => e.key === 'Escape' && handleClose()}
 		role="button"
 		tabindex="-1"
+		aria-label="Close modal"
 	>
 		<div
 			class="bg-background border border-border rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
 			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
 			role="dialog"
 			aria-modal="true"
+			tabindex="-1"
 		>
 			<!-- Header -->
 			<div class="flex items-center justify-between p-6 border-b border-border">

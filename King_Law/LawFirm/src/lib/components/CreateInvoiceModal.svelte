@@ -98,14 +98,18 @@
 	<div
 		class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
 		onclick={handleClose}
+		onkeydown={(e) => e.key === 'Escape' && handleClose()}
 		role="button"
 		tabindex="-1"
+		aria-label="Close modal"
 	>
 		<div
 			class="bg-background border border-border rounded-lg shadow-xl max-w-lg w-full"
 			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
 			role="dialog"
 			aria-modal="true"
+			tabindex="-1"
 		>
 			<!-- Header -->
 			<div class="flex items-center justify-between p-6 border-b border-border">

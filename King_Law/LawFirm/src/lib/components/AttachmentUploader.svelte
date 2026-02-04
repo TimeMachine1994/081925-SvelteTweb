@@ -1,9 +1,13 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
+	let {
+		onselect,
+		onclear
+	}: {
+		onselect?: (file: File) => void;
+		onclear?: () => void;
+	} = $props();
 
-	const dispatch = createEventDispatcher<{ select: File; clear: void }>();
-
-	let fileInput: HTMLInputElement;
+	let fileInput = $state<HTMLInputElement | null>(null);
 	let selectedFile = $state<File | null>(null);
 	let error = $state<string | null>(null);
 	let isDragging = $state(false);
@@ -41,7 +45,7 @@
 
 		if (file && validateFile(file)) {
 			selectedFile = file;
-			dispatch('select', file);
+			onselect?.(file);
 		} else {
 			selectedFile = null;
 		}
@@ -54,7 +58,7 @@
 		const file = e.dataTransfer?.files[0];
 		if (file && validateFile(file)) {
 			selectedFile = file;
-			dispatch('select', file);
+			onselect?.(file);
 		}
 	}
 
@@ -71,7 +75,7 @@
 		selectedFile = null;
 		error = null;
 		if (fileInput) fileInput.value = '';
-		dispatch('clear');
+		onclear?.();
 	}
 
 	function formatFileSize(bytes: number): string {
@@ -90,6 +94,8 @@
 			ondrop={handleDrop}
 			ondragover={handleDragOver}
 			ondragleave={handleDragLeave}
+			role="region"
+			aria-label="File drop zone"
 		>
 			<input
 				type="file"

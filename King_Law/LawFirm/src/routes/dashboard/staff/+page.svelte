@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { authStore } from '$lib/stores/auth.svelte.ts';
+	import { authStore } from '$lib/stores/auth.svelte';
 	import { onMount } from 'svelte';
 
 	let loading = $state(true);

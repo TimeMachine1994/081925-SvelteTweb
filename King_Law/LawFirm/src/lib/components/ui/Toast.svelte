@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { toastStore } from '$lib/stores/toast.svelte.ts';
+	import { toastStore } from '$lib/stores/toast.svelte';
 
 	const typeStyles = {
 		success: 'bg-green-500 text-white',

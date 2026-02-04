@@ -14,7 +14,7 @@ declare global {
 			session: {
 				id: string;
 				userId: string;
-				expiresAt: Date;
+				expiresAt: number;
 			} | null;
 		}
 	}

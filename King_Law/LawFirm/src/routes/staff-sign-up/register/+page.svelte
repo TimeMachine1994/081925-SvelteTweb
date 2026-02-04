@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { authStore } from '$lib/stores/auth.svelte.ts';
+	import { authStore } from '$lib/stores/auth.svelte';
 
 	let firstName = $state('');
 	let lastName = $state('');

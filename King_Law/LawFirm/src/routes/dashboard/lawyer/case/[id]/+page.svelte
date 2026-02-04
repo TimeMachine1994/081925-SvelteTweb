@@ -11,8 +11,9 @@
 		}).format(cents / 100);
 	}
 
-	function formatDate(date: Date): string {
-		return new Date(date).toLocaleDateString('en-US', {
+	function formatDate(date: Date | number): string {
+		const d = typeof date === 'number' ? new Date(date * 1000) : new Date(date);
+		return d.toLocaleDateString('en-US', {
 			year: 'numeric',
 			month: 'short',
 			day: 'numeric',

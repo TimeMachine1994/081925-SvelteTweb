@@ -9,7 +9,7 @@ test.describe('Chat with Attachments', () => {
 		const firstCase = page.locator('a[href^="/dashboard/lawyer/case/"]').first();
 		
 		if (!(await firstCase.isVisible())) {
-			test.skip('No cases available for testing chat');
+			test.skip(true, 'No cases available for testing chat');
 			return;
 		}
 
@@ -29,7 +29,7 @@ test.describe('Chat with Attachments', () => {
 		
 		if (await messageInput.isVisible()) {
 			await messageInput.fill(messageText);
-			await page.click('button:has-text("Send")').last();
+			await page.locator('button:has-text("Send")').last().click();
 			
 			// Wait for message to appear
 			await page.waitForTimeout(1000);
@@ -46,7 +46,7 @@ test.describe('Chat with Attachments', () => {
 		const firstCase = page.locator('a[href^="/dashboard/client/case/"]').first();
 		
 		if (!(await firstCase.isVisible())) {
-			test.skip('No cases available for client');
+			test.skip(true, 'No cases available for client');
 			return;
 		}
 
@@ -91,7 +91,7 @@ test.describe('Chat with Attachments', () => {
 		const firstCase = page.locator('a[href^="/dashboard/lawyer/case/"]').first();
 		
 		if (!(await firstCase.isVisible())) {
-			test.skip('No cases available');
+			test.skip(true, 'No cases available');
 			return;
 		}
 

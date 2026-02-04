@@ -65,7 +65,7 @@ test.describe('Lawyer Workflow', () => {
 			await expect(page).toHaveURL(/\/dashboard\/lawyer\/case\/.+/);
 			await expect(page.locator('h1')).toBeVisible();
 		} else {
-			test.skip('No cases available to test navigation');
+			test.skip(true, 'No cases available to test navigation');
 		}
 	});
 
@@ -74,7 +74,7 @@ test.describe('Lawyer Workflow', () => {
 		const firstCase = page.locator('a[href^="/dashboard/lawyer/case/"]').first();
 		
 		if (!(await firstCase.isVisible())) {
-			test.skip('No cases available for invoice creation');
+			test.skip(true, 'No cases available for invoice creation');
 			return;
 		}
 
@@ -114,7 +114,7 @@ test.describe('Lawyer Workflow', () => {
 		const firstCase = page.locator('a[href^="/dashboard/lawyer/case/"]').first();
 		
 		if (!(await firstCase.isVisible())) {
-			test.skip('No cases available for document upload');
+			test.skip(true, 'No cases available for document upload');
 			return;
 		}
 

@@ -39,7 +39,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		.leftJoin(user, eq(documents.uploadedById, user.id))
 		.leftJoin(cases, eq(documents.caseId, cases.id))
 		.where(
-			db.$with ? undefined : eq(documents.caseId, caseIds[0]) // Simplified for single case
+			caseIds.length > 0 ? eq(documents.caseId, caseIds[0]) : undefined // Simplified for single case
 		)
 		.orderBy(desc(documents.uploadedAt));
 

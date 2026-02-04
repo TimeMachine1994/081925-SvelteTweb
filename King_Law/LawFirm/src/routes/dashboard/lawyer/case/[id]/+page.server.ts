@@ -96,14 +96,14 @@ export const actions: Actions = {
 		}
 
 		await db.insert(invoices).values({
-			id: generateId(),
 			caseId: params.id,
+			id: generateId(),
 			description,
 			amount: Math.round(amount * 100),
-			dueDate: new Date(dueDate),
+			dueDate: Math.floor(new Date(dueDate).getTime() / 1000),
 			status: 'unpaid',
 			paidAmount: 0,
-			createdAt: new Date()
+			createdAt: Math.floor(Date.now() / 1000)
 		});
 
 		return { success: true };
