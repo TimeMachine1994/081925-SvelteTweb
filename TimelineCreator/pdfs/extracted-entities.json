@@ -1,0 +1,886 @@
+[
+  {
+    "type": "exhibit_number",
+    "text": "000003",
+    "confidence": 0.99880815,
+    "page": "2"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000004",
+    "confidence": 0.9997963,
+    "page": "3"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000008",
+    "confidence": 0.99975866,
+    "page": "7"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000008",
+    "confidence": 0.99975866,
+    "page": "7"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000009",
+    "confidence": 0.9983908,
+    "page": "8"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000011",
+    "confidence": 0.99872965,
+    "page": "10"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000013",
+    "confidence": 0.99717516,
+    "page": "12"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000014",
+    "confidence": 0.99558693,
+    "page": "13"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000006",
+    "confidence": 0.9941875,
+    "page": "5"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000015",
+    "confidence": 0.993668,
+    "page": "14"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000001",
+    "confidence": 0.98884004
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000010",
+    "confidence": 0.9723404,
+    "page": "9"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000012",
+    "confidence": 0.8310486,
+    "page": "11"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000005",
+    "confidence": 0.8006645,
+    "page": "4"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000002",
+    "confidence": 0.7101191,
+    "page": "1"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000061",
+    "confidence": 0.999586
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000062",
+    "confidence": 0.99919415,
+    "page": "1"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000063",
+    "confidence": 0.9994393,
+    "page": "2"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000065",
+    "confidence": 0.99971974,
+    "page": "4"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000067",
+    "confidence": 0.9981928,
+    "page": "6"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000070",
+    "confidence": 0.99908304,
+    "page": "9"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000074",
+    "confidence": 0.99972904,
+    "page": "13"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000066",
+    "confidence": 0.9968634,
+    "page": "5"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000069",
+    "confidence": 0.9958293,
+    "page": "8"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000071",
+    "confidence": 0.9929036,
+    "page": "10"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000073",
+    "confidence": 0.99152195,
+    "page": "12"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000075",
+    "confidence": 0.99064213,
+    "page": "14"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000072",
+    "confidence": 0.9572528,
+    "page": "11"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000068",
+    "confidence": 0.9309116,
+    "page": "7"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000064",
+    "confidence": 0.86522734,
+    "page": "3"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000078",
+    "confidence": 0.99977994,
+    "page": "2"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000080",
+    "confidence": 0.9996948,
+    "page": "4"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000077",
+    "confidence": 0.99863875,
+    "page": "1"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000081",
+    "confidence": 0.9996283,
+    "page": "5"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000082",
+    "confidence": 0.99961895,
+    "page": "6"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000084",
+    "confidence": 0.9993211,
+    "page": "8"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000086",
+    "confidence": 0.9995508,
+    "page": "10"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000087",
+    "confidence": 0.99980295,
+    "page": "11"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000088",
+    "confidence": 0.9994424,
+    "page": "12"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000090",
+    "confidence": 0.9995635,
+    "page": "14"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000079",
+    "confidence": 0.99163955,
+    "page": "3"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000089",
+    "confidence": 0.9890752,
+    "page": "13"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000085",
+    "confidence": 0.9866035,
+    "page": "9"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000076",
+    "confidence": 0.80727315
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000083",
+    "confidence": 0.7961768,
+    "page": "7"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000093",
+    "confidence": 0.998139,
+    "page": "2"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000094",
+    "confidence": 0.99886894,
+    "page": "3"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000096",
+    "confidence": 0.99892414,
+    "page": "5"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000097",
+    "confidence": 0.9997078,
+    "page": "6"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000098",
+    "confidence": 0.99973506,
+    "page": "7"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000100",
+    "confidence": 0.9986348,
+    "page": "9"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000101",
+    "confidence": 0.99926716,
+    "page": "10"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000102",
+    "confidence": 0.9990246,
+    "page": "11"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000104",
+    "confidence": 0.99921304,
+    "page": "13"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000105",
+    "confidence": 0.9817252,
+    "page": "14"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000092",
+    "confidence": 0.96013767,
+    "page": "1"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000099",
+    "confidence": 0.94334555,
+    "page": "8"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000091",
+    "confidence": 0.7844025
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000103",
+    "confidence": 0.6733698,
+    "page": "12"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000095",
+    "confidence": 0.5667137,
+    "page": "4"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000109",
+    "confidence": 0.9994326,
+    "page": "3"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000114",
+    "confidence": 0.99971867,
+    "page": "8"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000115",
+    "confidence": 0.99952704,
+    "page": "9"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000107",
+    "confidence": 0.9982472,
+    "page": "1"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000108",
+    "confidence": 0.99799156,
+    "page": "2"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000110",
+    "confidence": 0.99804133,
+    "page": "4"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000118",
+    "confidence": 0.9985831,
+    "page": "12"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000119",
+    "confidence": 0.99867857,
+    "page": "13"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000106",
+    "confidence": 0.9923106
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000111",
+    "confidence": 0.9721389,
+    "page": "5"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000120",
+    "confidence": 0.96744096,
+    "page": "14"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000116",
+    "confidence": 0.8717575,
+    "page": "10"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000112",
+    "confidence": 0.81417125,
+    "page": "6"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000117",
+    "confidence": 0.78865916,
+    "page": "11"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000113",
+    "confidence": 0.70975953,
+    "page": "7"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000121",
+    "confidence": 0.99951977
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000122",
+    "confidence": 0.9998101,
+    "page": "1"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000123",
+    "confidence": 0.9997783,
+    "page": "2"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000124",
+    "confidence": 0.99951434,
+    "page": "3"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000126",
+    "confidence": 0.99976313,
+    "page": "5"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000128",
+    "confidence": 0.99952,
+    "page": "7"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000129",
+    "confidence": 0.999776,
+    "page": "8"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000131",
+    "confidence": 0.99929494,
+    "page": "10"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000133",
+    "confidence": 0.9996145,
+    "page": "12"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000127",
+    "confidence": 0.998206,
+    "page": "6"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000135",
+    "confidence": 0.9974525,
+    "page": "14"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000130",
+    "confidence": 0.98808783,
+    "page": "9"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000132",
+    "confidence": 0.9870505,
+    "page": "11"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000134",
+    "confidence": 0.957371,
+    "page": "13"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000125",
+    "confidence": 0.86874396,
+    "page": "4"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000187",
+    "confidence": 0.99985313,
+    "page": "6"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000181",
+    "confidence": 0.99868536
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000183",
+    "confidence": 0.9985487,
+    "page": "2"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000184",
+    "confidence": 0.99844754,
+    "page": "3"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000188",
+    "confidence": 0.9981427,
+    "page": "7"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000191",
+    "confidence": 0.9986988,
+    "page": "10"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000192",
+    "confidence": 0.9990021,
+    "page": "11"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000193",
+    "confidence": 0.99982965,
+    "page": "12"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000194",
+    "confidence": 0.99969697,
+    "page": "13"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000189",
+    "confidence": 0.99727064,
+    "page": "8"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000195",
+    "confidence": 0.9977746,
+    "page": "14"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000186",
+    "confidence": 0.99472874,
+    "page": "5"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000190",
+    "confidence": 0.9689568,
+    "page": "9"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000185",
+    "confidence": 0.95394003,
+    "page": "4"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000182",
+    "confidence": 0.900814,
+    "page": "1"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000196",
+    "confidence": 0.999312
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000197",
+    "confidence": 0.9994833,
+    "page": "1"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000200",
+    "confidence": 0.99964774,
+    "page": "4"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000199",
+    "confidence": 0.99844486,
+    "page": "3"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000201",
+    "confidence": 0.9994087,
+    "page": "5"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000202",
+    "confidence": 0.99940234,
+    "page": "6"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000205",
+    "confidence": 0.9986732,
+    "page": "9"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000206",
+    "confidence": 0.998672,
+    "page": "10"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000208",
+    "confidence": 0.9996642,
+    "page": "12"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000209",
+    "confidence": 0.9989777,
+    "page": "13"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000207",
+    "confidence": 0.9928059,
+    "page": "11"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000204",
+    "confidence": 0.989296,
+    "page": "8"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000198",
+    "confidence": 0.9622177,
+    "page": "2"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000203",
+    "confidence": 0.5070376,
+    "page": "7"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000217",
+    "confidence": 0.99900967,
+    "page": "6"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000218",
+    "confidence": 0.99928284,
+    "page": "7"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000223",
+    "confidence": 0.99751455,
+    "page": "12"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000211",
+    "confidence": 0.995468
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000220",
+    "confidence": 0.995728,
+    "page": "9"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000219",
+    "confidence": 0.989674,
+    "page": "8"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000215",
+    "confidence": 0.9865501,
+    "page": "4"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000212",
+    "confidence": 0.98044986,
+    "page": "1"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000222",
+    "confidence": 0.90426993,
+    "page": "11"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000216",
+    "confidence": 0.85966265,
+    "page": "5"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000213",
+    "confidence": 0.8139393,
+    "page": "2"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000225",
+    "confidence": 0.72487265,
+    "page": "14"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000224",
+    "confidence": 0.6810941,
+    "page": "13"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000214",
+    "confidence": 0.21735725,
+    "page": "3"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000221",
+    "confidence": 0.1854217,
+    "page": "10"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000227",
+    "confidence": 0.99933887,
+    "page": "1"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000233",
+    "confidence": 0.9997034,
+    "page": "7"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000237",
+    "confidence": 0.9996807,
+    "page": "11"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000394",
+    "confidence": 0.99913996,
+    "page": "14"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000226",
+    "confidence": 0.9979905
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000229",
+    "confidence": 0.99699014,
+    "page": "3"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000234",
+    "confidence": 0.9977608,
+    "page": "8"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000238",
+    "confidence": 0.9978911,
+    "page": "12"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000239",
+    "confidence": 0.9929838,
+    "page": "13"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000232",
+    "confidence": 0.99009687,
+    "page": "6"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000235",
+    "confidence": 0.97821504,
+    "page": "9"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000228",
+    "confidence": 0.85444486,
+    "page": "2"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000236",
+    "confidence": 0.7599875,
+    "page": "10"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000231",
+    "confidence": 0.74240375,
+    "page": "5"
+  },
+  {
+    "type": "exhibit_number",
+    "text": "000230",
+    "confidence": 0.48092565,
+    "page": "4"
+  }
+]
