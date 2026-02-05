@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { faScaleBalanced, faPhone, faEnvelope, faLocationDot } from '@fortawesome/free-solid-svg-icons';
+	import { faScaleBalanced } from '@fortawesome/free-solid-svg-icons';
 	import Icon from './Icon.svelte';
 </script>
 
@@ -29,28 +29,6 @@
 				</ul>
 			</div>
 
-			<!-- Contact Info -->
-			<div>
-				<h3 class="font-title text-lg font-semibold mb-4">Contact Us</h3>
-				<ul class="space-y-3">
-					<li class="flex items-start space-x-3">
-						<Icon icon={faLocationDot} class="text-gold mt-1" />
-						<span class="text-muted-foreground">123 Legal Street<br />City, State 12345</span>
-					</li>
-					<li class="flex items-center space-x-3">
-						<Icon icon={faPhone} class="text-gold" />
-						<a href="tel:555-0100" class="text-muted-foreground hover:text-gold transition-colors">
-							(555) 010-0100
-						</a>
-					</li>
-					<li class="flex items-center space-x-3">
-						<Icon icon={faEnvelope} class="text-gold" />
-						<a href="mailto:info@kinglaw.com" class="text-muted-foreground hover:text-gold transition-colors">
-							info@kinglaw.com
-						</a>
-					</li>
-				</ul>
-			</div>
 		</div>
 
 		<div class="border border-gray-300 dark:border-gray-700 mt-8 pt-8 text-center text-muted-foreground">

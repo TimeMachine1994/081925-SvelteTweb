@@ -36,15 +36,6 @@
 			>
 		</div>
 		<div class="footer-section">
-			<h3 class="footer-heading">COVERAGE LOCATIONS</h3>
-			<p>
-				Orange, Lake, Osceola, Seminole, Marion, Sumter, Volusia, Flagler, and Brevard counties.
-			</p>
-			<p>Please call if your location is not listed:</p>
-			<p>(407) 221-5922</p>
-			<p>Email: Contact@tributestream.com</p>
-		</div>
-		<div class="footer-section">
 			<h3 class="footer-heading">Office Hours</h3>
 			<p>Monday - Friday: 10:00AM - 5:00PM EST</p>
 			<p>Saturday - Sunday: 12:00PM - 5:00PM EST</p>
