@@ -105,5 +105,39 @@ export const actions: Actions = {
 		});
 
 		return { success: true };
+	},
+
+	markPaid: async ({ request, params, locals }) => {
+		if (!locals.user || (locals.user.role !== 'lawyer' && locals.user.role !== 'admin')) {
+			return fail(401, { error: 'Unauthorized' });
+		}
+
+		const data = await request.formData();
+		const invoiceId = data.get('invoiceId')?.toString();
+
+		if (!invoiceId) {
+			return fail(400, { error: 'Invoice ID is required' });
+		}
+
+		const [invoice] = await db
+			.select()
+			.from(invoices)
+			.where(eq(invoices.id, invoiceId))
+			.limit(1);
+
+		if (!invoice || invoice.caseId !== params.id) {
+			return fail(404, { error: 'Invoice not found' });
+		}
+
+		await db
+			.update(invoices)
+			.set({
+				status: 'paid',
+				paidAmount: invoice.amount,
+				paidAt: new Date()
+			})
+			.where(eq(invoices.id, invoiceId));
+
+		return { success: true };
 	}
 };

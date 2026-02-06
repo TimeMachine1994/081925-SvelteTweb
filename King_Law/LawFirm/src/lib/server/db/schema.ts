@@ -136,6 +136,22 @@ export const caseStaffAssignments = sqliteTable('case_staff_assignments', {
 		.default(sql`(unixepoch())`)
 });
 
+// Consultations Table (public form submissions)
+export const consultations = sqliteTable('consultations', {
+	id: text('id').primaryKey(),
+	firstName: text('first_name').notNull(),
+	lastName: text('last_name').notNull(),
+	email: text('email').notNull(),
+	phone: text('phone'),
+	message: text('message').notNull(),
+	status: text('status', { enum: ['new', 'contacted', 'converted', 'dismissed'] })
+		.notNull()
+		.default('new'),
+	createdAt: integer('created_at')
+		.notNull()
+		.default(sql`(unixepoch())`)
+});
+
 // Session Table (for Lucia auth)
 export const session = sqliteTable('session', {
 	id: text('id').primaryKey(),

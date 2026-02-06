@@ -63,6 +63,18 @@
 		
 		{#if loading}
 			<div class="p-6 text-center text-muted-foreground">Loading cases...</div>
+		{:else if error}
+			<div class="p-6">
+				<div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 text-center">
+					<p class="text-red-800 dark:text-red-200 font-medium">{error}</p>
+					<button
+						onclick={() => window.location.reload()}
+						class="mt-2 text-sm text-gold hover:underline"
+					>
+						Try again
+					</button>
+				</div>
+			</div>
 		{:else if assignedCases.length === 0}
 			<div class="p-6 text-center text-muted-foreground">
 				No cases assigned to you yet.

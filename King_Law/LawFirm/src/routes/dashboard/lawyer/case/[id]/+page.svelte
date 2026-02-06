@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { PageData, ActionData } from './$types';
-	import ChatSlider from '$lib/components/ChatSlider.svelte';
+	import CreateInvoiceModal from '$lib/components/CreateInvoiceModal.svelte';
+	import DocumentPreviewModal from '$lib/components/DocumentPreviewModal.svelte';
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -24,7 +25,15 @@
 
 	let messageText = $state('');
 	let showInvoiceForm = $state(false);
+	let showInvoiceModal = $state(false);
 	let uploadingFile = $state(false);
+	let confirmPayId = $state<string | null>(null);
+	let previewDoc = $state<{ id: string; fileName: string; fileSize: number; mimeType: string } | null>(null);
+
+	function handleInvoiceCreated() {
+		showInvoiceModal = false;
+		window.location.reload();
+	}
 
 	async function sendMessage() {
 		if (!messageText.trim()) return;
@@ -166,7 +175,13 @@
 										<td class="px-4 py-3 text-sm text-muted-foreground">
 											{(doc.fileSize / 1024).toFixed(1)} KB
 										</td>
-										<td class="px-4 py-3 text-right">
+										<td class="px-4 py-3 text-right space-x-2">
+											<button
+												onclick={() => (previewDoc = { id: doc.id, fileName: doc.fileName, fileSize: doc.fileSize, mimeType: doc.mimeType })}
+												class="text-gold hover:underline text-sm"
+											>
+												Preview
+											</button>
 											<a href="/api/documents/{doc.id}" class="text-gold hover:underline text-sm">
 												Download
 											</a>
@@ -260,12 +275,45 @@
 										{invoice.status}
 									</span>
 								</div>
-								<div class="text-lg font-bold">{formatCurrency(invoice.amount)}</div>
-								{#if invoice.paidAmount > 0}
-									<p class="text-sm text-muted-foreground">
-										Paid: {formatCurrency(invoice.paidAmount)}
-									</p>
-								{/if}
+								<div class="flex items-center justify-between">
+									<div>
+										<div class="text-lg font-bold">{formatCurrency(invoice.amount)}</div>
+										{#if invoice.paidAmount > 0}
+											<p class="text-sm text-muted-foreground">
+												Paid: {formatCurrency(invoice.paidAmount)}
+											</p>
+										{/if}
+									</div>
+									{#if invoice.status !== 'paid'}
+										{#if confirmPayId === invoice.id}
+											<div class="flex items-center gap-2">
+												<span class="text-xs text-muted-foreground">Confirm?</span>
+												<form method="POST" action="?/markPaid" use:enhance>
+													<input type="hidden" name="invoiceId" value={invoice.id} />
+													<button
+														type="submit"
+														class="text-xs px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors"
+													>
+														Yes, Mark Paid
+													</button>
+												</form>
+												<button
+													onclick={() => (confirmPayId = null)}
+													class="text-xs px-3 py-1 border border-input rounded-md hover:bg-muted transition-colors"
+												>
+													Cancel
+												</button>
+											</div>
+										{:else}
+											<button
+												onclick={() => (confirmPayId = invoice.id)}
+												class="text-xs px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-md transition-colors"
+											>
+												Mark Paid
+											</button>
+										{/if}
+									{/if}
+								</div>
 							</div>
 						{/each}
 					</div>
@@ -340,4 +388,11 @@
 	caseName={data.case.title}
 	oncreated={handleInvoiceCreated} 
 	onclose={() => (showInvoiceModal = false)} 
+/>
+
+<!-- Document Preview Modal -->
+<DocumentPreviewModal
+	open={!!previewDoc}
+	doc={previewDoc}
+	onclose={() => (previewDoc = null)}
 />

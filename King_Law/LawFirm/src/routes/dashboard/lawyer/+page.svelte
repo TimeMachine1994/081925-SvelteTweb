@@ -8,6 +8,22 @@
 	let { data }: { data: PageData } = $props();
 
 	let showCreateCaseModal = $state(false);
+	let searchQuery = $state('');
+	let statusFilter = $state<'all' | 'active' | 'pending' | 'closed'>('all');
+
+	let filteredCases = $derived(
+		data.cases.filter(({ case: c, client }) => {
+			if (statusFilter !== 'all' && c.status !== statusFilter) return false;
+			if (!searchQuery.trim()) return true;
+			const q = searchQuery.toLowerCase();
+			return (
+				c.title.toLowerCase().includes(q) ||
+				(c.description?.toLowerCase().includes(q) ?? false) ||
+				`${client.firstName} ${client.lastName}`.toLowerCase().includes(q) ||
+				client.email.toLowerCase().includes(q)
+			);
+		})
+	);
 
 	function handleCaseCreated(event: CustomEvent) {
 		showCreateCaseModal = false;
@@ -105,8 +121,36 @@
 		</div>
 
 		{#if data.cases.length > 0}
+			<!-- Search & Filter -->
+			<div class="flex flex-col sm:flex-row gap-3 mb-4">
+				<div class="flex-1 relative">
+					<input
+						type="text"
+						bind:value={searchQuery}
+						placeholder="Search cases by title, client name, or email..."
+						class="w-full px-4 py-2 pl-10 border border-input rounded-md bg-background"
+					/>
+					<span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">🔍</span>
+				</div>
+				<select
+					bind:value={statusFilter}
+					class="px-3 py-2 border border-input rounded-md bg-background text-sm"
+				>
+					<option value="all">All Statuses</option>
+					<option value="active">Active</option>
+					<option value="pending">Pending</option>
+					<option value="closed">Closed</option>
+				</select>
+			</div>
+
+			{#if filteredCases.length > 0}
+				<p class="text-xs text-muted-foreground mb-3">
+					Showing {filteredCases.length} of {data.cases.length} case{data.cases.length !== 1 ? 's' : ''}
+				</p>
+			{/if}
+
 			<div class="grid md:grid-cols-2 gap-4">
-				{#each data.cases as { case: caseItem, client }}
+				{#each filteredCases as { case: caseItem, client }}
 					<a
 						href="/dashboard/lawyer/case/{caseItem.id}"
 						class="bg-background border border-border rounded-lg p-6 hover:border-gold transition-all hover:shadow-lg group"
@@ -139,6 +183,18 @@
 					</a>
 				{/each}
 			</div>
+
+			{#if filteredCases.length === 0}
+				<div class="bg-background border border-border rounded-lg p-8 text-center">
+					<p class="text-muted-foreground">No cases match your search.</p>
+					<button
+						onclick={() => { searchQuery = ''; statusFilter = 'all'; }}
+						class="text-gold hover:underline text-sm mt-2"
+					>
+						Clear filters
+					</button>
+				</div>
+			{/if}
 		{:else}
 			<div class="bg-background border border-border rounded-lg p-8 text-center">
 				<div class="text-4xl mb-4">📋</div>

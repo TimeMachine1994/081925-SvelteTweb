@@ -27,6 +27,17 @@
 <div>
 	<h1 class="font-title text-4xl mb-8">Client Dashboard</h1>
 
+	{#if casesStore.error || messagesStore.error || documentsStore.error || invoicesStore.error}
+		<div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-8 text-center">
+			<p class="text-red-800 dark:text-red-200 font-medium">
+				{casesStore.error || messagesStore.error || documentsStore.error || invoicesStore.error}
+			</p>
+			<button onclick={() => window.location.reload()} class="mt-2 text-sm text-gold hover:underline">
+				Try again
+			</button>
+		</div>
+	{/if}
+
 	<!-- Stats Overview -->
 	<div class="grid md:grid-cols-4 gap-6 mb-8">
 		<div class="bg-background border border-border rounded-lg p-6">

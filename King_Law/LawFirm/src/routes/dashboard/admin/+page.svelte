@@ -10,14 +10,18 @@
 		unusedCodes: 0
 	});
 	let loading = $state(true);
+	let error = $state('');
 
 	onMount(async () => {
 		try {
 			const response = await fetch('/api/admin/stats');
 			if (response.ok) {
 				stats = await response.json();
+			} else {
+				error = 'Failed to load dashboard stats';
 			}
 		} catch (err) {
+			error = 'Failed to connect to the server';
 			console.error('Failed to load stats:', err);
 		} finally {
 			loading = false;
@@ -30,6 +34,15 @@
 		<h1 class="text-3xl font-title">Admin Dashboard</h1>
 		<p class="text-muted-foreground mt-1">System overview and management</p>
 	</div>
+
+	{#if error}
+		<div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-8 text-center">
+			<p class="text-red-800 dark:text-red-200 font-medium">{error}</p>
+			<button onclick={() => window.location.reload()} class="mt-2 text-sm text-gold hover:underline">
+				Try again
+			</button>
+		</div>
+	{/if}
 
 	<!-- Stats -->
 	<div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">

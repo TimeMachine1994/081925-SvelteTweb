@@ -1,8 +1,8 @@
 # King Law Firm - Master Development Documentation
 
-**Last Updated:** January 27, 2026 (11:55 AM)  
-**Project Status:** 🟢 Core Features Complete | 🟢 Messaging/Documents Refactor Complete  
-**Tech Stack:** SvelteKit 5 SPA | Svelte 5 Runes | Turso DB | Drizzle ORM | shadcn-svelte | TailwindCSS
+**Last Updated:** February 5, 2026  
+**Project Status:** 🟢 Core Features Complete | 🟢 Messaging/Documents Refactor Complete | 🟢 Staff System Complete | 🟢 Public Website Complete  
+**Tech Stack:** SvelteKit 5 SPA | Svelte 5 Runes | Turso DB | Drizzle ORM | TailwindCSS 4
 
 ---
 
@@ -57,7 +57,8 @@ Cases are the central organizational unit linking all entities:
 |------|--------------|
 | **Lawyer** | Full CRUD on cases, documents, invoices; messaging; client management |
 | **Client** | Read cases; upload documents; pay invoices; messaging (within assigned case) |
-| **Admin** | System oversight; test data cleanup; user management |
+| **Staff** | Read-only access to assigned cases; view documents and messages; cannot send messages or edit cases |
+| **Admin** | System oversight; staff code management; settings; user management |
 
 ---
 
@@ -87,7 +88,7 @@ The application is a **pure Single-Page Application** using SvelteKit's `adapter
 
 ### Security Model (Defense-in-Depth)
 1. **Authentication** - Lucia Auth with session cookies
-2. **Authorization** - Role-based access control (client/lawyer/admin)
+2. **Authorization** - Role-based access control (client/lawyer/staff/admin)
 3. **Path Validation** - Prevent directory traversal attacks
 4. **Access Control** - Verify user owns/has access to resource
 5. **Filesystem Isolation** - Documents stored in protected directory
@@ -112,9 +113,8 @@ The application is a **pure Single-Page Application** using SvelteKit's `adapter
 | Drizzle ORM | Database ORM | Latest |
 | Turso | Database (SQLite) | Cloud |
 | Lucia | Authentication | v3 |
-| shadcn-svelte | UI Components | Latest |
 | TailwindCSS | Styling | 4.x |
-| Font Awesome | Icons | 6.x |
+| Custom Components | UI (no external component library) | — |
 
 ### Key Configuration Files
 | File | Purpose |
@@ -144,12 +144,15 @@ STRIPE_WEBHOOK_SECRET= # Stripe webhook secret (future)
 ### Tables Overview
 | Table | Purpose | Status |
 |-------|---------|--------|
-| `users` | User accounts (clients, lawyers, admins) | ✅ Complete |
+| `users` | User accounts (clients, lawyers, staff, admins) | ✅ Complete |
 | `cases` | Legal cases linking lawyers and clients | ✅ Complete |
 | `documents` | Uploaded files associated with cases | ✅ Complete |
 | `invoices` | Billing records for cases | ✅ Complete |
 | `messages` | Communication threads | ✅ Complete |
 | `sessions` | User authentication sessions | ✅ Complete |
+| `staff_codes` | Employee number → role mapping for staff registration | ✅ Complete |
+| `system_settings` | System config (staff sign-up password, etc.) | ✅ Complete |
+| `case_staff_assignments` | Junction table: staff ↔ cases they can access | ✅ Complete |
 
 ### Schema Details
 
@@ -160,7 +163,7 @@ STRIPE_WEBHOOK_SECRET= # Stripe webhook secret (future)
 | email | TEXT | Unique, required |
 | hashedPassword | TEXT | Argon2 hashed |
 | name | TEXT | Display name |
-| role | TEXT | 'client' \| 'lawyer' \| 'admin' |
+| role | TEXT | 'client' \| 'lawyer' \| 'staff' \| 'admin' |
 | createdAt | INTEGER | Unix timestamp |
 
 #### `cases`
@@ -204,10 +207,37 @@ STRIPE_WEBHOOK_SECRET= # Stripe webhook secret (future)
 | id | TEXT | Primary key |
 | content | TEXT | Message body |
 | senderId | TEXT | FK → users.id |
+| recipientId | TEXT | FK → users.id (nullable) |
 | caseId | TEXT | FK → cases.id (nullable for uncategorized) |
-| attachmentPath | TEXT | Optional file attachment |
-| isRead | INTEGER | 0 = unread, 1 = read |
+| attachmentDocumentId | TEXT | FK → documents.id (nullable) |
+| readAt | INTEGER | Timestamp when read (nullable) |
 | createdAt | INTEGER | Unix timestamp |
+
+#### `staff_codes`
+| Column | Type | Notes |
+|--------|------|-------|
+| id | TEXT | Primary key |
+| employeeNumber | TEXT | Unique employee number |
+| role | TEXT | 'lawyer' \| 'staff' \| 'admin' |
+| assignedToUserId | TEXT | FK → users.id (nullable, set on use) |
+| createdAt | INTEGER | Unix timestamp |
+| usedAt | INTEGER | Timestamp when code was used (nullable) |
+
+#### `system_settings`
+| Column | Type | Notes |
+|--------|------|-------|
+| key | TEXT | Primary key |
+| value | TEXT | Setting value |
+| updatedAt | INTEGER | Unix timestamp |
+
+#### `case_staff_assignments`
+| Column | Type | Notes |
+|--------|------|-------|
+| id | TEXT | Primary key |
+| caseId | TEXT | FK → cases.id |
+| userId | TEXT | FK → users.id (staff member) |
+| assignedAt | INTEGER | Unix timestamp |
+| assignedBy | TEXT | FK → users.id (who assigned) |
 
 ---
 
@@ -223,25 +253,41 @@ STRIPE_WEBHOOK_SECRET= # Stripe webhook secret (future)
 #### Registration
 | Path | Description |
 |------|-------------|
-| `/register` | Client registration (default) |
-| `/register?code=k1ngl4w` | Lawyer registration (access code required) |
+| `/register` | Client registration (public) |
+| `/staff-sign-up` | Password gate for staff/lawyer/admin registration |
+| `/staff-sign-up/register` | Staff registration form (requires valid staff password + employee number) |
 
-#### Login/Logout
+#### Staff Registration Flow
+1. User navigates to `/staff-sign-up`
+2. Enters staff sign-up password (stored in `system_settings` table)
+3. On success, redirected to `/staff-sign-up/register`
+4. Fills form: name, email, password, employee number
+5. Employee number looked up in `staff_codes` table → determines role (lawyer/staff/admin)
+6. Account created with assigned role; staff code marked as used
+
+#### Auth Endpoints
 | Endpoint | Method | Purpose |
 |----------|--------|---------|
 | `POST /api/auth/login` | POST | Authenticate user, create session |
 | `POST /api/auth/logout` | POST | Destroy session |
-| `GET /api/auth/me` | GET | Get current user from session |
+| `GET /api/auth/user` | GET | Get current user from session |
+| `POST /api/auth/register` | POST | Client registration |
+| `POST /api/auth/register-staff` | POST | Staff registration with employee code |
+| `POST /api/auth/verify-staff-password` | POST | Validate staff sign-up password |
 
 ### Route Guards
-Client-side route protection via `authStore`:
+Client-side route protection via `authStore` and server-side layout guards:
 ```javascript
 // In +layout.svelte or +page.svelte
 if (!$authStore.user) {
   goto('/login');
 }
-if ($authStore.user.role !== 'lawyer') {
-  goto('/dashboard/client');
+// Role-based routing
+switch ($authStore.user.role) {
+  case 'lawyer': goto('/dashboard/lawyer'); break;
+  case 'client': goto('/dashboard/client'); break;
+  case 'staff':  goto('/dashboard/staff');  break;
+  case 'admin':  goto('/dashboard/admin');  break;
 }
 ```
 
@@ -250,7 +296,7 @@ if ($authStore.user.role !== 'lawyer') {
 |-----------|-------|----------|-------|
 | Test Client (no cases) | `nocases@test.com` | `TestPassword123!` | E2E testing |
 | Test Admin | `admin@test.com` | `AdminPassword123!` | E2E testing |
-| Lawyer Access Code | — | `k1ngl4w` | Registration |
+| Staff Sign-Up Password | — | Stored in `system_settings` | Admin-configurable |
 
 ---
 
@@ -261,17 +307,22 @@ if ($authStore.user.role !== 'lawyer') {
 |----------|--------|--------|-------------|
 | `/api/auth/login` | POST | ✅ | Login with email/password |
 | `/api/auth/logout` | POST | ✅ | Destroy session |
-| `/api/auth/register` | POST | ✅ | Create new user |
-| `/api/auth/me` | GET | ✅ | Get current session user |
+| `/api/auth/register` | POST | ✅ | Client registration |
+| `/api/auth/register-staff` | POST | ✅ | Staff registration with employee code |
+| `/api/auth/user` | GET | ✅ | Get current session user |
+| `/api/auth/verify-staff-password` | POST | ✅ | Validate staff sign-up password |
 
 ### Cases (`/api/cases/*`)
 | Endpoint | Method | Status | Description |
 |----------|--------|--------|-------------|
 | `/api/cases` | GET | ✅ | List cases (filtered by role) |
 | `/api/cases` | POST | ✅ | Create new case (auto-links uncategorized messages/documents from client) |
-| `/api/cases/[id]` | GET | ✅ | Get single case |
-| `/api/cases/[id]` | PUT | ✅ | Update case |
-| `/api/cases/[id]` | DELETE | ✅ | Delete/archive case |
+| `/api/cases/[id]` | GET | ✅ | Get single case (staff: requires assignment check) |
+| `/api/cases/[id]` | PATCH | ✅ | Update case (staff blocked) |
+| `/api/cases/[id]` | DELETE | ✅ | Delete/archive case (staff blocked) |
+| `/api/cases/[id]/staff` | GET | ✅ | List staff assigned to case |
+| `/api/cases/[id]/staff` | POST | ✅ | Assign staff to case |
+| `/api/cases/[id]/staff` | DELETE | ✅ | Remove staff assignment |
 
 ### Messages (`/api/messages/*`)
 | Endpoint | Method | Status | Description |
@@ -302,10 +353,40 @@ if ($authStore.user.role !== 'lawyer') {
 | `/api/invoices/[id]` | DELETE | ✅ | Delete invoice |
 | `/api/invoices/[id]/pay` | POST | ❌ | Process payment (Stripe) |
 
+### Users (`/api/users/*`)
+| Endpoint | Method | Status | Description |
+|----------|--------|--------|-------------|
+| `/api/users` | GET | ✅ | List all users |
+| `/api/users/staff` | GET | ✅ | List staff users |
+
+### Staff (`/api/staff/*`)
+| Endpoint | Method | Status | Description |
+|----------|--------|--------|-------------|
+| `/api/staff/cases` | GET | ✅ | Get cases assigned to current staff member |
+
 ### Admin (`/api/admin/*`)
 | Endpoint | Method | Status | Description |
 |----------|--------|--------|-------------|
+| `/api/admin/staff-codes` | GET | ✅ | List all staff codes |
+| `/api/admin/staff-codes` | POST | ✅ | Create new staff code |
+| `/api/admin/staff-codes/[id]` | DELETE | ✅ | Delete staff code |
+| `/api/admin/settings/staff-password` | GET | ✅ | Get staff sign-up password |
+| `/api/admin/settings/staff-password` | PUT | ✅ | Update staff sign-up password |
+| `/api/admin/stats` | GET | ✅ | Admin dashboard statistics |
 | `/api/admin/test-cleanup` | POST | ⚠️ | Clean up E2E test data |
+
+### Consultations (`/api/consultations`)
+| Endpoint | Method | Status | Description |
+|----------|--------|--------|-------------|
+| `/api/consultations` | POST | ✅ | Home page consultation form submission |
+
+### Files (`/api/files/*`)
+| Endpoint | Method | Status | Description |
+|----------|--------|--------|-------------|
+| `/api/files/upload` | POST | ✅ | File upload |
+| `/api/files/download` | GET | ✅ | File download |
+| `/api/files/delete` | DELETE | ✅ | File delete |
+| `/api/files/list` | GET | ✅ | List files |
 
 ---
 
@@ -315,12 +396,12 @@ All stores use **Svelte 5 Runes** (`$state`, `$derived`, `$effect`).
 
 | Store | Location | Status | Purpose |
 |-------|----------|--------|---------|
-| `authStore` | `src/lib/stores/authStore.svelte.ts` | ✅ | User session, login/logout methods |
-| `casesStore` | `src/lib/stores/casesStore.svelte.ts` | ✅ | Cases CRUD, filtering |
-| `messagesStore` | `src/lib/stores/messagesStore.svelte.ts` | ✅ | Messages, polling, unread counts, attachments |
-| `documentsStore` | `src/lib/stores/documentsStore.svelte.ts` | ✅ | Documents CRUD, upload progress |
-| `invoicesStore` | `src/lib/stores/invoicesStore.svelte.ts` | ✅ | Invoices CRUD |
-| `toastStore` | `src/lib/stores/toastStore.svelte.ts` | ✅ | Global notifications |
+| `authStore` | `src/lib/stores/auth.svelte.ts` | ✅ | User session, login/logout, role-based routing |
+| `casesStore` | `src/lib/stores/cases.svelte.ts` | ✅ | Cases CRUD, filtering |
+| `messagesStore` | `src/lib/stores/messages.svelte.ts` | ✅ | Messages, polling, unread counts, attachments |
+| `documentsStore` | `src/lib/stores/documents.svelte.ts` | ✅ | Documents CRUD, upload progress |
+| `invoicesStore` | `src/lib/stores/invoices.svelte.ts` | ✅ | Invoices CRUD |
+| `toastStore` | `src/lib/stores/toast.svelte.ts` | ✅ | Global notifications |
 
 ### Store Methods Reference
 
@@ -339,54 +420,35 @@ All stores use **Svelte 5 Runes** (`$state`, `$derived`, `$effect`).
 - `startPolling(caseId?)` → Begin polling interval
 - `stopPolling()` → Stop polling
 - `unreadCount` → Number of unread messages (reactive)
-
----
-
 ## 8. UI Components Library
 
-### Core Components
-| Component | Location | Status | Purpose |
-|-----------|----------|--------|---------|
-| `Modal.svelte` | `src/lib/components/ui/` | ✅ | Generic modal wrapper |
-| `ConfirmDialog.svelte` | `src/lib/components/ui/` | ✅ | Confirmation prompts |
-| `Toast.svelte` | `src/lib/components/ui/` | ✅ | Notification toasts |
-| `LoadingSpinner.svelte` | `src/lib/components/ui/` | ✅ | Loading indicator |
-| `ErrorBoundary.svelte` | `src/lib/components/ui/` | ✅ | Error handling wrapper |
-
-### Chat Components
+### Layout Components
 | Component | Location | Status | Purpose |
 |-----------|----------|--------|--------|
-| `ChatSlider.svelte` | `src/lib/components/` | ⚠️ DEPRECATED | Slide-out chat panel (removed from dashboards) |
-| `MessageComposer.svelte` | `src/lib/components/` | ✅ | Inline message composer with history |
-| `MessageBubble.svelte` | `src/lib/components/` | ✅ | Individual message display |
-| `AttachmentUploader.svelte` | `src/lib/components/` | ✅ | File upload in chat |
-| `InboxMessage.svelte` | `src/lib/components/` | ✅ | Lawyer uncategorized inbox item |
+| `Navigation.svelte` | `src/lib/components/` | ✅ | Main navbar with logo, "King Law, P.L.L.C." branding, practice areas dropdown |
+| `Footer.svelte` | `src/lib/components/` | ✅ | Site footer with practice area links |
 
-### Dashboard Components
+### UI Utility Components
 | Component | Location | Status | Purpose |
-|-----------|----------|--------|---------|
-| `StatCard.svelte` | `src/lib/components/dashboard/` | ✅ | Dashboard metric card |
-| `CaseCard.svelte` | `src/lib/components/dashboard/` | ✅ | Case summary card |
-| `CaseTable.svelte` | `src/lib/components/dashboard/` | ✅ | Case list table |
-| `DocumentList.svelte` | `src/lib/components/dashboard/` | ✅ | Documents list |
-| `InvoiceList.svelte` | `src/lib/components/dashboard/` | ✅ | Invoices list |
+|-----------|----------|--------|--------|
+| `Toast.svelte` | `src/lib/components/ui/` | ✅ | Notification toasts |
+| `Skeleton.svelte` | `src/lib/components/ui/` | ✅ | Loading skeleton placeholders |
+| `LoadingSpinner.svelte` | `src/lib/components/` | ✅ | Loading indicator |
+| `ErrorBoundary.svelte` | `src/lib/components/` | ✅ | Error handling wrapper |
 
-### Modal Components
+### Chat / Messaging Components
 | Component | Location | Status | Purpose |
-|-----------|----------|--------|---------|
-| `CreateCaseModal.svelte` | `src/lib/components/modals/` | ✅ | Create new case form |
-| `EditCaseModal.svelte` | `src/lib/components/modals/` | ✅ | Edit case form |
-| `CreateInvoiceModal.svelte` | `src/lib/components/modals/` | ✅ | Create invoice form |
-| `UploadDocumentModal.svelte` | `src/lib/components/modals/` | ✅ | Document upload form |
-| `DocumentPreviewModal.svelte` | `src/lib/components/modals/` | ⚠️ | Preview documents |
-| `AssignToCaseModal.svelte` | `src/lib/components/modals/` | ❌ | Assign uncategorized items |
+|-----------|----------|--------|--------|
+| `MessageComposer.svelte` | `src/lib/components/` | ✅ | Inline message composer with history and auto-fetch |
+| `MessageBubble.svelte` | `src/lib/components/` | ✅ | Individual message display with read indicators |
+| `AttachmentUploader.svelte` | `src/lib/components/` | ✅ | File upload (drag & drop + click) |
+| `ChatSlider.svelte` | `src/lib/components/` |  DEPRECATED | Slide-out chat panel (removed from dashboards, file still exists) |
 
-### Components Completed (Jan 27, 2026)
-| Component | Purpose | Status |
-|-----------|---------|--------|
-| `MessageComposer.svelte` | Client messaging with auto-fetch and refresh | ✅ Complete |
-| `InboxMessage.svelte` | Lawyer uncategorized inbox | ✅ Complete |
-| `AssignToCaseModal.svelte` | Assign messages/docs to case | ✅ Complete |
+### Modal / Form Components
+| Component | Location | Status | Purpose |
+|-----------|----------|--------|--------|
+| `CreateCaseModal.svelte` | `src/lib/components/` | ✅ | Create new case form |
+| `CreateInvoiceModal.svelte` | `src/lib/components/` | ✅ | Create invoice form |
 
 ---
 
@@ -396,44 +458,48 @@ All stores use **Svelte 5 Runes** (`$state`, `$derived`, `$effect`).
 | Feature | Description | Key Files |
 |---------|-------------|-----------|
 | **SPA Architecture** | Pure client-side rendering with adapter-static | `svelte.config.js`, `+layout.js` |
-| **Authentication** | Login, logout, registration, session management | `/api/auth/*`, `authStore` |
-| **Database Schema** | All tables defined and migrated | `drizzle/schema.ts` |
-| **Case Management** | Full CRUD for cases | `/api/cases/*`, `casesStore` |
+| **Authentication** | Login, logout, registration (client + staff), session management | `/api/auth/*`, `authStore` |
+| **Staff Registration System** | Password-gated sign-up, employee codes, role assignment | `/staff-sign-up/*`, `/api/auth/register-staff` |
+| **Database Schema** | 10 tables defined and migrated (added `consultations`) | `src/lib/server/db/schema.ts` |
+| **Case Management** | Full CRUD for cases with staff assignment support | `/api/cases/*`, `casesStore` |
 | **Document Management** | Upload, download, delete documents | `/api/documents/*`, `documentsStore` |
 | **Invoice Management** | Create, edit, delete invoices | `/api/invoices/*`, `invoicesStore` |
-| **Chat System** | Real-time messaging with attachments | `/api/messages/*`, `messagesStore` |
-| **Lawyer Dashboard** | Case list, case detail, all tabs | `/dashboard/lawyer/*` |
+| **Chat System** | Real-time messaging with attachments (polling-based) | `/api/messages/*`, `messagesStore` |
+| **Lawyer Dashboard** | Case list, case detail (tabbed), documents page | `/dashboard/lawyer/*` |
 | **Client Dashboard** | Case view, documents, invoices, messages | `/dashboard/client/*` |
+| **Staff Dashboard** | Assigned cases (read-only), case detail view | `/dashboard/staff/*` |
+| **Admin Dashboard** | Stats, staff code management, settings | `/dashboard/admin/*` |
+| **Public Website** | Home (with consultation form), Meet Ben King, Contact | `/`, `/meet-ben-king`, `/contact` |
+| **Practice Areas** | 8 practice area pages with values-based messaging | `/services/*` (8 pages) |
+| **Consultation Form** | Home page form + API endpoint + DB storage + email notification template | `+page.svelte`, `/api/consultations`, `email.ts` |
 | **Toast Notifications** | Global notification system | `toastStore`, `Toast.svelte` |
-| **Modal Infrastructure** | Reusable modal and confirm dialog | `Modal.svelte`, `ConfirmDialog.svelte` |
 | **Day/Night Theme** | Theme toggle support | Layout components |
-| **Responsive Design** | Mobile-friendly layouts | All dashboard pages |
+| **Responsive Design** | Mobile-friendly layouts | All pages |
+| **ChatSlider Removal** | Removed slide-out panel; replaced with inline MessageComposer | Jan 27 refactor |
+| **Documents Show All** | Role-based access, attachments in both chat AND documents | `/api/documents/+server.ts` |
+| **Auto-Link to Case** | Uncategorized messages/docs link to new cases on creation | `/api/cases/+server.ts` |
+| **Navbar Branding** | "King Law, P.L.L.C." text next to logo | `Navigation.svelte` |
+| **Values-Based Messaging** | Replaced statistics with commitment/respect/loyalty messaging | Home, services pages |
+
+| **Invoice Mark Paid** | Green "Mark Paid" button with inline confirmation on unpaid invoices, `markPaid` server action | `lawyer/case/[id]/+page.server.ts`, `+page.svelte` |
+| **Document Preview** | `DocumentPreviewModal.svelte` — in-browser preview for PDFs, images, text; `?preview=1` API param | `DocumentPreviewModal.svelte`, `/api/documents/[id]` |
+| **Dashboard Search** | Search input + status filter on lawyer dashboard, `$derived` reactive filtering | `lawyer/+page.svelte` |
+| **Error State Coverage** | Error banners with "Try again" on staff, admin, client dashboards | `staff/+page.svelte`, `admin/+page.svelte`, `client/+page.svelte` |
 
 ### ⚠️ Partial / In Progress
 | Feature | What's Done | What's Missing | Priority |
 |---------|-------------|----------------|----------|
-| **Document Preview** | Basic preview modal | Full preview for all file types | Medium |
-| **Public Website** | Root layout, navigation | Service pages, About, Contact | Medium |
-| **Error Handling** | ErrorBoundary component | Comprehensive error states | Medium |
-| **Test Cleanup API** | Endpoint defined | Full implementation with guards | Low |
-
-### ✅ Completed (Jan 27, 2026 - Messaging/Documents Refactor)
-| Feature | Description | Key Files |
-|---------|-------------|----------|
-| **ChatSlider Removal** | Removed slide-out panel from dashboards | `dashboard/client/+page.svelte`, `dashboard/lawyer/+page.svelte` |
-| **MessageComposer Auto-Fetch** | Messages load on mount, refresh after send | `MessageComposer.svelte` |
-| **Documents Show All** | Role-based access to all documents | `/api/documents/+server.ts` |
-| **Attachments Dual Display** | Attachments appear in chat AND documents | `/api/messages/send/+server.ts`, documents pages |
-| **Auto-Link to Case** | Uncategorized messages/docs link to new cases | `/api/cases/+server.ts` |
+| **Email Notifications** | `src/lib/server/email.ts` utility with HTML+text templates; console-log placeholder | Swap to **SendGrid** (`@sendgrid/mail`) — account exists | Medium |
+| **Admin Dashboard** | Stats + staff codes + settings | User management page, system monitoring | Low |
 
 ### ❌ Not Started
 | Feature | Description | Blocked By | Priority |
 |---------|-------------|------------|----------|
-| **Stripe Payments** | Invoice payment processing | Stripe account setup | High |
-| **Client Profile Page** | Client details for lawyers | Design needed | Medium |
-| **Public Service Pages** | Practice area pages | Content needed | Low |
+| **Stripe Payments** | Invoice payment processing. Schema has `stripePaymentIntentId`, client "Pay Now" button exists (no-op). | Stripe account credentials | High |
+| **Client Profile Page** | Client details view for lawyers | Design needed | Medium |
 | **E2E Test Suite** | Comprehensive Playwright tests | Test infrastructure | Medium |
 | **Unit Tests** | Component and store tests | Test infrastructure | Medium |
+| **Admin User Management** | View/edit/disable users from admin dashboard | — | Medium |
 | **Accessibility Audit** | WCAG compliance | All features stable | Low |
 
 ---
@@ -443,65 +509,103 @@ All stores use **Svelte 5 Runes** (`$state`, `$derived`, `$effect`).
 ### Public Routes
 | Route | Purpose | Status |
 |-------|---------|--------|
-| `/` | Home page | ⚠️ Partial |
+| `/` | Home page (hero, services grid, consultation form, quote) | ✅ Complete |
+| `/meet-ben-king` | Attorney profile card + bio | ✅ Complete |
+| `/contact` | Contact form with map | ✅ Complete |
 | `/login` | User login | ✅ Complete |
-| `/register` | User registration | ✅ Complete |
-| `/services` | Services overview | ❌ Not Started |
-| `/about` | About the firm | ❌ Not Started |
-| `/contact` | Contact form | ❌ Not Started |
+| `/register` | Client registration | ✅ Complete |
+| `/staff-sign-up` | Staff password gate | ✅ Complete |
+| `/staff-sign-up/register` | Staff registration with employee number | ✅ Complete |
+| `/samples` | Website design samples | ✅ Complete |
+| `/samples/classic` | Classic sample | ✅ Complete |
+| `/samples/elegant` | Elegant sample | ✅ Complete |
+| `/samples/modern` | Modern sample | ✅ Complete |
+
+### Practice Area Pages (`/services/*`)
+| Route | Purpose | Status |
+|-------|---------|--------|
+| `/services/personal-injury` | Personal Injury | ✅ Complete |
+| `/services/criminal-defense` | Criminal Defense | ✅ Complete |
+| `/services/employment-law` | Employment Law | ✅ Complete |
+| `/services/real-estate-business` | Real Estate & Business Transactions | ✅ Complete |
+| `/services/civil-rights` | Civil Rights Violations | ✅ Complete |
+| `/services/cannabis-law` | Medical Marijuana & Commercial Cannabis | ✅ Complete |
+| `/services/appeals` | Appeals | ✅ Complete |
+| `/services/property-damage` | Property Damage | ✅ Complete |
 
 ### Client Dashboard (`/dashboard/client/*`)
 | Route | Purpose | Status |
 |-------|---------|--------|
-| `/dashboard/client` | Client home / case list | ✅ Complete |
-| `/dashboard/client/case/[id]` | Case detail view | ✅ Complete |
+| `/dashboard/client` | Client home / case list / stats | ✅ Complete |
+| `/dashboard/client/case/[id]` | Case detail view (overview, docs, invoices, messages) | ✅ Complete |
 | `/dashboard/client/documents` | All documents view | ✅ Complete |
 
 ### Lawyer Dashboard (`/dashboard/lawyer/*`)
 | Route | Purpose | Status |
 |-------|---------|--------|
-| `/dashboard/lawyer` | Lawyer home / case list | ✅ Complete |
-| `/dashboard/lawyer/case/[id]` | Case detail (tabbed view) | ✅ Complete |
-| `/dashboard/lawyer/clients` | Client list | ⚠️ Partial |
-| `/dashboard/lawyer/clients/[id]` | Client profile | ❌ Not Started |
+| `/dashboard/lawyer` | Lawyer home / case list / stats | ✅ Complete |
+| `/dashboard/lawyer/case/[id]` | Case detail (tabbed: overview, docs, invoices, messages) | ✅ Complete |
 | `/dashboard/lawyer/documents` | All documents view | ✅ Complete |
+
+### Staff Dashboard (`/dashboard/staff/*`)
+| Route | Purpose | Status |
+|-------|---------|--------|
+| `/dashboard/staff` | Staff home / assigned cases list | ✅ Complete |
+| `/dashboard/staff/cases/[id]` | Case detail (read-only: details, docs, messages) | ✅ Complete |
 
 ### Admin Dashboard (`/dashboard/admin/*`)
 | Route | Purpose | Status |
 |-------|---------|--------|
-| `/dashboard/admin` | Admin home | ⚠️ Partial |
+| `/dashboard/admin` | Admin home / stats overview | ✅ Complete |
+| `/dashboard/admin/staff-codes` | Manage employee codes (create, delete) | ✅ Complete |
+| `/dashboard/admin/settings` | System settings (staff password) | ✅ Complete |
 
 ---
 
 ## 11. Outstanding Items & TODOs
 
-### ✅ Completed (Jan 27, 2026)
-| Item | Description | Status |
-|------|-------------|--------|
-| ~~ChatSlider Removal~~ | Removed from client/lawyer dashboards | ✅ Done |
-| ~~MessageComposer Auto-Fetch~~ | Messages load on mount, refresh after send | ✅ Done |
-| ~~Documents API Refactor~~ | Role-based access to all documents | ✅ Done |
-| ~~Attachments Dual Display~~ | Show in chat AND documents panel | ✅ Done |
-| ~~Auto-Link to Case~~ | Uncategorized items link to new cases | ✅ Done |
+### ✅ Completed (Cumulative)
+| Item | Description | Date |
+|------|-------------|------|
+| ChatSlider Removal | Removed slide-out panel from dashboards | Jan 27 |
+| MessageComposer Auto-Fetch | Messages load on mount, refresh after send | Jan 27 |
+| Documents API Refactor | Role-based access to all documents | Jan 27 |
+| Attachments Dual Display | Show in chat AND documents panel | Jan 27 |
+| Auto-Link to Case | Uncategorized items link to new cases | Jan 27 |
+| Staff Registration System | Password gate, employee codes, role assignment | Jan 28 |
+| Staff Dashboard | Read-only case access for staff members | Jan 28 |
+| Admin Dashboard | Stats, staff codes, settings pages | Jan 28 |
+| Case Staff Assignments | Assign/remove staff from cases | Jan 28 |
+| Practice Areas Refactor | 8 practice area pages (was 4) | Feb 4 |
+| Content Messaging Refresh | Values-based messaging (removed statistics) | Feb 4 |
+| Home Page Consultation Form | Form + `/api/consultations` endpoint | Feb 5 |
+| Meet Ben King Page | Replaced `/about` with `/meet-ben-king` profile card | Feb 5 |
+| Navbar Branding | Added "King Law, P.L.L.C." text next to logo | Feb 5 |
+| Old About Page Removal | Deleted `/about` route | Feb 5 |
+| Invoice "Mark Paid" | Green button + inline "Confirm? Yes/Cancel" on unpaid invoices, `markPaid` server action | Feb 5 |
+| Consultation DB Storage | New `consultations` table (status: new/contacted/converted/dismissed), POST stores in DB, GET for lawyer/admin | Feb 5 |
+| Consultation Email Notification | `src/lib/server/email.ts` with `notifyFirmOfConsultation()` template (console-log placeholder; SendGrid account ready) | Feb 5 |
+| Dashboard Search Bar | Search input + status dropdown on lawyer dashboard, `$derived` filtering by title/client/email | Feb 5 |
+| Document Preview Modal | `DocumentPreviewModal.svelte` for PDFs/images/text, `?preview=1` API param, Preview button in lawyer case detail | Feb 5 |
+| Error State Coverage | Error banners with "Try again" on staff, admin, client dashboards | Feb 5 |
 
 ### 🔴 Immediate Priority (This Sprint)
-| Item | Description | Est. Time | Files |
-|------|-------------|-----------|-------|
-| Invoice "Mark Paid" | Quick action button with confirmation | 30 min | Lawyer dashboard, `/api/invoices/[id]` |
-| Dashboard Search Bar | Client-side case filtering | 45 min | Lawyer dashboard `+page.svelte` |
+| Item | Description | Est. Time |
+|------|-------------|-----------|
+| *(All immediate items completed — see above)* | | |
 
 ### 🟡 Short-Term (Next 2 Weeks)
-| Item | Description | Est. Time | Depends On |
-|------|-------------|-----------|------------|
-| Case Assignment UI | UI to assign messages to specific cases | 2-3 hrs | — |
+| Item | Description | Est. Time |
+|------|-------------|-----------|
+| *(All short-term items completed — see above)* | | |
 
 ### 🟢 Medium-Term (Next Month)
 | Item | Description | Est. Time | Depends On |
 |------|-------------|-----------|------------|
-| Stripe Integration | Payment processing for invoices | 4-6 hrs | Stripe account |
+| Stripe Integration | Payment processing for invoices. Schema already has `stripePaymentIntentId` column and `status: unpaid/partial/paid`. Client "Pay Now" button exists (no-op). Need: SDK, payment intent API, webhook, checkout flow. | 4-6 hrs | Stripe account (user to provide) |
+| SendGrid Email Swap | Replace console-log in `src/lib/server/email.ts` with `@sendgrid/mail`. Templates already built. Need: `npm i @sendgrid/mail`, `SENDGRID_API_KEY` env var. | 30 min | SendGrid API key |
 | Client Profile Page | Detailed client view for lawyers | 2-3 hrs | — |
-| Public Website Pages | Services, About, Contact | 4-6 hrs | Content |
-| Document Preview | Full preview modal for all types | 2-3 hrs | — |
+| Admin User Management | View/edit/disable users from admin dashboard | 3-4 hrs | — |
 
 ### 🔵 Long-Term (Backlog)
 | Item | Description | Priority |
@@ -510,7 +614,7 @@ All stores use **Svelte 5 Runes** (`$state`, `$derived`, `$effect`).
 | Unit Tests | Store and component tests | Medium |
 | Accessibility Audit | WCAG 2.1 AA compliance | Low |
 | PWA Support | Offline capabilities | Low |
-| Email Notifications | SendGrid integration | Low |
+| ChatSlider Cleanup | Delete deprecated `ChatSlider.svelte` file | Low |
 
 ---
 
@@ -535,14 +639,21 @@ Body: { "prefix": "E2E_TEST_" } or { "userId": "..." }
 ```
 
 ### Manual Testing Checklist
-- [ ] Login flow (client, lawyer)
-- [ ] Registration flow (with and without access code)
+- [ ] Login flow (client, lawyer, staff, admin)
+- [ ] Client registration (`/register`)
+- [ ] Staff registration (`/staff-sign-up` → `/staff-sign-up/register`)
 - [ ] Case CRUD (create, read, update, delete)
+- [ ] Staff case assignment and read-only access
 - [ ] Document upload/download/delete
 - [ ] Invoice creation and status changes
 - [ ] Chat messaging with attachments
+- [ ] Consultation form submission
+- [ ] Admin: staff code management
+- [ ] Admin: staff password settings
 - [ ] Responsive design (mobile, tablet, desktop)
 - [ ] Theme toggle (day/night)
+- [ ] Practice area pages (all 8)
+- [ ] Meet Ben King page
 
 ### Playwright E2E Tests (Planned)
 | Test Suite | Coverage | Status |
@@ -602,25 +713,29 @@ RewriteRule . /200.html [L]
 
 ## 14. Document Archive Reference
 
-These original DevDocs were consolidated into this master document:
+These DevDocs are archived/consolidated into this master document:
 
-| Original Document | Purpose | Key Sections Migrated |
-|-------------------|---------|----------------------|
-| `ConsolidatedMasterPlan.md` | Original master plan | Tech stack, database schema, all features |
-| `SPA_IMPLEMENTATION_COMPLETE.md` | SPA migration summary | Architecture, deployment |
-| `CHAT_IMPLEMENTATION_SUMMARY.md` | Chat feature details | Chat components, API endpoints |
-| `CHAT_IMPLEMENTATION_PROGRESS.md` | Chat progress tracking | Feature status |
-| `CHAT_INTERFACE_WBS.md` | Chat work breakdown | Component details |
-| `MASTER_WBS_01-20-26.md` | Status tracking | Feature status matrix |
-| `LAWYER_DASHBOARD_WBS_01-19-26.md` | Lawyer dashboard plan | Dashboard routes, components |
-| `DASHBOARD_REVIEW_01-19-26.md` | Architecture review | Recommendations |
-| `OUTSTANDING_ITEMS_01-20-26.md` | TODO list | Outstanding items |
-| `1-21-26_Missing_Func_Implementation_Plan.md` | Uncategorized messaging | Pending features |
-| `1-21-26_main_test.md` | E2E testing plan | Testing strategy |
-| `1-23-26-client-chat-update.md` | Chat card updates | Feature status |
-| `lawyer-dashboard-flow.md` | Lawyer workflow | Page inventory |
-| `spa-refactor-master-plan.md` | SPA migration guide | Architecture |
-| `system-architecture-report.md` | Architecture deep-dive | Security, data flow |
+| Document | Purpose | Status |
+|----------|---------|--------|
+| `ConsolidatedMasterPlan.md` | Original master plan | 🔴 Obsolete — superseded by this doc |
+| `spa-refactor-master-plan.md` | SPA migration guide | 🔴 Historical — migration complete |
+| `lawyer-dashboard-flow.md` | Lawyer dashboard plan | 🟡 Historical — executed |
+| `SPA_IMPLEMENTATION_COMPLETE.md` | SPA migration summary | 🟡 Partially stale |
+| `CHAT_IMPLEMENTATION_SUMMARY.md` | Chat feature details | 🟡 Stale re: ChatSlider |
+| `CHAT_IMPLEMENTATION_PROGRESS.md` | Chat progress tracking | 🟡 Stale re: ChatSlider |
+| `CHAT_INTERFACE_WBS.md` | Chat work breakdown | 🟢 Accurate |
+| `1-27-26-messaging-documents-refactor-wbs.md` | Messaging/docs refactor | 🟢 Accurate |
+| `1-23-26-client-chat-update.md` | Chat card updates | 🟢 Accurate |
+| `system-architecture-report.md` | Architecture deep-dive | 🟡 Missing staff system |
+| `MASTER_AUDIT_02-05-26.md` | Full dev doc audit | 🟢 Current — created Feb 5, 2026 |
+
+### .windsurf/plans/ (Completed Plans)
+| Plan | Purpose | Status |
+|------|---------|--------|
+| `staff-registration-system-ab7644.md` | Staff sign-up system | ✅ Completed |
+| `practice-areas-refactor-ab7644.md` | 8 practice area pages | ✅ Completed |
+| `content-messaging-refresh-ab7644.md` | Values-based messaging | ✅ Completed |
+| `home-page-refactor-781be5.md` | Consultation form + Meet Ben King | ✅ Completed |
 
 ---
 
@@ -643,7 +758,7 @@ These original DevDocs were consolidated into this master document:
 |--------|-------------------|
 | Case | `active`, `closed`, `archived` |
 | Invoice | `draft`, `sent`, `paid`, `overdue` |
-| Message | `read` (isRead: 1), `unread` (isRead: 0) |
+| Message | `read` (readAt set), `unread` (readAt null) |
 
 ---
 

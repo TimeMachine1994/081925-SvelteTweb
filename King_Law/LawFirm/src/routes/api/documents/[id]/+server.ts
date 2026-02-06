@@ -5,7 +5,7 @@ import { documents, cases } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { readFile } from 'fs/promises';
 
-export const GET: RequestHandler = async ({ params, locals }) => {
+export const GET: RequestHandler = async ({ params, locals, url }) => {
 	if (!locals.user) {
 		throw error(401, 'Unauthorized');
 	}
@@ -49,11 +49,12 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 	try {
 		// Read file from disk
 		const fileBuffer = await readFile(document.filePath);
+		const isPreview = url.searchParams.get('preview') === '1';
 
 		return new Response(fileBuffer, {
 			headers: {
 				'Content-Type': document.mimeType,
-				'Content-Disposition': `attachment; filename="${document.fileName}"`,
+				'Content-Disposition': `${isPreview ? 'inline' : 'attachment'}; filename="${document.fileName}"`,
 				'Content-Length': document.fileSize.toString()
 			}
 		});
