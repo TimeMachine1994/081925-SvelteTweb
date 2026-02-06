@@ -69,7 +69,8 @@ export const PATCH: RequestHandler = async ({ params, request, locals }) => {
 				...(settings.colorMode && { colorMode: settings.colorMode }),
 				...(settings.eventColor && { eventColor: settings.eventColor }),
 				...(settings.showLegend !== undefined && { showLegend: settings.showLegend }),
-				...(settings.columnMapping && { columnMapping: settings.columnMapping })
+				...(settings.columnMapping && { columnMapping: settings.columnMapping }),
+			...(settings.categoryConfig !== undefined && { categoryConfig: settings.categoryConfig })
 			})
 			.where(eq(table.projectSettings.projectId, params.id));
 	}

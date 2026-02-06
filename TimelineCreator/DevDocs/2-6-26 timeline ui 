@@ -1,0 +1,85 @@
+To break this down for a development or organizational perspective, here is a **Work Breakdown Structure (WBS)**. This outlines the logical components required to recreate the timeline’s layout, styling, and data logic.
+
+### **1. Layout Architecture (The Grid)**
+
+The foundational structure ensures chronological flow while maintaining vertical alignment.
+
+* **1.1 Container Level:** A horizontal scrolling "Canvas" that holds all years in a single row.
+* **1.2 Column Level (Chronology):** Each "Year" is a vertical stack (Flexbox or CSS Grid column).
+* **1.2.1 Header:** Year label (e.g., "2008") centered at the top of the stack.
+* **1.2.2 Body:** A container that allows boxes to be added vertically based on date order.
+
+
+* **1.3 Box Level (The Record):** The individual entry card with specific padding, borders, and typography.
+* **1.3.1 Header:** Bolded/underlined date and facility name.
+* **1.3.2 Content:** Bulleted or plain text clinical notes/observations.
+
+
+
+---
+
+### **2. Color-Coded Categorization (The Logic)**
+
+The colors function as a "Visual Shorthand" to help a reviewer (like an attorney or adjuster) quickly identify relevant events without reading every box.
+
+| Category | Hex/Color (Approx) | Functional Definition | Purpose |
+| --- | --- | --- | --- |
+| **Medical Treatment** | `#FFFF00` (Yellow) | Routine clinical visits, surgeries, imaging, and injections. | Establishes medical history and ongoing care. |
+| **Incident/Accident** | `#CC0000` (Red) | High-impact events: MVAs, falls, or workplace injuries. | Pinpoints moments of "New Injury" or aggravation. |
+| **Legal Milestone** | `#FF9900` (Orange) | The "Subject Accident" (the focus of the case) or legal filings. | Separates the current claim from historical data. |
+| **Gap Analysis** | `#006600` (Green) | Periods where the patient sought no medical care. | Highlights "Gaps in Treatment," a critical legal metric. |
+
+---
+
+### **3. Functional Elements (The Content)**
+
+The metadata inside each box serves specific documentation roles:
+
+* **3.1 Date-Stamping:** Primary sort key; ensures the box appears in the correct vertical position within the year column.
+* **3.2 Facility Identification:** Associates a specific provider (e.g., *Jackson Neurosurgery Clinic*) with a treatment phase.
+* **3.3 Clinical Summary:** High-level summary of findings (e.g., "Hit loose gravel," "Bilateral SI joint injections").
+* **3.4 Compliance Tracking:** Specific notations for UDS (Urine Drug Screen) results or medication management issues (as seen in your 2011 and 2020 entries).
+
+---
+
+### **4. Visual Hierarchy (Typography & Borders)**
+
+* **Emphasis:** Use of **Bold** for dates and key terms within the notes to facilitate scanning.
+* **Containment:** Black 1px solid borders around boxes to distinguish them from the background, even when colors are similar.
+* **Status Indicators:** Center-aligned text for "No Treatment" boxes to signal a change in the data pattern.
+
+ 1. Layout & Template Engine (The Architect)
+Instead of a "Move" tool, you need structural controls that manipulate the relationship between data points.
+
+Flow Controller: A toggle to switch the entire project between Vertical Columns (like your image), Horizontal Tracks, or Serpentine Paths (winding across the screen).
+
+Template Wrapper: A tool that applies "Visual Themes" to data. Selecting a "Legal/Medical" template would auto-assign the Yellow/Red/Green color logic based on keywords in the text.
+
+Smart Spacer: A tool that adjusts the vertical "gap" between boxes. It can either be Uniform (same gap for all) or Chronological (gap size is proportional to the time passed between dates).
+
+2. Content Enrichment Tools (The Annotator)
+These tools focus on the "Box Level" components specific to legal/medical data.
+
+Date-Picker / Parser: A tool that detects dates within pasted text and automatically creates the box in the correct year column.
+
+Category Stamper: A "Brush" tool where the user selects a category (e.g., MVA, Surgery, Gap) and clicks existing boxes to instantly apply the CSS class (color/border/weight) associated with that category.
+
+Medication/UDS Flag: A specialized toggle for clinical timelines to add standardized "warning" icons or high-contrast tags to specific entries.
+
+3. Data Management Tools (The Engine)
+Since the layout is "generated from data," these tools manage the backend logic.
+
+Column Mergers/Splitters: Instead of resizing a box, the user "merges" two years or "splits" a year into months if the density of medical visits is too high.
+
+Keyword Auto-Highlighter: A "Global Search & Style" tool. (e.g., "Highlight every instance of the word Oxycodone in red text across the entire 20-year timeline").
+
+Archive/Filter Toggle: Based on your previous preference for an "Archive Juror" function, this tool would hide/show specific boxes based on their status (e.g., "Hide all Routine Visits, only show MVAs").
+
+4. The "Special" Differentiator: Chronological Zoom
+Unlike a standard "Zoom" which just makes things bigger, a Chronological Zoom tool would change the level of detail:
+
+Level 1 (Macro): Only shows Year columns and Red (Accident) boxes.
+
+Level 2 (Normal): Shows all boxes with dates and titles.
+
+Level 3 (Micro): Expands boxes to show full clinical notes and OCR (Optical Character Recognition) snippets from the original medical records.

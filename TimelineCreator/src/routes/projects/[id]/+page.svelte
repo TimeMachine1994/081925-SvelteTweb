@@ -1,533 +1,510 @@
 <script lang="ts">
-	import { Button, Input, Select, Modal, ColorPicker, DataPreviewTable } from '$lib/components/ui';
-	import MasterTimeline from '$lib/components/timeline/MasterTimeline.svelte';
-	import ZoomTimeline from '$lib/components/timeline/ZoomTimeline.svelte';
-	import MediaLightbox from '$lib/components/timeline/MediaLightbox.svelte';
-	import CalendarTimeline from '$lib/components/timeline/CalendarTimeline.svelte';
+	import SchemaEditor from '$lib/components/editor/SchemaEditor.svelte';
+	import DataImporter from '$lib/components/editor/DataImporter.svelte';
+	import EditorToolbar from '$lib/components/editor/EditorToolbar.svelte';
+	import PreviewMode from '$lib/components/editor/PreviewMode.svelte';
+	import PropertiesPanel from '$lib/components/editor/PropertiesPanel.svelte';
+	import ColumnTimeline from '$lib/components/timeline/ColumnTimeline.svelte';
+	import { DEFAULT_CATEGORIES, type CategoryConfig, type YearStyle } from '$lib/config/categories';
+	import type { TimelineEvent } from '$lib/utils/csv-parser';
+	import type { ZoomLevel, SpacerMode } from '$lib/stores/editor.svelte';
+
+	type EditorTab = 'schema' | 'data' | 'editor' | 'preview';
 
 	let { data } = $props();
 
-	type Mode = 'editor' | 'preview' | 'print';
-	let mode = $state<Mode>('editor');
-
+	// --- Title editing ---
 	let title = $state(data.project.title);
-	let dataSourceUrl = $state(data.project.dataSourceUrl || '');
-	let isRefreshing = $state(false);
+	let isEditingTitle = $state(false);
+	let titleInputEl = $state<HTMLInputElement | null>(null);
 	let isSaving = $state(false);
-	let settingsModalOpen = $state(false);
 
-	let brushStart = $state(0);
-	let brushEnd = $state(100);
+	// --- Tab state ---
+	let activeTab = $state<EditorTab>('data');
 
-	let lightboxOpen = $state(false);
-	let lightboxEvent = $state<any>(null);
-	let lightboxEvents = $state<any[]>([]);
-
-	// Column mapping state
+	// --- Schema state ---
 	let columnMapping = $state<Record<string, string>>(
 		data.settings?.columnMapping ? JSON.parse(data.settings.columnMapping) : {}
 	);
+	let categoryConfig = $state<CategoryConfig[]>(
+		data.settings?.categoryConfig ? JSON.parse(data.settings.categoryConfig) : [...DEFAULT_CATEGORIES]
+	);
 	let availableColumns = $state<string[]>([]);
-	let previewRows = $state<string[][]>([]);
-	let isLoadingColumns = $state(false);
-	let needsRemapping = $state((data.events as any)?.needsRemapping || false);
 
-	// Line timeline options
-	let colorTheme = $state(data.settings?.colorTheme || 'default');
-	let defaultZoomLevel = $state(data.settings?.defaultZoomLevel || 'month');
+	// --- Events state ---
+	let events = $state<TimelineEvent[]>(
+		data.events?.events
+			? (data.events.events as TimelineEvent[]).map((e) => ({
+					...e,
+					parsedDate: new Date(e.parsedDate as unknown as string)
+				}))
+			: []
+	);
 
-	// Timeline style
-	let timelineStyle = $state(data.settings?.timelineStyle || 'line');
+	// --- Editor toolbar state ---
+	let zoomLevel = $state<ZoomLevel>('normal');
+	let spacerMode = $state<SpacerMode>('uniform');
+	let brushMode = $state(false);
+	let brushCategory = $state<CategoryConfig | null>(null);
+	let searchQuery = $state('');
+	let activeFilters = $state<Set<string>>(new Set());
+	let undoStack = $state<Array<{ eventId: string; oldCategory: string | undefined; newCategory: string }>>([]);
+	let redoStack = $state<Array<{ eventId: string; oldCategory: string | undefined; newCategory: string }>>([]);
 
-	// Calendar timeline options
-	let calendarGranularity = $state<'year' | 'month' | 'week'>((data.settings?.calendarGranularity as 'year' | 'month' | 'week') || 'month');
-	let colorMode = $state<'binary' | 'intensity'>((data.settings?.colorMode as 'binary' | 'intensity') || 'binary');
-	let eventColor = $state(data.settings?.eventColor || '#3B82F6');
-	let showLegend = $state(data.settings?.showLegend ?? true);
-
-	const zoomLevelOptions = [
-		{ value: 'year', label: 'Year' },
-		{ value: 'month', label: 'Month' },
-		{ value: 'day', label: 'Day' },
-		{ value: 'hour', label: 'Hour' }
-	];
-
-	const colorThemeOptions = [
-		{ value: 'default', label: 'Default (Blue)' },
-		{ value: 'legal', label: 'Legal (Navy)' },
-		{ value: 'neutral', label: 'Neutral (Gray)' },
-		{ value: 'warm', label: 'Warm (Amber)' }
-	];
-
-	const granularityOptions = [
-		{ value: 'year', label: 'Year → Months' },
-		{ value: 'month', label: 'Month → Days' },
-		{ value: 'week', label: 'Week → Days' }
-	];
-
-	const colorModeOptions = [
-		{ value: 'binary', label: 'Filled / Unfilled' },
-		{ value: 'intensity', label: 'Intensity by Count' }
-	];
-
-	async function refreshData() {
-		isRefreshing = true;
-		try {
-			const res = await fetch(`/api/projects/${data.project.id}/events?refresh=true`);
-			if (res.ok) {
-				const result = await res.json();
-				data.events = result;
-			}
-		} catch (err) {
-			console.error('Failed to refresh data:', err);
+	// --- Properties panel state ---
+	type Selection =
+		| { type: 'event'; event: TimelineEvent }
+		| { type: 'year'; year: number }
+		| null;
+	let selection = $state<Selection>(null);
+	let yearStyles = $state<Map<number, YearStyle>>((() => {
+		if (data.settings?.labelConfig) {
+			try {
+				const parsed = JSON.parse(data.settings.labelConfig);
+				if (parsed.yearStyles) {
+					return new Map(Object.entries(parsed.yearStyles).map(([k, v]) => [Number(k), v as YearStyle]));
+				}
+			} catch { /* ignore */ }
 		}
-		isRefreshing = false;
+		return new Map();
+	})());
+	let isSavingTimeline = $state(false);
+	let timelineSaved = $state(!!data.events?.events?.length);
+
+	const selectedEventId = $derived(() => {
+		if (selection?.type === 'event') return selection.event.id;
+		return null;
+	});
+
+	// --- Tab definitions ---
+	const tabs: { id: EditorTab; label: string; icon: string }[] = [
+		{ id: 'data', label: 'Data', icon: 'M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12' },
+		{ id: 'schema', label: 'Schema', icon: 'M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4' },
+		{ id: 'editor', label: 'Editor', icon: 'M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z' },
+		{ id: 'preview', label: 'Preview', icon: 'M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z' }
+	];
+
+	// --- Title editing ---
+	async function saveTitle() {
+		if (title.trim() === '') {
+			title = data.project.title;
+		}
+		isEditingTitle = false;
+		if (title !== data.project.title) {
+			isSaving = true;
+			try {
+				await fetch(`/api/projects/${data.project.id}`, {
+					method: 'PATCH',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ title })
+				});
+				data.project.title = title;
+			} catch (err) {
+				console.error('Failed to save title:', err);
+				title = data.project.title;
+			}
+			isSaving = false;
+		}
 	}
 
-	async function saveProject() {
-		isSaving = true;
+	function startEditingTitle() {
+		isEditingTitle = true;
+		setTimeout(() => titleInputEl?.focus(), 0);
+	}
+
+	function handleTitleKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter') saveTitle();
+		else if (e.key === 'Escape') {
+			title = data.project.title;
+			isEditingTitle = false;
+		}
+	}
+
+	// --- Schema callbacks ---
+	function handleSchemaSave(mapping: Record<string, string>, categories: CategoryConfig[]) {
+		columnMapping = mapping;
+		categoryConfig = categories;
+		activeTab = 'editor';
+	}
+
+	// --- Data callbacks ---
+	function handleEventsLoaded(newEvents: TimelineEvent[], columns: string[]) {
+		events = newEvents;
+		availableColumns = columns;
+	}
+
+	function handleEventsConfirmed(newEvents: TimelineEvent[], columns: string[]) {
+		events = newEvents;
+		availableColumns = columns;
+		activeTab = 'schema';
+	}
+
+	// --- Editor callbacks ---
+	function handleStamp(eventId: string) {
+		if (!brushCategory) return;
+		const event = events.find((e) => e.id === eventId);
+		if (!event) return;
+
+		undoStack = [...undoStack, {
+			eventId,
+			oldCategory: event.category,
+			newCategory: brushCategory.name
+		}];
+		redoStack = [];
+		events = events.map((e) =>
+			e.id === eventId ? { ...e, category: brushCategory!.name } : e
+		);
+	}
+
+	function handleUndo() {
+		if (undoStack.length === 0) return;
+		const entry = undoStack[undoStack.length - 1];
+		undoStack = undoStack.slice(0, -1);
+		redoStack = [...redoStack, entry];
+		events = events.map((e) =>
+			e.id === entry.eventId ? { ...e, category: entry.oldCategory } : e
+		);
+	}
+
+	function handleRedo() {
+		if (redoStack.length === 0) return;
+		const entry = redoStack[redoStack.length - 1];
+		redoStack = redoStack.slice(0, -1);
+		undoStack = [...undoStack, entry];
+		events = events.map((e) =>
+			e.id === entry.eventId ? { ...e, category: entry.newCategory } : e
+		);
+	}
+
+	function toggleBrush(cat: CategoryConfig | null) {
+		if (brushCategory === cat && brushMode) {
+			brushMode = false;
+			brushCategory = null;
+		} else {
+			brushMode = true;
+			brushCategory = cat;
+		}
+	}
+
+	function toggleFilter(categoryName: string) {
+		const newFilters = new Set(activeFilters);
+		if (newFilters.has(categoryName)) {
+			newFilters.delete(categoryName);
+		} else {
+			newFilters.add(categoryName);
+		}
+		activeFilters = newFilters;
+	}
+
+	// --- Properties panel callbacks ---
+	function handleEventClick(event: TimelineEvent) {
+		selection = { type: 'event', event };
+	}
+
+	function handleYearClick(year: number) {
+		selection = { type: 'year', year };
+	}
+
+	function handleClosePanel() {
+		selection = null;
+	}
+
+	function handleCategoryStyleChange(categoryName: string, updates: Partial<CategoryConfig>) {
+		categoryConfig = categoryConfig.map((c) =>
+			c.name === categoryName ? { ...c, ...updates } : c
+		);
+	}
+
+	function handleEventDataChange(eventId: string, updates: Partial<TimelineEvent>) {
+		events = events.map((e) =>
+			e.id === eventId ? { ...e, ...updates } : e
+		);
+		// Keep selection in sync with updated event
+		if (selection?.type === 'event' && selection.event.id === eventId) {
+			const updated = events.find((e) => e.id === eventId);
+			if (updated) selection = { type: 'event', event: updated };
+		}
+	}
+
+	function handleYearStyleChange(year: number, updates: Partial<YearStyle>) {
+		const current = yearStyles.get(year) || { bgColor: '#1F2937', textColor: '#FFFFFF', fontSize: 'text-lg' };
+		const newStyles = new Map(yearStyles);
+		newStyles.set(year, { ...current, ...updates });
+		yearStyles = newStyles;
+	}
+
+	// --- Save timeline ---
+	async function saveTimeline() {
+		isSavingTimeline = true;
 		try {
+			// 1. Save events
+			await fetch(`/api/projects/${data.project.id}/events`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ events, errors: [] })
+			});
+
+			// 2. Save categoryConfig + yearStyles (stored in labelConfig)
+			const yearStylesObj: Record<string, YearStyle> = {};
+			for (const [k, v] of yearStyles) {
+				yearStylesObj[String(k)] = v;
+			}
 			await fetch(`/api/projects/${data.project.id}`, {
 				method: 'PATCH',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					title,
-					dataSourceUrl,
 					settings: {
-						colorTheme,
-						defaultZoomLevel,
-						timelineStyle,
-						calendarGranularity,
-						colorMode,
-						eventColor,
-						showLegend,
-						columnMapping: JSON.stringify(columnMapping)
+						categoryConfig: JSON.stringify(categoryConfig),
+						labelConfig: JSON.stringify({ yearStyles: yearStylesObj })
 					}
 				})
 			});
+
+			timelineSaved = true;
+			activeTab = 'preview';
 		} catch (err) {
-			console.error('Failed to save:', err);
+			console.error('Failed to save timeline:', err);
 		}
-		isSaving = false;
-	}
-
-	async function loadColumnsFromSheet() {
-		if (!dataSourceUrl) return;
-		isLoadingColumns = true;
-		try {
-			const res = await fetch('/api/validate-sheets', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ url: dataSourceUrl })
-			});
-			const result = await res.json();
-			if (result.valid) {
-				availableColumns = result.columns;
-				previewRows = result.rows.slice(0, 3);
-			}
-		} catch (err) {
-			console.error('Failed to load columns:', err);
-		}
-		isLoadingColumns = false;
-	}
-
-	function handleMappingChange(newMapping: Record<string, string>) {
-		columnMapping = newMapping;
-	}
-
-	async function savePrintLayout() {
-		try {
-			await fetch(`/api/projects/${data.project.id}/print-layout`, {
-				method: 'PUT',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ layoutData: { brushStart, brushEnd } })
-			});
-		} catch (err) {
-			console.error('Failed to save print layout:', err);
-		}
-	}
-
-	function openLightbox(event: any) {
-		lightboxEvent = event;
-		lightboxEvents = [];
-		lightboxOpen = true;
-	}
-
-	function openLightboxWithEvents(events: any[], date: Date) {
-		if (events.length === 0) return;
-		lightboxEvent = events[0];
-		lightboxEvents = events;
-		lightboxOpen = true;
-	}
-
-	function handlePrint() {
-		window.print();
+		isSavingTimeline = false;
 	}
 </script>
 
 <svelte:head>
-	<title>{data.project.title} - TimelineCreator</title>
+	<title>{title} - TimelineCreator</title>
 </svelte:head>
 
-<div class="min-h-screen bg-gray-100 flex flex-col {mode === 'preview' ? 'bg-gray-900' : ''}">
-	{#if mode === 'editor'}
-		<header class="bg-white border-b border-gray-200 print:hidden">
-			<div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-4">
-				<div class="flex items-center justify-between">
-					<div class="flex items-center gap-4">
-						<a href="/" class="text-gray-400 hover:text-gray-600 transition-colors">
-							<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-							</svg>
-						</a>
-						<input
-							type="text"
-							bind:value={title}
-							onblur={saveProject}
-							class="text-xl font-bold text-gray-900 border-0 border-b-2 border-transparent hover:border-gray-300 focus:border-blue-500 focus:ring-0 bg-transparent px-1"
-						/>
-					</div>
-
-					<div class="flex items-center gap-3">
-						<Button variant="ghost" onclick={() => settingsModalOpen = true}>
-							<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-							</svg>
-							Settings
-						</Button>
-						<Button variant="ghost" onclick={refreshData} loading={isRefreshing}>
-							<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-							</svg>
-							Refresh Data
-						</Button>
-						<Button variant="secondary" onclick={() => mode = 'preview'}>
-							<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-							</svg>
-							Preview
-						</Button>
-						<Button variant="primary" onclick={() => mode = 'print'}>
-							<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-							</svg>
-							Print Preview
-						</Button>
-					</div>
-				</div>
-			</div>
-		</header>
-	{:else if mode === 'preview'}
-		<div class="fixed top-4 right-4 z-50 print:hidden">
-			<Button variant="secondary" onclick={() => mode = 'editor'}>
-				<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+<div class="h-screen flex flex-col bg-gray-100 print:bg-white">
+	<!-- Top Navbar -->
+	<header class="h-12 bg-white border-b border-gray-200 flex items-center px-4 shrink-0 print:hidden">
+		<div class="flex items-center gap-3 flex-1 min-w-0">
+			<!-- Back button -->
+			<a
+				href="/"
+				class="p-1.5 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+				title="Back to projects"
+			>
+				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
 				</svg>
-				Back to Editor
-			</Button>
-		</div>
-	{:else if mode === 'print'}
-		<header class="bg-white border-b border-gray-200 print:hidden">
-			<div class="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-4">
-				<div class="flex items-center justify-between">
-					<div class="flex items-center gap-4">
-						<Button variant="ghost" onclick={() => mode = 'editor'}>
-							<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
-							</svg>
-							Back to Editor
-						</Button>
-						<span class="text-lg font-semibold text-gray-900">Print Preview</span>
-					</div>
-					<div class="flex items-center gap-3">
-						<Button variant="secondary" onclick={savePrintLayout}>
-							Save Layout
-						</Button>
-						<Button variant="primary" onclick={handlePrint}>
-							<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-							</svg>
-							Print
-						</Button>
-					</div>
-				</div>
+			</a>
+
+			<!-- Editable title -->
+			{#if isEditingTitle}
+				<input
+					bind:this={titleInputEl}
+					type="text"
+					bind:value={title}
+					onblur={saveTitle}
+					onkeydown={handleTitleKeydown}
+					class="text-sm font-semibold text-gray-900 border border-blue-400 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white min-w-[200px]"
+				/>
+			{:else}
+				<button
+					type="button"
+					onclick={startEditingTitle}
+					class="text-sm font-semibold text-gray-900 hover:text-blue-600 truncate cursor-text px-2 py-1 rounded hover:bg-gray-50 transition-colors"
+					title="Click to edit title"
+				>
+					{title}
+				</button>
+			{/if}
+
+			{#if isSaving}
+				<span class="text-xs text-gray-400">Saving...</span>
+			{/if}
+
+			<!-- Tab indicator in header -->
+			<div class="ml-4 text-xs text-gray-400 capitalize">
+				{activeTab}
 			</div>
-		</header>
+		</div>
+	</header>
+
+	<!-- Editor toolbar (only visible on Editor tab) -->
+	{#if activeTab === 'editor'}
+		<EditorToolbar
+			{zoomLevel}
+			{spacerMode}
+			{brushMode}
+			{brushCategory}
+			{searchQuery}
+			{activeFilters}
+			{categoryConfig}
+			canUndo={undoStack.length > 0}
+			canRedo={redoStack.length > 0}
+			onZoomChange={(level) => (zoomLevel = level)}
+			onSpacerChange={(mode) => (spacerMode = mode)}
+			onBrushToggle={toggleBrush}
+			onSearchChange={(q) => (searchQuery = q)}
+			onFilterToggle={toggleFilter}
+			onUndo={handleUndo}
+			onRedo={handleRedo}
+		/>
 	{/if}
 
-	<main class="flex-1 p-4 {mode === 'preview' ? 'p-0' : ''}">
-		{#if data.events.errors && data.events.errors.length > 0}
-			<div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4 print:hidden">
-				<p class="text-yellow-800 font-medium">Data Warnings:</p>
-				<ul class="list-disc list-inside text-sm text-yellow-700 mt-1">
-					{#each data.events.errors as error}
-						<li>{error}</li>
-					{/each}
-				</ul>
-			</div>
-		{/if}
+	<!-- Body: sidebar + main content -->
+	<div class="flex flex-1 overflow-hidden">
+		<!-- Left sidebar: Tab navigation -->
+		<aside class="w-48 bg-white border-r border-gray-200 shrink-0 flex flex-col print:hidden">
+			<nav class="flex-1 p-2 space-y-1">
+				{#each tabs as tab}
+					<button
+						type="button"
+						class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all {activeTab === tab.id
+							? 'bg-blue-50 text-blue-700 font-medium'
+							: 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'}"
+						onclick={() => (activeTab = tab.id)}
+					>
+						<svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={tab.icon} />
+						</svg>
+						{tab.label}
 
-		{#if !data.project.dataSourceUrl}
-			<div class="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
-				<p class="text-blue-800">No data source configured. Add a Google Sheets URL in settings to load timeline events.</p>
-				<div class="mt-4">
-					<Button variant="primary" onclick={() => settingsModalOpen = true}>Configure Data Source</Button>
-				</div>
-			</div>
-		{:else if data.events.events.length === 0}
-			<div class="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
-				<p class="text-gray-600">No events found. Make sure your Google Sheet has the correct column headers (Date, Title, etc.)</p>
-				<div class="mt-4">
-					<Button variant="secondary" onclick={refreshData} loading={isRefreshing}>Refresh Data</Button>
-				</div>
-			</div>
-		{:else}
-			{#if timelineStyle === 'line'}
-				<!-- Line Timeline View -->
-				<div class="space-y-4">
-					<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4" style="height: {data.settings?.masterTimelineHeight || 120}px">
-						<MasterTimeline
-							events={data.events.events}
-							bind:brushStart
-							bind:brushEnd
-							theme={colorTheme}
-						/>
-					</div>
+						<!-- Status indicators -->
+						{#if tab.id === 'schema' && Object.keys(columnMapping).length > 0}
+							<span class="ml-auto w-2 h-2 rounded-full bg-green-400"></span>
+						{:else if tab.id === 'data' && events.length > 0}
+							<span class="ml-auto text-xs text-gray-400">{events.length}</span>
+						{:else if tab.id === 'editor' && events.length === 0}
+							<span class="ml-auto w-2 h-2 rounded-full bg-gray-300"></span>
+						{/if}
+					</button>
+				{/each}
+			</nav>
 
-					<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4" style="height: {data.settings?.zoomTimelineHeight || 400}px">
-						<ZoomTimeline
-							events={data.events.events}
-							{brushStart}
-							{brushEnd}
-							theme={colorTheme}
-							zoomLevel={defaultZoomLevel}
-							onEventClick={openLightbox}
-						/>
-					</div>
-
-					<!-- Scrollbar that syncs with brush - slide only, no resize -->
-					<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-2">
-						<div class="flex items-center gap-3">
-							<button
-								type="button"
-								class="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30"
-								onclick={() => {
-									const width = brushEnd - brushStart;
-									const newStart = Math.max(0, brushStart - 10);
-									brushStart = newStart;
-									brushEnd = newStart + width;
-								}}
-								disabled={brushStart <= 0}
-								aria-label="Scroll left"
-							>
-								<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-								</svg>
-							</button>
-							<div class="flex-1 relative h-3 bg-gray-100 rounded-full overflow-hidden">
-								<div 
-									class="absolute top-0 bottom-0 bg-blue-500 rounded-full cursor-grab active:cursor-grabbing"
-									style="left: {brushStart}%; width: {brushEnd - brushStart}%;"
-									draggable="false"
-									onmousedown={(e) => {
-										const container = e.currentTarget.parentElement;
-										if (!container) return;
-										const rect = container.getBoundingClientRect();
-										const width = brushEnd - brushStart;
-										
-										const handleMove = (moveEvent: MouseEvent) => {
-											const x = moveEvent.clientX - rect.left;
-											const percent = (x / rect.width) * 100;
-											const newStart = Math.max(0, Math.min(100 - width, percent - width / 2));
-											brushStart = newStart;
-											brushEnd = newStart + width;
-										};
-										
-										const handleUp = () => {
-											window.removeEventListener('mousemove', handleMove);
-											window.removeEventListener('mouseup', handleUp);
-										};
-										
-										window.addEventListener('mousemove', handleMove);
-										window.addEventListener('mouseup', handleUp);
-									}}
-								></div>
-							</div>
-							<button
-								type="button"
-								class="p-1 text-gray-400 hover:text-gray-600 disabled:opacity-30"
-								onclick={() => {
-									const width = brushEnd - brushStart;
-									const newEnd = Math.min(100, brushEnd + 10);
-									brushEnd = newEnd;
-									brushStart = newEnd - width;
-								}}
-								disabled={brushEnd >= 100}
-								aria-label="Scroll right"
-							>
-								<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-								</svg>
-							</button>
+			<!-- Workflow progress -->
+			<div class="p-3 border-t border-gray-100">
+				<div class="space-y-2">
+					<div class="flex items-center gap-2 text-xs">
+						<div class="w-4 h-4 rounded-full flex items-center justify-center {events.length > 0 ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'}">
+							{#if events.length > 0}✓{:else}1{/if}
 						</div>
+						<span class="text-gray-500">Data imported</span>
+					</div>
+					<div class="flex items-center gap-2 text-xs">
+						<div class="w-4 h-4 rounded-full flex items-center justify-center {Object.keys(columnMapping).length > 0 ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'}">
+							{#if Object.keys(columnMapping).length > 0}✓{:else}2{/if}
+						</div>
+						<span class="text-gray-500">Schema configured</span>
+					</div>
+					<div class="flex items-center gap-2 text-xs">
+						<div class="w-4 h-4 rounded-full flex items-center justify-center {timelineSaved ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'}">
+							{#if timelineSaved}&#10003;{:else}3{/if}
+						</div>
+						<span class="text-gray-500">Timeline ready</span>
 					</div>
 				</div>
-			{:else}
-				<!-- Calendar Timeline View -->
-				<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-					<CalendarTimeline
-						events={data.events.events}
-						granularity={calendarGranularity}
-						{colorMode}
-						{eventColor}
-						{showLegend}
-						onEventClick={openLightbox}
-						onDayClick={openLightboxWithEvents}
-					/>
-				</div>
-			{/if}
-		{/if}
-	</main>
-</div>
+			</div>
 
-<Modal bind:open={settingsModalOpen} title="Timeline Settings">
-	<div class="space-y-6">
-		<Input
-			type="url"
-			label="Google Sheets URL"
-			bind:value={dataSourceUrl}
-			placeholder="https://docs.google.com/spreadsheets/d/..."
-		/>
-
-		<!-- Column Mapping Section -->
-		<div class="border-t border-gray-200 pt-4">
-			<div class="flex items-center justify-between mb-3">
-				<h4 class="text-sm font-medium text-gray-900">Column Mapping</h4>
-				<Button
-					variant="secondary"
-					size="sm"
-					onclick={loadColumnsFromSheet}
-					disabled={isLoadingColumns || !dataSourceUrl}
+			<!-- Back to projects -->
+			<div class="p-3 border-t border-gray-100">
+				<a
+					href="/"
+					class="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
 				>
-					{isLoadingColumns ? 'Loading...' : 'Load Columns'}
-				</Button>
+					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+					</svg>
+					All Projects
+				</a>
 			</div>
-			
-			{#if needsRemapping || data.events?.errors?.length > 0}
-				<div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-3">
-					<p class="text-sm text-amber-800">
-						<strong>Column mapping needed:</strong> Your spreadsheet columns may have changed. 
-						Click "Load Columns" to remap them.
-					</p>
+		</aside>
+
+		<!-- Main content area: changes per tab -->
+		<main class="flex-1 overflow-hidden relative">
+			{#if activeTab === 'schema'}
+				<SchemaEditor
+					projectId={data.project.id}
+					bind:columnMapping
+					bind:categoryConfig
+					{availableColumns}
+					onSave={handleSchemaSave}
+				/>
+
+			{:else if activeTab === 'data'}
+				<DataImporter
+					projectId={data.project.id}
+					{columnMapping}
+					{categoryConfig}
+					existingEvents={events}
+					onEventsLoaded={handleEventsLoaded}
+					onConfirm={handleEventsConfirmed}
+				/>
+
+			{:else if activeTab === 'editor'}
+				<div class="flex flex-col h-full">
+					<div class="flex-1 overflow-hidden">
+						<ColumnTimeline
+							{events}
+							{zoomLevel}
+							{spacerMode}
+							{categoryConfig}
+							{searchQuery}
+							{activeFilters}
+							{brushMode}
+							{brushCategory}
+							{yearStyles}
+							selectedEventId={selectedEventId()}
+							onStamp={handleStamp}
+							onEventClick={handleEventClick}
+							onYearClick={handleYearClick}
+						/>
+					</div>
+					<div class="shrink-0 bg-white border-t border-gray-200 px-4 py-3 flex items-center justify-between print:hidden">
+						{#if timelineSaved}
+							<span class="text-xs text-green-600 flex items-center gap-1">
+								<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+								</svg>
+								Saved
+							</span>
+						{:else}
+							<span></span>
+						{/if}
+						<button
+							type="button"
+							class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+							onclick={saveTimeline}
+							disabled={isSavingTimeline || events.length === 0}
+						>
+							{#if isSavingTimeline}
+								<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+									<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+									<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+								</svg>
+								Saving...
+							{:else}
+								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+								</svg>
+								Save Timeline &rarr; Preview
+							{/if}
+						</button>
+					</div>
+
+					<!-- Properties Panel -->
+					<PropertiesPanel
+						{selection}
+						{categoryConfig}
+						{events}
+						{yearStyles}
+						onClose={handleClosePanel}
+						onCategoryStyleChange={handleCategoryStyleChange}
+						onEventDataChange={handleEventDataChange}
+						onYearStyleChange={handleYearStyleChange}
+					/>
 				</div>
+
+			{:else if activeTab === 'preview'}
+				<PreviewMode
+					{events}
+					{categoryConfig}
+					projectTitle={title}
+				/>
 			{/if}
-
-			{#if availableColumns.length > 0}
-				<DataPreviewTable
-					columns={availableColumns}
-					rows={previewRows}
-					bind:columnMapping={columnMapping}
-					onMappingChange={handleMappingChange}
-				/>
-			{:else}
-				<p class="text-sm text-gray-500">
-					Click "Load Columns" to view and remap your spreadsheet columns.
-				</p>
-			{/if}
-		</div>
-
-		<div class="border-t border-gray-200 pt-4">
-			<h4 class="text-sm font-medium text-gray-900 mb-3">Timeline Style</h4>
-			<div class="flex gap-4">
-				<label class="flex items-center gap-2 cursor-pointer">
-					<input
-						type="radio"
-						value="line"
-						bind:group={timelineStyle}
-						class="text-blue-600 focus:ring-blue-500"
-					/>
-					<span class="text-sm text-gray-700">Line Timeline</span>
-				</label>
-				<label class="flex items-center gap-2 cursor-pointer">
-					<input
-						type="radio"
-						value="calendar"
-						bind:group={timelineStyle}
-						class="text-blue-600 focus:ring-blue-500"
-					/>
-					<span class="text-sm text-gray-700">Calendar Timeline</span>
-				</label>
-			</div>
-		</div>
-
-		{#if timelineStyle === 'line'}
-			<div class="border-t border-gray-200 pt-4 space-y-4">
-				<h4 class="text-sm font-medium text-gray-900">Line Timeline Options</h4>
-				<Select
-					label="Color Theme"
-					options={colorThemeOptions}
-					bind:value={colorTheme}
-				/>
-				<Select
-					label="Default Zoom Level"
-					options={zoomLevelOptions}
-					bind:value={defaultZoomLevel}
-				/>
-			</div>
-		{:else}
-			<div class="border-t border-gray-200 pt-4 space-y-4">
-				<h4 class="text-sm font-medium text-gray-900">Calendar Timeline Options</h4>
-				<Select
-					label="Calendar Granularity"
-					options={granularityOptions}
-					bind:value={calendarGranularity}
-				/>
-				<Select
-					label="Color Mode"
-					options={colorModeOptions}
-					bind:value={colorMode}
-				/>
-				<ColorPicker
-					label="Event Color"
-					bind:value={eventColor}
-				/>
-				<label class="flex items-center gap-2 cursor-pointer">
-					<input
-						type="checkbox"
-						bind:checked={showLegend}
-						class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-					/>
-					<span class="text-sm text-gray-700">Show color legend</span>
-				</label>
-			</div>
-		{/if}
+		</main>
 	</div>
-
-	{#snippet footer()}
-		<Button variant="ghost" onclick={() => settingsModalOpen = false}>Cancel</Button>
-		<Button
-			variant="primary"
-			loading={isSaving}
-			onclick={async () => {
-				await saveProject();
-				settingsModalOpen = false;
-				if (dataSourceUrl !== data.project.dataSourceUrl) {
-					await refreshData();
-				}
-			}}
-		>
-			Save Settings
-		</Button>
-	{/snippet}
-</Modal>
-
-<MediaLightbox
-	bind:open={lightboxOpen}
-	event={lightboxEvent}
-	events={lightboxEvents}
-/>
+</div>
 
 <style>
 	@media print {

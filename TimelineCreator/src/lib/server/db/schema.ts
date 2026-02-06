@@ -45,7 +45,8 @@ export const projectSettings = sqliteTable('project_settings', {
 	showLegend: integer('show_legend', { mode: 'boolean' }).default(true),
 	dateRangeStart: integer('date_range_start', { mode: 'timestamp' }), // optional filter
 	dateRangeEnd: integer('date_range_end', { mode: 'timestamp' }), // optional filter
-	columnMapping: text('column_mapping') // JSON: { date: 0, title: 1, description: 2, ... }
+	columnMapping: text('column_mapping'), // JSON: { date: 0, title: 1, description: 2, ... }
+	categoryConfig: text('category_config') // JSON: [{ name, color, textColor, keywords[] }]
 });
 
 export const cachedEvents = sqliteTable('cached_events', {

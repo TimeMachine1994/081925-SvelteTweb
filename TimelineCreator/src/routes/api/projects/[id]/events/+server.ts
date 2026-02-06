@@ -8,6 +8,48 @@ import type { RequestHandler } from './$types';
 
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
+export const POST: RequestHandler = async ({ params, request, locals }) => {
+	if (!locals.user) {
+		throw error(401, 'Unauthorized');
+	}
+
+	const [project] = await db
+		.select()
+		.from(table.project)
+		.where(eq(table.project.id, params.id));
+
+	if (!project) {
+		throw error(404, 'Project not found');
+	}
+
+	const body = await request.json();
+	const { events, errors } = body;
+
+	// Upsert into cached_events
+	const [existingCache] = await db
+		.select()
+		.from(table.cachedEvents)
+		.where(eq(table.cachedEvents.projectId, params.id));
+
+	const eventData = JSON.stringify({ events, errors });
+
+	if (existingCache) {
+		await db
+			.update(table.cachedEvents)
+			.set({ eventData, cachedAt: new Date() })
+			.where(eq(table.cachedEvents.projectId, params.id));
+	} else {
+		await db.insert(table.cachedEvents).values({
+			id: generateId(),
+			projectId: params.id,
+			eventData,
+			cachedAt: new Date()
+		});
+	}
+
+	return json({ success: true, count: events.length });
+};
+
 export const GET: RequestHandler = async ({ params, url, locals }) => {
 	if (!locals.user) {
 		throw error(401, 'Unauthorized');

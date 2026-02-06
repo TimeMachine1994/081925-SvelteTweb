@@ -1,7 +1,8 @@
-import { redirect } from '@sveltejs/kit';
+import { redirect, fail } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
 import * as table from '$lib/server/db/schema';
 import { desc, eq } from 'drizzle-orm';
+import { generateId } from '$lib/utils/id';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -26,6 +27,33 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions: Actions = {
+	create: async ({ locals }) => {
+		if (!locals.user) {
+			return redirect(302, '/demo/lucia/login');
+		}
+
+		const projectId = generateId();
+		const settingsId = generateId();
+		const now = new Date();
+
+		await db.insert(table.project).values({
+			id: projectId,
+			userId: locals.user.id,
+			title: 'Untitled Timeline',
+			dataSourceUrl: null,
+			dataSourceType: 'google_sheets',
+			createdAt: now,
+			updatedAt: now
+		});
+
+		await db.insert(table.projectSettings).values({
+			id: settingsId,
+			projectId
+		});
+
+		throw redirect(302, `/projects/${projectId}`);
+	},
+
 	delete: async ({ request, locals }) => {
 		if (!locals.user) {
 			return redirect(302, '/demo/lucia/login');
@@ -35,9 +63,13 @@ export const actions: Actions = {
 		const projectId = formData.get('projectId') as string;
 
 		if (!projectId) {
-			return { success: false, error: 'Project ID is required' };
+			return fail(400, { error: 'Project ID is required' });
 		}
 
+		// Manually delete child rows (libsql doesn't enforce FK cascades by default)
+		await db.delete(table.printLayout).where(eq(table.printLayout.projectId, projectId));
+		await db.delete(table.cachedEvents).where(eq(table.cachedEvents.projectId, projectId));
+		await db.delete(table.projectSettings).where(eq(table.projectSettings.projectId, projectId));
 		await db.delete(table.project).where(eq(table.project.id, projectId));
 
 		return { success: true };

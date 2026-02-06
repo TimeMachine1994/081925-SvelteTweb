@@ -36,14 +36,14 @@
 					<h1 class="text-2xl font-bold text-gray-900">TimelineCreator</h1>
 					<p class="text-sm text-gray-500 mt-1">Legal Timeline Presentation Tool</p>
 				</div>
-				<a href="/new">
-					<Button variant="primary">
+				<form method="POST" action="?/create" use:enhance>
+					<Button variant="primary" type="submit">
 						<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
 						</svg>
 						New Timeline
 					</Button>
-				</a>
+				</form>
 			</div>
 		</div>
 	</header>
@@ -57,9 +57,9 @@
 				<h2 class="mt-4 text-xl font-semibold text-gray-900">No timelines yet</h2>
 				<p class="mt-2 text-gray-500">Create your first legal timeline to get started.</p>
 				<div class="mt-6">
-					<a href="/new">
-						<Button variant="primary" size="lg">Create Your First Timeline</Button>
-					</a>
+					<form method="POST" action="?/create" use:enhance>
+						<Button variant="primary" size="lg" type="submit">Create Your First Timeline</Button>
+					</form>
 				</div>
 			</div>
 		{:else}
