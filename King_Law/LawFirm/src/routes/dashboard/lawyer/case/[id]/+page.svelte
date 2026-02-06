@@ -1,11 +1,8 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { PageData, ActionData } from './$types';
-<<<<<<< HEAD
 	import CreateInvoiceModal from '$lib/components/CreateInvoiceModal.svelte';
 	import DocumentPreviewModal from '$lib/components/DocumentPreviewModal.svelte';
-=======
->>>>>>> 68bb0230176ca3621988ae365bbf793bcdb9f6e1
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -303,21 +300,9 @@
 	</div>
 </div>
 
-<<<<<<< HEAD
-<!-- Create Invoice Modal -->
-<CreateInvoiceModal 
-	open={showInvoiceModal} 
-	caseId={data.case.id} 
-	caseName={data.case.title}
-	oncreated={handleInvoiceCreated} 
-	onclose={() => (showInvoiceModal = false)} 
-/>
-
 <!-- Document Preview Modal -->
 <DocumentPreviewModal
 	open={!!previewDoc}
 	doc={previewDoc}
 	onclose={() => (previewDoc = null)}
 />
-=======
->>>>>>> 68bb0230176ca3621988ae365bbf793bcdb9f6e1

@@ -9,9 +9,12 @@
 	let { data }: { data: PageData } = $props();
 
 	let showCreateCaseModal = $state(false);
-<<<<<<< HEAD
 	let searchQuery = $state('');
 	let statusFilter = $state<'all' | 'active' | 'pending' | 'closed'>('all');
+	let selectedClientId = $state<string | null>(null);
+	let selectedClientForMessages = $state<string | null>(null);
+	let hiddenClientIds = $state<Set<string>>(new Set());
+	let showAllClientsModal = $state(false);
 
 	let filteredCases = $derived(
 		data.cases.filter(({ case: c, client }) => {
@@ -25,16 +28,11 @@
 				client.email.toLowerCase().includes(q)
 			);
 		})
-=======
-	let selectedClientId = $state<string | null>(null);
-	let selectedClientForMessages = $state<string | null>(null);
-	let hiddenClientIds = $state<Set<string>>(new Set());
-	let showAllClientsModal = $state(false);
+	);
 
 	// Filter out hidden clients
 	let visibleNewClients = $derived(
 		data.newClients?.filter((c: any) => !hiddenClientIds.has(c.id)) || []
->>>>>>> 68bb0230176ca3621988ae365bbf793bcdb9f6e1
 	);
 
 	function handleCaseCreated(event: CustomEvent) {
