@@ -42,7 +42,6 @@ async function seed() {
 		
 		await db.insert(user).values({
 			id: lawyerId,
-			username: 'lawyer@test.com',
 			email: 'lawyer@test.com',
 			passwordHash: lawyerPasswordHash,
 			firstName: 'Ben',
@@ -57,7 +56,6 @@ async function seed() {
 		
 		await db.insert(user).values({
 			id: clientId,
-			username: 'client@test.com',
 			email: 'client@test.com',
 			passwordHash: clientPasswordHash,
 			firstName: 'John',

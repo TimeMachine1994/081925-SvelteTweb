@@ -170,8 +170,8 @@
 				Arrested or under investigation? Don't wait. Contact us immediately for urgent legal representation.
 			</p>
 			<div class="flex flex-col sm:flex-row gap-4 justify-center">
-				<a href="tel:4075550100" class="bg-gold hover:bg-gold-dark text-black font-semibold px-8 py-3 rounded-md transition-colors">
-					Call Now: (407) 555-0100
+				<a href="tel:6893536943" class="bg-gold hover:bg-gold-dark text-black font-semibold px-8 py-3 rounded-md transition-colors">
+					Call Now: (689) 353-6943
 				</a>
 				<a href="/contact" class="border-2 border-gold text-gold hover:bg-gold hover:text-black font-semibold px-8 py-3 rounded-md transition-colors">
 					Request Consultation

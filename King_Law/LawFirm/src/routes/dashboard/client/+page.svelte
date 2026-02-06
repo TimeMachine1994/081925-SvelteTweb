@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { casesStore } from '$lib/stores/cases.svelte.ts';
 	import { documentsStore } from '$lib/stores/documents.svelte.ts';
 	import { messagesStore } from '$lib/stores/messages.svelte.ts';
@@ -6,7 +7,13 @@
 
 	let activeCases = $derived(casesStore.cases.filter(c => c.case.status === 'active').length);
 	let documentsCount = $derived(documentsStore.documents.length);
-	let unreadMessages = $derived(messagesStore.messages.filter(m => !m.message.readAt).length);
+	// Use unreadCounts.total which correctly counts only messages where user is recipient
+	let unreadMessages = $derived(messagesStore.unreadCounts.total);
+
+	onMount(() => {
+		// Fetch unread counts on mount
+		messagesStore.fetchUnreadCounts();
+	});
 
 	function formatCurrency(cents: number): string {
 		return new Intl.NumberFormat('en-US', {

@@ -13,7 +13,6 @@ export const actions: Actions = {
 	default: async ({ request, cookies }) => {
 		console.log('\n========== REGISTRATION ATTEMPT STARTED ==========');
 		const data = await request.formData();
-		const username = data.get('username')?.toString();
 		const email = data.get('email')?.toString();
 		const password = data.get('password')?.toString();
 		const confirmPassword = data.get('confirmPassword')?.toString();
@@ -24,7 +23,6 @@ export const actions: Actions = {
 		const accessCode = data.get('accessCode')?.toString();
 		
 		console.log('Registration data:', {
-			username,
 			email,
 			firstName,
 			lastName,
@@ -33,7 +31,7 @@ export const actions: Actions = {
 			hasAccessCode: !!accessCode
 		});
 
-		if (!username || !email || !password || !confirmPassword || !firstName || !lastName) {
+		if (!email || !password || !confirmPassword || !firstName || !lastName) {
 			console.log('❌ Registration failed: Missing required fields');
 			return fail(400, { error: 'All required fields must be filled' });
 		}
@@ -54,19 +52,6 @@ export const actions: Actions = {
 		}
 
 		console.log('✅ All validation checks passed');
-
-		console.log('🔍 Checking if username exists...');
-		const existingUser = await db
-			.select()
-			.from(user)
-			.where(eq(user.username, username))
-			.limit(1);
-
-		if (existingUser.length > 0) {
-			console.log('❌ Registration failed: Username already exists');
-			return fail(400, { error: 'Username already exists' });
-		}
-		console.log('✅ Username available');
 
 		console.log('🔍 Checking if email exists...');
 		const existingEmail = await db
@@ -93,7 +78,6 @@ export const actions: Actions = {
 			console.log('💾 Inserting user into database...');
 			await db.insert(user).values({
 				id: userId,
-				username,
 				email,
 				passwordHash,
 				firstName,

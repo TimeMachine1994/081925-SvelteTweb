@@ -2,7 +2,7 @@
 	import { authStore } from '$lib/stores/auth.svelte.ts';
 	import { goto } from '$app/navigation';
 
-	let username = $state('');
+	let email = $state('');
 	let password = $state('');
 	let error = $state('');
 
@@ -10,7 +10,7 @@
 		e.preventDefault();
 		error = '';
 		
-		const result = await authStore.login(username, password);
+		const result = await authStore.login(email, password);
 		
 		if (result.success) {
 			goto(authStore.dashboardRoute);
@@ -58,11 +58,11 @@
 				{/if}
 
 				<div>
-					<label for="username" class="block text-sm font-medium text-king-blue mb-2">Username</label>
+					<label for="email" class="block text-sm font-medium text-king-blue mb-2">Email</label>
 					<input
-						type="text"
-						id="username"
-						bind:value={username}
+						type="email"
+						id="email"
+						bind:value={email}
 						required
 						class="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
 					/>

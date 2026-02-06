@@ -43,10 +43,12 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	const caseMessages = await db
 		.select({
 			message: messages,
-			sender: user
+			sender: user,
+			attachment: documents
 		})
 		.from(messages)
 		.innerJoin(user, eq(messages.senderId, user.id))
+		.leftJoin(documents, eq(messages.attachmentDocumentId, documents.id))
 		.where(eq(messages.caseId, caseId));
 
 	return {

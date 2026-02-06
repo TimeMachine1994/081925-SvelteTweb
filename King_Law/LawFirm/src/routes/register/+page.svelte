@@ -4,7 +4,6 @@
 
 	let firstName = $state('');
 	let lastName = $state('');
-	let username = $state('');
 	let email = $state('');
 	let phoneNumber = $state('');
 	let password = $state('');
@@ -21,7 +20,6 @@
 		}
 
 		const result = await authStore.register({
-			username,
 			email,
 			password,
 			firstName,
@@ -48,10 +46,11 @@
 		<div class="bg-card border border-border rounded-lg p-6 shadow-lg">
 			<form onsubmit={handleSubmit}>
 				{#if error}
-					<div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 px-4 py-3 rounded mb-4">
-						{error}
-					</div>
-				{/if}
+				<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+					<p class="font-medium">Registration Error</p>
+					<p class="text-sm">{error}</p>
+				</div>
+			{/if}
 
 				<div class="grid grid-cols-2 gap-4 mb-4">
 					<div>
@@ -74,17 +73,6 @@
 							class="w-full px-3 py-2 border border-input rounded-md bg-background"
 						/>
 					</div>
-				</div>
-
-				<div class="mb-4">
-					<label for="username" class="block text-sm font-medium mb-2">Username</label>
-					<input
-						type="text"
-						id="username"
-						bind:value={username}
-						required
-						class="w-full px-3 py-2 border border-input rounded-md bg-background"
-					/>
 				</div>
 
 				<div class="mb-4">

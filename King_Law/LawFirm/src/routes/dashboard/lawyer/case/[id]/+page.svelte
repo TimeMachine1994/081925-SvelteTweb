@@ -1,8 +1,11 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
 	import type { PageData, ActionData } from './$types';
+<<<<<<< HEAD
 	import CreateInvoiceModal from '$lib/components/CreateInvoiceModal.svelte';
 	import DocumentPreviewModal from '$lib/components/DocumentPreviewModal.svelte';
+=======
+>>>>>>> 68bb0230176ca3621988ae365bbf793bcdb9f6e1
 
 	let { data, form }: { data: PageData; form: ActionData } = $props();
 
@@ -23,7 +26,6 @@
 		});
 	}
 
-	let messageText = $state('');
 	let showInvoiceForm = $state(false);
 	let showInvoiceModal = $state(false);
 	let uploadingFile = $state(false);
@@ -33,29 +35,6 @@
 	function handleInvoiceCreated() {
 		showInvoiceModal = false;
 		window.location.reload();
-	}
-
-	async function sendMessage() {
-		if (!messageText.trim()) return;
-
-		try {
-			const response = await fetch('/api/messages/send', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					caseId: data.case.id,
-					recipientId: data.client.id,
-					content: messageText
-				})
-			});
-
-			if (response.ok) {
-				messageText = '';
-				window.location.reload();
-			}
-		} catch (error) {
-			console.error('Failed to send message:', error);
-		}
 	}
 
 	async function uploadFile(event: Event) {
@@ -145,9 +124,7 @@
 		</div>
 	</div>
 
-	<div class="grid lg:grid-cols-2 gap-8">
-		<!-- Left Column -->
-		<div class="space-y-8">
+	<div class="space-y-8">
 			<!-- Documents -->
 			<div>
 				<div class="flex justify-between items-center mb-4">
@@ -203,10 +180,10 @@
 				<div class="flex justify-between items-center mb-4">
 					<h2 class="font-title text-2xl">Invoices</h2>
 					<button
-						onclick={() => (showInvoiceModal = true)}
+						onclick={() => (showInvoiceForm = !showInvoiceForm)}
 						class="bg-gold hover:bg-gold-dark text-black font-semibold px-4 py-2 rounded-md transition-colors"
 					>
-						Create Invoice
+						{showInvoiceForm ? 'Cancel' : 'Create Invoice'}
 					</button>
 				</div>
 
@@ -323,64 +300,10 @@
 					</div>
 				{/if}
 			</div>
-		</div>
-
-		<!-- Right Column - Messages -->
-		<div>
-			<h2 class="font-title text-2xl mb-4">Messages</h2>
-
-			<div class="bg-background border border-border rounded-lg overflow-hidden">
-				<div class="h-96 overflow-y-auto p-4 space-y-4">
-					{#if data.messages.length > 0}
-						{#each data.messages as { message, sender }}
-							<div
-								class="p-3 rounded-lg {sender.id === data.client.id
-									? 'bg-muted ml-4'
-									: 'bg-gold/10 mr-4'}"
-							>
-								<div class="flex justify-between items-start mb-1">
-									<span class="font-semibold text-sm">
-										{sender.firstName} {sender.lastName}
-									</span>
-									<span class="text-xs text-muted-foreground">
-										{formatDate(message.createdAt)}
-									</span>
-								</div>
-								<p class="text-sm">{message.content}</p>
-							</div>
-						{/each}
-					{:else}
-						<p class="text-center text-muted-foreground">No messages yet</p>
-					{/if}
-				</div>
-
-				<div class="border-t border-border p-4">
-					<form
-						onsubmit={(e) => {
-							e.preventDefault();
-							sendMessage();
-						}}
-						class="flex gap-2"
-					>
-						<input
-							type="text"
-							bind:value={messageText}
-							placeholder="Type your message..."
-							class="flex-1 px-3 py-2 border border-input rounded-md bg-background"
-						/>
-						<button
-							type="submit"
-							class="bg-gold hover:bg-gold-dark text-black font-semibold px-6 py-2 rounded-md transition-colors"
-						>
-							Send
-						</button>
-					</form>
-				</div>
-			</div>
-		</div>
 	</div>
 </div>
 
+<<<<<<< HEAD
 <!-- Create Invoice Modal -->
 <CreateInvoiceModal 
 	open={showInvoiceModal} 
@@ -396,3 +319,5 @@
 	doc={previewDoc}
 	onclose={() => (previewDoc = null)}
 />
+=======
+>>>>>>> 68bb0230176ca3621988ae365bbf793bcdb9f6e1

@@ -17,7 +17,7 @@
 
 			<!-- Desktop Navigation -->
 			<div class="hidden lg:flex items-center gap-10">
-				<a href="/" class="text-king-blue/70 hover:text-king-blue transition-colors text-sm tracking-wide uppercase">Home</a>
+				<a href="/meet-ben-king" class="text-king-blue/70 hover:text-king-blue transition-colors text-sm tracking-wide uppercase">Meet Ben King</a>
 				
 				<div class="relative group">
 					<button class="text-king-blue/70 hover:text-king-blue transition-colors text-sm tracking-wide uppercase flex items-center gap-1">
@@ -40,7 +40,7 @@
 					</div>
 				</div>
 
-				<a href="/meet-ben-king" class="text-king-blue/70 hover:text-king-blue transition-colors text-sm tracking-wide uppercase">Meet Ben King</a>
+				<a href="/our-team" class="text-king-blue/70 hover:text-king-blue transition-colors text-sm tracking-wide uppercase">Our Team</a>
 				<a href="/contact" class="text-king-blue/70 hover:text-king-blue transition-colors text-sm tracking-wide uppercase">Contact</a>
 			</div>
 
@@ -52,6 +52,15 @@
 						class="bg-gold hover:bg-gold-light text-king-blue px-6 py-2.5 rounded-lg font-semibold transition-all hover:shadow-lg"
 					>
 						Dashboard
+					</a>
+					<a 
+						href="/logout"
+						class="text-king-blue/70 hover:text-red-600 transition-colors p-2 rounded-lg hover:bg-red-50"
+						title="Logout"
+					>
+						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+						</svg>
 					</a>
 				{:else}
 					<a href="/login" class="text-king-blue/70 hover:text-king-blue transition-colors text-sm">Login</a>
@@ -84,8 +93,8 @@
 	{#if mobileMenuOpen}
 		<div class="lg:hidden bg-king-blue">
 			<div class="px-6 py-6 space-y-1">
-				<a href="/" class="block py-3 text-white/80 hover:text-gold border-b border-white/10">Home</a>
-				
+				<a href="/meet-ben-king" class="block py-3 text-white/80 hover:text-gold border-b border-white/10" onclick={() => mobileMenuOpen = false}>Meet Ben King</a>
+ 				
 				<button 
 					class="w-full flex justify-between items-center py-3 text-white/80 hover:text-gold border-b border-white/10"
 					onclick={() => servicesOpen = !servicesOpen}
@@ -97,31 +106,42 @@
 				</button>
 				{#if servicesOpen}
 					<div class="pl-4 space-y-1 pb-2">
-						<a href="/services/personal-injury" class="block py-2 text-white/60 hover:text-gold text-sm">Personal Injury</a>
-						<a href="/services/criminal-defense" class="block py-2 text-white/60 hover:text-gold text-sm">Criminal Defense</a>
-						<a href="/services/employment-law" class="block py-2 text-white/60 hover:text-gold text-sm">Employment Law</a>
-						<a href="/services/real-estate-business" class="block py-2 text-white/60 hover:text-gold text-sm">Real Estate & Business</a>
-						<a href="/services/civil-rights" class="block py-2 text-white/60 hover:text-gold text-sm">Civil Rights</a>
-						<a href="/services/cannabis-law" class="block py-2 text-white/60 hover:text-gold text-sm">Cannabis Law</a>
-						<a href="/services/appeals" class="block py-2 text-white/60 hover:text-gold text-sm">Appeals</a>
-						<a href="/services/property-damage" class="block py-2 text-white/60 hover:text-gold text-sm">Property Damage</a>
+						<a href="/services/personal-injury" class="block py-2 text-white/60 hover:text-gold text-sm" onclick={() => mobileMenuOpen = false}>Personal Injury</a>
+						<a href="/services/criminal-defense" class="block py-2 text-white/60 hover:text-gold text-sm" onclick={() => mobileMenuOpen = false}>Criminal Defense</a>
+						<a href="/services/employment-law" class="block py-2 text-white/60 hover:text-gold text-sm" onclick={() => mobileMenuOpen = false}>Employment Law</a>
+						<a href="/services/real-estate-business" class="block py-2 text-white/60 hover:text-gold text-sm" onclick={() => mobileMenuOpen = false}>Real Estate & Business</a>
+						<a href="/services/civil-rights" class="block py-2 text-white/60 hover:text-gold text-sm" onclick={() => mobileMenuOpen = false}>Civil Rights</a>
+						<a href="/services/cannabis-law" class="block py-2 text-white/60 hover:text-gold text-sm" onclick={() => mobileMenuOpen = false}>Cannabis Law</a>
+						<a href="/services/appeals" class="block py-2 text-white/60 hover:text-gold text-sm" onclick={() => mobileMenuOpen = false}>Appeals</a>
+						<a href="/services/property-damage" class="block py-2 text-white/60 hover:text-gold text-sm" onclick={() => mobileMenuOpen = false}>Property Damage</a>
 					</div>
 				{/if}
 				
-				<a href="/meet-ben-king" class="block py-3 text-white/80 hover:text-gold border-b border-white/10">Meet Ben King</a>
-				<a href="/contact" class="block py-3 text-white/80 hover:text-gold border-b border-white/10">Contact</a>
+				<a href="/our-team" class="block py-3 text-white/80 hover:text-gold border-b border-white/10" onclick={() => mobileMenuOpen = false}>Our Team</a>
+				<a href="/contact" class="block py-3 text-white/80 hover:text-gold border-b border-white/10" onclick={() => mobileMenuOpen = false}>Contact</a>
 				
 				<div class="pt-4 space-y-3">
 					{#if user}
 						<a 
 							href={user.role === 'lawyer' ? '/dashboard/lawyer' : '/dashboard/client'}
 							class="block text-center bg-gold text-king-blue py-3 rounded-lg font-semibold"
+							onclick={() => mobileMenuOpen = false}
 						>
 							Dashboard
 						</a>
+						<a 
+							href="/logout"
+							class="flex items-center justify-center gap-2 text-white/80 hover:text-red-400 py-2 transition-colors"
+							onclick={() => mobileMenuOpen = false}
+						>
+							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+							</svg>
+							Logout
+						</a>
 					{:else}
-						<a href="/login" class="block text-center text-white/80 hover:text-gold py-2">Login</a>
-						<a href="/contact" class="block text-center bg-gold text-king-blue py-3 rounded-lg font-semibold">
+						<a href="/login" class="block text-center text-white/80 hover:text-gold py-2" onclick={() => mobileMenuOpen = false}>Login</a>
+						<a href="/contact" class="block text-center bg-gold text-king-blue py-3 rounded-lg font-semibold" onclick={() => mobileMenuOpen = false}>
 							Free Consultation
 						</a>
 					{/if}

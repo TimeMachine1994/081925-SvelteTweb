@@ -18,7 +18,6 @@ export const lucia = new Lucia(adapter, {
 	},
 	getUserAttributes: (attributes) => {
 		return {
-			username: attributes.username,
 			email: attributes.email,
 			firstName: attributes.firstName,
 			lastName: attributes.lastName,
@@ -36,7 +35,6 @@ declare module 'lucia' {
 }
 
 interface DatabaseUserAttributes {
-	username: string;
 	email: string;
 	firstName: string;
 	lastName: string;
@@ -92,7 +90,7 @@ export async function validateSessionToken(token: string) {
 	console.log('✅ Session found in database');
 
 	const { user: dbUser, session: dbSession } = result[0];
-	console.log('Session user:', { id: dbUser.id, username: dbUser.username, role: dbUser.role });
+	console.log('Session user:', { id: dbUser.id, email: dbUser.email, role: dbUser.role });
 	console.log('Session expires:', new Date(dbSession.expiresAt).toISOString());
 
 	const expiresAt = new Date(dbSession.expiresAt);

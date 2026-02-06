@@ -2,6 +2,7 @@
 	import { messagesStore } from '$lib/stores/messages.svelte.ts';
 	import { casesStore } from '$lib/stores/cases.svelte.ts';
 	import { authStore } from '$lib/stores/auth.svelte.ts';
+	import { chatUIStore } from '$lib/stores/chatUI.svelte.ts';
 	import MessageBubble from './MessageBubble.svelte';
 	import AttachmentUploader from './AttachmentUploader.svelte';
 	import { onMount, onDestroy } from 'svelte';
@@ -21,6 +22,17 @@
 	let selectedFile = $state<File | null>(null);
 	let messagesContainer: HTMLDivElement;
 	let sending = $state(false);
+
+	// Filter messages by selected client if viewing uncategorized
+	let displayMessages = $derived(() => {
+		if (chatUIStore.filterUncategorized && chatUIStore.selectedClientId) {
+			return messagesStore.messages.filter(
+				item => item.message.senderId === chatUIStore.selectedClientId || 
+				        item.message.recipientId === chatUIStore.selectedClientId
+			);
+		}
+		return messagesStore.messages;
+	});
 
 	// Auto-scroll to bottom when new messages arrive
 	$effect(() => {
@@ -47,11 +59,29 @@
 	});
 
 	function toggleChat() {
+		if (isOpen) {
+			chatUIStore.close();
+		} else {
+			chatUIStore.open();
+		}
 		isOpen = !isOpen;
 		if (!isOpen && onclose) {
 			onclose();
 		}
 	}
+
+	// Sync with chatUIStore
+	$effect(() => {
+		if (chatUIStore.isOpen && !isOpen) {
+			isOpen = true;
+			// If viewing a specific client's uncategorized messages
+			if (chatUIStore.filterUncategorized) {
+				messagesStore.fetchMessages(undefined, true);
+			}
+		} else if (!chatUIStore.isOpen && isOpen && !caseId) {
+			isOpen = false;
+		}
+	});
 
 	async function handleSend(e: Event) {
 		e.preventDefault();
@@ -162,7 +192,9 @@
 		<div class="flex items-center justify-between p-4 border-b border-border">
 			<div>
 				<h2 class="font-title text-xl">Messages</h2>
-				{#if caseId && casesStore.cases.length > 0}
+				{#if chatUIStore.selectedClientName}
+					<p class="text-sm text-muted-foreground">with {chatUIStore.selectedClientName}</p>
+				{:else if caseId && casesStore.cases.length > 0}
 					{@const currentCase = casesStore.cases.find((c) => c.case.id === caseId)}
 					{#if currentCase}
 						<p class="text-sm text-muted-foreground">{currentCase.case.title}</p>
@@ -182,14 +214,14 @@
 
 		<!-- Messages Container -->
 		<div bind:this={messagesContainer} class="flex-1 overflow-y-auto p-4">
-			{#if messagesStore.loading && messagesStore.messages.length === 0}
+			{#if messagesStore.loading && displayMessages().length === 0}
 				<div class="flex items-center justify-center h-full">
 					<div class="text-center">
 						<div class="w-8 h-8 border-4 border-gold border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
 						<p class="text-sm text-muted-foreground">Loading messages...</p>
 					</div>
 				</div>
-			{:else if messagesStore.messages.length === 0}
+			{:else if displayMessages().length === 0}
 				<div class="flex items-center justify-center h-full text-center">
 					<div>
 						<div class="text-4xl mb-2">💬</div>
@@ -198,7 +230,7 @@
 					</div>
 				</div>
 			{:else}
-				{#each messagesStore.messages as item}
+				{#each displayMessages() as item}
 					<MessageBubble
 						message={item.message}
 						sender={item.sender}

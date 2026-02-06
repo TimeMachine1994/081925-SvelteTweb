@@ -10,7 +10,7 @@
 		email: string;
 	};
 
-	let { open = false }: { open?: boolean } = $props();
+	let { open = false, initialClientId = null }: { open?: boolean; initialClientId?: string | null } = $props();
 
 	let clients = $state<Client[]>([]);
 	let loading = $state(false);
@@ -43,6 +43,11 @@
 			if (!response.ok) throw new Error('Failed to load clients');
 			const data = await response.json();
 			clients = data.users || [];
+			
+			// If initialClientId is provided, pre-select that client
+			if (initialClientId) {
+				formData.clientId = initialClientId;
+			}
 		} catch (err: any) {
 			error = err.message;
 		} finally {

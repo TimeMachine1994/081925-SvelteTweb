@@ -12,7 +12,7 @@ dotenv.config();
 // Define user table schema
 const user = sqliteTable('user', {
 	id: text('id').primaryKey(),
-	username: text('username').notNull().unique(),
+	username: text('username'),
 	passwordHash: text('password_hash').notNull(),
 	role: text('role', { enum: ['client', 'lawyer', 'admin'] }).notNull().default('client'),
 	email: text('email').notNull().unique(),
@@ -60,7 +60,6 @@ async function createBenKing() {
 
 		await db.insert(user).values({
 			id: userId,
-			username: 'benking',
 			passwordHash: passwordHash,
 			role: 'lawyer',
 			email: 'ben@kinglaw.com',
@@ -72,7 +71,7 @@ async function createBenKing() {
 		});
 
 		console.log('\n✅ Ben King created successfully!');
-		console.log('   Username: benking');
+		console.log('   Email: ben@kinglaw.com');
 		console.log('   Password: kinglaw123');
 		console.log('   Email: ben@kinglaw.com');
 		console.log('   Role: lawyer');

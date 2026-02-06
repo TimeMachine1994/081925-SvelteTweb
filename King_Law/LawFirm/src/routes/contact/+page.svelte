@@ -116,22 +116,22 @@
 							<div>
 								<p class="text-gold uppercase tracking-[0.2em] text-xs mb-3">Address</p>
 								<p class="text-white/80">
-									123 Legal Street<br />
+									419 N. Magnolia Ave<br />
 									Orlando, FL 32801
 								</p>
 							</div>
 
 							<div>
 								<p class="text-gold uppercase tracking-[0.2em] text-xs mb-3">Phone</p>
-								<a href="tel:4075550100" class="text-white hover:text-gold transition-colors text-xl font-semibold">
-									(407) 555-0100
+								<a href="tel:6893536943" class="text-white hover:text-gold transition-colors text-xl font-semibold">
+									(689) 353-6943
 								</a>
 							</div>
 
 							<div>
 								<p class="text-gold uppercase tracking-[0.2em] text-xs mb-3">Email</p>
-								<a href="mailto:info@kinglawfirm.com" class="text-white/80 hover:text-gold transition-colors">
-									info@kinglawfirm.com
+								<a href="mailto:ben@givekingaring.com" class="text-white/80 hover:text-gold transition-colors">
+									ben@givekingaring.com
 								</a>
 							</div>
 
