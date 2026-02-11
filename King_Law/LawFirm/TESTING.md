@@ -1,5 +1,9 @@
 # Testing Guide - King Law Firm
 
+> **Note (Feb 11, 2026):** This guide predates the staff registration system and admin dashboard.
+> It only covers lawyer and client flows. Staff and admin test flows are not yet documented.
+> See `DevDocs/1-27-26-master-wbs.md` Section 12 for the current testing strategy.
+
 ## Overview
 This project uses Playwright for end-to-end testing of the complete lawyer and client workflows.
 

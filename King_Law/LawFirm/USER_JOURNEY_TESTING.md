@@ -1,5 +1,10 @@
 # User Journey Testing - Complete Implementation
 
+> **Note (Feb 11, 2026):** This document predates the staff registration system and admin dashboard.
+> Journey tests only cover lawyer and client flows. Staff sign-up, admin staff-code management,
+> and consultation form submission are not covered here.
+> See `DevDocs/1-27-26-master-wbs.md` Section 12 for the current testing strategy.
+
 ## Overview
 Comprehensive end-to-end testing suite covering all critical user journeys for the King Law Firm application using Playwright.
 

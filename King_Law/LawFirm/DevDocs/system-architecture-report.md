@@ -1,5 +1,17 @@
 # King Law Firm Case Management System - Architecture Report
 
+> **Note (Feb 11, 2026):** Core data flow and case-centric architecture descriptions remain accurate.
+> However, this report is **missing** the following additions made since it was written:
+> - **Staff role** (4th role: client, lawyer, staff, admin)
+> - **3 new DB tables:** `staff_codes`, `system_settings`, `case_staff_assignments`
+> - **`consultations` table** and `/api/consultations` endpoint
+> - **8 practice area pages** (was 4)
+> - **`/meet-ben-king` page** (replaced `/about`)
+> - **Staff dashboard** and **admin dashboard** (staff codes, settings)
+> - **Inline MessageComposer** (replaced ChatSlider on dashboards)
+>
+> See `1-27-26-master-wbs.md` for the authoritative, up-to-date reference.
+
 ## Executive Summary
 
 The King Law Firm case management system is a comprehensive web application built to facilitate seamless collaboration between lawyers and their clients. The system operates on a hub-and-spoke model where **cases** serve as the central organizational unit, connecting lawyers, clients, documents, invoices, and messages into a unified workflow. This architecture ensures data integrity, proper access control, and an intuitive user experience for both legal professionals and their clients.

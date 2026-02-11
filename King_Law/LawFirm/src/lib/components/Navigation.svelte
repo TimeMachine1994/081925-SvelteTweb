@@ -8,15 +8,15 @@
 
 <nav class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100">
 	<div class="max-w-7xl mx-auto px-6 lg:px-8">
-		<div class="flex justify-between items-center h-20">
+		<div class="flex items-center h-20">
 			<!-- Logo -->
-			<a href="/" class="flex items-center gap-3 group">
+			<a href="/" class="flex items-center gap-3 group shrink-0">
 				<img src="https://kinglawbucket.s3.us-east-2.amazonaws.com/public/King+Law+Official+Logo++No+BKG.png" alt="King Law" class="h-12 w-auto" />
 				<span class="font-title text-xl text-king-blue">King Law, P.L.L.C.</span>
 			</a>
 
 			<!-- Desktop Navigation -->
-			<div class="hidden lg:flex items-center gap-10">
+			<div class="hidden lg:flex flex-1 items-center justify-center gap-8">
 				<a href="/meet-ben-king" class="text-king-blue/70 hover:text-king-blue transition-colors text-sm tracking-wide uppercase">Meet Ben King</a>
 				
 				<div class="relative group">
@@ -41,6 +41,7 @@
 				</div>
 
 				<a href="/our-team" class="text-king-blue/70 hover:text-king-blue transition-colors text-sm tracking-wide uppercase">Our Team</a>
+				<a href="/schedule" class="text-king-blue/70 hover:text-king-blue transition-colors text-sm tracking-wide uppercase">Schedule</a>
 				<a href="/contact" class="text-king-blue/70 hover:text-king-blue transition-colors text-sm tracking-wide uppercase">Contact</a>
 			</div>
 
@@ -63,9 +64,9 @@
 						</svg>
 					</a>
 				{:else}
-					<a href="/login" class="text-king-blue/70 hover:text-king-blue transition-colors text-sm">Login</a>
-					<a href="/contact" class="bg-king-blue hover:bg-king-blue-light text-white px-6 py-2.5 rounded-lg font-semibold transition-all hover:shadow-lg">
-						Free Consultation
+					<a href="/login" class="border border-king-blue/30 hover:border-king-blue text-king-blue px-5 py-2.5 rounded-lg font-semibold text-sm transition-all hover:bg-king-blue/5">Login</a>
+					<a href="/pay-bill" class="bg-gold hover:bg-gold-light text-king-blue px-6 py-2.5 rounded-lg font-semibold transition-all hover:shadow-lg">
+						Pay Bill
 					</a>
 				{/if}
 			</div>
@@ -118,6 +119,7 @@
 				{/if}
 				
 				<a href="/our-team" class="block py-3 text-white/80 hover:text-gold border-b border-white/10" onclick={() => mobileMenuOpen = false}>Our Team</a>
+				<a href="/schedule" class="block py-3 text-white/80 hover:text-gold border-b border-white/10" onclick={() => mobileMenuOpen = false}>Schedule</a>
 				<a href="/contact" class="block py-3 text-white/80 hover:text-gold border-b border-white/10" onclick={() => mobileMenuOpen = false}>Contact</a>
 				
 				<div class="pt-4 space-y-3">
@@ -141,8 +143,8 @@
 						</a>
 					{:else}
 						<a href="/login" class="block text-center text-white/80 hover:text-gold py-2" onclick={() => mobileMenuOpen = false}>Login</a>
-						<a href="/contact" class="block text-center bg-gold text-king-blue py-3 rounded-lg font-semibold" onclick={() => mobileMenuOpen = false}>
-							Free Consultation
+						<a href="/pay-bill" class="block text-center bg-gold text-king-blue py-3 rounded-lg font-semibold" onclick={() => mobileMenuOpen = false}>
+						Pay Bill
 						</a>
 					{/if}
 				</div>

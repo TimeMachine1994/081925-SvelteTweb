@@ -1,0 +1,30 @@
+{
+	"/": [
+		"src/routes/+page.server.ts"
+	],
+	"/api/projects": [
+		"src/routes/api/projects/+server.ts"
+	],
+	"/api/projects/[id]": [
+		"src/routes/api/projects/[id]/+server.ts"
+	],
+	"/api/projects/[id]/events": [
+		"src/routes/api/projects/[id]/events/+server.ts"
+	],
+	"/api/projects/[id]/print-layout": [
+		"src/routes/api/projects/[id]/print-layout/+server.ts"
+	],
+	"/api/validate-sheets": [
+		"src/routes/api/validate-sheets/+server.ts"
+	],
+	"/demo": [],
+	"/demo/lucia": [
+		"src/routes/demo/lucia/+page.server.ts"
+	],
+	"/demo/lucia/login": [
+		"src/routes/demo/lucia/login/+page.server.ts"
+	],
+	"/projects/[id]": [
+		"src/routes/projects/[id]/+page.server.ts"
+	]
+}

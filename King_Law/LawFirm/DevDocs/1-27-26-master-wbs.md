@@ -1,7 +1,7 @@
 # King Law Firm - Master Development Documentation
 
-**Last Updated:** February 5, 2026  
-**Project Status:** 🟢 Core Features Complete | 🟢 Messaging/Documents Refactor Complete | 🟢 Staff System Complete | 🟢 Public Website Complete  
+**Last Updated:** February 11, 2026  
+**Project Status:** 🟢 Core Features Complete | 🟢 Messaging/Documents Refactor Complete | 🟢 Staff System Complete | 🟢 Public Website Complete | 🟢 Square Payments Live  
 **Tech Stack:** SvelteKit 5 SPA | Svelte 5 Runes | Turso DB | Drizzle ORM | TailwindCSS 4
 
 ---
@@ -128,8 +128,13 @@ The application is a **pure Single-Page Application** using SvelteKit's `adapter
 ```env
 DATABASE_URL=         # Turso database URL
 DATABASE_AUTH_TOKEN=  # Turso auth token
-STRIPE_SECRET_KEY=    # Stripe API key (future)
-STRIPE_WEBHOOK_SECRET= # Stripe webhook secret (future)
+SENDGRID_API_KEY=     # SendGrid email API key
+AWS_ACCESS_KEY_ID=    # S3 file storage
+AWS_SECRET_ACCESS_KEY=# S3 file storage
+AWS_REGION=           # S3 region (us-east-2)
+AWS_S3_BUCKET=        # S3 bucket name
+SQUARE_ACCESS_TOKEN=  # Square API access token (sandbox or production)
+SQUARE_LOCATION_ID=   # Square location ID
 ```
 
 ### Theme Support
@@ -294,9 +299,12 @@ switch ($authStore.user.role) {
 ### Credentials Reference
 | User Type | Email | Password | Notes |
 |-----------|-------|----------|-------|
-| Test Client (no cases) | `nocases@test.com` | `TestPassword123!` | E2E testing |
-| Test Admin | `admin@test.com` | `AdminPassword123!` | E2E testing |
+| Test Lawyer | `lawyer@test.com` | `test` | Seeded via `seed-test-user.ts` |
+| Test Client (with cases) | `client@test.com` | `test` | Seeded via `seed-test-user.ts` |
+| Test Client (no cases) | `nocases@test.com` | `test` | Seeded via `seed-test-user.ts` |
 | Staff Sign-Up Password | — | Stored in `system_settings` | Admin-configurable |
+
+> **Note:** Run `npx tsx scripts/reset-test-passwords.ts` to reset all test passwords to `test`. Run `npx tsx scripts/seed-test-user.ts` to create test users if they don't exist.
 
 ---
 
@@ -351,7 +359,7 @@ switch ($authStore.user.role) {
 | `/api/invoices/[id]` | GET | ✅ | Get single invoice |
 | `/api/invoices/[id]` | PUT | ✅ | Update invoice |
 | `/api/invoices/[id]` | DELETE | ✅ | Delete invoice |
-| `/api/invoices/[id]/pay` | POST | ❌ | Process payment (Stripe) |
+| `/api/invoices/[id]/pay` | POST | ❌ | Process payment (future — may integrate with Square) |
 
 ### Users (`/api/users/*`)
 | Endpoint | Method | Status | Description |
@@ -374,6 +382,11 @@ switch ($authStore.user.role) {
 | `/api/admin/settings/staff-password` | PUT | ✅ | Update staff sign-up password |
 | `/api/admin/stats` | GET | ✅ | Admin dashboard statistics |
 | `/api/admin/test-cleanup` | POST | ⚠️ | Clean up E2E test data |
+
+### Square Payments (`/api/square/*`)
+| Endpoint | Method | Status | Description |
+|----------|--------|--------|-------------|
+| `/api/square/create-payment-link` | POST | ✅ | Create Square Payment Link (hosted checkout URL) for bill payments |
 
 ### Consultations (`/api/consultations`)
 | Endpoint | Method | Status | Description |
@@ -485,6 +498,8 @@ All stores use **Svelte 5 Runes** (`$state`, `$derived`, `$effect`).
 | **Document Preview** | `DocumentPreviewModal.svelte` — in-browser preview for PDFs, images, text; `?preview=1` API param | `DocumentPreviewModal.svelte`, `/api/documents/[id]` |
 | **Dashboard Search** | Search input + status filter on lawyer dashboard, `$derived` reactive filtering | `lawyer/+page.svelte` |
 | **Error State Coverage** | Error banners with "Try again" on staff, admin, client dashboards | `staff/+page.svelte`, `admin/+page.svelte`, `client/+page.svelte` |
+| **Square Payments (Pay Bill)** | Public `/pay-bill` page with amount, name, email, phone fields. Creates Square Payment Link via `/api/square/create-payment-link`, redirects to Square hosted checkout. | `/pay-bill/+page.svelte`, `/api/square/create-payment-link/+server.ts` |
+| **Navbar Redesign** | "Free Consultation" → "Pay Bill" (gold button), Login as outlined button, centered nav links with `flex-1 justify-center` | `Navigation.svelte` |
 
 ### ⚠️ Partial / In Progress
 | Feature | What's Done | What's Missing | Priority |
@@ -495,7 +510,7 @@ All stores use **Svelte 5 Runes** (`$state`, `$derived`, `$effect`).
 ### ❌ Not Started
 | Feature | Description | Blocked By | Priority |
 |---------|-------------|------------|----------|
-| **Stripe Payments** | Invoice payment processing. Schema has `stripePaymentIntentId`, client "Pay Now" button exists (no-op). | Stripe account credentials | High |
+| **Invoice Payments** | In-dashboard invoice payment (client "Pay Now" button is no-op). Could integrate with Square. | Payment flow design | Medium |
 | **Client Profile Page** | Client details view for lawyers | Design needed | Medium |
 | **E2E Test Suite** | Comprehensive Playwright tests | Test infrastructure | Medium |
 | **Unit Tests** | Component and store tests | Test infrastructure | Medium |
@@ -512,6 +527,7 @@ All stores use **Svelte 5 Runes** (`$state`, `$derived`, `$effect`).
 | `/` | Home page (hero, services grid, consultation form, quote) | ✅ Complete |
 | `/meet-ben-king` | Attorney profile card + bio | ✅ Complete |
 | `/contact` | Contact form with map | ✅ Complete |
+| `/pay-bill` | Square payment page (amount, name, email, phone → Square checkout) | ✅ Complete |
 | `/login` | User login | ✅ Complete |
 | `/register` | Client registration | ✅ Complete |
 | `/staff-sign-up` | Staff password gate | ✅ Complete |
@@ -588,6 +604,12 @@ All stores use **Svelte 5 Runes** (`$state`, `$derived`, `$effect`).
 | Dashboard Search Bar | Search input + status dropdown on lawyer dashboard, `$derived` filtering by title/client/email | Feb 5 |
 | Document Preview Modal | `DocumentPreviewModal.svelte` for PDFs/images/text, `?preview=1` API param, Preview button in lawyer case detail | Feb 5 |
 | Error State Coverage | Error banners with "Try again" on staff, admin, client dashboards | Feb 5 |
+| Square Payment Link API | `/api/square/create-payment-link` — POST endpoint creates Square Payment Link via hosted checkout, returns redirect URL | Feb 11 |
+| Pay Bill Page | `/pay-bill` — public page with amount, name, email/phone, memo fields; calls Square API and redirects to Square checkout | Feb 11 |
+| Navbar → Pay Bill Button | Changed "Free Consultation" CTA to "Pay Bill" (gold button) linking to `/pay-bill` | Feb 11 |
+| Navbar Centered Layout | Nav links centered with `flex-1 justify-center`, logo pinned left with `shrink-0` | Feb 11 |
+| Navbar Login Outlined Button | Login styled as outlined secondary button (`border-king-blue/30`) next to gold Pay Bill | Feb 11 |
+| Test Password Reset | Updated `reset-test-passwords.ts` to use password `test`; all test users reset | Feb 11 |
 
 ### 🔴 Immediate Priority (This Sprint)
 | Item | Description | Est. Time |
@@ -602,7 +624,7 @@ All stores use **Svelte 5 Runes** (`$state`, `$derived`, `$effect`).
 ### 🟢 Medium-Term (Next Month)
 | Item | Description | Est. Time | Depends On |
 |------|-------------|-----------|------------|
-| Stripe Integration | Payment processing for invoices. Schema already has `stripePaymentIntentId` column and `status: unpaid/partial/paid`. Client "Pay Now" button exists (no-op). Need: SDK, payment intent API, webhook, checkout flow. | 4-6 hrs | Stripe account (user to provide) |
+| Invoice Square Integration | Wire client "Pay Now" button to use Square (similar to `/pay-bill` flow). Schema has payment columns ready. | 2-3 hrs | — |
 | SendGrid Email Swap | Replace console-log in `src/lib/server/email.ts` with `@sendgrid/mail`. Templates already built. Need: `npm i @sendgrid/mail`, `SENDGRID_API_KEY` env var. | 30 min | SendGrid API key |
 | Client Profile Page | Detailed client view for lawyers | 2-3 hrs | — |
 | Admin User Management | View/edit/disable users from admin dashboard | 3-4 hrs | — |
@@ -715,19 +737,29 @@ RewriteRule . /200.html [L]
 
 These DevDocs are archived/consolidated into this master document:
 
+### Active DevDocs (in `DevDocs/`)
 | Document | Purpose | Status |
 |----------|---------|--------|
-| `ConsolidatedMasterPlan.md` | Original master plan | 🔴 Obsolete — superseded by this doc |
-| `spa-refactor-master-plan.md` | SPA migration guide | 🔴 Historical — migration complete |
-| `lawyer-dashboard-flow.md` | Lawyer dashboard plan | 🟡 Historical — executed |
-| `SPA_IMPLEMENTATION_COMPLETE.md` | SPA migration summary | 🟡 Partially stale |
-| `CHAT_IMPLEMENTATION_SUMMARY.md` | Chat feature details | 🟡 Stale re: ChatSlider |
-| `CHAT_IMPLEMENTATION_PROGRESS.md` | Chat progress tracking | 🟡 Stale re: ChatSlider |
+| `1-27-26-master-wbs.md` | **This document** — authoritative master doc | � Current |
+| `MASTER_AUDIT_02-05-26.md` | Full dev doc audit | � Current — created Feb 5, 2026 |
 | `CHAT_INTERFACE_WBS.md` | Chat work breakdown | 🟢 Accurate |
 | `1-27-26-messaging-documents-refactor-wbs.md` | Messaging/docs refactor | 🟢 Accurate |
 | `1-23-26-client-chat-update.md` | Chat card updates | 🟢 Accurate |
-| `system-architecture-report.md` | Architecture deep-dive | 🟡 Missing staff system |
-| `MASTER_AUDIT_02-05-26.md` | Full dev doc audit | 🟢 Current — created Feb 5, 2026 |
+| `system-architecture-report.md` | Architecture deep-dive | 🟡 Missing staff system (staleness note added) |
+| `2-3-26-Markdown-To-Fix-Chat-Notifications.md` | Per-user message read tracking WBS | 🟡 Planned — not yet implemented |
+
+### Archived DevDocs (in `DevDocs/archive/`)
+Moved Feb 11, 2026. Each file has an archive header explaining why.
+
+| Document | Reason Archived |
+|----------|-----------------|
+| `ConsolidatedMasterPlan.md` | Superseded — old theme, shadcn-svelte, Font Awesome, 4 practice areas, 3 roles |
+| `spa-refactor-master-plan.md` | Historical — SPA migration complete |
+| `lawyer-dashboard-flow.md` | Historical — plan executed, doesn't reflect staff system |
+| `SPA_IMPLEMENTATION_COMPLETE.md` | Stale — claims .server.ts removed (they're still active) |
+| `CHAT_IMPLEMENTATION_SUMMARY.md` | Stale — references ChatSlider on dashboards (removed Jan 27) |
+| `CHAT_IMPLEMENTATION_PROGRESS.md` | Stale — same ChatSlider issue, Phase 3/4 abandoned |
+| `IMPLEMENTATION_SUMMARY.md` | Superseded — Phase 1 snapshot from Jan 14, old theme/roles/pages |
 
 ### .windsurf/plans/ (Completed Plans)
 | Plan | Purpose | Status |

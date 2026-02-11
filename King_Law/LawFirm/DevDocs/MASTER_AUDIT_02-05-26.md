@@ -1,7 +1,8 @@
 # King Law Firm — Master Dev Doc Audit
 
 **Date:** February 5, 2026  
-**Purpose:** Comprehensive audit of all development documentation against the actual codebase state.
+**Purpose:** Comprehensive audit of all development documentation against the actual codebase state.  
+**Note (Feb 11):** Audit findings are still valid. Obsolete docs referenced in Section 4 have been moved to `DevDocs/archive/`. The authoritative master doc remains `1-27-26-master-wbs.md`.
 
 ---
 

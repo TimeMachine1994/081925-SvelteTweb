@@ -21,7 +21,7 @@ const client = createClient({
 
 const db = drizzle(client);
 
-const TEST_PASSWORD = 'TestPassword123!';
+const TEST_PASSWORD = 'test';
 const TEST_USERNAMES = ['nocases', 'lawyer@test.com', 'client@test.com'];
 
 async function resetTestPasswords() {

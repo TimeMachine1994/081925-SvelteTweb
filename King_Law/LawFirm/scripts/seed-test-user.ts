@@ -60,7 +60,7 @@ async function seedTestUsers() {
 		}
 
 		// Hash password
-		const hashedPassword = await hash('TestPassword123!', {
+		const hashedPassword = await hash('test', {
 			memoryCost: 19456,
 			timeCost: 2,
 			outputLen: 32,

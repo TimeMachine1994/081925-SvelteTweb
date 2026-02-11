@@ -9,10 +9,10 @@ import { desc } from 'drizzle-orm';
 // POST - Handle consultation form submissions
 export const POST: RequestHandler = async ({ request }) => {
 	try {
-		const { firstName, lastName, email, phone, message } = await request.json();
+		const { firstName, lastName, email, phone, message, matterType, currentlyRepresented, urgency, preferredDate } = await request.json();
 
 		// Validate required fields
-		if (!firstName || !lastName || !email || !message) {
+		if (!firstName || !lastName || !email) {
 			return json({ error: 'Please fill in all required fields' }, { status: 400 });
 		}
 
@@ -31,7 +31,11 @@ export const POST: RequestHandler = async ({ request }) => {
 				lastName: lastName.trim(),
 				email: email.trim().toLowerCase(),
 				phone: phone?.trim() || null,
-				message: message.trim(),
+				message: message?.trim() || null,
+				matterType: matterType || null,
+				currentlyRepresented: currentlyRepresented || null,
+				urgency: urgency || null,
+				preferredDate: preferredDate || null,
 				status: 'new'
 			})
 			.returning();
@@ -40,6 +44,9 @@ export const POST: RequestHandler = async ({ request }) => {
 			id: consultation.id,
 			name: `${firstName} ${lastName}`,
 			email,
+			matterType,
+			urgency,
+			preferredDate,
 			timestamp: new Date().toISOString()
 		});
 

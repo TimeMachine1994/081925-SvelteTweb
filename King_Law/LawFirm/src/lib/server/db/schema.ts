@@ -143,10 +143,36 @@ export const consultations = sqliteTable('consultations', {
 	lastName: text('last_name').notNull(),
 	email: text('email').notNull(),
 	phone: text('phone'),
-	message: text('message').notNull(),
+	message: text('message'),
+	matterType: text('matter_type'),
+	currentlyRepresented: text('currently_represented'),
+	urgency: text('urgency'),
+	preferredDate: text('preferred_date'),
 	status: text('status', { enum: ['new', 'contacted', 'converted', 'dismissed'] })
 		.notNull()
 		.default('new'),
+	createdAt: integer('created_at')
+		.notNull()
+		.default(sql`(unixepoch())`)
+});
+
+// Appointments Table (scheduled consultation bookings)
+export const appointments = sqliteTable('appointments', {
+	id: text('id').primaryKey(),
+	firstName: text('first_name').notNull(),
+	lastName: text('last_name').notNull(),
+	email: text('email').notNull(),
+	phone: text('phone'),
+	matterType: text('matter_type'),
+	currentlyRepresented: text('currently_represented'),
+	briefDescription: text('brief_description'),
+	urgency: text('urgency'),
+	startTime: text('start_time').notNull(),
+	endTime: text('end_time').notNull(),
+	googleEventId: text('google_event_id'),
+	status: text('status', { enum: ['confirmed', 'cancelled'] })
+		.notNull()
+		.default('confirmed'),
 	createdAt: integer('created_at')
 		.notNull()
 		.default(sql`(unixepoch())`)
