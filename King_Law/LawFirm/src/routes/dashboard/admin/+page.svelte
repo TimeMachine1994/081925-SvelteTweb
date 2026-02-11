@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { authStore } from '$lib/stores/auth.svelte.ts';
 	import { onMount } from 'svelte';
+	import { Users, Scale, UserCog, UserCheck, KeyRound, Settings, ChevronRight } from 'lucide-svelte';
+	import StatCard from '$lib/components/ui/StatCard.svelte';
 
 	let stats = $state({
 		totalUsers: 0,
@@ -45,42 +47,40 @@
 	{/if}
 
 	<!-- Stats -->
-	<div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
-		<div class="bg-card border border-border rounded-lg p-6">
-			<h3 class="text-sm font-medium text-muted-foreground">Total Users</h3>
-			<p class="text-3xl font-bold mt-2">{loading ? '...' : stats.totalUsers}</p>
-		</div>
-		<div class="bg-card border border-border rounded-lg p-6">
-			<h3 class="text-sm font-medium text-muted-foreground">Lawyers</h3>
-			<p class="text-3xl font-bold mt-2">{loading ? '...' : stats.lawyers}</p>
-		</div>
-		<div class="bg-card border border-border rounded-lg p-6">
-			<h3 class="text-sm font-medium text-muted-foreground">Staff</h3>
-			<p class="text-3xl font-bold mt-2">{loading ? '...' : stats.staff}</p>
-		</div>
-		<div class="bg-card border border-border rounded-lg p-6">
-			<h3 class="text-sm font-medium text-muted-foreground">Clients</h3>
-			<p class="text-3xl font-bold mt-2">{loading ? '...' : stats.clients}</p>
-		</div>
-		<div class="bg-card border border-border rounded-lg p-6">
-			<h3 class="text-sm font-medium text-muted-foreground">Unused Codes</h3>
-			<p class="text-3xl font-bold mt-2">{loading ? '...' : stats.unusedCodes}</p>
-		</div>
+	<div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+		<StatCard label="Total Users" value={loading ? '...' : stats.totalUsers} icon={Users} />
+		<StatCard label="Lawyers" value={loading ? '...' : stats.lawyers} icon={Scale} iconClass="text-green-600" />
+		<StatCard label="Staff" value={loading ? '...' : stats.staff} icon={UserCog} iconClass="text-purple-600" />
+		<StatCard label="Clients" value={loading ? '...' : stats.clients} icon={UserCheck} iconClass="text-blue-600" />
+		<StatCard label="Unused Codes" value={loading ? '...' : stats.unusedCodes} icon={KeyRound} iconClass="text-gold" />
 	</div>
 
 	<!-- Quick Actions -->
-	<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-		<a href="/dashboard/admin/users" class="bg-card border border-border rounded-lg p-6 hover:border-gold transition-colors">
-			<h3 class="font-semibold text-lg">Manage Users</h3>
-			<p class="text-sm text-muted-foreground mt-1">View and manage all user accounts</p>
+	<h2 class="font-title text-xl mb-4">Quick Actions</h2>
+	<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+		<a href="/dashboard/admin/users" class="bg-background border border-border rounded-lg p-5 hover:border-gold hover:shadow-md transition-all group flex items-center gap-4">
+			<Users class="w-8 h-8 text-muted-foreground group-hover:text-gold transition-colors shrink-0" />
+			<div class="flex-1 min-w-0">
+				<h3 class="font-semibold">Manage Users</h3>
+				<p class="text-xs text-muted-foreground mt-0.5">View and manage all user accounts</p>
+			</div>
+			<ChevronRight class="w-5 h-5 text-muted-foreground group-hover:text-gold transition-colors shrink-0" />
 		</a>
-		<a href="/dashboard/admin/staff-codes" class="bg-card border border-border rounded-lg p-6 hover:border-gold transition-colors">
-			<h3 class="font-semibold text-lg">Staff Codes</h3>
-			<p class="text-sm text-muted-foreground mt-1">Create and manage employee registration codes</p>
+		<a href="/dashboard/admin/staff-codes" class="bg-background border border-border rounded-lg p-5 hover:border-gold hover:shadow-md transition-all group flex items-center gap-4">
+			<KeyRound class="w-8 h-8 text-muted-foreground group-hover:text-gold transition-colors shrink-0" />
+			<div class="flex-1 min-w-0">
+				<h3 class="font-semibold">Staff Codes</h3>
+				<p class="text-xs text-muted-foreground mt-0.5">Create and manage registration codes</p>
+			</div>
+			<ChevronRight class="w-5 h-5 text-muted-foreground group-hover:text-gold transition-colors shrink-0" />
 		</a>
-		<a href="/dashboard/admin/settings" class="bg-card border border-border rounded-lg p-6 hover:border-gold transition-colors">
-			<h3 class="font-semibold text-lg">Settings</h3>
-			<p class="text-sm text-muted-foreground mt-1">Configure staff sign-up password and system settings</p>
+		<a href="/dashboard/admin/settings" class="bg-background border border-border rounded-lg p-5 hover:border-gold hover:shadow-md transition-all group flex items-center gap-4">
+			<Settings class="w-8 h-8 text-muted-foreground group-hover:text-gold transition-colors shrink-0" />
+			<div class="flex-1 min-w-0">
+				<h3 class="font-semibold">Settings</h3>
+				<p class="text-xs text-muted-foreground mt-0.5">Staff password and system config</p>
+			</div>
+			<ChevronRight class="w-5 h-5 text-muted-foreground group-hover:text-gold transition-colors shrink-0" />
 		</a>
 	</div>
 </div>

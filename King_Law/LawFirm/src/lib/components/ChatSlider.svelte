@@ -5,6 +5,7 @@
 	import { chatUIStore } from '$lib/stores/chatUI.svelte.ts';
 	import MessageBubble from './MessageBubble.svelte';
 	import AttachmentUploader from './AttachmentUploader.svelte';
+	import { MessageSquare } from 'lucide-svelte';
 	import { onMount, onDestroy } from 'svelte';
 
 	let { 
@@ -224,7 +225,7 @@
 			{:else if displayMessages().length === 0}
 				<div class="flex items-center justify-center h-full text-center">
 					<div>
-						<div class="text-4xl mb-2">💬</div>
+						<MessageSquare class="w-10 h-10 mb-2 text-muted-foreground mx-auto" />
 						<p class="text-muted-foreground">No messages yet</p>
 						<p class="text-sm text-muted-foreground">Start the conversation!</p>
 					</div>

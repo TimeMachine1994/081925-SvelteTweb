@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
+	import { Paperclip } from 'lucide-svelte';
 
 	const dispatch = createEventDispatcher<{ select: File; clear: void }>();
 
@@ -103,14 +104,14 @@
 				onclick={() => fileInput?.click()}
 				class="w-full py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
 			>
-				<div class="text-2xl mb-1">📎</div>
+				<div class="mb-1"><Paperclip class="w-6 h-6 mx-auto" /></div>
 				<div>Click to attach file or drag and drop</div>
 				<div class="text-xs mt-1">PDF, DOC, DOCX, JPG, PNG, TXT (Max 10MB)</div>
 			</button>
 		</div>
 	{:else}
 		<div class="flex items-center gap-2 p-3 border border-border rounded-lg bg-background">
-			<span class="text-2xl">📎</span>
+			<Paperclip class="w-6 h-6 text-muted-foreground shrink-0" />
 			<div class="flex-1 min-w-0">
 				<div class="text-sm font-medium truncate">{selectedFile.name}</div>
 				<div class="text-xs text-muted-foreground">{formatFileSize(selectedFile.size)}</div>

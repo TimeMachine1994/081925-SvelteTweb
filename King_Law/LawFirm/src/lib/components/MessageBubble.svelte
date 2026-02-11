@@ -1,4 +1,7 @@
 <script lang="ts">
+	import FileIcon from '$lib/components/ui/FileIcon.svelte';
+	import { Check, CheckCheck } from 'lucide-svelte';
+
 	type Message = {
 		id: string;
 		content: string;
@@ -44,12 +47,6 @@
 		return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 	}
 
-	function getFileIcon(mimeType: string): string {
-		if (mimeType.startsWith('image/')) return '🖼️';
-		if (mimeType.includes('pdf')) return '📄';
-		if (mimeType.includes('word')) return '📝';
-		return '📎';
-	}
 </script>
 
 <div class="flex {isOwn ? 'justify-end' : 'justify-start'} mb-4">
@@ -78,7 +75,7 @@
 						? 'border-black/20 bg-black/10'
 						: 'border-border bg-background'} flex items-center gap-2"
 				>
-					<span class="text-2xl">{getFileIcon(attachment.mimeType)}</span>
+					<FileIcon mimeType={attachment.mimeType} class="w-6 h-6" />
 					<div class="flex-1 min-w-0">
 						<div class="text-sm font-medium truncate">{attachment.fileName}</div>
 						<div class="text-xs opacity-70">{formatFileSize(attachment.fileSize)}</div>
@@ -99,10 +96,10 @@
 				<span class="text-xs opacity-70">{formatTime(message.createdAt)}</span>
 				{#if isOwn}
 					{#if message.readAt}
-						<span class="text-xs">✓✓</span>
-					{:else}
-						<span class="text-xs">✓</span>
-					{/if}
+					<CheckCheck class="w-3.5 h-3.5" />
+				{:else}
+					<Check class="w-3.5 h-3.5" />
+				{/if}
 				{/if}
 			</div>
 		</div>

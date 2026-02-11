@@ -3,6 +3,8 @@
 	import { messagesStore } from '$lib/stores/messages.svelte.ts';
 	import { toastStore } from '$lib/stores/toast.svelte.ts';
 	import AttachmentUploader from './AttachmentUploader.svelte';
+	import { Paperclip, Send, Loader2 } from 'lucide-svelte';
+	import FileIcon from '$lib/components/ui/FileIcon.svelte';
 
 	interface Props {
 		caseId?: string | null;
@@ -151,7 +153,7 @@
 							href="/api/documents/{item.attachment.id}"
 							class="inline-flex items-center gap-1 mt-2 text-xs text-gold hover:underline"
 						>
-							📎 {item.attachment.fileName}
+							<Paperclip class="w-3 h-3 inline" /> {item.attachment.fileName}
 						</a>
 					{/if}
 				</div>
@@ -184,7 +186,7 @@
 				onclick={() => (showAttachment = !showAttachment)}
 				class="inline-flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground border border-border rounded-lg hover:bg-muted transition-colors"
 			>
-				📎 {showAttachment ? 'Hide Attachment' : 'Attach File'}
+				<Paperclip class="w-4 h-4" /> {showAttachment ? 'Hide Attachment' : 'Attach File'}
 			</button>
 
 			<button
@@ -194,9 +196,10 @@
 				class="inline-flex items-center gap-2 px-6 py-2 bg-gold hover:bg-gold-dark text-black font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 			>
 				{#if sending}
-					<span class="animate-spin">⏳</span>
+					<Loader2 class="w-4 h-4 animate-spin" />
 					Sending...
 				{:else}
+					<Send class="w-4 h-4" />
 					Send Message
 				{/if}
 			</button>

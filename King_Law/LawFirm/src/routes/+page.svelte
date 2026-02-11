@@ -293,7 +293,7 @@
 									name="firstName" 
 									required
 									onblur={handleBlur}
-									class="w-full px-4 py-3 rounded-lg border transition-all {touched['firstName'] && fieldErrors['firstName'] ? 'border-red-400 focus:border-red-400 focus:ring-2 focus:ring-red-100' : touched['firstName'] && !fieldErrors['firstName'] ? 'border-green-400 focus:border-green-400 focus:ring-2 focus:ring-green-100' : 'border-gray-200 focus:border-gold focus:ring-2 focus:ring-gold/20'}"
+									class="w-full px-4 py-3 rounded-lg border text-gray-900 bg-white transition-all {touched['firstName'] && fieldErrors['firstName'] ? 'border-red-400 focus:border-red-400 focus:ring-2 focus:ring-red-100' : touched['firstName'] && !fieldErrors['firstName'] ? 'border-green-400 focus:border-green-400 focus:ring-2 focus:ring-green-100' : 'border-gray-200 focus:border-gold focus:ring-2 focus:ring-gold/20'}"
 									placeholder="John"
 								/>
 								{#if touched['firstName'] && fieldErrors['firstName']}
@@ -308,7 +308,7 @@
 									name="lastName" 
 									required
 									onblur={handleBlur}
-									class="w-full px-4 py-3 rounded-lg border transition-all {touched['lastName'] && fieldErrors['lastName'] ? 'border-red-400 focus:border-red-400 focus:ring-2 focus:ring-red-100' : touched['lastName'] && !fieldErrors['lastName'] ? 'border-green-400 focus:border-green-400 focus:ring-2 focus:ring-green-100' : 'border-gray-200 focus:border-gold focus:ring-2 focus:ring-gold/20'}"
+									class="w-full px-4 py-3 rounded-lg border text-gray-900 bg-white transition-all {touched['lastName'] && fieldErrors['lastName'] ? 'border-red-400 focus:border-red-400 focus:ring-2 focus:ring-red-100' : touched['lastName'] && !fieldErrors['lastName'] ? 'border-green-400 focus:border-green-400 focus:ring-2 focus:ring-green-100' : 'border-gray-200 focus:border-gold focus:ring-2 focus:ring-gold/20'}"
 									placeholder="Doe"
 								/>
 								{#if touched['lastName'] && fieldErrors['lastName']}
@@ -324,7 +324,7 @@
 								name="email" 
 								required
 								onblur={handleBlur}
-								class="w-full px-4 py-3 rounded-lg border transition-all {touched['email'] && fieldErrors['email'] ? 'border-red-400 focus:border-red-400 focus:ring-2 focus:ring-red-100' : touched['email'] && !fieldErrors['email'] ? 'border-green-400 focus:border-green-400 focus:ring-2 focus:ring-green-100' : 'border-gray-200 focus:border-gold focus:ring-2 focus:ring-gold/20'}"
+								class="w-full px-4 py-3 rounded-lg border text-gray-900 bg-white transition-all {touched['email'] && fieldErrors['email'] ? 'border-red-400 focus:border-red-400 focus:ring-2 focus:ring-red-100' : touched['email'] && !fieldErrors['email'] ? 'border-green-400 focus:border-green-400 focus:ring-2 focus:ring-green-100' : 'border-gray-200 focus:border-gold focus:ring-2 focus:ring-gold/20'}"
 								placeholder="john@example.com"
 							/>
 							{#if touched['email'] && fieldErrors['email']}
@@ -337,7 +337,7 @@
 								type="tel" 
 								id="phone" 
 								name="phone" 
-								class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all"
+								class="w-full px-4 py-3 rounded-lg border border-gray-200 text-gray-900 bg-white focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all"
 								placeholder="(689) 353-6943"
 							/>
 						</div>
@@ -347,7 +347,7 @@
 								id="message" 
 								name="message" 
 								rows="4"
-								class="w-full px-4 py-3 rounded-lg border border-gray-200 focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all resize-none"
+								class="w-full px-4 py-3 rounded-lg border border-gray-200 text-gray-900 bg-white focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all resize-none"
 								placeholder="Briefly describe your legal matter..."
 							></textarea>
 						</div>

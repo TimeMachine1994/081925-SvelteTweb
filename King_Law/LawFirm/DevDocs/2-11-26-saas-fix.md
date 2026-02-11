@@ -1,9 +1,24 @@
 # King Law Portal — SaaS UI/UX Refactor WBS
 
 **Date:** February 11, 2026
+**Last Updated:** February 11, 2026 — Session 2
 **Goal:** Transform the dashboard experience from a scattered, page-centric layout into a cohesive SaaS-grade application with sidebar navigation, progressive disclosure, dark mode, command bar, notifications, and onboarding.
 
 **Reference:** `.windsurf/plans/saas-ui-refactor-5330f3.md` (high-level refactor plan)
+
+---
+
+## Overall Status
+
+| Phase | Status | Notes |
+|-------|--------|-------|
+| Phase 1 — App Shell & Sidebar | ✅ COMPLETE | Sidebar simplified to essential nav only |
+| Phase 2 — Dark Mode & Design System | ✅ COMPLETE | All emoji icons replaced with Lucide |
+| Phase 3 — Progressive Disclosure | ✅ COMPLETE | All 4 dashboards refactored |
+| Phase 4 — Command Bar (CMD+K) | ✅ COMPLETE | Role-aware, keyboard-driven |
+| Phase 5 — Notifications | ✅ COMPLETE | Store + TopBar dropdown |
+| Phase 6 — Onboarding & Audit Log | ✅ COMPLETE | Components + stores created |
+| Post-Phase Fixes | ✅ COMPLETE | Sidebar, chat, forms, scheduling |
 
 ---
 
@@ -16,7 +31,9 @@
 5. [Phase 4 — Command Bar (CMD+K)](#5-phase-4--command-bar-cmdk)
 6. [Phase 5 — Notifications & Activity System](#6-phase-5--notifications--activity-system)
 7. [Phase 6 — Onboarding & Audit Log](#7-phase-6--onboarding--audit-log)
-8. [Dependency Graph](#8-dependency-graph)
+8. [Post-Phase Fixes & Polish](#8-post-phase-fixes--polish)
+9. [Remaining Work & Next Steps](#9-remaining-work--next-steps)
+10. [File Manifest](#10-file-manifest)
 
 ---
 
@@ -635,77 +652,120 @@ Add notification creation to existing API handlers:
 
 ---
 
-## 8. Dependency Graph
+## 8. Post-Phase Fixes & Polish
 
-```
-Phase 1 (App Shell)
-  ├── Phase 2 (Dark Mode)     ← needs TopBar for toggle
-  ├── Phase 3 (Disclosure)    ← needs sidebar for new nav structure
-  ├── Phase 4 (CMD+K)         ← needs AppShell for global listener
-  └── Phase 5 (Notifications) ← needs TopBar for bell icon
-        └── Phase 6 (Onboarding + Audit) ← needs Phases 1-3 stable
-```
+All completed in Session 2 after the core 6 phases.
 
-**Recommended execution order:** 1 → 2 → 3 → 4 → 5 → 6
+### 8.1 Sidebar Simplification ✅
+- **Problem:** Multiple sidebar links (Dashboard, Cases, Clients, Documents, Messages) all pointed to the same `/dashboard/lawyer` URL, causing all to appear active simultaneously.
+- **Fix:** Stripped sidebar to essential distinct routes only. Tabs on the dashboard handle sub-navigation.
+  - **Client:** Dashboard + Pay Bill
+  - **Lawyer:** Dashboard only
+  - **Staff:** Dashboard only
+  - **Admin:** Dashboard, Users, Staff Codes, Settings (all distinct routes)
 
-Phases 2 and 4 are smaller and can be parallelized if needed. Phase 3 is the second-largest effort after Phase 1.
+### 8.2 Profile Page ✅
+- Made user name/avatar in sidebar bottom-left clickable → `/dashboard/profile`
+- Created `src/routes/dashboard/profile/+page.svelte` — shows avatar, name, email, role
+- Placeholder for future profile editing
+- Works for all roles (inherits shared dashboard auth guard)
+
+### 8.3 Floating Chat Removal ✅
+- Removed global `ChatSlider` from `src/routes/dashboard/+layout.svelte`
+- Case-specific `ChatSlider` on `client/case/[id]/+page.svelte` remains intact
+
+### 8.4 Clickable Stat Cards ✅
+- `StatCard` component now supports `onclick` prop (renders as `<button>`)
+- **Lawyer dashboard:** All 4 stat cards clickable
+  - Total Cases → Cases tab (all)
+  - Active Cases → Cases tab with `active` filter pre-set
+  - Documents → Documents tab
+  - Total Revenue → Invoices tab
+- URL query params (`?tab=cases&status=active`) for deep-linkable tab state
+- **Client dashboard:** Active Cases → Cases tab, Unpaid Invoices → Invoices tab
+
+### 8.5 White-on-White Form Text Fix ✅
+- **Global fix in `app.css`:** Added `@layer base` rules for `input`, `textarea`, `select`, `option` — all use `--color-foreground` / `--color-background`
+- **Browser autofill fix:** `-webkit-autofill` overrides to prevent default white background
+- **Placeholder fix:** `::placeholder` uses `--color-muted-foreground`
+- **Home page consultation form:** Explicit `text-gray-900 bg-white` on all inputs (First Name, Last Name, Email, Phone, Message textarea) since this section is always light-themed
+
+### 8.6 Schedule Page Auto-Select ✅
+- `src/routes/schedule/+page.svelte` — Added `onMount` that auto-selects today's date (or next Monday if weekend) and fetches available time slots immediately
+- Users no longer see misleading "Select a date" placeholder
 
 ---
 
-## File Creation/Modification Summary
+## 9. Remaining Work & Next Steps
 
-### New Files (17)
+### Ready to Implement (not yet started)
 
-| File | Phase |
-|------|-------|
-| `src/lib/components/dashboard/AppShell.svelte` | 1 |
-| `src/lib/components/dashboard/Sidebar.svelte` | 1 |
-| `src/lib/components/dashboard/TopBar.svelte` | 1 |
-| `src/lib/utils/breadcrumbs.ts` | 1 |
-| `src/routes/dashboard/+layout.svelte` | 1 |
-| `src/routes/dashboard/+layout.server.ts` | 1 |
-| `src/routes/dashboard/+layout.ts` | 1 |
-| `src/lib/stores/theme.svelte.ts` | 2 |
-| `src/lib/components/ui/StatCard.svelte` | 3 |
-| `src/lib/components/ui/Badge.svelte` | 3 |
-| `src/lib/components/ui/EmptyState.svelte` | 3 |
-| `src/lib/components/ui/DataTable.svelte` | 3 |
-| `src/lib/components/ui/Tabs.svelte` | 3 |
-| `src/lib/components/ui/ActivityFeed.svelte` | 3 |
-| `src/lib/stores/commandBar.svelte.ts` | 4 |
-| `src/lib/components/dashboard/CommandBar.svelte` | 4 |
-| `src/lib/stores/notifications.svelte.ts` | 5 |
-| `src/lib/components/dashboard/NotificationDropdown.svelte` | 5 |
-| `src/lib/components/dashboard/OnboardingChecklist.svelte` | 6 |
-| `src/lib/server/audit.ts` | 6 |
-| `src/routes/api/notifications/+server.ts` | 5 |
-| `src/routes/api/notifications/mark-read/+server.ts` | 5 |
-| `src/routes/api/admin/audit-log/+server.ts` | 6 |
-| `src/routes/dashboard/admin/audit-log/+page.svelte` | 6 |
+| Item | Priority | Notes |
+|------|----------|-------|
+| **Server-side notifications** | High | Add `notifications` DB table + API routes. Currently client-side store only. |
+| **Notification triggers** | High | Wire into `messages/send`, `invoices`, `cases`, `documents/upload` API handlers |
+| **Audit log DB table + API** | Medium | `audit_log` schema, `logAuditEvent()` helper, admin page at `/dashboard/admin/audit-log` |
+| **Onboarding integration** | Medium | Wire `OnboardingChecklist` into client/lawyer dashboard pages with localStorage persistence |
+| **Profile page editing** | Low | Add form to edit name, email, password on `/dashboard/profile` |
+| **DataTable component** | Low | Planned but not yet created — tables are inline. Could DRY up docs/invoices tables. |
+| **Additional sidebar items** | Low | User wants to decide what else belongs in sidebar later |
+| **Lucide cleanup on marketing pages** | Low | Services pages, home page, team page still use emoji checkmarks (✓). Dashboard is clean. |
 
-### Modified Files (20+)
+### Architecture Decisions Made
+
+- **Tabs over sidebar** for sub-navigation within dashboards
+- **URL query params** (`?tab=cases&status=active`) for deep-linkable tab/filter state
+- **No floating chat** — chat is contextual (inside case detail pages only)
+- **Profile page** at `/dashboard/profile` (shared route, all roles)
+- **Command Bar** uses `document.addEventListener('keydown')` for CMD+K, dispatched from TopBar search button
+
+---
+
+## 10. File Manifest
+
+### New Files Created (Session 1 + 2)
+
+| File | Phase | Status |
+|------|-------|--------|
+| `src/lib/components/dashboard/AppShell.svelte` | 1 | ✅ |
+| `src/lib/components/dashboard/Sidebar.svelte` | 1 | ✅ |
+| `src/lib/components/dashboard/TopBar.svelte` | 1 | ✅ |
+| `src/lib/components/dashboard/CommandBar.svelte` | 4 | ✅ |
+| `src/lib/utils/breadcrumbs.ts` | 1 | ✅ |
+| `src/routes/dashboard/+layout.svelte` | 1 | ✅ |
+| `src/routes/dashboard/+layout.server.ts` | 1 | ✅ |
+| `src/routes/dashboard/+layout.ts` | 1 | ✅ |
+| `src/routes/dashboard/profile/+page.svelte` | Post | ✅ |
+| `src/lib/stores/theme.svelte.ts` | 2 | ✅ |
+| `src/lib/stores/notifications.svelte.ts` | 5 | ✅ |
+| `src/lib/stores/auditLog.svelte.ts` | 6 | ✅ |
+| `src/lib/components/ui/StatCard.svelte` | 3 | ✅ |
+| `src/lib/components/ui/Badge.svelte` | 3 | ✅ |
+| `src/lib/components/ui/EmptyState.svelte` | 3 | ✅ |
+| `src/lib/components/ui/Tabs.svelte` | 3 | ✅ |
+| `src/lib/components/ui/ActivityFeed.svelte` | 3 | ✅ |
+| `src/lib/components/ui/OnboardingChecklist.svelte` | 6 | ✅ |
+
+### Modified Files
 
 | File | Phase | Change |
 |------|-------|--------|
-| `package.json` | 1 | Add `lucide-svelte`, remove `@fortawesome/*` |
-| `src/routes/+layout.svelte` | 1 | Conditional nav/footer rendering |
-| `src/routes/dashboard/client/+layout.svelte` | 1 | Strip nav markup |
-| `src/routes/dashboard/lawyer/+layout.svelte` | 1 | Strip nav markup |
-| `src/routes/dashboard/admin/+layout.svelte` | 1 | Strip nav markup |
-| `src/routes/dashboard/staff/+layout.svelte` | 1 | Strip nav markup |
-| `src/app.css` | 2 | Dark mode CSS variables |
-| `src/routes/dashboard/client/+page.svelte` | 2, 3 | Token cleanup + restructure |
-| `src/routes/dashboard/lawyer/+page.svelte` | 2, 3 | Token cleanup + major restructure (tabs) |
-| `src/routes/dashboard/admin/+page.svelte` | 2, 3 | Token cleanup + StatCard swap |
-| `src/routes/dashboard/staff/+page.svelte` | 2, 3 | Token cleanup + StatCard/Badge swap |
-| `src/routes/dashboard/lawyer/case/[id]/+page.svelte` | 2, 3 | Token cleanup + tabs |
-| `src/routes/dashboard/client/case/[id]/+page.svelte` | 2, 3 | Token cleanup + tabs |
-| `src/routes/dashboard/admin/staff-codes/+page.svelte` | 2 | Token cleanup |
-| `src/routes/dashboard/admin/settings/+page.svelte` | 2 | Token cleanup |
-| `src/lib/components/ChatSlider.svelte` | 2 | Token cleanup |
-| `src/lib/components/CreateCaseModal.svelte` | 2 | Token cleanup |
-| `src/lib/components/CreateInvoiceModal.svelte` | 2 | Token cleanup |
-| `src/lib/components/DocumentPreviewModal.svelte` | 2 | Token cleanup + Lucide icons |
-| `src/lib/components/MessageBubble.svelte` | 2 | Token cleanup + Lucide icons |
-| `src/lib/server/db/schema.ts` | 5, 6 | Add `notifications` + `audit_log` tables |
-| API mutation handlers (5+ files) | 5, 6 | Add notification + audit triggers |
+| `package.json` | 1 | Added `lucide-svelte` |
+| `src/app.css` | 2, Post | Dark mode vars, form text color fixes, autofill fixes |
+| `src/routes/+layout.svelte` | 1 | Conditional nav/footer for dashboard routes |
+| `src/routes/+page.svelte` | Post | Consultation form inputs: `text-gray-900 bg-white` |
+| `src/routes/schedule/+page.svelte` | Post | Auto-select today + fetch slots on mount |
+| `src/routes/dashboard/+layout.svelte` | Post | Removed global floating ChatSlider |
+| `src/routes/dashboard/client/+page.svelte` | 2, 3 | Lucide icons + StatCard/Badge/EmptyState/Tabs |
+| `src/routes/dashboard/lawyer/+page.svelte` | 2, 3, Post | Full tab refactor + URL param deep-linking |
+| `src/routes/dashboard/admin/+page.svelte` | 3 | StatCard + Lucide icon quick actions |
+| `src/routes/dashboard/staff/+page.svelte` | 3 | StatCard/Badge/EmptyState + Lucide icons |
+| `src/routes/dashboard/client/documents/+page.svelte` | 2 | FileIcon component, Lucide icons |
+| `src/routes/dashboard/lawyer/documents/+page.svelte` | 2 | FileIcon component, Lucide icons |
+| `src/lib/components/ChatSlider.svelte` | 2 | Emoji → Lucide MessageSquare |
+| `src/lib/components/AttachmentUploader.svelte` | 2 | Emoji → Lucide Paperclip |
+| `src/lib/components/MessageComposer.svelte` | 2 | Emoji → Lucide Paperclip/Send/Loader2 |
+| `src/lib/components/dashboard/Sidebar.svelte` | Post | Simplified nav, clickable user → profile |
+| `src/lib/components/dashboard/TopBar.svelte` | 4, 5 | Search opens CMD+K, notification dropdown |
+| `src/lib/components/dashboard/AppShell.svelte` | 4 | CommandBar wired in |
+| `src/lib/components/ui/StatCard.svelte` | Post | Added `onclick` prop support |

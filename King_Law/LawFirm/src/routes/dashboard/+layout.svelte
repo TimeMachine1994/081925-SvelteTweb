@@ -1,6 +1,5 @@
 <script lang="ts">
 	import AppShell from '$lib/components/dashboard/AppShell.svelte';
-	import ChatSlider from '$lib/components/ChatSlider.svelte';
 	import { authStore } from '$lib/stores/auth.svelte.ts';
 
 	let { children }: { children: any } = $props();
@@ -10,11 +9,6 @@
 	<AppShell>
 		{@render children()}
 	</AppShell>
-
-	<!-- Chat Interface available on all dashboard pages -->
-	{#if authStore.user.role === 'client' || authStore.user.role === 'lawyer'}
-		<ChatSlider />
-	{/if}
 {:else}
 	<!-- Loading state while auth resolves -->
 	<div class="flex h-screen items-center justify-center bg-muted">

@@ -4,11 +4,28 @@
 	import { documentsStore } from '$lib/stores/documents.svelte.ts';
 	import { messagesStore } from '$lib/stores/messages.svelte.ts';
 	import { invoicesStore } from '$lib/stores/invoices.svelte.ts';
+	import { FolderOpen, DollarSign, MessageSquare, FileText, ClipboardList, Briefcase, Receipt } from 'lucide-svelte';
+	import StatCard from '$lib/components/ui/StatCard.svelte';
+	import Badge from '$lib/components/ui/Badge.svelte';
+	import EmptyState from '$lib/components/ui/EmptyState.svelte';
+	import Tabs from '$lib/components/ui/Tabs.svelte';
 
 	let activeCases = $derived(casesStore.cases.filter(c => c.case.status === 'active').length);
 	let documentsCount = $derived(documentsStore.documents.length);
 	// Use unreadCounts.total which correctly counts only messages where user is recipient
 	let unreadMessages = $derived(messagesStore.unreadCounts.total);
+
+	let activeTab = $state('cases');
+
+	const tabs = [
+		{ id: 'cases', label: 'My Cases', icon: Briefcase, badge: undefined as string | number | undefined },
+		{ id: 'invoices', label: 'Invoices', icon: Receipt }
+	];
+
+	// Dynamically set case count badge
+	let dynamicTabs = $derived(tabs.map(t => 
+		t.id === 'cases' ? { ...t, badge: casesStore.cases.length || undefined } : t
+	));
 
 	onMount(() => {
 		// Fetch unread counts on mount
@@ -47,40 +64,16 @@
 
 	<!-- Stats Overview -->
 	<div class="grid md:grid-cols-4 gap-6 mb-8">
-		<div class="bg-background border border-border rounded-lg p-6">
-			<div class="text-3xl mb-2">📁</div>
-			<div class="text-2xl font-bold">{activeCases}</div>
-			<div class="text-sm text-muted-foreground">Active Cases</div>
-		</div>
-
-		<div class="bg-background border border-border rounded-lg p-6">
-			<div class="text-3xl mb-2">💰</div>
-			<div class="text-2xl font-bold">{formatCurrency(0)}</div>
-			<div class="text-sm text-muted-foreground">Unpaid Invoices</div>
-		</div>
-
-		<div class="bg-background border border-border rounded-lg p-6">
-			<div class="text-3xl mb-2">💬</div>
-			<div class="text-2xl font-bold {unreadMessages > 0 ? 'text-red-500' : ''}">{unreadMessages}</div>
-			<div class="text-sm text-muted-foreground">Unread Messages</div>
-		</div>
-
-		<a
-			href="/dashboard/client/documents"
-			class="bg-background border border-border rounded-lg p-6 hover:border-gold hover:shadow-md transition-all block"
-		>
-			<div class="text-3xl mb-2">📄</div>
-			<div class="text-2xl font-bold">{documentsCount}</div>
-			<div class="text-sm text-muted-foreground">Documents</div>
-		</a>
+		<StatCard label="Active Cases" value={activeCases} icon={FolderOpen} onclick={() => activeTab = 'cases'} />
+		<StatCard label="Unpaid Invoices" value={formatCurrency(0)} icon={DollarSign} iconClass="text-gold" onclick={() => activeTab = 'invoices'} />
+		<StatCard label="Unread Messages" value={unreadMessages} icon={MessageSquare} />
+		<StatCard label="Documents" value={documentsCount} icon={FileText} href="/dashboard/client/documents" />
 	</div>
 
-	<!-- Your Cases -->
-	<div class="mb-8">
-		<div class="flex justify-between items-center mb-4">
-			<h2 class="font-title text-2xl">Your Cases</h2>
-		</div>
+	<!-- Tabs: Cases / Invoices -->
+	<Tabs tabs={dynamicTabs} bind:activeTab />
 
+	{#if activeTab === 'cases'}
 		{#if casesStore.cases.length > 0}
 			<div class="grid md:grid-cols-2 gap-4">
 				{#each casesStore.cases as caseItem}
@@ -92,15 +85,7 @@
 							<h3 class="font-semibold text-lg group-hover:text-gold transition-colors">
 								{caseItem.case.title}
 							</h3>
-							<span
-								class="text-xs px-2 py-1 rounded-full {caseItem.case.status === 'active'
-									? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-									: caseItem.case.status === 'pending'
-										? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
-										: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'}"
-							>
-								{caseItem.case.status}
-							</span>
+							<Badge variant={caseItem.case.status} />
 						</div>
 						{#if caseItem.case.description}
 							<p class="text-sm text-muted-foreground mb-4 line-clamp-2">
@@ -114,28 +99,15 @@
 				{/each}
 			</div>
 		{:else}
-			<div class="bg-background border border-border rounded-lg p-8 text-center">
-				<div class="text-4xl mb-4">📋</div>
-				<h3 class="font-semibold text-lg mb-2">No Active Cases</h3>
-				<p class="text-muted-foreground mb-4">
-					You don't have any cases yet. Contact us to get started.
-				</p>
-				<a
-					href="/contact"
-					class="inline-block bg-gold hover:bg-gold-dark text-black font-semibold px-6 py-2 rounded-md transition-colors"
-				>
-					Contact Us
-				</a>
-			</div>
+			<EmptyState
+				icon={ClipboardList}
+				title="No Active Cases"
+				description="You don't have any cases yet. Contact us to get started."
+				actionLabel="Contact Us"
+				actionHref="/contact"
+			/>
 		{/if}
-	</div>
-
-	<!-- Invoices -->
-	<div>
-		<div class="flex justify-between items-center mb-4">
-			<h2 class="font-title text-2xl">Invoices</h2>
-		</div>
-
+	{:else if activeTab === 'invoices'}
 		{#if invoicesStore.invoices.length > 0}
 			<div class="bg-background border border-border rounded-lg overflow-hidden">
 				<table class="w-full">
@@ -143,7 +115,7 @@
 						<tr>
 							<th class="text-left px-6 py-3 text-sm font-semibold">Description</th>
 							<th class="text-left px-6 py-3 text-sm font-semibold">Amount</th>
-							<th class="text-left px-6 py-3 text-sm font-semibold">Due Date</th>
+							<th class="text-left px-6 py-3 text-sm font-semibold hidden sm:table-cell">Due Date</th>
 							<th class="text-left px-6 py-3 text-sm font-semibold">Status</th>
 							<th class="text-right px-6 py-3 text-sm font-semibold">Actions</th>
 						</tr>
@@ -153,23 +125,15 @@
 							<tr class="border-t border-border hover:bg-muted/50">
 								<td class="px-6 py-4">{invoice.description}</td>
 								<td class="px-6 py-4 font-semibold">{formatCurrency(invoice.amount)}</td>
-								<td class="px-6 py-4 text-sm text-muted-foreground">
+								<td class="px-6 py-4 text-sm text-muted-foreground hidden sm:table-cell">
 									{formatDate(invoice.dueDate)}
 								</td>
 								<td class="px-6 py-4">
-									<span
-										class="text-xs px-2 py-1 rounded-full {invoice.status === 'paid'
-											? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-											: invoice.status === 'partial'
-												? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
-												: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'}"
-									>
-										{invoice.status}
-									</span>
+									<Badge variant={invoice.status === 'paid' ? 'paid' : invoice.status === 'partial' ? 'partial' : 'unpaid'} />
 								</td>
 								<td class="px-6 py-4 text-right">
 									{#if invoice.status !== 'paid'}
-										<button class="text-gold hover:underline text-sm">Pay Now</button>
+										<a href="/pay-bill" class="text-gold hover:underline text-sm">Pay Now</a>
 									{/if}
 								</td>
 							</tr>
@@ -178,9 +142,7 @@
 				</table>
 			</div>
 		{:else}
-			<div class="bg-background border border-border rounded-lg p-8 text-center">
-				<p class="text-muted-foreground">No invoices yet</p>
-			</div>
+			<EmptyState icon={Receipt} title="No Invoices" description="No invoices have been created yet." />
 		{/if}
-	</div>
+	{/if}
 </div>

@@ -62,6 +62,25 @@
 	font-display: swap;
 }
 
+/* Dark Mode Overrides */
+.dark {
+	--color-primary: #F2B022;
+	--color-primary-foreground: #1D3047;
+	--color-secondary: #1a2230;
+	--color-secondary-foreground: #e7e9ea;
+	--color-accent: #F2B022;
+	--color-accent-foreground: #1D3047;
+	--color-muted: #1a2230;
+	--color-muted-foreground: #8b98a5;
+	--color-background: #0f1419;
+	--color-foreground: #e7e9ea;
+	--color-border: #2f3944;
+	--color-input: #2f3944;
+	--color-ring: #F2B022;
+	--color-card: #16202a;
+	--color-card-foreground: #e7e9ea;
+}
+
 @layer base {
 	body {
 		background-color: var(--color-background);
@@ -83,5 +102,38 @@
 
 	.font-quote {
 		font-family: var(--font-quote);
+	}
+
+	/* Fix white-on-white: ensure all form controls inherit proper colors */
+	input,
+	textarea,
+	select,
+	option {
+		color: var(--color-foreground);
+		background-color: var(--color-background);
+	}
+
+	select option {
+		color: var(--color-foreground);
+		background-color: var(--color-background);
+	}
+
+	/* Fix browser autofill: override the default white background */
+	input:-webkit-autofill,
+	input:-webkit-autofill:hover,
+	input:-webkit-autofill:focus,
+	input:-webkit-autofill:active,
+	textarea:-webkit-autofill,
+	select:-webkit-autofill {
+		-webkit-text-fill-color: var(--color-foreground) !important;
+		-webkit-box-shadow: 0 0 0 1000px var(--color-background) inset !important;
+		box-shadow: 0 0 0 1000px var(--color-background) inset !important;
+		transition: background-color 5000s ease-in-out 0s;
+	}
+
+	/* Placeholder text */
+	::placeholder {
+		color: var(--color-muted-foreground);
+		opacity: 1;
 	}
 }

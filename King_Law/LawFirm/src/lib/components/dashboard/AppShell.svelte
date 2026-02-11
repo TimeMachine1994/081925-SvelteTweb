@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Sidebar from './Sidebar.svelte';
 	import TopBar from './TopBar.svelte';
+	import CommandBar from './CommandBar.svelte';
 	import { authStore } from '$lib/stores/auth.svelte.ts';
 
 	let { children }: { children: any } = $props();
@@ -70,4 +71,7 @@
 			{@render children()}
 		</main>
 	</div>
+
+	<!-- Command Bar (CMD+K) -->
+	<CommandBar user={authStore.user} onLogout={handleLogout} />
 </div>

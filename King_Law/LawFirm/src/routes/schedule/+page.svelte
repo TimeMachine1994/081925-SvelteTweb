@@ -5,6 +5,8 @@
 		display: string;
 	}
 
+	import { onMount } from 'svelte';
+
 	// State
 	let step = $state<'pick' | 'form' | 'success'>('pick');
 	let selectedDate = $state('');
@@ -12,6 +14,18 @@
 	let slotsMessage = $state('');
 	let loadingSlots = $state(false);
 	let selectedSlot = $state<TimeSlot | null>(null);
+
+	// Auto-select today (or next weekday) and load slots on mount
+	onMount(() => {
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		const day = today.getDay();
+		// If weekend, advance to Monday
+		if (day === 0) today.setDate(today.getDate() + 1);
+		if (day === 6) today.setDate(today.getDate() + 2);
+		const dateStr = today.toISOString().split('T')[0];
+		fetchSlots(dateStr);
+	});
 
 	// Form state
 	let formStatus = $state<'idle' | 'submitting' | 'error'>('idle');

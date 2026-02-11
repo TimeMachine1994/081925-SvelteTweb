@@ -44,22 +44,13 @@
 	const navItems: Record<string, NavItem[]> = {
 		client: [
 			{ icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard/client' },
-			{ icon: Briefcase, label: 'My Cases', href: '/dashboard/client' },
-			{ icon: FileText, label: 'Documents', href: '/dashboard/client/documents' },
-			{ icon: MessageSquare, label: 'Messages', href: '/dashboard/client' },
-			{ icon: Receipt, label: 'Invoices', href: '/dashboard/client' },
 			{ icon: CreditCard, label: 'Pay Bill', href: '/pay-bill' }
 		],
 		lawyer: [
-			{ icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard/lawyer' },
-			{ icon: Briefcase, label: 'Cases', href: '/dashboard/lawyer' },
-			{ icon: Users, label: 'Clients', href: '/dashboard/lawyer' },
-			{ icon: FileText, label: 'Documents', href: '/dashboard/lawyer/documents' },
-			{ icon: MessageSquare, label: 'Messages', href: '/dashboard/lawyer' }
+			{ icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard/lawyer' }
 		],
 		staff: [
-			{ icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard/staff' },
-			{ icon: Briefcase, label: 'Assigned Cases', href: '/dashboard/staff' }
+			{ icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard/staff' }
 		],
 		admin: [
 			{ icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard/admin' },
@@ -153,7 +144,7 @@
 	<!-- User Section -->
 	<div class="border-t border-white/10 px-3 py-4 shrink-0">
 		{#if !collapsed}
-			<div class="flex items-center gap-3 mb-3">
+			<a href="/dashboard/profile" class="flex items-center gap-3 mb-3 px-2 py-2 -mx-1 rounded-md hover:bg-white/10 transition-colors">
 				<div
 					class="w-8 h-8 rounded-full bg-gold text-king-blue flex items-center justify-center text-sm font-bold shrink-0"
 				>
@@ -169,16 +160,15 @@
 						{user?.role}
 					</span>
 				</div>
-			</div>
+			</a>
 		{:else}
-			<div class="flex justify-center mb-3">
+			<a href="/dashboard/profile" class="flex justify-center mb-3" title="{user?.firstName} {user?.lastName} — View Profile">
 				<div
-					class="w-8 h-8 rounded-full bg-gold text-king-blue flex items-center justify-center text-sm font-bold"
-					title="{user?.firstName} {user?.lastName}"
+					class="w-8 h-8 rounded-full bg-gold text-king-blue flex items-center justify-center text-sm font-bold hover:ring-2 hover:ring-gold/50 transition-all"
 				>
 					{user?.firstName?.[0]}{user?.lastName?.[0]}
 				</div>
-			</div>
+			</a>
 		{/if}
 
 		<button

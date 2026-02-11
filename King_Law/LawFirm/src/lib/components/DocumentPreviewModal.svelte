@@ -1,4 +1,7 @@
 <script lang="ts">
+	import FileIcon from '$lib/components/ui/FileIcon.svelte';
+	import { X } from 'lucide-svelte';
+
 	type DocInfo = {
 		id: string;
 		fileName: string;
@@ -34,13 +37,6 @@
 		return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 	}
 
-	function getFileIcon(mimeType: string): string {
-		if (mimeType.startsWith('image/')) return '🖼️';
-		if (mimeType.includes('pdf')) return '📄';
-		if (mimeType.includes('word')) return '📝';
-		if (mimeType.includes('text')) return '📃';
-		return '📎';
-	}
 
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Escape') onclose();
@@ -65,7 +61,7 @@
 			<!-- Header -->
 			<div class="flex items-center justify-between p-4 border-b border-border shrink-0">
 				<div class="flex items-center gap-3 min-w-0">
-					<span class="text-2xl">{getFileIcon(doc.mimeType)}</span>
+					<FileIcon mimeType={doc.mimeType} class="w-6 h-6 text-muted-foreground" />
 					<div class="min-w-0">
 						<h2 class="font-semibold truncate">{doc.fileName}</h2>
 						<p class="text-xs text-muted-foreground">{formatFileSize(doc.fileSize)}</p>
@@ -84,9 +80,7 @@
 						class="p-2 hover:bg-muted rounded-md transition-colors"
 						aria-label="Close preview"
 					>
-						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-						</svg>
+						<X class="w-5 h-5" />
 					</button>
 				</div>
 			</div>
@@ -117,7 +111,7 @@
 					{/if}
 				{:else}
 					<div class="flex flex-col items-center justify-center h-64 text-center">
-						<span class="text-6xl mb-4">{getFileIcon(doc.mimeType)}</span>
+						<div class="mb-4"><FileIcon mimeType={doc.mimeType} class="w-16 h-16 text-muted-foreground" /></div>
 						<h3 class="font-semibold text-lg mb-2">Preview not available</h3>
 						<p class="text-sm text-muted-foreground mb-4">
 							This file type ({doc.mimeType}) cannot be previewed in the browser.

@@ -4,6 +4,8 @@
 	import { toastStore } from '$lib/stores/toast.svelte.ts';
 	import Toast from '$lib/components/ui/Toast.svelte';
 	import Skeleton from '$lib/components/ui/Skeleton.svelte';
+	import FileIcon from '$lib/components/ui/FileIcon.svelte';
+	import { Search, Download, FolderOpen, MessageSquare } from 'lucide-svelte';
 
 	let { data } = $props();
 
@@ -44,13 +46,6 @@
 		return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 	}
 
-	function getFileIcon(mimeType: string): string {
-		if (mimeType.startsWith('image/')) return '🖼️';
-		if (mimeType === 'application/pdf') return '📕';
-		if (mimeType.includes('word') || mimeType.includes('document')) return '📄';
-		if (mimeType.includes('sheet') || mimeType.includes('excel')) return '📊';
-		return '📎';
-	}
 </script>
 
 <Toast />
@@ -65,9 +60,7 @@
 		
 		<!-- Search -->
 		<div class="relative w-full sm:w-64">
-			<svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-			</svg>
+			<Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
 			<input
 				type="text"
 				bind:value={searchQuery}
@@ -100,7 +93,7 @@
 						<tr class="border-t border-border hover:bg-muted/50 transition-colors">
 							<td class="px-6 py-4">
 								<div class="flex items-center gap-3">
-									<span class="text-2xl">{getFileIcon(item.document.mimeType)}</span>
+									<FileIcon mimeType={item.document.mimeType} class="w-6 h-6 text-muted-foreground shrink-0" />
 									<div>
 										<p class="font-medium">{item.document.fileName}</p>
 										<p class="text-xs text-muted-foreground md:hidden">
@@ -113,12 +106,12 @@
 								{#if item.document.caseId}
 									<a 
 										href="/dashboard/lawyer/case/{item.document.caseId}"
-										class="text-gold hover:underline text-sm"
+										class="text-gold hover:underline text-sm inline-flex items-center gap-1"
 									>
-										📁 View Case
+										<FolderOpen class="w-3.5 h-3.5" /> View Case
 									</a>
 								{:else}
-									<span class="text-muted-foreground text-sm">💬 Message Attachment</span>
+									<span class="text-muted-foreground text-sm inline-flex items-center gap-1"><MessageSquare class="w-3.5 h-3.5" /> Message Attachment</span>
 								{/if}
 							</td>
 							<td class="px-6 py-4 text-sm text-muted-foreground hidden md:table-cell">
@@ -132,9 +125,7 @@
 									href="/api/documents/{item.document.id}"
 									class="inline-flex items-center gap-1 text-gold hover:text-gold-dark font-medium text-sm transition-colors"
 								>
-									<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-									</svg>
+									<Download class="w-4 h-4" />
 									Download
 								</a>
 							</td>
@@ -149,7 +140,7 @@
 		</p>
 	{:else if searchQuery}
 		<div class="bg-background border border-border rounded-lg p-12 text-center">
-			<div class="text-4xl mb-4">🔍</div>
+			<Search class="w-12 h-12 mb-4 text-muted-foreground mx-auto" />
 			<p class="text-muted-foreground mb-4">No documents match "{searchQuery}"</p>
 			<button
 				onclick={() => searchQuery = ''}
@@ -160,7 +151,7 @@
 		</div>
 	{:else}
 		<div class="bg-background border border-border rounded-lg p-12 text-center">
-			<div class="text-4xl mb-4">📁</div>
+			<FolderOpen class="w-12 h-12 mb-4 text-muted-foreground mx-auto" />
 			<h2 class="text-xl font-semibold mb-2">No Documents Yet</h2>
 			<p class="text-muted-foreground">
 				Documents uploaded to cases will appear here.
