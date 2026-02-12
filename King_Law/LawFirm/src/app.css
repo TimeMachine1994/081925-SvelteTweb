@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
-/* Tailwind v4: Define custom colors using @theme */
-@theme {
+/* Tailwind v4: Extend default theme with custom colors (preserves built-in palette) */
+@theme extend {
 	/* King Law Brand Colors */
 	--color-king-blue: #1D3047;
 	--color-king-blue-light: #2d4a6b;
@@ -66,18 +66,18 @@
 .dark {
 	--color-primary: #F2B022;
 	--color-primary-foreground: #1D3047;
-	--color-secondary: #1a2230;
+	--color-secondary: #162842;
 	--color-secondary-foreground: #e7e9ea;
 	--color-accent: #F2B022;
 	--color-accent-foreground: #1D3047;
-	--color-muted: #1a2230;
+	--color-muted: #162842;
 	--color-muted-foreground: #8b98a5;
-	--color-background: #0f1419;
+	--color-background: #1D3047;
 	--color-foreground: #e7e9ea;
 	--color-border: #2f3944;
-	--color-input: #2f3944;
+	--color-input: #1D3047;
 	--color-ring: #F2B022;
-	--color-card: #16202a;
+	--color-card: #142336;
 	--color-card-foreground: #e7e9ea;
 }
 
@@ -108,18 +108,12 @@
 		font-family: var(--font-quote);
 	}
 
-	/* Ensure form controls have readable text */
+	/* Form controls: inherit parent text color instead of browser default */
 	input,
 	textarea,
 	select,
 	option {
-		color: var(--color-foreground);
-		background-color: var(--color-background);
-	}
-
-	select option {
-		color: var(--color-foreground);
-		background-color: var(--color-background);
+		color: inherit;
 	}
 
 	/* Fix browser autofill */
@@ -212,4 +206,13 @@
 	box-shadow:
 		inset 0 2px 4px rgba(0, 0, 0, 0.2),
 		inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Hide scrollbar but keep scroll functionality */
+.scrollbar-hide {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+	display: none;
 }

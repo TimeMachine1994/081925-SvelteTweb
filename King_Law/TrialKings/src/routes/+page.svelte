@@ -1,4 +1,6 @@
 <script lang="ts">
+	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
+
 	let { data } = $props();
 
 	let email = $state('');
@@ -53,66 +55,69 @@
 	<title>TrialKings - File Upload & Print Orders</title>
 </svelte:head>
 
-<div class="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
-	<nav class="border-b border-slate-700 bg-slate-900/50 backdrop-blur">
+<div class="min-h-screen bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-900 dark:to-slate-800">
+	<nav class="border-b border-slate-200/80 bg-white/90 shadow-sm backdrop-blur dark:border-slate-700 dark:bg-slate-900/50 dark:shadow-none">
 		<div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-			<a href="/" class="text-2xl font-bold text-white">TrialKings</a>
-			{#if data.user}
-				<a
-					href="/dashboard"
-					class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-				>
-					Dashboard
-				</a>
-			{:else}
-				<a
-					href="/login"
-					class="rounded-lg bg-slate-700 px-4 py-2 text-sm font-medium text-white hover:bg-slate-600"
-				>
-					Login
-				</a>
-			{/if}
+			<a href="/" class="text-2xl font-bold text-slate-900 dark:text-white">TrialKings</a>
+			<div class="flex items-center gap-3">
+				<ThemeToggle />
+				{#if data.user}
+					<a
+						href="/dashboard"
+						class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+					>
+						Dashboard
+					</a>
+				{:else}
+					<a
+						href="/login"
+						class="rounded-lg bg-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-300 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
+					>
+						Login
+					</a>
+				{/if}
+			</div>
 		</div>
 	</nav>
 
 	<main class="mx-auto max-w-2xl px-6 py-16">
 		<div class="text-center">
-			<h1 class="text-4xl font-bold text-white sm:text-5xl">
+			<h1 class="text-4xl font-bold text-slate-900 sm:text-5xl dark:text-white">
 				Upload Files &<br />Order Prints
 			</h1>
-			<p class="mt-4 text-lg text-slate-400">
+			<p class="mt-4 text-lg text-slate-600 dark:text-slate-400">
 				Upload your files, manage them from your dashboard, and order professional prints.
 			</p>
 		</div>
 
 		<form
 			onsubmit={handleSubmit}
-			class="mt-12 rounded-2xl border border-slate-700 bg-slate-800/50 p-8 backdrop-blur"
+			class="mt-12 rounded-2xl border border-slate-200 bg-white p-8 shadow-xl ring-1 ring-slate-900/5 dark:border-slate-700 dark:bg-slate-800/50 dark:shadow-none dark:ring-0 dark:backdrop-blur"
 		>
 			<div class="space-y-6">
 				<div>
-					<label for="email" class="block text-sm font-medium text-slate-300">Email Address</label>
+					<label for="email" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Email Address</label>
 					<input
 						type="email"
 						id="email"
 						bind:value={email}
 						required
 						placeholder="you@example.com"
-						class="mt-2 block w-full rounded-lg border-slate-600 bg-slate-700 px-4 py-3 text-white placeholder-slate-400 focus:border-blue-500 focus:ring-blue-500"
+						class="mt-2 block w-full rounded-lg border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 placeholder-slate-400 focus:border-blue-500 focus:bg-white focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-slate-400"
 					/>
-					<p class="mt-2 text-sm text-slate-500">
+					<p class="mt-2 text-sm text-slate-500 dark:text-slate-500">
 						We'll create an account for you or send a login link if you already have one.
 					</p>
 				</div>
 
 				<div>
-					<label for="file-input" class="block text-sm font-medium text-slate-300">Files</label>
+					<label for="file-input" class="block text-sm font-medium text-slate-700 dark:text-slate-300">Files</label>
 					<div
-						class="mt-2 flex justify-center rounded-lg border-2 border-dashed border-slate-600 px-6 py-10 transition hover:border-slate-500"
+						class="mt-2 flex justify-center rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 px-6 py-10 transition hover:border-blue-400 hover:bg-blue-50/50 dark:border-slate-600 dark:bg-transparent dark:hover:border-slate-500"
 					>
 						<div class="text-center">
 							<svg
-								class="mx-auto h-12 w-12 text-slate-500"
+								class="mx-auto h-12 w-12 text-slate-400 dark:text-slate-500"
 								fill="none"
 								viewBox="0 0 24 24"
 								stroke="currentColor"
@@ -140,22 +145,22 @@
 								/>
 							</div>
 							{#if files?.length}
-								<p class="mt-3 text-sm text-slate-400">
+								<p class="mt-3 text-sm text-slate-600 dark:text-slate-400">
 									{files.length} file{files.length > 1 ? 's' : ''} selected
 								</p>
 							{:else}
-								<p class="mt-2 text-xs text-slate-500">PNG, JPG, PDF up to 50MB each</p>
+								<p class="mt-2 text-xs text-slate-500 dark:text-slate-500">PNG, JPG, PDF up to 50MB each</p>
 							{/if}
 						</div>
 					</div>
 				</div>
 
 				{#if error}
-					<div class="rounded-lg bg-red-900/50 p-4 text-sm text-red-300">{error}</div>
+					<div class="rounded-lg bg-red-50 p-4 text-sm text-red-600 dark:bg-red-900/50 dark:text-red-300">{error}</div>
 				{/if}
 
 				{#if message}
-					<div class="rounded-lg bg-green-900/50 p-4 text-sm text-green-300">{message}</div>
+					<div class="rounded-lg bg-green-50 p-4 text-sm text-green-600 dark:bg-green-900/50 dark:text-green-300">{message}</div>
 				{/if}
 
 				<button
@@ -173,8 +178,8 @@
 		</form>
 
 		<div class="mt-12 grid gap-6 sm:grid-cols-3">
-			<div class="rounded-xl border border-slate-700 bg-slate-800/30 p-6 text-center">
-				<div class="mx-auto h-12 w-12 rounded-full bg-blue-600/20 p-3 text-blue-400">
+			<div class="rounded-xl border border-slate-200 bg-white p-6 text-center shadow-md ring-1 ring-slate-900/5 dark:border-slate-700 dark:bg-slate-800/30 dark:shadow-none dark:ring-0">
+				<div class="mx-auto h-12 w-12 rounded-full bg-blue-100 p-3 text-blue-600 dark:bg-blue-600/20 dark:text-blue-400">
 					<svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path
 							stroke-linecap="round"
@@ -184,11 +189,11 @@
 						/>
 					</svg>
 				</div>
-				<h3 class="mt-4 font-semibold text-white">Upload</h3>
-				<p class="mt-2 text-sm text-slate-400">Securely upload your files</p>
+				<h3 class="mt-4 font-semibold text-slate-900 dark:text-white">Upload</h3>
+				<p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Securely upload your files</p>
 			</div>
-			<div class="rounded-xl border border-slate-700 bg-slate-800/30 p-6 text-center">
-				<div class="mx-auto h-12 w-12 rounded-full bg-green-600/20 p-3 text-green-400">
+			<div class="rounded-xl border border-slate-200 bg-white p-6 text-center shadow-md ring-1 ring-slate-900/5 dark:border-slate-700 dark:bg-slate-800/30 dark:shadow-none dark:ring-0">
+				<div class="mx-auto h-12 w-12 rounded-full bg-green-100 p-3 text-green-600 dark:bg-green-600/20 dark:text-green-400">
 					<svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path
 							stroke-linecap="round"
@@ -198,11 +203,11 @@
 						/>
 					</svg>
 				</div>
-				<h3 class="mt-4 font-semibold text-white">Manage</h3>
-				<p class="mt-2 text-sm text-slate-400">Access files from your dashboard</p>
+				<h3 class="mt-4 font-semibold text-slate-900 dark:text-white">Manage</h3>
+				<p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Access files from your dashboard</p>
 			</div>
-			<div class="rounded-xl border border-slate-700 bg-slate-800/30 p-6 text-center">
-				<div class="mx-auto h-12 w-12 rounded-full bg-purple-600/20 p-3 text-purple-400">
+			<div class="rounded-xl border border-slate-200 bg-white p-6 text-center shadow-md ring-1 ring-slate-900/5 dark:border-slate-700 dark:bg-slate-800/30 dark:shadow-none dark:ring-0">
+				<div class="mx-auto h-12 w-12 rounded-full bg-purple-100 p-3 text-purple-600 dark:bg-purple-600/20 dark:text-purple-400">
 					<svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
 						<path
 							stroke-linecap="round"
@@ -212,8 +217,8 @@
 						/>
 					</svg>
 				</div>
-				<h3 class="mt-4 font-semibold text-white">Print</h3>
-				<p class="mt-2 text-sm text-slate-400">Order professional prints</p>
+				<h3 class="mt-4 font-semibold text-slate-900 dark:text-white">Print</h3>
+				<p class="mt-2 text-sm text-slate-600 dark:text-slate-400">Order professional prints</p>
 			</div>
 		</div>
 	</main>

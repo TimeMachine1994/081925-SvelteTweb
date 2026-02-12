@@ -118,7 +118,7 @@
 			</button>
 
 			{#if showNotifications}
-				<div class="absolute right-0 top-full mt-1 w-80 bg-background border border-border rounded-lg shadow-lg z-50 overflow-hidden">
+				<div class="absolute right-0 top-full mt-1 w-[calc(100vw-2rem)] sm:w-80 max-w-80 bg-background border border-border rounded-lg shadow-lg z-50 overflow-hidden">
 					<div class="flex items-center justify-between px-4 py-3 border-b border-border">
 						<h3 class="text-sm font-semibold">Notifications</h3>
 						{#if notificationsStore.unreadCount > 0}

@@ -22,31 +22,31 @@
 {#if href}
 	<a
 		{href}
-		class="bg-background border border-border rounded-lg p-6 {interactiveClass} block"
+		class="bg-background border border-border rounded-lg p-4 sm:p-6 {interactiveClass} block"
 	>
 		{#if Icon}
-			<Icon class="w-8 h-8 mb-2 {iconClass}" />
+			<Icon class="w-6 h-6 sm:w-8 sm:h-8 mb-1.5 sm:mb-2 {iconClass}" />
 		{/if}
-		<div class="text-2xl font-bold">{value}</div>
-		<div class="text-sm text-muted-foreground">{label}</div>
+		<div class="text-lg sm:text-2xl font-bold">{value}</div>
+		<div class="text-xs sm:text-sm text-muted-foreground">{label}</div>
 	</a>
 {:else if onclick}
 	<button
 		{onclick}
-		class="bg-background border border-border rounded-lg p-6 {interactiveClass} block w-full text-left"
+		class="bg-background border border-border rounded-lg p-4 sm:p-6 {interactiveClass} block w-full text-left"
 	>
 		{#if Icon}
-			<Icon class="w-8 h-8 mb-2 {iconClass}" />
+			<Icon class="w-6 h-6 sm:w-8 sm:h-8 mb-1.5 sm:mb-2 {iconClass}" />
 		{/if}
-		<div class="text-2xl font-bold">{value}</div>
-		<div class="text-sm text-muted-foreground">{label}</div>
+		<div class="text-lg sm:text-2xl font-bold">{value}</div>
+		<div class="text-xs sm:text-sm text-muted-foreground">{label}</div>
 	</button>
 {:else}
-	<div class="bg-background border border-border rounded-lg p-6">
+	<div class="bg-background border border-border rounded-lg p-4 sm:p-6">
 		{#if Icon}
-			<Icon class="w-8 h-8 mb-2 {iconClass}" />
+			<Icon class="w-6 h-6 sm:w-8 sm:h-8 mb-1.5 sm:mb-2 {iconClass}" />
 		{/if}
-		<div class="text-2xl font-bold">{value}</div>
-		<div class="text-sm text-muted-foreground">{label}</div>
+		<div class="text-lg sm:text-2xl font-bold">{value}</div>
+		<div class="text-xs sm:text-sm text-muted-foreground">{label}</div>
 	</div>
 {/if}

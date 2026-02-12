@@ -80,7 +80,7 @@
 
 <main class="mx-auto max-w-6xl px-6 py-8">
 	<div class="flex items-center justify-between">
-		<h1 class="text-2xl font-bold text-white">My Files</h1>
+		<h1 class="text-2xl font-bold text-slate-900 dark:text-white">My Files</h1>
 		<div class="flex gap-3">
 			{#if selectedFiles.size > 0}
 				<a
@@ -102,29 +102,29 @@
 	</div>
 
 	{#if localFiles.length === 0}
-		<div class="mt-12 rounded-2xl border-2 border-dashed border-slate-700 p-12 text-center">
-			<svg class="mx-auto h-16 w-16 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+		<div class="mt-12 rounded-2xl border-2 border-dashed border-slate-300 p-12 text-center dark:border-slate-700">
+			<svg class="mx-auto h-16 w-16 text-slate-400 dark:text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
 			</svg>
-			<p class="mt-4 text-lg text-slate-400">No files yet</p>
+			<p class="mt-4 text-lg text-slate-600 dark:text-slate-400">No files yet</p>
 			<p class="mt-2 text-sm text-slate-500">Upload files to get started</p>
 		</div>
 	{:else}
 		<div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			{#each localFiles as file (file.id)}
-				<div class="group relative rounded-xl border border-slate-700 bg-slate-800/50 p-4 transition hover:border-slate-600">
+				<div class="group relative rounded-xl border border-slate-200 bg-white p-4 shadow-md ring-1 ring-slate-900/5 transition hover:shadow-lg dark:border-slate-700 dark:bg-slate-800/50 dark:shadow-none dark:ring-0 dark:hover:border-slate-600">
 					<div class="flex items-start gap-3">
 						<input
 							type="checkbox"
 							checked={selectedFiles.has(file.id)}
 							onchange={() => toggleSelect(file.id)}
-							class="mt-1 h-4 w-4 rounded border-slate-600 bg-slate-700 text-blue-600 focus:ring-blue-500"
+							class="mt-1 h-4 w-4 rounded border-slate-300 bg-white text-blue-600 focus:ring-blue-500 dark:border-slate-600 dark:bg-slate-700"
 						/>
 						<div class="min-w-0 flex-1">
-							<p class="truncate font-medium text-white" title={file.originalName}>
+							<p class="truncate font-medium text-slate-900 dark:text-white" title={file.originalName}>
 								{file.originalName}
 							</p>
-							<p class="mt-1 text-sm text-slate-400">
+							<p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
 								{formatSize(file.size)} • {formatDate(file.uploadedAt)}
 							</p>
 						</div>
@@ -132,7 +132,7 @@
 					<div class="mt-4 flex gap-2">
 						<a
 							href="/api/files/{file.id}/download"
-							class="flex-1 rounded-lg bg-slate-700 px-3 py-2 text-center text-sm text-white hover:bg-slate-600"
+							class="flex-1 rounded-lg bg-slate-100 px-3 py-2 text-center text-sm text-slate-700 hover:bg-slate-200 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
 						>
 							Download
 						</a>

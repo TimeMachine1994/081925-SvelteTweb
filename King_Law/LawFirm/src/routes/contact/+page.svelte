@@ -20,13 +20,13 @@
 	</section>
 
 	<!-- Contact Content -->
-	<section class="py-24 bg-white">
+	<section class="py-24 bg-white dark:bg-background">
 		<div class="max-w-6xl mx-auto px-6 lg:px-8">
 			<div class="grid lg:grid-cols-12 gap-8 lg:gap-16">
 				<!-- Form Column -->
 				<div class="lg:col-span-7">
 					<p class="text-gold uppercase tracking-[0.3em] text-sm mb-4">Send a Message</p>
-					<h2 class="font-title text-3xl text-king-blue mb-8">Tell Us About Your Situation</h2>
+					<h2 class="font-title text-3xl text-king-blue dark:text-white mb-8">Tell Us About Your Situation</h2>
 					
 					{#if form?.success}
 						<div class="bg-green-50 border-l-4 border-green-500 text-green-800 px-6 py-4 rounded-r-lg mb-6">
@@ -43,56 +43,56 @@
 					<form method="POST" use:enhance class="space-y-6">
 						<div class="grid md:grid-cols-2 gap-6">
 							<div>
-								<label for="name" class="block text-sm font-medium text-king-blue mb-2">Name *</label>
+								<label for="name" class="block text-sm font-medium text-king-blue dark:text-white mb-2">Name *</label>
 								<input
 									type="text"
 									id="name"
 									name="name"
 									required
-									class="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
+									class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-gray-50 dark:bg-card dark:text-foreground focus:bg-white dark:focus:bg-card focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
 								/>
 							</div>
 							<div>
-								<label for="phone" class="block text-sm font-medium text-king-blue mb-2">Phone</label>
+								<label for="phone" class="block text-sm font-medium text-king-blue dark:text-white mb-2">Phone</label>
 								<input
 									type="tel"
 									id="phone"
 									name="phone"
-									class="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
+									class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-gray-50 dark:bg-card dark:text-foreground focus:bg-white dark:focus:bg-card focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
 								/>
 							</div>
 						</div>
 
 						<div>
-							<label for="email" class="block text-sm font-medium text-king-blue mb-2">Email *</label>
+							<label for="email" class="block text-sm font-medium text-king-blue dark:text-white mb-2">Email *</label>
 							<input
 								type="email"
 								id="email"
 								name="email"
 								required
-								class="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
+								class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-gray-50 dark:bg-card dark:text-foreground focus:bg-white dark:focus:bg-card focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
 							/>
 						</div>
 
 						<div>
-							<label for="subject" class="block text-sm font-medium text-king-blue mb-2">Subject *</label>
+							<label for="subject" class="block text-sm font-medium text-king-blue dark:text-white mb-2">Subject *</label>
 							<input
 								type="text"
 								id="subject"
 								name="subject"
 								required
-								class="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
+								class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-gray-50 dark:bg-card dark:text-foreground focus:bg-white dark:focus:bg-card focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
 							/>
 						</div>
 
 						<div>
-							<label for="message" class="block text-sm font-medium text-king-blue mb-2">Message *</label>
+							<label for="message" class="block text-sm font-medium text-king-blue dark:text-white mb-2">Message *</label>
 							<textarea
 								id="message"
 								name="message"
 								rows="6"
 								required
-								class="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none resize-none"
+								class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-gray-50 dark:bg-card dark:text-foreground focus:bg-white dark:focus:bg-card focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none resize-none"
 							></textarea>
 						</div>
 
