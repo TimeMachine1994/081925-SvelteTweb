@@ -82,7 +82,7 @@
 				<button
 					type="submit"
 					disabled={authStore.loading}
-					class="w-full bg-king-blue hover:bg-king-blue-light text-white font-semibold py-4 px-6 rounded-lg transition-all hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+					class="w-full bg-king-blue hover:bg-king-blue-light text-white font-semibold py-4 px-6 rounded-lg transition-all depth-gold disabled:opacity-50 disabled:cursor-not-allowed"
 				>
 					{authStore.loading ? 'Signing in...' : 'Sign In'}
 				</button>

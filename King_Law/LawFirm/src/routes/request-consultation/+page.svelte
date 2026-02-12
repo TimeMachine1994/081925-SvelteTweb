@@ -118,7 +118,7 @@
 		<div class="max-w-3xl mx-auto px-6 lg:px-8">
 
 			{#if formStatus === 'success'}
-				<div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-12 text-center">
+				<div class="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-12 text-center depth-card-dark">
 					<div class="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
 						<svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -131,7 +131,7 @@
 						<button
 							type="button"
 							onclick={() => formStatus = 'idle'}
-							class="bg-gold hover:bg-gold-light text-king-blue px-8 py-3 rounded-lg font-bold transition-all"
+							class="bg-gold hover:bg-gold-light text-king-blue px-8 py-3 rounded-lg font-bold transition-all depth-gold"
 						>
 							Submit Another Request
 						</button>
@@ -287,7 +287,7 @@
 					<button
 						type="submit"
 						disabled={formStatus === 'submitting'}
-						class="w-full sm:w-auto bg-gold hover:bg-gold-light text-king-blue px-10 py-4 rounded-lg font-bold text-lg transition-all transform hover:scale-105 shadow-lg hover:shadow-gold/30 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+						class="w-full sm:w-auto bg-gold hover:bg-gold-light text-king-blue px-10 py-4 rounded-lg font-bold text-lg transition-all transform hover:scale-105 depth-gold disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
 					>
 						{formStatus === 'submitting' ? 'Submitting...' : 'Request Consultation'}
 					</button>
@@ -303,7 +303,7 @@
 	<!-- Trust Indicators -->
 	<section class="py-16 bg-king-blue border-t border-white/5">
 		<div class="max-w-4xl mx-auto px-6 lg:px-8">
-			<div class="grid sm:grid-cols-3 gap-8 text-center">
+			<div class="grid sm:grid-cols-3 gap-6 md:gap-8 text-center">
 				<div>
 					<div class="w-12 h-12 bg-gold/20 rounded-xl flex items-center justify-center mx-auto mb-4">
 						<svg class="w-6 h-6 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>

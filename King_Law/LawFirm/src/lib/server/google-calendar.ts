@@ -16,7 +16,7 @@ function loadCredentials(): { client_email: string; private_key: string } {
 	// Option 1: JSON key file (recommended — avoids \n escaping issues)
 	const keyFilePath =
 		env.GOOGLE_SERVICE_ACCOUNT_KEY_FILE ||
-		'gen-lang-client-0353730314-b6bd4448a86e.json';
+		'gen-lang-client-0353730314-c2cd0c2d6329.json';
 	try {
 		const raw = readFileSync(resolve(keyFilePath), 'utf-8');
 		_cachedCreds = JSON.parse(raw);

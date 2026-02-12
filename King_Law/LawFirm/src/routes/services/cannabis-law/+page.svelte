@@ -1,105 +1,106 @@
 <div class="py-16 md:py-24 bg-background">
 	<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-		<h1 class="font-title text-4xl md:text-5xl mb-6">Medical Marijuana & Commercial Cannabis</h1>
+		<h1 class="font-title text-4xl md:text-5xl mb-6">Cannabis Law</h1>
 		<p class="text-xl text-muted-foreground mb-12">
-			Navigating the complex legal landscape of Florida's cannabis industry
+			Regulatory compliance, risk containment, and business counsel for operators and qualified patients
 		</p>
 
-		<div class="bg-muted p-6 rounded-lg border border-border mb-8">
-			<h2 class="font-title text-2xl mb-4">Expert Guidance in a Growing Industry</h2>
+		<div class="bg-muted p-6 rounded-lg border border-border mb-8 depth-card">
+			<h2 class="font-title text-2xl mb-4">Navigating a Rapidly Evolving Regulatory Landscape</h2>
 			<p class="text-muted-foreground">
-				Florida's cannabis laws are constantly evolving, creating both opportunities and legal challenges. 
-				Whether you're a patient seeking access, a business entering the market, or someone facing 
-				cannabis-related charges, we provide knowledgeable counsel tailored to your unique situation.
+				Florida's cannabis laws change frequently, creating compliance risks for operators and 
+				uncertainty for patients. Whether you're managing a licensed operation, structuring a new 
+				venture, or addressing a cannabis-related legal matter, we provide informed counsel that 
+				keeps you ahead of the regulatory curve.
 			</p>
 		</div>
 
-		<h2 class="font-title text-3xl mb-6">Medical Marijuana Services</h2>
-		<div class="grid md:grid-cols-2 gap-6 mb-12">
-			<div class="bg-background border border-border rounded-lg p-6">
-				<h3 class="font-semibold text-xl mb-3">🏥 Patient Rights</h3>
+		<h2 class="font-title text-3xl mb-6">Patient & Individual Services</h2>
+		<div class="grid md:grid-cols-2 gap-4 md:gap-6 mb-12">
+			<div class="bg-background border border-border rounded-lg p-6 depth-card">
+				<h3 class="font-semibold text-xl mb-3">Patient Rights & Privacy</h3>
 				<p class="text-muted-foreground">
-					Understanding your rights as a medical marijuana patient—from obtaining your card 
-					to protecting your privacy and employment.
+					Protecting your rights as a qualified patient — from card eligibility through 
+					employment protections and privacy considerations.
 				</p>
 			</div>
 
-			<div class="bg-background border border-border rounded-lg p-6">
-				<h3 class="font-semibold text-xl mb-3">⚖️ Criminal Defense</h3>
+			<div class="bg-background border border-border rounded-lg p-6 depth-card">
+				<h3 class="font-semibold text-xl mb-3">Criminal Defense</h3>
 				<p class="text-muted-foreground">
-					Facing charges related to cannabis? We'll fight to protect your rights and 
-					minimize the impact on your life.
+					Cannabis-related charges require counsel that understands both criminal law and 
+					the evolving regulatory framework. We work to contain exposure and protect your record.
 				</p>
 			</div>
 
-			<div class="bg-background border border-border rounded-lg p-6">
-				<h3 class="font-semibold text-xl mb-3">🚗 DUI Defense</h3>
+			<div class="bg-background border border-border rounded-lg p-6 depth-card">
+				<h3 class="font-semibold text-xl mb-3">DUI Defense</h3>
 				<p class="text-muted-foreground">
-					Cannabis DUI cases require specialized knowledge. We challenge evidence and 
-					fight unfair charges aggressively.
+					Cannabis DUI cases involve unique evidentiary challenges. We examine testing 
+					procedures, challenge unreliable evidence, and pursue the best available outcome.
 				</p>
 			</div>
 
-			<div class="bg-background border border-border rounded-lg p-6">
-				<h3 class="font-semibold text-xl mb-3">💼 Employment Issues</h3>
+			<div class="bg-background border border-border rounded-lg p-6 depth-card">
+				<h3 class="font-semibold text-xl mb-3">Employment Protections</h3>
 				<p class="text-muted-foreground">
-					Terminated or discriminated against for legal medical marijuana use? We'll 
-					advocate for your workplace rights.
+					If you've faced adverse employment action related to lawful medical cannabis use, 
+					we evaluate your options and pursue appropriate remedies.
 				</p>
 			</div>
 		</div>
 
-		<h2 class="font-title text-3xl mb-6">Commercial Cannabis Services</h2>
-		<div class="grid md:grid-cols-2 gap-6 mb-12">
-			<div class="bg-background border border-border rounded-lg p-6">
-				<h3 class="font-semibold text-xl mb-3">📋 Licensing & Compliance</h3>
+		<h2 class="font-title text-3xl mb-6">Business & Operator Services</h2>
+		<div class="grid md:grid-cols-2 gap-4 md:gap-6 mb-12">
+			<div class="bg-background border border-border rounded-lg p-6 depth-card">
+				<h3 class="font-semibold text-xl mb-3">Licensing & Compliance</h3>
 				<p class="text-muted-foreground">
-					Navigate the complex application process and maintain compliance with 
-					Florida's strict regulatory requirements.
+					Application strategy, ongoing compliance management, and audit preparation — 
+					structured to keep your operation within Florida's regulatory requirements.
 				</p>
 			</div>
 
-			<div class="bg-background border border-border rounded-lg p-6">
-				<h3 class="font-semibold text-xl mb-3">🏢 Business Formation</h3>
+			<div class="bg-background border border-border rounded-lg p-6 depth-card">
+				<h3 class="font-semibold text-xl mb-3">Entity Formation & Structuring</h3>
 				<p class="text-muted-foreground">
-					Structure your cannabis business for success with proper entity formation, 
-					operating agreements, and investor relations.
+					Proper entity selection, operating agreements, and investor documentation — 
+					designed for the unique requirements of cannabis businesses.
 				</p>
 			</div>
 
-			<div class="bg-background border border-border rounded-lg p-6">
-				<h3 class="font-semibold text-xl mb-3">📝 Contract Negotiation</h3>
+			<div class="bg-background border border-border rounded-lg p-6 depth-card">
+				<h3 class="font-semibold text-xl mb-3">Contract & Partnership Agreements</h3>
 				<p class="text-muted-foreground">
-					Supplier agreements, distribution contracts, and partnership deals—we protect 
-					your business interests.
+					Supplier agreements, distribution contracts, and partnership terms — drafted to 
+					protect your interests and anticipate regulatory changes.
 				</p>
 			</div>
 
-			<div class="bg-background border border-border rounded-lg p-6">
-				<h3 class="font-semibold text-xl mb-3">🛡️ Regulatory Defense</h3>
+			<div class="bg-background border border-border rounded-lg p-6 depth-card">
+				<h3 class="font-semibold text-xl mb-3">Regulatory Defense</h3>
 				<p class="text-muted-foreground">
-					Facing regulatory action or investigation? We'll represent your interests 
-					before state agencies.
+					When regulatory actions or investigations arise, we provide strategic representation 
+					before state agencies to protect your license and operations.
 				</p>
 			</div>
 		</div>
 
 		<div class="bg-green-50 dark:bg-green-900/20 border-2 border-green-300 dark:border-green-700 rounded-lg p-6 mb-8">
-			<h3 class="font-semibold text-lg mb-3">🌿 Staying Ahead of the Law</h3>
+			<h3 class="font-semibold text-lg mb-3">A Fast-Moving Legal Environment</h3>
 			<p class="text-muted-foreground">
-				Cannabis law is one of the fastest-changing areas of legal practice. We stay current 
-				on legislative developments, regulatory updates, and court decisions to provide you 
-				with accurate, up-to-date advice.
+				Cannabis law is one of the most rapidly evolving areas of legal practice. We monitor 
+				legislative developments, regulatory updates, and court decisions continuously to ensure 
+				our clients receive current, accurate counsel.
 			</p>
 		</div>
 
 		<div class="bg-gold/10 border-2 border-gold rounded-lg p-8 text-center">
 			<h3 class="font-title text-2xl mb-4">Cannabis Law Consultation</h3>
 			<p class="text-muted-foreground mb-6">
-				Whether you're starting a business, facing charges, or have questions about your rights, 
-				we're here to help navigate this complex legal landscape.
+				Whether you're operating a licensed business, entering the market, or addressing a 
+				personal legal matter, contact us for informed, confidential counsel.
 			</p>
-			<a href="/contact" class="inline-block bg-gold hover:bg-gold-dark text-black font-semibold px-8 py-3 rounded-md transition-colors">
+			<a href="/schedule" class="inline-block bg-gold hover:bg-gold-dark text-black font-semibold px-8 py-3 rounded-md transition-colors depth-gold">
 				Schedule Consultation
 			</a>
 		</div>

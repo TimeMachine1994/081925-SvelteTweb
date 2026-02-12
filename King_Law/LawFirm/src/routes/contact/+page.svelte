@@ -14,7 +14,7 @@
 				Let's Start a<br/>Conversation
 			</h1>
 			<p class="text-xl text-white/70 max-w-2xl">
-				Every great outcome begins with a conversation. Reach out today for your confidential consultation.
+				Tell us what's on your plate. We'll outline how coordinated legal counsel can simplify your situation — confidentially, with no obligation.
 			</p>
 		</div>
 	</section>
@@ -22,11 +22,11 @@
 	<!-- Contact Content -->
 	<section class="py-24 bg-white">
 		<div class="max-w-6xl mx-auto px-6 lg:px-8">
-			<div class="grid lg:grid-cols-12 gap-16">
+			<div class="grid lg:grid-cols-12 gap-8 lg:gap-16">
 				<!-- Form Column -->
 				<div class="lg:col-span-7">
 					<p class="text-gold uppercase tracking-[0.3em] text-sm mb-4">Send a Message</p>
-					<h2 class="font-title text-3xl text-king-blue mb-8">How Can We Help?</h2>
+					<h2 class="font-title text-3xl text-king-blue mb-8">Tell Us About Your Situation</h2>
 					
 					{#if form?.success}
 						<div class="bg-green-50 border-l-4 border-green-500 text-green-800 px-6 py-4 rounded-r-lg mb-6">
@@ -98,7 +98,7 @@
 
 						<button
 							type="submit"
-							class="w-full bg-king-blue hover:bg-king-blue-light text-white font-semibold py-4 px-6 rounded-lg transition-all hover:shadow-lg"
+							class="w-full bg-king-blue hover:bg-king-blue-light text-white font-semibold py-4 px-6 rounded-lg transition-all depth-gold"
 						>
 							Send Message
 						</button>
@@ -107,14 +107,18 @@
 
 				<!-- Info Column -->
 				<div class="lg:col-span-5">
-					<div class="bg-king-blue rounded-2xl p-8 text-white sticky top-28">
-						<div class="flex items-center gap-3 mb-8">
-							<img src="https://kinglawbucket.s3.us-east-2.amazonaws.com/public/King+Law+Official+Logo++No+BKG.png" alt="King Law" class="h-12 w-auto" />
+					<div class="bg-king-blue rounded-2xl p-6 md:p-8 text-white lg:sticky lg:top-28 depth-card-dark">
+						<div class="mb-8 rounded-xl overflow-hidden">
+							<img src="https://images1.loopnet.com/i2/Ey6wPQmSPw4GKc2vgW1TWFMUK_CgXKrLqSZeaXBD7RA/110/419-N-Magnolia-Ave-Orlando-FL-Primary-Photo-1-Large.jpg" alt="King Law Firm Office" class="w-full h-48 object-cover" />
 						</div>
 
 						<div class="space-y-8">
 							<div>
 								<p class="text-gold uppercase tracking-[0.2em] text-xs mb-3">Address</p>
+								<div class="flex items-center gap-3 mb-1">
+									<p class="text-white font-bold text-lg">King Law Firm</p>
+									<img src="https://kinglawbucket.s3.us-east-2.amazonaws.com/public/King+Law+Official+Logo++No+BKG.png" alt="King Law" class="h-8 w-auto" />
+								</div>
 								<p class="text-white/80">
 									419 N. Magnolia Ave<br />
 									Orlando, FL 32801
@@ -144,10 +148,17 @@
 							</div>
 
 							<div class="pt-6 border-t border-white/10">
+								<p class="text-gold uppercase tracking-[0.2em] text-xs mb-3">What to Expect</p>
+								<ul class="text-white/70 text-sm space-y-2 mb-6">
+									<li class="flex items-start gap-2"><span class="text-gold">&#10003;</span> Response within one business day</li>
+									<li class="flex items-start gap-2"><span class="text-gold">&#10003;</span> All communications are confidential</li>
+									<li class="flex items-start gap-2"><span class="text-gold">&#10003;</span> Clear fee discussion before any engagement</li>
+									<li class="flex items-start gap-2"><span class="text-gold">&#10003;</span> Direct attorney access — no gatekeepers</li>
+								</ul>
 								<p class="text-white/60 text-sm mb-4">
-									Already a client? Access your case documents and communicate with your attorney.
+									Already a client? Access your documents and communicate securely.
 								</p>
-								<a href="/login" class="inline-block bg-gold hover:bg-gold-light text-king-blue px-6 py-3 rounded-lg font-semibold transition-all">
+								<a href="/login" class="inline-block bg-gold hover:bg-gold-light text-king-blue px-6 py-3 rounded-lg font-semibold transition-all depth-gold">
 									Client Portal →
 								</a>
 							</div>

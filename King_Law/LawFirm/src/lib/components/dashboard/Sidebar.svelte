@@ -44,7 +44,7 @@
 	const navItems: Record<string, NavItem[]> = {
 		client: [
 			{ icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard/client' },
-			{ icon: CreditCard, label: 'Pay Bill', href: '/pay-bill' }
+			{ icon: Receipt, label: 'Invoices', href: '/dashboard/client/invoices' }
 		],
 		lawyer: [
 			{ icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard/lawyer' }

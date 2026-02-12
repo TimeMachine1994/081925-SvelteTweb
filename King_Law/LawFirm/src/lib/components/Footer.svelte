@@ -1,4 +1,4 @@
-<footer class="bg-king-blue mt-auto">
+<footer class="bg-king-blue mt-auto depth-inset">
 	<!-- Main Footer -->
 	<div class="max-w-7xl mx-auto px-6 lg:px-8 py-16">
 		<div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
@@ -8,7 +8,7 @@
 					<img src="https://kinglawbucket.s3.us-east-2.amazonaws.com/public/King+Law+Official+Logo++No+BKG.png" alt="King Law" class="h-14 w-auto" />
 				</div>
 				<p class="text-white/60 mb-8 leading-relaxed max-w-md">
-					Providing exceptional legal services with integrity, expertise, and unwavering dedication to achieving the best outcomes for our clients.
+					Personal general counsel for Orlando's executives, physicians, and business leaders. One coordinated strategy across every legal matter.
 				</p>
 				<div class="flex items-center gap-6">
 					<a href="tel:6893536943" class="flex items-center gap-2 text-gold hover:text-gold-light transition-colors">
@@ -35,12 +35,12 @@
 				<ul class="space-y-3">
 					<li><a href="/services/personal-injury" class="text-white/70 hover:text-gold transition-colors text-sm">Personal Injury</a></li>
 					<li><a href="/services/criminal-defense" class="text-white/70 hover:text-gold transition-colors text-sm">Criminal Defense</a></li>
-					<li><a href="/services/employment-law" class="text-white/70 hover:text-gold transition-colors text-sm">Employment Law</a></li>
-					<li><a href="/services/real-estate-business" class="text-white/70 hover:text-gold transition-colors text-sm">Real Estate & Business</a></li>
-					<li><a href="/services/civil-rights" class="text-white/70 hover:text-gold transition-colors text-sm">Civil Rights Violations</a></li>
-					<li><a href="/services/cannabis-law" class="text-white/70 hover:text-gold transition-colors text-sm">Medical Marijuana & Cannabis</a></li>
-					<li><a href="/services/appeals" class="text-white/70 hover:text-gold transition-colors text-sm">Appeals</a></li>
-					<li><a href="/services/property-damage" class="text-white/70 hover:text-gold transition-colors text-sm">Property Damage</a></li>
+					<li><a href="/services/executive-counsel" class="text-white/70 hover:text-gold transition-colors text-sm">Executive & Employment Counsel</a></li>
+					<li><a href="/services/business-investment" class="text-white/70 hover:text-gold transition-colors text-sm">Business & Investment</a></li>
+					<li><a href="/services/civil-rights" class="text-white/70 hover:text-gold transition-colors text-sm">Civil Rights</a></li>
+					<li><a href="/services/cannabis-law" class="text-white/70 hover:text-gold transition-colors text-sm">Cannabis Law</a></li>
+					<li><a href="/services/appellate-strategy" class="text-white/70 hover:text-gold transition-colors text-sm">Appellate Strategy</a></li>
+					<li><a href="/services/property-claims" class="text-white/70 hover:text-gold transition-colors text-sm">Property & Insurance Claims</a></li>
 				</ul>
 			</div>
 		</div>

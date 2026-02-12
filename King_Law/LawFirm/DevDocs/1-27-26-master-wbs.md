@@ -1,7 +1,7 @@
 # King Law Firm - Master Development Documentation
 
 **Last Updated:** February 11, 2026  
-**Project Status:** 🟢 Core Features Complete | 🟢 Messaging/Documents Refactor Complete | 🟢 Staff System Complete | 🟢 Public Website Complete | 🟢 Square Payments Live  
+**Project Status:** 🟢 Core Features Complete | 🟢 Messaging/Documents Refactor Complete | 🟢 Staff System Complete | 🟢 Public Website Complete | 🟢 Square Payments Live | 🟢 Schedule Widget Integrated  
 **Tech Stack:** SvelteKit 5 SPA | Svelte 5 Runes | Turso DB | Drizzle ORM | TailwindCSS 4
 
 ---
@@ -388,10 +388,16 @@ switch ($authStore.user.role) {
 |----------|--------|--------|-------------|
 | `/api/square/create-payment-link` | POST | ✅ | Create Square Payment Link (hosted checkout URL) for bill payments |
 
+### Schedule (`/api/schedule/*`)
+| Endpoint | Method | Status | Description |
+|----------|--------|--------|-------------|
+| `/api/schedule/availability` | GET | ✅ | Fetch available time slots for a given date (`?date=YYYY-MM-DD`) |
+| `/api/schedule/book` | POST | ✅ | Book a consultation time slot |
+
 ### Consultations (`/api/consultations`)
 | Endpoint | Method | Status | Description |
 |----------|--------|--------|-------------|
-| `/api/consultations` | POST | ✅ | Home page consultation form submission |
+| `/api/consultations` | POST | ✅ | Home page consultation form submission (legacy) |
 
 ### Files (`/api/files/*`)
 | Endpoint | Method | Status | Description |
@@ -462,6 +468,7 @@ All stores use **Svelte 5 Runes** (`$state`, `$derived`, `$effect`).
 |-----------|----------|--------|--------|
 | `CreateCaseModal.svelte` | `src/lib/components/` | ✅ | Create new case form |
 | `CreateInvoiceModal.svelte` | `src/lib/components/` | ✅ | Create invoice form |
+| `ScheduleWidget.svelte` | `src/lib/components/` | ✅ | Reusable scheduling widget (date/time picker → booking form → success). Accepts `variant` prop (`'dark'` \| `'light'`). |
 
 ---
 
@@ -482,9 +489,10 @@ All stores use **Svelte 5 Runes** (`$state`, `$derived`, `$effect`).
 | **Client Dashboard** | Case view, documents, invoices, messages | `/dashboard/client/*` |
 | **Staff Dashboard** | Assigned cases (read-only), case detail view | `/dashboard/staff/*` |
 | **Admin Dashboard** | Stats, staff code management, settings | `/dashboard/admin/*` |
-| **Public Website** | Home (with consultation form), Meet Ben King, Contact | `/`, `/meet-ben-king`, `/contact` |
+| **Public Website** | Home (with schedule widget), Meet Ben King, Contact, Schedule | `/`, `/meet-ben-king`, `/contact`, `/schedule` |
 | **Practice Areas** | 8 practice area pages with values-based messaging | `/services/*` (8 pages) |
 | **Consultation Form** | Home page form + API endpoint + DB storage + email notification template | `+page.svelte`, `/api/consultations`, `email.ts` |
+| **Schedule Widget** | Reusable `ScheduleWidget.svelte` with 3-step booking flow (date/time picker, form, success). Light variant on home page, dark variant on schedule page. Uses Svelte 5 `$state`/`$derived`/`$props` runes, keyed `{#each}` blocks, `$derived.by`. | `ScheduleWidget.svelte`, `/schedule/+page.svelte`, `+page.svelte` |
 | **Toast Notifications** | Global notification system | `toastStore`, `Toast.svelte` |
 | **Day/Night Theme** | Theme toggle support | Layout components |
 | **Responsive Design** | Mobile-friendly layouts | All pages |
@@ -524,7 +532,8 @@ All stores use **Svelte 5 Runes** (`$state`, `$derived`, `$effect`).
 ### Public Routes
 | Route | Purpose | Status |
 |-------|---------|--------|
-| `/` | Home page (hero, services grid, consultation form, quote) | ✅ Complete |
+| `/` | Home page (hero, services grid, schedule widget, quote) | ✅ Complete |
+| `/schedule` | Schedule a consultation (hero, schedule widget dark variant, trust indicators) | ✅ Complete |
 | `/meet-ben-king` | Attorney profile card + bio | ✅ Complete |
 | `/contact` | Contact form with map | ✅ Complete |
 | `/pay-bill` | Square payment page (amount, name, email, phone → Square checkout) | ✅ Complete |
@@ -610,6 +619,9 @@ All stores use **Svelte 5 Runes** (`$state`, `$derived`, `$effect`).
 | Navbar Centered Layout | Nav links centered with `flex-1 justify-center`, logo pinned left with `shrink-0` | Feb 11 |
 | Navbar Login Outlined Button | Login styled as outlined secondary button (`border-king-blue/30`) next to gold Pay Bill | Feb 11 |
 | Test Password Reset | Updated `reset-test-passwords.ts` to use password `test`; all test users reset | Feb 11 |
+| Schedule Widget Extraction | Created reusable `ScheduleWidget.svelte` from inline schedule page code. 3-step flow: date/time picker → booking form → success. `variant` prop for dark/light themes. Svelte 5 best practices (`$state`, `$derived`, `$derived.by`, `$props`, keyed `{#each}`). | Feb 11 |
+| Home Page → Schedule Widget | Replaced simple consultation form on home page with `<ScheduleWidget variant="light" />` for direct booking | Feb 11 |
+| Schedule Page Refactor | Replaced ~530 lines of inline scheduling logic with `<ScheduleWidget variant="dark" />`, keeping hero + trust indicators | Feb 11 |
 
 ### 🔴 Immediate Priority (This Sprint)
 | Item | Description | Est. Time |
@@ -747,6 +759,7 @@ These DevDocs are archived/consolidated into this master document:
 | `1-23-26-client-chat-update.md` | Chat card updates | 🟢 Accurate |
 | `system-architecture-report.md` | Architecture deep-dive | 🟡 Missing staff system (staleness note added) |
 | `2-3-26-Markdown-To-Fix-Chat-Notifications.md` | Per-user message read tracking WBS | 🟡 Planned — not yet implemented |
+| `2-11-26-schedule-widget.md` | Schedule widget extraction plan, architecture, Svelte 5 best practices | 🟢 Completed |
 
 ### Archived DevDocs (in `DevDocs/archive/`)
 Moved Feb 11, 2026. Each file has an archive header explaining why.

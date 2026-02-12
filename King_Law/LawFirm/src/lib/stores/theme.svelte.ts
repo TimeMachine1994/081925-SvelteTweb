@@ -43,6 +43,11 @@ function createThemeStore() {
 		applyTheme(m);
 	}
 
+	function toggle() {
+		const resolved = mode === 'system' ? getSystemPreference() : mode;
+		setMode(resolved === 'dark' ? 'light' : 'dark');
+	}
+
 	return {
 		get mode() {
 			return mode;
@@ -52,7 +57,8 @@ function createThemeStore() {
 			return mode === 'dark' || (mode === 'system' && getSystemPreference() === 'dark');
 		},
 		init,
-		setMode
+		setMode,
+		toggle
 	};
 }
 

@@ -65,7 +65,7 @@
 	<!-- Stats Overview -->
 	<div class="grid md:grid-cols-4 gap-6 mb-8">
 		<StatCard label="Active Cases" value={activeCases} icon={FolderOpen} onclick={() => activeTab = 'cases'} />
-		<StatCard label="Unpaid Invoices" value={formatCurrency(0)} icon={DollarSign} iconClass="text-gold" onclick={() => activeTab = 'invoices'} />
+		<StatCard label="Unpaid Invoices" value={formatCurrency(invoicesStore.invoices.filter(i => i.invoice.status !== 'paid').reduce((sum, i) => sum + (i.invoice.amount - (i.invoice.paidAmount || 0)), 0))} icon={DollarSign} iconClass="text-gold" href="/dashboard/client/invoices" />
 		<StatCard label="Unread Messages" value={unreadMessages} icon={MessageSquare} />
 		<StatCard label="Documents" value={documentsCount} icon={FileText} href="/dashboard/client/documents" />
 	</div>
@@ -133,7 +133,7 @@
 								</td>
 								<td class="px-6 py-4 text-right">
 									{#if invoice.status !== 'paid'}
-										<a href="/pay-bill" class="text-gold hover:underline text-sm">Pay Now</a>
+										<a href="/dashboard/client/invoices/{invoice.id}/pay" class="text-gold hover:underline text-sm">Pay Now</a>
 									{/if}
 								</td>
 							</tr>

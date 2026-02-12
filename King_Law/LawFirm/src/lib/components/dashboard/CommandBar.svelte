@@ -54,7 +54,7 @@
 			items.push(
 				{ id: 'nav-dash', icon: LayoutDashboard, label: 'Dashboard', description: 'Go to client dashboard', action: () => navigate(base), keywords: ['home', 'overview'] },
 				{ id: 'nav-docs', icon: FileText, label: 'Documents', description: 'View your documents', action: () => navigate(`${base}/documents`), keywords: ['files', 'uploads'] },
-				{ id: 'nav-pay', icon: CreditCard, label: 'Pay Bill', description: 'Make a payment', action: () => navigate('/pay-bill'), keywords: ['payment', 'invoice'] }
+				{ id: 'nav-invoices', icon: Receipt, label: 'Invoices', description: 'View and pay invoices', action: () => navigate(`${base}/invoices`), keywords: ['payment', 'invoice', 'bill', 'pay'] }
 			);
 		} else if (role === 'lawyer') {
 			items.push(
