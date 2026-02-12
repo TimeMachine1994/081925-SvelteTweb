@@ -142,71 +142,71 @@
 	</section>
 
 	<!-- The Problem Section -->
-	<section class="py-24 bg-white">
+	<section class="py-24 bg-background">
 		<div class="max-w-5xl mx-auto px-6 lg:px-8">
 			<p class="text-gold uppercase tracking-[0.3em] text-sm mb-4">The Problem</p>
-			<h2 class="font-title text-4xl md:text-5xl text-king-blue mb-6">You Have Multiple Advisors.<br/>Nobody Owns the Whole Picture.</h2>
-			<p class="text-gray-500 text-lg max-w-3xl mb-16 leading-relaxed">
+			<h2 class="font-title text-4xl md:text-5xl text-king-blue dark:text-white mb-6">You Have Multiple Advisors.<br/>Nobody Owns the Whole Picture.</h2>
+			<p class="text-gray-500 dark:text-white/60 text-lg max-w-3xl mb-16 leading-relaxed">
 				You're managing a trust that needs updating, a real estate closing, an employment contract, a family matter — and every one of them lives with a different lawyer. Nothing is coordinated. Deadlines get missed. Advice conflicts. You're the one holding it together.
 			</p>
 
 			<div class="grid md:grid-cols-3 gap-4 md:gap-8">
-				<div class="bg-gray-50 rounded-2xl p-5 md:p-7 border-l-4 border-red-400/60 border border-gray-100 depth-card">
-					<h3 class="font-semibold text-king-blue text-lg mb-2">Fragmented Counsel</h3>
-					<p class="text-gray-500 leading-relaxed">Multiple attorneys who don't talk to each other, giving you inconsistent or contradictory advice across matters.</p>
+				<div class="bg-muted rounded-2xl p-5 md:p-7 border-l-4 border-red-400/60 border border-gray-100 dark:border-white/10 depth-card">
+					<h3 class="font-semibold text-king-blue dark:text-white text-lg mb-2">Fragmented Counsel</h3>
+					<p class="text-gray-500 dark:text-white/60 leading-relaxed">Multiple attorneys who don't talk to each other, giving you inconsistent or contradictory advice across matters.</p>
 				</div>
-				<div class="bg-gray-50 rounded-2xl p-5 md:p-7 border-l-4 border-red-400/60 border border-gray-100 depth-card">
-					<h3 class="font-semibold text-king-blue text-lg mb-2">Reactive, Not Proactive</h3>
-					<p class="text-gray-500 leading-relaxed">You only hear from your lawyer when there's a crisis — never before one. Risks compound because nobody is watching the full picture.</p>
+				<div class="bg-muted rounded-2xl p-5 md:p-7 border-l-4 border-red-400/60 border border-gray-100 dark:border-white/10 depth-card">
+					<h3 class="font-semibold text-king-blue dark:text-white text-lg mb-2">Reactive, Not Proactive</h3>
+					<p class="text-gray-500 dark:text-white/60 leading-relaxed">You only hear from your lawyer when there's a crisis — never before one. Risks compound because nobody is watching the full picture.</p>
 				</div>
-				<div class="bg-gray-50 rounded-2xl p-5 md:p-7 border-l-4 border-red-400/60 border border-gray-100 depth-card">
-					<h3 class="font-semibold text-king-blue text-lg mb-2">Unpredictable Costs</h3>
-					<p class="text-gray-500 leading-relaxed">Every phone call is a billable event. You avoid calling your own attorney because you don't know what it'll cost. That avoidance creates risk.</p>
+				<div class="bg-muted rounded-2xl p-5 md:p-7 border-l-4 border-red-400/60 border border-gray-100 dark:border-white/10 depth-card">
+					<h3 class="font-semibold text-king-blue dark:text-white text-lg mb-2">Unpredictable Costs</h3>
+					<p class="text-gray-500 dark:text-white/60 leading-relaxed">Every phone call is a billable event. You avoid calling your own attorney because you don't know what it'll cost. That avoidance creates risk.</p>
 				</div>
 			</div>
 		</div>
 	</section>
 
 	<!-- The Solution Section -->
-	<section class="py-24 bg-gray-50">
+	<section class="py-24 bg-muted">
 		<div class="max-w-5xl mx-auto px-6 lg:px-8">
 			<p class="text-gold uppercase tracking-[0.3em] text-sm mb-4">The Solution</p>
-			<h2 class="font-title text-4xl md:text-5xl text-king-blue mb-6">Your Personal General Counsel.<br/>One Call. Everything Handled.</h2>
-			<p class="text-gray-500 text-lg max-w-3xl mb-16 leading-relaxed">
+			<h2 class="font-title text-4xl md:text-5xl text-king-blue dark:text-white mb-6">Your Personal General Counsel.<br/>One Call. Everything Handled.</h2>
+			<p class="text-gray-500 dark:text-white/60 text-lg max-w-3xl mb-16 leading-relaxed">
 				The King's Fortress Package makes King Law your personal legal command center. We quarterback every matter, coordinate every specialist, and proactively manage risk across your entire legal landscape — for one predictable annual fee.
 			</p>
 
 			<div class="grid md:grid-cols-2 gap-4 md:gap-6">
-				<div class="bg-white rounded-2xl p-5 md:p-8 border border-gray-100 depth-card">
+				<div class="bg-card rounded-2xl p-5 md:p-8 border border-gray-100 dark:border-white/10 depth-card">
 					<div class="w-12 h-12 bg-gold/15 rounded-xl flex items-center justify-center mb-5">
 						<svg class="w-6 h-6 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
 					</div>
-					<h3 class="font-title text-2xl text-king-blue mb-3">Comprehensive Legal Audit</h3>
-					<p class="text-gray-500 leading-relaxed">Upon enrollment, we conduct a full 90-minute Legal Balance Sheet intake — mapping every asset, entity, contract, beneficiary, and open matter. You receive a written Risk Map and Roadmap within 10 business days.</p>
+					<h3 class="font-title text-2xl text-king-blue dark:text-white mb-3">Comprehensive Legal Audit</h3>
+					<p class="text-gray-500 dark:text-white/60 leading-relaxed">Upon enrollment, we conduct a full 90-minute Legal Balance Sheet intake — mapping every asset, entity, contract, beneficiary, and open matter. You receive a written Risk Map and Roadmap within 10 business days.</p>
 				</div>
 
-				<div class="bg-white rounded-2xl p-5 md:p-8 border border-gray-100 depth-card">
+				<div class="bg-card rounded-2xl p-5 md:p-8 border border-gray-100 dark:border-white/10 depth-card">
 					<div class="w-12 h-12 bg-gold/15 rounded-xl flex items-center justify-center mb-5">
 						<svg class="w-6 h-6 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
 					</div>
-					<h3 class="font-title text-2xl text-king-blue mb-3">72-Hour Evidence Bank</h3>
-					<p class="text-gray-500 leading-relaxed">Within the first 72 hours after enrollment, if any of your matters require video documentation — witness statements, property conditions, incident scenes — we mobilize to record and preserve it. Included in your fee.</p>
+					<h3 class="font-title text-2xl text-king-blue dark:text-white mb-3">72-Hour Evidence Bank</h3>
+					<p class="text-gray-500 dark:text-white/60 leading-relaxed">Within the first 72 hours after enrollment, if any of your matters require video documentation — witness statements, property conditions, incident scenes — we mobilize to record and preserve it. Included in your fee.</p>
 				</div>
 
-				<div class="bg-white rounded-2xl p-5 md:p-8 border border-gray-100 depth-card">
+				<div class="bg-card rounded-2xl p-5 md:p-8 border border-gray-100 dark:border-white/10 depth-card">
 					<div class="w-12 h-12 bg-gold/15 rounded-xl flex items-center justify-center mb-5">
 						<svg class="w-6 h-6 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
 					</div>
-					<h3 class="font-title text-2xl text-king-blue mb-3">Monthly Legal Services</h3>
-					<p class="text-gray-500 leading-relaxed">Ongoing counsel, contract reviews, dispute triage, document preparation, and coordination with outside specialists — all on a recurring monthly basis. No surprise invoices. No meter running on every call.</p>
+					<h3 class="font-title text-2xl text-king-blue dark:text-white mb-3">Monthly Legal Services</h3>
+					<p class="text-gray-500 dark:text-white/60 leading-relaxed">Ongoing counsel, contract reviews, dispute triage, document preparation, and coordination with outside specialists — all on a recurring monthly basis. No surprise invoices. No meter running on every call.</p>
 				</div>
 
-				<div class="bg-white rounded-2xl p-5 md:p-8 border border-gray-100 depth-card">
+				<div class="bg-card rounded-2xl p-5 md:p-8 border border-gray-100 dark:border-white/10 depth-card">
 					<div class="w-12 h-12 bg-gold/15 rounded-xl flex items-center justify-center mb-5">
 						<svg class="w-6 h-6 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/></svg>
 					</div>
-					<h3 class="font-title text-2xl text-king-blue mb-3">Pre-Trial Work + One Trial</h3>
-					<p class="text-gray-500 leading-relaxed">Full pre-trial preparation — discovery, depositions, motions, and strategy — plus one complete trial included in your annual membership. No separate litigation retainer needed.</p>
+					<h3 class="font-title text-2xl text-king-blue dark:text-white mb-3">Pre-Trial Work + One Trial</h3>
+					<p class="text-gray-500 dark:text-white/60 leading-relaxed">Full pre-trial preparation — discovery, depositions, motions, and strategy — plus one complete trial included in your annual membership. No separate litigation retainer needed.</p>
 				</div>
 			</div>
 		</div>
@@ -247,17 +247,17 @@
 	</section>
 
 	<!-- What's Included Breakdown -->
-	<section class="py-24 bg-white">
+	<section class="py-24 bg-background">
 		<div class="max-w-5xl mx-auto px-6 lg:px-8">
 			<div class="text-center mb-16">
 				<p class="text-gold uppercase tracking-[0.3em] text-sm mb-4">Membership Details</p>
-				<h2 class="font-title text-4xl md:text-5xl text-king-blue mb-4">Everything Inside the Fortress</h2>
-				<p class="text-gray-500 text-lg max-w-2xl mx-auto">One annual fee. No surprise bills. No hourly meters. Complete legal protection.</p>
+				<h2 class="font-title text-4xl md:text-5xl text-king-blue dark:text-white mb-4">Everything Inside the Fortress</h2>
+				<p class="text-gray-500 dark:text-white/60 text-lg max-w-2xl mx-auto">One annual fee. No surprise bills. No hourly meters. Complete legal protection.</p>
 			</div>
 
 			<div class="grid lg:grid-cols-2 gap-8 items-start">
 				<!-- Fortress Tier -->
-				<div class="bg-gray-50 rounded-3xl border border-gray-100 overflow-hidden depth-card">
+				<div class="bg-muted rounded-3xl border border-gray-100 dark:border-white/10 overflow-hidden depth-card">
 					<div class="bg-king-blue p-8 text-center">
 						<p class="text-white/50 uppercase tracking-widest text-xs mb-2">Fortress</p>
 						<div class="flex items-baseline justify-center gap-2">
@@ -271,71 +271,71 @@
 							<div class="flex items-start gap-3">
 								<span class="text-gold text-lg mt-0.5">&#10003;</span>
 								<div>
-									<p class="font-semibold text-king-blue text-sm">Comprehensive Legal Audit</p>
-									<p class="text-gray-400 text-xs">90-minute intake + written Risk Map & Roadmap</p>
+									<p class="font-semibold text-king-blue dark:text-white text-sm">Comprehensive Legal Audit</p>
+									<p class="text-gray-400 dark:text-white/50 text-xs">90-minute intake + written Risk Map & Roadmap</p>
 								</div>
 							</div>
 							<div class="flex items-start gap-3">
 								<span class="text-gold text-lg mt-0.5">&#10003;</span>
 								<div>
-									<p class="font-semibold text-king-blue text-sm">72-Hour Evidence Bank</p>
-									<p class="text-gray-400 text-xs">Video documentation & evidence preservation</p>
+									<p class="font-semibold text-king-blue dark:text-white text-sm">72-Hour Evidence Bank</p>
+									<p class="text-gray-400 dark:text-white/50 text-xs">Video documentation & evidence preservation</p>
 								</div>
 							</div>
 							<div class="flex items-start gap-3">
 								<span class="text-gold text-lg mt-0.5">&#10003;</span>
 								<div>
-									<p class="font-semibold text-king-blue text-sm">Monthly Legal Counsel</p>
-									<p class="text-gray-400 text-xs">Ongoing advisory, contract review & dispute triage</p>
+									<p class="font-semibold text-king-blue dark:text-white text-sm">Monthly Legal Counsel</p>
+									<p class="text-gray-400 dark:text-white/50 text-xs">Ongoing advisory, contract review & dispute triage</p>
 								</div>
 							</div>
 							<div class="flex items-start gap-3">
 								<span class="text-gold text-lg mt-0.5">&#10003;</span>
 								<div>
-									<p class="font-semibold text-king-blue text-sm">Quarterly Governance Reviews</p>
-									<p class="text-gray-400 text-xs">Proactive check-ins on job, comp, property & family changes</p>
+									<p class="font-semibold text-king-blue dark:text-white text-sm">Quarterly Governance Reviews</p>
+									<p class="text-gray-400 dark:text-white/50 text-xs">Proactive check-ins on job, comp, property & family changes</p>
 								</div>
 							</div>
 							<div class="flex items-start gap-3">
 								<span class="text-gold text-lg mt-0.5">&#10003;</span>
 								<div>
-									<p class="font-semibold text-king-blue text-sm">Annual Estate & Beneficiary Audit</p>
-									<p class="text-gray-400 text-xs">Florida homestead, spousal rights & trust alignment</p>
+									<p class="font-semibold text-king-blue dark:text-white text-sm">Annual Estate & Beneficiary Audit</p>
+									<p class="text-gray-400 dark:text-white/50 text-xs">Florida homestead, spousal rights & trust alignment</p>
 								</div>
 							</div>
 							<div class="flex items-start gap-3">
 								<span class="text-gold text-lg mt-0.5">&#10003;</span>
 								<div>
-									<p class="font-semibold text-king-blue text-sm">Pre-Trial Preparation</p>
-									<p class="text-gray-400 text-xs">Discovery, depositions, motions & strategy</p>
+									<p class="font-semibold text-king-blue dark:text-white text-sm">Pre-Trial Preparation</p>
+									<p class="text-gray-400 dark:text-white/50 text-xs">Discovery, depositions, motions & strategy</p>
 								</div>
 							</div>
 							<div class="flex items-start gap-3">
 								<span class="text-gold text-lg mt-0.5">&#10003;</span>
 								<div>
-									<p class="font-semibold text-king-blue text-sm">One Trial Included</p>
-									<p class="text-gray-400 text-xs">Full courtroom representation at no additional fee</p>
+									<p class="font-semibold text-king-blue dark:text-white text-sm">One Trial Included</p>
+									<p class="text-gray-400 dark:text-white/50 text-xs">Full courtroom representation at no additional fee</p>
 								</div>
 							</div>
 							<div class="flex items-start gap-3">
 								<span class="text-gold text-lg mt-0.5">&#10003;</span>
 								<div>
-									<p class="font-semibold text-king-blue text-sm">Specialist Coordination</p>
-									<p class="text-gray-400 text-xs">We quarterback CPAs, wealth managers & outside counsel</p>
+									<p class="font-semibold text-king-blue dark:text-white text-sm">Specialist Coordination</p>
+									<p class="text-gray-400 dark:text-white/50 text-xs">We quarterback CPAs, wealth managers & outside counsel</p>
 								</div>
 							</div>
 							<div class="flex items-start gap-3">
 								<span class="text-gold text-lg mt-0.5">&#10003;</span>
 								<div>
-									<p class="font-semibold text-king-blue text-sm">Direct Attorney Access</p>
-									<p class="text-gray-400 text-xs">No gatekeepers — rapid response when you need it</p>
+									<p class="font-semibold text-king-blue dark:text-white text-sm">Direct Attorney Access</p>
+									<p class="text-gray-400 dark:text-white/50 text-xs">No gatekeepers — rapid response when you need it</p>
 								</div>
 							</div>
 							<div class="flex items-start gap-3">
 								<span class="text-gold text-lg mt-0.5">&#10003;</span>
 								<div>
-									<p class="font-semibold text-king-blue text-sm">Secure Client Portal</p>
-									<p class="text-gray-400 text-xs">Private digital workspace for documents & communication</p>
+									<p class="font-semibold text-king-blue dark:text-white text-sm">Secure Client Portal</p>
+									<p class="text-gray-400 dark:text-white/50 text-xs">Private digital workspace for documents & communication</p>
 								</div>
 							</div>
 						</div>
@@ -360,49 +360,49 @@
 						</div>
 						<p class="text-white/40 mt-2 text-sm">Everything in Fortress + Strategy Suite</p>
 					</div>
-					<div class="bg-gray-50 p-8">
+					<div class="bg-muted p-8">
 						<p class="text-xs text-gold font-semibold uppercase tracking-widest mb-4">Everything in Fortress, plus:</p>
 
 						<div class="space-y-4 mb-6">
 							<div class="flex items-start gap-3">
 								<span class="text-gold text-lg mt-0.5">&#10003;</span>
 								<div>
-									<p class="font-semibold text-king-blue text-sm">Strategy Suite Access</p>
-									<p class="text-gray-400 text-xs">Private professional workspace in the heart of Downtown Orlando</p>
+									<p class="font-semibold text-king-blue dark:text-white text-sm">Strategy Suite Access</p>
+									<p class="text-gray-400 dark:text-white/50 text-xs">Private professional workspace in the heart of Downtown Orlando</p>
 								</div>
 							</div>
 							<div class="flex items-start gap-3">
 								<span class="text-gold text-lg mt-0.5">&#10003;</span>
 								<div>
-									<p class="font-semibold text-king-blue text-sm">Reservable Study Rooms</p>
-									<p class="text-gray-400 text-xs">Private rooms for court prep, meetings, depositions, or focused work</p>
+									<p class="font-semibold text-king-blue dark:text-white text-sm">Reservable Study Rooms</p>
+									<p class="text-gray-400 dark:text-white/50 text-xs">Private rooms for court prep, meetings, depositions, or focused work</p>
 								</div>
 							</div>
 							<div class="flex items-start gap-3">
 								<span class="text-gold text-lg mt-0.5">&#10003;</span>
 								<div>
-									<p class="font-semibold text-king-blue text-sm">Printing & Business Services</p>
-									<p class="text-gray-400 text-xs">On-site printing for filings, briefs, and document preparation</p>
+									<p class="font-semibold text-king-blue dark:text-white text-sm">Printing & Business Services</p>
+									<p class="text-gray-400 dark:text-white/50 text-xs">On-site printing for filings, briefs, and document preparation</p>
 								</div>
 							</div>
 							<div class="flex items-start gap-3">
 								<span class="text-gold text-lg mt-0.5">&#10003;</span>
 								<div>
-									<p class="font-semibold text-king-blue text-sm">Complimentary Parking</p>
-									<p class="text-gray-400 text-xs">Downtown Orlando parking included with every visit</p>
+									<p class="font-semibold text-king-blue dark:text-white text-sm">Complimentary Parking</p>
+									<p class="text-gray-400 dark:text-white/50 text-xs">Downtown Orlando parking included with every visit</p>
 								</div>
 							</div>
 							<div class="flex items-start gap-3">
 								<span class="text-gold text-lg mt-0.5">&#10003;</span>
 								<div>
-									<p class="font-semibold text-king-blue text-sm">Coffee & Snacks</p>
-									<p class="text-gray-400 text-xs">Complimentary refreshments whenever you use the Suite</p>
+									<p class="font-semibold text-king-blue dark:text-white text-sm">Coffee & Snacks</p>
+									<p class="text-gray-400 dark:text-white/50 text-xs">Complimentary refreshments whenever you use the Suite</p>
 								</div>
 							</div>
 						</div>
 
-						<div class="border-t border-gray-200 pt-4 mb-6">
-							<p class="text-gray-500 text-xs leading-relaxed">Use the Strategy Suite for court preparation, client meetings, quiet study, or anytime you need a professional space — it's yours as an Elite member.</p>
+						<div class="border-t border-gray-200 dark:border-white/10 pt-4 mb-6">
+							<p class="text-gray-500 dark:text-white/60 text-xs leading-relaxed">Use the Strategy Suite for court preparation, client meetings, quiet study, or anytime you need a professional space — it's yours as an Elite member.</p>
 						</div>
 
 						<div class="text-center">
@@ -417,40 +417,40 @@
 	</section>
 
 	<!-- Who This Is For -->
-	<section class="py-24 bg-gray-50">
+	<section class="py-24 bg-muted">
 		<div class="max-w-5xl mx-auto px-6 lg:px-8">
 			<div class="grid lg:grid-cols-2 gap-8 lg:gap-16 items-start">
 				<div>
 					<p class="text-gold uppercase tracking-[0.3em] text-sm mb-4">Is This You?</p>
-					<h2 class="font-title text-4xl text-king-blue mb-6">Built for People With Complex Lives</h2>
-					<p class="text-gray-500 text-lg leading-relaxed mb-8">
+					<h2 class="font-title text-4xl text-king-blue dark:text-white mb-6">Built for People With Complex Lives</h2>
+					<p class="text-gray-500 dark:text-white/60 text-lg leading-relaxed mb-8">
 						The Fortress Package isn't for someone with a single legal question. It's for people whose professional success and personal wealth have created a web of legal needs that no single-matter firm can manage.
 					</p>
-					<p class="text-gray-500 leading-relaxed">
+					<p class="text-gray-500 dark:text-white/60 leading-relaxed">
 						If you see yourself in two or more of the situations to the right, you're exactly who this was designed for.
 					</p>
 				</div>
 
 				<div class="space-y-4">
-					<div class="bg-white rounded-xl p-6 border border-gray-100 depth-card">
-						<h4 class="font-semibold text-king-blue mb-1">Corporate executives & senior managers</h4>
-						<p class="text-gray-400 text-sm">Employment contracts, equity comp, estate plans, and real estate — all interrelated, all needing coordination.</p>
+					<div class="bg-card rounded-xl p-6 border border-gray-100 dark:border-white/10 depth-card">
+						<h4 class="font-semibold text-king-blue dark:text-white mb-1">Corporate executives & senior managers</h4>
+						<p class="text-gray-400 dark:text-white/50 text-sm">Employment contracts, equity comp, estate plans, and real estate — all interrelated, all needing coordination.</p>
 					</div>
-					<div class="bg-white rounded-xl p-6 border border-gray-100 depth-card">
-						<h4 class="font-semibold text-king-blue mb-1">Physicians & healthcare leaders</h4>
-						<p class="text-gray-400 text-sm">Liability exposure, employment agreements, practice ownership, and family estate planning under one roof.</p>
+					<div class="bg-card rounded-xl p-6 border border-gray-100 dark:border-white/10 depth-card">
+						<h4 class="font-semibold text-king-blue dark:text-white mb-1">Physicians & healthcare leaders</h4>
+						<p class="text-gray-400 dark:text-white/50 text-sm">Liability exposure, employment agreements, practice ownership, and family estate planning under one roof.</p>
 					</div>
-					<div class="bg-white rounded-xl p-6 border border-gray-100 depth-card">
-						<h4 class="font-semibold text-king-blue mb-1">Aerospace, defense & tech leaders</h4>
-						<p class="text-gray-400 text-sm">IP/confidentiality, security-sensitive matters, equity structures, and relocation issues that demand precision.</p>
+					<div class="bg-card rounded-xl p-6 border border-gray-100 dark:border-white/10 depth-card">
+						<h4 class="font-semibold text-king-blue dark:text-white mb-1">Aerospace, defense & tech leaders</h4>
+						<p class="text-gray-400 dark:text-white/50 text-sm">IP/confidentiality, security-sensitive matters, equity structures, and relocation issues that demand precision.</p>
 					</div>
-					<div class="bg-white rounded-xl p-6 border border-gray-100 depth-card">
-						<h4 class="font-semibold text-king-blue mb-1">High-earning dual-income families</h4>
-						<p class="text-gray-400 text-sm">Equity comp plus rental properties plus young-family estate planning plus tax coordination — growing complexity fast.</p>
+					<div class="bg-card rounded-xl p-6 border border-gray-100 dark:border-white/10 depth-card">
+						<h4 class="font-semibold text-king-blue dark:text-white mb-1">High-earning dual-income families</h4>
+						<p class="text-gray-400 dark:text-white/50 text-sm">Equity comp plus rental properties plus young-family estate planning plus tax coordination — growing complexity fast.</p>
 					</div>
-					<div class="bg-white rounded-xl p-6 border border-gray-100 depth-card">
-						<h4 class="font-semibold text-king-blue mb-1">Multi-property investors</h4>
-						<p class="text-gray-400 text-sm">LLC structuring, title strategy, lease management, dispute containment — across multiple holdings.</p>
+					<div class="bg-card rounded-xl p-6 border border-gray-100 dark:border-white/10 depth-card">
+						<h4 class="font-semibold text-king-blue dark:text-white mb-1">Multi-property investors</h4>
+						<p class="text-gray-400 dark:text-white/50 text-sm">LLC structuring, title strategy, lease management, dispute containment — across multiple holdings.</p>
 					</div>
 				</div>
 			</div>
@@ -472,50 +472,50 @@
 	</section>
 
 	<!-- Value Comparison -->
-	<section class="py-24 bg-white">
+	<section class="py-24 bg-background">
 		<div class="max-w-5xl mx-auto px-6 lg:px-8">
 			<div class="text-center mb-16">
 				<p class="text-gold uppercase tracking-[0.3em] text-sm mb-4">The Math</p>
-				<h2 class="font-title text-4xl md:text-5xl text-king-blue mb-4">What Fragmented Counsel Actually Costs</h2>
-				<p class="text-gray-500 text-lg max-w-2xl mx-auto">At Orlando's median attorney rate of $375/hour, the math speaks for itself.</p>
+				<h2 class="font-title text-4xl md:text-5xl text-king-blue dark:text-white mb-4">What Fragmented Counsel Actually Costs</h2>
+				<p class="text-gray-500 dark:text-white/60 text-lg max-w-2xl mx-auto">At Orlando's median attorney rate of $375/hour, the math speaks for itself.</p>
 			</div>
 
 			<div class="grid md:grid-cols-3 gap-4 md:gap-8 max-w-5xl mx-auto items-stretch">
 				<!-- Without Fortress -->
-				<div class="bg-gray-50 rounded-2xl p-6 md:p-9 border border-gray-200 depth-card">
-					<h3 class="font-title text-xl text-king-blue mb-6">Without Fortress</h3>
+				<div class="bg-muted rounded-2xl p-6 md:p-9 border border-gray-200 dark:border-white/10 depth-card">
+					<h3 class="font-title text-xl text-king-blue dark:text-white mb-6">Without Fortress</h3>
 					<div class="space-y-3 mb-8 text-sm">
-						<div class="flex justify-between text-gray-600">
+						<div class="flex justify-between text-gray-600 dark:text-white/70">
 							<span>Estate plan refresh</span>
 							<span class="font-semibold">$4K–$8K</span>
 						</div>
-						<div class="flex justify-between text-gray-600">
+						<div class="flex justify-between text-gray-600 dark:text-white/70">
 							<span>Employment contract</span>
 							<span class="font-semibold">$1.5K–$3K</span>
 						</div>
-						<div class="flex justify-between text-gray-600">
+						<div class="flex justify-between text-gray-600 dark:text-white/70">
 							<span>Real estate transaction</span>
 							<span class="font-semibold">$2K–$5K</span>
 						</div>
-						<div class="flex justify-between text-gray-600">
+						<div class="flex justify-between text-gray-600 dark:text-white/70">
 							<span>Entity structuring</span>
 							<span class="font-semibold">$1.5K–$4K</span>
 						</div>
-						<div class="flex justify-between text-gray-600">
+						<div class="flex justify-between text-gray-600 dark:text-white/70">
 							<span>Dispute / pre-trial</span>
 							<span class="font-semibold">$5K–$25K</span>
 						</div>
-						<div class="flex justify-between text-gray-600">
+						<div class="flex justify-between text-gray-600 dark:text-white/70">
 							<span>Trial representation</span>
 							<span class="font-semibold">$10K–$50K+</span>
 						</div>
 					</div>
-					<div class="border-t border-gray-200 pt-4">
+					<div class="border-t border-gray-200 dark:border-white/10 pt-4">
 						<div class="flex justify-between">
-							<span class="font-semibold text-king-blue text-sm">Typical annual total</span>
+							<span class="font-semibold text-king-blue dark:text-white text-sm">Typical annual total</span>
 							<span class="font-bold text-red-500">$24K–$95K+</span>
 						</div>
-						<p class="text-gray-400 text-xs mt-2">Plus the hidden cost of uncoordinated advice</p>
+						<p class="text-gray-400 dark:text-white/50 text-xs mt-2">Plus the hidden cost of uncoordinated advice</p>
 					</div>
 				</div>
 
@@ -602,21 +602,21 @@
 	</section>
 
 	<!-- FAQ Section -->
-	<section class="py-24 bg-gray-50">
+	<section class="py-24 bg-muted">
 		<div class="max-w-3xl mx-auto px-6 lg:px-8">
 			<div class="text-center mb-16">
 				<p class="text-gold uppercase tracking-[0.3em] text-sm mb-4">Questions</p>
-				<h2 class="font-title text-4xl text-king-blue">Frequently Asked</h2>
+				<h2 class="font-title text-4xl text-king-blue dark:text-white">Frequently Asked</h2>
 			</div>
 
 			<div class="space-y-3">
 				{#each faqs as faq, i (faq.q)}
-					<div class="bg-white rounded-xl border border-gray-100 overflow-hidden depth-card">
+					<div class="bg-card rounded-xl border border-gray-100 dark:border-white/10 overflow-hidden depth-card">
 						<button
 							onclick={() => toggleFaq(i)}
-							class="w-full text-left px-6 py-5 flex items-center justify-between gap-4 hover:bg-gray-50 transition-colors"
+							class="w-full text-left px-6 py-5 flex items-center justify-between gap-4 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
 						>
-							<span class="font-semibold text-king-blue">{faq.q}</span>
+							<span class="font-semibold text-king-blue dark:text-white">{faq.q}</span>
 							<svg
 								class="w-5 h-5 text-gold shrink-0 transition-transform duration-200 {openFaq === i ? 'rotate-180' : ''}"
 								fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -625,7 +625,7 @@
 							</svg>
 						</button>
 						{#if openFaq === i}
-							<div class="px-6 py-5 text-gray-500 leading-relaxed border-t border-gray-100">
+							<div class="px-6 py-5 text-gray-500 dark:text-white/60 leading-relaxed border-t border-gray-100 dark:border-white/10">
 								{faq.a}
 							</div>
 						{/if}
@@ -739,17 +739,17 @@
 	</section>
 
 	<!-- Final CTA -->
-	<section class="py-20 bg-white">
+	<section class="py-20 bg-background">
 		<div class="max-w-3xl mx-auto px-6 lg:px-8 text-center">
-			<h2 class="font-title text-4xl text-king-blue mb-6">Stop Managing Your Legal Life Alone.</h2>
-			<p class="text-gray-500 text-lg mb-10 max-w-2xl mx-auto leading-relaxed">
+			<h2 class="font-title text-4xl text-king-blue dark:text-white mb-6">Stop Managing Your Legal Life Alone.</h2>
+			<p class="text-gray-500 dark:text-white/60 text-lg mb-10 max-w-2xl mx-auto leading-relaxed">
 				The Fortress Package exists because the people who need the most legal coordination are the ones least likely to have it. Let us change that.
 			</p>
 			<div class="flex flex-col sm:flex-row gap-4 justify-center">
 				<a href="#apply" class="bg-gold hover:bg-gold-light text-king-blue px-10 py-4 rounded-lg font-bold transition-all duration-200 transform hover:scale-105 depth-gold text-lg">
 					Apply for Fortress Membership
 				</a>
-				<a href="tel:6893536943" class="border-2 border-king-blue/30 hover:border-gold text-king-blue px-8 py-4 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2 depth-card">
+				<a href="tel:6893536943" class="border-2 border-king-blue/30 dark:border-white/20 hover:border-gold text-king-blue dark:text-white px-8 py-4 rounded-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2 depth-card">
 					<svg class="w-5 h-5 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
 					(689) 353-6943
 				</a>

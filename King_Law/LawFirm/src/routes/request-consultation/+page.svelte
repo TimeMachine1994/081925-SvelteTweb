@@ -98,6 +98,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Request a Consultation | King Law</title>
+</svelte:head>
+
 <div class="min-h-screen pt-20">
 	<!-- Hero Section -->
 	<section class="py-20 bg-king-blue">

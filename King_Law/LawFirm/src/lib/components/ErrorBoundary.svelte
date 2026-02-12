@@ -37,7 +37,7 @@
 					</p>
 					<button
 						onclick={reset}
-						class="bg-gold hover:bg-gold-dark text-black font-semibold px-4 py-2 rounded-md transition-colors"
+						class="bg-gold hover:bg-gold-dark text-king-blue font-semibold px-4 py-2 rounded-md transition-colors"
 					>
 						Try Again
 					</button>

@@ -2,6 +2,10 @@
 	import ScheduleWidget from '$lib/components/ScheduleWidget.svelte';
 </script>
 
+<svelte:head>
+	<title>King Law, PLLC — Your Personal General Counsel</title>
+</svelte:head>
+
 <div class="min-h-screen pt-20">
 	<!-- Hero Section -->
 	<section class="min-h-[85vh] flex items-center relative overflow-hidden">
@@ -70,7 +74,7 @@
 	</section>
 
 	<!-- How We Work -->
-	<section class="py-24 bg-white dark:bg-background">
+	<section class="py-24 bg-background">
 		<div class="max-w-5xl mx-auto px-6 lg:px-8">
 			<p class="text-gold uppercase tracking-[0.3em] text-sm mb-4">How We Work</p>
 			<h2 class="font-title text-4xl text-king-blue dark:text-white mb-8 md:mb-16">Built Around Your Priorities</h2>
@@ -223,7 +227,7 @@
 	</section>
 
 	<!-- Schedule a Consultation Section -->
-	<section class="py-24 bg-white dark:bg-background">
+	<section class="py-24 bg-background">
 		<div class="max-w-6xl mx-auto px-6 lg:px-8">
 			<div class="text-center mb-12">
 				<p class="text-gold uppercase tracking-[0.3em] text-sm mb-4">Get Started</p>
@@ -253,7 +257,7 @@
 	</section>
 
 	<!-- Quote + CTA Section -->
-	<section class="py-12 md:py-24 bg-gray-50 dark:bg-king-blue-dark">
+	<section class="py-12 md:py-24 bg-muted">
 		<div class="max-w-4xl mx-auto px-6 lg:px-8 text-center">
 			<span class="text-gold text-6xl font-title">"</span>
 			<blockquote class="font-title text-3xl md:text-4xl text-king-blue dark:text-white leading-relaxed mb-6">

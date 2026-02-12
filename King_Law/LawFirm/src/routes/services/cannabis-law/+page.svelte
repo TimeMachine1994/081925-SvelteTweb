@@ -1,3 +1,8 @@
+<svelte:head>
+	<title>Cannabis Law | King Law</title>
+</svelte:head>
+
+<div class="min-h-screen pt-20">
 <div class="py-16 md:py-24 bg-background">
 	<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 		<h1 class="font-title text-4xl md:text-5xl mb-6">Cannabis Law</h1>
@@ -100,9 +105,10 @@
 				Whether you're operating a licensed business, entering the market, or addressing a 
 				personal legal matter, contact us for informed, confidential counsel.
 			</p>
-			<a href="/schedule" class="inline-block bg-gold hover:bg-gold-dark text-black font-semibold px-8 py-3 rounded-md transition-colors depth-gold">
+			<a href="/schedule" class="inline-block bg-gold hover:bg-gold-dark text-king-blue font-semibold px-8 py-3 rounded-lg transition-colors depth-gold">
 				Schedule Consultation
 			</a>
 		</div>
 	</div>
+</div>
 </div>

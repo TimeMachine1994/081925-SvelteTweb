@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Tailwind v4: Extend default theme with custom colors (preserves built-in palette) */
 @theme extend {
 	/* King Law Brand Colors */
@@ -24,6 +26,8 @@
 	--color-border: #ccd0d5;
 	--color-input: #ccd0d5;
 	--color-ring: #F2B022;
+	--color-card: #ffffff;
+	--color-card-foreground: #1D3047;
 
 	/* Font families */
 	--font-body: 'Junction Regular', system-ui, sans-serif;

@@ -34,6 +34,10 @@
 	];
 </script>
 
+<svelte:head>
+	<title>Our Team | King Law</title>
+</svelte:head>
+
 <div class="min-h-screen pt-20">
 	<!-- Hero Section -->
 	<section class="py-24 bg-king-blue">
@@ -50,14 +54,14 @@
 	</section>
 
 	<!-- Team Members - Alternating Layout -->
-	<section class="py-16 bg-white dark:bg-background">
+	<section class="py-16 bg-background">
 		<div class="max-w-6xl mx-auto px-6 lg:px-8">
 			{#each teamMembers as member, i}
 				<div class="grid lg:grid-cols-2 gap-6 lg:gap-12 items-center py-8 lg:py-16 {i !== teamMembers.length - 1 ? 'border-b border-gray-100 dark:border-white/10' : ''}">
 					<!-- Image -->
 					<div class="{i % 2 === 1 ? 'lg:order-2' : ''}">
 						<div class="relative">
-							<div class="bg-white dark:bg-card rounded-2xl overflow-hidden depth-card">
+							<div class="bg-card rounded-2xl overflow-hidden depth-card">
 								{#if member.image}
 									<img src={member.image} alt={member.name} class="aspect-[4/5] w-full object-cover" />
 								{:else}
@@ -83,6 +87,11 @@
 						<p class="text-gray-500 dark:text-white/60 text-lg leading-relaxed">
 							{member.bio}
 						</p>
+						{#if i === 0}
+							<a href="/meet-ben-king" class="inline-block mt-6 bg-gold hover:bg-gold-light text-king-blue px-8 py-3 rounded-lg font-semibold transition-all depth-gold">
+								Meet Ben King
+							</a>
+						{/if}
 					</div>
 				</div>
 			{/each}

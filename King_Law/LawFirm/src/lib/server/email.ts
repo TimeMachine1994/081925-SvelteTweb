@@ -1,13 +1,14 @@
 /**
  * Email utility for King Law Firm
  * 
- * Currently logs emails to console. To enable real email delivery:
- * 1. Install a provider (e.g., `npm install @sendgrid/mail` or `nodemailer`)
- * 2. Add env vars: SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS (or SENDGRID_API_KEY)
- * 3. Replace the sendEmail function body with the provider's send method
+ * All outbound email is sent via SendGrid using the SENDGRID_API_KEY env var.
+ * The verified sender address is print@trialkings.law.
  */
 
-const FIRM_EMAIL = 'info@kinglawpllc.com';
+import sgMail from '@sendgrid/mail';
+import { env } from '$env/dynamic/private';
+
+const FIRM_EMAIL = 'print@trialkings.law';
 const FIRM_NAME = 'King Law, P.L.L.C.';
 
 interface EmailOptions {
@@ -15,20 +16,30 @@ interface EmailOptions {
 	subject: string;
 	text: string;
 	html?: string;
+	replyTo?: string;
 }
 
 export async function sendEmail(options: EmailOptions): Promise<{ success: boolean; error?: string }> {
 	try {
-		// TODO: Replace with real email provider
-		// Example with SendGrid:
-		// import sgMail from '@sendgrid/mail';
-		// sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
-		// await sgMail.send({ from: FIRM_EMAIL, ...options });
+		if (!env.SENDGRID_API_KEY) {
+			console.error('SENDGRID_API_KEY not configured — email not sent');
+			return { success: false, error: 'Email service not configured' };
+		}
 
-		console.log(`📧 Email queued (no provider configured):`, {
+		sgMail.setApiKey(env.SENDGRID_API_KEY);
+
+		await sgMail.send({
+			to: options.to,
+			from: FIRM_EMAIL,
+			subject: options.subject,
+			text: options.text,
+			...(options.html && { html: options.html }),
+			...(options.replyTo && { replyTo: options.replyTo })
+		});
+
+		console.log(`📧 Email sent via SendGrid:`, {
 			to: options.to,
 			subject: options.subject,
-			preview: options.text.substring(0, 100) + '...',
 			timestamp: new Date().toISOString()
 		});
 

@@ -1,3 +1,8 @@
+<svelte:head>
+	<title>Business &amp; Investment | King Law</title>
+</svelte:head>
+
+<div class="min-h-screen pt-20">
 <div class="py-16 md:py-24 bg-background">
 	<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 		<h1 class="font-title text-4xl md:text-5xl mb-6">Business & Investment</h1>
@@ -113,9 +118,10 @@
 				Every deal and entity exists within a larger strategy. Contact us to discuss how 
 				coordinated legal counsel can protect and grow your investments.
 			</p>
-			<a href="/schedule" class="inline-block bg-gold hover:bg-gold-dark text-black font-semibold px-8 py-3 rounded-md transition-colors depth-gold">
+			<a href="/schedule" class="inline-block bg-gold hover:bg-gold-dark text-king-blue font-semibold px-8 py-3 rounded-lg transition-colors depth-gold">
 				Schedule Consultation
 			</a>
 		</div>
 	</div>
+</div>
 </div>

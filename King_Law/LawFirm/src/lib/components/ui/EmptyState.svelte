@@ -25,7 +25,7 @@
 	{#if actionLabel && actionHref}
 		<a
 			href={actionHref}
-			class="inline-block bg-gold hover:bg-gold-dark text-black font-semibold px-6 py-2 rounded-md transition-colors"
+			class="inline-block bg-gold hover:bg-gold-dark text-king-blue font-semibold px-6 py-2 rounded-md transition-colors"
 		>
 			{actionLabel}
 		</a>

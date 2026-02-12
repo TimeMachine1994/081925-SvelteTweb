@@ -32,7 +32,11 @@
 	}
 </script>
 
-<div class="min-h-screen flex items-center justify-center bg-background p-4">
+<svelte:head>
+	<title>Staff Sign Up | King Law</title>
+</svelte:head>
+
+<div class="min-h-screen flex items-center justify-center bg-background p-4 pt-24">
 	<div class="w-full max-w-md">
 		<div class="text-center mb-8">
 			<h1 class="font-title text-4xl mb-2">Staff Sign Up</h1>
@@ -65,7 +69,7 @@
 				<button
 					type="submit"
 					disabled={loading}
-					class="w-full bg-gold hover:bg-gold-dark text-black font-semibold py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+					class="w-full bg-gold hover:bg-gold-dark text-king-blue font-semibold py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 				>
 					{loading ? 'Verifying...' : 'Continue'}
 				</button>

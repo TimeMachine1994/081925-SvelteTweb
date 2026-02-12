@@ -21,7 +21,7 @@
 
 			<!-- Desktop Navigation -->
 			<div class="hidden lg:flex flex-1 items-center justify-center gap-8">
-				<a href="/meet-ben-king" class="text-king-blue/70 dark:text-white/70 hover:text-king-blue dark:hover:text-gold transition-colors text-sm tracking-wide uppercase">Meet Ben King</a>
+				<a href="/Fortress" class="text-king-blue/70 dark:text-white/70 hover:text-king-blue dark:hover:text-gold transition-colors text-sm tracking-wide uppercase">Fortress</a>
 				
 				<div class="relative group">
 					<button class="text-king-blue/70 dark:text-white/70 hover:text-king-blue dark:hover:text-gold transition-colors text-sm tracking-wide uppercase flex items-center gap-1">
@@ -109,7 +109,7 @@
 	{#if mobileMenuOpen}
 		<div class="lg:hidden bg-king-blue depth-card-dark">
 			<div class="px-6 py-6 space-y-1">
-				<a href="/meet-ben-king" class="block py-3 text-white/80 hover:text-gold border-b border-white/10" onclick={() => mobileMenuOpen = false}>Meet Ben King</a>
+				<a href="/Fortress" class="block py-3 text-white/80 hover:text-gold border-b border-white/10" onclick={() => mobileMenuOpen = false}>Fortress</a>
  				
 				<button 
 					class="w-full flex justify-between items-center py-3 text-white/80 hover:text-gold border-b border-white/10"
@@ -152,7 +152,7 @@
 					</button>
 					{#if user}
 						<a 
-							href={user.role === 'lawyer' ? '/dashboard/lawyer' : '/dashboard/client'}
+							href={user.role === 'lawyer' || user.role === 'admin' ? '/dashboard/lawyer' : '/dashboard/client'}
 							class="block text-center bg-gold text-king-blue py-3 rounded-lg font-semibold depth-gold"
 							onclick={() => mobileMenuOpen = false}
 						>

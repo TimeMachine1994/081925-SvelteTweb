@@ -20,6 +20,10 @@
 	}
 </script>
 
+<svelte:head>
+	<title>Sign In | King Law</title>
+</svelte:head>
+
 <div class="min-h-screen flex">
 	<!-- Left Panel - Branding -->
 	<div class="hidden lg:flex lg:w-1/2 bg-king-blue items-center justify-center p-12">
@@ -37,7 +41,7 @@
 	</div>
 
 	<!-- Right Panel - Login Form -->
-	<div class="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white dark:bg-background">
+	<div class="w-full lg:w-1/2 flex items-center justify-center p-8 bg-background">
 		<div class="w-full max-w-md">
 			<!-- Mobile Logo -->
 			<div class="lg:hidden flex items-center gap-3 mb-8 justify-center">
@@ -64,7 +68,7 @@
 						id="email"
 						bind:value={email}
 						required
-						class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-gray-50 dark:bg-card dark:text-foreground focus:bg-white dark:focus:bg-card focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
+						class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-muted dark:text-foreground focus:bg-background focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
 					/>
 				</div>
 
@@ -75,14 +79,14 @@
 						id="password"
 						bind:value={password}
 						required
-						class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-gray-50 dark:bg-card dark:text-foreground focus:bg-white dark:focus:bg-card focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
+						class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-muted dark:text-foreground focus:bg-background focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
 					/>
 				</div>
 
 				<button
 					type="submit"
 					disabled={authStore.loading}
-					class="w-full bg-king-blue hover:bg-king-blue-light text-white font-semibold py-4 px-6 rounded-lg transition-all depth-gold disabled:opacity-50 disabled:cursor-not-allowed"
+					class="w-full bg-king-blue hover:bg-king-blue-light text-white font-semibold py-4 px-6 rounded-lg transition-all hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
 				>
 					{authStore.loading ? 'Signing in...' : 'Sign In'}
 				</button>

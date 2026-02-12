@@ -229,7 +229,7 @@
 										max={remaining / 100}
 										bind:value={customAmount}
 										placeholder="0.00"
-										class="w-full pl-7 pr-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-gray-50 dark:bg-card dark:text-foreground focus:bg-white dark:focus:bg-card focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none text-lg font-semibold"
+										class="w-full pl-7 pr-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-muted dark:text-foreground focus:bg-background focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none text-lg font-semibold"
 									/>
 								</div>
 								{#if customAmount && !isValidAmount}

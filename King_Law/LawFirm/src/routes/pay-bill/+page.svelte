@@ -89,7 +89,7 @@
 	</section>
 
 	<!-- Payment Form -->
-	<section class="py-24 bg-white dark:bg-background">
+	<section class="py-24 bg-background">
 		<div class="max-w-6xl mx-auto px-6 lg:px-8">
 			<div class="grid lg:grid-cols-12 gap-16">
 				<!-- Form Column -->
@@ -130,7 +130,7 @@
 									bind:value={amount}
 									required
 									placeholder="0.00"
-									class="w-full pl-8 pr-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-gray-50 dark:bg-card dark:text-foreground focus:bg-white dark:focus:bg-card focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none text-lg font-semibold"
+									class="w-full pl-8 pr-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-muted dark:text-foreground focus:bg-background focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none text-lg font-semibold"
 								/>
 							</div>
 						</div>
@@ -144,7 +144,7 @@
 									bind:value={name}
 									required
 									placeholder="Jane Doe"
-									class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-gray-50 dark:bg-card dark:text-foreground focus:bg-white dark:focus:bg-card focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
+									class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-muted dark:text-foreground focus:bg-background focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
 								/>
 							</div>
 							<div>
@@ -154,7 +154,7 @@
 									id="phone"
 									bind:value={phone}
 									placeholder="(555) 555-5555"
-									class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-gray-50 dark:bg-card dark:text-foreground focus:bg-white dark:focus:bg-card focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
+									class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-muted dark:text-foreground focus:bg-background focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
 								/>
 							</div>
 						</div>
@@ -166,7 +166,7 @@
 								id="email"
 								bind:value={email}
 								placeholder="jane@example.com"
-								class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-gray-50 dark:bg-card dark:text-foreground focus:bg-white dark:focus:bg-card focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
+								class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-muted dark:text-foreground focus:bg-background focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
 							/>
 							<p class="text-xs text-gray-400 dark:text-white/50 mt-1">Please provide either an email or phone number.</p>
 						</div>
@@ -178,7 +178,7 @@
 								id="memo"
 								bind:value={memo}
 								placeholder="e.g. Invoice #1234 or case reference"
-								class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-gray-50 dark:bg-card dark:text-foreground focus:bg-white dark:focus:bg-card focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
+								class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-muted dark:text-foreground focus:bg-background focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
 							/>
 						</div>
 

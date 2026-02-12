@@ -1,3 +1,8 @@
+<svelte:head>
+	<title>Appellate Strategy | King Law</title>
+</svelte:head>
+
+<div class="min-h-screen pt-20">
 <div class="py-16 md:py-24 bg-background">
 	<div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 		<h1 class="font-title text-4xl md:text-5xl mb-6">Appellate Strategy</h1>
@@ -114,13 +119,14 @@
 				and provide a candid assessment of your options.
 			</p>
 			<div class="flex flex-col sm:flex-row gap-4 justify-center">
-				<a href="/schedule" class="bg-gold hover:bg-gold-dark text-black font-semibold px-8 py-3 rounded-md transition-colors depth-gold">
+				<a href="/schedule" class="bg-gold hover:bg-gold-dark text-king-blue font-semibold px-8 py-3 rounded-lg transition-colors depth-gold">
 					Request Case Review
 				</a>
-				<a href="tel:6893536943" class="border-2 border-gold text-gold hover:bg-gold hover:text-black font-semibold px-8 py-3 rounded-md transition-colors depth-ghost">
+				<a href="tel:6893536943" class="border-2 border-gold text-gold hover:bg-gold hover:text-king-blue font-semibold px-8 py-3 rounded-lg transition-colors depth-ghost">
 					Call (689) 353-6943
 				</a>
 			</div>
 		</div>
 	</div>
+</div>
 </div>

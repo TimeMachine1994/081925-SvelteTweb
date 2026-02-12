@@ -5,6 +5,10 @@
 	let { form }: { form: ActionData } = $props();
 </script>
 
+<svelte:head>
+	<title>Contact Us | King Law</title>
+</svelte:head>
+
 <div class="min-h-screen pt-20">
 	<!-- Hero Section -->
 	<section class="py-24 bg-king-blue">
@@ -20,7 +24,7 @@
 	</section>
 
 	<!-- Contact Content -->
-	<section class="py-24 bg-white dark:bg-background">
+	<section class="py-24 bg-background">
 		<div class="max-w-6xl mx-auto px-6 lg:px-8">
 			<div class="grid lg:grid-cols-12 gap-8 lg:gap-16">
 				<!-- Form Column -->
@@ -49,7 +53,7 @@
 									id="name"
 									name="name"
 									required
-									class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-gray-50 dark:bg-card dark:text-foreground focus:bg-white dark:focus:bg-card focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
+									class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-muted dark:text-foreground focus:bg-background focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
 								/>
 							</div>
 							<div>
@@ -58,7 +62,7 @@
 									type="tel"
 									id="phone"
 									name="phone"
-									class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-gray-50 dark:bg-card dark:text-foreground focus:bg-white dark:focus:bg-card focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
+									class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-muted dark:text-foreground focus:bg-background focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
 								/>
 							</div>
 						</div>
@@ -70,7 +74,7 @@
 								id="email"
 								name="email"
 								required
-								class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-gray-50 dark:bg-card dark:text-foreground focus:bg-white dark:focus:bg-card focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
+								class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-muted dark:text-foreground focus:bg-background focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
 							/>
 						</div>
 
@@ -81,7 +85,7 @@
 								id="subject"
 								name="subject"
 								required
-								class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-gray-50 dark:bg-card dark:text-foreground focus:bg-white dark:focus:bg-card focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
+								class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-muted dark:text-foreground focus:bg-background focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
 							/>
 						</div>
 
@@ -92,13 +96,13 @@
 								name="message"
 								rows="6"
 								required
-								class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-gray-50 dark:bg-card dark:text-foreground focus:bg-white dark:focus:bg-card focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none resize-none"
+								class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-muted dark:text-foreground focus:bg-background focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none resize-none"
 							></textarea>
 						</div>
 
 						<button
 							type="submit"
-							class="w-full bg-king-blue hover:bg-king-blue-light text-white font-semibold py-4 px-6 rounded-lg transition-all depth-gold"
+							class="w-full bg-king-blue hover:bg-king-blue-light text-white font-semibold py-4 px-6 rounded-lg transition-all hover:shadow-lg"
 						>
 							Send Message
 						</button>
