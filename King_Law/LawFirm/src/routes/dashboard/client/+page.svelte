@@ -10,7 +10,7 @@
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import Tabs from '$lib/components/ui/Tabs.svelte';
 
-	let activeCases = $derived(casesStore.cases.filter(c => c.case.status === 'active').length);
+	let activeCases = $derived(casesStore.cases.filter(c => c.case.status === 'active' || c.case.status === 'open').length);
 	let documentsCount = $derived(documentsStore.documents.length);
 	// Use unreadCounts.total which correctly counts only messages where user is recipient
 	let unreadMessages = $derived(messagesStore.unreadCounts.total);

@@ -4,6 +4,20 @@ type User = {
 	role: 'client' | 'lawyer' | 'staff' | 'admin';
 	firstName: string;
 	lastName: string;
+	phoneNumber: string | null;
+	addressLine1: string | null;
+	addressLine2: string | null;
+	city: string | null;
+	state: string | null;
+	zipCode: string | null;
+	dateOfBirth: string | null;
+	preferredContact: 'email' | 'phone' | 'text' | null;
+	emergencyContactName: string | null;
+	emergencyContactPhone: string | null;
+	squareCustomerId: string | null;
+	squareCardId: string | null;
+	cardLastFour: string | null;
+	cardBrand: string | null;
 };
 
 class AuthStore {
@@ -144,6 +158,32 @@ class AuthStore {
 
 	get canEditCases(): boolean {
 		return this.user?.role === 'lawyer' || this.user?.role === 'admin';
+	}
+
+	async updateProfile(profileData: Partial<Omit<User, 'id' | 'email' | 'role' | 'squareCustomerId' | 'squareCardId' | 'cardLastFour' | 'cardBrand'>>) {
+		this.loading = true;
+		this.error = null;
+		try {
+			const response = await fetch('/api/auth/profile', {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(profileData)
+			});
+
+			if (!response.ok) {
+				const data = await response.json();
+				throw new Error(data.message || 'Profile update failed');
+			}
+
+			const data = await response.json();
+			this.user = data.user;
+			return { success: true };
+		} catch (err) {
+			this.error = err instanceof Error ? err.message : 'Profile update failed';
+			return { success: false, error: this.error };
+		} finally {
+			this.loading = false;
+		}
 	}
 
 	async logout(): Promise<void> {

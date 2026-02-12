@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import ChatSlider from '$lib/components/ChatSlider.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -278,6 +277,3 @@
 		</div>
 	</div>
 </div>
-
-<!-- Case-Specific Chat -->
-<ChatSlider caseId={data.case.id} />

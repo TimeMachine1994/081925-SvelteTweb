@@ -22,7 +22,20 @@ export const lucia = new Lucia(adapter, {
 			firstName: attributes.firstName,
 			lastName: attributes.lastName,
 			role: attributes.role,
-			phoneNumber: attributes.phoneNumber
+			phoneNumber: attributes.phoneNumber,
+			addressLine1: attributes.addressLine1,
+			addressLine2: attributes.addressLine2,
+			city: attributes.city,
+			state: attributes.state,
+			zipCode: attributes.zipCode,
+			dateOfBirth: attributes.dateOfBirth,
+			preferredContact: attributes.preferredContact,
+			emergencyContactName: attributes.emergencyContactName,
+			emergencyContactPhone: attributes.emergencyContactPhone,
+			squareCustomerId: attributes.squareCustomerId,
+			squareCardId: attributes.squareCardId,
+			cardLastFour: attributes.cardLastFour,
+			cardBrand: attributes.cardBrand
 		};
 	}
 });
@@ -40,6 +53,19 @@ interface DatabaseUserAttributes {
 	lastName: string;
 	role: 'client' | 'lawyer' | 'staff' | 'admin';
 	phoneNumber: string | null;
+	addressLine1: string | null;
+	addressLine2: string | null;
+	city: string | null;
+	state: string | null;
+	zipCode: string | null;
+	dateOfBirth: string | null;
+	preferredContact: 'email' | 'phone' | 'text' | null;
+	emergencyContactName: string | null;
+	emergencyContactPhone: string | null;
+	squareCustomerId: string | null;
+	squareCardId: string | null;
+	cardLastFour: string | null;
+	cardBrand: string | null;
 }
 
 // Generate random session ID

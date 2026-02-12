@@ -10,6 +10,19 @@ declare global {
 				lastName: string;
 				role: 'client' | 'lawyer' | 'admin' | 'staff';
 				phoneNumber: string | null;
+				addressLine1: string | null;
+				addressLine2: string | null;
+				city: string | null;
+				state: string | null;
+				zipCode: string | null;
+				dateOfBirth: string | null;
+				preferredContact: 'email' | 'phone' | 'text' | null;
+				emergencyContactName: string | null;
+				emergencyContactPhone: string | null;
+				squareCustomerId: string | null;
+				squareCardId: string | null;
+				cardLastFour: string | null;
+				cardBrand: string | null;
 			} | null;
 			session: {
 				id: string;

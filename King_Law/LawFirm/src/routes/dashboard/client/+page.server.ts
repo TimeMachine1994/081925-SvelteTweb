@@ -41,7 +41,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		: [];
 
 	// Calculate stats
-	const activeCases = userCases.filter((c) => c.status === 'active').length;
+	const activeCases = userCases.filter((c) => c.status === 'active' || c.status === 'open').length;
 	const unpaidInvoices = userInvoices.filter((i) => i.status !== 'paid');
 	const totalUnpaid = unpaidInvoices.reduce((sum, inv) => sum + (inv.amount - inv.paidAmount), 0);
 	const unreadMessages = userMessages.filter((m) => !m.readAt).length;
