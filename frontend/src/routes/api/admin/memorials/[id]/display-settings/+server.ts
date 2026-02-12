@@ -38,8 +38,9 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 };
 
 /**
- * POST - Set display settings (customTitle and publicNote) for a memorial
+ * POST - Set display settings (customTitle) for a memorial
  * Admin only endpoint
+ * NOTE: publicNote is deprecated and managed via text blocks now.
  */
 export const POST: RequestHandler = async ({ params, locals, request }) => {
 	// Check admin authentication
@@ -53,24 +54,16 @@ export const POST: RequestHandler = async ({ params, locals, request }) => {
 	}
 
 	try {
-		const { customTitle, publicNote } = await request.json();
+		const { customTitle } = await request.json();
 
 		// Validate inputs
 		if (customTitle !== undefined && customTitle !== null && typeof customTitle !== 'string') {
 			throw error(400, 'Custom title must be a string');
 		}
 
-		if (publicNote !== undefined && publicNote !== null && typeof publicNote !== 'string') {
-			throw error(400, 'Public note must be a string');
-		}
-
 		// Limit lengths
 		if (customTitle && customTitle.length > 200) {
 			throw error(400, 'Custom title must be 200 characters or less');
-		}
-
-		if (publicNote && publicNote.length > 5000) {
-			throw error(400, 'Public note must be 5000 characters or less');
 		}
 
 		// Check if memorial exists
@@ -88,10 +81,6 @@ export const POST: RequestHandler = async ({ params, locals, request }) => {
 			updateData.customTitle = customTitle || null; // Convert empty string to null
 		}
 
-		if (publicNote !== undefined) {
-			updateData.publicNote = publicNote || null; // Convert empty string to null
-		}
-
 		// Update memorial
 		await adminDb.collection('memorials').doc(memorialId).update(updateData);
 
@@ -103,8 +92,7 @@ export const POST: RequestHandler = async ({ params, locals, request }) => {
 			targetId: memorialId,
 			targetType: 'memorial',
 			changes: {
-				customTitle: customTitle !== undefined ? customTitle : '(unchanged)',
-				publicNote: publicNote !== undefined ? (publicNote ? publicNote.substring(0, 100) + '...' : null) : '(unchanged)'
+				customTitle: customTitle !== undefined ? customTitle : '(unchanged)'
 			},
 			timestamp: new Date()
 		});
@@ -112,7 +100,6 @@ export const POST: RequestHandler = async ({ params, locals, request }) => {
 		return json({
 			success: true,
 			customTitle: customTitle || null,
-			publicNote: publicNote || null,
 			message: 'Display settings updated successfully'
 		});
 	} catch (err: any) {
@@ -146,7 +133,6 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
 		// Clear display settings
 		await adminDb.collection('memorials').doc(memorialId).update({
 			customTitle: null,
-			publicNote: null,
 			updatedAt: new Date()
 		});
 

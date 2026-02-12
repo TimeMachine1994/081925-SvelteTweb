@@ -1,3 +1,7 @@
+// DEPRECATED: This API is no longer called by the admin UI.
+// Emergency chat embeds are replaced by embed blocks (type: chat) in the block editor.
+// Retained for backward compatibility until all memorials are migrated.
+
 import { json } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
 import type { RequestHandler } from './$types';

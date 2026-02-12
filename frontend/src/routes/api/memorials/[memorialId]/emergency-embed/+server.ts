@@ -1,3 +1,7 @@
+// DEPRECATED: This API is no longer called by the admin UI.
+// Emergency embeds are replaced by embed blocks in the block editor.
+// Retained for backward compatibility until all memorials are migrated.
+
 import { adminDb } from '$lib/server/firebase';
 import { error as svelteError, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';

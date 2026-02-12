@@ -157,15 +157,16 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			// Livestream legacy field (mostly replaced by streams collection)
 			livestream: memorialData.livestream || null,
 			
-			// Emergency embed overrides
+			// DEPRECATED: Emergency embed overrides (replaced by embed blocks)
 			emergencyEmbed: memorialData.emergencyEmbed || null,
 			emergencyChatEmbed: memorialData.emergencyChatEmbed || null,
 			
-			// Video file embed (GCS video with download)
+			// DEPRECATED: Video file embed (replaced by embed blocks)
 			videoFile: memorialData.videoFile || null,
 			
 			// Admin display overrides
 			customTitle: memorialData.customTitle || null,
+			// DEPRECATED: publicNote (replaced by text blocks)
 			publicNote: memorialData.publicNote || null,
 			
 			// Calculator/Payment - properly cleaned

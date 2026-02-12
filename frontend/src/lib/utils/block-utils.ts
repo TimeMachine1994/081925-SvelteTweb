@@ -245,6 +245,7 @@ export function findBlock(blocks: MemorialBlock[], blockId: string): MemorialBlo
 
 /**
  * Check if blocks array contains a block with the given stream ID
+ * @deprecated Used only by the deprecated blocks/sync API. No longer called from UI.
  */
 export function hasStreamBlock(blocks: MemorialBlock[], streamId: string): boolean {
 	return blocks.some(

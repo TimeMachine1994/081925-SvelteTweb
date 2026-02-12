@@ -12,9 +12,11 @@
 		onEdit: (block: MemorialBlock) => void;
 		onToggle: (blockId: string, enabled: boolean) => void;
 		onDelete: (blockId: string) => void;
+		onMoveUp?: (blockId: string) => void;
+		onMoveDown?: (blockId: string) => void;
 	}
 
-	let { blocks, streams, findStream, onReorder, onEdit, onToggle, onDelete }: Props = $props();
+	let { blocks, streams, findStream, onReorder, onEdit, onToggle, onDelete, onMoveUp, onMoveDown }: Props = $props();
 
 	// Local copy for drag operations
 	let items = $state<MemorialBlock[]>([]);
@@ -43,7 +45,7 @@
 	onconsider={handleDndConsider}
 	onfinalize={handleDndFinalize}
 >
-	{#each items as block (block.id)}
+	{#each items as block, index (block.id)}
 		<div animate:flip={{ duration: flipDurationMs }} class="block-wrapper">
 			<BlockItem
 				{block}
@@ -51,6 +53,10 @@
 				onEdit={() => onEdit(block)}
 				onToggle={(enabled) => onToggle(block.id, enabled)}
 				onDelete={() => onDelete(block.id)}
+				onMoveUp={onMoveUp ? () => onMoveUp(block.id) : undefined}
+				onMoveDown={onMoveDown ? () => onMoveDown(block.id) : undefined}
+				isFirst={index === 0}
+				isLast={index === items.length - 1}
 			/>
 		</div>
 	{/each}
@@ -65,6 +71,6 @@
 	}
 
 	.block-wrapper {
-		/* Needed for drag animation */
+		min-height: 0;
 	}
 </style>

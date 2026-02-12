@@ -39,8 +39,7 @@
 	// Debug logging for embed data
 	onMount(() => {
 		console.log('🎨 [MEMORIAL PAGE] Client-side data loaded:', {
-			memorialId: memorial?.id,
-			hasEmergencyEmbed: !!memorial?.emergencyEmbed
+			memorialId: memorial?.id
 		});
 	});
 
@@ -313,24 +312,13 @@
 							<MemorialStreamDisplay 
 								streams={streams || []} 
 								memorialName={(memorial as any).customTitle || memorial.lovedOneName}
-								emergencyEmbed={memorial.emergencyEmbed}
-								emergencyChatEmbed={memorial.emergencyChatEmbed}
 							/>
 						{/if}
 					</div>
-					
-					<!-- Public Note Card -->
-					{#if (memorial as any).publicNote}
-						<div class="public-note-card">
-							<div class="public-note-content">
-								{@html (memorial as any).publicNote}
-							</div>
-						</div>
-					{/if}
 				</div>
 				
-				<!-- Legacy Custom HTML Content - Only show if no emergency embed -->
-				{#if !memorial.emergencyEmbed}
+				<!-- Legacy Custom HTML Content -->
+				{#if (memorial as any).custom_html}
 					<div class="memorial-content-container">
 						<div class="legacy-content">
 							{@html (memorial as any).custom_html}
@@ -432,20 +420,9 @@
 							<MemorialStreamDisplay 
 								streams={streams || []} 
 								memorialName={(memorial as any).customTitle || memorial.lovedOneName}
-								emergencyEmbed={memorial.emergencyEmbed}
-								emergencyChatEmbed={memorial.emergencyChatEmbed}
 							/>
 						{/if}
 					</div>
-					
-					<!-- Public Note Card -->
-					{#if (memorial as any).publicNote}
-						<div class="public-note-card">
-							<div class="public-note-content">
-								{@html (memorial as any).publicNote}
-							</div>
-						</div>
-					{/if}
 				</div>
 			</div>
 		{/if}
@@ -610,57 +587,6 @@
 		margin-bottom: 1.5rem;
 		font-family: 'Fanwood Text', serif;
 		font-style: italic;
-	}
-
-	/* Public Note Card - Gold transparent with ABeeZee font */
-	.public-note-card {
-		max-width: 1000px;
-		margin: 2rem auto 0 auto;
-		padding: 1.5rem 2rem;
-		background: rgba(213, 186, 127, 0.15);
-		border: 2px solid rgba(213, 186, 127, 0.4);
-		border-radius: 12px;
-		backdrop-filter: blur(8px);
-	}
-
-	.public-note-content {
-		font-family: 'ABeeZee', sans-serif;
-		font-size: 1.1rem;
-		line-height: 1.7;
-		color: #e0e0e0;
-		text-align: center;
-	}
-
-	.public-note-content :global(a) {
-		color: #D5BA7F;
-		text-decoration: underline;
-		transition: color 0.2s ease;
-	}
-
-	.public-note-content :global(a:hover) {
-		color: #f0d998;
-	}
-
-	.public-note-content :global(b),
-	.public-note-content :global(strong) {
-		color: #f5f5f5;
-		font-weight: 600;
-	}
-
-	.public-note-content :global(i),
-	.public-note-content :global(em) {
-		font-style: italic;
-	}
-
-	@media (max-width: 768px) {
-		.public-note-card {
-			margin: 1.5rem 1rem 0 1rem;
-			padding: 1rem 1.25rem;
-		}
-
-		.public-note-content {
-			font-size: 1rem;
-		}
 	}
 
 	.loading {

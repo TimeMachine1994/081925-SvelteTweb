@@ -1,3 +1,7 @@
+// DEPRECATED: This API is no longer called by the admin UI.
+// Orphan stream sync is no longer needed — streams are created via block editor only.
+// Retained for backward compatibility and one-time migration use.
+
 import { adminDb } from '$lib/server/firebase';
 import { error as svelteError, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';

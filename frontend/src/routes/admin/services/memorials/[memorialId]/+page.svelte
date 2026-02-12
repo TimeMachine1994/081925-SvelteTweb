@@ -35,38 +35,12 @@
 
 	const publicUrl = memorial.fullSlug ? `https://tributestream.com/${memorial.fullSlug}` : '';
 
-	// Stream creation state
-	let showStreamForm = $state(false);
-	let streamTitle = $state('');
-	let streamDate = $state('');
-	let streamTime = $state('');
-	let isCreatingStream = $state(false);
-
-	// Emergency embed state
-	let showEmergencyEmbed = $state(false);
-	let embedCode = $state('');
-	let embedTitle = $state('');
-	let isCreatingEmbed = $state(false);
-
-	// Emergency chat embed state
-	let showEmergencyChatEmbed = $state(false);
-	let chatEmbedCode = $state('');
-	let chatEmbedTitle = $state('');
-	let isCreatingChatEmbed = $state(false);
-
 	// Display settings state
 	let isEditingDisplay = $state(false);
 	let isSavingDisplay = $state(false);
 	let displayError = $state<string | null>(null);
 	let displaySuccess = $state<string | null>(null);
 	let customTitleInput = $state(memorial.customTitle || '');
-	let publicNoteInput = $state(memorial.publicNote || '');
-
-	// Video file embed state
-	let showVideoFileForm = $state(false);
-	let videoFileUrl = $state('');
-	let videoFileTitle = $state('');
-	let isAddingVideoFile = $state(false);
 
 	// Handle custom pricing updates
 	async function handlePricingUpdate() {
@@ -119,185 +93,6 @@
 		}
 	}
 
-	async function handleCreateStream() {
-		if (!streamTitle.trim()) {
-			alert('Please enter a stream title');
-			return;
-		}
-
-		if (!streamDate || !streamTime) {
-			alert('Please select a date and time');
-			return;
-		}
-
-		isCreatingStream = true;
-
-		try {
-			// Combine date and time into ISO format
-			const scheduledStartTime = `${streamDate}T${streamTime}:00`;
-
-			const response = await fetch(`/api/memorials/${memorial.id}/streams`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					title: streamTitle,
-					scheduledStartTime,
-					description: ''
-				})
-			});
-
-			if (response.ok) {
-				alert('Stream created successfully!');
-				// Reload the page to show the new stream
-				location.reload();
-			} else {
-				const error = await response.json();
-				alert(`Failed to create stream: ${error.message || 'Unknown error'}`);
-			}
-		} catch (error) {
-			console.error('Error creating stream:', error);
-			alert('An error occurred while creating the stream.');
-		} finally {
-			isCreatingStream = false;
-		}
-	}
-
-	function cancelStreamForm() {
-		showStreamForm = false;
-		streamTitle = '';
-		streamDate = '';
-		streamTime = '';
-	}
-
-	async function handleDeleteStream(streamId: string, streamTitle: string) {
-		const confirmMessage = `Are you sure you want to delete this livestream?\n\n"${streamTitle}"\n\nThis action cannot be undone.`;
-		
-		if (!confirm(confirmMessage)) {
-			return;
-		}
-
-		try {
-			const response = await fetch(`/api/streams/${streamId}/delete`, {
-				method: 'DELETE'
-			});
-
-			if (response.ok) {
-				alert('Livestream deleted successfully');
-				// Reload the page to show updated stream list
-				location.reload();
-			} else {
-				const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
-				alert(`Failed to delete livestream: ${errorData.message || 'Please try again.'}`);
-			}
-		} catch (error) {
-			console.error('Error deleting livestream:', error);
-			alert('An error occurred while deleting the livestream.');
-		}
-	}
-
-	async function handleCreateEmergencyEmbed() {
-		if (!embedCode.trim()) {
-			alert('Please enter an embed code or iframe URL');
-			return;
-		}
-
-		isCreatingEmbed = true;
-
-		try {
-			const response = await fetch(`/api/memorials/${memorial.id}/emergency-embed`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					embedCode: embedCode.trim(),
-					title: embedTitle.trim() || 'Emergency Embed'
-				})
-			});
-
-			if (response.ok) {
-				alert('Emergency embed created successfully! It will appear on the memorial page.');
-				location.reload();
-			} else {
-				const error = await response.json();
-				alert(`Failed to create embed: ${error.message || 'Unknown error'}`);
-			}
-		} catch (error) {
-			console.error('Error creating emergency embed:', error);
-			alert('An error occurred while creating the embed.');
-		} finally {
-			isCreatingEmbed = false;
-		}
-	}
-
-	function cancelEmbedForm() {
-		showEmergencyEmbed = false;
-		embedCode = '';
-		embedTitle = '';
-	}
-
-	// Emergency Chat Embed handlers
-	async function handleCreateEmergencyChatEmbed() {
-		if (!chatEmbedCode.trim()) {
-			alert('Please enter a chat embed code or iframe URL');
-			return;
-		}
-
-		isCreatingChatEmbed = true;
-		try {
-			const response = await fetch(`/api/memorials/${memorial.id}/emergency-chat-embed`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					embedCode: chatEmbedCode.trim(),
-					title: chatEmbedTitle.trim() || 'Live Chat'
-				})
-			});
-
-			if (response.ok) {
-				alert('Emergency chat embed created! It will now appear on the memorial page.');
-				showEmergencyChatEmbed = false;
-				chatEmbedCode = '';
-				chatEmbedTitle = '';
-				location.reload();
-			} else {
-				const error = await response.json();
-				alert(`Failed to create chat embed: ${error.message || 'Unknown error'}`);
-			}
-		} catch (error) {
-			console.error('Error creating emergency chat embed:', error);
-			alert('An error occurred while creating the chat embed.');
-		} finally {
-			isCreatingChatEmbed = false;
-		}
-	}
-
-	function cancelChatEmbedForm() {
-		showEmergencyChatEmbed = false;
-		chatEmbedCode = '';
-		chatEmbedTitle = '';
-	}
-
-	async function handleRemoveEmergencyChatEmbed() {
-		if (!confirm('Are you sure you want to remove the emergency chat embed? Normal chat will be displayed again.')) {
-			return;
-		}
-
-		try {
-			const response = await fetch(`/api/memorials/${memorial.id}/emergency-chat-embed`, {
-				method: 'DELETE'
-			});
-
-			if (response.ok) {
-				alert('Emergency chat embed removed.');
-				location.reload();
-			} else {
-				const error = await response.json();
-				alert(`Failed to remove chat embed: ${error.message || 'Unknown error'}`);
-			}
-		} catch (error) {
-			console.error('Error removing emergency chat embed:', error);
-			alert('An error occurred while removing the chat embed.');
-		}
-	}
 
 	// Display settings handlers
 	async function handleSaveDisplaySettings() {
@@ -310,8 +105,7 @@
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					customTitle: customTitleInput.trim(),
-					publicNote: publicNoteInput.trim()
+					customTitle: customTitleInput.trim()
 				})
 			});
 
@@ -337,12 +131,11 @@
 	function cancelDisplayEdit() {
 		isEditingDisplay = false;
 		customTitleInput = memorial.customTitle || '';
-		publicNoteInput = memorial.publicNote || '';
 		displayError = null;
 	}
 
 	async function clearDisplaySettings() {
-		if (!confirm('Clear custom title and public note? This will revert to defaults.')) {
+		if (!confirm('Clear custom title? This will revert to defaults.')) {
 			return;
 		}
 
@@ -360,7 +153,6 @@
 			}
 
 			customTitleInput = '';
-			publicNoteInput = '';
 			displaySuccess = 'Display settings cleared!';
 			isEditingDisplay = false;
 			await invalidateAll();
@@ -372,102 +164,6 @@
 			displayError = err.message || 'Failed to clear display settings';
 		} finally {
 			isSavingDisplay = false;
-		}
-	}
-
-	async function handleRemoveEmergencyEmbed() {
-		if (!confirm('Are you sure you want to remove the emergency embed? Normal streams will be displayed again.')) {
-			return;
-		}
-		
-		try {
-			const response = await fetch(`/api/memorials/${memorial.id}/emergency-embed`, {
-				method: 'DELETE'
-			});
-			
-			if (!response.ok) {
-				const error = await response.json();
-				alert(`Error: ${error.message}`);
-				return;
-			}
-			
-			alert('Emergency embed removed successfully!');
-			window.location.reload();
-		} catch (error) {
-			console.error('Error removing embed:', error);
-			alert('Failed to remove emergency embed. Please try again.');
-		}
-	}
-
-	// Video file embed handlers
-	async function handleAddVideoFile() {
-		if (!videoFileUrl.trim()) {
-			alert('Please enter a video URL');
-			return;
-		}
-
-		// Basic URL validation
-		if (!videoFileUrl.includes('storage.googleapis.com') && !videoFileUrl.includes('storage.cloud.google.com')) {
-			const proceed = confirm('This URL does not appear to be a Google Cloud Storage link. Continue anyway?');
-			if (!proceed) return;
-		}
-
-		isAddingVideoFile = true;
-
-		try {
-			const response = await fetch(`/api/memorials/${memorial.id}/video-file`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					url: videoFileUrl.trim(),
-					title: videoFileTitle.trim() || 'Video Recording'
-				})
-			});
-
-			if (response.ok) {
-				alert('Video file added successfully!');
-				showVideoFileForm = false;
-				videoFileUrl = '';
-				videoFileTitle = '';
-				location.reload();
-			} else {
-				const error = await response.json();
-				alert(`Failed to add video file: ${error.message || 'Unknown error'}`);
-			}
-		} catch (error) {
-			console.error('Error adding video file:', error);
-			alert('An error occurred while adding the video file.');
-		} finally {
-			isAddingVideoFile = false;
-		}
-	}
-
-	function cancelVideoFileForm() {
-		showVideoFileForm = false;
-		videoFileUrl = '';
-		videoFileTitle = '';
-	}
-
-	async function handleRemoveVideoFile() {
-		if (!confirm('Are you sure you want to remove this video file?')) {
-			return;
-		}
-
-		try {
-			const response = await fetch(`/api/memorials/${memorial.id}/video-file`, {
-				method: 'DELETE'
-			});
-
-			if (response.ok) {
-				alert('Video file removed successfully!');
-				location.reload();
-			} else {
-				const error = await response.json();
-				alert(`Failed to remove video file: ${error.message || 'Unknown error'}`);
-			}
-		} catch (error) {
-			console.error('Error removing video file:', error);
-			alert('An error occurred while removing the video file.');
 		}
 	}
 	
@@ -550,19 +246,6 @@
 					<p class="help-text">Leave blank to use "{memorial.lovedOneName}" as the title</p>
 				</div>
 
-				<div class="form-group">
-					<label for="public-note">Public Note (shown below livestream)</label>
-					<textarea
-						id="public-note"
-						bind:value={publicNoteInput}
-						placeholder="Add a note that will appear below the livestream player. Supports basic HTML for formatting (bold, italic, links)."
-						rows="4"
-						disabled={isSavingDisplay}
-						maxlength="5000"
-					></textarea>
-					<p class="help-text">This note appears in a styled card below the video player on the public memorial page. Supports HTML: &lt;b&gt;, &lt;i&gt;, &lt;a href="..."&gt;</p>
-				</div>
-
 				<div class="form-actions">
 					<button 
 						class="primary-btn" 
@@ -577,7 +260,7 @@
 					>
 						Cancel
 					</button>
-					{#if memorial.customTitle || memorial.publicNote}
+					{#if memorial.customTitle}
 						<button 
 							class="danger-btn-small"
 							onclick={clearDisplaySettings}
@@ -596,14 +279,6 @@
 						<span class="custom-value">{memorial.customTitle}</span>
 					{:else}
 						<span class="default-value">Using default: "{memorial.lovedOneName}"</span>
-					{/if}
-				</div>
-				<div class="preview-row">
-					<strong>Public Note:</strong>
-					{#if memorial.publicNote}
-						<div class="note-preview">{@html memorial.publicNote}</div>
-					{:else}
-						<span class="default-value">None set</span>
 					{/if}
 				</div>
 			</div>
@@ -627,309 +302,27 @@
 		/>
 	</div>
 
-	<div class="card">
-		<div class="section-header">
-			<h2>📹 Livestreams ({streams.length})</h2>
-			<div class="button-group">
+	<!-- Livestream Info (read-only reference — use block editor above to manage content) -->
+	{#if streams.length > 0}
+		<div class="card">
+			<div class="section-header">
+				<h2>� Livestreams ({streams.length})</h2>
 				<button 
 					class="switcher-btn" 
 					onclick={() => goto(`/admin/services/memorials/${memorial.id}/switcher`)}
 				>
 					🎬 Open Video Switcher
 				</button>
-				<button class="create-btn" onclick={() => showStreamForm = !showStreamForm}>
-					{showStreamForm ? '✖ Cancel' : '➕ Create Livestream'}
-				</button>
-				<button class="emergency-btn" onclick={() => showEmergencyEmbed = !showEmergencyEmbed}>
-					{showEmergencyEmbed ? '✖ Cancel' : '🚨 Emergency Video'}
-				</button>
-				<button class="chat-emergency-btn" onclick={() => showEmergencyChatEmbed = !showEmergencyChatEmbed}>
-					{showEmergencyChatEmbed ? '✖ Cancel' : '💬 Emergency Chat'}
-				</button>
-				<button class="video-file-btn" onclick={() => showVideoFileForm = !showVideoFileForm}>
-					{showVideoFileForm ? '✖ Cancel' : '📁 Add Video File'}
-				</button>
+			</div>
+			<div class="streams-grid">
+				{#each streams as stream}
+					<div class="stream-item">
+						<StreamCard {stream} canManage={true} memorialId={memorial.id} />
+					</div>
+				{/each}
 			</div>
 		</div>
-
-		{#if memorial.emergencyEmbed}
-			<div class="emergency-embed-active">
-				<div class="emergency-header">
-					<h3>🚨 Active Emergency Embed</h3>
-					<button class="danger-btn-small" onclick={handleRemoveEmergencyEmbed}>
-						🗑️ Remove
-					</button>
-				</div>
-				<p><strong>Title:</strong> {memorial.emergencyEmbed.title}</p>
-				<p class="embed-preview"><strong>Embed Code:</strong> {memorial.emergencyEmbed.embedCode.substring(0, 100)}...</p>
-				<p class="warning-text">⚠️ This embed is currently showing on the memorial page and overriding normal streams.</p>
-			</div>
-		{/if}
-
-		{#if showEmergencyEmbed}
-			<div class="emergency-form">
-				<h3>🚨 Emergency Embed Override</h3>
-				<p class="info-text">Use this to quickly embed an external stream (Vimeo, YouTube, etc.) that will appear immediately on the memorial page.</p>
-				
-				<div class="form-group">
-					<label for="embed-title">Title (optional)</label>
-					<input
-						id="embed-title"
-						type="text"
-						bind:value={embedTitle}
-						placeholder="e.g., Memorial Service Live Stream"
-						disabled={isCreatingEmbed}
-					/>
-				</div>
-
-				<div class="form-group">
-					<label for="embed-code">Embed Code or iframe URL *</label>
-					<textarea
-						id="embed-code"
-						bind:value={embedCode}
-						placeholder='Paste full iframe embed code or just the URL. Examples:
-<iframe src="https://vimeo.com/..." ...></iframe>
-or
-https://player.vimeo.com/video/123456789'
-						rows="6"
-						disabled={isCreatingEmbed}
-					></textarea>
-				</div>
-
-				<div class="warning-box">
-					<strong>⚠️ Warning:</strong> This will override normal streams and display immediately on the memorial page.
-					Use for emergency situations only.
-				</div>
-
-				<div class="form-actions">
-					<button 
-						class="emergency-btn" 
-						onclick={handleCreateEmergencyEmbed}
-						disabled={isCreatingEmbed}
-					>
-						{isCreatingEmbed ? '⏳ Creating...' : '🚨 Activate Emergency Embed'}
-					</button>
-					<button 
-						onclick={cancelEmbedForm}
-						disabled={isCreatingEmbed}
-					>
-						Cancel
-					</button>
-				</div>
-			</div>
-		{/if}
-
-		{#if (memorial as any).emergencyChatEmbed}
-			<div class="emergency-embed-active chat-embed">
-				<div class="emergency-header">
-					<h3>💬 Active Emergency Chat Embed</h3>
-					<button class="danger-btn-small" onclick={handleRemoveEmergencyChatEmbed}>
-						🗑️ Remove
-					</button>
-				</div>
-				<p><strong>Title:</strong> {(memorial as any).emergencyChatEmbed.title || 'Live Chat'}</p>
-				<p class="embed-preview"><strong>Embed Code:</strong> {(memorial as any).emergencyChatEmbed.embedCode.substring(0, 100)}...</p>
-				<p class="warning-text">⚠️ This chat embed is currently overriding normal chat on the memorial page.</p>
-			</div>
-		{/if}
-
-		{#if showEmergencyChatEmbed}
-			<div class="emergency-form chat-form">
-				<h3>💬 Emergency Chat Embed</h3>
-				<p class="info-text">Use this to quickly embed an external chat (YouTube Live Chat, etc.) that will replace the normal chat widget.</p>
-				
-				<div class="form-group">
-					<label for="chat-embed-title">Title (optional)</label>
-					<input
-						id="chat-embed-title"
-						type="text"
-						bind:value={chatEmbedTitle}
-						placeholder="e.g., Live Chat"
-						disabled={isCreatingChatEmbed}
-					/>
-				</div>
-
-				<div class="form-group">
-					<label for="chat-embed-code">Chat Embed Code or iframe URL *</label>
-					<textarea
-						id="chat-embed-code"
-						bind:value={chatEmbedCode}
-						placeholder='Paste chat embed iframe. Example:
-<iframe src="https://www.youtube.com/live_chat?v=VIDEO_ID&embed_domain=YOUR_DOMAIN" ...></iframe>'
-						rows="4"
-						disabled={isCreatingChatEmbed}
-					></textarea>
-				</div>
-
-				<div class="form-actions">
-					<button 
-						class="chat-emergency-btn" 
-						onclick={handleCreateEmergencyChatEmbed}
-						disabled={isCreatingChatEmbed}
-					>
-						{isCreatingChatEmbed ? '⏳ Creating...' : '💬 Activate Chat Embed'}
-					</button>
-					<button 
-						onclick={cancelChatEmbedForm}
-						disabled={isCreatingChatEmbed}
-					>
-						Cancel
-					</button>
-				</div>
-			</div>
-		{/if}
-
-		{#if (memorial as any).videoFile}
-			<div class="video-file-active">
-				<div class="emergency-header">
-					<h3>📁 Active Video File</h3>
-					<button class="danger-btn-small" onclick={handleRemoveVideoFile}>
-						🗑️ Remove
-					</button>
-				</div>
-				<p><strong>Title:</strong> {(memorial as any).videoFile.title}</p>
-				<div class="video-preview">
-					<video 
-						controls 
-						preload="metadata"
-						class="video-player"
-					>
-						<source src={(memorial as any).videoFile.url} type="video/mp4" />
-						Your browser does not support the video tag.
-					</video>
-				</div>
-				<div class="video-actions">
-					<a 
-						href={(memorial as any).videoFile.url} 
-						download 
-						target="_blank"
-						class="download-btn"
-					>
-						⬇️ Download Video
-					</a>
-				</div>
-			</div>
-		{/if}
-
-		{#if showVideoFileForm}
-			<div class="video-file-form">
-				<h3>📁 Add Video File</h3>
-				<p class="info-text">Add a video file from Google Cloud Storage. This will be displayed on the memorial page with a download button.</p>
-				
-				<div class="form-group">
-					<label for="video-title">Video Title</label>
-					<input
-						id="video-title"
-						type="text"
-						bind:value={videoFileTitle}
-						placeholder="e.g., Memorial Service Recording"
-						disabled={isAddingVideoFile}
-					/>
-				</div>
-
-				<div class="form-group">
-					<label for="video-url">Google Cloud Storage URL *</label>
-					<input
-						id="video-url"
-						type="url"
-						bind:value={videoFileUrl}
-						placeholder="https://storage.googleapis.com/bucket-name/video.mp4"
-						disabled={isAddingVideoFile}
-					/>
-					<p class="help-text">Paste the public URL of the MP4 file from Google Cloud Storage</p>
-				</div>
-
-				<div class="form-actions">
-					<button 
-						class="video-file-btn" 
-						onclick={handleAddVideoFile}
-						disabled={isAddingVideoFile}
-					>
-						{isAddingVideoFile ? '⏳ Adding...' : '📁 Add Video File'}
-					</button>
-					<button 
-						onclick={cancelVideoFileForm}
-						disabled={isAddingVideoFile}
-					>
-						Cancel
-					</button>
-				</div>
-			</div>
-		{/if}
-
-		{#if showStreamForm}
-			<div class="stream-form">
-				<h3>Create New Livestream</h3>
-				<div class="form-group">
-					<label for="stream-title">Title *</label>
-					<input
-						id="stream-title"
-						type="text"
-						bind:value={streamTitle}
-						placeholder="Enter stream title (e.g., Memorial Service for {memorial.lovedOneName})"
-						disabled={isCreatingStream}
-					/>
-				</div>
-
-				<div class="form-row">
-					<div class="form-group">
-						<label for="stream-date">Date *</label>
-						<input
-							id="stream-date"
-							type="date"
-							bind:value={streamDate}
-							disabled={isCreatingStream}
-						/>
-					</div>
-
-					<div class="form-group">
-						<label for="stream-time">Time *</label>
-						<input
-							id="stream-time"
-							type="time"
-							bind:value={streamTime}
-							disabled={isCreatingStream}
-						/>
-					</div>
-				</div>
-
-				<div class="form-actions">
-					<button 
-						class="primary-btn" 
-						onclick={handleCreateStream}
-						disabled={isCreatingStream}
-					>
-						{isCreatingStream ? '⏳ Creating...' : '📅 Schedule Stream'}
-					</button>
-					<button 
-						onclick={cancelStreamForm}
-						disabled={isCreatingStream}
-					>
-						Cancel
-					</button>
-				</div>
-			</div>
-		{/if}
-
-		{#if streams.length === 0 && !showStreamForm}
-			<p class="empty-message">No livestreams yet. Click "Create Livestream" to add one.</p>
-		{/if}
-
-		<div class="streams-grid">
-			{#each streams as stream}
-				<div class="stream-item">
-					<StreamCard {stream} canManage={true} memorialId={memorial.id} />
-					<button 
-						class="delete-stream-btn" 
-						onclick={() => handleDeleteStream(stream.id, stream.title)}
-						title="Delete this livestream"
-					>
-						🗑️ Delete Stream
-					</button>
-				</div>
-			{/each}
-		</div>
-	</div>
+	{/if}
 
 	<!-- Chat Moderation Section -->
 	{#if streams.length > 0}
@@ -1017,16 +410,8 @@ https://player.vimeo.com/video/123456789'
 	button:disabled { opacity: 0.5; cursor: not-allowed; }
 	button.danger-btn { background: #e53e3e; color: white; border-color: #e53e3e; }
 	button.danger-btn:hover { background: #c53030; }
-	button.create-btn { background: #3182ce; color: white; border-color: #3182ce; }
-	button.create-btn:hover { background: #2c5282; }
 	button.primary-btn { background: #3182ce; color: white; border-color: #3182ce; font-weight: 600; }
 	button.primary-btn:hover { background: #2c5282; }
-	button.emergency-btn { background: #e53e3e; color: white; border-color: #e53e3e; font-weight: 600; }
-	button.emergency-btn:hover { background: #c53030; }
-	button.chat-emergency-btn { background: #7c3aed; color: white; border-color: #7c3aed; font-weight: 600; }
-	button.chat-emergency-btn:hover { background: #6d28d9; }
-	button.video-file-btn { background: #2563eb; color: white; border-color: #2563eb; font-weight: 600; }
-	button.video-file-btn:hover { background: #1d4ed8; }
 	button.switcher-btn { background: #805ad5; color: white; border-color: #805ad5; font-weight: 600; }
 	button.switcher-btn:hover { background: #6b46c1; }
 	button.danger-btn-small { background: #e53e3e; color: white; border-color: #e53e3e; padding: 0.375rem 0.75rem; font-size: 0.875rem; }
@@ -1036,47 +421,12 @@ https://player.vimeo.com/video/123456789'
 	.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
 	.section-header h2 { margin: 0; }
 	.section-subtitle { margin: 0; font-size: 0.875rem; color: #718096; width: 100%; }
-	.button-group { display: flex; gap: 0.5rem; }
 
-	/* Stream form */
-	.stream-form { background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 1rem; }
-	.stream-form h3 { margin: 0 0 1rem 0; font-size: 1.125rem; color: #2d3748; }
-	
-	/* Emergency embed form */
-	.emergency-form { background: #f7fafc; border: 1px solid #cbd5e0; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 1rem; }
-	.emergency-form h3 { margin: 0 0 0.5rem 0; font-size: 1.125rem; color: #2d3748; }
-	.info-text { color: #4a5568; font-size: 0.875rem; margin-bottom: 1rem; }
-	.warning-box { background: #fed7d7; border: 1px solid #fc8181; border-radius: 0.375rem; padding: 0.75rem; margin-top: 1rem; margin-bottom: 1rem; color: #742a2a; font-size: 0.875rem; }
-	
-	/* Active emergency embed display */
-	.emergency-embed-active { background: #f7fafc; border: 1px solid #cbd5e0; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem; }
-	.emergency-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
-	.emergency-header h3 { margin: 0; font-size: 1rem; color: #2d3748; }
-	.emergency-embed-active p { margin: 0.5rem 0; font-size: 0.875rem; color: #4a5568; }
-	.embed-preview { font-family: monospace; font-size: 0.75rem; background: white; padding: 0.5rem; border-radius: 0.25rem; word-break: break-all; }
-	.warning-text { font-weight: 600; color: #c53030; margin-top: 0.75rem; }
-
-	/* Video file form and display */
-	.video-file-form { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 1rem; }
-	.video-file-form h3 { margin: 0 0 0.5rem 0; font-size: 1.125rem; color: #1e40af; }
-	.video-file-active { background: #f0fdf4; border: 1px solid #86efac; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem; }
-	.video-preview { margin: 1rem 0; }
-	.video-player { width: 100%; max-width: 640px; border-radius: 0.5rem; background: #000; }
-	.video-actions { margin-top: 1rem; }
-	.download-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.25rem; background: #059669; color: white; text-decoration: none; border-radius: 0.5rem; font-weight: 600; font-size: 0.875rem; transition: background 0.2s; }
-	.download-btn:hover { background: #047857; }
-	
 	.form-group { margin-bottom: 1rem; }
 	.form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #4a5568; font-size: 0.875rem; }
 	.form-group input { width: 100%; padding: 0.625rem; border: 1px solid #cbd5e0; border-radius: 0.375rem; font-size: 0.875rem; }
 	.form-group input:focus { outline: none; border-color: #3182ce; box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1); }
 	.form-group input:disabled { background: #edf2f7; cursor: not-allowed; }
-	.form-group textarea { width: 100%; padding: 0.625rem; border: 1px solid #cbd5e0; border-radius: 0.375rem; font-size: 0.875rem; font-family: monospace; resize: vertical; }
-	.form-group textarea:focus { outline: none; border-color: #3182ce; box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1); }
-	.form-group textarea:disabled { background: #edf2f7; cursor: not-allowed; }
-	
-	.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-	
 	.form-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
 	.form-actions button { flex: 0 0 auto; }
 
@@ -1084,38 +434,11 @@ https://player.vimeo.com/video/123456789'
 	
 	.streams-grid { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1rem; }
 	
-	/* Stream item with delete button */
 	.stream-item { 
-		position: relative; 
 		border: 1px solid #e2e8f0; 
 		border-radius: 0.5rem; 
 		padding: 1rem; 
 		background: white; 
-	}
-	
-	.delete-stream-btn { 
-		position: absolute; 
-		top: 1rem; 
-		right: 1rem; 
-		padding: 0.5rem 0.75rem; 
-		background: #e53e3e; 
-		color: white; 
-		border: 1px solid #c53030; 
-		border-radius: 0.375rem; 
-		font-size: 0.875rem; 
-		cursor: pointer; 
-		transition: all 0.2s; 
-		z-index: 10;
-	}
-	
-	.delete-stream-btn:hover { 
-		background: #c53030; 
-		transform: translateY(-1px); 
-		box-shadow: 0 2px 4px rgba(197, 48, 48, 0.2); 
-	}
-	
-	.delete-stream-btn:active { 
-		transform: translateY(0); 
 	}
 	
 	/* Chat panels */
@@ -1275,17 +598,6 @@ https://player.vimeo.com/video/123456789'
 		font-style: italic;
 	}
 
-	.note-preview {
-		background: #f7fafc;
-		border: 1px solid #e2e8f0;
-		border-radius: 0.375rem;
-		padding: 0.75rem;
-		font-size: 0.875rem;
-		color: #2d3748;
-		flex: 1;
-		min-width: 200px;
-	}
-
 	.success-message {
 		background: #c6f6d5;
 		border: 1px solid #9ae6b4;
@@ -1313,149 +625,6 @@ https://player.vimeo.com/video/123456789'
 		font-style: italic;
 	}
 	
-	/* Modal styles */
-	.modal-overlay {
-		position: fixed;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		background: rgba(0, 0, 0, 0.6);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		z-index: 9999;
-		padding: 1rem;
-	}
-	
-	.modal-content {
-		background: white;
-		border-radius: 0.5rem;
-		box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-		max-width: 700px;
-		width: 100%;
-		max-height: 90vh;
-		overflow: hidden;
-		display: flex;
-		flex-direction: column;
-	}
-	
-	.modal-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 1.5rem;
-		border-bottom: 1px solid #e2e8f0;
-	}
-	
-	.modal-header h3 {
-		margin: 0;
-		font-size: 1.25rem;
-		color: #2d3748;
-	}
-	
-	.close-btn {
-		background: none;
-		border: none;
-		font-size: 1.5rem;
-		color: #718096;
-		cursor: pointer;
-		padding: 0.25rem 0.5rem;
-		line-height: 1;
-		transition: color 0.2s;
-	}
-	
-	.close-btn:hover {
-		color: #2d3748;
-		background: none;
-	}
-	
-	.modal-body {
-		padding: 1.5rem;
-		overflow-y: auto;
-		flex: 1;
-	}
-	
-	.info-section {
-		background: #f7fafc;
-		border: 1px solid #e2e8f0;
-		border-radius: 0.375rem;
-		padding: 1rem;
-		margin-bottom: 1.5rem;
-	}
-	
-	.info-section p {
-		margin: 0.5rem 0;
-		font-size: 0.875rem;
-		color: #2d3748;
-	}
-	
-	.info-section p:first-child {
-		margin-top: 0;
-	}
-	
-	.info-section p:last-child {
-		margin-bottom: 0;
-	}
-	
-	.code-section {
-		margin-top: 1.5rem;
-	}
-	
-	.code-section label {
-		display: block;
-		margin-bottom: 0.5rem;
-		font-size: 0.875rem;
-		color: #4a5568;
-	}
-	
-	.code-textarea {
-		width: 100%;
-		min-height: 200px;
-		padding: 0.75rem;
-		border: 1px solid #cbd5e0;
-		border-radius: 0.375rem;
-		font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
-		font-size: 0.8125rem;
-		line-height: 1.5;
-		background: #f7fafc;
-		color: #2d3748;
-		resize: vertical;
-	}
-	
-	.code-textarea:focus {
-		outline: none;
-		border-color: #3182ce;
-		box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
-		background: white;
-	}
-	
-	.help-text {
-		margin: 0.5rem 0 0 0;
-		font-size: 0.75rem;
-		color: #718096;
-		font-style: italic;
-	}
-	
-	.modal-footer {
-		padding: 1rem 1.5rem;
-		border-top: 1px solid #e2e8f0;
-		display: flex;
-		justify-content: flex-end;
-		gap: 0.75rem;
-	}
-	
-	button.secondary-btn {
-		background: #718096;
-		color: white;
-		border-color: #718096;
-		padding: 0.5rem 1.5rem;
-	}
-	
-	button.secondary-btn:hover {
-		background: #4a5568;
-	}
-
 	/* Clickable owner link styling */
 	button.owner-link {
 		background: none;

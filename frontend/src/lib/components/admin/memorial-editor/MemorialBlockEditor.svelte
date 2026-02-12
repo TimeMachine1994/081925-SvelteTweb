@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { MemorialBlock, BlockType, EmbedConfig, TextConfig, LivestreamConfig } from '$lib/types/memorial-blocks';
-	import { sortBlocksByOrder, hasStreamBlock } from '$lib/utils/block-utils';
+	import { sortBlocksByOrder } from '$lib/utils/block-utils';
 	import BlockList from './BlockList.svelte';
 	import BlockToolbar from './BlockToolbar.svelte';
 	import AddBlockModal from './modals/AddBlockModal.svelte';
@@ -22,18 +22,12 @@
 	let editingBlock = $state<MemorialBlock | null>(null);
 	let showAddModal = $state(false);
 	let isSaving = $state(false);
-	let isSyncing = $state(false);
 	let saveStatus = $state<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
 	// Find stream data for a livestream block
 	function findStream(streamId: string) {
 		return streams.find(s => s.id === streamId);
 	}
-
-	// Calculate orphan streams (streams without blocks)
-	let orphanCount = $derived(() => {
-		return streams.filter(s => !hasStreamBlock(blocks, s.id)).length;
-	});
 
 	// Handle reorder from drag-and-drop
 	async function handleReorder(newOrder: string[]) {
@@ -204,44 +198,28 @@
 		}
 	}
 
-	// Handle sync orphan streams to blocks
-	async function handleSync() {
-		isSyncing = true;
-		saveStatus = 'saving';
+	// Handle move up
+	function handleMoveUp(blockId: string) {
+		const idx = blocks.findIndex(b => b.id === blockId);
+		if (idx <= 0) return;
+		const newOrder = blocks.map(b => b.id);
+		[newOrder[idx - 1], newOrder[idx]] = [newOrder[idx], newOrder[idx - 1]];
+		handleReorder(newOrder);
+	}
 
-		try {
-			const response = await fetch(`/api/memorials/${memorialId}/blocks/sync`, {
-				method: 'POST'
-			});
-
-			if (!response.ok) {
-				throw new Error('Failed to sync streams');
-			}
-
-			const data = await response.json();
-			blocks = sortBlocksByOrder(data.blocks);
-			saveStatus = 'saved';
-			setTimeout(() => saveStatus = 'idle', 2000);
-			
-			console.log(`✅ Synced ${data.created} stream(s) to blocks`);
-			onSave?.();
-		} catch (err) {
-			console.error('Error syncing streams:', err);
-			saveStatus = 'error';
-		} finally {
-			isSyncing = false;
-		}
+	// Handle move down
+	function handleMoveDown(blockId: string) {
+		const idx = blocks.findIndex(b => b.id === blockId);
+		if (idx < 0 || idx >= blocks.length - 1) return;
+		const newOrder = blocks.map(b => b.id);
+		[newOrder[idx], newOrder[idx + 1]] = [newOrder[idx + 1], newOrder[idx]];
+		handleReorder(newOrder);
 	}
 </script>
 
 <div class="block-editor">
 	<div class="editor-header">
-		<BlockToolbar 
-			onAdd={() => showAddModal = true} 
-			orphanCount={orphanCount()}
-			onSync={handleSync}
-			{isSyncing}
-		/>
+		<BlockToolbar onAdd={() => showAddModal = true} />
 		<div class="save-status" class:saving={saveStatus === 'saving'} class:saved={saveStatus === 'saved'} class:error={saveStatus === 'error'}>
 			{#if saveStatus === 'saving'}
 				⏳ Saving...
@@ -267,6 +245,8 @@
 			onEdit={handleEdit}
 			onToggle={handleToggle}
 			onDelete={handleDelete}
+			onMoveUp={handleMoveUp}
+			onMoveDown={handleMoveDown}
 		/>
 	{/if}
 </div>

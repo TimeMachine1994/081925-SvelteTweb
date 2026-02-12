@@ -149,7 +149,19 @@ export interface Memorial {
 
 	// Admin display overrides
 	customTitle?: string; // Override for the memorial page title (replaces lovedOneName in display)
-	publicNote?: string; // Rich text note shown below livestream on public page
+	/** @deprecated Use contentBlocks with type 'text' instead */
+	publicNote?: string;
+
+	// Content blocks (block editor)
+	contentBlocks?: any[];
+	contentBlocksVersion?: number;
+
+	/** @deprecated Use contentBlocks with type 'embed' instead */
+	emergencyEmbed?: { embedCode: string; title: string; createdAt: string; createdBy: string; createdByEmail?: string } | null;
+	/** @deprecated Use contentBlocks with type 'embed' (embedType: chat) instead */
+	emergencyChatEmbed?: { embedCode: string; title?: string; createdAt: string; createdBy: string } | null;
+	/** @deprecated Use contentBlocks with type 'embed' instead */
+	videoFile?: { url: string; title: string; createdAt: string; createdBy: string } | null;
 }
 
 export interface ManualPaymentInfo {

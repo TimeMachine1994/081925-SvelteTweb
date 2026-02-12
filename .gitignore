@@ -12,6 +12,9 @@
 firebase-adminsdk-*.json
 service-account-*.json
 
+# Google Cloud service account credentials
+gen-lang-client-*.json
+
 # Scripts directory sensitive files
 scripts/*firebase*.json
 scripts/*adminsdk*.json

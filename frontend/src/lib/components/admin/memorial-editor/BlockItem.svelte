@@ -11,9 +11,13 @@
 		onEdit: () => void;
 		onToggle: (enabled: boolean) => void;
 		onDelete: () => void;
+		onMoveUp?: () => void;
+		onMoveDown?: () => void;
+		isFirst?: boolean;
+		isLast?: boolean;
 	}
 
-	let { block, stream, onEdit, onToggle, onDelete }: Props = $props();
+	let { block, stream, onEdit, onToggle, onDelete, onMoveUp, onMoveDown, isFirst = false, isLast = false }: Props = $props();
 
 	function getBlockTitle(): string {
 		switch (block.type) {
@@ -58,6 +62,28 @@
 	</div>
 
 	<div class="block-actions">
+		{#if onMoveUp}
+			<button
+				class="action-btn move-btn"
+				onclick={onMoveUp}
+				disabled={isFirst}
+				title="Move up"
+			>
+				▲
+			</button>
+		{/if}
+
+		{#if onMoveDown}
+			<button
+				class="action-btn move-btn"
+				onclick={onMoveDown}
+				disabled={isLast}
+				title="Move down"
+			>
+				▼
+			</button>
+		{/if}
+
 		<button
 			class="action-btn toggle-btn"
 			class:enabled={block.enabled}
@@ -212,5 +238,21 @@
 
 	.delete-btn:hover {
 		background: #fed7d7;
+	}
+
+	.move-btn {
+		border-bottom: 1px solid #e2e8f0;
+		font-size: 0.75rem;
+		color: #718096;
+	}
+
+	.move-btn:hover:not(:disabled) {
+		background: #ebf8ff;
+		color: #3182ce;
+	}
+
+	.move-btn:disabled {
+		opacity: 0.3;
+		cursor: not-allowed;
 	}
 </style>
