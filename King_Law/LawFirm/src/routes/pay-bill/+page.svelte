@@ -89,22 +89,22 @@
 	</section>
 
 	<!-- Payment Form -->
-	<section class="py-24 bg-white">
+	<section class="py-24 bg-white dark:bg-background">
 		<div class="max-w-6xl mx-auto px-6 lg:px-8">
 			<div class="grid lg:grid-cols-12 gap-16">
 				<!-- Form Column -->
 				<div class="lg:col-span-7">
 					<p class="text-gold uppercase tracking-[0.3em] text-sm mb-4">Payment Details</p>
-					<h2 class="font-title text-3xl text-king-blue mb-8">Enter Your Information</h2>
+					<h2 class="font-title text-3xl text-king-blue dark:text-white mb-8">Enter Your Information</h2>
 
 					{#if error}
-						<div class="bg-red-50 border-l-4 border-red-500 text-red-800 px-6 py-4 rounded-r-lg mb-6">
+						<div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 text-red-800 dark:text-red-200 px-6 py-4 rounded-r-lg mb-6">
 							{error}
 						</div>
 					{/if}
 
 					{#if paymentLink}
-						<div class="bg-green-50 border-l-4 border-green-500 text-green-800 px-6 py-4 rounded-r-lg mb-6">
+						<div class="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 text-green-800 dark:text-green-200 px-6 py-4 rounded-r-lg mb-6">
 							<p class="font-semibold">Payment link created! Redirecting to Square checkout...</p>
 							<a href={paymentLink} class="underline mt-1 inline-block">Click here if not redirected</a>
 						</div>
@@ -119,9 +119,9 @@
 					>
 						<!-- Amount -->
 						<div>
-							<label for="amount" class="block text-sm font-medium text-king-blue mb-2">Payment Amount *</label>
+							<label for="amount" class="block text-sm font-medium text-king-blue dark:text-white mb-2">Payment Amount *</label>
 							<div class="relative">
-								<span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-medium">$</span>
+								<span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white/50 font-medium">$</span>
 								<input
 									type="number"
 									id="amount"
@@ -130,55 +130,55 @@
 									bind:value={amount}
 									required
 									placeholder="0.00"
-									class="w-full pl-8 pr-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none text-lg font-semibold"
+									class="w-full pl-8 pr-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-gray-50 dark:bg-card dark:text-foreground focus:bg-white dark:focus:bg-card focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none text-lg font-semibold"
 								/>
 							</div>
 						</div>
 
 						<div class="grid md:grid-cols-2 gap-6">
 							<div>
-								<label for="name" class="block text-sm font-medium text-king-blue mb-2">Full Name *</label>
+								<label for="name" class="block text-sm font-medium text-king-blue dark:text-white mb-2">Full Name *</label>
 								<input
 									type="text"
 									id="name"
 									bind:value={name}
 									required
 									placeholder="Jane Doe"
-									class="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
+									class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-gray-50 dark:bg-card dark:text-foreground focus:bg-white dark:focus:bg-card focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
 								/>
 							</div>
 							<div>
-								<label for="phone" class="block text-sm font-medium text-king-blue mb-2">Phone Number</label>
+								<label for="phone" class="block text-sm font-medium text-king-blue dark:text-white mb-2">Phone Number</label>
 								<input
 									type="tel"
 									id="phone"
 									bind:value={phone}
 									placeholder="(555) 555-5555"
-									class="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
+									class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-gray-50 dark:bg-card dark:text-foreground focus:bg-white dark:focus:bg-card focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
 								/>
 							</div>
 						</div>
 
 						<div>
-							<label for="email" class="block text-sm font-medium text-king-blue mb-2">Email Address</label>
+							<label for="email" class="block text-sm font-medium text-king-blue dark:text-white mb-2">Email Address</label>
 							<input
 								type="email"
 								id="email"
 								bind:value={email}
 								placeholder="jane@example.com"
-								class="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
+								class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-gray-50 dark:bg-card dark:text-foreground focus:bg-white dark:focus:bg-card focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
 							/>
-							<p class="text-xs text-gray-400 mt-1">Please provide either an email or phone number.</p>
+							<p class="text-xs text-gray-400 dark:text-white/50 mt-1">Please provide either an email or phone number.</p>
 						</div>
 
 						<div>
-							<label for="memo" class="block text-sm font-medium text-king-blue mb-2">Memo / Invoice # <span class="text-gray-400 font-normal">(optional)</span></label>
+							<label for="memo" class="block text-sm font-medium text-king-blue dark:text-white mb-2">Memo / Invoice # <span class="text-gray-400 dark:text-white/50 font-normal">(optional)</span></label>
 							<input
 								type="text"
 								id="memo"
 								bind:value={memo}
 								placeholder="e.g. Invoice #1234 or case reference"
-								class="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
+								class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-gray-50 dark:bg-card dark:text-foreground focus:bg-white dark:focus:bg-card focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
 							/>
 						</div>
 

@@ -178,7 +178,7 @@
 										</div>
 										<button 
 											onclick={() => hideClient(client.id)}
-											class="text-gray-400 hover:text-red-500 p-1 shrink-0"
+											class="text-gray-400 dark:text-muted-foreground hover:text-red-500 p-1 shrink-0"
 											title="Hide"
 										><X class="w-4 h-4" /></button>
 									</div>

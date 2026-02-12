@@ -37,7 +37,7 @@
 	</div>
 
 	<!-- Right Panel - Login Form -->
-	<div class="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
+	<div class="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white dark:bg-background">
 		<div class="w-full max-w-md">
 			<!-- Mobile Logo -->
 			<div class="lg:hidden flex items-center gap-3 mb-8 justify-center">
@@ -46,36 +46,36 @@
 
 			<div class="mb-8">
 				<p class="text-gold uppercase tracking-[0.3em] text-sm mb-4">Client Portal</p>
-				<h1 class="font-title text-4xl text-king-blue mb-2">Sign In</h1>
-				<p class="text-gray-500">Enter your credentials to access your account</p>
+				<h1 class="font-title text-4xl text-king-blue dark:text-white mb-2">Sign In</h1>
+				<p class="text-gray-500 dark:text-white/60">Enter your credentials to access your account</p>
 			</div>
 
 			<form onsubmit={handleSubmit} class="space-y-6">
 				{#if error}
-					<div class="bg-red-50 border-l-4 border-red-500 text-red-800 px-6 py-4 rounded-r-lg">
+					<div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 text-red-800 dark:text-red-200 px-6 py-4 rounded-r-lg">
 						{error}
 					</div>
 				{/if}
 
 				<div>
-					<label for="email" class="block text-sm font-medium text-king-blue mb-2">Email</label>
+					<label for="email" class="block text-sm font-medium text-king-blue dark:text-white mb-2">Email</label>
 					<input
 						type="email"
 						id="email"
 						bind:value={email}
 						required
-						class="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
+						class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-gray-50 dark:bg-card dark:text-foreground focus:bg-white dark:focus:bg-card focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
 					/>
 				</div>
 
 				<div>
-					<label for="password" class="block text-sm font-medium text-king-blue mb-2">Password</label>
+					<label for="password" class="block text-sm font-medium text-king-blue dark:text-white mb-2">Password</label>
 					<input
 						type="password"
 						id="password"
 						bind:value={password}
 						required
-						class="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
+						class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-gray-50 dark:bg-card dark:text-foreground focus:bg-white dark:focus:bg-card focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
 					/>
 				</div>
 
@@ -87,14 +87,14 @@
 					{authStore.loading ? 'Signing in...' : 'Sign In'}
 				</button>
 
-				<p class="text-center text-gray-500">
+				<p class="text-center text-gray-500 dark:text-white/60">
 					Don't have an account?
 					<a href="/register" class="text-gold hover:text-gold-dark font-semibold">Create one</a>
 				</p>
 			</form>
 
-			<div class="mt-12 pt-8 border-t border-gray-100 text-center">
-				<a href="/" class="text-gray-400 hover:text-king-blue transition-colors text-sm">
+			<div class="mt-12 pt-8 border-t border-gray-100 dark:border-white/10 text-center">
+				<a href="/" class="text-gray-400 dark:text-white/50 hover:text-king-blue dark:hover:text-gold transition-colors text-sm">
 					← Back to Homepage
 				</a>
 			</div>

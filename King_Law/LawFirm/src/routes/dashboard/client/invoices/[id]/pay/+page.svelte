@@ -221,7 +221,7 @@
 							{#if paymentMode === 'partial'}
 								<!-- svelte-ignore a11y_click_events_have_key_events -->
 							<div class="relative" onclick={(e) => e.stopPropagation()}>
-									<span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">$</span>
+									<span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-white/50 font-medium">$</span>
 									<input
 										type="number"
 										step="0.01"
@@ -229,7 +229,7 @@
 										max={remaining / 100}
 										bind:value={customAmount}
 										placeholder="0.00"
-										class="w-full pl-7 pr-4 py-3 border border-gray-200 rounded-lg bg-gray-50 focus:bg-white focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none text-lg font-semibold"
+										class="w-full pl-7 pr-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-gray-50 dark:bg-card dark:text-foreground focus:bg-white dark:focus:bg-card focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none text-lg font-semibold"
 									/>
 								</div>
 								{#if customAmount && !isValidAmount}

@@ -29,13 +29,13 @@
 					<h2 class="font-title text-3xl text-king-blue dark:text-white mb-8">Tell Us About Your Situation</h2>
 					
 					{#if form?.success}
-						<div class="bg-green-50 border-l-4 border-green-500 text-green-800 px-6 py-4 rounded-r-lg mb-6">
+						<div class="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 text-green-800 dark:text-green-200 px-6 py-4 rounded-r-lg mb-6">
 							Thank you for contacting us. We'll get back to you soon!
 						</div>
 					{/if}
 
 					{#if form?.error}
-						<div class="bg-red-50 border-l-4 border-red-500 text-red-800 px-6 py-4 rounded-r-lg mb-6">
+						<div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 text-red-800 dark:text-red-200 px-6 py-4 rounded-r-lg mb-6">
 							{form.error}
 						</div>
 					{/if}

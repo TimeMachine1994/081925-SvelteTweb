@@ -84,7 +84,7 @@
 						<h3 class="font-title text-2xl text-king-blue dark:text-white">Single Point of Accountability</h3>
 					</div>
 					<div class="md:col-span-7">
-						<p class="text-gray-500 dark:text-white/60 text-lg leading-relaxed">One attorney coordinates every matter, aligns with your outside advisors, and owns the whole picture so you never have to chase updates.</p>
+						<p class="text-gray-800 dark:text-white/60 text-lg leading-relaxed">One attorney coordinates every matter, aligns with your outside advisors, and owns the whole picture so you never have to chase updates.</p>
 					</div>
 				</div>
 
@@ -96,7 +96,7 @@
 						<h3 class="font-title text-2xl text-king-blue dark:text-white">Prevention Over Reaction</h3>
 					</div>
 					<div class="md:col-span-7">
-						<p class="text-gray-500 dark:text-white/60 text-lg leading-relaxed">We map risk proactively — reviewing contracts, structuring entities, and identifying exposure before problems surface.</p>
+						<p class="text-gray-800 dark:text-white/60 text-lg leading-relaxed">We map risk proactively — reviewing contracts, structuring entities, and identifying exposure before problems surface.</p>
 					</div>
 				</div>
 
@@ -108,7 +108,7 @@
 						<h3 class="font-title text-2xl text-king-blue dark:text-white">Transparent Process</h3>
 					</div>
 					<div class="md:col-span-7">
-						<p class="text-gray-500 dark:text-white/60 text-lg leading-relaxed">Clear fee structures, a secure client portal, and direct communication. You always know what's happening, what it costs, and what comes next.</p>
+						<p class="text-gray-800 dark:text-white/60 text-lg leading-relaxed">Clear fee structures, a secure client portal, and direct communication. You always know what's happening, what it costs, and what comes next.</p>
 					</div>
 				</div>
 			</div>
@@ -228,21 +228,21 @@
 			<div class="text-center mb-12">
 				<p class="text-gold uppercase tracking-[0.3em] text-sm mb-4">Get Started</p>
 				<h2 class="font-title text-4xl text-king-blue dark:text-white mb-6">Schedule a Free Consultation</h2>
-				<p class="text-gray-500 dark:text-white/60 text-lg max-w-2xl mx-auto leading-relaxed">
+				<p class="text-gray-800 dark:text-white/60 text-lg max-w-2xl mx-auto leading-relaxed">
 					Take the first step toward resolving your legal matter. Pick a time that works for you and book directly into our calendar.
 				</p>
 				<div class="flex flex-wrap gap-6 justify-center mt-8">
 					<div class="flex items-center gap-2">
 						<span class="text-gold text-lg">✓</span>
-						<span class="text-gray-600 dark:text-white/70 text-sm">No obligation</span>
+						<span class="text-gray-800 dark:text-white/70 text-sm">No obligation</span>
 					</div>
 					<div class="flex items-center gap-2">
 						<span class="text-gold text-lg">✓</span>
-						<span class="text-gray-600 dark:text-white/70 text-sm">100% confidential</span>
+						<span class="text-gray-800 dark:text-white/70 text-sm">100% confidential</span>
 					</div>
 					<div class="flex items-center gap-2">
 						<span class="text-gold text-lg">✓</span>
-						<span class="text-gray-600 dark:text-white/70 text-sm">Instant confirmation</span>
+						<span class="text-gray-800 dark:text-white/70 text-sm">Instant confirmation</span>
 					</div>
 				</div>
 			</div>
