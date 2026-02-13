@@ -6,7 +6,7 @@
 	import BookingReminderBanner from '$lib/components/BookingReminderBanner.svelte';
 	import { shouldShowBookingBanner, markBannerAsSeen, debugBannerState } from '$lib/utils/bookingBanner';
 	import { getEnabledBlocks } from '$lib/utils/block-utils';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { Facebook, Twitter, Linkedin, Share2, X } from 'lucide-svelte';
 	import { browser } from '$app/environment';
 
@@ -36,11 +36,51 @@
 	});
 	
 	
-	// Debug logging for embed data
-	onMount(() => {
+	// Force refresh listener — reloads page when admin triggers force refresh
+	let forceRefreshUnsub: (() => void) | null = null;
+	let initialForceRefreshAt: string | null = null;
+
+	onMount(async () => {
 		console.log('🎨 [MEMORIAL PAGE] Client-side data loaded:', {
 			memorialId: memorial?.id
 		});
+
+		// Setup force refresh listener on the memorial document
+		if (browser && memorial?.id) {
+			try {
+				const { db } = await import('$lib/firebase');
+				const { doc, onSnapshot } = await import('firebase/firestore');
+
+				const memorialRef = doc(db, 'memorials', memorial.id);
+				let isFirstSnapshot = true;
+
+				forceRefreshUnsub = onSnapshot(memorialRef, (snapshot) => {
+					if (!snapshot.exists()) return;
+					const data = snapshot.data();
+					const refreshAt = data.forceRefreshAt || null;
+
+					if (isFirstSnapshot) {
+						// Store the initial value so we don't reload on page load
+						initialForceRefreshAt = refreshAt;
+						isFirstSnapshot = false;
+						console.log('🔄 [FORCE REFRESH] Listener ready, initial:', refreshAt);
+						return;
+					}
+
+					// If forceRefreshAt changed from what we initially loaded, reload
+					if (refreshAt && refreshAt !== initialForceRefreshAt) {
+						console.log('🔄 [FORCE REFRESH] Detected! Reloading page...');
+						window.location.reload();
+					}
+				});
+			} catch (err) {
+				console.error('❌ [FORCE REFRESH] Failed to setup listener:', err);
+			}
+		}
+	});
+
+	onDestroy(() => {
+		forceRefreshUnsub?.();
 	});
 
 	// Booking banner state

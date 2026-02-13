@@ -128,6 +128,37 @@
 		}
 	}
 
+	// Force refresh state
+	let isForceRefreshing = $state(false);
+	let forceRefreshSuccess = $state(false);
+
+	async function handleForceRefresh() {
+		if (!confirm('This will force-reload the memorial page for ALL viewers. Continue?')) return;
+
+		isForceRefreshing = true;
+		forceRefreshSuccess = false;
+
+		try {
+			const response = await fetch(`/api/memorials/${memorial.id}/force-refresh`, {
+				method: 'POST'
+			});
+
+			if (!response.ok) {
+				const data = await response.json();
+				throw new Error(data.message || 'Failed to trigger force refresh');
+			}
+
+			forceRefreshSuccess = true;
+			setTimeout(() => { forceRefreshSuccess = false; }, 3000);
+			console.log('✅ [FORCE REFRESH] Triggered successfully');
+		} catch (err: any) {
+			console.error('❌ [FORCE REFRESH] Error:', err);
+			alert(`Force refresh failed: ${err.message}`);
+		} finally {
+			isForceRefreshing = false;
+		}
+	}
+
 	function cancelDisplayEdit() {
 		isEditingDisplay = false;
 		customTitleInput = memorial.customTitle || '';
@@ -172,7 +203,14 @@
 <AdminLayout title="Memorial Details" subtitle="View and manage all aspects of this memorial">
 	<div class="header-actions">
 		<button onclick={() => goto('/admin/services/memorials')}>← Back</button>
-		<div>
+		<div style="display: flex; gap: 0.5rem; align-items: center;">
+			<button 
+				class="refresh-btn" 
+				onclick={handleForceRefresh}
+				disabled={isForceRefreshing}
+			>
+				{isForceRefreshing ? '⏳ Refreshing...' : forceRefreshSuccess ? '✅ Sent!' : '🔄 Force Refresh Viewers'}
+			</button>
 			<button class="danger-btn" onclick={handleDelete}>🗑️ Delete</button>
 		</div>
 	</div>
@@ -414,6 +452,8 @@
 	button.primary-btn:hover { background: #2c5282; }
 	button.switcher-btn { background: #805ad5; color: white; border-color: #805ad5; font-weight: 600; }
 	button.switcher-btn:hover { background: #6b46c1; }
+	button.refresh-btn { background: #38a169; color: white; border-color: #38a169; font-weight: 600; }
+	button.refresh-btn:hover { background: #2f855a; }
 	button.danger-btn-small { background: #e53e3e; color: white; border-color: #e53e3e; padding: 0.375rem 0.75rem; font-size: 0.875rem; }
 	button.danger-btn-small:hover { background: #c53030; }
 

@@ -2,7 +2,6 @@
 	import { enhance } from '$app/forms';
 	import { Building2, User, Mail, Phone, MapPin, Save, ArrowLeft, Video, Calendar, ExternalLink, ChevronDown, ChevronUp } from 'lucide-svelte';
 	import type { PageData } from './$types';
-	import EncoderSelector from '$lib/components/streaming/EncoderSelector.svelte';
 
 	let { data, form }: { data: PageData; form: any } = $props();
 
@@ -167,18 +166,7 @@
 							{#if isExpanded}
 								<div class="border-t border-gray-100 bg-gray-50 p-4">
 									<div class="grid gap-4 md:grid-cols-2">
-										<!-- Encoder Selector -->
-										<div>
-											<EncoderSelector
-												memorialId={memorial.id}
-												currentEncoderId={memorial.encoderConfig?.assignedEncoderId}
-												currentEncoderName={memorial.encoderConfig?.assignedEncoderName}
-												onAssigned={() => location.reload()}
-												onUnassigned={() => location.reload()}
-											/>
-										</div>
-
-																			</div>
+									</div>
 								</div>
 							{/if}
 						</div>

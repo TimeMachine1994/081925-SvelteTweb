@@ -54,38 +54,6 @@ export const ADMIN_NAV: NavDomain[] = [
 				requiredPermission: { resource: 'memorial', action: 'read' }
 			},
 			{
-				id: 'streams',
-				label: 'Streams',
-				href: '/admin/services/streams',
-				icon: '📹',
-				description: 'Livestream management',
-				requiredPermission: { resource: 'stream', action: 'read' }
-			},
-			{
-				id: 'slideshows',
-				label: 'Slideshows',
-				href: '/admin/services/slideshows',
-				icon: '🖼️',
-				description: 'Photo slideshow library',
-				requiredPermission: { resource: 'memorial', action: 'read' }
-			},
-			{
-				id: 'schedule-requests',
-				label: 'Schedule Requests',
-				href: '/admin/services/schedule-requests',
-				icon: '📅',
-				description: 'Schedule edit requests',
-				requiredPermission: { resource: 'memorial', action: 'read' }
-			},
-			{
-				id: 'encoders',
-				label: 'Encoders',
-				href: '/admin/services/encoders',
-				icon: '📡',
-				description: 'Streaming encoder devices',
-				requiredPermission: { resource: 'stream', action: 'read' }
-			},
-			{
 				id: 'receipts',
 				label: 'Receipts',
 				href: '/admin/services/receipts',
@@ -115,14 +83,6 @@ export const ADMIN_NAV: NavDomain[] = [
 				icon: '🏥',
 				description: 'Funeral home accounts',
 				requiredPermission: { resource: 'funeral_director', action: 'read' }
-			},
-			{
-				id: 'admin-users',
-				label: 'Admin Users',
-				href: '/admin/users/admin-users',
-				icon: '🔑',
-				description: 'Administrator accounts',
-				requiredPermission: { resource: 'system', action: 'read' }
 			}
 		]
 	},
@@ -153,22 +113,6 @@ export const ADMIN_NAV: NavDomain[] = [
 				icon: '📋',
 				description: 'System activity logs',
 				requiredPermission: { resource: 'audit_log', action: 'read' }
-			},
-			{
-				id: 'demo-sessions',
-				label: 'Demo Sessions',
-				href: '/admin/system/demo-sessions',
-				icon: '🎭',
-				description: 'Active demo environments',
-				requiredPermission: { resource: 'system', action: 'read' }
-			},
-			{
-				id: 'deleted-items',
-				label: 'Deleted Items',
-				href: '/admin/system/deleted-items',
-				icon: '🗑️',
-				description: 'Soft-deleted resources',
-				requiredPermission: { resource: 'system', action: 'read' }
 			},
 			{
 				id: 'wiki',
