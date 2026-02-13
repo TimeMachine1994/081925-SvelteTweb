@@ -7,6 +7,14 @@ export type StreamVisibility = 'public' | 'hidden' | 'archived';
 // Mux-specific streaming status
 export type MuxStreamingStatus = 'idle' | 'active' | 'disconnected';
 
+/** Individual VOD recording from a stream session */
+export interface MuxRecording {
+	assetId: string;              // Mux asset ID for this recording
+	vodPlaybackId: string;        // Playback ID for this VOD
+	duration?: number;            // Duration in seconds
+	createdAt: string;            // ISO timestamp when recording was processed
+}
+
 export interface StreamCredentials {
 	// For WHIP (Mobile Input & Mobile Streaming)
 	whipUrl?: string;
@@ -35,11 +43,14 @@ export interface MuxStreamConfig {
 	rtmpUrl: string;              // RTMP ingest URL
 	streamKey: string;            // RTMP stream key for OBS
 	
-	// Recording (populated after stream ends)
+	// Recording — legacy single fields (latest recording wins, for backward compat)
 	assetId?: string;             // Mux VOD asset ID
 	vodPlaybackId?: string;       // VOD playback ID for recordings
 	recordingReady: boolean;      // Is recording processed and ready?
 	duration?: number;            // Recording duration in seconds
+	
+	// Multiple recordings (one per stream session, newest last)
+	recordings?: MuxRecording[];
 	
 	// Stream status from Mux
 	reconnectWindow?: number;     // Seconds before stream times out

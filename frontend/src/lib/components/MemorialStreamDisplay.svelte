@@ -48,6 +48,7 @@
 			vodPlaybackId?: string;
 			recordingReady?: boolean;
 			duration?: number;
+			recordings?: { assetId: string; vodPlaybackId: string; duration?: number; createdAt: string }[];
 		};
 		
 		// Chat configuration (FIX-C)
@@ -103,10 +104,11 @@
 	/**
 	 * Handle video download - fetches file and triggers save dialog
 	 */
-	async function handleDownload(stream: Stream) {
-		if (!stream.mux?.vodPlaybackId || downloadingStreamId) return;
+	async function handleDownload(stream: Stream, vodPlaybackId?: string) {
+		const pid = vodPlaybackId || stream.mux?.vodPlaybackId;
+		if (!pid || downloadingStreamId) return;
 		
-		const playbackId = stream.mux.vodPlaybackId;
+		const playbackId = pid;
 		const url = `https://stream.mux.com/${playbackId}/high.mp4`;
 		const filename = `${stream.title || 'recording'}-${playbackId}.mp4`;
 		
@@ -297,7 +299,8 @@
 				s.status === 'completed' || 
 				s.status === 'ended' ||
 				s.recordingReady === true || 
-				s.mux?.recordingReady === true;
+				s.mux?.recordingReady === true ||
+				(s.mux?.recordings?.length ?? 0) > 0;
 			
 			// Debug logging for recording detection
 			if (s.mux?.vodPlaybackId || s.status === 'completed' || s.status === 'ended') {
@@ -500,7 +503,7 @@
 				<h2 class="stream-section-title">Service Recording</h2>
 				{#each recordedStreams as stream (stream.id)}
 					<div class="stream-item">
-						{#if stream.mux?.recordingReady && stream.mux?.vodPlaybackId}
+						{#if stream.mux?.recordingReady && (stream.mux?.recordings?.length || stream.mux?.vodPlaybackId)}
 							<!-- MUX PLATFORM - Recorded video player with archived chat -->
 							<div class="mux-stream-container {!stream.chat?.enabled ? 'no-chat' : ''}">
 								<div class="video-column">
@@ -529,8 +532,36 @@
 										
 										<MuxVideoPlayer stream={stream} autoplay={false} showTitle={true} />
 										
-										<!-- Download Master Button - Centered below video -->
-										{#if stream.mux?.vodPlaybackId}
+										<!-- Download Buttons -->
+										{#if stream.mux?.recordings?.length}
+											<div class="download-button-container">
+												{#each stream.mux.recordings as recording, i}
+													<button 
+														type="button"
+														class="download-master-button"
+														disabled={downloadingStreamId === stream.id}
+														onclick={() => handleDownload(stream, recording.vodPlaybackId)}
+													>
+														{#if downloadingStreamId === stream.id}
+															<svg class="spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+																<circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="20"/>
+															</svg>
+															Downloading...
+														{:else}
+															<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+																<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+																<polyline points="7 10 12 15 17 10"/>
+																<line x1="12" y1="15" x2="12" y2="3"/>
+															</svg>
+															{stream.mux.recordings.length > 1 ? `Download Part ${i + 1}` : 'Download Recording'}
+															{#if recording.duration}
+																({Math.floor(recording.duration / 60)}m {Math.floor(recording.duration % 60)}s)
+															{/if}
+														{/if}
+													</button>
+												{/each}
+											</div>
+										{:else if stream.mux?.vodPlaybackId}
 											<div class="download-button-container">
 												<button 
 													type="button"

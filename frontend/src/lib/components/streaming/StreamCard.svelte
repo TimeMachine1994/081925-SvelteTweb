@@ -518,10 +518,24 @@
 				</div>
 			{:else if stream.status === 'completed' || stream.mux?.recordingReady}
 				<div class="rounded-lg bg-green-50 p-4">
-					<p class="text-sm text-green-800">
-						 <strong>📼 Recording Available</strong> - Stream has been saved and is ready for playback
+					<p class="text-sm font-semibold text-green-800">
+						📼 {stream.mux?.recordings?.length && stream.mux.recordings.length > 1 ? `${stream.mux.recordings.length} Recordings Available` : 'Recording Available'}
 					</p>
-					{#if stream.mux?.vodPlaybackId}
+					{#if stream.mux?.recordings?.length}
+						<div class="mt-2 space-y-2">
+							{#each stream.mux.recordings as recording, i}
+								<div class="rounded bg-green-100 p-2 text-xs text-green-700">
+									<p>
+										<strong>Session {i + 1}:</strong>
+										<code class="bg-green-200 px-1 rounded">{recording.vodPlaybackId}</code>
+										{#if recording.duration}
+											— {Math.floor(recording.duration / 60)}m {Math.floor(recording.duration % 60)}s
+										{/if}
+									</p>
+								</div>
+							{/each}
+						</div>
+					{:else if stream.mux?.vodPlaybackId}
 						<div class="mt-2 text-xs text-green-700">
 							<p><strong>VOD Playback ID:</strong> <code class="bg-green-100 px-1 rounded">{stream.mux.vodPlaybackId}</code></p>
 							{#if stream.mux?.duration}

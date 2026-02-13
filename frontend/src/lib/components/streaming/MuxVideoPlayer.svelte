@@ -27,6 +27,7 @@
 			vodPlaybackId?: string;
 			streamingStatus?: 'idle' | 'active' | 'disconnected';
 			recordingReady?: boolean;
+			recordings?: { assetId: string; vodPlaybackId: string; duration?: number; createdAt: string }[];
 		};
 	}
 
@@ -61,10 +62,18 @@
 		}
 
 		// For completed/ended streams with recording ready, use VOD playback ID
-		// Check recordingReady flag OR ended/completed status to ensure we use VOD when available
-		if ((stream.mux.recordingReady || stream.status === 'completed' || stream.status === 'ended') && stream.mux.vodPlaybackId) {
-			console.log('📼 [MUX PLAYER] Using VOD playback ID:', stream.mux.vodPlaybackId);
-			return stream.mux.vodPlaybackId;
+		if (stream.mux.recordingReady || stream.status === 'completed' || stream.status === 'ended') {
+			// Prefer latest recording from recordings array
+			if (stream.mux.recordings?.length) {
+				const latest = stream.mux.recordings[stream.mux.recordings.length - 1];
+				console.log('📼 [MUX PLAYER] Using latest recording VOD playback ID:', latest.vodPlaybackId, `(session ${stream.mux.recordings.length})`);
+				return latest.vodPlaybackId;
+			}
+			// Fallback to legacy single field
+			if (stream.mux.vodPlaybackId) {
+				console.log('📼 [MUX PLAYER] Using legacy VOD playback ID:', stream.mux.vodPlaybackId);
+				return stream.mux.vodPlaybackId;
+			}
 		}
 
 		// For live or scheduled streams, use live playback ID

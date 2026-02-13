@@ -12,7 +12,7 @@
  * - video.asset.errored - Recording processing failed
  */
 
-import { adminDb } from '$lib/server/firebase';
+import { adminDb, FieldValue } from '$lib/server/firebase';
 import { error as svelteKitError, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { verifyMuxWebhookSignature } from '$lib/server/mux';
@@ -187,10 +187,16 @@ async function handleStreamEnded(event: any) {
 
 		// Update stream status
 		const streamingStatus = event.type === 'video.live_stream.disconnected' ? 'disconnected' : 'idle';
+
+		// Read current status — guard against overwriting 'completed' with 'ended'
+		const currentData = streamDoc.data();
+		const currentStatus = currentData.status;
+		const newStatus = currentStatus === 'completed' ? 'completed' : 'ended';
 		
 		console.log('💾 [MUX WEBHOOK] Updating stream status...');
+		console.log('⏹️ [MUX WEBHOOK] Status transition:', currentStatus, '→', newStatus);
 		await streamDoc.ref.update({
-			status: 'ended',  // Mark as ended so UI shows recording section
+			status: newStatus,
 			'mux.streamingStatus': streamingStatus,
 			liveEndedAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString()
@@ -243,20 +249,48 @@ async function handleRecordingReady(event: any) {
 		console.log('📼 [MUX WEBHOOK] VOD Playback ID:', playbackId);
 		console.log('📼 [MUX WEBHOOK] Duration:', duration, 'seconds');
 
-		// Update stream with recording information
-		console.log('💾 [MUX WEBHOOK] Updating stream with recording data...');
-		await streamDoc.ref.update({
-			status: 'completed',
+		// Read current stream status to guard against race conditions
+		const currentData = streamDoc.data();
+		const isCurrentlyLive = currentData.status === 'live';
+
+		console.log('� [MUX WEBHOOK] Current stream status:', currentData.status);
+		console.log('📼 [MUX WEBHOOK] Is currently live:', isCurrentlyLive);
+
+		// Build recording entry for the recordings array
+		const recording = {
+			assetId,
+			vodPlaybackId: playbackId,
+			duration: duration || 0,
+			createdAt: new Date().toISOString()
+		};
+
+		// Build update — append to recordings array + update legacy fields
+		const updateData: Record<string, any> = {
+			// Legacy single-recording fields (latest recording wins)
 			'mux.assetId': assetId,
 			'mux.vodPlaybackId': playbackId,
 			'mux.recordingReady': true,
 			'mux.duration': duration,
+			// Append to recordings array (one entry per stream session)
+			'mux.recordings': FieldValue.arrayUnion(recording),
 			// NOTE: chat.locked is NOT auto-set - admin controls chat lock status
 			recordingReady: true,  // Legacy field for backward compatibility
 			updatedAt: new Date().toISOString()
-		});
+		};
 
-		console.log('✅ [MUX WEBHOOK] Recording information saved');
+		// RACE GUARD: Only set status to 'completed' if NOT currently live
+		// (a new session may have started while this recording was processing)
+		if (!isCurrentlyLive) {
+			updateData.status = 'completed';
+			console.log('📼 [MUX WEBHOOK] Setting status to completed');
+		} else {
+			console.log('⚠️ [MUX WEBHOOK] Stream is currently LIVE — NOT overwriting status to completed');
+		}
+
+		console.log('💾 [MUX WEBHOOK] Updating stream with recording data...');
+		await streamDoc.ref.update(updateData);
+
+		console.log('✅ [MUX WEBHOOK] Recording information saved (session appended to recordings array)');
 		console.log('📼 [MUX WEBHOOK] Stream:', streamDoc.id, 'recording is ready for playback');
 
 	} catch (error) {
