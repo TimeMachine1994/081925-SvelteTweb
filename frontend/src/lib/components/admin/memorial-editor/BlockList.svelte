@@ -7,6 +7,7 @@
 	interface Props {
 		blocks: MemorialBlock[];
 		streams: any[];
+		memorialId: string;
 		findStream: (streamId: string) => any;
 		onReorder: (newOrder: string[]) => void;
 		onEdit: (block: MemorialBlock) => void;
@@ -16,7 +17,7 @@
 		onMoveDown?: (blockId: string) => void;
 	}
 
-	let { blocks, streams, findStream, onReorder, onEdit, onToggle, onDelete, onMoveUp, onMoveDown }: Props = $props();
+	let { blocks, streams, memorialId, findStream, onReorder, onEdit, onToggle, onDelete, onMoveUp, onMoveDown }: Props = $props();
 
 	// Local copy for drag operations
 	let items = $state<MemorialBlock[]>([]);
@@ -50,6 +51,7 @@
 			<BlockItem
 				{block}
 				stream={block.type === 'livestream' ? findStream((block.config as any).streamId) : null}
+				{memorialId}
 				onEdit={() => onEdit(block)}
 				onToggle={(enabled) => onToggle(block.id, enabled)}
 				onDelete={() => onDelete(block.id)}

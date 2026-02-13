@@ -76,7 +76,7 @@
 				</div>
 
 				<div class="info-box">
-					<p>💡 To edit stream details (title, time, credentials), use the Stream Card on this memorial's detail page or the Video Switcher.</p>
+					<p>💡 Stream credentials (RTMP URL, Stream Key) and controls are displayed directly in the livestream block below. Use the StreamCard controls to manage credentials, chat, visibility, and embeds.</p>
 				</div>
 			{:else}
 				<div class="error-box">

@@ -240,6 +240,7 @@
 		<BlockList
 			{blocks}
 			{streams}
+			{memorialId}
 			{findStream}
 			onReorder={handleReorder}
 			onEdit={handleEdit}

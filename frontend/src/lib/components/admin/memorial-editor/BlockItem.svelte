@@ -8,6 +8,7 @@
 	interface Props {
 		block: MemorialBlock;
 		stream?: any;
+		memorialId: string;
 		onEdit: () => void;
 		onToggle: (enabled: boolean) => void;
 		onDelete: () => void;
@@ -17,7 +18,7 @@
 		isLast?: boolean;
 	}
 
-	let { block, stream, onEdit, onToggle, onDelete, onMoveUp, onMoveDown, isFirst = false, isLast = false }: Props = $props();
+	let { block, stream, memorialId, onEdit, onToggle, onDelete, onMoveUp, onMoveDown, isFirst = false, isLast = false }: Props = $props();
 
 	function getBlockTitle(): string {
 		switch (block.type) {
@@ -52,7 +53,7 @@
 
 		<div class="block-preview">
 			{#if block.type === 'livestream'}
-				<LivestreamBlock {block} {stream} />
+				<LivestreamBlock {block} {stream} {memorialId} />
 			{:else if block.type === 'embed'}
 				<EmbedBlock {block} />
 			{:else if block.type === 'text'}

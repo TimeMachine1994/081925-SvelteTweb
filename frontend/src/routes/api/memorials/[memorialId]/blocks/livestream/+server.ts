@@ -3,6 +3,7 @@ import { error as svelteError, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import type { MemorialBlock, CreateLivestreamBlockRequest } from '$lib/types/memorial-blocks';
 import { sortBlocksByOrder, createLivestreamBlock, insertBlockAt } from '$lib/utils/block-utils';
+import { createMuxLiveStream } from '$lib/server/mux';
 
 /**
  * Livestream Block Creation API
@@ -45,22 +46,60 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 		// Create stream document in root streams collection (not subcollection)
 		const streamsRef = adminDb.collection('streams');
 		const now = new Date().toISOString();
-		
+
+		// === MUX INTEGRATION: Create Live Stream with RTMP credentials ===
+		console.log('🎬 [BLOCKS] Creating Mux live stream for:', title.trim());
+
+		let muxLiveStream;
+		try {
+			muxLiveStream = await createMuxLiveStream(title.trim(), {
+				reconnectWindow: 60,
+				reducedLatency: true
+			});
+
+			console.log('✅ [BLOCKS] Mux live stream created:', muxLiveStream.id);
+			console.log('🎬 [BLOCKS] Playback ID:', muxLiveStream.playbackId);
+			console.log('📺 [BLOCKS] RTMP URL:', muxLiveStream.rtmpUrl);
+			console.log('🔑 [BLOCKS] Stream Key length:', muxLiveStream.streamKey?.length || 0);
+		} catch (muxError) {
+			console.error('❌ [BLOCKS] Failed to create Mux live stream:', muxError);
+			throw svelteError(500, `Failed to create Mux live stream: ${muxError instanceof Error ? muxError.message : 'Unknown error'}`);
+		}
+
 		const streamData = {
 			title: title.trim(),
 			description: description?.trim() || '',
 			scheduledStartTime: scheduledStartTime || null,
-			status: 'scheduled',
+			status: scheduledStartTime ? 'scheduled' : 'ready',
+			visibility: 'public',
 			memorialId,
 			createdAt: now,
 			updatedAt: now,
 			createdBy: locals.user.uid,
 			createdByEmail: locals.user.email,
-			// Chat defaults
+
+			// Mux Platform Configuration (RTMP credentials for OBS)
+			mux: {
+				liveStreamId: muxLiveStream.id,
+				playbackId: muxLiveStream.playbackId,
+				rtmpUrl: muxLiveStream.rtmpUrl,
+				streamKey: muxLiveStream.streamKey,
+				recordingReady: false,
+				streamingStatus: 'idle',
+				reconnectWindow: 60
+			},
+
+			// Firestore Chat Configuration
 			chat: {
 				enabled: true,
-				locked: false
-			}
+				locked: false,
+				archived: false,
+				messageCount: 0,
+				participantCount: 0,
+				moderationMode: 'manual'
+			},
+
+			isVisible: true
 		};
 
 		const streamDocRef = await streamsRef.add(streamData);
