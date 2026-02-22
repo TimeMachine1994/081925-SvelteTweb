@@ -1,61 +1,53 @@
+import { hash, verify } from '@node-rs/argon2';
 import { fail, redirect } from '@sveltejs/kit';
-import type { Actions } from './$types';
-import { db } from '$lib/server/db';
-import { user } from '$lib/server/db/schema';
-import { verifyPassword, generateSessionToken, createSession, SESSION_COOKIE_NAME } from '$lib/server/auth';
 import { eq } from 'drizzle-orm';
-import { dev } from '$app/environment';
+import { db } from '$lib/server/db';
+import * as table from '$lib/server/db/schema';
+import * as auth from '$lib/server/auth';
+import { getDashboardRoute } from '$lib/utils/auth-helpers';
+import type { Actions, PageServerLoad } from './$types';
+
+export const load: PageServerLoad = async ({ locals }) => {
+	if (locals.user) {
+		redirect(302, getDashboardRoute(locals.user));
+	}
+	return {};
+};
 
 export const actions: Actions = {
 	default: async ({ request, cookies }) => {
-		const data = await request.formData();
-		const email = data.get('email')?.toString();
-		const password = data.get('password')?.toString();
+		const formData = await request.formData();
+		const username = formData.get('username');
+		const password = formData.get('password');
 
-		if (!email || !password) {
-			return fail(400, { error: 'Email and password are required' });
+		if (!username || !password) {
+			return fail(400, { message: 'Username and password are required' });
 		}
 
-		// Normalize email to lowercase for case-insensitive login
-		const normalizedEmail = email.toLowerCase();
-
-		// Find user by email
-		const existingUser = await db
+		const [existingUser] = await db
 			.select()
-			.from(user)
-			.where(eq(user.email, normalizedEmail))
-			.limit(1);
+			.from(table.user)
+			.where(eq(table.user.username, username as string));
 
-		if (existingUser.length === 0) {
-			return fail(400, { error: 'Invalid email or password' });
+		if (!existingUser) {
+			return fail(400, { message: 'Invalid username or password' });
 		}
 
-		const dbUser = existingUser[0];
-		const validPassword = await verifyPassword(dbUser.passwordHash, password);
-
-		if (!validPassword) {
-			return fail(400, { error: 'Invalid email or password' });
-		}
-
-		// Create session
-		const sessionToken = generateSessionToken();
-		await createSession(sessionToken, dbUser.id);
-
-		// Set session cookie
-		cookies.set(SESSION_COOKIE_NAME, sessionToken, {
-			path: '/',
-			httpOnly: true,
-			secure: !dev,
-			sameSite: 'lax',
-			maxAge: 60 * 60 * 24 * 30
+		const validPassword = await verify(existingUser.passwordHash, password as string, {
+			memoryCost: 19456,
+			timeCost: 2,
+			outputLen: 32,
+			parallelism: 1
 		});
 
-		// Redirect based on role - redirect() throws automatically
-		const redirectPath =
-			dbUser.role === 'lawyer' || dbUser.role === 'admin'
-				? '/dashboard/lawyer'
-				: '/dashboard/client';
-		
-		redirect(303, redirectPath);
+		if (!validPassword) {
+			return fail(400, { message: 'Invalid username or password' });
+		}
+
+		const sessionToken = auth.generateSessionToken();
+		const session = await auth.createSession(sessionToken, existingUser.id);
+		auth.setSessionTokenCookie(cookies, sessionToken, session.expiresAt);
+
+		redirect(302, getDashboardRoute(existingUser));
 	}
 };

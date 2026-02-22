@@ -27,6 +27,7 @@ async function seed() {
 
 	await db.insert(table.user).values({
 		id: lawyerId,
+		username: 'john.attorney',
 		passwordHash: lawyerPassword,
 		role: 'lawyer',
 		email: 'john@kinglaw.com',
@@ -37,23 +38,26 @@ async function seed() {
 		updatedAt: new Date()
 	});
 
-	console.log('✓ Created lawyer account: john@kinglaw.com / password123');
+	console.log('✓ Created lawyer account: john.attorney / password123');
 
 	// Create client accounts
 	const clients = [
 		{
+			username: 'jane.client',
 			email: 'jane@example.com',
 			firstName: 'Jane',
 			lastName: 'Doe',
 			phoneNumber: '555-0101'
 		},
 		{
+			username: 'bob.client',
 			email: 'bob@example.com',
 			firstName: 'Bob',
 			lastName: 'Smith',
 			phoneNumber: '555-0102'
 		},
 		{
+			username: 'alice.client',
 			email: 'alice@example.com',
 			firstName: 'Alice',
 			lastName: 'Johnson',
@@ -74,6 +78,7 @@ async function seed() {
 
 		await db.insert(table.user).values({
 			id: clientId,
+			username: client.username,
 			passwordHash: clientPassword,
 			role: 'client',
 			email: client.email,
@@ -85,7 +90,7 @@ async function seed() {
 		});
 
 		clientIds.push(clientId);
-		console.log(`✓ Created client account: ${client.email} / password123`);
+		console.log(`✓ Created client account: ${client.username} / password123`);
 	}
 
 	// Create sample cases
@@ -160,8 +165,8 @@ async function seed() {
 
 	console.log('✅ Database seeding complete!');
 	console.log('\n📝 Test Accounts:');
-	console.log('   Lawyer: john@kinglaw.com / password123');
-	console.log('   Clients: jane@example.com, bob@example.com, alice@example.com / password123');
+	console.log('   Lawyer: john.attorney / password123');
+	console.log('   Clients: jane.client, bob.client, alice.client / password123');
 }
 
 seed()

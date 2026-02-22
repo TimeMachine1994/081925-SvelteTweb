@@ -1,175 +1,177 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
-	import type { ActionData } from './$types';
+	import { faPhone, faEnvelope, faLocationDot, faClock } from '@fortawesome/free-solid-svg-icons';
+	import Icon from '$lib/components/Icon.svelte';
 
-	let { form }: { form: ActionData } = $props();
+	let formData = $state({
+		name: '',
+		email: '',
+		phone: '',
+		subject: '',
+		message: ''
+	});
+	let formSubmitting = $state(false);
+
+	async function handleSubmit(e: Event) {
+		e.preventDefault();
+		formSubmitting = true;
+		
+		await new Promise(resolve => setTimeout(resolve, 1000));
+		
+		alert('Thank you for contacting us. We will respond within 24 hours.');
+		formData = { name: '', email: '', phone: '', subject: '', message: '' };
+		formSubmitting = false;
+	}
 </script>
 
 <svelte:head>
-	<title>Contact Us | King Law</title>
+	<title>Contact Us - King Law Firm</title>
 </svelte:head>
 
-<div class="min-h-screen pt-20">
-	<!-- Hero Section -->
-	<section class="py-24 bg-king-blue">
-		<div class="max-w-5xl mx-auto px-6 lg:px-8">
-			<p class="text-gold uppercase tracking-[0.3em] text-sm mb-6">Get in Touch</p>
-			<h1 class="font-title text-5xl md:text-6xl text-white leading-tight mb-6">
-				Let's Start a<br/>Conversation
-			</h1>
-			<p class="text-xl text-white/70 max-w-2xl">
-				Tell us what's on your plate. We'll outline how coordinated legal counsel can simplify your situation — confidentially, with no obligation.
+<section class="bg-gradient-to-br from-background via-secondary to-background py-16">
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+		<div class="text-center">
+			<h1 class="font-title text-5xl font-bold mb-4">Contact Us</h1>
+			<p class="text-xl text-muted-foreground">
+				Get in touch with our legal team today
 			</p>
 		</div>
-	</section>
+	</div>
+</section>
 
-	<!-- Contact Content -->
-	<section class="py-24 bg-background">
-		<div class="max-w-6xl mx-auto px-6 lg:px-8">
-			<div class="grid lg:grid-cols-12 gap-8 lg:gap-16">
-				<!-- Form Column -->
-				<div class="lg:col-span-7">
-					<p class="text-gold uppercase tracking-[0.3em] text-sm mb-4">Send a Message</p>
-					<h2 class="font-title text-3xl text-king-blue dark:text-white mb-8">Tell Us About Your Situation</h2>
+<section class="py-16 bg-background">
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+		<div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+			<div>
+				<h2 class="font-title text-3xl font-bold mb-8">Send Us a Message</h2>
+				<form onsubmit={handleSubmit} class="space-y-6">
+					<div>
+						<label for="name" class="block text-sm font-semibold mb-2">Name *</label>
+						<input
+							type="text"
+							id="name"
+							bind:value={formData.name}
+							required
+							class="w-full px-4 py-3 bg-secondary border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
+						/>
+					</div>
+
+					<div>
+						<label for="email" class="block text-sm font-semibold mb-2">Email *</label>
+						<input
+							type="email"
+							id="email"
+							bind:value={formData.email}
+							required
+							class="w-full px-4 py-3 bg-secondary border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
+						/>
+					</div>
+
+					<div>
+						<label for="phone" class="block text-sm font-semibold mb-2">Phone</label>
+						<input
+							type="tel"
+							id="phone"
+							bind:value={formData.phone}
+							class="w-full px-4 py-3 bg-secondary border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
+						/>
+					</div>
+
+					<div>
+						<label for="subject" class="block text-sm font-semibold mb-2">Subject *</label>
+						<input
+							type="text"
+							id="subject"
+							bind:value={formData.subject}
+							required
+							class="w-full px-4 py-3 bg-secondary border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
+						/>
+					</div>
+
+					<div>
+						<label for="message" class="block text-sm font-semibold mb-2">Message *</label>
+						<textarea
+							id="message"
+							bind:value={formData.message}
+							required
+							rows="6"
+							class="w-full px-4 py-3 bg-secondary border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
+						></textarea>
+					</div>
+
+					<button
+						type="submit"
+						disabled={formSubmitting}
+						class="w-full px-8 py-4 bg-gold text-black font-semibold rounded-lg hover:bg-gold-dark transition-colors disabled:opacity-50"
+					>
+						{formSubmitting ? 'Sending...' : 'Send Message'}
+					</button>
+				</form>
+			</div>
+
+			<div class="space-y-8">
+				<div>
+					<h2 class="font-title text-3xl font-bold mb-8">Contact Information</h2>
 					
-					{#if form?.success}
-						<div class="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 text-green-800 dark:text-green-200 px-6 py-4 rounded-r-lg mb-6">
-							Thank you for contacting us. We'll get back to you soon!
-						</div>
-					{/if}
-
-					{#if form?.error}
-						<div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 text-red-800 dark:text-red-200 px-6 py-4 rounded-r-lg mb-6">
-							{form.error}
-						</div>
-					{/if}
-
-					<form method="POST" use:enhance class="space-y-6">
-						<div class="grid md:grid-cols-2 gap-6">
+					<div class="space-y-6">
+						<div class="flex items-start space-x-4">
+							<Icon icon={faLocationDot} size="lg" class="text-gold mt-1" />
 							<div>
-								<label for="name" class="block text-sm font-medium text-king-blue dark:text-white mb-2">Name *</label>
-								<input
-									type="text"
-									id="name"
-									name="name"
-									required
-									class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-muted dark:text-foreground focus:bg-background focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
-								/>
-							</div>
-							<div>
-								<label for="phone" class="block text-sm font-medium text-king-blue dark:text-white mb-2">Phone</label>
-								<input
-									type="tel"
-									id="phone"
-									name="phone"
-									class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-muted dark:text-foreground focus:bg-background focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
-								/>
+								<div class="font-semibold mb-1">Office Address</div>
+								<p class="text-muted-foreground">
+									123 Legal Street<br />
+									Suite 100<br />
+									City, State 12345
+								</p>
 							</div>
 						</div>
 
-						<div>
-							<label for="email" class="block text-sm font-medium text-king-blue dark:text-white mb-2">Email *</label>
-							<input
-								type="email"
-								id="email"
-								name="email"
-								required
-								class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-muted dark:text-foreground focus:bg-background focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
-							/>
-						</div>
-
-						<div>
-							<label for="subject" class="block text-sm font-medium text-king-blue dark:text-white mb-2">Subject *</label>
-							<input
-								type="text"
-								id="subject"
-								name="subject"
-								required
-								class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-muted dark:text-foreground focus:bg-background focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
-							/>
-						</div>
-
-						<div>
-							<label for="message" class="block text-sm font-medium text-king-blue dark:text-white mb-2">Message *</label>
-							<textarea
-								id="message"
-								name="message"
-								rows="6"
-								required
-								class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-muted dark:text-foreground focus:bg-background focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none resize-none"
-							></textarea>
-						</div>
-
-						<button
-							type="submit"
-							class="w-full bg-king-blue hover:bg-king-blue-light text-white font-semibold py-4 px-6 rounded-lg transition-all hover:shadow-lg"
-						>
-							Send Message
-						</button>
-					</form>
-				</div>
-
-				<!-- Info Column -->
-				<div class="lg:col-span-5">
-					<div class="bg-king-blue rounded-2xl p-6 md:p-8 text-white lg:sticky lg:top-28 depth-card-dark">
-						<div class="mb-8 rounded-xl overflow-hidden">
-							<img src="https://images1.loopnet.com/i2/Ey6wPQmSPw4GKc2vgW1TWFMUK_CgXKrLqSZeaXBD7RA/110/419-N-Magnolia-Ave-Orlando-FL-Primary-Photo-1-Large.jpg" alt="King Law Firm Office" class="w-full h-48 object-cover" />
-						</div>
-
-						<div class="space-y-8">
+						<div class="flex items-start space-x-4">
+							<Icon icon={faPhone} size="lg" class="text-gold mt-1" />
 							<div>
-								<p class="text-gold uppercase tracking-[0.2em] text-xs mb-3">Address</p>
-								<div class="flex items-center gap-3 mb-1">
-									<p class="text-white font-bold text-lg">King Law Firm</p>
-									<img src="https://kinglawbucket.s3.us-east-2.amazonaws.com/public/King+Law+Official+Logo++No+BKG.png" alt="King Law" class="h-8 w-auto" />
+								<div class="font-semibold mb-1">Phone</div>
+								<a href="tel:555-0100" class="text-muted-foreground hover:text-gold transition-colors">
+									(555) 010-0100
+								</a>
+							</div>
+						</div>
+
+						<div class="flex items-start space-x-4">
+							<Icon icon={faEnvelope} size="lg" class="text-gold mt-1" />
+							<div>
+								<div class="font-semibold mb-1">Email</div>
+								<a href="mailto:info@kinglaw.com" class="text-muted-foreground hover:text-gold transition-colors">
+									info@kinglaw.com
+								</a>
+							</div>
+						</div>
+
+						<div class="flex items-start space-x-4">
+							<Icon icon={faClock} size="lg" class="text-gold mt-1" />
+							<div>
+								<div class="font-semibold mb-1">Office Hours</div>
+								<div class="text-muted-foreground space-y-1">
+									<div>Monday - Friday: 9:00 AM - 6:00 PM</div>
+									<div>Saturday: 10:00 AM - 2:00 PM</div>
+									<div>Sunday: Closed</div>
 								</div>
-								<p class="text-white/80">
-									419 N. Magnolia Ave<br />
-									Orlando, FL 32801
-								</p>
-							</div>
-
-							<div>
-								<p class="text-gold uppercase tracking-[0.2em] text-xs mb-3">Phone</p>
-								<a href="tel:6893536943" class="text-white hover:text-gold transition-colors text-xl font-semibold">
-									(689) 353-6943
-								</a>
-							</div>
-
-							<div>
-								<p class="text-gold uppercase tracking-[0.2em] text-xs mb-3">Email</p>
-								<a href="mailto:ben@givekingaring.com" class="text-white/80 hover:text-gold transition-colors">
-									ben@givekingaring.com
-								</a>
-							</div>
-
-							<div>
-								<p class="text-gold uppercase tracking-[0.2em] text-xs mb-3">Office Hours</p>
-								<p class="text-white/80">
-									Monday - Friday: 9:00 AM - 5:00 PM<br />
-									Saturday - Sunday: Closed
-								</p>
-							</div>
-
-							<div class="pt-6 border-t border-white/10">
-								<p class="text-gold uppercase tracking-[0.2em] text-xs mb-3">What to Expect</p>
-								<ul class="text-white/70 text-sm space-y-2 mb-6">
-									<li class="flex items-start gap-2"><span class="text-gold">&#10003;</span> Response within one business day</li>
-									<li class="flex items-start gap-2"><span class="text-gold">&#10003;</span> All communications are confidential</li>
-									<li class="flex items-start gap-2"><span class="text-gold">&#10003;</span> Clear fee discussion before any engagement</li>
-									<li class="flex items-start gap-2"><span class="text-gold">&#10003;</span> Direct attorney access — no gatekeepers</li>
-								</ul>
-								<p class="text-white/60 text-sm mb-4">
-									Already a client? Access your documents and communicate securely.
-								</p>
-								<a href="/login" class="inline-block bg-gold hover:bg-gold-light text-king-blue px-6 py-3 rounded-lg font-semibold transition-all depth-gold">
-									Client Portal →
-								</a>
 							</div>
 						</div>
 					</div>
 				</div>
+
+				<div class="bg-secondary p-6 rounded-lg">
+					<h3 class="font-title text-xl font-bold mb-4">Emergency Contact</h3>
+					<p class="text-muted-foreground mb-4">
+						For urgent legal matters outside office hours, please call our emergency line:
+					</p>
+					<a
+						href="tel:555-0199"
+						class="inline-block px-6 py-3 bg-gold text-black font-semibold rounded-lg hover:bg-gold-dark transition-colors"
+					>
+						(555) 010-0199
+					</a>
+				</div>
 			</div>
 		</div>
-	</section>
-</div>
+	</div>
+</section>

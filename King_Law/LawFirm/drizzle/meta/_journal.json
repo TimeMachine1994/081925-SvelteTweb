@@ -12,15 +12,13 @@
     {
       "idx": 1,
       "version": "6",
+<<<<<<< HEAD
+      "when": 1768447577617,
+      "tag": "0001_big_doomsday",
+=======
       "when": 1768509325002,
       "tag": "0001_curious_golden_guardian",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1770149350241,
-      "tag": "0002_remove-username-requirement",
+>>>>>>> 12d6d5035b4dfe72b47c33d55eb1be392370c567
       "breakpoints": true
     }
   ]

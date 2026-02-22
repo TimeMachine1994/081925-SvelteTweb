@@ -1,143 +1,104 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
-import { cases, user as userTable, messages, documents } from '$lib/server/db/schema';
-import { eq, or, isNull, and } from 'drizzle-orm';
+import { cases, user } from '$lib/server/db/schema';
+import { eq, and } from 'drizzle-orm';
 import { generateId } from '$lib/server/auth';
-import { alias } from 'drizzle-orm/sqlite-core';
 
-export const GET: RequestHandler = async ({ locals, url }) => {
+// GET /api/cases - Get all cases for current user
+export const GET: RequestHandler = async ({ locals }) => {
 	if (!locals.user) {
 		throw error(401, 'Unauthorized');
 	}
 
-	try {
-		const caseId = url.searchParams.get('id');
+	let userCases;
 
-		if (caseId) {
-			// Create aliases for client and lawyer joins
-			const clientTable = alias(userTable, 'client');
-			const lawyerTable = alias(userTable, 'lawyer');
-
-			const [caseData] = await db
-				.select({
-					case: cases,
-					client: clientTable,
-					lawyer: lawyerTable
-				})
-				.from(cases)
-				.leftJoin(clientTable, eq(cases.clientId, clientTable.id))
-				.leftJoin(lawyerTable, eq(cases.lawyerId, lawyerTable.id))
-				.where(eq(cases.id, caseId))
-				.limit(1);
-
-			if (!caseData) {
-				throw error(404, 'Case not found');
-			}
-
-			if (
-				locals.user.role !== 'admin' &&
-				caseData.case.clientId !== locals.user.id &&
-				caseData.case.lawyerId !== locals.user.id
-			) {
-				throw error(403, 'Access denied');
-			}
-
-			return json({ case: caseData });
-		}
-
-		let userCases;
-		if (locals.user.role === 'client') {
-			userCases = await db
-				.select({
-					case: cases,
-					lawyer: userTable
-				})
-				.from(cases)
-				.leftJoin(userTable, eq(cases.lawyerId, userTable.id))
-				.where(eq(cases.clientId, locals.user.id));
-		} else {
-			userCases = await db
-				.select({
-					case: cases,
-					client: userTable
-				})
-				.from(cases)
-				.leftJoin(userTable, eq(cases.clientId, userTable.id))
-				.where(
-					or(eq(cases.lawyerId, locals.user.id), eq(userTable.role, 'admin'))
-				);
-		}
-
-		return json({ cases: userCases });
-	} catch (err) {
-		console.error('Get cases error:', err);
-		if (err instanceof Response) throw err;
-		throw error(500, 'Failed to fetch cases');
+	if (locals.user.role === 'lawyer') {
+		userCases = await db
+			.select({
+				case: cases,
+				client: {
+					id: user.id,
+					firstName: user.firstName,
+					lastName: user.lastName,
+					email: user.email
+				}
+			})
+			.from(cases)
+			.innerJoin(user, eq(cases.clientId, user.id))
+			.where(eq(cases.lawyerId, locals.user.id));
+	} else if (locals.user.role === 'client') {
+		userCases = await db
+			.select({
+				case: cases,
+				lawyer: {
+					id: user.id,
+					firstName: user.firstName,
+					lastName: user.lastName,
+					email: user.email
+				}
+			})
+			.from(cases)
+			.innerJoin(user, eq(cases.lawyerId, user.id))
+			.where(eq(cases.clientId, locals.user.id));
+	} else {
+		// Admin sees all
+		userCases = await db.select().from(cases);
 	}
+
+	return json({ cases: userCases });
 };
 
+// POST /api/cases - Create a new case (lawyers only)
 export const POST: RequestHandler = async ({ request, locals }) => {
-	if (!locals.user || locals.user.role === 'client') {
+	if (!locals.user) {
+		throw error(401, 'Unauthorized');
+	}
+
+	if (locals.user.role !== 'lawyer' && locals.user.role !== 'admin') {
 		throw error(403, 'Only lawyers can create cases');
 	}
 
-	try {
-		const { clientId, title, description, status } = await request.json();
+	const body = await request.json();
+	const { clientId, title, description, status } = body;
 
-		if (!clientId || !title) {
-			throw error(400, 'Client ID and title are required');
-		}
-
-		const [newCase] = await db
-			.insert(cases)
-			.values({
-				id: generateId(),
-				clientId,
-				lawyerId: locals.user.id,
-				title,
-				description: description || null,
-				status: status || 'pending'
-			})
-			.returning();
-
-		// Link uncategorized messages from this client to the new case
-		await db
-			.update(messages)
-			.set({ caseId: newCase.id })
-			.where(
-				and(
-					eq(messages.senderId, clientId),
-					isNull(messages.caseId)
-				)
-			);
-
-		// Also link messages sent TO this client (from lawyers) that are uncategorized
-		await db
-			.update(messages)
-			.set({ caseId: newCase.id })
-			.where(
-				and(
-					eq(messages.recipientId, clientId),
-					isNull(messages.caseId)
-				)
-			);
-
-		// Link uncategorized documents uploaded by this client to the new case
-		await db
-			.update(documents)
-			.set({ caseId: newCase.id })
-			.where(
-				and(
-					eq(documents.uploadedById, clientId),
-					isNull(documents.caseId)
-				)
-			);
-
-		return json({ success: true, case: newCase });
-	} catch (err) {
-		console.error('Create case error:', err);
-		if (err instanceof Response) throw err;
-		throw error(500, 'Failed to create case');
+	if (!clientId || !title) {
+		throw error(400, 'clientId and title are required');
 	}
+
+	// Verify client exists and is a client
+	const client = await db.query.user.findFirst({
+		where: and(eq(user.id, clientId), eq(user.role, 'client'))
+	});
+
+	if (!client) {
+		throw error(404, 'Client not found');
+	}
+
+	const caseId = generateId();
+	const now = new Date();
+
+	await db.insert(cases).values({
+		id: caseId,
+		clientId,
+		lawyerId: locals.user.id,
+		title: title.trim(),
+		description: description?.trim() || null,
+		status: status || 'pending',
+		createdAt: now,
+		updatedAt: now
+	});
+
+	const newCase = {
+		id: caseId,
+		clientId,
+		lawyerId: locals.user.id,
+		title: title.trim(),
+		description: description?.trim() || null,
+		status: status || 'pending',
+		createdAt: now,
+		updatedAt: now
+	};
+
+	return json({ case: newCase }, { status: 201 });
 };

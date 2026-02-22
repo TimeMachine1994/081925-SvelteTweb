@@ -1,60 +1,93 @@
+import { redirect } from '@sveltejs/kit';
+import { eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
-import { cases, documents, invoices, messages } from '$lib/server/db/schema';
-import { eq, and, isNull } from 'drizzle-orm';
+import * as table from '$lib/server/db/schema';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
-	const userId = locals.user!.id;
+	if (!locals.user) {
+		redirect(302, '/login');
+	}
 
-	// Load client's cases
-	const userCases = await db
-		.select()
-		.from(cases)
-		.where(eq(cases.clientId, userId));
+	if (locals.user.role !== 'client') {
+		redirect(302, '/dashboard/lawyer');
+	}
 
-	const caseIds = userCases.map((c) => c.id);
+	// Fetch client's cases with lawyer info
+	const cases = await db
+		.select({
+			case: table.cases,
+			lawyer: {
+				id: table.user.id,
+				firstName: table.user.firstName,
+				lastName: table.user.lastName,
+				email: table.user.email,
+				phoneNumber: table.user.phoneNumber
+			}
+		})
+		.from(table.cases)
+		.innerJoin(table.user, eq(table.cases.lawyerId, table.user.id))
+		.where(eq(table.cases.clientId, locals.user.id));
 
-	// Load documents
-	const userDocuments = caseIds.length > 0
+	// Get a default lawyer for clients without cases (first available lawyer)
+	let defaultLawyer = null;
+	if (cases.length === 0) {
+		const lawyers = await db
+			.select({
+				id: table.user.id,
+				firstName: table.user.firstName,
+				lastName: table.user.lastName
+			})
+			.from(table.user)
+			.where(eq(table.user.role, 'lawyer'))
+			.limit(1);
+		defaultLawyer = lawyers[0] || null;
+	}
+
+	// Fetch documents for all cases
+	const caseIds = cases.map(c => c.case.id);
+	const documents = caseIds.length > 0
 		? await db
 				.select()
-				.from(documents)
-				.where(eq(documents.uploadedById, userId))
-				.limit(5)
+				.from(table.documents)
+				.where(eq(table.documents.caseId, caseIds[0]))
 		: [];
 
-	// Load invoices
-	const userInvoices = caseIds.length > 0
+	// Fetch invoices for all cases
+	const invoices = caseIds.length > 0
 		? await db
 				.select()
-				.from(invoices)
-				.orderBy(invoices.createdAt)
+				.from(table.invoices)
+				.where(eq(table.invoices.caseId, caseIds[0]))
 		: [];
 
-	// Load messages
-	const userMessages = caseIds.length > 0
+	// Fetch recent messages with full sender details
+	const messages = caseIds.length > 0
 		? await db
-				.select()
-				.from(messages)
-				.where(eq(messages.senderId, userId))
-				.limit(10)
+				.select({
+					id: table.messages.id,
+					caseId: table.messages.caseId,
+					senderId: table.messages.senderId,
+					content: table.messages.content,
+					attachmentDocumentId: table.messages.attachmentDocumentId,
+					createdAt: table.messages.createdAt,
+					readAt: table.messages.readAt,
+					senderName: table.user.firstName,
+					senderLastName: table.user.lastName,
+					senderRole: table.user.role
+				})
+				.from(table.messages)
+				.innerJoin(table.user, eq(table.messages.senderId, table.user.id))
+				.where(eq(table.messages.caseId, caseIds[0]))
+				.orderBy(table.messages.createdAt)
 		: [];
-
-	// Calculate stats
-	const activeCases = userCases.filter((c) => c.status === 'active' || c.status === 'open').length;
-	const unpaidInvoices = userInvoices.filter((i) => i.status !== 'paid');
-	const totalUnpaid = unpaidInvoices.reduce((sum, inv) => sum + (inv.amount - inv.paidAmount), 0);
-	const unreadMessages = userMessages.filter((m) => !m.readAt).length;
 
 	return {
-		cases: userCases,
-		documents: userDocuments,
-		invoices: userInvoices,
-		stats: {
-			activeCases,
-			totalUnpaid,
-			unreadMessages,
-			documentsCount: userDocuments.length
-		}
+		user: locals.user,
+		cases: cases.map(c => ({ ...c.case, lawyer: c.lawyer })),
+		documents,
+		invoices,
+		messages: messages.map(m => ({ ...m, sender: { firstName: m.senderName, lastName: m.senderLastName, role: m.senderRole } })),
+		defaultLawyer
 	};
 };

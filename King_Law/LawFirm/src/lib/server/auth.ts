@@ -1,172 +1,94 @@
-import { Lucia } from 'lucia';
-import { DrizzleSQLiteAdapter } from '@lucia-auth/adapter-drizzle';
-import { db } from './db';
-import { session, user } from './db/schema';
-import { encodeBase32LowerCaseNoPadding, encodeHexLowerCase } from '@oslojs/encoding';
-import { sha256 } from '@oslojs/crypto/sha2';
-import { hash, verify } from '@node-rs/argon2';
+import type { RequestEvent } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
-import { dev } from '$app/environment';
+import { sha256 } from '@oslojs/crypto/sha2';
+import { encodeBase64url, encodeHexLowerCase } from '@oslojs/encoding';
+import { db } from '$lib/server/db';
+import * as table from '$lib/server/db/schema';
 
-const adapter = new DrizzleSQLiteAdapter(db, session, user);
+const DAY_IN_MS = 1000 * 60 * 60 * 24;
 
-export const lucia = new Lucia(adapter, {
-	sessionCookie: {
-		attributes: {
-			secure: !dev
-		}
-	},
-	getUserAttributes: (attributes) => {
-		return {
-			email: attributes.email,
-			firstName: attributes.firstName,
-			lastName: attributes.lastName,
-			role: attributes.role,
-			phoneNumber: attributes.phoneNumber,
-			addressLine1: attributes.addressLine1,
-			addressLine2: attributes.addressLine2,
-			city: attributes.city,
-			state: attributes.state,
-			zipCode: attributes.zipCode,
-			dateOfBirth: attributes.dateOfBirth,
-			preferredContact: attributes.preferredContact,
-			emergencyContactName: attributes.emergencyContactName,
-			emergencyContactPhone: attributes.emergencyContactPhone,
-			squareCustomerId: attributes.squareCustomerId,
-			squareCardId: attributes.squareCardId,
-			cardLastFour: attributes.cardLastFour,
-			cardBrand: attributes.cardBrand
-		};
-	}
-});
+export const sessionCookieName = 'auth-session';
 
-declare module 'lucia' {
-	interface Register {
-		Lucia: typeof lucia;
-		DatabaseUserAttributes: DatabaseUserAttributes;
-	}
+export function generateSessionToken() {
+	const bytes = crypto.getRandomValues(new Uint8Array(18));
+	const token = encodeBase64url(bytes);
+	return token;
 }
 
-interface DatabaseUserAttributes {
-	email: string;
-	firstName: string;
-	lastName: string;
-	role: 'client' | 'lawyer' | 'staff' | 'admin';
-	phoneNumber: string | null;
-	addressLine1: string | null;
-	addressLine2: string | null;
-	city: string | null;
-	state: string | null;
-	zipCode: string | null;
-	dateOfBirth: string | null;
-	preferredContact: 'email' | 'phone' | 'text' | null;
-	emergencyContactName: string | null;
-	emergencyContactPhone: string | null;
-	squareCustomerId: string | null;
-	squareCardId: string | null;
-	cardLastFour: string | null;
-	cardBrand: string | null;
+export function generateId() {
+	const bytes = crypto.getRandomValues(new Uint8Array(15));
+	return encodeBase64url(bytes);
 }
 
-// Generate random session ID
-export function generateId(length: number = 15): string {
-	const bytes = new Uint8Array(length);
-	crypto.getRandomValues(bytes);
-	return encodeBase32LowerCaseNoPadding(bytes);
-}
-
-// Generate session token
-export function generateSessionToken(): string {
-	const bytes = new Uint8Array(20);
-	crypto.getRandomValues(bytes);
-	return encodeBase32LowerCaseNoPadding(bytes);
-}
-
-// Create session
 export async function createSession(token: string, userId: string) {
-	console.log('📝 createSession called for userId:', userId);
 	const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
-	console.log('Generated sessionId:', sessionId.substring(0, 10) + '...');
-	const sessionData = {
+	const session: table.Session = {
 		id: sessionId,
 		userId,
-		expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30) // 30 days
+		expiresAt: new Date(Date.now() + DAY_IN_MS * 30)
 	};
-	console.log('Session expires at:', sessionData.expiresAt.toISOString());
-	await db.insert(session).values(sessionData);
-	console.log('✅ Session inserted into database');
-	return sessionData;
+	await db.insert(table.session).values(session);
+	return session;
 }
 
-// Validate session
 export async function validateSessionToken(token: string) {
-	console.log('🔍 validateSessionToken called');
 	const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
-	console.log('Looking for sessionId:', sessionId.substring(0, 10) + '...');
-	const result = await db
-		.select({ user, session })
-		.from(session)
-		.innerJoin(user, eq(session.userId, user.id))
-		.where(eq(session.id, sessionId));
+	const [result] = await db
+		.select({
+			// Return full user data for role-based access
+			user: {
+				id: table.user.id,
+				username: table.user.username,
+				role: table.user.role,
+				email: table.user.email,
+				firstName: table.user.firstName,
+				lastName: table.user.lastName,
+				phoneNumber: table.user.phoneNumber
+			},
+			session: table.session
+		})
+		.from(table.session)
+		.innerJoin(table.user, eq(table.session.userId, table.user.id))
+		.where(eq(table.session.id, sessionId));
 
-	if (result.length < 1) {
-		console.log('❌ No session found in database');
+	if (!result) {
 		return { session: null, user: null };
 	}
-	console.log('✅ Session found in database');
+	const { session, user } = result;
 
-	const { user: dbUser, session: dbSession } = result[0];
-	console.log('Session user:', { id: dbUser.id, email: dbUser.email, role: dbUser.role });
-	console.log('Session expires:', new Date(dbSession.expiresAt).toISOString());
-
-	const expiresAt = new Date(dbSession.expiresAt);
-	if (Date.now() >= expiresAt.getTime()) {
-		console.log('❌ Session expired, deleting...');
-		await db.delete(session).where(eq(session.id, sessionId));
+	const sessionExpired = Date.now() >= session.expiresAt.getTime();
+	if (sessionExpired) {
+		await db.delete(table.session).where(eq(table.session.id, session.id));
 		return { session: null, user: null };
 	}
-	console.log('✅ Session is valid');
 
-	// Extend session if it's past halfway through its lifetime
-	if (Date.now() >= expiresAt.getTime() - 1000 * 60 * 60 * 24 * 15) {
-		console.log('🔄 Extending session expiration...');
-		dbSession.expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
+	const renewSession = Date.now() >= session.expiresAt.getTime() - DAY_IN_MS * 15;
+	if (renewSession) {
+		session.expiresAt = new Date(Date.now() + DAY_IN_MS * 30);
 		await db
-			.update(session)
-			.set({ expiresAt: dbSession.expiresAt })
-			.where(eq(session.id, sessionId));
-		console.log('✅ Session extended to:', dbSession.expiresAt.toISOString());
+			.update(table.session)
+			.set({ expiresAt: session.expiresAt })
+			.where(eq(table.session.id, session.id));
 	}
 
-	return { session: dbSession, user: dbUser };
+	return { session, user };
 }
 
-// Invalidate session
+export type SessionValidationResult = Awaited<ReturnType<typeof validateSessionToken>>;
+
 export async function invalidateSession(sessionId: string) {
-	console.log('🗑️ Invalidating session:', sessionId.substring(0, 10) + '...');
-	await db.delete(session).where(eq(session.id, sessionId));
-	console.log('✅ Session deleted');
+	await db.delete(table.session).where(eq(table.session.id, sessionId));
 }
 
-// Hash password
-export async function hashPassword(password: string): Promise<string> {
-	console.log('🔐 Hashing password with Argon2...');
-	const hashed = await hash(password, {
-		memoryCost: 19456,
-		timeCost: 2,
-		outputLen: 32,
-		parallelism: 1
+export function setSessionTokenCookie(cookies: any, token: string, expiresAt: Date) {
+	cookies.set(sessionCookieName, token, {
+		expires: expiresAt,
+		path: '/'
 	});
-	console.log('✅ Password hash generated');
-	return hashed;
 }
 
-// Verify password
-export async function verifyPassword(hash: string, password: string): Promise<boolean> {
-	console.log('🔍 Verifying password against hash...');
-	const isValid = await verify(hash, password);
-	console.log('Password verification result:', isValid ? '✅ MATCH' : '❌ NO MATCH');
-	return isValid;
+export function deleteSessionTokenCookie(cookies: any) {
+	cookies.delete(sessionCookieName, {
+		path: '/'
+	});
 }
-
-export const SESSION_COOKIE_NAME = 'auth_session';

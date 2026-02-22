@@ -1,36 +1,38 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { casesStore } from '$lib/stores/cases.svelte.ts';
-	import { documentsStore } from '$lib/stores/documents.svelte.ts';
-	import { messagesStore } from '$lib/stores/messages.svelte.ts';
-	import { invoicesStore } from '$lib/stores/invoices.svelte.ts';
-	import { FolderOpen, DollarSign, MessageSquare, FileText, ClipboardList, Briefcase, Receipt } from 'lucide-svelte';
-	import StatCard from '$lib/components/ui/StatCard.svelte';
-	import Badge from '$lib/components/ui/Badge.svelte';
-	import EmptyState from '$lib/components/ui/EmptyState.svelte';
-	import Tabs from '$lib/components/ui/Tabs.svelte';
+	import { faFolder, faFileAlt, faFileInvoiceDollar, faComments, faGavel, faCheckCircle, faClock, faTimesCircle } from '@fortawesome/free-solid-svg-icons';
+	import Icon from '$lib/components/Icon.svelte';
+	import ChatSlider from '$lib/components/ChatSlider.svelte';
+	import type { PageData } from './$types';
 
-	let activeCases = $derived(casesStore.cases.filter(c => c.case.status === 'active' || c.case.status === 'open').length);
-	let documentsCount = $derived(documentsStore.documents.length);
-	// Use unreadCounts.total which correctly counts only messages where user is recipient
-	let unreadMessages = $derived(messagesStore.unreadCounts.total);
+	interface Props {
+		data: PageData;
+	}
 
-	let activeTab = $state('cases');
+	let { data }: Props = $props();
+	let messages = $state(data.messages || []);
 
-	const tabs = [
-		{ id: 'cases', label: 'My Cases', icon: Briefcase, badge: undefined as string | number | undefined },
-		{ id: 'invoices', label: 'Invoices', icon: Receipt }
-	];
+	async function handleSendMessage(content: string) {
+		if (!data.activeCaseId) return;
 
-	// Dynamically set case count badge
-	let dynamicTabs = $derived(tabs.map(t => 
-		t.id === 'cases' ? { ...t, badge: casesStore.cases.length || undefined } : t
-	));
+		const response = await fetch('/api/messages', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				caseId: data.activeCaseId,
+				content
+			})
+		});
 
-	onMount(() => {
-		// Fetch unread counts on mount
-		messagesStore.fetchUnreadCounts();
-	});
+		if (response.ok) {
+			const { message } = await response.json();
+			messages = [...messages, message];
+		} else {
+			throw new Error('Failed to send message');
+		}
+	}
+
+	// Prepare cases for chat slider
+	const chatCases = data.cases.map(c => ({ id: c.id, title: c.title }));
 
 	function formatCurrency(cents: number): string {
 		return new Intl.NumberFormat('en-US', {
@@ -40,130 +42,250 @@
 	}
 
 	function formatDate(date: Date): string {
-		return new Date(date).toLocaleDateString('en-US', {
+		return new Intl.DateTimeFormat('en-US', {
 			year: 'numeric',
 			month: 'short',
 			day: 'numeric'
-		});
+		}).format(new Date(date));
+	}
+
+	function getStatusIcon(status: string) {
+		switch (status) {
+			case 'active': return faCheckCircle;
+			case 'pending': return faClock;
+			case 'closed': return faTimesCircle;
+			default: return faGavel;
+		}
+	}
+
+	function getStatusColor(status: string) {
+		switch (status) {
+			case 'active': return 'text-green-600 dark:text-green-400';
+			case 'pending': return 'text-yellow-600 dark:text-yellow-400';
+			case 'closed': return 'text-gray-600 dark:text-gray-400';
+			default: return 'text-gold';
+		}
 	}
 </script>
 
-<div>
-	<h1 class="font-title text-2xl sm:text-4xl mb-4 sm:mb-8">Client Dashboard</h1>
+<svelte:head>
+	<title>Client Dashboard - King Law Firm</title>
+</svelte:head>
 
-	{#if casesStore.error || messagesStore.error || documentsStore.error || invoicesStore.error}
-		<div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-8 text-center">
-			<p class="text-red-800 dark:text-red-200 font-medium">
-				{casesStore.error || messagesStore.error || documentsStore.error || invoicesStore.error}
+<div class="min-h-screen bg-background py-8">
+	<div class="flex gap-0">
+		<div class="flex-1 px-4 sm:px-6 lg:px-8 max-w-7xl">
+		<!-- Welcome Header -->
+		<div class="mb-8">
+			<h1 class="font-title text-4xl font-bold mb-2">
+				Welcome, {data.user.firstName}!
+			</h1>
+			<p class="text-muted-foreground">
+				Manage your cases, documents, and communications with your attorney
 			</p>
-			<button onclick={() => window.location.reload()} class="mt-2 text-sm text-gold hover:underline">
-				Try again
-			</button>
 		</div>
-	{/if}
 
-	<!-- Stats Overview -->
-	<div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
-		<StatCard label="Active Cases" value={activeCases} icon={FolderOpen} onclick={() => activeTab = 'cases'} />
-		<StatCard label="Unpaid Invoices" value={formatCurrency(invoicesStore.invoices.filter(i => i.invoice.status !== 'paid').reduce((sum, i) => sum + (i.invoice.amount - (i.invoice.paidAmount || 0)), 0))} icon={DollarSign} iconClass="text-gold" href="/dashboard/client/invoices" />
-		<StatCard label="Unread Messages" value={unreadMessages} icon={MessageSquare} />
-		<StatCard label="Documents" value={documentsCount} icon={FileText} href="/dashboard/client/documents" />
-	</div>
-
-	<!-- Tabs: Cases / Invoices -->
-	<Tabs tabs={dynamicTabs} bind:activeTab />
-
-	{#if activeTab === 'cases'}
-		{#if casesStore.cases.length > 0}
-			<div class="grid sm:grid-cols-2 gap-3 sm:gap-4">
-				{#each casesStore.cases as caseItem}
-					<a
-						href="/dashboard/client/case/{caseItem.case.id}"
-						class="bg-background border border-border rounded-lg p-4 sm:p-6 hover:border-gold transition-all hover:shadow-lg group"
-					>
-						<div class="flex justify-between items-start gap-2 mb-2">
-							<h3 class="font-semibold text-base sm:text-lg group-hover:text-gold transition-colors">
-								{caseItem.case.title}
-							</h3>
-							<Badge variant={caseItem.case.status} />
-						</div>
-						{#if caseItem.case.description}
-							<p class="text-sm text-muted-foreground mb-4 line-clamp-2">
-								{caseItem.case.description}
-							</p>
-						{/if}
-						<div class="text-xs text-muted-foreground">
-							Updated: {formatDate(caseItem.case.updatedAt)}
-						</div>
-					</a>
-				{/each}
+		<!-- Quick Stats -->
+		<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+			<div class="bg-secondary p-6 rounded-lg border border-gray-300 dark:border-gray-700">
+				<div class="flex items-center justify-between mb-2">
+					<Icon icon={faFolder} class="text-gold" size="lg" />
+					<span class="text-3xl font-bold">{data.cases.length}</span>
+				</div>
+				<div class="text-sm text-muted-foreground">Active Cases</div>
 			</div>
-		{:else}
-			<EmptyState
-				icon={ClipboardList}
-				title="No Active Cases"
-				description="You don't have any cases yet. Contact us to get started."
-				actionLabel="Contact Us"
-				actionHref="/contact"
-			/>
-		{/if}
-	{:else if activeTab === 'invoices'}
-		{#if invoicesStore.invoices.length > 0}
-			<!-- Mobile: Card layout -->
-			<div class="space-y-3 sm:hidden">
-				{#each invoicesStore.invoices as { invoice }}
-					<div class="bg-background border border-border rounded-lg p-4">
-						<div class="flex justify-between items-start mb-2">
-							<div class="font-semibold text-sm flex-1 min-w-0 mr-2">{invoice.description}</div>
-							<Badge variant={invoice.status === 'paid' ? 'paid' : invoice.status === 'partial' ? 'partial' : 'unpaid'} />
-						</div>
-						<div class="flex justify-between items-center">
-							<div>
-								<div class="text-lg font-bold">{formatCurrency(invoice.amount)}</div>
-								<div class="text-xs text-muted-foreground">Due: {formatDate(invoice.dueDate)}</div>
+
+			<div class="bg-secondary p-6 rounded-lg border border-gray-300 dark:border-gray-700">
+				<div class="flex items-center justify-between mb-2">
+					<Icon icon={faFileAlt} class="text-gold" size="lg" />
+					<span class="text-3xl font-bold">{data.documents.length}</span>
+				</div>
+				<div class="text-sm text-muted-foreground">Documents</div>
+			</div>
+
+			<div class="bg-secondary p-6 rounded-lg border border-gray-300 dark:border-gray-700">
+				<div class="flex items-center justify-between mb-2">
+					<Icon icon={faFileInvoiceDollar} class="text-gold" size="lg" />
+					<span class="text-3xl font-bold">{data.invoices.filter(i => i.status !== 'paid').length}</span>
+				</div>
+				<div class="text-sm text-muted-foreground">Pending Invoices</div>
+			</div>
+
+			<div class="bg-secondary p-6 rounded-lg border border-gray-300 dark:border-gray-700">
+				<div class="flex items-center justify-between mb-2">
+					<Icon icon={faComments} class="text-gold" size="lg" />
+					<span class="text-3xl font-bold">{data.messages.filter(m => !m.readAt && m.senderId !== data.user.id).length}</span>
+				</div>
+				<div class="text-sm text-muted-foreground">Unread Messages</div>
+			</div>
+		</div>
+
+		<!-- Cases Section -->
+		<div class="mb-8">
+			<h2 class="font-title text-2xl font-bold mb-4">Your Cases</h2>
+			
+			{#if data.cases.length === 0}
+				<div class="bg-secondary p-8 rounded-lg border border-gray-300 dark:border-gray-700 text-center">
+					<Icon icon={faFolder} size="2xl" class="text-muted-foreground mx-auto mb-4" />
+					<p class="text-muted-foreground">No cases yet. Contact us to get started.</p>
+				</div>
+			{:else}
+				<div class="space-y-4">
+					{#each data.cases as caseItem}
+						<a href="/dashboard/client/case/{caseItem.id}" class="block bg-secondary p-6 rounded-lg border border-gray-300 dark:border-gray-700 hover:border-gold transition-colors cursor-pointer">
+							<div class="flex items-start justify-between mb-4">
+								<div class="flex-1">
+									<div class="flex items-center space-x-3 mb-2">
+										<Icon icon={getStatusIcon(caseItem.status)} class={getStatusColor(caseItem.status)} />
+										<h3 class="font-title text-xl font-bold">{caseItem.title}</h3>
+									</div>
+									<p class="text-muted-foreground mb-2">{caseItem.description || 'No description provided'}</p>
+									<div class="text-sm text-muted-foreground">
+										<span class="font-semibold">Attorney:</span>
+										{caseItem.lawyer.firstName} {caseItem.lawyer.lastName}
+										{#if caseItem.lawyer.email}
+											• <span class="text-gold">{caseItem.lawyer.email}</span>
+										{/if}
+									</div>
+								</div>
+								<span class="px-3 py-1 bg-background rounded-lg text-sm font-semibold capitalize">
+									{caseItem.status}
+								</span>
 							</div>
-							{#if invoice.status !== 'paid'}
-								<a href="/dashboard/client/invoices/{invoice.id}/pay" class="bg-gold hover:bg-gold-dark text-black px-3 py-1.5 rounded text-xs font-semibold">Pay Now</a>
-							{/if}
+							<div class="flex space-x-4 text-sm text-muted-foreground">
+								<span>Created: {formatDate(caseItem.createdAt)}</span>
+								<span>•</span>
+								<span>Updated: {formatDate(caseItem.updatedAt)}</span>
+							</div>
+						</a>
+					{/each}
+				</div>
+			{/if}
+		</div>
+
+		<!-- Documents & Invoices Grid -->
+		<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+			<!-- Recent Documents -->
+			<div>
+				<h2 class="font-title text-2xl font-bold mb-4">Recent Documents</h2>
+				<div class="bg-secondary rounded-lg border border-gray-300 dark:border-gray-700 overflow-hidden">
+					{#if data.documents.length === 0}
+						<div class="p-8 text-center">
+							<Icon icon={faFileAlt} size="2xl" class="text-muted-foreground mx-auto mb-4" />
+							<p class="text-muted-foreground">No documents yet</p>
 						</div>
-					</div>
-				{/each}
+					{:else}
+						<div class="divide-y divide-border">
+							{#each data.documents.slice(0, 5) as doc}
+								<div class="p-4 hover:bg-background transition-colors">
+									<div class="flex items-center justify-between">
+										<div class="flex items-center space-x-3">
+											<Icon icon={faFileAlt} class="text-gold" />
+											<div>
+												<div class="font-semibold">{doc.fileName}</div>
+												<div class="text-sm text-muted-foreground">
+													{formatDate(doc.uploadedAt)}
+												</div>
+											</div>
+										</div>
+										<a href="/api/documents/{doc.id}" class="px-4 py-2 bg-gold text-black rounded-lg hover:bg-gold-dark transition-colors text-sm font-semibold">
+											Download
+										</a>
+									</div>
+								</div>
+							{/each}
+						</div>
+					{/if}
+				</div>
 			</div>
-			<!-- Desktop: Table layout -->
-			<div class="bg-background border border-border rounded-lg overflow-hidden hidden sm:block">
-				<table class="w-full">
-					<thead class="bg-muted">
-						<tr>
-							<th class="text-left px-4 sm:px-6 py-3 text-sm font-semibold">Description</th>
-							<th class="text-left px-4 sm:px-6 py-3 text-sm font-semibold">Amount</th>
-							<th class="text-left px-4 sm:px-6 py-3 text-sm font-semibold hidden md:table-cell">Due Date</th>
-							<th class="text-left px-4 sm:px-6 py-3 text-sm font-semibold">Status</th>
-							<th class="text-right px-4 sm:px-6 py-3 text-sm font-semibold">Actions</th>
-						</tr>
-					</thead>
-					<tbody>
-						{#each invoicesStore.invoices as { invoice }}
-							<tr class="border-t border-border hover:bg-muted/50">
-								<td class="px-4 sm:px-6 py-3 sm:py-4 text-sm">{invoice.description}</td>
-								<td class="px-4 sm:px-6 py-3 sm:py-4 font-semibold text-sm">{formatCurrency(invoice.amount)}</td>
-								<td class="px-4 sm:px-6 py-3 sm:py-4 text-sm text-muted-foreground hidden md:table-cell">
-									{formatDate(invoice.dueDate)}
-								</td>
-								<td class="px-4 sm:px-6 py-3 sm:py-4">
-									<Badge variant={invoice.status === 'paid' ? 'paid' : invoice.status === 'partial' ? 'partial' : 'unpaid'} />
-								</td>
-								<td class="px-4 sm:px-6 py-3 sm:py-4 text-right">
+
+			<!-- Invoices -->
+			<div>
+				<h2 class="font-title text-2xl font-bold mb-4">Invoices</h2>
+				<div class="bg-secondary rounded-lg border border-gray-300 dark:border-gray-700 overflow-hidden">
+					{#if data.invoices.length === 0}
+						<div class="p-8 text-center">
+							<Icon icon={faFileInvoiceDollar} size="2xl" class="text-muted-foreground mx-auto mb-4" />
+							<p class="text-muted-foreground">No invoices yet</p>
+						</div>
+					{:else}
+						<div class="divide-y divide-border">
+							{#each data.invoices as invoice}
+								<div class="p-4 hover:bg-background transition-colors">
+									<div class="flex items-center justify-between mb-2">
+										<div class="flex-1">
+											<div class="font-semibold">{invoice.description}</div>
+											<div class="text-sm text-muted-foreground">
+												Due: {formatDate(invoice.dueDate)}
+											</div>
+										</div>
+										<div class="text-right">
+											<div class="text-2xl font-bold">{formatCurrency(invoice.amount)}</div>
+											<span class={`text-sm font-semibold capitalize ${
+												invoice.status === 'paid' ? 'text-green-600' :
+												invoice.status === 'partial' ? 'text-yellow-600' :
+												'text-red-600'
+											}`}>
+												{invoice.status}
+											</span>
+										</div>
+									</div>
 									{#if invoice.status !== 'paid'}
-										<a href="/dashboard/client/invoices/{invoice.id}/pay" class="text-gold hover:underline text-sm">Pay Now</a>
+										<button class="w-full mt-2 px-4 py-2 bg-gold text-black rounded-lg hover:bg-gold-dark transition-colors text-sm font-semibold">
+											Pay Now
+										</button>
 									{/if}
-								</td>
-							</tr>
-						{/each}
-					</tbody>
-				</table>
+								</div>
+							{/each}
+						</div>
+					{/if}
+				</div>
 			</div>
-		{:else}
-			<EmptyState icon={Receipt} title="No Invoices" description="No invoices have been created yet." />
-		{/if}
-	{/if}
+		</div>
+
+		<!-- Recent Messages -->
+		<div class="mt-8">
+			<h2 class="font-title text-2xl font-bold mb-4">Recent Messages</h2>
+			<div class="bg-secondary rounded-lg border border-gray-300 dark:border-gray-700 overflow-hidden">
+				{#if data.messages.length === 0}
+					<div class="p-8 text-center">
+						<Icon icon={faComments} size="2xl" class="text-muted-foreground mx-auto mb-4" />
+						<p class="text-muted-foreground">No messages yet</p>
+					</div>
+				{:else}
+					<div class="divide-y divide-border">
+						{#each data.messages.slice(0, 5) as message}
+							<div class="p-4 hover:bg-background transition-colors {!message.readAt && message.senderId !== data.user.id ? 'bg-gold/5' : ''}">
+								<div class="flex items-start space-x-3">
+									<div class="flex-1">
+										<div class="flex items-center space-x-2 mb-1">
+											<span class="font-semibold">
+												{message.sender.firstName} {message.sender.lastName}
+											</span>
+											{#if !message.readAt && message.senderId !== data.user.id}
+												<span class="px-2 py-0.5 bg-gold text-black text-xs font-semibold rounded">New</span>
+											{/if}
+										</div>
+										<p class="text-muted-foreground">{message.content}</p>
+										<div class="text-xs text-muted-foreground mt-1">
+											{formatDate(message.createdAt)}
+										</div>
+									</div>
+								</div>
+							</div>
+						{/each}
+					</div>
+				{/if}
+			</div>
+		</div>
+	</div>
+	</div>
 </div>
+
+<!-- Chat Slider -->
+<ChatSlider 
+	cases={chatCases} 
+	currentUserId={data.user.id} 
+	userRole="client"
+	defaultRecipientId={data.defaultLawyer?.id ?? null}
+/>

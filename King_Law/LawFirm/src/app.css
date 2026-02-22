@@ -1,99 +1,90 @@
 @import 'tailwindcss';
 
-@custom-variant dark (&:where(.dark, .dark *));
+@layer theme {
+	/* Custom Fonts */
+	@font-face {
+		font-family: 'Junction Regular';
+		src: url('/fonts/Junction-regular.woff2') format('woff2'),
+			url('/fonts/Junction-regular.woff') format('woff');
+		font-weight: normal;
+		font-style: normal;
+		font-display: swap;
+	}
 
-/* Tailwind v4: Extend default theme with custom colors (preserves built-in palette) */
-@theme extend {
-	/* King Law Brand Colors */
-	--color-king-blue: #1D3047;
-	--color-king-blue-light: #2d4a6b;
-	--color-king-blue-dark: #141f2e;
-	--color-gold: #F2B022;
-	--color-gold-light: #f5c04d;
-	--color-gold-dark: #d99a1a;
-	
-	/* Semantic Colors */
-	--color-primary: #1D3047;
-	--color-primary-foreground: #ffffff;
-	--color-secondary: #f0f2f5;
-	--color-secondary-foreground: #1D3047;
-	--color-accent: #F2B022;
-	--color-accent-foreground: #1D3047;
-	--color-muted: #f0f2f5;
-	--color-muted-foreground: #5a6677;
-	--color-background: #ffffff;
-	--color-foreground: #1D3047;
-	--color-border: #ccd0d5;
-	--color-input: #ccd0d5;
-	--color-ring: #F2B022;
-	--color-card: #ffffff;
-	--color-card-foreground: #1D3047;
+	@font-face {
+		font-family: 'Goudy Bookletter 1911';
+		src: url('/fonts/GoudyBookletter1911.woff2') format('woff2'),
+			url('/fonts/GoudyBookletter1911.woff') format('woff');
+		font-weight: normal;
+		font-style: normal;
+		font-display: swap;
+	}
 
-	/* Font families */
-	--font-body: 'Junction Regular', system-ui, sans-serif;
-	--font-title: 'Goudy Bookletter 1911', Georgia, serif;
-	--font-quote: 'League Script', cursive;
+	@font-face {
+		font-family: 'League Script';
+		src: url('/fonts/LeagueScript-Regular.woff2') format('woff2'),
+			url('/fonts/LeagueScript-Regular.woff') format('woff');
+		font-weight: normal;
+		font-style: normal;
+		font-display: swap;
+	}
 
-	/* Border radius */
-	--radius: 0.5rem;
-	--radius-lg: 0.5rem;
-	--radius-md: calc(0.5rem - 2px);
-	--radius-sm: calc(0.5rem - 4px);
-}
+	:root {
+		/* Light mode colors */
+		--color-gold: 42 80% 63%;
+		--color-gold-dark: 42 75% 50%;
+		--color-black: 0 0% 0%;
+		--color-white: 0 0% 100%;
+		--color-grey-50: 0 0% 98%;
+		--color-grey-100: 0 0% 95%;
+		--color-grey-200: 0 0% 90%;
+		--color-grey-300: 0 0% 80%;
+		--color-grey-400: 0 0% 63%;
+		--color-grey-500: 0 0% 50%;
+		--color-grey-600: 0 0% 40%;
+		--color-grey-700: 0 0% 30%;
+		--color-grey-800: 0 0% 15%;
+		--color-grey-900: 0 0% 10%;
 
-/* Custom Fonts */
-@font-face {
-	font-family: 'Junction Regular';
-	src: url('/fonts/junction-regular.woff') format('woff');
-	font-weight: normal;
-	font-style: normal;
-	font-display: swap;
-}
+		--background: var(--color-white);
+		--foreground: var(--color-black);
+		--primary: var(--color-gold);
+		--primary-foreground: var(--color-black);
+		--secondary: var(--color-grey-200);
+		--secondary-foreground: var(--color-black);
+		--muted: var(--color-grey-100);
+		--muted-foreground: var(--color-grey-600);
+		--accent: var(--color-gold);
+		--accent-foreground: var(--color-black);
+		--border: var(--color-grey-300);
+		--input: var(--color-grey-300);
+		--ring: var(--color-gold);
+		--radius: 0.5rem;
+	}
 
-@font-face {
-	font-family: 'Goudy Bookletter 1911';
-	src: url('/fonts/goudy_bookletter_1911-webfont.woff') format('woff');
-	font-weight: normal;
-	font-style: normal;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: 'League Script';
-	src: url('/fonts/LeagueScriptNumberOne-webfont.woff') format('woff');
-	font-weight: normal;
-	font-style: normal;
-	font-display: swap;
-}
-
-/* Dark Mode Overrides */
-.dark {
-	--color-primary: #F2B022;
-	--color-primary-foreground: #1D3047;
-	--color-secondary: #162842;
-	--color-secondary-foreground: #e7e9ea;
-	--color-accent: #F2B022;
-	--color-accent-foreground: #1D3047;
-	--color-muted: #162842;
-	--color-muted-foreground: #8b98a5;
-	--color-background: #1D3047;
-	--color-foreground: #e7e9ea;
-	--color-border: #2f3944;
-	--color-input: #1D3047;
-	--color-ring: #F2B022;
-	--color-card: #142336;
-	--color-card-foreground: #e7e9ea;
+	.dark {
+		/* Dark mode colors */
+		--background: var(--color-grey-900);
+		--foreground: var(--color-white);
+		--primary: var(--color-gold);
+		--primary-foreground: var(--color-black);
+		--secondary: var(--color-grey-800);
+		--secondary-foreground: var(--color-white);
+		--muted: var(--color-grey-800);
+		--muted-foreground: var(--color-grey-400);
+		--accent: var(--color-gold-dark);
+		--accent-foreground: var(--color-white);
+		--border: var(--color-grey-700);
+		--input: var(--color-grey-700);
+		--ring: var(--color-gold);
+	}
 }
 
 @layer base {
-	html {
-		scroll-padding-top: 5.5rem;
-	}
-
 	body {
-		background-color: var(--color-background);
-		color: var(--color-foreground);
-		font-family: var(--font-body);
+		background-color: hsl(var(--background));
+		color: hsl(var(--foreground));
+		font-family: 'Junction Regular', system-ui, sans-serif;
 		font-feature-settings:
 			'rlig' 1,
 			'calt' 1;
@@ -105,118 +96,10 @@
 	h4,
 	h5,
 	h6 {
-		font-family: var(--font-title);
+		font-family: 'Goudy Bookletter 1911', Georgia, serif;
 	}
 
 	.font-quote {
-		font-family: var(--font-quote);
+		font-family: 'League Script', cursive;
 	}
-
-	/* Form controls: inherit parent text color instead of browser default */
-	input,
-	textarea,
-	select,
-	option {
-		color: inherit;
-	}
-
-	/* Fix browser autofill */
-	input:-webkit-autofill,
-	input:-webkit-autofill:hover,
-	input:-webkit-autofill:focus,
-	input:-webkit-autofill:active,
-	textarea:-webkit-autofill,
-	select:-webkit-autofill {
-		-webkit-text-fill-color: var(--color-foreground) !important;
-		-webkit-box-shadow: 0 0 0 1000px var(--color-background) inset !important;
-		box-shadow: 0 0 0 1000px var(--color-background) inset !important;
-		transition: background-color 5000s ease-in-out 0s;
-	}
-
-	/* Placeholder text */
-	::placeholder {
-		color: var(--color-muted-foreground);
-		opacity: 1;
-	}
-}
-
-/* ─── Depth & Layering Utilities ─── */
-
-/* Hero / max elevation (dark bg) */
-.depth-dark-3 {
-	box-shadow:
-		inset 0 1px 0 rgba(255, 255, 255, 0.12),
-		0 12px 32px rgba(0, 0, 0, 0.4),
-		0 20px 60px rgba(0, 0, 0, 0.3);
-}
-
-/* Gold glow for primary CTAs */
-.depth-gold {
-	box-shadow:
-		inset 0 1px 0 rgba(255, 255, 255, 0.2),
-		0 4px 12px rgba(242, 176, 34, 0.25),
-		0 8px 24px rgba(242, 176, 34, 0.15);
-	transition: box-shadow 0.2s ease, transform 0.2s ease;
-}
-.depth-gold:hover {
-	box-shadow:
-		inset 0 1px 0 rgba(255, 255, 255, 0.25),
-		0 8px 24px rgba(242, 176, 34, 0.35),
-		0 16px 48px rgba(242, 176, 34, 0.2);
-}
-
-/* Light-bg cards: rest + hover */
-.depth-card {
-	box-shadow:
-		inset 0 1px 0 rgba(255, 255, 255, 0.7),
-		0 1px 3px rgba(0, 0, 0, 0.06),
-		0 2px 8px rgba(0, 0, 0, 0.04);
-	transition: box-shadow 0.2s ease, transform 0.2s ease;
-}
-.depth-card:hover {
-	box-shadow:
-		inset 0 1px 0 rgba(255, 255, 255, 0.8),
-		0 4px 12px rgba(0, 0, 0, 0.08),
-		0 8px 24px rgba(0, 0, 0, 0.06);
-	transform: translateY(-1px);
-}
-
-/* Dark-bg cards: rest + hover */
-.depth-card-dark {
-	box-shadow:
-		inset 0 1px 0 rgba(255, 255, 255, 0.06),
-		0 2px 6px rgba(0, 0, 0, 0.3),
-		0 4px 16px rgba(0, 0, 0, 0.2);
-	transition: box-shadow 0.2s ease, transform 0.2s ease;
-}
-.depth-card-dark:hover {
-	box-shadow:
-		inset 0 1px 0 rgba(255, 255, 255, 0.1),
-		0 6px 20px rgba(0, 0, 0, 0.35),
-		0 12px 36px rgba(0, 0, 0, 0.25);
-	transform: translateY(-1px);
-}
-
-/* Ghost button hover */
-.depth-ghost:hover {
-	box-shadow:
-		inset 0 1px 0 rgba(255, 255, 255, 0.06),
-		0 2px 6px rgba(0, 0, 0, 0.2),
-		0 4px 16px rgba(0, 0, 0, 0.15);
-}
-
-/* Recessed inset (for inputs on dark bg) */
-.depth-inset {
-	box-shadow:
-		inset 0 2px 4px rgba(0, 0, 0, 0.2),
-		inset 0 -1px 0 rgba(255, 255, 255, 0.05);
-}
-
-/* Hide scrollbar but keep scroll functionality */
-.scrollbar-hide {
-	-ms-overflow-style: none;
-	scrollbar-width: none;
-}
-.scrollbar-hide::-webkit-scrollbar {
-	display: none;
 }

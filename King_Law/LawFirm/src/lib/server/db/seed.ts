@@ -1,110 +1,168 @@
-import { drizzle } from 'drizzle-orm/libsql';
-import { createClient } from '@libsql/client';
-import { user, cases, invoices } from './schema';
 import { hash } from '@node-rs/argon2';
-import { encodeBase32LowerCaseNoPadding } from '@oslojs/encoding';
-import * as dotenv from 'dotenv';
-
-// Load environment variables
-dotenv.config();
-
-// Create database client
-const turso = createClient({
-	url: process.env.DATABASE_URL!,
-	authToken: process.env.DATABASE_AUTH_TOKEN
-});
-
-const db = drizzle(turso);
-
-// Generate ID function (copied from auth.ts)
-function generateId(): string {
-	const bytes = new Uint8Array(10);
-	crypto.getRandomValues(bytes);
-	return encodeBase32LowerCaseNoPadding(bytes);
-}
-
-const ARGON2_OPTIONS = {
-	memoryCost: 19456,
-	timeCost: 2,
-	outputLen: 32,
-	parallelism: 1
-};
+import { db } from './index';
+import * as table from './schema';
 
 async function seed() {
-	console.log('🌱 Starting database seed...');
+	console.log('🌱 Seeding database...');
 
-	try {
-		// Create test lawyer
-		const lawyerId = generateId();
-		const lawyerPasswordHash = await hash('TestPassword123!', ARGON2_OPTIONS);
-		
-		const now = Math.floor(Date.now() / 1000); // Unix epoch in seconds
-		
-		await db.insert(user).values({
-			id: lawyerId,
-			email: 'lawyer@test.com',
-			passwordHash: lawyerPasswordHash,
-			firstName: 'Ben',
-			lastName: 'King',
-			role: 'lawyer'
-		});
-		console.log('✅ Created lawyer: lawyer@test.com / TestPassword123!');
+	// Create a lawyer account
+	const lawyerId = 'lawyer_' + Date.now();
+	const lawyerPassword = await hash('password123', {
+		memoryCost: 19456,
+		timeCost: 2,
+		outputLen: 32,
+		parallelism: 1
+	});
 
-		// Create test client
-		const clientId = generateId();
-		const clientPasswordHash = await hash('TestPassword123!', ARGON2_OPTIONS);
-		
-		await db.insert(user).values({
-			id: clientId,
-			email: 'client@test.com',
-			passwordHash: clientPasswordHash,
-			firstName: 'John',
+	await db.insert(table.user).values({
+		id: lawyerId,
+		username: 'john.attorney',
+		passwordHash: lawyerPassword,
+		role: 'lawyer',
+		email: 'john@kinglaw.com',
+		firstName: 'John',
+		lastName: 'Attorney',
+		phoneNumber: '555-0100',
+		createdAt: new Date(),
+		updatedAt: new Date()
+	});
+
+	console.log('✓ Created lawyer account: john.attorney / password123');
+
+	// Create client accounts
+	const clients = [
+		{
+			username: 'jane.client',
+			email: 'jane@example.com',
+			firstName: 'Jane',
 			lastName: 'Doe',
+			phoneNumber: '555-0101'
+		},
+		{
+			username: 'bob.client',
+			email: 'bob@example.com',
+			firstName: 'Bob',
+			lastName: 'Smith',
+			phoneNumber: '555-0102'
+		},
+		{
+			username: 'alice.client',
+			email: 'alice@example.com',
+			firstName: 'Alice',
+			lastName: 'Johnson',
+			phoneNumber: '555-0103'
+		}
+	];
+
+	const clientIds: string[] = [];
+
+	for (const client of clients) {
+		const clientId = 'client_' + Date.now() + '_' + Math.random().toString(36).substring(7);
+		const clientPassword = await hash('password123', {
+			memoryCost: 19456,
+			timeCost: 2,
+			outputLen: 32,
+			parallelism: 1
+		});
+
+		await db.insert(table.user).values({
+			id: clientId,
+			username: client.username,
+			passwordHash: clientPassword,
 			role: 'client',
-			phoneNumber: '555-1234'
+			email: client.email,
+			firstName: client.firstName,
+			lastName: client.lastName,
+			phoneNumber: client.phoneNumber,
+			createdAt: new Date(),
+			updatedAt: new Date()
 		});
-		console.log('✅ Created client: client@test.com / TestPassword123!');
 
-		// Create a sample case
-		const caseId = generateId();
-		await db.insert(cases).values({
+		clientIds.push(clientId);
+		console.log(`✓ Created client account: ${client.username} / password123`);
+	}
+
+	// Create sample cases
+	const caseIds: string[] = [];
+
+	for (let i = 0; i < clientIds.length; i++) {
+		const caseId = 'case_' + Date.now() + '_' + i;
+		const caseTitles = [
+			'Personal Injury - Car Accident',
+			'Business Contract Dispute',
+			'Estate Planning'
+		];
+
+		await db.insert(table.cases).values({
 			id: caseId,
-			clientId: clientId,
+			clientId: clientIds[i],
 			lawyerId: lawyerId,
-			title: 'Sample Case',
-			description: 'This is a sample case for testing purposes',
-			status: 'active'
+			title: caseTitles[i],
+			description: `Sample case for ${clients[i].firstName} ${clients[i].lastName}`,
+			status: 'active',
+			createdAt: new Date(),
+			updatedAt: new Date()
 		});
-		console.log('✅ Created sample case');
 
-		// Create a sample invoice
-		const invoiceId = generateId();
-		const dueDate = Math.floor((Date.now() + 30 * 24 * 60 * 60 * 1000) / 1000);
-		await db.insert(invoices).values({
+		caseIds.push(caseId);
+		console.log(`✓ Created case: ${caseTitles[i]}`);
+
+		// Create sample invoice
+		const invoiceId = 'invoice_' + Date.now() + '_' + i;
+		const dueDate = new Date();
+		dueDate.setDate(dueDate.getDate() + 30);
+
+		await db.insert(table.invoices).values({
 			id: invoiceId,
 			caseId: caseId,
-			description: 'Sample legal consultation',
-			amount: 50000, // $500.00 in cents
+			amount: (5000 + i * 1000) * 100, // $5000-$7000 in cents
+			description: `Legal services for ${caseTitles[i]}`,
+			status: i === 0 ? 'paid' : 'unpaid',
 			dueDate: dueDate,
-			status: 'unpaid',
-			paidAmount: 0
+			paidAmount: i === 0 ? 500000 : 0,
+			createdAt: new Date(),
+			paidAt: i === 0 ? new Date() : null
 		});
-		console.log('✅ Created sample invoice');
 
-		console.log('\n🎉 Database seeded successfully!');
-		console.log('\nTest accounts:');
-		console.log('  Lawyer: lawyer@test.com / TestPassword123!');
-		console.log('  Client: client@test.com / TestPassword123!');
-		
-	} catch (error) {
-		console.error('❌ Error seeding database:', error);
-		throw error;
+		console.log(`✓ Created invoice for case ${i + 1}`);
+
+		// Create sample messages
+		const messageId1 = 'msg_' + Date.now() + '_' + i + '_1';
+		const messageId2 = 'msg_' + Date.now() + '_' + i + '_2';
+
+		await db.insert(table.messages).values([
+			{
+				id: messageId1,
+				caseId: caseId,
+				senderId: clientIds[i],
+				content: `Hello, I have a question about my ${caseTitles[i].toLowerCase()} case.`,
+				createdAt: new Date(Date.now() - 86400000),
+				readAt: new Date(Date.now() - 43200000)
+			},
+			{
+				id: messageId2,
+				caseId: caseId,
+				senderId: lawyerId,
+				content: `I'd be happy to help. Let's schedule a meeting to discuss the details.`,
+				createdAt: new Date(Date.now() - 43200000),
+				readAt: null
+			}
+		]);
+
+		console.log(`✓ Created messages for case ${i + 1}`);
 	}
+
+	console.log('✅ Database seeding complete!');
+	console.log('\n📝 Test Accounts:');
+	console.log('   Lawyer: john.attorney / password123');
+	console.log('   Clients: jane.client, bob.client, alice.client / password123');
 }
 
 seed()
-	.then(() => process.exit(0))
 	.catch((error) => {
-		console.error(error);
+		console.error('❌ Seeding failed:', error);
 		process.exit(1);
+	})
+	.finally(() => {
+		process.exit(0);
 	});

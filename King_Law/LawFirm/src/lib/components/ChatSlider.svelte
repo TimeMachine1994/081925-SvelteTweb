@@ -1,305 +1,482 @@
 <script lang="ts">
-	import { messagesStore } from '$lib/stores/messages.svelte.ts';
-	import { casesStore } from '$lib/stores/cases.svelte.ts';
-	import { authStore } from '$lib/stores/auth.svelte.ts';
-	import { chatUIStore } from '$lib/stores/chatUI.svelte.ts';
-	import MessageBubble from './MessageBubble.svelte';
-	import AttachmentUploader from './AttachmentUploader.svelte';
-	import { MessageSquare } from 'lucide-svelte';
+	import { faComments, faTimes, faPaperPlane, faSpinner, faCircle, faPaperclip, faFile, faDownload } from '@fortawesome/free-solid-svg-icons';
+	import Icon from './Icon.svelte';
 	import { onMount, onDestroy } from 'svelte';
 
-	let { 
-		caseId,
-		open = false,
-		onclose
-	}: { 
-		caseId?: string;
-		open?: boolean;
-		onclose?: () => void;
-	} = $props();
+	interface Case {
+		id: string;
+		title: string;
+	}
 
-	let isOpen = $state(open);
-	let messageContent = $state('');
-	let selectedFile = $state<File | null>(null);
+	interface Message {
+		id: string;
+		caseId: string | null;
+		senderId: string;
+		content: string;
+		createdAt: Date;
+		readAt: Date | null;
+		senderFirstName: string | null;
+		senderLastName: string | null;
+		senderRole: string | null;
+		attachmentDocumentId?: string | null;
+		attachmentFileName?: string | null;
+		attachmentFileSize?: number | null;
+	}
+
+	interface Props {
+		cases: Case[];
+		currentUserId: string;
+		userRole: 'client' | 'lawyer' | 'admin';
+		defaultRecipientId?: string | null;
+	}
+
+	let { cases, currentUserId, userRole, defaultRecipientId = null }: Props = $props();
+
+	let isOpen = $state(false);
+	let selectedCaseId = $state<string | null>(null);
+	let messages = $state<Message[]>([]);
+	let newMessage = $state('');
+	let isLoading = $state(false);
+	let isSending = $state(false);
+	let unreadCounts = $state<Record<string, number>>({});
+	let totalUnread = $state(0);
 	let messagesContainer: HTMLDivElement;
-	let sending = $state(false);
+	let unreadPollingInterval: ReturnType<typeof setInterval> | null = null;
+	let messagePollingInterval: ReturnType<typeof setInterval> | null = null;
+	let attachmentFile = $state<File | null>(null);
+	let fileInput: HTMLInputElement;
 
-	// Filter messages by selected client if viewing uncategorized
-	let displayMessages = $derived(() => {
-		if (chatUIStore.filterUncategorized && chatUIStore.selectedClientId) {
-			return messagesStore.messages.filter(
-				item => item.message.senderId === chatUIStore.selectedClientId || 
-				        item.message.recipientId === chatUIStore.selectedClientId
-			);
-		}
-		return messagesStore.messages;
-	});
+	function formatFileSize(bytes: number): string {
+		if (bytes < 1024) return bytes + ' B';
+		if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+		return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+	}
 
-	// Auto-scroll to bottom when new messages arrive
-	$effect(() => {
-		if (messagesStore.messages.length && messagesContainer) {
-			setTimeout(() => {
-				messagesContainer.scrollTop = messagesContainer.scrollHeight;
-			}, 100);
-		}
-	});
-
-	onMount(async () => {
-		// Load initial messages
-		if (caseId) {
-			await messagesStore.fetchMessages(caseId);
-			messagesStore.startPolling(caseId, 5000);
-		}
-
-		// Fetch unread counts
-		await messagesStore.fetchUnreadCounts();
+	// Fetch unread counts on mount
+	onMount(() => {
+		fetchUnreadCounts();
+		// Poll for unread counts every 10 seconds
+		unreadPollingInterval = setInterval(fetchUnreadCounts, 10000);
 	});
 
 	onDestroy(() => {
-		messagesStore.stopPolling();
+		if (unreadPollingInterval) {
+			clearInterval(unreadPollingInterval);
+		}
+		if (messagePollingInterval) {
+			clearInterval(messagePollingInterval);
+		}
 	});
 
-	function toggleChat() {
-		if (isOpen) {
-			chatUIStore.close();
-		} else {
-			chatUIStore.open();
-		}
-		isOpen = !isOpen;
-		if (!isOpen && onclose) {
-			onclose();
-		}
-	}
-
-	// Sync with chatUIStore
+	// Start/stop message polling based on open state
 	$effect(() => {
-		if (chatUIStore.isOpen && !isOpen) {
-			isOpen = true;
-			// If viewing a specific client's uncategorized messages
-			if (chatUIStore.filterUncategorized) {
-				messagesStore.fetchMessages(undefined, true);
+		if (isOpen && selectedCaseId) {
+			// Start polling for new messages every 5 seconds
+			messagePollingInterval = setInterval(() => {
+				if (selectedCaseId) {
+					pollNewMessages(selectedCaseId);
+				}
+			}, 5000);
+		} else {
+			// Stop polling when closed
+			if (messagePollingInterval) {
+				clearInterval(messagePollingInterval);
+				messagePollingInterval = null;
 			}
-		} else if (!chatUIStore.isOpen && isOpen && !caseId) {
-			isOpen = false;
 		}
 	});
 
-	async function handleSend(e: Event) {
-		e.preventDefault();
-
-		if ((!messageContent.trim() && !selectedFile) || sending) return;
-
-		sending = true;
-
-		let result;
-		if (selectedFile) {
-			result = await messagesStore.sendMessageWithAttachment(
-				caseId || null,
-				messageContent.trim(),
-				selectedFile
-			);
-		} else {
-			result = await messagesStore.sendMessage(caseId || null, messageContent.trim());
+	async function pollNewMessages(caseId: string) {
+		try {
+			const res = await fetch(`/api/messages?caseId=${caseId}`);
+			if (res.ok) {
+				const data = await res.json();
+				// Only update if there are new messages
+				if (data.messages.length > messages.length) {
+					const hadNewMessages = data.messages.length > messages.length;
+					messages = data.messages;
+					if (hadNewMessages) {
+						scrollToBottom();
+						// Mark new messages as read
+						await markMessagesAsRead(caseId);
+					}
+				}
+			}
+		} catch (e) {
+			console.error('Failed to poll messages:', e);
 		}
-
-		if (result.success) {
-			messageContent = '';
-			selectedFile = null;
-		}
-
-		sending = false;
 	}
 
-	function handleFileSelect(e: CustomEvent<File>) {
-		selectedFile = e.detail;
+	async function fetchUnreadCounts() {
+		try {
+			const res = await fetch('/api/messages/unread');
+			if (res.ok) {
+				const data = await res.json();
+				unreadCounts = data.unreadByCaseId;
+				totalUnread = data.unreadCount;
+			}
+		} catch (e) {
+			console.error('Failed to fetch unread counts:', e);
+		}
 	}
 
-	function handleFileClear() {
-		selectedFile = null;
+	async function fetchMessages(caseId: string) {
+		isLoading = true;
+		try {
+			const res = await fetch(`/api/messages?caseId=${caseId}`);
+			if (res.ok) {
+				const data = await res.json();
+				messages = data.messages;
+				scrollToBottom();
+				// Mark messages as read
+				await markMessagesAsRead(caseId);
+			}
+		} catch (e) {
+			console.error('Failed to fetch messages:', e);
+		} finally {
+			isLoading = false;
+		}
+	}
+
+	async function markMessagesAsRead(caseId: string) {
+		try {
+			await fetch('/api/messages/mark-read', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ caseId })
+			});
+			// Update local unread count
+			if (unreadCounts[caseId]) {
+				totalUnread -= unreadCounts[caseId];
+				unreadCounts[caseId] = 0;
+			}
+		} catch (e) {
+			console.error('Failed to mark messages as read:', e);
+		}
+	}
+
+	async function sendMessage() {
+		if ((!newMessage.trim() && !attachmentFile) || isSending) return;
+		
+		// For clients with no cases, need a recipient
+		const canSend = selectedCaseId || (cases.length === 0 && defaultRecipientId);
+		if (!canSend) return;
+
+		isSending = true;
+		try {
+			let attachmentDocumentId = null;
+
+			// Upload file first if there's an attachment
+			if (attachmentFile && selectedCaseId) {
+				const formData = new FormData();
+				formData.append('file', attachmentFile);
+				formData.append('caseId', selectedCaseId);
+				const uploadRes = await fetch('/api/documents/upload', {
+					method: 'POST',
+					body: formData
+				});
+				if (uploadRes.ok) {
+					const uploadData = await uploadRes.json();
+					attachmentDocumentId = uploadData.documentId;
+				}
+			}
+
+			const res = await fetch('/api/messages', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					caseId: selectedCaseId || null,
+					recipientId: selectedCaseId ? null : defaultRecipientId,
+					content: newMessage.trim() || (attachmentFile ? `Attached: ${attachmentFile.name}` : ''),
+					attachmentDocumentId
+				})
+			});
+
+			if (res.ok) {
+				const data = await res.json();
+				messages = [...messages, data.message];
+				newMessage = '';
+				attachmentFile = null;
+				scrollToBottom();
+			}
+		} catch (e) {
+			console.error('Failed to send message:', e);
+		} finally {
+			isSending = false;
+		}
+	}
+
+	function handleFileSelect(e: Event) {
+		const target = e.target as HTMLInputElement;
+		if (target.files && target.files[0]) {
+			attachmentFile = target.files[0];
+		}
+	}
+
+	function removeAttachment() {
+		attachmentFile = null;
+		if (fileInput) fileInput.value = '';
+	}
+
+	function scrollToBottom() {
+		setTimeout(() => {
+			if (messagesContainer) {
+				messagesContainer.scrollTop = messagesContainer.scrollHeight;
+			}
+		}, 50);
+	}
+
+	function selectCase(caseId: string) {
+		selectedCaseId = caseId;
+		fetchMessages(caseId);
+	}
+
+	function toggleSlider() {
+		isOpen = !isOpen;
+		if (isOpen) {
+			if (cases.length > 0 && !selectedCaseId) {
+				selectCase(cases[0].id);
+			} else if (cases.length === 0) {
+				// No cases - show uncategorized message area
+				selectedCaseId = null;
+				messages = [];
+			}
+		}
+	}
+
+	function formatTime(date: Date): string {
+		return new Intl.DateTimeFormat('en-US', {
+			month: 'short',
+			day: 'numeric',
+			hour: 'numeric',
+			minute: '2-digit'
+		}).format(new Date(date));
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Enter' && !e.shiftKey) {
 			e.preventDefault();
-			handleSend(e);
+			sendMessage();
 		}
 	}
-
-	let unreadCount = $derived(messagesStore.getUnreadCount(caseId));
-
-	// Sync with external open prop
-	$effect(() => {
-		isOpen = open;
-	});
-
-	// Mark messages as read when chat opens
-	$effect(() => {
-		if (isOpen && messagesStore.messages.length > 0) {
-			const unreadIds = messagesStore.messages
-				.filter(item => !item.message.readAt && item.message.senderId !== authStore.user?.id)
-				.map(item => item.message.id);
-			
-			if (unreadIds.length > 0) {
-				messagesStore.markAsRead(unreadIds);
-			}
-		}
-	});
 </script>
 
-<!-- Toggle Button -->
+<!-- Chat Toggle Button (Fixed position) -->
 <button
-	onclick={toggleChat}
-	class="fixed right-6 bottom-6 w-14 h-14 bg-gold hover:bg-gold-dark text-black rounded-full shadow-lg flex items-center justify-center transition-all z-40"
+	onclick={toggleSlider}
+	class="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-gold text-black shadow-lg transition-transform hover:scale-110 hover:bg-gold-dark"
 	aria-label="Toggle chat"
 >
-	{#if isOpen}
-		<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-		</svg>
-	{:else}
-		<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-			<path
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="2"
-				d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
-			/>
-		</svg>
-		{#if unreadCount > 0}
-			<span
-				class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold"
-			>
-				{unreadCount > 9 ? '9+' : unreadCount}
-			</span>
-		{/if}
+	<Icon icon={faComments} size="lg" />
+	{#if totalUnread > 0}
+		<span class="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+			{totalUnread > 9 ? '9+' : totalUnread}
+		</span>
 	{/if}
 </button>
 
-<!-- Chat Slider -->
-{#if isOpen}
-	<!-- Backdrop for mobile -->
-	<div
-		class="fixed inset-0 bg-black/50 md:hidden z-40"
-		onclick={toggleChat}
-		role="button"
-		tabindex="-1"
-	></div>
+<!-- Chat Slider Panel -->
+<div
+	class="fixed bottom-0 right-0 top-0 z-50 flex w-full max-w-md transform flex-col bg-background shadow-2xl transition-transform duration-300 ease-in-out {isOpen ? 'translate-x-0' : 'translate-x-full'}"
+>
+	<!-- Header -->
+	<div class="flex items-center justify-between border-b border-border bg-secondary px-4 py-3">
+		<h2 class="font-title text-xl font-bold">Messages</h2>
+		<button
+			onclick={toggleSlider}
+			class="rounded-lg p-2 transition-colors hover:bg-background"
+			aria-label="Close chat"
+		>
+			<Icon icon={faTimes} />
+		</button>
+	</div>
 
-	<!-- Chat Panel -->
+	<!-- Case Selector -->
+	{#if cases.length > 1}
+		<div class="border-b border-border p-3">
+			<select
+				class="w-full rounded-lg border border-border bg-background px-3 py-2 text-foreground focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
+				bind:value={selectedCaseId}
+				onchange={() => selectedCaseId && fetchMessages(selectedCaseId)}
+			>
+				{#each cases as caseItem}
+					<option value={caseItem.id}>
+						{caseItem.title}
+						{#if unreadCounts[caseItem.id]}
+							({unreadCounts[caseItem.id]} unread)
+						{/if}
+					</option>
+				{/each}
+			</select>
+		</div>
+	{:else if cases.length === 1}
+		<div class="border-b border-border bg-secondary/50 px-4 py-2 text-sm text-muted-foreground">
+			<span class="font-semibold">{cases[0].title}</span>
+		</div>
+	{/if}
+
+	<!-- Messages Area -->
 	<div
-		class="fixed right-0 top-0 h-full w-full md:w-[400px] bg-background border-l border-border shadow-2xl flex flex-col z-50 transition-transform"
+		bind:this={messagesContainer}
+		class="flex-1 overflow-y-auto p-4"
 	>
-		<!-- Header -->
-		<div class="flex items-center justify-between p-4 border-b border-border">
-			<div>
-				<h2 class="font-title text-xl">Messages</h2>
-				{#if chatUIStore.selectedClientName}
-					<p class="text-sm text-muted-foreground">with {chatUIStore.selectedClientName}</p>
-				{:else if caseId && casesStore.cases.length > 0}
-					{@const currentCase = casesStore.cases.find((c) => c.case.id === caseId)}
-					{#if currentCase}
-						<p class="text-sm text-muted-foreground">{currentCase.case.title}</p>
-					{/if}
+		{#if cases.length === 0 && !defaultRecipientId}
+			<div class="flex h-full items-center justify-center text-center text-muted-foreground">
+				<div>
+					<Icon icon={faComments} size="2xl" class="mx-auto mb-4 opacity-50" />
+					<p>No active cases</p>
+					<p class="text-sm">Contact us to get started</p>
+				</div>
+			</div>
+		{:else if cases.length === 0 && defaultRecipientId}
+			<!-- Client with no cases can still message -->
+			<div class="flex h-full flex-col">
+				{#if messages.length === 0}
+					<div class="flex flex-1 items-center justify-center text-center text-muted-foreground">
+						<div>
+							<Icon icon={faComments} size="2xl" class="mx-auto mb-4 opacity-50" />
+							<p>Send a message to your attorney</p>
+							<p class="text-sm">Your message will be reviewed and a case may be created</p>
+						</div>
+					</div>
+				{:else}
+					<div class="space-y-4">
+						{#each messages as message}
+							{@const isOwn = message.senderId === currentUserId}
+							<div class="flex {isOwn ? 'justify-end' : 'justify-start'}">
+								<div class="max-w-[80%]">
+									<div class="rounded-2xl px-4 py-2 {isOwn ? 'bg-gold text-black rounded-br-md' : 'bg-secondary text-foreground rounded-bl-md'}">
+										{#if !isOwn}
+											<div class="mb-1 text-xs font-semibold text-gold">
+												{message.senderFirstName} {message.senderLastName}
+											</div>
+										{/if}
+										<p class="whitespace-pre-wrap break-words">{message.content}</p>
+									</div>
+									<div class="mt-1 px-2 text-xs text-muted-foreground {isOwn ? 'text-right' : ''}">
+										{formatTime(message.createdAt)}
+									</div>
+								</div>
+							</div>
+						{/each}
+					</div>
 				{/if}
 			</div>
-			<button
-				onclick={toggleChat}
-				class="p-2 hover:bg-muted rounded-md transition-colors"
-				aria-label="Close chat"
-			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-				</svg>
-			</button>
-		</div>
-
-		<!-- Messages Container -->
-		<div bind:this={messagesContainer} class="flex-1 overflow-y-auto p-4">
-			{#if messagesStore.loading && displayMessages().length === 0}
-				<div class="flex items-center justify-center h-full">
-					<div class="text-center">
-						<div class="w-8 h-8 border-4 border-gold border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-						<p class="text-sm text-muted-foreground">Loading messages...</p>
-					</div>
+		{:else if isLoading}
+			<div class="flex h-full items-center justify-center">
+				<Icon icon={faSpinner} class="animate-spin text-gold" size="2xl" />
+			</div>
+		{:else if messages.length === 0}
+			<div class="flex h-full items-center justify-center text-center text-muted-foreground">
+				<div>
+					<Icon icon={faComments} size="2xl" class="mx-auto mb-4 opacity-50" />
+					<p>No messages yet</p>
+					<p class="text-sm">Start the conversation!</p>
 				</div>
-			{:else if displayMessages().length === 0}
-				<div class="flex items-center justify-center h-full text-center">
-					<div>
-						<MessageSquare class="w-10 h-10 mb-2 text-muted-foreground mx-auto" />
-						<p class="text-muted-foreground">No messages yet</p>
-						<p class="text-sm text-muted-foreground">Start the conversation!</p>
+			</div>
+		{:else}
+			<div class="space-y-4">
+				{#each messages as message}
+					{@const isOwn = message.senderId === currentUserId}
+					<div class="flex {isOwn ? 'justify-end' : 'justify-start'}">
+						<div class="max-w-[80%] {isOwn ? 'order-2' : ''}">
+							<div
+								class="rounded-2xl px-4 py-2 {isOwn
+									? 'bg-gold text-black rounded-br-md'
+									: 'bg-secondary text-foreground rounded-bl-md'}"
+							>
+								{#if !isOwn}
+									<div class="mb-1 text-xs font-semibold text-gold">
+										{message.senderFirstName} {message.senderLastName}
+										<span class="ml-1 text-muted-foreground capitalize">({message.senderRole})</span>
+									</div>
+								{/if}
+								<p class="whitespace-pre-wrap break-words">{message.content}</p>
+								{#if message.attachmentDocumentId}
+									<a 
+										href="/api/documents/{message.attachmentDocumentId}" 
+										class="mt-2 flex items-center gap-2 px-3 py-2 rounded-lg {isOwn ? 'bg-black/10 hover:bg-black/20' : 'bg-background hover:bg-background/80'} transition-colors"
+									>
+										<Icon icon={faFile} size="sm" />
+										<span class="text-sm font-medium truncate">{message.attachmentFileName || 'Attachment'}</span>
+										{#if message.attachmentFileSize}
+											<span class="text-xs opacity-70">({formatFileSize(message.attachmentFileSize)})</span>
+										{/if}
+										<Icon icon={faDownload} size="sm" class="ml-auto" />
+									</a>
+								{/if}
+							</div>
+							<div class="mt-1 flex items-center gap-2 px-2 text-xs text-muted-foreground {isOwn ? 'justify-end' : ''}">
+								<span>{formatTime(message.createdAt)}</span>
+								{#if isOwn && message.readAt}
+									<span class="text-green-500">Read</span>
+								{/if}
+							</div>
+						</div>
 					</div>
-				</div>
-			{:else}
-				{#each displayMessages() as item}
-					<MessageBubble
-						message={item.message}
-						sender={item.sender}
-						attachment={item.attachment}
-						isOwn={item.message.senderId === authStore.user?.id}
-					/>
 				{/each}
-			{/if}
-		</div>
+			</div>
+		{/if}
+	</div>
 
-		<!-- Input Area -->
-		<div class="p-4 border-t border-border">
-			<form onsubmit={handleSend} class="space-y-2">
-				{#if selectedFile}
-					<AttachmentUploader onselect={handleFileSelect} onclear={handleFileClear} />
-				{/if}
-
-				<div class="flex gap-2">
-					<textarea
-						bind:value={messageContent}
-						onkeydown={handleKeydown}
-						placeholder="Type a message..."
-						rows="1"
-						class="flex-1 px-3 py-2 border border-input rounded-md bg-background resize-none focus:outline-none focus:ring-2 focus:ring-gold"
-					></textarea>
-
-					{#if !selectedFile}
-						<button
-							type="button"
-							onclick={() => {
-								const uploader = document.createElement('input');
-								uploader.type = 'file';
-								uploader.accept = '.pdf,.doc,.docx,.jpg,.jpeg,.png,.txt';
-								uploader.onchange = (e) => {
-									const file = (e.target as HTMLInputElement).files?.[0];
-									if (file) selectedFile = file;
-								};
-								uploader.click();
-							}}
-							class="px-3 py-2 border border-input rounded-md hover:bg-muted transition-colors"
-							aria-label="Attach file"
-						>
-							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
-								/>
-							</svg>
-						</button>
-					{/if}
-
-					<button
-						type="submit"
-						disabled={(!messageContent.trim() && !selectedFile) || sending}
-						class="px-4 py-2 bg-gold hover:bg-gold-dark text-black font-semibold rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-					>
-						{#if sending}
-							<div class="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
-						{:else}
-							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-							</svg>
-						{/if}
+	<!-- Message Input -->
+	{#if (cases.length > 0 && selectedCaseId) || (cases.length === 0 && defaultRecipientId)}
+		<div class="border-t border-border bg-secondary p-4">
+			{#if attachmentFile}
+				<div class="mb-2 flex items-center gap-2 rounded-lg bg-background px-3 py-2 text-sm">
+					<Icon icon={faFile} class="text-gold" />
+					<span class="flex-1 truncate">{attachmentFile.name}</span>
+					<span class="text-muted-foreground">({formatFileSize(attachmentFile.size)})</span>
+					<button onclick={removeAttachment} class="p-1 hover:text-red-500">
+						<Icon icon={faTimes} size="sm" />
 					</button>
 				</div>
-			</form>
+			{/if}
+			<div class="flex items-end gap-2">
+				{#if selectedCaseId}
+					<input 
+						type="file" 
+						bind:this={fileInput}
+						onchange={handleFileSelect}
+						class="hidden" 
+					/>
+					<button
+						onclick={() => fileInput?.click()}
+						class="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background text-muted-foreground transition-colors hover:border-gold hover:text-gold"
+						aria-label="Attach file"
+					>
+						<Icon icon={faPaperclip} />
+					</button>
+				{/if}
+				<textarea
+					bind:value={newMessage}
+					onkeydown={handleKeydown}
+					placeholder={cases.length === 0 ? "Send a message to your attorney..." : "Type a message..."}
+					rows="1"
+					class="max-h-32 min-h-[2.5rem] flex-1 resize-none rounded-lg border border-border bg-background px-4 py-2 text-foreground placeholder:text-muted-foreground focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
+				></textarea>
+				<button
+					onclick={sendMessage}
+					disabled={(!newMessage.trim() && !attachmentFile) || isSending}
+					class="flex h-10 w-10 items-center justify-center rounded-lg bg-gold text-black transition-colors hover:bg-gold-dark disabled:cursor-not-allowed disabled:opacity-50"
+					aria-label="Send message"
+				>
+					{#if isSending}
+						<Icon icon={faSpinner} class="animate-spin" />
+					{:else}
+						<Icon icon={faPaperPlane} />
+					{/if}
+				</button>
+			</div>
 		</div>
-	</div>
+	{/if}
+</div>
+
+<!-- Backdrop -->
+{#if isOpen}
+	<button
+		onclick={toggleSlider}
+		class="fixed inset-0 z-40 bg-black/50 md:hidden"
+		aria-label="Close chat backdrop"
+	></button>
 {/if}

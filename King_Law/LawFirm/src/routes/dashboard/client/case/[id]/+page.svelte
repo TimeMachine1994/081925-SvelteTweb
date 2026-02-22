@@ -1,7 +1,13 @@
 <script lang="ts">
+	import { faArrowLeft, faFileAlt, faFileInvoiceDollar, faComments, faDownload, faCheckCircle, faClock, faTimesCircle, faGavel } from '@fortawesome/free-solid-svg-icons';
+	import Icon from '$lib/components/Icon.svelte';
 	import type { PageData } from './$types';
 
-	let { data }: { data: PageData } = $props();
+	interface Props {
+		data: PageData;
+	}
+
+	let { data }: Props = $props();
 
 	function formatCurrency(cents: number): string {
 		return new Intl.NumberFormat('en-US', {
@@ -10,268 +16,258 @@
 		}).format(cents / 100);
 	}
 
-	function formatDate(date: Date | string | number): string {
-		// Handle Unix timestamps (seconds) - multiply by 1000 to get milliseconds
-		let dateObj: Date;
-		if (typeof date === 'number') {
-			dateObj = new Date(date < 10000000000 ? date * 1000 : date);
-		} else {
-			dateObj = new Date(date);
-		}
-		return dateObj.toLocaleDateString('en-US', {
+	function formatDate(date: Date): string {
+		return new Intl.DateTimeFormat('en-US', {
 			year: 'numeric',
 			month: 'short',
-			day: 'numeric',
-			hour: '2-digit',
-			minute: '2-digit'
-		});
+			day: 'numeric'
+		}).format(new Date(date));
 	}
 
-	let messageText = $state('');
+	function formatTime(date: Date): string {
+		return new Intl.DateTimeFormat('en-US', {
+			month: 'short',
+			day: 'numeric',
+			hour: 'numeric',
+			minute: '2-digit'
+		}).format(new Date(date));
+	}
+
+	function getStatusIcon(status: string) {
+		switch (status) {
+			case 'active': return faCheckCircle;
+			case 'pending': return faClock;
+			case 'closed': return faTimesCircle;
+			default: return faGavel;
+		}
+	}
+
+	function getStatusColor(status: string) {
+		switch (status) {
+			case 'active': return 'text-green-600 dark:text-green-400';
+			case 'pending': return 'text-yellow-600 dark:text-yellow-400';
+			case 'closed': return 'text-gray-600 dark:text-gray-400';
+			default: return 'text-gold';
+		}
+	}
+
+	// Message state
+	let newMessage = $state('');
+	let isSending = $state(false);
+	let messagesData = $state(data.messages);
 
 	async function sendMessage() {
-		if (!messageText.trim()) return;
+		if (!newMessage.trim() || isSending) return;
 
+		isSending = true;
 		try {
-			const response = await fetch('/api/messages/send', {
+			const res = await fetch('/api/messages', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
 					caseId: data.case.id,
-					recipientId: data.lawyer.id,
-					content: messageText
+					content: newMessage.trim()
 				})
 			});
 
-			if (response.ok) {
-				messageText = '';
-				window.location.reload();
+			if (res.ok) {
+				const result = await res.json();
+				messagesData = [...messagesData, {
+					...result.message,
+					sender: {
+						firstName: data.user.firstName,
+						lastName: data.user.lastName,
+						role: data.user.role
+					}
+				}];
+				newMessage = '';
 			}
-		} catch (error) {
-			console.error('Failed to send message:', error);
+		} catch (e) {
+			console.error('Failed to send message:', e);
+		} finally {
+			isSending = false;
 		}
 	}
 
-	let uploadingFile = $state(false);
-
-	async function uploadFile(event: Event) {
-		const input = event.target as HTMLInputElement;
-		const file = input.files?.[0];
-		if (!file) return;
-
-		uploadingFile = true;
-		const formData = new FormData();
-		formData.append('file', file);
-		formData.append('caseId', data.case.id);
-
-		try {
-			const response = await fetch('/api/documents/upload', {
-				method: 'POST',
-				body: formData
-			});
-
-			if (response.ok) {
-				window.location.reload();
-			}
-		} catch (error) {
-			console.error('Failed to upload file:', error);
-		} finally {
-			uploadingFile = false;
+	function handleKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter' && !e.shiftKey) {
+			e.preventDefault();
+			sendMessage();
 		}
 	}
 </script>
 
-<div>
-	<div class="mb-6">
-		<a href="/dashboard/client" class="text-gold hover:underline text-sm">← Back to Dashboard</a>
-	</div>
+<svelte:head>
+	<title>{data.case.title} - King Law Firm</title>
+</svelte:head>
 
-	<div class="bg-background border border-border rounded-lg p-6 mb-8">
-		<div class="flex justify-between items-start mb-4">
-			<div>
-				<h1 class="font-title text-3xl mb-2">{data.case.title}</h1>
-				<p class="text-muted-foreground">
-					Case ID: <span class="font-mono text-sm">{data.case.id}</span>
-				</p>
-			</div>
-			<span
-				class="text-xs px-3 py-1 rounded-full {data.case.status === 'active'
-					? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-					: data.case.status === 'pending'
-						? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
-						: 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400'}"
-			>
-				{data.case.status}
-			</span>
-		</div>
-
-		{#if data.case.description}
-			<p class="text-muted-foreground mb-4">{data.case.description}</p>
-		{/if}
-
-		<div class="grid md:grid-cols-2 gap-4 pt-4 border-t border-border">
-			<div>
-				<h3 class="font-semibold mb-2">Your Lawyer</h3>
-				<p>
-					{data.lawyer.firstName} {data.lawyer.lastName}
-				</p>
-				<p class="text-sm text-muted-foreground">{data.lawyer.email}</p>
-			</div>
-			<div>
-				<h3 class="font-semibold mb-2">Case Dates</h3>
-				<p class="text-sm">
-					<span class="text-muted-foreground">Created:</span>
-					{formatDate(data.case.createdAt)}
-				</p>
-				<p class="text-sm">
-					<span class="text-muted-foreground">Updated:</span>
-					{formatDate(data.case.updatedAt)}
-				</p>
-			</div>
-		</div>
-	</div>
-
-	<div class="grid lg:grid-cols-2 gap-8">
-		<!-- Left Column -->
-		<div class="space-y-8">
-			<!-- Documents -->
-			<div>
-				<div class="flex justify-between items-center mb-4">
-					<h2 class="font-title text-2xl">Documents</h2>
-					<label class="bg-gold hover:bg-gold-dark text-black font-semibold px-4 py-2 rounded-md cursor-pointer transition-colors">
-						<input type="file" onchange={uploadFile} class="hidden" disabled={uploadingFile} />
-						{uploadingFile ? 'Uploading...' : 'Upload'}
-					</label>
-				</div>
-
-				{#if data.documents.length > 0}
-					<div class="bg-background border border-border rounded-lg overflow-hidden">
-						<table class="w-full">
-							<thead class="bg-muted">
-								<tr>
-									<th class="text-left px-4 py-3 text-sm font-semibold">File Name</th>
-									<th class="text-left px-4 py-3 text-sm font-semibold">Size</th>
-									<th class="text-right px-4 py-3 text-sm font-semibold">Actions</th>
-								</tr>
-							</thead>
-							<tbody>
-								{#each data.documents as doc}
-									<tr class="border-t border-border hover:bg-muted/50">
-										<td class="px-4 py-3 text-sm">{doc.fileName}</td>
-										<td class="px-4 py-3 text-sm text-muted-foreground">
-											{(doc.fileSize / 1024).toFixed(1)} KB
-										</td>
-										<td class="px-4 py-3 text-right">
-											<a href="/api/documents/{doc.id}" class="text-gold hover:underline text-sm">
-												Download
-											</a>
-										</td>
-									</tr>
-								{/each}
-							</tbody>
-						</table>
+<div class="min-h-screen bg-background py-8">
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+		<!-- Back Button & Header -->
+		<div class="mb-8">
+			<a href="/dashboard/client" class="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-4">
+				<Icon icon={faArrowLeft} />
+				<span>Back to Dashboard</span>
+			</a>
+			
+			<div class="flex items-start justify-between">
+				<div>
+					<div class="flex items-center gap-3 mb-2">
+						<Icon icon={getStatusIcon(data.case.status)} class={getStatusColor(data.case.status)} size="lg" />
+						<h1 class="font-title text-3xl font-bold">{data.case.title}</h1>
 					</div>
-				{:else}
-					<div class="bg-background border border-border rounded-lg p-8 text-center">
-						<p class="text-muted-foreground">No documents uploaded yet</p>
-					</div>
-				{/if}
-			</div>
-
-			<!-- Invoices -->
-			<div>
-				<h2 class="font-title text-2xl mb-4">Invoices</h2>
-
-				{#if data.invoices.length > 0}
-					<div class="space-y-3">
-						{#each data.invoices as invoice}
-							<div class="bg-background border border-border rounded-lg p-4">
-								<div class="flex justify-between items-start mb-2">
-									<div>
-										<h3 class="font-semibold">{invoice.description}</h3>
-										<p class="text-sm text-muted-foreground">
-											Due: {formatDate(invoice.dueDate)}
-										</p>
-									</div>
-									<span
-										class="text-xs px-2 py-1 rounded-full {invoice.status === 'paid'
-											? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-											: invoice.status === 'partial'
-												? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
-												: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'}"
-									>
-										{invoice.status}
-									</span>
-								</div>
-								<div class="flex justify-between items-center">
-									<span class="text-lg font-bold">{formatCurrency(invoice.amount)}</span>
-									{#if invoice.status !== 'paid'}
-										<button class="bg-gold hover:bg-gold-dark text-black px-4 py-2 rounded text-sm font-semibold transition-colors">
-											Pay Now
-										</button>
-									{/if}
-								</div>
-							</div>
-						{/each}
-					</div>
-				{:else}
-					<div class="bg-background border border-border rounded-lg p-8 text-center">
-						<p class="text-muted-foreground">No invoices yet</p>
-					</div>
-				{/if}
-			</div>
-		</div>
-
-		<!-- Right Column - Messages -->
-		<div>
-			<h2 class="font-title text-2xl mb-4">Messages</h2>
-
-			<div class="bg-background border border-border rounded-lg overflow-hidden">
-				<div class="h-96 overflow-y-auto p-4 space-y-4">
-					{#if data.messages.length > 0}
-						{#each data.messages as { message, sender }}
-							<div
-								class="p-3 rounded-lg {sender.id === data.lawyer.id
-									? 'bg-muted ml-4'
-									: 'bg-gold/10 mr-4'}"
-							>
-								<div class="flex justify-between items-start mb-1">
-									<span class="font-semibold text-sm">
-										{sender.firstName} {sender.lastName}
-									</span>
-									<span class="text-xs text-muted-foreground">
-										{formatDate(message.createdAt)}
-									</span>
-								</div>
-								<p class="text-sm">{message.content}</p>
-							</div>
-						{/each}
-					{:else}
-						<p class="text-center text-muted-foreground">No messages yet</p>
+					{#if data.case.description}
+						<p class="text-muted-foreground mb-2">{data.case.description}</p>
 					{/if}
+					<div class="text-sm text-muted-foreground">
+						<span class="font-semibold">Attorney:</span>
+						{data.case.lawyer.firstName} {data.case.lawyer.lastName}
+						{#if data.case.lawyer.email}
+							• <a href="mailto:{data.case.lawyer.email}" class="text-gold hover:underline">{data.case.lawyer.email}</a>
+						{/if}
+					</div>
+				</div>
+				<span class="px-4 py-2 bg-secondary rounded-lg text-sm font-semibold capitalize">
+					{data.case.status}
+				</span>
+			</div>
+		</div>
+
+		<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+			<!-- Left Column: Documents & Invoices -->
+			<div class="lg:col-span-1 space-y-8">
+				<!-- Documents -->
+				<div>
+					<h2 class="font-title text-xl font-bold mb-4">Documents</h2>
+					<div class="bg-secondary rounded-lg border border-border overflow-hidden">
+						{#if data.documents.length === 0}
+							<div class="p-6 text-center text-muted-foreground">
+								<Icon icon={faFileAlt} size="xl" class="mx-auto mb-2 opacity-50" />
+								<p>No documents yet</p>
+							</div>
+						{:else}
+							<div class="divide-y divide-border">
+								{#each data.documents as doc}
+									<div class="p-4 hover:bg-background transition-colors">
+										<div class="flex items-center justify-between">
+											<div class="flex items-center gap-3">
+												<Icon icon={faFileAlt} class="text-gold" />
+												<div>
+													<div class="font-semibold text-sm">{doc.fileName}</div>
+													<div class="text-xs text-muted-foreground">{formatDate(doc.uploadedAt)}</div>
+												</div>
+											</div>
+											<a 
+												href="/api/documents/{doc.id}/download" 
+												class="p-2 hover:bg-gold/10 rounded-lg transition-colors"
+												title="Download"
+											>
+												<Icon icon={faDownload} class="text-gold" />
+											</a>
+										</div>
+									</div>
+								{/each}
+							</div>
+						{/if}
+					</div>
 				</div>
 
-				<div class="border-t border-border p-4">
-					<form
-						onsubmit={(e) => {
-							e.preventDefault();
-							sendMessage();
-						}}
-						class="flex gap-2"
-					>
-						<input
-							type="text"
-							bind:value={messageText}
-							placeholder="Type your message..."
-							class="flex-1 px-3 py-2 border border-input rounded-md bg-background"
-						/>
-						<button
-							type="submit"
-							class="bg-gold hover:bg-gold-dark text-black font-semibold px-6 py-2 rounded-md transition-colors"
-						>
-							Send
-						</button>
-					</form>
+				<!-- Invoices -->
+				<div>
+					<h2 class="font-title text-xl font-bold mb-4">Invoices</h2>
+					<div class="bg-secondary rounded-lg border border-border overflow-hidden">
+						{#if data.invoices.length === 0}
+							<div class="p-6 text-center text-muted-foreground">
+								<Icon icon={faFileInvoiceDollar} size="xl" class="mx-auto mb-2 opacity-50" />
+								<p>No invoices yet</p>
+							</div>
+						{:else}
+							<div class="divide-y divide-border">
+								{#each data.invoices as invoice}
+									<div class="p-4 hover:bg-background transition-colors">
+										<div class="flex items-center justify-between mb-2">
+											<div class="font-semibold text-sm">{invoice.description}</div>
+											<span class={`text-xs font-semibold capitalize px-2 py-1 rounded ${
+												invoice.status === 'paid' ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' :
+												invoice.status === 'partial' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300' :
+												'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
+											}`}>
+												{invoice.status}
+											</span>
+										</div>
+										<div class="flex items-center justify-between">
+											<div class="text-xs text-muted-foreground">Due: {formatDate(invoice.dueDate)}</div>
+											<div class="text-lg font-bold">{formatCurrency(invoice.amount)}</div>
+										</div>
+										{#if invoice.status !== 'paid'}
+											<button class="w-full mt-3 px-4 py-2 bg-gold text-black rounded-lg hover:bg-gold-dark transition-colors text-sm font-semibold">
+												Pay Now
+											</button>
+										{/if}
+									</div>
+								{/each}
+							</div>
+						{/if}
+					</div>
+				</div>
+			</div>
+
+			<!-- Right Column: Messages -->
+			<div class="lg:col-span-2">
+				<h2 class="font-title text-xl font-bold mb-4">Messages</h2>
+				<div class="bg-secondary rounded-lg border border-border flex flex-col" style="height: 600px;">
+					<!-- Messages List -->
+					<div class="flex-1 overflow-y-auto p-4 space-y-4">
+						{#if messagesData.length === 0}
+							<div class="flex h-full items-center justify-center text-center text-muted-foreground">
+								<div>
+									<Icon icon={faComments} size="2xl" class="mx-auto mb-4 opacity-50" />
+									<p>No messages yet</p>
+									<p class="text-sm">Start the conversation with your attorney</p>
+								</div>
+							</div>
+						{:else}
+							{#each messagesData as message}
+								{@const isOwn = message.senderId === data.user.id}
+								<div class="flex {isOwn ? 'justify-end' : 'justify-start'}">
+									<div class="max-w-[75%]">
+										<div class="rounded-2xl px-4 py-2 {isOwn ? 'bg-gold text-black rounded-br-md' : 'bg-background text-foreground rounded-bl-md'}">
+											{#if !isOwn}
+												<div class="mb-1 text-xs font-semibold text-gold">
+													{message.sender.firstName} {message.sender.lastName}
+													<span class="text-muted-foreground capitalize">({message.sender.role})</span>
+												</div>
+											{/if}
+											<p class="whitespace-pre-wrap break-words">{message.content}</p>
+										</div>
+										<div class="mt-1 px-2 text-xs text-muted-foreground {isOwn ? 'text-right' : ''}">
+											{formatTime(message.createdAt)}
+										</div>
+									</div>
+								</div>
+							{/each}
+						{/if}
+					</div>
+
+					<!-- Message Input -->
+					<div class="border-t border-border p-4">
+						<div class="flex items-end gap-2">
+							<textarea
+								bind:value={newMessage}
+								onkeydown={handleKeydown}
+								placeholder="Type a message..."
+								rows="2"
+								class="flex-1 resize-none rounded-lg border border-border bg-background px-4 py-2 text-foreground placeholder:text-muted-foreground focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
+							></textarea>
+							<button
+								onclick={sendMessage}
+								disabled={!newMessage.trim() || isSending}
+								class="px-6 py-2 bg-gold text-black rounded-lg hover:bg-gold-dark transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+							>
+								{isSending ? 'Sending...' : 'Send'}
+							</button>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

@@ -1,28 +1,28 @@
 import type { Handle } from '@sveltejs/kit';
-import { validateSessionToken, SESSION_COOKIE_NAME } from '$lib/server/auth';
+import * as auth from '$lib/server/auth';
 
-export const handle: Handle = async ({ event, resolve }) => {
-	console.log('\n🌐 [HOOKS] Request to:', event.url.pathname);
-	const token = event.cookies.get(SESSION_COOKIE_NAME);
+const handleAuth: Handle = async ({ event, resolve }) => {
+	const sessionToken = event.cookies.get(auth.sessionCookieName);
 
-	if (!token) {
-		console.log('🔓 [HOOKS] No session cookie found - user is not authenticated');
+	if (!sessionToken) {
 		event.locals.user = null;
 		event.locals.session = null;
+
 		return resolve(event);
 	}
 
-	console.log('🍪 [HOOKS] Session cookie found:', token.substring(0, 10) + '...');
-	const { session, user } = await validateSessionToken(token);
+	const { session, user } = await auth.validateSessionToken(sessionToken);
 
-	if (user) {
-		console.log('✅ [HOOKS] User authenticated:', { username: user.username, role: user.role });
+	if (session) {
+		auth.setSessionTokenCookie(event.cookies, sessionToken, session.expiresAt);
 	} else {
-		console.log('❌ [HOOKS] Session validation failed - no user found');
+		auth.deleteSessionTokenCookie(event.cookies);
 	}
 
-	event.locals.session = session;
 	event.locals.user = user;
+	event.locals.session = session;
 
 	return resolve(event);
 };
+
+export const handle: Handle = handleAuth;

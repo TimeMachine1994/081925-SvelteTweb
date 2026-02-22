@@ -1,162 +1,124 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
-import { invoices, cases, user as userTable } from '$lib/server/db/schema';
-import { eq, and, or } from 'drizzle-orm';
+import { invoices, cases, user } from '$lib/server/db/schema';
+import { eq, and, inArray } from 'drizzle-orm';
 import { generateId } from '$lib/server/auth';
 
+// GET /api/invoices - Get invoices (optionally filter by caseId)
 export const GET: RequestHandler = async ({ url, locals }) => {
 	if (!locals.user) {
 		throw error(401, 'Unauthorized');
 	}
 
-	try {
-		const caseId = url.searchParams.get('caseId');
+	const caseId = url.searchParams.get('caseId');
 
-		let rawInvoices: typeof invoices.$inferSelect[] = [];
-		if (caseId) {
-			// Get invoices for specific case
-			const [caseData] = await db.select().from(cases).where(eq(cases.id, caseId)).limit(1);
+	if (locals.user.role === 'lawyer' || locals.user.role === 'admin') {
+		// Lawyer sees all their invoices
+		const whereClause = caseId
+			? and(eq(cases.lawyerId, locals.user.id), eq(invoices.caseId, caseId))
+			: eq(cases.lawyerId, locals.user.id);
 
-			if (!caseData) {
-				throw error(404, 'Case not found');
-			}
-
-			// Verify user has access to this case
-			if (
-				locals.user.role !== 'admin' &&
-				caseData.clientId !== locals.user.id &&
-				caseData.lawyerId !== locals.user.id
-			) {
-				throw error(403, 'Access denied');
-			}
-
-			rawInvoices = await db.select().from(invoices).where(eq(invoices.caseId, caseId));
-		} else if (locals.user.role === 'client') {
-			// Get all invoices for client's cases
-			const clientCases = await db
-				.select()
-				.from(cases)
-				.where(eq(cases.clientId, locals.user.id));
-
-			const caseIds = clientCases.map((c) => c.id);
-
-			if (caseIds.length > 0) {
-				rawInvoices = await db
-					.select()
-					.from(invoices)
-					.where(or(...caseIds.map((id) => eq(invoices.caseId, id))));
-			} else {
-				rawInvoices = [];
-			}
-		} else {
-			// Get all invoices for lawyer's cases
-			const lawyerCases = await db
-				.select()
-				.from(cases)
-				.where(eq(cases.lawyerId, locals.user.id));
-
-			const caseIds = lawyerCases.map((c) => c.id);
-
-			if (caseIds.length > 0) {
-				rawInvoices = await db
-					.select()
-					.from(invoices)
-					.where(or(...caseIds.map((id) => eq(invoices.caseId, id))));
-			} else {
-				rawInvoices = [];
-			}
-		}
-
-		// Format invoices to match expected structure: { invoice, case?, client? }
-		const formattedInvoices = await Promise.all(
-			rawInvoices.map(async (inv) => {
-				let caseInfo = null;
-				let clientInfo = null;
-
-				if (inv.caseId) {
-					const [caseData] = await db
-						.select({
-							case: cases,
-							client: userTable
-						})
-						.from(cases)
-						.leftJoin(userTable, eq(cases.clientId, userTable.id))
-						.where(eq(cases.id, inv.caseId))
-						.limit(1);
-
-					if (caseData) {
-						caseInfo = { id: caseData.case.id, title: caseData.case.title };
-						if (caseData.client) {
-							clientInfo = {
-								firstName: caseData.client.firstName,
-								lastName: caseData.client.lastName
-							};
-						}
-					}
+		const results = await db
+			.select({
+				invoice: invoices,
+				case: {
+					id: cases.id,
+					title: cases.title,
+					clientId: cases.clientId
+				},
+				client: {
+					id: user.id,
+					firstName: user.firstName,
+					lastName: user.lastName,
+					email: user.email
 				}
-
-				return {
-					invoice: inv,
-					case: caseInfo,
-					client: clientInfo
-				};
 			})
-		);
+			.from(invoices)
+			.innerJoin(cases, eq(invoices.caseId, cases.id))
+			.innerJoin(user, eq(cases.clientId, user.id))
+			.where(whereClause);
+		return json({
+			invoices: results.map((r) => ({
+				...r.invoice,
+				case: r.case,
+				client: r.client
+			}))
+		});
+	} else {
+		// Client sees only their invoices
+		let query = db
+			.select({
+				invoice: invoices,
+				case: {
+					id: cases.id,
+					title: cases.title
+				}
+			})
+			.from(invoices)
+			.innerJoin(cases, eq(invoices.caseId, cases.id))
+			.where(eq(cases.clientId, locals.user.id));
 
-		return json({ invoices: formattedInvoices });
-	} catch (err) {
-		console.error('Get invoices error:', err);
-		if (err instanceof Response) throw err;
-		throw error(500, 'Failed to fetch invoices');
+		const results = await query;
+		return json({
+			invoices: results.map((r) => ({
+				...r.invoice,
+				case: r.case
+			}))
+		});
 	}
 };
 
+// POST /api/invoices - Create a new invoice (lawyers only)
 export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!locals.user) {
 		throw error(401, 'Unauthorized');
 	}
 
-	if (locals.user.role === 'client') {
+	if (locals.user.role !== 'lawyer' && locals.user.role !== 'admin') {
 		throw error(403, 'Only lawyers can create invoices');
 	}
 
-	try {
-		const { caseId, description, amount, dueDate } = await request.json();
+	const body = await request.json();
+	const { caseId, amount, description, dueDate } = body;
 
-		if (!caseId || !description || !amount || !dueDate) {
-			throw error(400, 'caseId, description, amount, and dueDate are required');
-		}
-
-		// Verify case exists and lawyer has access
-		const [caseData] = await db.select().from(cases).where(eq(cases.id, caseId)).limit(1);
-
-		if (!caseData) {
-			throw error(404, 'Case not found');
-		}
-
-		if (locals.user.role !== 'admin' && caseData.lawyerId !== locals.user.id) {
-			throw error(403, 'You can only create invoices for your own cases');
-		}
-
-		const invoiceId = generateId();
-		const [newInvoice] = await db
-			.insert(invoices)
-			.values({
-				id: invoiceId,
-				caseId,
-				description,
-				amount: parseInt(amount),
-				dueDate: Math.floor(new Date(dueDate).getTime() / 1000),
-				status: 'unpaid',
-				paidAmount: 0
-			})
-			.returning();
-
-		return json({ success: true, invoice: newInvoice });
-	} catch (err) {
-		console.error('Create invoice error:', err);
-		if (err instanceof Response) throw err;
-		throw error(500, 'Failed to create invoice');
+	if (!caseId || !amount || !description || !dueDate) {
+		throw error(400, 'caseId, amount, description, and dueDate are required');
 	}
+
+	// Verify case exists and belongs to this lawyer
+	const caseRecord = await db.query.cases.findFirst({
+		where: and(eq(cases.id, caseId), eq(cases.lawyerId, locals.user.id))
+	});
+
+	if (!caseRecord) {
+		throw error(404, 'Case not found or access denied');
+	}
+
+	const invoiceId = generateId();
+	const now = new Date();
+
+	await db.insert(invoices).values({
+		id: invoiceId,
+		caseId,
+		amount: Math.round(amount * 100), // Convert dollars to cents
+		description: description.trim(),
+		status: 'unpaid',
+		dueDate: new Date(dueDate),
+		paidAmount: 0,
+		createdAt: now
+	});
+
+	const newInvoice = {
+		id: invoiceId,
+		caseId,
+		amount: Math.round(amount * 100),
+		description: description.trim(),
+		status: 'unpaid',
+		dueDate: new Date(dueDate),
+		paidAmount: 0,
+		createdAt: now
+	};
+
+	return json({ invoice: newInvoice }, { status: 201 });
 };

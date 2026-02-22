@@ -1,107 +1,92 @@
 <script lang="ts">
-	import { authStore } from '$lib/stores/auth.svelte.ts';
-	import { goto } from '$app/navigation';
+	import { faRightToBracket, faUser, faLock } from '@fortawesome/free-solid-svg-icons';
+	import Icon from '$lib/components/Icon.svelte';
+	import { enhance } from '$app/forms';
+	import type { ActionData } from './$types';
 
-	let email = $state('');
-	let password = $state('');
-	let error = $state('');
-
-	async function handleSubmit(e: Event) {
-		e.preventDefault();
-		error = '';
-		
-		const result = await authStore.login(email, password);
-		
-		if (result.success) {
-			goto(authStore.dashboardRoute);
-		} else {
-			error = result.error || 'Login failed';
-		}
+	interface Props {
+		form?: ActionData;
 	}
+
+	let { form }: Props = $props();
+	let isSubmitting = $state(false);
 </script>
 
 <svelte:head>
-	<title>Sign In | King Law</title>
+	<title>Login - King Law Firm</title>
 </svelte:head>
 
-<div class="min-h-screen flex">
-	<!-- Left Panel - Branding -->
-	<div class="hidden lg:flex lg:w-1/2 bg-king-blue items-center justify-center p-12">
-		<div class="max-w-md">
-			<div class="flex items-center gap-3 mb-8">
-				<img src="https://kinglawbucket.s3.us-east-2.amazonaws.com/public/King+Law+Official+Logo++No+BKG.png" alt="King Law" class="h-16 w-auto" />
-			</div>
-			<h2 class="font-title text-4xl text-white leading-tight mb-6">
-				Welcome to Your<br/>Client Portal
-			</h2>
-			<p class="text-white/60 text-lg leading-relaxed">
-				Access your case documents, communicate with your attorney, and stay updated on your legal matters—all in one secure place.
-			</p>
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-secondary to-background py-12 px-4 sm:px-6 lg:px-8">
+	<div class="max-w-md w-full space-y-8">
+		<div class="text-center">
+			<Icon icon={faRightToBracket} size="2xl" class="text-gold mx-auto mb-4" />
+			<h2 class="font-title text-4xl font-bold mb-2">Welcome Back</h2>
+			<p class="text-muted-foreground">Sign in to access your dashboard</p>
 		</div>
-	</div>
 
-	<!-- Right Panel - Login Form -->
-	<div class="w-full lg:w-1/2 flex items-center justify-center p-8 bg-background">
-		<div class="w-full max-w-md">
-			<!-- Mobile Logo -->
-			<div class="lg:hidden flex items-center gap-3 mb-8 justify-center">
-				<img src="https://kinglawbucket.s3.us-east-2.amazonaws.com/public/King+Law+Official+Logo++No+BKG.png" alt="King Law" class="h-14 w-auto" />
-			</div>
+		<form
+			method="POST"
+			use:enhance={() => {
+				isSubmitting = true;
+				return async ({ update }) => {
+					await update();
+					isSubmitting = false;
+				};
+			}}
+			class="mt-8 space-y-6 bg-background p-8 rounded-lg border border-gray-300 dark:border-gray-700 shadow-lg"
+		>
+			{#if form?.message}
+				<div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200 px-4 py-3 rounded-lg">
+					{form.message}
+				</div>
+			{/if}
 
-			<div class="mb-8">
-				<p class="text-gold uppercase tracking-[0.3em] text-sm mb-4">Client Portal</p>
-				<h1 class="font-title text-4xl text-king-blue dark:text-white mb-2">Sign In</h1>
-				<p class="text-gray-500 dark:text-white/60">Enter your credentials to access your account</p>
-			</div>
-
-			<form onsubmit={handleSubmit} class="space-y-6">
-				{#if error}
-					<div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 text-red-800 dark:text-red-200 px-6 py-4 rounded-r-lg">
-						{error}
-					</div>
-				{/if}
-
+			<div class="space-y-4">
 				<div>
-					<label for="email" class="block text-sm font-medium text-king-blue dark:text-white mb-2">Email</label>
+					<label for="username" class="block text-sm font-semibold mb-2">
+						<Icon icon={faUser} size="sm" class="inline mr-2" />
+						Username
+					</label>
 					<input
-						type="email"
-						id="email"
-						bind:value={email}
+						type="text"
+						id="username"
+						name="username"
 						required
-						class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-muted dark:text-foreground focus:bg-background focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
+						autocomplete="username"
+						class="w-full px-4 py-3 bg-secondary border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
+						placeholder="Enter your username"
 					/>
 				</div>
 
 				<div>
-					<label for="password" class="block text-sm font-medium text-king-blue dark:text-white mb-2">Password</label>
+					<label for="password" class="block text-sm font-semibold mb-2">
+						<Icon icon={faLock} size="sm" class="inline mr-2" />
+						Password
+					</label>
 					<input
 						type="password"
 						id="password"
-						bind:value={password}
+						name="password"
 						required
-						class="w-full px-4 py-3 border border-gray-200 dark:border-border rounded-lg bg-muted dark:text-foreground focus:bg-background focus:border-gold focus:ring-2 focus:ring-gold/20 transition-all outline-none"
+						autocomplete="current-password"
+						class="w-full px-4 py-3 bg-secondary border border-gray-300 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-gold"
+						placeholder="Enter your password"
 					/>
 				</div>
-
-				<button
-					type="submit"
-					disabled={authStore.loading}
-					class="w-full bg-king-blue hover:bg-king-blue-light text-white font-semibold py-4 px-6 rounded-lg transition-all hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-				>
-					{authStore.loading ? 'Signing in...' : 'Sign In'}
-				</button>
-
-				<p class="text-center text-gray-500 dark:text-white/60">
-					Don't have an account?
-					<a href="/register" class="text-gold hover:text-gold-dark font-semibold">Create one</a>
-				</p>
-			</form>
-
-			<div class="mt-12 pt-8 border-t border-gray-100 dark:border-white/10 text-center">
-				<a href="/" class="text-gray-400 dark:text-white/50 hover:text-king-blue dark:hover:text-gold transition-colors text-sm">
-					← Back to Homepage
-				</a>
 			</div>
-		</div>
+
+			<button
+				type="submit"
+				disabled={isSubmitting}
+				class="w-full px-6 py-3 bg-gold text-black font-semibold rounded-lg hover:bg-gold-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+			>
+				{isSubmitting ? 'Signing in...' : 'Sign In'}
+			</button>
+
+			<div class="text-center text-sm text-muted-foreground">
+				Don't have an account?
+				<a href="/register" class="text-gold hover:underline font-semibold">Register here</a>
+			</div>
+		</form>
 	</div>
 </div>
