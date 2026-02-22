@@ -1,1 +1,0 @@
-export { default as component } from "../../../../src/routes/services/property-damage/+page.svelte";

@@ -1,1 +1,0 @@
-export { default as component } from "../../../../src/routes/services/appellate-strategy/+page.svelte";
