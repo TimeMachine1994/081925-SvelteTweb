@@ -1,0 +1,1 @@
+export { default as component } from "../../../../src/routes/services/real-estate-business/+page.svelte";

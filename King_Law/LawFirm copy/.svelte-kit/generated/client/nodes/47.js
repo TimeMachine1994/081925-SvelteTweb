@@ -1,0 +1,1 @@
+export { default as component } from "../../../../src/routes/services/family-estate-law/+page.svelte";
