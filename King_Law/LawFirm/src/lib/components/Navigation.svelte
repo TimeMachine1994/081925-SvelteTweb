@@ -55,6 +55,7 @@
 
 				<a href="/about" class="hover:text-gold transition-colors">About</a>
 				<a href="/contact" class="hover:text-gold transition-colors">Contact</a>
+				<a href="/book" class="hover:text-gold transition-colors">Book Now</a>
 				
 				{#if user}
 					<a
@@ -86,10 +87,10 @@
 
 				<!-- Contact Button -->
 				<a
-					href="/contact"
+					href="/book"
 					class="px-6 py-2 bg-gold text-black font-semibold rounded-lg hover:bg-gold-dark transition-colors"
 				>
-					Free Consultation
+					Book Consultation
 				</a>
 			</div>
 
@@ -145,6 +146,14 @@
 					Contact
 				</a>
 
+				<a
+					href="/book"
+					class="block py-2 hover:text-gold transition-colors"
+					onclick={() => (mobileMenuOpen = false)}
+				>
+					Book Now
+				</a>
+
 				{#if user}
 					<a
 						href={user.role === 'lawyer' ? '/dashboard/lawyer' : '/dashboard/client'}
@@ -166,11 +175,11 @@
 				{/if}
 
 				<a
-					href="/contact"
+					href="/book"
 					class="block w-full text-center px-6 py-3 bg-gold text-black font-semibold rounded-lg hover:bg-gold-dark transition-colors"
 					onclick={() => (mobileMenuOpen = false)}
 				>
-					Free Consultation
+					Book Consultation
 				</a>
 			</div>
 		</div>

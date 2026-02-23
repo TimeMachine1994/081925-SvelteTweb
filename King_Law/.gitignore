@@ -1,0 +1,12 @@
+node_modules
+.svelte-kit
+.vercel
+build
+.output
+.env
+.env.*
+!.env.example
+!.env.test
+.DS_Store
+Thumbs.db
+*.db

@@ -66,7 +66,7 @@
 			</p>
 			<div class="flex flex-col sm:flex-row gap-4 justify-center">
 				<a
-					href="/contact"
+					href="/book"
 					class="px-8 py-4 bg-gold text-black font-semibold rounded-lg hover:bg-gold-dark transition-colors text-lg"
 				>
 					Schedule Consultation
