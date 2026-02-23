@@ -3,6 +3,18 @@
 **Date:** January 22, 2026  
 **Objective:** Comprehensive audit of all functions, APIs, and interfaces with Svelte 5 best practices compliance
 
+> **⚠️ PARTIALLY OUTDATED (Feb 17, 2026)**  
+> This audit was conducted when the detail page was **860 lines**. It is now **~688 lines** due to significant refactoring:
+> - **Stream creation form** — Removed. Now handled via `MemorialBlockEditor` → `AddBlockModal` → livestream blocks
+> - **Emergency embed form** — Removed. Now handled via embed blocks in the block editor
+> - **`handleCreateStream()`** — No longer exists in this file
+> - **`handleSetEmergencyEmbed()` / `handleRemoveEmergencyEmbed()`** — No longer exist
+> - **`emergencyEmbed` / `emergencyChatEmbed` / `publicNote` / `videoFile`** — No longer loaded by server
+> - **`location.reload()` on detail page** — Fixed (uses `invalidateAll()`)
+> - **`alert()` / `confirm()` on detail page** — Still present (7 alert, 3 confirm)
+> 
+> See `WBS_BLOCK_EDITOR_SYSTEM.md` for the new block editor architecture.
+
 ---
 
 ## EXECUTIVE SUMMARY

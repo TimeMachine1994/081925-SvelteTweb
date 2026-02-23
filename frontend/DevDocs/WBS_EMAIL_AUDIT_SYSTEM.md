@@ -207,8 +207,66 @@ function sanitizeForLog(data: Record<string, any>): Record<string, any> {
   if (sanitized.resetLink) {
     sanitized._resetLinkIncluded = true;
   }
+
+  // Mask confirmation URLs (strip tokens)
+  if (sanitized.confirmationUrl && typeof sanitized.confirmationUrl === 'string') {
+    sanitized._confirmationUrlIncluded = true;
+    const url = sanitized.confirmationUrl as string;
+    if (url.includes('?')) {
+      sanitized.confirmationUrl = url.split('?')[0] + '?token=***MASKED***';
+    }
+  }
+
+  // Mask calculator magic links (strip tokens)
+  if (sanitized.calculatorMagicLink && typeof sanitized.calculatorMagicLink === 'string') {
+    sanitized._calculatorMagicLinkIncluded = true;
+    const url = sanitized.calculatorMagicLink as string;
+    if (url.includes('?')) {
+      sanitized.calculatorMagicLink = url.split('?')[0] + '?token=***MASKED***';
+    }
+  }
   
   return sanitized;
+}
+
+/**
+ * Helper to build log params from common email data patterns
+ * Simplifies integration — all 14 email functions use this
+ */
+export function buildLogParams(
+  type: LogEmailParams['type'],
+  to: string,
+  templateData: Record<string, unknown>,
+  options: {
+    templateId?: string;
+    templateName?: string;
+    subject?: string;
+    cc?: string[];
+    triggeredBy?: string;
+    triggeredByUserId?: string;
+    triggeredByAdminId?: string;
+    memorialId?: string;
+    userId?: string;
+    invoiceId?: string;
+    streamId?: string;
+  } = {}
+): LogEmailParams {
+  return {
+    type,
+    to,
+    templateData,
+    templateId: options.templateId,
+    templateName: options.templateName,
+    subject: options.subject,
+    cc: options.cc,
+    triggeredBy: options.triggeredBy || type,
+    triggeredByUserId: options.triggeredByUserId,
+    triggeredByAdminId: options.triggeredByAdminId,
+    memorialId: options.memorialId,
+    userId: options.userId,
+    invoiceId: options.invoiceId,
+    streamId: options.streamId
+  };
 }
 
 /**
@@ -610,19 +668,20 @@ Route: /admin/system/email-logs
 ## Implementation Schedule
 
 ### Week 1: Core Infrastructure
-- [ ] **Day 1-2**: Phase 1.1 (Data model & types)
-- [ ] **Day 3-4**: Phase 1.2 (Audit logging service)
-- [ ] **Day 5**: Phase 1.3 (Integrate into first 5 email functions)
+- [x] **Day 1-2**: Phase 1.1 (Data model & types)
+- [x] **Day 3-4**: Phase 1.2 (Audit logging service)
+- [x] **Day 5**: Phase 1.3 (Integrate into first 5 email functions)
 
 ### Week 2: Complete Integration & API
-- [ ] **Day 1-2**: Phase 1.3 continued (Remaining 9 email functions)
-- [ ] **Day 3-4**: Phase 2.1 (API endpoints)
+- [x] **Day 1-2**: Phase 1.3 continued (Remaining 9 email functions)
+- [x] **Day 3-4**: Phase 2.1 (API endpoints — list, detail, resend)
 - [ ] **Day 5**: Testing & bug fixes
 
 ### Week 3: Admin UI
-- [ ] **Day 1-2**: Phase 3.1 (List page with DataGrid)
-- [ ] **Day 3**: Phase 3.2 (Detail view component)
-- [ ] **Day 4**: Phase 3.3 (Integration with existing pages)
+- [x] **Day 1-2**: Phase 3.1 (List page with DataGrid, FilterBuilder, stats, pagination)
+- [x] **Day 3**: Phase 3.2 (EmailLogDetail modal — JSON viewer, resend, related links)
+- [x] **Day 4**: Phase 3.3.1 (Email logs link in admin sidebar navigation)
+- [ ] **Day 4**: Phase 3.3.2-3.3.3 (Integration with memorial/user detail pages — deferred)
 - [ ] **Day 5**: Phase 4.2 (Documentation)
 
 ### Week 4: Polish & Testing
@@ -690,5 +749,5 @@ Route: /admin/system/email-logs
 
 ---
 
-*Document Version: 1.0*  
-*Last Updated: January 29, 2026*
+*Document Version: 1.1*  
+*Last Updated: February 19, 2026 — Phase 2 (API endpoints) and Phase 3 (Admin UI) implemented*

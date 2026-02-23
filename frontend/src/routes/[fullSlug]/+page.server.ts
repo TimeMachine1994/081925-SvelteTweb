@@ -76,12 +76,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			custom_html: memorialData.custom_html || null,
 			hasCustomHtml: hasCustomHtml,
 			createdByUserId: memorialData.createdByUserId || null,
-			// Emergency embed overrides
-			emergencyEmbed: memorialData.emergencyEmbed || null,
-			emergencyChatEmbed: memorialData.emergencyChatEmbed || null,
 			// Admin display overrides
 			customTitle: memorialData.customTitle || null,
-			publicNote: memorialData.publicNote || null,
 			// Content blocks for WYSIWYG editor
 			contentBlocks: memorialData.contentBlocks || [],
 			contentBlocksVersion: memorialData.contentBlocksVersion || 0,
@@ -98,7 +94,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			lovedOneName: memorial.lovedOneName,
 			fullSlug: memorial.fullSlug,
 			isPublic: memorial.isPublic,
-			hasEmergencyEmbed: !!memorial.emergencyEmbed
+			contentBlocks: memorial.contentBlocks?.length || 0
 		});
 
 		// Load streams for this memorial

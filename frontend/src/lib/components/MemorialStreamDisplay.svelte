@@ -68,29 +68,12 @@
 		};
 	}
 	
-	interface EmergencyEmbed {
-		embedCode: string;
-		title: string;
-		createdAt: string;
-		createdBy: string;
-		createdByEmail?: string;
-	}
-	
-	interface EmergencyChatEmbed {
-		embedCode: string;
-		title?: string;
-		createdAt: string;
-		createdBy: string;
-	}
-	
 	interface Props {
 		streams: Stream[];
 		memorialName: string;
-		emergencyEmbed?: EmergencyEmbed | null;
-		emergencyChatEmbed?: EmergencyChatEmbed | null;
 	}
 	
-	let { streams, memorialName, emergencyEmbed, emergencyChatEmbed }: Props = $props();
+	let { streams, memorialName }: Props = $props();
 	
 	// Real-time stream updates - this will be updated by Firestore listeners
 	let liveStreams = $state<Stream[]>(streams || []);
@@ -354,18 +337,7 @@
 	);
 </script>
 
-{#if emergencyEmbed}
-	<!-- Emergency Embed Override - Takes Priority -->
-	<div class="memorial-streams emergency-active">
-		<div class="stream-section">
-			<div class="stream-item">
-				<div class="embed-container">
-					{@html emergencyEmbed.embedCode}
-				</div>
-			</div>
-		</div>
-	</div>
-{:else if hasVisibleStreams}
+{#if hasVisibleStreams}
 	<div class="memorial-streams">
 		<!-- Live Streams -->
 		{#if categorizedLiveStreams.length > 0}
@@ -420,26 +392,12 @@
 								</div>
 								
 								{#if stream.chat?.enabled}
-									<!-- Chat column - emergency embed or normal chat -->
 									<div class="chat-column">
-										{#if emergencyChatEmbed}
-											<!-- Emergency chat embed override -->
-											<div class="emergency-chat-embed">
-												<div class="chat-header emergency">
-													<h3>💬 {emergencyChatEmbed.title || 'Live Chat'}</h3>
-												</div>
-												<div class="embed-content">
-													{@html emergencyChatEmbed.embedCode}
-												</div>
-											</div>
-										{:else}
-											<!-- Normal chat widget -->
-											<LiveChatWidget 
-												streamId={stream.id} 
-												enabled={true}
-												locked={stream.chat?.locked ?? false}
-											/>
-										{/if}
+										<LiveChatWidget 
+											streamId={stream.id} 
+											enabled={true}
+											locked={stream.chat?.locked ?? false}
+										/>
 									</div>
 								{/if}
 							</div>
@@ -602,22 +560,11 @@
 								
 								{#if stream.chat?.enabled}
 									<div class="chat-column">
-										{#if emergencyChatEmbed}
-											<div class="emergency-chat-embed">
-												<div class="chat-header emergency">
-													<h3>💬 {emergencyChatEmbed.title || 'Chat'}</h3>
-												</div>
-												<div class="embed-content">
-													{@html emergencyChatEmbed.embedCode}
-												</div>
-											</div>
-										{:else}
-											<LiveChatWidget 
-												streamId={stream.id} 
-												enabled={true}
-												locked={stream.chat?.locked ?? false}
-											/>
-										{/if}
+										<LiveChatWidget 
+											streamId={stream.id} 
+											enabled={true}
+											locked={stream.chat?.locked ?? false}
+										/>
 									</div>
 								{/if}
 							</div>
@@ -637,22 +584,11 @@
 								
 								{#if stream.chat?.enabled}
 									<div class="chat-column">
-										{#if emergencyChatEmbed}
-											<div class="emergency-chat-embed">
-												<div class="chat-header emergency">
-													<h3>💬 {emergencyChatEmbed.title || 'Chat'}</h3>
-												</div>
-												<div class="embed-content">
-													{@html emergencyChatEmbed.embedCode}
-												</div>
-											</div>
-										{:else}
-											<LiveChatWidget 
-												streamId={stream.id} 
-												enabled={true}
-												locked={stream.chat?.locked ?? false}
-											/>
-										{/if}
+										<LiveChatWidget 
+											streamId={stream.id} 
+											enabled={true}
+											locked={stream.chat?.locked ?? false}
+										/>
 									</div>
 								{/if}
 							</div>
@@ -1184,57 +1120,6 @@
 		.placeholder-description {
 			font-size: 0.875rem;
 		}
-	}
-	
-	/* Emergency embed: Remove all gaps for flush appearance */
-	.memorial-streams.emergency-active .stream-section {
-		margin-bottom: 0;
-	}
-	
-	.memorial-streams.emergency-active .stream-item {
-		margin-bottom: 0;
-	}
-	
-	/* Emergency Chat Embed Styles */
-	.emergency-chat-embed {
-		display: flex;
-		flex-direction: column;
-		height: 100%;
-		min-height: 400px;
-		border: 1px solid #4a4a4a;
-		border-radius: 8px;
-		overflow: hidden;
-		background: #1a1a1a;
-	}
-	
-	.emergency-chat-embed .chat-header {
-		padding: 0.75rem 1rem;
-		background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
-		border-bottom: 1px solid #4a4a4a;
-	}
-	
-	.emergency-chat-embed .chat-header.emergency {
-		background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%);
-		border-bottom: 1px solid #8b5cf6;
-	}
-	
-	.emergency-chat-embed .chat-header h3 {
-		margin: 0;
-		font-size: 1rem;
-		font-weight: 600;
-		color: white;
-	}
-	
-	.emergency-chat-embed .embed-content {
-		flex: 1;
-		overflow: hidden;
-	}
-	
-	.emergency-chat-embed .embed-content :global(iframe) {
-		width: 100%;
-		height: 100%;
-		min-height: 350px;
-		border: none;
 	}
 	
 	/* Download Master Button - Centered below video */

@@ -247,7 +247,7 @@
 		<meta property="og:site_name" content="Tributestream" />
 		<meta property="og:title" content={`Celebration of Life for ${memorial.lovedOneName}`} />
 		<meta property="og:description" content={memorial.content || `Join us in celebrating the life of ${memorial.lovedOneName}`} />
-		<meta property="og:url" content={browser ? window.location.href : `https://tributestream.com/${memorial.fullSlug || memorial.slug}`} />
+		<meta property="og:url" content={browser ? window.location.href : `https://tributestream.com/${memorial.fullSlug}`} />
 		{#if memorial.imageUrl}
 			<meta property="og:image" content={memorial.imageUrl} />
 			<meta property="og:image:alt" content={memorial.lovedOneName} />

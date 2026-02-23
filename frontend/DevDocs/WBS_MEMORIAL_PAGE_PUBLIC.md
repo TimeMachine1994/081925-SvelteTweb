@@ -3,6 +3,15 @@
 **Document Created:** January 22, 2026  
 **Route:** `/[fullSlug]` → `src/routes/[fullSlug]/+page.server.ts`
 
+> **⚠️ PARTIALLY OUTDATED (Feb 17, 2026)**  
+> The following features described in this document have been **removed** and replaced by the Block Editor system (see `WBS_BLOCK_EDITOR_SYSTEM.md`):
+> - `emergencyEmbed` — replaced by embed blocks (`type: 'embed'`, `embedType: 'video'`)
+> - `emergencyChatEmbed` — replaced by embed blocks (`type: 'embed'`, `embedType: 'chat'`)
+> - `publicNote` — replaced by text blocks (`type: 'text'`, `style: 'note'`)
+> 
+> These fields are no longer loaded by the server or rendered by `MemorialStreamDisplay.svelte`.  
+> The public page now uses `BlockRenderer.svelte` for content when `contentBlocks` are present.
+
 ---
 
 ## 1. Server Load Function (READ Operations)
@@ -44,7 +53,24 @@ const slideshowsSnapshot = await adminDb
 
 ---
 
-## 2. Client-Side Real-Time Listeners
+## 2. Component Inventory
+
+| **Component** | **Path** | **Purpose** |
+|---------------|----------|-------------|
+| `+page.svelte` | `src/routes/[fullSlug]/+page.svelte` | Page shell — layout, OG meta tags, permission gating |
+| `MemorialStreamDisplay` | `src/lib/components/MemorialStreamDisplay.svelte` | Categorizes streams (live/scheduled/recorded), sets up real-time Firestore listeners |
+| `CountdownVideoPlayer` | `src/lib/components/CountdownVideoPlayer.svelte` | Styled video placeholder showing scheduled date/time for upcoming livestreams |
+| `BlockRenderer` | `src/lib/components/memorial/BlockRenderer.svelte` | Routes `contentBlocks` to the correct renderer (livestream → `MemorialStreamDisplay`, embed → `EmbedRenderer`, text → `TextRenderer`) |
+| `EmbedRenderer` | `src/lib/components/memorial/EmbedRenderer.svelte` | Renders embed blocks (video/chat iframes) with sanitization |
+| `TextRenderer` | `src/lib/components/memorial/TextRenderer.svelte` | Renders text blocks (headings, notes, paragraphs) |
+| `BookingReminderBanner` | `src/lib/components/BookingReminderBanner.svelte` | Displays booking reminder banner to memorial owners |
+| `SlideshowSection` | `src/lib/components/SlideshowSection.svelte` | Renders photo slideshows |
+| `MuxVideoPlayer` | `src/lib/components/streaming/MuxVideoPlayer.svelte` | Mux HLS video player for live and recorded streams |
+| `LiveChatWidget` | `src/lib/components/streaming/LiveChatWidget.svelte` | Real-time chat widget alongside streams |
+
+---
+
+## 3. Client-Side Real-Time Listeners
 
 Located in: `src/lib/components/MemorialStreamDisplay.svelte`
 
@@ -234,19 +260,30 @@ const hasPermission =
 │                    +page.svelte (Client)                         │
 │                                                                  │
 │  - Display memorial info                                         │
-│  - Render MemorialStreamDisplay component                        │
+│  - Render BlockRenderer (if contentBlocks present)               │
+│  - Render MemorialStreamDisplay (via BlockRenderer or direct)    │
 │  - Render SlideshowSection component                            │
+│  - Render BookingReminderBanner (if owner)                      │
 └─────────────────────────────────────────────────────────────────┘
                               │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│              MemorialStreamDisplay.svelte                        │
-│                                                                  │
-│  - Setup onSnapshot() listeners for each stream                 │
-│  - Categorize: live / scheduled / recorded                      │
-│  - Render MuxVideoPlayer or Cloudflare iframe                   │
-│  - Render LiveChatWidget if chat.enabled                        │
-└─────────────────────────────────────────────────────────────────┘
+                    ┌─────────┼─────────┐
+                    ▼         ▼         ▼
+          ┌──────────┐ ┌──────────┐ ┌──────────┐
+          │BlockRend.│ │Slideshow │ │Booking   │
+          │          │ │Section   │ │Reminder  │
+          └────┬─────┘ └──────────┘ └──────────┘
+               │
+       ┌───────┼───────┐
+       ▼       ▼       ▼
+┌──────────┐┌──────┐┌──────┐
+│ Memorial ││Embed ││Text  │
+│ Stream   ││Rend. ││Rend. │
+│ Display  │└──────┘└──────┘
+└────┬─────┘
+     │
+     ├─── MuxVideoPlayer (live/recorded)
+     ├─── CountdownVideoPlayer (scheduled)
+     └─── LiveChatWidget (if chat.enabled)
 ```
 
 ---

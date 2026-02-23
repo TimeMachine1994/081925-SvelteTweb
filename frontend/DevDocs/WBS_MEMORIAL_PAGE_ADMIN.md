@@ -5,6 +5,16 @@
 - List: `/admin/services/memorials` → `src/routes/admin/services/memorials/+page.server.ts`
 - Detail: `/admin/services/memorials/[memorialId]` → `src/routes/admin/services/memorials/[memorialId]/+page.server.ts`
 
+> **⚠️ PARTIALLY OUTDATED (Feb 19, 2026)**  
+> The following features have been **removed** from the codebase and replaced by the Block Editor system (see `WBS_BLOCK_EDITOR_SYSTEM.md`):
+> - **Old Section 3.3 (Stream Creation Form)** — Deleted. Streams are now created via `MemorialBlockEditor` → `AddBlockModal` → `POST /blocks/livestream`
+> - **Old Section 3.4 (Emergency Embed API)** — Deleted. API endpoints removed. Replaced by embed blocks (`type: 'embed'`)
+> - **`publicNote`** — Replaced by text blocks (`type: 'text'`, `style: 'note'`)
+> - **`emergencyEmbed` / `emergencyChatEmbed` / `videoFile`** — API endpoints deleted, fields no longer loaded by server
+> 
+> The admin detail page now uses `MemorialBlockEditor.svelte` (11 components) as the primary content management interface.  
+> The detail page is now ~688 lines (was ~860 when this doc was written).
+
 ---
 
 ## 1. List Page Server Load (READ Operations)
@@ -75,9 +85,41 @@ const followerCount = followersSnap.size;
 
 ---
 
-## 3. Admin WRITE Operations (via API Endpoints)
+## 3. Component Inventory
 
-### 3.1 Bulk Actions API (`/api/admin/bulk-actions`)
+### List Page Components
+
+| **Component** | **Path** | **Purpose** |
+|---------------|----------|-------------|
+| `+page.svelte` | `src/routes/admin/services/memorials/+page.svelte` | List page shell — search, sort, pagination, inline actions |
+| `AdminLayout` | `src/lib/components/admin/AdminLayout.svelte` | Shared admin sidebar + header layout |
+| `DataGrid` | `src/lib/components/admin/DataGrid.svelte` | Sortable data table with column definitions |
+| `BulkActionBar` | `src/lib/components/admin/BulkActionBar.svelte` | Multi-select action bar (mark paid, delete, etc.) |
+| `FilterBuilder` | `src/lib/components/admin/FilterBuilder.svelte` | Dynamic filter UI for narrowing memorial list |
+
+### Detail Page Components
+
+| **Component** | **Path** | **Purpose** |
+|---------------|----------|-------------|
+| `+page.svelte` | `src/routes/admin/services/memorials/[memorialId]/+page.svelte` | Detail page shell (~688 lines) — orchestrates all sections |
+| `MemorialBlockEditor` | `src/lib/components/admin/memorial-editor/MemorialBlockEditor.svelte` | Block editor for memorial content (see `WBS_BLOCK_EDITOR_SYSTEM.md` for full 11-component breakdown) |
+| `CustomPricingEditor` | `src/lib/components/admin/CustomPricingEditor.svelte` | Per-memorial pricing overrides |
+| `AdminScheduleEditor` | `src/lib/components/admin/AdminScheduleEditor.svelte` | Schedule & billing editor for memorial services |
+| `StreamCard` | `src/lib/components/streaming/StreamCard.svelte` | Read-only stream display card (status, credentials, actions) |
+| `AdminChatPanel` | `src/lib/components/admin/AdminChatPanel.svelte` | Per-stream chat moderation (see `1-22-26_CHAT_SYSTEM_WBS.md`) |
+
+### Cross-Referenced WBS Documents
+
+| **Area** | **Document** | **Components Covered** |
+|----------|-------------|----------------------|
+| Block Editor | `WBS_BLOCK_EDITOR_SYSTEM.md` | `MemorialBlockEditor`, `BlockList`, `BlockItem`, `BlockToolbar`, `AddBlockModal`, `EditEmbedModal`, `EditLivestreamModal`, `EditTextModal` + 3 block type previews |
+| Chat System | `1-22-26_CHAT_SYSTEM_WBS.md` | `AdminChatPanel`, `LiveChatWidget`, `ChatModerationPanel` |
+
+---
+
+## 4. Admin WRITE Operations (via API Endpoints)
+
+### 4.1 Bulk Actions API (`/api/admin/bulk-actions`)
 
 | **Action** | **Collection** | **Type** | **Fields Modified** |
 |------------|----------------|----------|---------------------|
@@ -118,103 +160,71 @@ await adminDb.collection('admin_audit_logs').add({
 });
 ```
 
-### 3.2 Display Settings API (`/api/admin/memorials/[id]/display-settings`)
+### 4.2 Display Settings API (`/api/admin/memorials/[id]/display-settings`)
 
 | **Method** | **Collection** | **Type** | **Fields Modified** |
 |------------|----------------|----------|---------------------|
-| GET | `memorials` | READ | (fetch `customTitle`, `publicNote`) |
-| POST | `memorials` | UPDATE | `customTitle`, `publicNote`, `updatedAt` |
+| GET | `memorials` | READ | (fetch `customTitle`) |
+| POST | `memorials` | UPDATE | `customTitle`, `updatedAt` |
 | POST | `auditLogs` | CREATE | Audit trail entry |
-| DELETE | `memorials` | UPDATE | `customTitle=null`, `publicNote=null`, `updatedAt` |
+| DELETE | `memorials` | UPDATE | `customTitle=null`, `updatedAt` |
 | DELETE | `auditLogs` | CREATE | Audit trail entry |
 
-### Code Reference
-
-```typescript
-// Update display settings
-await adminDb.collection('memorials').doc(memorialId).update({
-    customTitle: customTitle || null,
-    publicNote: publicNote || null,
-    updatedAt: new Date()
-});
-
-// Audit trail
-await adminDb.collection('auditLogs').add({
-    action: 'UPDATE_DISPLAY_SETTINGS',
-    performedBy: locals.user.uid,
-    performedByEmail: locals.user.email,
-    targetId: memorialId,
-    targetType: 'memorial',
-    changes: { customTitle, publicNote },
-    timestamp: new Date()
-});
-```
-
-### 3.3 Stream Creation API (`/api/memorials/[memorialId]/streams`)
+### 4.3 Custom Pricing API (`/api/admin/memorials/[id]/pricing`)
 
 | **Method** | **Collection** | **Type** | **Purpose** |
 |------------|----------------|----------|-------------|
-| GET | `memorials` | READ | Verify memorial exists |
-| GET | `streams` | READ | Fetch streams for memorial |
-| POST | `memorials` | READ | Verify memorial + permissions |
-| POST | `streams` | CREATE | Create new stream with Mux config |
+| POST | `memorials` | UPDATE | Set per-memorial custom pricing overrides |
 
-### Code Reference
-
-```typescript
-// Create stream document
-const streamData = {
-    title: title.trim(),
-    description: description?.trim() || '',
-    memorialId,
-    status: scheduledStartTime ? 'scheduled' : 'ready',
-    visibility: 'public',
-    
-    // Mux Platform Configuration
-    mux: {
-        liveStreamId: muxLiveStream.id,
-        playbackId: muxLiveStream.playbackId,
-        rtmpUrl: muxLiveStream.rtmpUrl,
-        streamKey: muxLiveStream.streamKey,
-        recordingReady: false,
-        streamingStatus: 'idle',
-        reconnectWindow: 60
-    },
-    
-    // Chat Configuration
-    chat: {
-        enabled: true,
-        archived: false,
-        messageCount: 0,
-        participantCount: 0,
-        moderationMode: 'manual'
-    },
-    
-    createdBy: userId,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    isVisible: true
-};
-
-const streamRef = await adminDb.collection('streams').add(streamData);
-```
-
-### 3.4 Emergency Embed API (`/api/memorials/[memorialId]/emergency-embed`)
-
-| **Method** | **Collection** | **Type** | **Fields Modified** |
-|------------|----------------|----------|---------------------|
-| POST | `memorials` | UPDATE | `emergencyEmbed` object |
-| DELETE | `memorials` | UPDATE | `emergencyEmbed=null` |
-
-### 3.5 Stream Delete API (`/api/streams/[streamId]/delete`)
+### 4.4 Force Refresh API (`/api/memorials/[memorialId]/force-refresh`)
 
 | **Method** | **Collection** | **Type** | **Purpose** |
 |------------|----------------|----------|-------------|
-| DELETE | `streams` | UPDATE/DELETE | Delete stream document |
+| POST | `memorials` | UPDATE | Set `forceRefreshAt` timestamp, triggers page reload for all viewers |
+
+### 4.5 Block Editor APIs → See `WBS_BLOCK_EDITOR_SYSTEM.md`
+
+| **Route** | **Methods** | **Purpose** |
+|-----------|-------------|-------------|
+| `/api/memorials/[memorialId]/blocks` | GET, POST | List all blocks; create text/embed block |
+| `/api/memorials/[memorialId]/blocks/[blockId]` | PATCH, DELETE | Update or delete single block |
+| `/api/memorials/[memorialId]/blocks/livestream` | POST | Atomically create Mux stream + livestream block |
+| `/api/memorials/[memorialId]/blocks/reorder` | POST | Reorder all blocks by ID array |
+| `/api/memorials/[memorialId]/embeds` | — | Per-stream embed management |
+
+### 4.6 Slideshow APIs
+
+| **Route** | **Methods** | **Purpose** |
+|-----------|-------------|-------------|
+| `/api/memorials/[memorialId]/slideshow` | GET, POST | List/create slideshows |
+| `/api/memorials/[memorialId]/slideshow/[slideshowId]` | PATCH, DELETE | Update/delete individual slideshow |
+| `/api/memorials/[memorialId]/slideshow-embed` | GET | Get slideshow embed data |
+
+### 4.7 Stream Management APIs
+
+| **Route** | **Methods** | **Purpose** |
+|-----------|-------------|-------------|
+| `/api/streams/[streamId]/delete` | DELETE | Delete stream document |
+| `/api/streams/[streamId]/status` | PATCH | Update stream status (live/ended/etc.) |
+| `/api/streams/[streamId]/title` | PATCH | Update stream title |
+| `/api/streams/[streamId]/visibility` | PATCH | Toggle stream visibility |
+| `/api/streams/[streamId]/schedule` | PATCH | Update scheduled start time |
+| `/api/streams/[streamId]/embed` | GET | Get stream embed URL |
+| `/api/streams/[streamId]/analytics` | GET | Fetch stream viewer analytics |
+| `/api/streams/[streamId]/check-live` | GET | Check if stream is currently live |
+| `/api/streams/[streamId]/check-status` | GET | Poll current stream status |
+
+### 4.8 Chat APIs → See `1-22-26_CHAT_SYSTEM_WBS.md`
+
+| **Route** | **Methods** | **Purpose** |
+|-----------|-------------|-------------|
+| `/api/streams/[streamId]/chat/toggle` | PATCH | Enable/disable chat |
+| `/api/streams/[streamId]/chat/lock` | PATCH | Lock/unlock chat |
+| `/api/streams/[streamId]/chat/messages` | GET, POST | Fetch/send chat messages |
 
 ---
 
-## 4. Data Fields Read (List Page)
+## 5. Data Fields Read (List Page)
 
 | **Field** | **Type** | **Used For** |
 |-----------|----------|--------------|
@@ -235,7 +245,7 @@ const streamRef = await adminDb.collection('streams').add(streamData);
 
 ---
 
-## 5. Data Fields Read (Detail Page)
+## 6. Data Fields Read (Detail Page)
 
 | **Field** | **Type** | **Used For** |
 |-----------|----------|--------------|
@@ -256,9 +266,9 @@ const streamRef = await adminDb.collection('streams').add(streamData);
 | `memorialLocationName` | string | Legacy field |
 | `memorialLocationAddress` | string | Legacy field |
 | `livestream` | object | Legacy streaming config |
-| `emergencyEmbed` | object | Emergency override display |
 | `customTitle` | string | Display settings editor |
-| `publicNote` | string | Display settings editor |
+| `contentBlocks` | array | Block editor content (see `WBS_BLOCK_EDITOR_SYSTEM.md`) |
+| `contentBlocksVersion` | number | Block editor version counter |
 | `calculatorConfig` | object | Payment info |
 | `isPaid` | boolean | Payment status |
 | `paymentStatus` | string | Payment workflow |
@@ -267,7 +277,7 @@ const streamRef = await adminDb.collection('streams').add(streamData);
 
 ---
 
-## 6. Data Fields Read from `streams` Collection (Admin)
+## 7. Data Fields Read from `streams` Collection (Admin)
 
 | **Field** | **Type** | **Used For** |
 |-----------|----------|--------------|
@@ -308,7 +318,7 @@ const streamRef = await adminDb.collection('streams').add(streamData);
 
 ---
 
-## 7. Data Fields Written (Admin Actions Summary)
+## 8. Data Fields Written (Admin Actions Summary)
 
 | **Field** | **Action** | **Value Type** | **API Endpoint** |
 |-----------|------------|----------------|------------------|
@@ -322,13 +332,11 @@ const streamRef = await adminDb.collection('streams').add(streamData);
 | `deletedAt` | Soft Delete | timestamp | `/api/admin/bulk-actions` |
 | `deletedBy` | Soft Delete | string | `/api/admin/bulk-actions` |
 | `customTitle` | Display Settings | string | `/api/admin/memorials/[id]/display-settings` |
-| `publicNote` | Display Settings | string | `/api/admin/memorials/[id]/display-settings` |
-| `emergencyEmbed` | Emergency Override | object | `/api/memorials/[id]/emergency-embed` |
 | `updatedAt` | All updates | timestamp | (various) |
 
 ---
 
-## 8. Audit Logging
+## 9. Audit Logging
 
 ### `admin_audit_logs` Collection (Bulk Actions)
 
@@ -355,7 +363,7 @@ const streamRef = await adminDb.collection('streams').add(streamData);
 
 ---
 
-## 9. Permission Model
+## 10. Permission Model
 
 ```typescript
 // All admin routes require admin role
@@ -380,7 +388,7 @@ const hasPermission = hasPermission(userWithRole, resourceType, requiredAction);
 
 ---
 
-## 10. Data Flow Diagram
+## 11. Data Flow Diagram
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -438,24 +446,23 @@ const hasPermission = hasPermission(userWithRole, resourceType, requiredAction);
 │                                                                  │
 │  Sections:                                                       │
 │  ├─ Basic Info Card                                             │
-│  ├─ Display Settings Editor                                     │
-│  ├─ Custom Pricing Editor                                       │
-│  ├─ Livestreams (StreamCard components)                         │
-│  ├─ Chat Moderation (AdminChatPanel)                            │
+│  ├─ Display Settings Editor (inline)                            │
+│  ├─ MemorialBlockEditor (→ WBS_BLOCK_EDITOR_SYSTEM.md)         │
+│  ├─ CustomPricingEditor                                         │
+│  ├─ AdminScheduleEditor                                         │
+│  ├─ StreamCard(s) + AdminChatPanel                              │
 │  ├─ Slideshows                                                  │
 │  ├─ Payment Info                                                │
-│  └─ Analytics                                                   │
+│  └─ Force Refresh control                                       │
 └─────────────────────────────────────────────────────────────────┘
                               │
-              ┌───────────────┼───────────────┐
-              ▼               ▼               ▼
-┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
-│ Display Settings│ │ Create Stream   │ │ Emergency Embed │
-│ POST/DELETE     │ │ POST            │ │ POST/DELETE     │
-│ /api/admin/     │ │ /api/memorials/ │ │ /api/memorials/ │
-│ memorials/[id]/ │ │ [id]/streams    │ │ [id]/emergency- │
-│ display-settings│ │                 │ │ embed           │
-└─────────────────┘ └─────────────────┘ └─────────────────┘
+       ┌──────────┬───────────┼───────────┬──────────┐
+       ▼          ▼           ▼           ▼          ▼
+┌───────────┐┌───────────┐┌───────────┐┌──────────┐┌──────────┐
+│ Display   ││ Block     ││ Stream    ││ Slideshow││ Chat     │
+│ Settings  ││ Editor    ││ Mgmt APIs ││ APIs     ││ APIs     │
+│ 4.2       ││ 4.5       ││ 4.7       ││ 4.6      ││ 4.8      │
+└───────────┘└───────────┘└───────────┘└──────────┘└──────────┘
 ```
 
 ---
@@ -471,7 +478,8 @@ const hasPermission = hasPermission(userWithRole, resourceType, requiredAction);
 
 **Write Operations:** 
 - Update memorial fields (payment, visibility, display settings, soft delete)
-- Create streams with Mux configuration
+- Create/edit/delete content blocks via block editor
+- Create streams with Mux configuration (via block editor livestream blocks)
 - Create audit log entries
 
 **Real-time Features:** None (server-rendered)

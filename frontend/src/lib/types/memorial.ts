@@ -149,18 +149,26 @@ export interface Memorial {
 
 	// Admin display overrides
 	customTitle?: string; // Override for the memorial page title (replaces lovedOneName in display)
-	/** @deprecated Use contentBlocks with type 'text' instead */
-	publicNote?: string;
 
-	// Content blocks (block editor)
+	// Content blocks (block editor) — primary content management system
 	contentBlocks?: any[];
 	contentBlocksVersion?: number;
 
-	/** @deprecated Use contentBlocks with type 'embed' instead */
+	// ─── REMOVED FIELDS (Feb 2026) ───────────────────────────────────
+	// These fields may still exist on older Firestore documents but are
+	// no longer loaded by the app. Use the block editor equivalents:
+	//   publicNote       → contentBlocks with type 'text', style 'note'
+	//   emergencyEmbed   → contentBlocks with type 'embed', embedType 'video'
+	//   emergencyChatEmbed → contentBlocks with type 'embed', embedType 'chat'
+	//   videoFile        → contentBlocks with type 'embed', embedType 'video'
+	// ─────────────────────────────────────────────────────────────────
+	/** @deprecated REMOVED — Use contentBlocks with type 'text' instead. No longer loaded by server. */
+	publicNote?: string;
+	/** @deprecated REMOVED — Use contentBlocks with type 'embed' instead. No longer loaded by server. */
 	emergencyEmbed?: { embedCode: string; title: string; createdAt: string; createdBy: string; createdByEmail?: string } | null;
-	/** @deprecated Use contentBlocks with type 'embed' (embedType: chat) instead */
+	/** @deprecated REMOVED — Use contentBlocks with type 'embed' (embedType: chat) instead. No longer loaded by server. */
 	emergencyChatEmbed?: { embedCode: string; title?: string; createdAt: string; createdBy: string } | null;
-	/** @deprecated Use contentBlocks with type 'embed' instead */
+	/** @deprecated REMOVED — Use contentBlocks with type 'embed' instead. No longer loaded by server. */
 	videoFile?: { url: string; title: string; createdAt: string; createdBy: string } | null;
 }
 

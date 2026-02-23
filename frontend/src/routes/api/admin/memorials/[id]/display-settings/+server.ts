@@ -28,8 +28,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 
 		return json({
 			success: true,
-			customTitle: data?.customTitle || null,
-			publicNote: data?.publicNote || null
+			customTitle: data?.customTitle || null
 		});
 	} catch (err: any) {
 		console.error('Error fetching display settings:', err);

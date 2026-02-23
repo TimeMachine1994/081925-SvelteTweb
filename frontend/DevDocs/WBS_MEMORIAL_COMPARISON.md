@@ -2,6 +2,9 @@
 
 **Document Created:** January 22, 2026
 
+> **Updated Feb 19, 2026**  
+> Comparison tables updated to reflect the Block Editor migration. Deprecated fields (`emergencyEmbed`, `publicNote`, `videoFile`) and deleted APIs removed. Component trees and API lists now current. See `WBS_BLOCK_EDITOR_SYSTEM.md` for block editor details.
+
 ---
 
 ## Quick Reference
@@ -52,9 +55,9 @@
 | `directorEmail` | ✅ | ❌ | |
 | `additionalNotes` | ✅ | ❌ | |
 | `custom_html` | ✅ | ❌ | Legacy display |
-| `emergencyEmbed` | ✅ | ✅ | Display / management |
 | `customTitle` | ✅ | ✅ | Display / editor |
-| `publicNote` | ✅ | ✅ | Display / editor |
+| `contentBlocks` | ✅ | ✅ | Block editor content (see `WBS_BLOCK_EDITOR_SYSTEM.md`) |
+| `contentBlocksVersion` | ✅ | ✅ | Block editor version counter |
 | `ownerUid` | ✅ | ✅ | Permission / link |
 | `funeralDirectorUid` | ✅ | ❌ | Permission check only |
 | `creatorEmail` | ❌ | ✅ | Admin display |
@@ -96,11 +99,14 @@
 | Update `isPublic` | ❌ | ✅ | `/api/admin/bulk-actions` |
 | Soft delete memorial | ❌ | ✅ | `/api/admin/bulk-actions` |
 | Update `customTitle` | ❌ | ✅ | `/api/admin/memorials/[id]/display-settings` |
-| Update `publicNote` | ❌ | ✅ | `/api/admin/memorials/[id]/display-settings` |
-| Create stream | ❌ | ✅ | `/api/memorials/[id]/streams` |
+| Create/edit/delete content blocks | ❌ | ✅ | `/api/memorials/[id]/blocks/*` |
+| Create livestream (via block editor) | ❌ | ✅ | `/api/memorials/[id]/blocks/livestream` |
 | Delete stream | ❌ | ✅ | `/api/streams/[id]/delete` |
-| Set emergency embed | ❌ | ✅ | `/api/memorials/[id]/emergency-embed` |
-| Remove emergency embed | ❌ | ✅ | `/api/memorials/[id]/emergency-embed` |
+| Update stream (status/title/visibility/schedule) | ❌ | ✅ | `/api/streams/[id]/{action}` |
+| Manage slideshows | ❌ | ✅ | `/api/memorials/[id]/slideshow/*` |
+| Force refresh public page | ❌ | ✅ | `/api/memorials/[id]/force-refresh` |
+| Set custom pricing | ❌ | ✅ | `/api/admin/memorials/[id]/pricing` |
+| Toggle/lock chat | ❌ | ✅ | `/api/streams/[id]/chat/toggle`, `chat/lock` |
 | Create audit log | ❌ | ✅ | (automatic) |
 
 *Memorial creation exists but via separate create page, not detail page
@@ -109,11 +115,11 @@
 
 ## 4. Real-Time Features Comparison
 
-| **Feature** | **Public** | **Admin** |
-|-------------|------------|-----------|
-| Stream status updates | ✅ `onSnapshot()` | ❌ |
-| Chat messages | ✅ via LiveChatWidget | ✅ via AdminChatPanel |
-| Follower count | ❌ | ❌ (static load) |
+| **Feature** | **Public** | **Admin** | **Notes** |
+|-------------|------------|-----------|-----------|
+| Stream status updates | ✅ `onSnapshot()` | ❌ | Public page has Firestore real-time listeners |
+| Chat messages | ✅ via LiveChatWidget (polling) | ✅ via AdminChatPanel (polling) | Both use `fetch()` polling, not `onSnapshot()` |
+| Follower count | ❌ | ❌ (static load) | |
 
 ---
 
@@ -205,30 +211,39 @@ hasPermission(userWithRole, resourceType, requiredAction)
 
 ```
 +page.svelte
-├── BookingReminderBanner
+├── BookingReminderBanner (if owner)
+├── BlockRenderer (routes contentBlocks)
+│   ├── MemorialStreamDisplay (livestream blocks)
+│   │   ├── CountdownVideoPlayer (scheduled)
+│   │   ├── MuxVideoPlayer (live/recorded)
+│   │   └── LiveChatWidget
+│   ├── EmbedRenderer (embed blocks)
+│   └── TextRenderer (text blocks)
 ├── SlideshowSection
-│   └── (renders slideshows)
-├── MemorialStreamDisplay
-│   ├── CountdownVideoPlayer (scheduled)
-│   ├── MuxVideoPlayer (live/recorded)
-│   └── LiveChatWidget
-└── Legacy custom_html rendering
+└── Legacy custom_html rendering (fallback)
 ```
+
+See `WBS_MEMORIAL_PAGE_PUBLIC.md` Section 2 for full inventory.
 
 ### Admin Panel Components
 
 ```
-+page.svelte (Detail)
++page.svelte (Detail, ~688 lines)
 ├── AdminLayout
-├── StreamCard (per stream)
+├── Display Settings Editor (inline)
+├── MemorialBlockEditor (→ WBS_BLOCK_EDITOR_SYSTEM.md)
+│   ├── BlockList → BlockItem(s)
+│   ├── BlockToolbar
+│   └── AddBlockModal / Edit*Modal
 ├── CustomPricingEditor
+├── AdminScheduleEditor
+├── StreamCard (per stream)
 ├── AdminChatPanel (per stream)
-├── Display Settings Form
-├── Stream Creation Form
-├── Emergency Embed Form
 ├── Slideshows List
-└── Analytics Display
+└── Force Refresh control
 ```
+
+See `WBS_MEMORIAL_PAGE_ADMIN.md` Section 3 for full inventory.
 
 ---
 
@@ -245,12 +260,17 @@ hasPermission(userWithRole, resourceType, requiredAction)
 | **Internal API** | **Purpose** |
 |------------------|-------------|
 | `/api/admin/bulk-actions` | Payment, visibility, delete |
-| `/api/admin/memorials/[id]/display-settings` | Title, note management |
+| `/api/admin/memorials/[id]/display-settings` | Custom title management |
 | `/api/admin/memorials/[id]/pricing` | Custom pricing |
-| `/api/memorials/[id]/streams` | Stream CRUD |
-| `/api/memorials/[id]/emergency-embed` | Emergency embed |
+| `/api/memorials/[id]/blocks/*` | Block editor CRUD (5 routes) |
+| `/api/memorials/[id]/force-refresh` | Force-reload public page |
+| `/api/memorials/[id]/slideshow/*` | Slideshow CRUD (3 routes) |
 | `/api/streams/[id]/delete` | Stream deletion |
-| `/api/streams/[id]/chat/toggle` | Chat enable/disable |
+| `/api/streams/[id]/{status,title,visibility,schedule}` | Stream management (4 routes) |
+| `/api/streams/[id]/{analytics,check-live,check-status,embed}` | Stream info (4 routes) |
+| `/api/streams/[id]/chat/{toggle,lock,messages}` | Chat management (3 routes) |
+
+See `WBS_MEMORIAL_PAGE_ADMIN.md` Sections 4.1–4.8 for full details.
 
 ---
 
@@ -260,7 +280,7 @@ hasPermission(userWithRole, resourceType, requiredAction)
 |--------------|-----------------|-----------------|
 | **Primary Function** | Read & display | Full CRUD |
 | **User Access** | Multi-tier permissions | Admin only |
-| **Real-time** | Yes (streams) | No |
+| **Real-time** | Yes (stream `onSnapshot`) | No (polling only) |
 | **Audit Logging** | None | All writes logged |
 | **Data Volume** | Single memorial + related | List + detail views |
 | **Write Capability** | None | Extensive |
@@ -293,3 +313,5 @@ memorials/{id}/slideshows:
 
 - [WBS_MEMORIAL_PAGE_PUBLIC.md](./WBS_MEMORIAL_PAGE_PUBLIC.md) - Full public page breakdown
 - [WBS_MEMORIAL_PAGE_ADMIN.md](./WBS_MEMORIAL_PAGE_ADMIN.md) - Full admin panel breakdown
+- [WBS_BLOCK_EDITOR_SYSTEM.md](./WBS_BLOCK_EDITOR_SYSTEM.md) - Block editor architecture
+- [1-22-26_CHAT_SYSTEM_WBS.md](./1-22-26_CHAT_SYSTEM_WBS.md) - Chat system details

@@ -115,6 +115,14 @@ export const ADMIN_NAV: NavDomain[] = [
 				requiredPermission: { resource: 'audit_log', action: 'read' }
 			},
 			{
+				id: 'email-logs',
+				label: 'Email Logs',
+				href: '/admin/system/email-logs',
+				icon: '📧',
+				description: 'Email audit trail — view all sent emails',
+				requiredPermission: { resource: 'audit_log', action: 'read' }
+			},
+			{
 				id: 'wiki',
 				label: 'Wiki',
 				href: '/admin/wiki',
