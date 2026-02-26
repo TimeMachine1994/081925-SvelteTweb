@@ -72,10 +72,15 @@
 					alert('Please enter text content');
 					return;
 				}
-				onAdd('text', {
+				const textConfig: TextConfig = {
 					content: textContent.trim(),
-					style: textStyle
-				} as TextConfig);
+					style: textStyle,
+					fontSize: textStyle === 'heading' ? '2rem' : '1.125rem',
+					fontColor: textStyle === 'note' ? '#92400e' : '#ffffff',
+					lineHeight: textStyle === 'heading' ? '1.3' : '1.7',
+					textAlign: 'center'
+				};
+				onAdd('text', textConfig);
 				break;
 		}
 	}

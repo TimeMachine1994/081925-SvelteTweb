@@ -30,6 +30,11 @@ export interface EmbedConfig {
 export interface TextConfig {
 	content: string;
 	style: TextStyle;
+	// Custom styling overrides
+	fontSize?: string;    // CSS value, e.g. "1.5rem", "2rem"
+	fontColor?: string;   // CSS color, e.g. "#ffffff", "rgba(255,255,255,0.9)"
+	lineHeight?: string;  // CSS line-height, e.g. "1.4", "1.8"
+	textAlign?: 'left' | 'center' | 'right';
 }
 
 // Union type for block configurations

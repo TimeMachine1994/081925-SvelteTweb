@@ -6,17 +6,27 @@
 	}
 
 	let { config }: Props = $props();
+
+	// Build inline style string from custom config values
+	const customStyle = $derived.by(() => {
+		const parts: string[] = [];
+		if (config.fontSize) parts.push(`font-size: ${config.fontSize}`);
+		if (config.fontColor) parts.push(`color: ${config.fontColor}`);
+		if (config.lineHeight) parts.push(`line-height: ${config.lineHeight}`);
+		if (config.textAlign) parts.push(`text-align: ${config.textAlign}`);
+		return parts.join('; ');
+	});
 </script>
 
 <div class="text-renderer" class:heading={config.style === 'heading'} class:note={config.style === 'note'} class:paragraph={config.style === 'paragraph'}>
 	{#if config.style === 'heading'}
-		<h2 class="text-heading">{config.content}</h2>
+		<h2 class="text-heading" style={customStyle}>{config.content}</h2>
 	{:else if config.style === 'note'}
 		<div class="text-note">
-			<p>{config.content}</p>
+			<p style={customStyle}>{config.content}</p>
 		</div>
 	{:else}
-		<p class="text-paragraph">{config.content}</p>
+		<p class="text-paragraph" style={customStyle}>{config.content}</p>
 	{/if}
 </div>
 
@@ -27,17 +37,17 @@
 
 	.text-heading {
 		margin: 0;
-		font-size: 1.5rem;
+		font-size: 2rem;
 		font-weight: 700;
-		color: #1a202c;
+		color: #ffffff;
 		line-height: 1.3;
 		text-align: center;
 	}
 
 	.text-paragraph {
 		margin: 0;
-		font-size: 1rem;
-		color: #4a5568;
+		font-size: 1.125rem;
+		color: #ffffff;
 		line-height: 1.7;
 		text-align: center;
 	}
@@ -52,7 +62,7 @@
 
 	.text-note p {
 		margin: 0;
-		font-size: 0.9375rem;
+		font-size: 1rem;
 		color: #92400e;
 		line-height: 1.6;
 		text-align: center;
@@ -61,11 +71,11 @@
 	/* Responsive */
 	@media (max-width: 768px) {
 		.text-heading {
-			font-size: 1.25rem;
+			font-size: 1.5rem;
 		}
 
 		.text-paragraph {
-			font-size: 0.9375rem;
+			font-size: 1rem;
 		}
 
 		.text-note {

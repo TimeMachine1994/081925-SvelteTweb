@@ -15,6 +15,13 @@ import type {
 	TextStyle
 } from '$lib/types/memorial-blocks';
 
+export interface TextCustomStyles {
+	fontSize?: string;
+	fontColor?: string;
+	lineHeight?: string;
+	textAlign?: 'left' | 'center' | 'right';
+}
+
 /**
  * Generate a unique block ID
  */
@@ -154,9 +161,11 @@ export function createEmbedBlock(
 export function createTextBlock(
 	content: string,
 	style: TextStyle,
-	order: number
+	order: number,
+	customStyles?: TextCustomStyles
 ): MemorialBlock {
-	return createBlock('text', { content, style } as TextConfig, order);
+	const config: TextConfig = { content, style, ...customStyles };
+	return createBlock('text', config, order);
 }
 
 /**
@@ -188,6 +197,18 @@ export function validateBlockConfig(type: BlockType, config: BlockConfig): strin
 			}
 			if (!c.style || !['paragraph', 'heading', 'note'].includes(c.style)) {
 				return 'Text block requires valid style (paragraph, heading, or note)';
+			}
+			if (c.fontSize !== undefined && typeof c.fontSize !== 'string') {
+				return 'fontSize must be a string CSS value';
+			}
+			if (c.fontColor !== undefined && typeof c.fontColor !== 'string') {
+				return 'fontColor must be a string CSS color';
+			}
+			if (c.lineHeight !== undefined && typeof c.lineHeight !== 'string') {
+				return 'lineHeight must be a string CSS value';
+			}
+			if (c.textAlign !== undefined && !['left', 'center', 'right'].includes(c.textAlign)) {
+				return 'textAlign must be left, center, or right';
 			}
 			break;
 		}
