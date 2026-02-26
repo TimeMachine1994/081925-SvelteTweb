@@ -62,7 +62,7 @@ const slideshowsSnapshot = await adminDb
 | `CountdownVideoPlayer` | `src/lib/components/CountdownVideoPlayer.svelte` | Styled video placeholder showing scheduled date/time for upcoming livestreams |
 | `BlockRenderer` | `src/lib/components/memorial/BlockRenderer.svelte` | Routes `contentBlocks` to the correct renderer (livestream → `MemorialStreamDisplay`, embed → `EmbedRenderer`, text → `TextRenderer`) |
 | `EmbedRenderer` | `src/lib/components/memorial/EmbedRenderer.svelte` | Renders embed blocks (video/chat iframes) with sanitization |
-| `TextRenderer` | `src/lib/components/memorial/TextRenderer.svelte` | Renders text blocks (headings, notes, paragraphs) |
+| `TextRenderer` | `src/lib/components/memorial/TextRenderer.svelte` | Renders text blocks with custom styling (font color, size, line height, alignment). Defaults: white text, 2rem headings, 1.125rem paragraphs. Inline style overrides from `TextConfig`. |
 | `BookingReminderBanner` | `src/lib/components/BookingReminderBanner.svelte` | Displays booking reminder banner to memorial owners |
 | `SlideshowSection` | `src/lib/components/SlideshowSection.svelte` | Renders photo slideshows |
 | `MuxVideoPlayer` | `src/lib/components/streaming/MuxVideoPlayer.svelte` | Mux HLS video player for live and recorded streams |

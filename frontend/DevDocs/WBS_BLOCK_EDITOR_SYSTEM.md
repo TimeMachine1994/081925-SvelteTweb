@@ -1,8 +1,9 @@
 # WBS: Memorial Block Editor System
 
 **Date:** February 17, 2026  
+**Last Updated:** February 26, 2026  
 **Status:** Implemented (Production)  
-**Version:** 1.0  
+**Version:** 1.1 — Added text block customization (font color, size, line height, alignment)  
 **Replaces:** Emergency Embed, Emergency Chat Embed, Public Note, Inline Stream Creation
 
 ---
@@ -118,7 +119,14 @@ interface MemorialBlock {
 
 interface LivestreamConfig { streamId: string; }
 interface EmbedConfig { title: string; embedCode: string; embedType: EmbedType; }
-interface TextConfig { content: string; style: TextStyle; }
+interface TextConfig {
+  content: string;
+  style: TextStyle;
+  fontSize?: string;    // CSS value, e.g. "2rem" — defaults: heading 2rem, paragraph 1.125rem
+  fontColor?: string;   // CSS color, e.g. "#ffffff" — defaults: white (note: #92400e)
+  lineHeight?: string;  // CSS line-height, e.g. "1.4" — defaults: heading 1.3, paragraph 1.7
+  textAlign?: 'left' | 'center' | 'right';  // default: center
+}
 ```
 
 **API Types:**
@@ -153,8 +161,8 @@ interface DeleteBlockResponse { deleted: string; blocks: MemorialBlock[]; }
 | `createBlock(type, config, order)` | Factory with defaults |
 | `createLivestreamBlock(streamId, order)` | Convenience: create livestream block |
 | `createEmbedBlock(title, code, type, order)` | Convenience: create embed block |
-| `createTextBlock(content, style, order)` | Convenience: create text block |
-| `validateBlockConfig(type, config)` | Returns error string or null |
+| `createTextBlock(content, style, order, customStyles?)` | Convenience: create text block with optional styling overrides |
+| `validateBlockConfig(type, config)` | Returns error string or null (validates optional text styling fields) |
 | `getBlockIcon(type)` | Emoji icon per type |
 | `getBlockTypeLabel(type)` | Human label per type |
 | `getEnabledBlocks(blocks)` | Filter enabled + sort |
@@ -174,11 +182,11 @@ interface DeleteBlockResponse { deleted: string; blocks: MemorialBlock[]; }
 | `src/lib/components/admin/memorial-editor/BlockToolbar.svelte` | — | "+ Add Block" button |
 | `src/lib/components/admin/memorial-editor/blocks/EmbedBlock.svelte` | — | Embed block preview in editor |
 | `src/lib/components/admin/memorial-editor/blocks/LivestreamBlock.svelte` | — | Livestream block preview in editor |
-| `src/lib/components/admin/memorial-editor/blocks/TextBlock.svelte` | — | Text block preview in editor |
+| `src/lib/components/admin/memorial-editor/blocks/TextBlock.svelte` | — | Text block preview in editor (shows color swatch + font size indicator) |
 | `src/lib/components/admin/memorial-editor/modals/AddBlockModal.svelte` | — | Type picker + config form for new blocks |
 | `src/lib/components/admin/memorial-editor/modals/EditEmbedModal.svelte` | — | Edit embed: title, code, type |
 | `src/lib/components/admin/memorial-editor/modals/EditLivestreamModal.svelte` | — | Edit livestream: view stream details |
-| `src/lib/components/admin/memorial-editor/modals/EditTextModal.svelte` | — | Edit text: content, style |
+| `src/lib/components/admin/memorial-editor/modals/EditTextModal.svelte` | — | Edit text: content, style, font color, font size, line height, text align (with live dark-bg preview) |
 
 ### 3.4 Public Page Renderers (3 files)
 
@@ -474,6 +482,12 @@ These APIs are no longer called by the admin UI. They are retained until all mem
 | Block duplication | **P3** | Clone an existing block |
 | Undo/redo | **P4** | Version history with rollback |
 
+### 10.1 Completed Enhancements
+
+| Enhancement | Date | Description |
+|-------------|------|-------------|
+| Text block customization | Feb 26, 2026 | Font color, font size, line height, and text alignment controls in EditTextModal. Smart defaults (white text, bigger sizes) for dark memorial background. Admin preview shows color swatch + size tag. AddBlockModal sets defaults on new blocks. TextRenderer applies inline style overrides. |
+
 ---
 
 ## 11. Component Responsibilities
@@ -502,10 +516,14 @@ These APIs are no longer called by the admin UI. They are retained until all mem
 ### TextRenderer
 
 - **Props:** `config: TextConfig`
-- **Styling:** Heading (centered, bold), paragraph (centered, gray), note (yellow card)
+- **Computed:** `$derived.by` builds inline CSS string from `config.fontSize`, `config.fontColor`, `config.lineHeight`, `config.textAlign`
+- **CSS Defaults:** Heading (2rem, white, bold, centered), paragraph (1.125rem, white, centered), note (amber card, #92400e)
+- **Inline overrides:** Custom values from `TextConfig` override CSS defaults via `style` attribute
+- **Backward compatible:** Blocks without custom fields render with new white/bigger CSS defaults
 
 ---
 
-*Document Version: 1.0*  
+*Document Version: 1.1*  
 *Created: February 17, 2026*  
+*Updated: February 26, 2026 — Text block customization (v1.1)*  
 *Author: Automated WBS from codebase audit*
