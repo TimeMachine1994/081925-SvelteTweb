@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CheckCircle, ArrowLeft, Home } from 'lucide-svelte';
+	import { CheckCircle, ArrowLeft, Home, Mail } from 'lucide-svelte';
 	import { Button } from '$lib/ui';
 </script>
 
