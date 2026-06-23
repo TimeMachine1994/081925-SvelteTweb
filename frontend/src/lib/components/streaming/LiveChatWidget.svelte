@@ -33,8 +33,8 @@
 	let sending = $state(false);
 	let loading = $state(false);
 	let error = $state<string | null>(null);
-	let messagesContainer: HTMLDivElement;
-	let pollInterval: NodeJS.Timeout;
+	let messagesContainer = $state<HTMLDivElement | undefined>();
+	let pollInterval: ReturnType<typeof setInterval>;
 
 	// Debug logging for chat state
 	console.log('💬 [CHAT] Init:', { streamId, enabled, locked });
