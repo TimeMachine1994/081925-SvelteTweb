@@ -60,5 +60,10 @@ export const adminAuth = admin.auth();
 export const adminDb = admin.firestore();
 export const adminStorage = admin.storage();
 
+// Accessor used throughout the API routes. Returns the initialized Firestore instance.
+export function getAdminDb() {
+	return adminDb;
+}
+
 // Export FieldValue for array operations
 export { FieldValue } from 'firebase-admin/firestore';
