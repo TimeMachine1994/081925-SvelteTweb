@@ -192,13 +192,6 @@
 			onplay={handlePlaybackStart}
 			onpause={handlePlaybackPause}
 		></mux-player>
-
-		<!-- Stream info footer -->
-		{#if stream.description}
-			<div class="stream-description">
-				<p>{stream.description}</p>
-			</div>
-		{/if}
 	</div>
 {:else}
 	<!-- Fallback when no playback ID available -->
@@ -261,18 +254,6 @@
 		aspect-ratio: 16 / 9;
 		--media-object-fit: contain;
 		--media-object-position: center;
-	}
-
-	.stream-description {
-		padding: 1rem;
-		background: rgba(0, 0, 0, 0.8);
-		color: #d1d5db;
-	}
-
-	.stream-description p {
-		margin: 0;
-		font-size: 0.875rem;
-		line-height: 1.5;
 	}
 
 	/* No player message styling */
