@@ -20,6 +20,7 @@
 	interface MuxPlayerStream {
 		id: string;
 		title?: string;
+		description?: string;
 		status: string;
 		mux?: {
 			liveStreamId?: string;
@@ -28,6 +29,7 @@
 			streamingStatus?: 'idle' | 'active' | 'disconnected';
 			recordingReady?: boolean;
 			recordings?: { assetId: string; vodPlaybackId: string; duration?: number; createdAt: string }[];
+			publishedRecordings?: string[];
 		};
 	}
 
@@ -37,13 +39,16 @@
 		autoplay?: boolean;
 		muted?: boolean;
 		showTitle?: boolean;
+		/** Pin a specific recording's VOD playback ID (overrides the latest-recording fallback). */
+		forcedVodPlaybackId?: string;
 	}
 
 	let { 
 		stream, 
 		autoplay = true, 
 		muted = false,
-		showTitle = true 
+		showTitle = true,
+		forcedVodPlaybackId
 	}: Props = $props();
 
 	/**
@@ -55,6 +60,12 @@
 		console.log('🎬 [MUX PLAYER] Determining playback ID for stream:', stream.id);
 		console.log('🎬 [MUX PLAYER] Stream status:', stream.status);
 		
+		// Explicit recording selection always wins (admin-curated published recording)
+		if (forcedVodPlaybackId) {
+			console.log('📌 [MUX PLAYER] Using forced VOD playback ID:', forcedVodPlaybackId);
+			return forcedVodPlaybackId;
+		}
+
 		// Check if stream has Mux configuration
 		if (!stream.mux) {
 			console.warn('⚠️ [MUX PLAYER] No Mux configuration found for stream:', stream.id);
@@ -95,6 +106,8 @@
 	 * Recording state takes precedence - if recording is ready, stream is not live
 	 */
 	const isLive = $derived(() => {
+		// A pinned recording is always on-demand
+		if (forcedVodPlaybackId) return false;
 		// If recording is ready or stream has ended, it's NOT live anymore
 		if (stream.mux?.recordingReady) return false;
 		if (stream.status === 'completed' || stream.status === 'ended') return false;

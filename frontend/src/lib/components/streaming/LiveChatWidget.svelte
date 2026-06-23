@@ -21,9 +21,10 @@
 		streamId: string;
 		enabled?: boolean;  // Show/hide chat entirely
 		locked?: boolean;   // Prevent new messages (read-only mode)
+		live?: boolean;     // When false (recorded/ended), load once and don't poll
 	}
 
-	let { streamId, enabled = true, locked = false }: Props = $props();
+	let { streamId, enabled = true, locked = false, live = true }: Props = $props();
 
 	// Component state
 	let messages = $state<StreamChatMessage[]>([]);
@@ -173,8 +174,11 @@
 		// Load initial messages
 		loadMessages();
 
-		// Always poll for new messages (even if locked - users can still read)
-		pollInterval = setInterval(loadMessages, 2000);
+		// Only poll for new messages on live streams. For recorded/ended streams the
+		// chat is historical, so we load once and skip the constant 2s polling.
+		if (live) {
+			pollInterval = setInterval(loadMessages, 2000);
+		}
 
 		// Cleanup on unmount
 		return () => {

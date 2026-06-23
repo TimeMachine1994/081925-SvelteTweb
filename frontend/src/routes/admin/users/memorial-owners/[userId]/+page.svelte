@@ -1,5 +1,7 @@
 <script lang="ts">
 	import AdminLayout from '$lib/components/admin/AdminLayout.svelte';
+	import RecordLink from '$lib/components/admin/RecordLink.svelte';
+	import { databaseDeepLink } from '$lib/admin/relationships';
 	import { goto } from '$app/navigation';
 
 	let { data } = $props();
@@ -179,7 +181,7 @@
 							>
 							<td>
 								<a href="/{memorial.fullSlug}" target="_blank" class="btn-link">View</a>
-								<a href="/admin/content/memorials" class="btn-link">Edit</a>
+								<a href="/admin/services/memorials/{memorial.id}" class="btn-link">Manage</a>
 							</td>
 						</tr>
 					{/each}
@@ -202,6 +204,7 @@
 						<th>Status</th>
 						<th>Scheduled</th>
 						<th>Created</th>
+						<th>Actions</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -209,11 +212,12 @@
 						<tr>
 							<td>{stream.title}</td>
 							<td>
-								{#if data.memorials.find((m) => m.id === stream.memorialId)}
-									{data.memorials.find((m) => m.id === stream.memorialId).lovedOneName}
-								{:else}
-									{stream.memorialId}
-								{/if}
+								<RecordLink
+									field="memorialId"
+									value={stream.memorialId}
+									label={data.memorials.find((m) => m.id === stream.memorialId)?.lovedOneName ??
+										stream.memorialId}
+								/>
 							</td>
 							<td>
 								<span class="badge status-{stream.status}">
@@ -222,6 +226,11 @@
 							</td>
 							<td>{stream.scheduledStartTime || 'N/A'}</td>
 							<td>{new Date(stream.createdAt).toLocaleDateString()}</td>
+							<td>
+								<a class="btn-link" href={databaseDeepLink('streams', { document: stream.id })}>
+									View in DB
+								</a>
+							</td>
 						</tr>
 					{/each}
 				</tbody>

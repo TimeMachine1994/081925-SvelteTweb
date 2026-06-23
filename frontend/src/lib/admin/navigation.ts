@@ -123,6 +123,14 @@ export const ADMIN_NAV: NavDomain[] = [
 				requiredPermission: { resource: 'audit_log', action: 'read' }
 			},
 			{
+				id: 'database',
+				label: 'Database',
+				href: '/admin/system/database',
+				icon: '🗄️',
+				description: 'Firestore collection CRUD console',
+				requiredPermission: { resource: 'system', action: 'read' }
+			},
+			{
 				id: 'wiki',
 				label: 'Wiki',
 				href: '/admin/wiki',

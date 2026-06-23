@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount, onDestroy, tick } from 'svelte';
 	import { browser } from '$app/environment';
 	import CountdownVideoPlayer from './CountdownVideoPlayer.svelte';
 	import MuxVideoPlayer from './streaming/MuxVideoPlayer.svelte';
 	import LiveChatWidget from './streaming/LiveChatWidget.svelte';
+	import { selectDisplayRecordings } from '$lib/utils/recording-selection';
 	
 	console.log('🎬 [MEMORIAL STREAM DISPLAY] Component loaded - Mux integration active');
 	
@@ -49,6 +50,7 @@
 			recordingReady?: boolean;
 			duration?: number;
 			recordings?: { assetId: string; vodPlaybackId: string; duration?: number; createdAt: string }[];
+			publishedRecordings?: string[];
 		};
 		
 		// Chat configuration (FIX-C)
@@ -83,9 +85,10 @@
 	
 	// Download state tracking
 	let downloadingStreamId = $state<string | null>(null);
+	let downloadProgress = $state(0); // 0-100, only meaningful when content-length is known
 	
 	/**
-	 * Handle video download - fetches file and triggers save dialog
+	 * Handle video download - streams file (with progress) and triggers save dialog
 	 */
 	async function handleDownload(stream: Stream, vodPlaybackId?: string) {
 		const pid = vodPlaybackId || stream.mux?.vodPlaybackId;
@@ -95,14 +98,39 @@
 		const url = `https://stream.mux.com/${playbackId}/high.mp4`;
 		const filename = `${stream.title || 'recording'}-${playbackId}.mp4`;
 		
+		downloadingStreamId = stream.id;
+		downloadProgress = 0;
+		// Ensure the spinner paints before the heavy network work begins
+		await tick();
+		
 		try {
-			downloadingStreamId = stream.id;
 			console.log('📥 [DOWNLOAD] Starting download for:', filename);
 			
 			const response = await fetch(url);
 			if (!response.ok) throw new Error(`Download failed: ${response.status}`);
 			
-			const blob = await response.blob();
+			const total = Number(response.headers.get('content-length')) || 0;
+			const reader = response.body?.getReader();
+			let blob: Blob;
+			
+			if (reader) {
+				const chunks: Uint8Array[] = [];
+				let received = 0;
+				for (;;) {
+					const { done, value } = await reader.read();
+					if (done) break;
+					if (value) {
+						chunks.push(value);
+						received += value.length;
+						if (total) downloadProgress = Math.round((received / total) * 100);
+					}
+				}
+				blob = new Blob(chunks as BlobPart[]);
+			} else {
+				// Fallback when the response body isn't a readable stream
+				blob = await response.blob();
+			}
+			
 			const blobUrl = URL.createObjectURL(blob);
 			
 			// Create temporary link and trigger download
@@ -121,6 +149,7 @@
 			alert('Download failed. Please try right-clicking the video and selecting "Save video as..."');
 		} finally {
 			downloadingStreamId = null;
+			downloadProgress = 0;
 		}
 	}
 	
@@ -331,6 +360,14 @@
 		return null;
 	}
 	
+	// Resolve which recordings to actually display for a recorded stream.
+	// Honors admin-curated `publishedRecordings` (ordered); otherwise falls back
+	// to the latest recording (preserves prior behavior).
+	type RecordingItem = { assetId: string; vodPlaybackId: string; duration?: number; createdAt: string };
+	function getDisplayRecordings(stream: Stream): RecordingItem[] {
+		return selectDisplayRecordings(stream.mux) as RecordingItem[];
+	}
+
 	// Determine if we should show any streams section
 	let hasVisibleStreams = $derived(
 		categorizedLiveStreams.length > 0 || scheduledStreams.length > 0 || recordedStreams.length > 0
@@ -397,6 +434,7 @@
 											streamId={stream.id} 
 											enabled={true}
 											locked={stream.chat?.locked ?? false}
+											live={stream.status === 'live' || stream.mux?.streamingStatus === 'active'}
 										/>
 									</div>
 								{/if}
@@ -460,6 +498,7 @@
 			<div class="stream-section recorded-section">
 				<h2 class="stream-section-title">Service Recording</h2>
 				{#each recordedStreams as stream (stream.id)}
+					{@const displayRecordings = getDisplayRecordings(stream)}
 					<div class="stream-item">
 						{#if stream.mux?.recordingReady && (stream.mux?.recordings?.length || stream.mux?.vodPlaybackId)}
 							<!-- MUX PLATFORM - Recorded video player with archived chat -->
@@ -488,12 +527,14 @@
 											</div>
 										{/if}
 										
-										<MuxVideoPlayer stream={stream} autoplay={false} showTitle={true} />
+										{#each displayRecordings as recording, i (recording.vodPlaybackId)}
+											<MuxVideoPlayer stream={stream} autoplay={false} showTitle={i === 0} forcedVodPlaybackId={recording.vodPlaybackId} />
+										{/each}
 										
 										<!-- Download Buttons -->
-										{#if stream.mux?.recordings?.length}
+										{#if displayRecordings.length}
 											<div class="download-button-container">
-												{#each stream.mux.recordings as recording, i}
+												{#each displayRecordings as recording, i}
 													<button 
 														type="button"
 														class="download-master-button"
@@ -504,17 +545,14 @@
 															<svg class="spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 																<circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="20"/>
 															</svg>
-															Downloading...
+															{downloadProgress > 0 ? `Downloading... ${downloadProgress}%` : 'Downloading...'}
 														{:else}
 															<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 																<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
 																<polyline points="7 10 12 15 17 10"/>
 																<line x1="12" y1="15" x2="12" y2="3"/>
 															</svg>
-															{stream.mux.recordings.length > 1 ? `Download Part ${i + 1}` : 'Download Recording'}
-															{#if recording.duration}
-																({Math.floor(recording.duration / 60)}m {Math.floor(recording.duration % 60)}s)
-															{/if}
+															{displayRecordings.length > 1 ? `Download Part ${i + 1}` : 'Download Recording'}
 														{/if}
 													</button>
 												{/each}
@@ -531,7 +569,7 @@
 														<svg class="spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 															<circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="20"/>
 														</svg>
-														Downloading...
+														{downloadProgress > 0 ? `Downloading... ${downloadProgress}%` : 'Downloading...'}
 													{:else}
 														<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 															<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -564,6 +602,7 @@
 											streamId={stream.id} 
 											enabled={true}
 											locked={stream.chat?.locked ?? false}
+											live={stream.status === 'live' || stream.mux?.streamingStatus === 'active'}
 										/>
 									</div>
 								{/if}
@@ -588,6 +627,7 @@
 											streamId={stream.id} 
 											enabled={true}
 											locked={stream.chat?.locked ?? false}
+											live={false}
 										/>
 									</div>
 								{/if}

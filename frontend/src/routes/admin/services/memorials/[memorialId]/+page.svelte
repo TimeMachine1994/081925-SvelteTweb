@@ -5,6 +5,7 @@
 	import AdminScheduleEditor from '$lib/components/admin/AdminScheduleEditor.svelte';
 	import AdminChatPanel from '$lib/components/admin/AdminChatPanel.svelte';
 	import MemorialBlockEditor from '$lib/components/admin/memorial-editor/MemorialBlockEditor.svelte';
+	import RecordingPicker from '$lib/components/admin/RecordingPicker.svelte';
 	import { goto } from '$app/navigation';
 	import { invalidateAll } from '$app/navigation';
 	
@@ -339,6 +340,17 @@
 			onSave={() => invalidateAll()}
 		/>
 	</div>
+
+	<!-- Published Recordings Picker -->
+	{#if streams.some((s) => (s.mux?.recordings?.length ?? 0) > 0 || s.mux?.vodPlaybackId)}
+		<div class="card">
+			<div class="section-header">
+				<h2>🎞️ Published Recordings</h2>
+				<p class="section-subtitle">Choose which Mux recording(s) appear on the public page. Unselected sessions stay hidden.</p>
+			</div>
+			<RecordingPicker memorialId={memorial.id} {streams} onSaved={() => invalidateAll()} />
+		</div>
+	{/if}
 
 	<!-- Livestream Info (read-only reference — use block editor above to manage content) -->
 	{#if streams.length > 0}

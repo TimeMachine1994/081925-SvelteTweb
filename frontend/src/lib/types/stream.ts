@@ -51,6 +51,10 @@ export interface MuxStreamConfig {
 	
 	// Multiple recordings (one per stream session, newest last)
 	recordings?: MuxRecording[];
+
+	// Admin-curated list of recording vodPlaybackIds to publish on the public page,
+	// in display order. When empty/absent, the player falls back to the latest recording.
+	publishedRecordings?: string[];
 	
 	// Stream status from Mux
 	reconnectWindow?: number;     // Seconds before stream times out

@@ -19,7 +19,7 @@ if (getApps().length === 0) {
 		process.env.FIRESTORE_EMULATOR_HOST = '127.0.0.1:8080';
 
 		adminApp = initializeApp({
-			projectId: 'firebasetweb' // Use your main project ID
+			projectId: 'fir-tweb' // Use your main project ID
 		});
 	} else {
 		// Production mode - use default credentials or service account
@@ -35,13 +35,13 @@ if (getApps().length === 0) {
 				console.log('🔑 Using service account credentials');
 				adminApp = initializeApp({
 					credential: cert(serviceAccount),
-					projectId: 'firebasetweb'
+					projectId: 'fir-tweb'
 				});
 			} else {
 				console.log('🔑 Using default application credentials');
 				// Use default application credentials (works in many environments)
 				adminApp = initializeApp({
-					projectId: 'firebasetweb'
+					projectId: 'fir-tweb'
 				});
 			}
 		} catch (error) {
@@ -58,6 +58,6 @@ export const adminAuth = getAuth(adminApp);
 export const adminStorage = getStorage(adminApp);
 
 // Emulators disabled - using production Firestore
-console.log('🔥 Firebase Admin initialized for production project: firebasetweb');
+console.log('🔥 Firebase Admin initialized for production project: fir-tweb');
 
 export { adminApp, FieldValue };

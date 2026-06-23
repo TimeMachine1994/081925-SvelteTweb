@@ -20,7 +20,7 @@ if (admin.apps.length) {
 	);
 } else {
 	const serviceAccountJson = env.PRIVATE_FIREBASE_SERVICE_ACCOUNT_KEY;
-	const storageBucket = env.PRIVATE_FIREBASE_STORAGE_BUCKET || 'tributestream-lemhr.firebasestorage.app';
+	const storageBucket = env.PRIVATE_FIREBASE_STORAGE_BUCKET || 'fir-tweb.firebasestorage.app';
 
 	console.log('🔥 [FIREBASE] Service account key present:', !!serviceAccountJson);
 	console.log('🔥 [FIREBASE] Service account key length:', serviceAccountJson?.length || 0);
@@ -38,7 +38,7 @@ if (admin.apps.length) {
 		} catch (parseError) {
 			console.error('❌ [FIREBASE] Error parsing service account JSON:', parseError);
 			admin.initializeApp({
-				projectId: 'tributestream-lemhr',
+				projectId: 'fir-tweb',
 				storageBucket: storageBucket
 			});
 			console.log('⚠️ [FIREBASE] Firebase Admin initialized with fallback configuration.');
@@ -47,7 +47,7 @@ if (admin.apps.length) {
 		console.error('❌ [FIREBASE] Service account key missing or too short!');
 		console.error('❌ [FIREBASE] Please add full service account JSON to PRIVATE_FIREBASE_SERVICE_ACCOUNT_KEY in .env');
 		admin.initializeApp({
-			projectId: 'tributestream-lemhr',
+			projectId: 'fir-tweb',
 			storageBucket: storageBucket
 		});
 		console.log('⚠️ [FIREBASE] Firebase Admin initialized WITHOUT credentials (auth will fail).');
