@@ -29,13 +29,13 @@ export const ADMIN_NAV: NavDomain[] = [
 	{
 		id: 'dashboard',
 		label: 'Dashboard',
-		icon: '📊',
+		icon: 'dashboard',
 		items: [
 			{
 				id: 'overview',
 				label: 'Overview',
 				href: '/admin',
-				icon: '🏠',
+				icon: 'overview',
 				description: 'System overview and key metrics'
 			}
 		]
@@ -43,21 +43,29 @@ export const ADMIN_NAV: NavDomain[] = [
 	{
 		id: 'services',
 		label: 'Services',
-		icon: '🕊️',
+		icon: 'services',
 		items: [
 			{
 				id: 'memorials',
 				label: 'Memorials',
 				href: '/admin/services/memorials',
-				icon: '💝',
+				icon: 'memorials',
 				description: 'All memorial pages',
 				requiredPermission: { resource: 'memorial', action: 'read' }
+			},
+			{
+				id: 'streams',
+				label: 'Streams',
+				href: '/admin/services/streams',
+				icon: 'streams',
+				description: 'Livestreams across all memorials',
+				requiredPermission: { resource: 'stream', action: 'read' }
 			},
 			{
 				id: 'receipts',
 				label: 'Receipts',
 				href: '/admin/services/receipts',
-				icon: '🧾',
+				icon: 'receipts',
 				description: 'Payment receipts and invoices',
 				requiredPermission: { resource: 'memorial', action: 'read' }
 			}
@@ -66,13 +74,13 @@ export const ADMIN_NAV: NavDomain[] = [
 	{
 		id: 'users',
 		label: 'Users',
-		icon: '👥',
+		icon: 'users',
 		items: [
 			{
 				id: 'memorial-owners',
 				label: 'Memorial Owners',
 				href: '/admin/users/memorial-owners',
-				icon: '👤',
+				icon: 'user',
 				description: 'Family and individual users',
 				requiredPermission: { resource: 'user', action: 'read' }
 			},
@@ -80,7 +88,7 @@ export const ADMIN_NAV: NavDomain[] = [
 				id: 'funeral-directors',
 				label: 'Funeral Directors',
 				href: '/admin/users/funeral-directors',
-				icon: '🏥',
+				icon: 'funeral-directors',
 				description: 'Funeral home accounts',
 				requiredPermission: { resource: 'funeral_director', action: 'read' }
 			}
@@ -89,13 +97,13 @@ export const ADMIN_NAV: NavDomain[] = [
 	{
 		id: 'content',
 		label: 'Content',
-		icon: '📝',
+		icon: 'content',
 		items: [
 			{
 				id: 'blog',
 				label: 'Blog Posts',
 				href: '/admin/content/blog',
-				icon: '📰',
+				icon: 'blog',
 				description: 'Blog content management',
 				requiredPermission: { resource: 'blog', action: 'read' }
 			}
@@ -104,13 +112,13 @@ export const ADMIN_NAV: NavDomain[] = [
 	{
 		id: 'system',
 		label: 'System',
-		icon: '⚙️',
+		icon: 'system',
 		items: [
 			{
 				id: 'audit-logs',
 				label: 'Audit Logs',
 				href: '/admin/system/audit-logs',
-				icon: '📋',
+				icon: 'audit-logs',
 				description: 'System activity logs',
 				requiredPermission: { resource: 'audit_log', action: 'read' }
 			},
@@ -118,7 +126,7 @@ export const ADMIN_NAV: NavDomain[] = [
 				id: 'email-logs',
 				label: 'Email Logs',
 				href: '/admin/system/email-logs',
-				icon: '📧',
+				icon: 'email-logs',
 				description: 'Email audit trail — view all sent emails',
 				requiredPermission: { resource: 'audit_log', action: 'read' }
 			},
@@ -126,7 +134,7 @@ export const ADMIN_NAV: NavDomain[] = [
 				id: 'database',
 				label: 'Database',
 				href: '/admin/system/database',
-				icon: '🗄️',
+				icon: 'database',
 				description: 'Firestore collection CRUD console',
 				requiredPermission: { resource: 'system', action: 'read' }
 			},
@@ -134,7 +142,7 @@ export const ADMIN_NAV: NavDomain[] = [
 				id: 'wiki',
 				label: 'Wiki',
 				href: '/admin/wiki',
-				icon: '📚',
+				icon: 'wiki',
 				description: 'Internal documentation',
 				requiredPermission: { resource: 'system', action: 'read' }
 			}

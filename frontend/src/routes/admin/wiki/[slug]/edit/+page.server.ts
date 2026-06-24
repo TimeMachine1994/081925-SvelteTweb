@@ -1,17 +1,11 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
+import { requireAdmin, requireAdminAction } from '$lib/server/adminGuard';
 import type { WikiPage } from '$lib/types/wiki';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
-	// Check authentication - same pattern as /admin page
-	if (!locals.user) {
-		throw redirect(302, '/login');
-	}
-
-	if (locals.user.role !== 'admin') {
-		throw redirect(302, '/profile');
-	}
+	requireAdmin(locals, { resource: 'system', action: 'read' });
 
 	const { slug } = params;
 
@@ -70,9 +64,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 export const actions: Actions = {
 	update: async ({ request, params, locals }) => {
-		if (!locals.user || locals.user.role !== 'admin') {
-			return fail(403, { error: 'Unauthorized' });
-		}
+		const guard = requireAdminAction(locals, { resource: 'system', action: 'update' });
+		if (!guard.ok) return guard.failure;
 
 		const { slug } = params;
 
@@ -142,8 +135,8 @@ export const actions: Actions = {
 				content,
 				category: category || null,
 				tags,
-				updatedBy: locals.user.uid,
-				updatedByEmail: locals.user.email || '',
+				updatedBy: guard.user.uid,
+				updatedByEmail: guard.user.email || '',
 				updatedAt: now,
 				version: (currentData.version || 1) + 1
 			};
@@ -162,9 +155,8 @@ export const actions: Actions = {
 	},
 
 	delete: async ({ params, locals }) => {
-		if (!locals.user || locals.user.role !== 'admin') {
-			return fail(403, { error: 'Unauthorized' });
-		}
+		const guard = requireAdminAction(locals, { resource: 'system', action: 'delete' });
+		if (!guard.ok) return guard.failure;
 
 		const { slug } = params;
 

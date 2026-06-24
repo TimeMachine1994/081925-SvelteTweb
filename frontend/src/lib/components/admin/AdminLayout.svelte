@@ -12,8 +12,10 @@ Based on ADMIN_REFACTOR_1_ARCHITECTURE.md
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { adminUser, can } from '$lib/stores/adminUser';
-	import { getAccessibleNav, getBreadcrumbs, type NavDomain } from '$lib/admin/navigation';
-	import { goto } from '$app/navigation';
+	import { getAccessibleNav, getBreadcrumbs } from '$lib/admin/navigation';
+	import AdminIcon from './ui/AdminIcon.svelte';
+	import ToastContainer from './ui/ToastContainer.svelte';
+	import type { Snippet } from 'svelte';
 	
 	let {
 		title,
@@ -24,7 +26,7 @@ Based on ADMIN_REFACTOR_1_ARCHITECTURE.md
 		title: string;
 		subtitle?: string;
 		actions?: Array<{ label: string; onclick: () => void; variant?: string; icon?: string }>;
-		children?: any;
+		children?: Snippet;
 	} = $props();
 
 	// State
@@ -73,7 +75,7 @@ Based on ADMIN_REFACTOR_1_ARCHITECTURE.md
 		<!-- Logo & Close -->
 		<div class="sidebar-header">
 			<div class="logo">
-				<span class="logo-icon">🕊️</span>
+				<span class="logo-icon"><AdminIcon name="logo" size={22} /></span>
 				<span class="logo-text">Tributestream</span>
 			</div>
 			<button class="close-mobile" onclick={() => (mobileMenuOpen = false)}>✕</button>
@@ -81,21 +83,21 @@ Based on ADMIN_REFACTOR_1_ARCHITECTURE.md
 
 		<!-- Command Palette Trigger -->
 		<button class="command-trigger" onclick={openCommandPalette}>
-			<span class="icon">🔍</span>
+			<span class="icon"><AdminIcon name="search" size={16} /></span>
 			<span class="text">Search...</span>
 			<kbd>⌘K</kbd>
 		</button>
 
 		<!-- Navigation Domains -->
 		<nav class="sidebar-nav">
-			{#each accessibleNav as domain}
+			{#each accessibleNav as domain (domain.id)}
 				<div class="nav-domain">
 					<div class="domain-header">
-						<span class="domain-icon">{domain.icon}</span>
+						<span class="domain-icon"><AdminIcon name={domain.icon} size={15} /></span>
 						<span class="domain-label">{domain.label}</span>
 					</div>
 					<ul class="domain-items">
-						{#each domain.items as item}
+						{#each domain.items as item (item.id)}
 							<li>
 								<a
 									href={item.href}
@@ -103,7 +105,7 @@ Based on ADMIN_REFACTOR_1_ARCHITECTURE.md
 									class:active={$page.url.pathname === item.href}
 									onclick={() => (mobileMenuOpen = false)}
 								>
-									<span class="item-icon">{item.icon}</span>
+									<span class="item-icon"><AdminIcon name={item.icon} size={17} /></span>
 									<span class="item-label">{item.label}</span>
 								</a>
 							</li>
@@ -119,7 +121,7 @@ Based on ADMIN_REFACTOR_1_ARCHITECTURE.md
 				<div class="footer-section">
 					<h4>Recently Viewed</h4>
 					<ul class="recent-items">
-						{#each recentlyViewed.slice(0, 5) as item}
+						{#each recentlyViewed.slice(0, 5) as item (item.href)}
 							<li>
 								<a href={item.href}>{item.label}</a>
 							</li>
@@ -159,7 +161,7 @@ Based on ADMIN_REFACTOR_1_ARCHITECTURE.md
 
 			<!-- Breadcrumbs -->
 			<nav class="breadcrumbs">
-				{#each breadcrumbs as crumb, i}
+				{#each breadcrumbs as crumb, i (crumb.href)}
 					{#if i > 0}
 						<span class="separator">/</span>
 					{/if}
@@ -183,7 +185,7 @@ Based on ADMIN_REFACTOR_1_ARCHITECTURE.md
 			</div>
 			{#if actions.length > 0}
 				<div class="header-actions">
-					{#each actions as action}
+					{#each actions as action (action.label)}
 						<button
 							class="action-btn"
 							class:primary={action.variant === 'primary'}
@@ -191,7 +193,7 @@ Based on ADMIN_REFACTOR_1_ARCHITECTURE.md
 							onclick={action.onclick}
 						>
 							{#if action.icon}
-								<span class="icon">{action.icon}</span>
+								<span class="icon"><AdminIcon name={action.icon} size={16} /></span>
 							{/if}
 							{action.label}
 						</button>
@@ -202,9 +204,12 @@ Based on ADMIN_REFACTOR_1_ARCHITECTURE.md
 
 		<!-- Page Content -->
 		<div class="page-content">
-			{@render children()}
+			{@render children?.()}
 		</div>
 	</main>
+
+	<!-- Global toast notifications -->
+	<ToastContainer />
 </div>
 
 <style>

@@ -49,12 +49,19 @@ const authHandle: Handle = async ({ event, resolve }) => {
 			console.log('🔍 [AUTH] User custom claims:', userRecord.customClaims);
 			console.log('🔍 [AUTH] User email:', userRecord.email);
 
+			const claims = userRecord.customClaims || {};
+			const isAdmin = claims.role === 'admin';
+			// Granular admin role for RBAC. Falls back to 'super_admin' for legacy
+			// admins that predate the 5-tier role system, preserving prior behavior.
+			const adminRole = isAdmin ? claims.adminRole || 'super_admin' : undefined;
+
 			event.locals.user = {
 				uid: userRecord.uid,
 				email: userRecord.email || null,
 				displayName: userRecord.displayName,
-				role: userRecord.customClaims?.role || 'owner',
-				isAdmin: userRecord.customClaims?.role === 'admin'
+				role: claims.role || 'owner',
+				isAdmin,
+				adminRole
 			};
 
 			console.log('🔍 [AUTH] Final user object:', event.locals.user);

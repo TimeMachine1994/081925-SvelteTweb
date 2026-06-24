@@ -1,10 +1,8 @@
-import { redirect } from '@sveltejs/kit';
 import { DATABASE_COLLECTIONS } from '$lib/server/adminDatabase';
+import { requireAdmin } from '$lib/server/adminGuard';
 
 export const load = async ({ locals }: any) => {
-	if (!locals.user || locals.user.role !== 'admin') {
-		throw redirect(302, '/login');
-	}
+	requireAdmin(locals, { resource: 'system', action: 'read' });
 
 	return {
 		collections: DATABASE_COLLECTIONS,

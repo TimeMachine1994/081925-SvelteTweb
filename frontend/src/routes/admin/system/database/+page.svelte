@@ -278,6 +278,12 @@
 		}
 	}
 
+	function handleKeydown(event: KeyboardEvent) {
+		if (event.key !== 'Escape') return;
+		if (showCreate) showCreate = false;
+		if (showDelete) showDelete = false;
+	}
+
 	onMount(() => {
 		const params = $page.url.searchParams;
 		const requested = params.get('collection');
@@ -300,18 +306,20 @@
 	});
 </script>
 
+<svelte:window onkeydown={handleKeydown} />
+
 <AdminLayout
 	title="Database"
 	subtitle="Browse and manage allowlisted Firestore collections"
 	actions={[
 		{
 			label: 'Refresh',
-			icon: '🔄',
+			icon: 'refresh',
 			onclick: () => selectedCollection && loadCollection(selectedCollection)
 		},
 		{
 			label: 'Create Document',
-			icon: '➕',
+			icon: 'add',
 			onclick: () => (showCreate = true)
 		}
 	]}
@@ -445,8 +453,9 @@
 	</div>
 
 	{#if showCreate && selectedCollection}
-		<div class="modal-overlay" onclick={() => (showCreate = false)}>
-			<div class="modal-content" onclick={(event) => event.stopPropagation()}>
+		<div class="modal-overlay">
+			<button class="modal-backdrop" aria-label="Close dialog" onclick={() => (showCreate = false)}></button>
+			<div class="modal-content" role="dialog" aria-modal="true">
 				<div class="modal-header">
 					<h3>Create document in {selectedCollection.id}</h3>
 					<button onclick={() => (showCreate = false)}>✕</button>
@@ -472,8 +481,9 @@
 	{/if}
 
 	{#if showDelete && selectedDocument && selectedCollection}
-		<div class="modal-overlay" onclick={() => (showDelete = false)}>
-			<div class="modal-content" onclick={(event) => event.stopPropagation()}>
+		<div class="modal-overlay">
+			<button class="modal-backdrop" aria-label="Close dialog" onclick={() => (showDelete = false)}></button>
+			<div class="modal-content" role="dialog" aria-modal="true">
 				<div class="modal-header">
 					<h3>Delete {selectedDocument.id}</h3>
 					<button onclick={() => (showDelete = false)}>✕</button>
@@ -785,7 +795,20 @@
 		padding: 2rem;
 	}
 
+	.modal-backdrop {
+		position: absolute;
+		inset: 0;
+		padding: 0;
+		margin: 0;
+		border: 0;
+		border-radius: 0;
+		background: transparent;
+		cursor: default;
+	}
+
 	.modal-content {
+		position: relative;
+		z-index: 1;
 		width: min(720px, 100%);
 		max-height: 90vh;
 		overflow: auto;

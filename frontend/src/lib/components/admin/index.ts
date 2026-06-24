@@ -8,3 +8,6 @@ export { default as AdminLayout } from './AdminLayout.svelte';
 export { default as DataGrid } from './DataGrid.svelte';
 export { default as FilterBuilder } from './FilterBuilder.svelte';
 export { default as BulkActionBar } from './BulkActionBar.svelte';
+
+// Shared UI primitives (Tailwind + Lucide)
+export * from './ui';

@@ -1,39 +1,16 @@
-import { redirect } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
+import { requireAdmin } from '$lib/server/adminGuard';
 import type { WikiPage } from '$lib/types/wiki';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
-	console.log('📖 [WIKI] Loading wiki pages...');
-	console.log('📖 [WIKI] User:', locals.user);
-	
-	// Check authentication - same pattern as /admin page
-	if (!locals.user) {
-		console.log('❌ [WIKI] No authenticated user - redirecting to login');
-		throw redirect(302, '/login');
-	}
-
-	if (locals.user.role !== 'admin') {
-		console.log('❌ [WIKI] User lacks admin privileges:', {
-			uid: locals.user.uid,
-			role: locals.user.role
-		});
-		throw redirect(302, '/profile');
-	}
-
-	console.log('✅ [WIKI] Admin access verified for:', locals.user.email);
+	requireAdmin(locals, { resource: 'system', action: 'read' });
 
 	try {
-
-		// Fetch wiki pages
-		console.log('📖 [WIKI] Fetching pages from Firestore...');
-		
 		// Fetch all wiki pages (no orderBy to avoid index requirement on first run)
 		const pagesSnapshot = await adminDb
 			.collection('wiki_pages')
 			.get();
-
-		console.log('📖 [WIKI] Found', pagesSnapshot.docs.length, 'pages');
 
 		const pages: WikiPage[] = pagesSnapshot.docs
 			.map((doc) => {
@@ -64,15 +41,12 @@ export const load: PageServerLoad = async ({ locals }) => {
 				return dateB.getTime() - dateA.getTime();
 			});
 
-		console.log('✅ [WIKI] Successfully loaded and sorted', pages.length, 'pages');
-		
 		return {
 			pages
 		};
 	} catch (error) {
-		console.error('❌ [WIKI] Error loading wiki pages:', error);
-		console.error('❌ [WIKI] Error details:', error instanceof Error ? error.message : 'Unknown error');
-		
+		console.error('Error loading wiki pages:', error);
+
 		// Return empty array on error instead of redirecting
 		return {
 			pages: []

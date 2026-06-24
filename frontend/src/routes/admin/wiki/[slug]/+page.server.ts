@@ -1,17 +1,11 @@
-import { error, redirect } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
+import { requireAdmin } from '$lib/server/adminGuard';
 import type { WikiPage } from '$lib/types/wiki';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
-	// Check authentication - same pattern as /admin page
-	if (!locals.user) {
-		throw redirect(302, '/login');
-	}
-
-	if (locals.user.role !== 'admin') {
-		throw redirect(302, '/profile');
-	}
+	requireAdmin(locals, { resource: 'system', action: 'read' });
 
 	const { slug } = params;
 

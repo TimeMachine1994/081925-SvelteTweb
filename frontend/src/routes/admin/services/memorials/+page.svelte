@@ -9,6 +9,8 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 	import DataGrid from '$lib/components/admin/DataGrid.svelte';
 	import BulkActionBar from '$lib/components/admin/BulkActionBar.svelte';
 	import FilterBuilder from '$lib/components/admin/FilterBuilder.svelte';
+	import { ConfirmDialog } from '$lib/components/admin/ui';
+	import { adminToast } from '$lib/stores/adminToast';
 	import { can } from '$lib/stores/adminUser';
 	import { goto } from '$app/navigation';
 	import { applyFilters, type FilterRule } from '$lib/utils/filter-utils';
@@ -20,6 +22,10 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 	let showFilters = $state(false);
 	let search = $state<string>(data.searchQuery || '');
 	let activeFilters = $state<FilterRule[]>([]);
+
+	// Bulk-delete confirmation state
+	let confirmDeleteOpen = $state(false);
+	let pendingDeleteIds = $state<string[]>([]);
 
 	// Derived filtered data
 	let filteredMemorials = $derived.by(() => {
@@ -42,7 +48,7 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 		if (response.ok) {
 			location.reload();
 		} else {
-			alert('Failed to update payment status. Please try again.');
+			adminToast.error('Failed to update payment status. Please try again.');
 		}
 	}
 
@@ -62,7 +68,7 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 		if (response.ok) {
 			location.reload();
 		} else {
-			alert('Failed to update visibility. Please try again.');
+			adminToast.error('Failed to update visibility. Please try again.');
 		}
 	}
 
@@ -98,7 +104,7 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 			label: 'Payment',
 			field: 'isPaid',
 			width: 120,
-			formatter: (val: boolean) => (val ? '✅ Paid' : '❌ Unpaid'),
+			formatter: (val: boolean) => (val ? 'Paid' : 'Unpaid'),
 			onClick: togglePayment,
 			sortable: true
 		},
@@ -107,7 +113,7 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 			label: 'Visibility',
 			field: 'isPublic',
 			width: 100,
-			formatter: (val: boolean) => (val ? '🌐 Public' : '🔒 Private'),
+			formatter: (val: boolean) => (val ? 'Public' : 'Private'),
 			onClick: toggleVisibility
 		},
 		{
@@ -145,19 +151,17 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 
 	// Actions
 	async function handleBulkAction(action: string, ids: string[]) {
-		console.log('Bulk action:', action, ids);
-		
-		// Confirm delete action
+		// Delete needs explicit confirmation via dialog
 		if (action === 'delete') {
-			const count = ids.length;
-			const memorial = count === 1 ? 'memorial' : 'memorials';
-			const confirmMessage = `Are you sure you want to delete ${count} ${memorial}?\n\nThis will mark them as deleted and they will be hidden from the admin list.`;
-			
-			if (!confirm(confirmMessage)) {
-				return;
-			}
+			pendingDeleteIds = ids;
+			confirmDeleteOpen = true;
+			return;
 		}
-		
+
+		await runBulkAction(action, ids);
+	}
+
+	async function runBulkAction(action: string, ids: string[]) {
 		const response = await fetch('/api/admin/bulk-actions', {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
@@ -168,16 +172,24 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 			const result = await response.json();
 			const successCount = result.success?.length || 0;
 			const failedCount = result.failed?.length || 0;
-			
+
 			if (failedCount > 0) {
-				alert(`Action completed with errors:\n✅ ${successCount} succeeded\n❌ ${failedCount} failed`);
+				adminToast.info(`${successCount} succeeded, ${failedCount} failed`);
+			} else {
+				adminToast.success(`${successCount} ${successCount === 1 ? 'item' : 'items'} updated`);
 			}
-			
-			// Reload data
+
 			location.reload();
 		} else {
-			alert('Action failed. Please try again.');
+			adminToast.error('Action failed. Please try again.');
 		}
+	}
+
+	async function confirmBulkDelete() {
+		const ids = pendingDeleteIds;
+		confirmDeleteOpen = false;
+		pendingDeleteIds = [];
+		await runBulkAction('delete', ids);
 	}
 
 	function handleRowClick(memorial: any) {
@@ -191,14 +203,14 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 	actions={[
 		{
 			label: 'Filters',
-			icon: '🔍',
+			icon: 'filter',
 			onclick: () => (showFilters = !showFilters)
 		},
 		...$can('memorial', 'create')
 			? [
 					{
 						label: 'Create Memorial',
-						icon: '➕',
+						icon: 'add',
 						variant: 'primary',
 						onclick: () => goto('/admin/services/memorials/create')
 					}
@@ -207,7 +219,7 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 	]}
 >
 	<!-- Search Bar -->
-	<form class="search-bar" method="GET">
+	<form class="mb-4 flex items-center gap-2" method="GET">
 		<input
 			type="text"
 			name="q"
@@ -217,8 +229,14 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 				const target = event.currentTarget as HTMLInputElement;
 				search = target.value;
 			}}
+			class="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
 		/>
-		<button type="submit">Search</button>
+		<button
+			type="submit"
+			class="rounded-md border border-slate-300 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100"
+		>
+			Search
+		</button>
 	</form>
 
 	<!-- Bulk Actions Bar -->
@@ -235,7 +253,7 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 	{/if}
 
 	{#if showFilters}
-		<div class="filters-panel">
+		<div class="mb-6 rounded-lg border border-slate-200 bg-white p-6">
 			<FilterBuilder
 				fields={[
 					{ id: 'lovedOneName', label: 'Name', type: 'string' },
@@ -261,42 +279,16 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 	/>
 </AdminLayout>
 
-<style>
-	.search-bar {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		margin-bottom: 1rem;
-	}
+<ConfirmDialog
+	bind:open={confirmDeleteOpen}
+	title="Delete memorials?"
+	message={`This will mark ${pendingDeleteIds.length} ${pendingDeleteIds.length === 1 ? 'memorial' : 'memorials'} as deleted and hide them from the admin list.`}
+	confirmLabel="Delete"
+	variant="danger"
+	onConfirm={confirmBulkDelete}
+	onCancel={() => {
+		confirmDeleteOpen = false;
+		pendingDeleteIds = [];
+	}}
+/>
 
-	.search-bar input[type='text'] {
-		flex: 1;
-		padding: 0.5rem 0.75rem;
-		border-radius: 0.375rem;
-		border: 1px solid #e2e8f0;
-		font-size: 0.9375rem;
-	}
-
-	.search-bar button[type='submit'] {
-		padding: 0.5rem 1rem;
-		border-radius: 0.375rem;
-		border: 1px solid #cbd5e0;
-		background: #edf2f7;
-		font-size: 0.9375rem;
-		cursor: pointer;
-		transition: background 0.15s ease, border-color 0.15s ease;
-	}
-
-	.search-bar button[type='submit']:hover {
-		background: #e2e8f0;
-		border-color: #a0aec0;
-	}
-
-	.filters-panel {
-		background: white;
-		border: 1px solid #e2e8f0;
-		border-radius: 0.5rem;
-		padding: 1.5rem;
-		margin-bottom: 1.5rem;
-	}
-</style>

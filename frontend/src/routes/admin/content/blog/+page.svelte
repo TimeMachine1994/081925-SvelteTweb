@@ -6,7 +6,10 @@ Manage blog posts and articles
 <script lang="ts">
 	import AdminLayout from '$lib/components/admin/AdminLayout.svelte';
 	import DataGrid from '$lib/components/admin/DataGrid.svelte';
+	import BulkActionBar from '$lib/components/admin/BulkActionBar.svelte';
 	import FilterBuilder from '$lib/components/admin/FilterBuilder.svelte';
+	import { StatCard, ConfirmDialog } from '$lib/components/admin/ui';
+	import { adminToast } from '$lib/stores/adminToast';
 	import { can } from '$lib/stores/adminUser';
 	import { goto } from '$app/navigation';
 	import { applyFilters, type FilterRule } from '$lib/utils/filter-utils';
@@ -17,6 +20,10 @@ Manage blog posts and articles
 	let selectedPosts = $state<Set<string>>(new Set());
 	let showFilters = $state(false);
 	let activeFilters = $state<FilterRule[]>([]);
+
+	// Bulk-delete confirmation state
+	let confirmDeleteOpen = $state(false);
+	let pendingDeleteIds = $state<string[]>([]);
 
 	// Derived filtered data
 	let filteredPosts = $derived.by(() => {
@@ -46,13 +53,13 @@ Manage blog posts and articles
 			width: 150,
 			formatter: (val: string) => {
 				const categoryMap: Record<string, string> = {
-					'memorial-planning': '💝 Memorial Planning',
-					'grief-support': '🤝 Grief Support',
-					technology: '💻 Technology',
-					'funeral-industry': '🏥 Funeral Industry',
-					livestreaming: '📹 Livestreaming',
-					'company-news': '📰 Company News',
-					'customer-stories': '⭐ Customer Stories'
+					'memorial-planning': 'Memorial Planning',
+					'grief-support': 'Grief Support',
+					technology: 'Technology',
+					'funeral-industry': 'Funeral Industry',
+					livestreaming: 'Livestreaming',
+					'company-news': 'Company News',
+					'customer-stories': 'Customer Stories'
 				};
 				return categoryMap[val] || val;
 			}
@@ -64,10 +71,10 @@ Manage blog posts and articles
 			width: 120,
 			formatter: (val: string) => {
 				const statusMap: Record<string, string> = {
-					published: '✅ Published',
-					draft: '📝 Draft',
-					scheduled: '🕒 Scheduled',
-					archived: '📦 Archived'
+					published: 'Published',
+					draft: 'Draft',
+					scheduled: 'Scheduled',
+					archived: 'Archived'
 				};
 				return statusMap[val] || val;
 			},
@@ -78,7 +85,7 @@ Manage blog posts and articles
 			label: 'Featured',
 			field: 'featured',
 			width: 100,
-			formatter: (val: boolean) => (val ? '⭐ Yes' : '-')
+			formatter: (val: boolean) => (val ? 'Yes' : '-')
 		},
 		{
 			id: 'publishedAt',
@@ -109,48 +116,51 @@ Manage blog posts and articles
 	async function handleBulkAction(action: string, ids: string[]) {
 		if (!ids.length) return;
 
-		console.log('Bulk action on blog posts:', action, ids);
+		if (action === 'delete') {
+			pendingDeleteIds = ids;
+			confirmDeleteOpen = true;
+			return;
+		}
 
+		if (action === 'publish') {
+			await updateStatus(ids, 'published', 'Blog posts published');
+		} else if (action === 'draft') {
+			await updateStatus(ids, 'draft', 'Blog posts moved to draft');
+		}
+	}
+
+	async function updateStatus(ids: string[], status: string, successMessage: string) {
 		try {
-			if (action === 'delete') {
-				if (!confirm(`Delete ${ids.length} blog post(s)?`)) return;
-
-				for (const id of ids) {
-					await fetch('/api/admin/blog', {
-						method: 'DELETE',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({ id })
-					});
-				}
-
-				alert('Blog posts deleted successfully');
-				location.reload();
-			} else if (action === 'publish') {
-				for (const id of ids) {
-					await fetch('/api/admin/blog', {
-						method: 'PUT',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({ id, status: 'published' })
-					});
-				}
-
-				alert('Blog posts published successfully');
-				location.reload();
-			} else if (action === 'draft') {
-				for (const id of ids) {
-					await fetch('/api/admin/blog', {
-						method: 'PUT',
-						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({ id, status: 'draft' })
-					});
-				}
-
-				alert('Blog posts moved to draft');
-				location.reload();
+			for (const id of ids) {
+				await fetch('/api/admin/blog', {
+					method: 'PUT',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ id, status })
+				});
 			}
-		} catch (error) {
-			console.error('Bulk action failed:', error);
-			alert('Bulk action failed');
+			adminToast.success(successMessage);
+			location.reload();
+		} catch {
+			adminToast.error('Action failed. Please try again.');
+		}
+	}
+
+	async function confirmBulkDelete() {
+		const ids = pendingDeleteIds;
+		confirmDeleteOpen = false;
+		pendingDeleteIds = [];
+		try {
+			for (const id of ids) {
+				await fetch('/api/admin/blog', {
+					method: 'DELETE',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ id })
+				});
+			}
+			adminToast.success('Blog posts deleted');
+			location.reload();
+		} catch {
+			adminToast.error('Delete failed. Please try again.');
 		}
 	}
 
@@ -165,19 +175,19 @@ Manage blog posts and articles
 	actions={[
 		{
 			label: 'Filters',
-			icon: '🔍',
+			icon: 'filter',
 			onclick: () => (showFilters = !showFilters)
 		},
 		{
 			label: 'View Live Blog',
-			icon: '🌐',
+			icon: 'public',
 			onclick: () => window.open('/blog', '_blank')
 		},
 		...$can('blog_post', 'create')
 			? [
 					{
 						label: 'New Post',
-						icon: '➕',
+						icon: 'add',
 						variant: 'primary',
 						onclick: () => goto('/admin/content/blog/create')
 					}
@@ -186,7 +196,7 @@ Manage blog posts and articles
 	]}
 >
 	{#if showFilters}
-		<div class="filters-panel">
+		<div class="mb-6 rounded-lg border border-slate-200 bg-white p-6">
 			<FilterBuilder
 				fields={[
 					{ id: 'title', label: 'Title', type: 'string' },
@@ -225,23 +235,23 @@ Manage blog posts and articles
 		</div>
 	{/if}
 
-	<div class="stats-bar">
-		<div class="stat">
-			<span class="stat-label">Published</span>
-			<span class="stat-value published">{data.stats.published}</span>
-		</div>
-		<div class="stat">
-			<span class="stat-label">Drafts</span>
-			<span class="stat-value draft">{data.stats.draft}</span>
-		</div>
-		<div class="stat">
-			<span class="stat-label">Scheduled</span>
-			<span class="stat-value scheduled">{data.stats.scheduled}</span>
-		</div>
-		<div class="stat">
-			<span class="stat-label">Featured</span>
-			<span class="stat-value featured">{data.stats.featured}</span>
-		</div>
+	{#if selectedPosts.size > 0}
+		<BulkActionBar
+			selectedCount={selectedPosts.size}
+			resourceType="blog_post"
+			onAction={(action) => handleBulkAction(action, Array.from(selectedPosts))}
+			onClear={() => {
+				selectedPosts.clear();
+				selectedPosts = selectedPosts;
+			}}
+		/>
+	{/if}
+
+	<div class="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+		<StatCard label="Published" value={data.stats.published} icon="complete" variant="success" />
+		<StatCard label="Drafts" value={data.stats.draft} icon="edit" variant="neutral" />
+		<StatCard label="Scheduled" value={data.stats.scheduled} icon="calendar" variant="warning" />
+		<StatCard label="Featured" value={data.stats.featured} icon="blog" variant="info" />
 	</div>
 
 	<DataGrid
@@ -254,58 +264,16 @@ Manage blog posts and articles
 	/>
 </AdminLayout>
 
-<style>
-	.filters-panel {
-		background: white;
-		border: 1px solid #e2e8f0;
-		border-radius: 0.5rem;
-		padding: 1.5rem;
-		margin-bottom: 1.5rem;
-	}
+<ConfirmDialog
+	bind:open={confirmDeleteOpen}
+	title="Delete blog posts?"
+	message={`This will permanently delete ${pendingDeleteIds.length} blog ${pendingDeleteIds.length === 1 ? 'post' : 'posts'}.`}
+	confirmLabel="Delete"
+	variant="danger"
+	onConfirm={confirmBulkDelete}
+	onCancel={() => {
+		confirmDeleteOpen = false;
+		pendingDeleteIds = [];
+	}}
+/>
 
-	.stats-bar {
-		background: white;
-		border: 1px solid #e2e8f0;
-		border-radius: 0.5rem;
-		padding: 1.5rem;
-		margin-bottom: 1.5rem;
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-		gap: 1.5rem;
-	}
-
-	.stat {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-		text-align: center;
-	}
-
-	.stat-label {
-		font-size: 0.8125rem;
-		color: #718096;
-		font-weight: 500;
-	}
-
-	.stat-value {
-		font-size: 2rem;
-		font-weight: 700;
-		color: #2d3748;
-	}
-
-	.stat-value.published {
-		color: #38a169;
-	}
-
-	.stat-value.draft {
-		color: #718096;
-	}
-
-	.stat-value.scheduled {
-		color: #d69e2e;
-	}
-
-	.stat-value.featured {
-		color: #805ad5;
-	}
-</style>

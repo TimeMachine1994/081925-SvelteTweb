@@ -1,5 +1,6 @@
-import { redirect, error } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
+import { requireAdmin } from '$lib/server/adminGuard';
 
 // Helper to safely serialize Firestore data
 function safeSerialize(data: any): any {
@@ -38,24 +39,17 @@ function safeSerialize(data: any): any {
 }
 
 export const load = async ({ locals, params }: any) => {
-	// Auth check
-	if (!locals.user || locals.user.role !== 'admin') {
-		throw redirect(302, '/login');
-	}
+	requireAdmin(locals, { resource: 'user', action: 'read' });
 
 	const { userId } = params;
-	console.log('🔍 [USER DETAIL] Loading user:', userId);
 
 	try {
 		// 1. Get main user profile
-		console.log('📝 [USER DETAIL] Fetching user document...');
 		const userDoc = await adminDb.collection('users').doc(userId).get();
 		if (!userDoc.exists) {
-			console.log('❌ [USER DETAIL] User not found');
 			throw error(404, 'User not found');
 		}
 		const userData = userDoc.data();
-		console.log('✅ [USER DETAIL] User data loaded:', userData?.email);
 
 		// 2. Get funeral director profile (if applicable)
 		let funeralDirectorData = null;
@@ -209,8 +203,6 @@ export const load = async ({ locals, params }: any) => {
 		// 10. Get follower count (memorials user follows) - simplified
 		let followedMemorialsCount = 0;
 
-		console.log('✅ [USER DETAIL] All data loaded, serializing response...');
-		
 		// Safely serialize all data before returning
 		const serializedUser = safeSerialize(userData);
 		const serializedFuneralDirector = funeralDirectorData ? safeSerialize(funeralDirectorData) : null;
@@ -244,11 +236,10 @@ export const load = async ({ locals, params }: any) => {
 			}
 		};
 
-		console.log('✅ [USER DETAIL] Response serialized successfully');
 		return result;
 	} catch (err: any) {
-		console.error('❌ [USER DETAIL] Error loading user detail:', err);
-		console.error('❌ [USER DETAIL] Error stack:', err?.stack);
+		if (err instanceof Response) throw err;
+		console.error('Error loading user detail:', err);
 		throw error(500, `Failed to load user details: ${err?.message || 'Unknown error'}`);
 	}
 };

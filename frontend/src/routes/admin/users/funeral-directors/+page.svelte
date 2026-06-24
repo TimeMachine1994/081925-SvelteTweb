@@ -20,7 +20,7 @@ Manage funeral home partners
 
 	// Derived filtered data
 	let filteredDirectors = $derived.by(() => {
-		return applyFilters(data.directors, activeFilters);
+		return applyFilters(data.funeralDirectors, activeFilters);
 	});
 
 	// Column configuration
@@ -59,11 +59,11 @@ Manage funeral home partners
 			width: 120,
 			formatter: (val: string) => {
 				const statusMap: Record<string, string> = {
-					approved: '✅ Active',
-					suspended: '🚫 Suspended',
-					inactive: '⏸️ Inactive'
+					approved: 'Active',
+					suspended: 'Suspended',
+					inactive: 'Inactive'
 				};
-				return statusMap[val] || '✅ Active';
+				return statusMap[val] || 'Active';
 			},
 			sortable: true
 		},
@@ -89,19 +89,6 @@ Manage funeral home partners
 		}
 	];
 
-	// Actions
-	async function handleBulkAction(action: string, ids: string[]) {
-		const response = await fetch('/api/admin/bulk-actions', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ action, ids, resourceType: 'funeral_director' })
-		});
-
-		if (response.ok) {
-			location.reload();
-		}
-	}
-
 	function handleRowClick(director: any) {
 		goto(`/admin/users/funeral-directors/${director.id}`);
 	}
@@ -113,13 +100,13 @@ Manage funeral home partners
 	actions={[
 		{
 			label: 'Filters',
-			icon: '🔍',
+			icon: 'filter',
 			onclick: () => (showFilters = !showFilters)
 		}
 	]}
 >
 	{#if showFilters}
-		<div class="filters-panel">
+		<div class="mb-6 rounded-lg border border-slate-200 bg-white p-6">
 			<FilterBuilder
 				fields={[
 					{ id: 'companyName', label: 'Funeral Home', type: 'string' },
@@ -154,13 +141,3 @@ Manage funeral home partners
 	/>
 	<!-- onRowClick disabled until detail pages are created -->
 </AdminLayout>
-
-<style>
-	.filters-panel {
-		background: white;
-		border: 1px solid #e2e8f0;
-		border-radius: 0.5rem;
-		padding: 1.5rem;
-		margin-bottom: 1.5rem;
-	}
-</style>

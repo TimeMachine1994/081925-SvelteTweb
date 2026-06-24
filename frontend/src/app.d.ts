@@ -10,6 +10,8 @@ declare global {
 				displayName?: string;
 				role: 'admin' | 'owner' | 'funeral_director';
 				isAdmin: boolean;
+				/** Granular admin RBAC role (super_admin, content_admin, etc.). Only set for admins. */
+				adminRole?: string;
 			} | null;
 		}
 		interface PageData {
@@ -19,6 +21,7 @@ declare global {
 				displayName?: string;
 				role: 'admin' | 'owner' | 'funeral_director';
 				isAdmin: boolean;
+				adminRole?: string;
 			} | null;
 		}
 		// interface PageState {}

@@ -1,11 +1,9 @@
-import { redirect, error } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
+import { requireAdmin } from '$lib/server/adminGuard';
 
 export const load = async ({ locals, params }: any) => {
-	// Auth check
-	if (!locals.user || locals.user.role !== 'admin') {
-		throw redirect(302, '/login');
-	}
+	requireAdmin(locals, { resource: 'memorial', action: 'read' });
 
 	const { receiptId } = params;
 	console.log('🧾 [RECEIPT] Loading receipt for memorial:', receiptId);

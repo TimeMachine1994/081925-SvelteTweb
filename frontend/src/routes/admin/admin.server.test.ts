@@ -1,129 +1,106 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { load } from './+page.server';
 
-// Mock SvelteKit redirect
+// Mock SvelteKit redirect/fail
 vi.mock('@sveltejs/kit', () => ({
-	redirect: vi.fn()
+	redirect: vi.fn((status: number, location: string) => {
+		const err: any = new Error(`Redirect to ${location}`);
+		err.status = status;
+		err.location = location;
+		throw err;
+	}),
+	fail: vi.fn((status: number, data: any) => ({ status, data }))
 }));
 
-// Mock Firebase Admin
-vi.mock('$lib/server/firebase', () => ({
-	adminDb: {
-		collection: vi.fn()
-	}
+// Mock Firebase Admin with a chainable query builder
+vi.mock('$lib/server/firebase', () => {
+	const makeChain = () => {
+		const chain: any = {
+			orderBy: vi.fn(() => chain),
+			limit: vi.fn(() => chain),
+			where: vi.fn(() => chain),
+			count: vi.fn(() => chain),
+			get: vi.fn().mockResolvedValue({ docs: [], size: 0, data: () => ({ count: 0 }) })
+		};
+		return chain;
+	};
+	return {
+		adminDb: {
+			collection: vi.fn(() => makeChain())
+		}
+	};
+});
+
+// Mock audit logger so the archive action has no side effects
+vi.mock('$lib/server/auditLogger', () => ({
+	logAdminAction: vi.fn(),
+	extractUserContext: vi.fn(() => null)
 }));
 
-describe('Admin Page Server Load', () => {
-	let mockRedirect: any;
-	let mockAdminDb: any;
-
-	beforeEach(async () => {
+describe('Admin Dashboard Server Load (RBAC + contract)', () => {
+	beforeEach(() => {
 		vi.clearAllMocks();
-		// Get the mocked functions
-		const { redirect } = await import('@sveltejs/kit');
-		const { adminDb } = await import('$lib/server/firebase');
-		mockRedirect = vi.mocked(redirect);
-		mockAdminDb = vi.mocked(adminDb);
 	});
 
-	it('should redirect to login if user is not authenticated', async () => {
+	it('redirects unauthenticated users to /login', async () => {
 		const locals = { user: null };
-
-		// Mock redirect to throw (simulating SvelteKit behavior)
-		mockRedirect.mockImplementation(() => {
-			throw new Error('Redirect');
-		});
-
-		await expect(load({ locals } as any)).rejects.toThrow();
-		expect(mockRedirect).toHaveBeenCalledWith(302, '/login');
+		await expect(load({ locals } as any)).rejects.toMatchObject({ location: '/login' });
 	});
 
-	it('should redirect to profile if user is not admin', async () => {
+	it('redirects non-admin users to /profile', async () => {
 		const locals = {
-			user: {
-				email: 'user@test.com',
-				admin: false,
-				role: 'owner'
-			}
+			user: { email: 'user@test.com', uid: 'u1', role: 'owner', isAdmin: false }
 		};
-
-		// Mock redirect to throw (simulating SvelteKit behavior)
-		mockRedirect.mockImplementation(() => {
-			throw new Error('Redirect');
-		});
-
-		await expect(load({ locals } as any)).rejects.toThrow();
-		expect(mockRedirect).toHaveBeenCalledWith(302, '/profile');
+		await expect(load({ locals } as any)).rejects.toMatchObject({ location: '/profile' });
 	});
 
-	it('should allow access for admin users with admin flag', async () => {
+	it('redirects admins missing the role flag to /profile', async () => {
+		// isAdmin true but role not 'admin' -> denied by guard
+		const locals = {
+			user: { email: 'admin@test.com', uid: 'a1', role: 'owner', isAdmin: true }
+		};
+		await expect(load({ locals } as any)).rejects.toMatchObject({ location: '/profile' });
+	});
+
+	it('grants access to admins and returns the dashboard contract', async () => {
 		const locals = {
 			user: {
 				email: 'admin@test.com',
-				admin: true,
-				role: 'owner',
-				uid: 'admin-123'
+				uid: 'admin-456',
+				role: 'admin',
+				isAdmin: true,
+				adminRole: 'super_admin'
 			}
 		};
 
-		// Mock Firestore collections to return empty results
-		mockAdminDb.collection.mockReturnValue({
-			get: vi.fn().mockResolvedValue({
-				docs: [],
-				size: 0
-			})
-		});
-
-		const result = await load({ locals } as any);
+		const result = (await load({ locals } as any)) as any;
 
 		expect(result).toHaveProperty('adminUser');
+		expect(result).toHaveProperty('incompleteMemorials');
 		expect(result).toHaveProperty('recentMemorials');
-		expect(result).toHaveProperty('pendingFuneralDirectors');
 		expect(result).toHaveProperty('stats');
+		expect(result.stats).toHaveProperty('totalMemorials');
+		expect(result.stats).toHaveProperty('unpaidMemorials');
 		expect(result.adminUser.email).toBe('admin@test.com');
 	});
 
-	it('should allow access for admin users with admin role', async () => {
+	it('handles database errors gracefully with a safe fallback', async () => {
+		const { adminDb } = await import('$lib/server/firebase');
+		vi.mocked(adminDb.collection).mockImplementationOnce(() => {
+			throw new Error('Database connection failed');
+		});
+
 		const locals = {
 			user: {
 				email: 'admin@test.com',
-				admin: true,
+				uid: 'a2',
 				role: 'admin',
-				uid: 'admin-456'
+				isAdmin: true,
+				adminRole: 'super_admin'
 			}
 		};
 
-		// Mock basic Firestore responses
-		mockAdminDb.collection.mockReturnValue({
-			get: vi.fn().mockResolvedValue({
-				docs: [],
-				size: 0
-			})
-		});
-
-		const result = await load({ locals } as any);
-
-		expect(result).toHaveProperty('adminUser');
-		expect(result.adminUser.email).toBe('admin@test.com');
-	});
-
-	it('should handle database errors gracefully', async () => {
-		const locals = {
-			user: {
-				email: 'admin@test.com',
-				admin: true,
-				role: 'admin',
-				uid: 'admin-789'
-			}
-		};
-
-		// Mock database error
-		mockAdminDb.collection.mockReturnValue({
-			get: vi.fn().mockRejectedValue(new Error('Database connection failed'))
-		});
-
-		// Should not throw an error, but return error state
-		const result = await load({ locals } as any);
+		const result = (await load({ locals } as any)) as any;
 
 		expect(result).toHaveProperty('error');
 		expect(result).toHaveProperty('adminUser');

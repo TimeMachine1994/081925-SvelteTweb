@@ -1,76 +1,60 @@
-import { redirect, fail } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
-import type { Actions } from './$types';
+import { requireAdmin, requireAdminAction } from '$lib/server/adminGuard';
+import { logAdminAction, extractUserContext } from '$lib/server/auditLogger';
+import { createLogger } from '$lib/admin/logger';
+import type { Actions, PageServerLoad } from './$types';
+
+const log = createLogger('Dashboard');
+
+interface DashboardMemorial {
+	id: string;
+	lovedOneName: string;
+	fullSlug?: string;
+	creatorEmail: string;
+	creatorName: string;
+	createdAt: string | null;
+	isComplete: boolean;
+	isArchived: boolean;
+	isPaid: boolean;
+	location: string;
+	paymentAmount: number | null;
+}
 
 /**
- * SIMPLIFIED ADMIN DASHBOARD SERVER LOAD
+ * ADMIN DASHBOARD LOADER
  *
- * Purpose: Load essential data for admin operations:
- * 1. Recent memorials (for oversight)
- * 2. Funeral directors (all auto-approved)
- * 3. Basic system stats
+ * Loads only what the dashboard renders:
+ * - Quick stats (counts)
+ * - Incomplete memorials (priority queue)
+ * - Recent memorials (oversight list)
  *
- * Follows established patterns from memorial flow analysis
+ * Access is enforced server-side via `requireAdmin`.
  */
-export const load = async ({ locals }: any) => {
-	console.log('🔐 [ADMIN LOAD] Starting admin dashboard load for:', locals.user?.email);
+export const load: PageServerLoad = async ({ locals }) => {
+	const admin = requireAdmin(locals, { resource: 'memorial', action: 'read' });
+	log.info('Loading dashboard for', admin.email);
 
 	try {
-		// === AUTHENTICATION & AUTHORIZATION ===
-		// Following same pattern as memorial APIs
-		if (!locals.user) {
-			console.log('🚫 [ADMIN LOAD] No authenticated user - redirecting to login');
-			throw redirect(302, '/login');
-		}
+		const [recentMemorialsSnap, totalMemorialsSnap, totalDirectorsSnap, totalUsersSnap] =
+			await Promise.all([
+				adminDb.collection('memorials').orderBy('createdAt', 'desc').limit(50).get(),
+				adminDb.collection('memorials').count().get(),
+				adminDb.collection('funeral_directors').count().get(),
+				adminDb.collection('users').count().get()
+			]);
 
-		if (locals.user.role !== 'admin') {
-			console.log('🚫 [ADMIN LOAD] User lacks admin privileges:', {
-				uid: locals.user.uid,
-				role: locals.user.role
-			});
-			throw redirect(302, '/profile');
-		}
-
-		console.log('✅ [ADMIN LOAD] Admin authentication verified for:', locals.user.email);
-
-		// === DATA LOADING ===
-		// Load comprehensive data for admin operations
-		console.log('📊 [ADMIN LOAD] Loading comprehensive admin dashboard data...');
-
-		const [recentMemorialsSnap, allUsersSnap, funeralDirectorsSnap] = await Promise.all([
-			// Load recent memorials for oversight
-			adminDb.collection('memorials').orderBy('createdAt', 'desc').limit(50).get(),
-			// Load all users for user management
-			adminDb.collection('users').orderBy('createdAt', 'desc').limit(100).get(),
-			// Load funeral directors
-			adminDb.collection('funeral_directors').get()
-		]);
-
-		// === PROCESS RECENT MEMORIALS ===
-		// Following memorial collection structure from flow analysis
-		const recentMemorials = recentMemorialsSnap.docs.map((doc) => {
+		const recentMemorials: DashboardMemorial[] = recentMemorialsSnap.docs.map((doc) => {
 			const data = doc.data();
-			console.log(`💝 [ADMIN LOAD] Processing memorial: ${data.lovedOneName}`);
 
-			// Extract scheduled start time from new or legacy structure
-			let scheduledStartTime = null;
-			if (data.services?.main?.time?.date && data.services?.main?.time?.time && !data.services.main.time.isUnknown) {
-				scheduledStartTime = `${data.services.main.time.date}T${data.services.main.time.time}`;
-			} else if (data.memorialDate && data.memorialTime) {
-				// Fallback to legacy fields
-				scheduledStartTime = `${data.memorialDate}T${data.memorialTime}`;
-			}
+			const location =
+				data.services?.main?.location?.name || data.memorialLocationName || 'Not specified';
 
-			// Extract location from new or legacy structure
-			const location = data.services?.main?.location?.name 
-				|| data.memorialLocationName 
-				|| 'Not specified';
-
-			// Extract payment status - check multiple sources
-			const isPaid = data.isPaid 
-				|| data.calculatorConfig?.isPaid 
-				|| data.paymentStatus === 'paid'
-				|| false;
+			const isPaid =
+				data.isPaid ||
+				data.calculatorConfig?.isPaid ||
+				data.paymentStatus === 'paid' ||
+				false;
 
 			return {
 				id: doc.id,
@@ -79,114 +63,54 @@ export const load = async ({ locals }: any) => {
 				creatorEmail: data.creatorEmail || '',
 				creatorName: data.creatorName || '',
 				createdAt: data.createdAt?.toDate?.()?.toISOString() || null,
-				isPublic: data.isPublic !== false,
-				isComplete: data.isComplete || false, // Include completion status
-				isArchived: data.isArchived || false, // Include archived status
-				// Payment status from calculatorConfig (following established pattern)
-				paymentStatus: data.calculatorConfig?.status || 'draft',
-				// Check if has active livestream
-				hasLivestream: !!data.livestream?.isActive,
-				// NEW FIELDS for enhanced display
-				scheduledStartTime,
-				location,
+				isComplete: data.isComplete || false,
+				isArchived: data.isArchived || false,
 				isPaid,
+				location,
 				paymentAmount: data.calculatorConfig?.totalPrice || null
 			};
 		});
 
-		// === PROCESS USERS ===
-		const allUsers = allUsersSnap.docs.map((doc) => {
-			const data = doc.data();
-			return {
-				uid: doc.id,
-				email: data.email || '',
-				displayName: data.displayName || data.name || '',
-				role: data.role || 'owner',
-				createdAt: data.createdAt?.toDate?.()?.toISOString() || null,
-				lastLoginAt: data.lastLoginAt?.toDate?.()?.toISOString() || null
-			};
-		});
-
-		// === PROCESS FUNERAL DIRECTORS ===
-		const allFuneralDirectors = funeralDirectorsSnap.docs.map((doc) => {
-			const data = doc.data();
-			return {
-				id: doc.id,
-				companyName: data.companyName || '',
-				contactPerson: data.contactPerson || '',
-				email: data.email || '',
-				phone: data.phone || '',
-				licenseNumber: data.licenseNumber || '',
-				businessType: data.businessType || '',
-				status: data.status || 'approved', // V1: All auto-approved
-				createdAt: data.createdAt?.toDate?.()?.toISOString() || null
-			};
-		});
-
-		// All FDs are auto-approved on registration (no approval workflow)
-		const activeFuneralDirectors = allFuneralDirectors.filter(fd => fd.status === 'approved');
-		const suspendedFuneralDirectors = allFuneralDirectors.filter(fd => fd.status === 'suspended');
-
-		// === CALCULATE STATS ===
-		// Get quick stats for dashboard overview
-		const [totalMemorialsSnap, totalDirectorsSnap] = await Promise.all([
-			adminDb.collection('memorials').count().get(),
-			adminDb.collection('funeral_directors').count().get()
-		]);
+		const incompleteMemorials = recentMemorials.filter((m) => !m.isComplete && !m.isArchived);
+		const unpaidCount = recentMemorials.filter((m) => !m.isPaid && !m.isArchived).length;
 
 		const stats = {
 			totalMemorials: totalMemorialsSnap.data().count,
 			totalFuneralDirectors: totalDirectorsSnap.data().count,
-			recentMemorials: recentMemorials.length
+			totalUsers: totalUsersSnap.data().count,
+			incompleteMemorials: incompleteMemorials.length,
+			unpaidMemorials: unpaidCount
 		};
 
-		// Filter incomplete memorials (priority view) - exclude archived
-		const incompleteMemorials = recentMemorials.filter(m => !m.isComplete && !m.isArchived);
-
-		console.log('✅ [ADMIN LOAD] Dashboard data loaded successfully:', {
-			recentMemorials: recentMemorials.length,
-			incompleteMemorials: incompleteMemorials.length,
-			allUsers: allUsers.length,
-			activeFuneralDirectors: activeFuneralDirectors.length,
-			stats
-		});
+		log.info('Dashboard loaded', stats);
 
 		return {
-			// Core admin data
-			incompleteMemorials, // New: show incomplete first
-			recentMemorials,
-			allUsers,
-			funeralDirectors: activeFuneralDirectors,
-			suspendedFuneralDirectors,
+			incompleteMemorials,
+			recentMemorials: recentMemorials.filter((m) => !m.isArchived),
 			stats,
-			// User context
 			adminUser: {
-				email: locals.user.email,
-				uid: locals.user.uid
+				email: locals.user!.email,
+				uid: locals.user!.uid,
+				adminRole: locals.user!.adminRole
 			}
 		};
 	} catch (error: any) {
-		console.error('💥 [ADMIN LOAD] Error loading admin dashboard:', {
-			error: error.message,
-			stack: error.stack,
-			user: locals.user?.email
-		});
+		log.error('Failed to load dashboard', error);
 
-		// Return safe fallback data to prevent 500 errors
 		return {
-			incompleteMemorials: [],
-			recentMemorials: [],
-			allUsers: [],
-			funeralDirectors: [],
-			suspendedFuneralDirectors: [],
+			incompleteMemorials: [] as DashboardMemorial[],
+			recentMemorials: [] as DashboardMemorial[],
 			stats: {
 				totalMemorials: 0,
 				totalFuneralDirectors: 0,
-				recentMemorials: 0
+				totalUsers: 0,
+				incompleteMemorials: 0,
+				unpaidMemorials: 0
 			},
 			adminUser: {
 				email: locals.user?.email || '',
-				uid: locals.user?.uid || ''
+				uid: locals.user?.uid || '',
+				adminRole: locals.user?.adminRole
 			},
 			error: `Failed to load admin data: ${error.message}`
 		};
@@ -194,42 +118,47 @@ export const load = async ({ locals }: any) => {
 };
 
 export const actions: Actions = {
-	archive: async ({ request, locals }: { request: Request; locals: any }) => {
-		console.log('📦 [ADMIN ACTION] Archive memorial action started');
+	archive: async (event) => {
+		const { request, locals } = event;
+		const guard = requireAdminAction(locals, { resource: 'memorial', action: 'update' });
+		if (!guard.ok) return guard.failure;
 
-		// Auth check
-		if (!locals.user || locals.user.role !== 'admin') {
-			console.log('🚫 [ADMIN ACTION] Unauthorized archive attempt');
-			return fail(401, { error: 'Unauthorized' });
+		const formData = await request.formData();
+		const memorialId = formData.get('memorialId') as string;
+
+		if (!memorialId) {
+			return fail(400, { error: 'Memorial ID is required' });
 		}
 
 		try {
-			const formData = await request.formData();
-			const memorialId = formData.get('memorialId') as string;
-
-			if (!memorialId) {
-				return fail(400, { error: 'Memorial ID is required' });
-			}
-
-			console.log('📦 [ADMIN ACTION] Archiving memorial:', memorialId);
-
-			// Update memorial with archived status
 			await adminDb.collection('memorials').doc(memorialId).update({
 				isArchived: true,
 				archivedAt: new Date(),
-				archivedBy: locals.user.email,
+				archivedBy: guard.user.email,
 				updatedAt: new Date()
 			});
 
-			console.log('✅ [ADMIN ACTION] Memorial archived successfully:', memorialId);
+			await logAdminAction(
+				extractUserContext(event),
+				'system_config_changed',
+				memorialId,
+				{ operation: 'archive_memorial' },
+				true
+			);
 
+			log.info('Archived memorial', memorialId);
 			return { success: true };
 		} catch (error: any) {
-			console.error('❌ [ADMIN ACTION] Error archiving memorial:', error);
-			return fail(500, { 
-				error: 'Failed to archive memorial', 
-				details: error.message 
-			});
+			log.error('Failed to archive memorial', error);
+			await logAdminAction(
+				extractUserContext(event),
+				'system_config_changed',
+				memorialId,
+				{ operation: 'archive_memorial' },
+				false,
+				error.message
+			);
+			return { error: 'Failed to archive memorial' };
 		}
 	}
 };

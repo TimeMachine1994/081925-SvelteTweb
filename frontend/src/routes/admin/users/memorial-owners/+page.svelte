@@ -52,7 +52,7 @@ Manage users who own memorial pages
 			label: 'Has Paid',
 			field: 'hasPaidForMemorial',
 			width: 100,
-			formatter: (val: boolean) => (val ? '✅ Yes' : '❌ No'),
+			formatter: (val: boolean) => (val ? 'Yes' : 'No'),
 			sortable: true
 		},
 		{
@@ -60,7 +60,7 @@ Manage users who own memorial pages
 			label: 'Status',
 			field: 'suspended',
 			width: 100,
-			formatter: (val: boolean) => (val ? '🚫 Suspended' : '✅ Active'),
+			formatter: (val: boolean) => (val ? 'Suspended' : 'Active'),
 			sortable: true
 		},
 		{
@@ -88,19 +88,6 @@ Manage users who own memorial pages
 		}
 	];
 
-	// Actions
-	async function handleBulkAction(action: string, ids: string[]) {
-		const response = await fetch('/api/admin/bulk-actions', {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ action, ids, resourceType: 'user' })
-		});
-
-		if (response.ok) {
-			location.reload();
-		}
-	}
-
 	function handleRowClick(user: any) {
 		goto(`/admin/users/memorial-owners/${user.id}`);
 	}
@@ -112,18 +99,13 @@ Manage users who own memorial pages
 	actions={[
 		{
 			label: 'Filters',
-			icon: '🔍',
+			icon: 'filter',
 			onclick: () => (showFilters = !showFilters)
-		},
-		{
-			label: 'Export CSV',
-			icon: '📥',
-			onclick: () => console.log('Export users')
 		}
 	]}
 >
 	{#if showFilters}
-		<div class="filters-panel">
+		<div class="mb-6 rounded-lg border border-slate-200 bg-white p-6">
 			<FilterBuilder
 				fields={[
 					{ id: 'displayName', label: 'Name', type: 'string' },
@@ -150,14 +132,6 @@ Manage users who own memorial pages
 </AdminLayout>
 
 <style>
-	.filters-panel {
-		background: white;
-		border: 1px solid #e2e8f0;
-		border-radius: 0.5rem;
-		padding: 1.5rem;
-		margin-bottom: 1.5rem;
-	}
-
 	/* Clickable user name styling */
 	:global(.user-name-link) {
 		color: #d5ba7f;

@@ -1,13 +1,11 @@
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
+import { requireAdmin } from '$lib/server/adminGuard';
 import { env } from '$env/dynamic/private';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
-	// 1. Security Check
-	if (!locals.user || locals.user.role !== 'admin') {
-		throw error(403, 'Unauthorized access');
-	}
+	requireAdmin(locals, { resource: 'stream', action: 'read' });
 
 	const { memorialId } = params;
 
@@ -114,7 +112,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		try {
 			const tokenData = await createDailyToken(dailyRoomName, {
 				isOwner: true,
-				userName: `Admin (${locals.user.displayName || 'Staff'})`,
+				userName: `Admin (${locals.user!.displayName || 'Staff'})`,
 				expiresIn: 86400 // 24 hours
 			});
 			token = tokenData.token;

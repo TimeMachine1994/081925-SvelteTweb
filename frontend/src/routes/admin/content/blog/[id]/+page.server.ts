@@ -1,18 +1,12 @@
 import { error, redirect } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
+import { requireAdmin, requireAdminAction } from '$lib/server/adminGuard';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const { id } = params;
 
-	console.log('📝 [BLOG EDIT] Loading blog post with ID:', id);
-	console.log('📝 [BLOG EDIT] User:', locals.user?.email, 'Role:', locals.user?.role);
-
-	// Auth check
-	if (!locals.user || locals.user.role !== 'admin') {
-		console.warn('❌ [BLOG EDIT] Unauthorized access attempt');
-		throw redirect(302, '/login');
-	}
+	requireAdmin(locals, { resource: 'blog', action: 'update' });
 
 	try {
 		// Load blog post
@@ -73,7 +67,10 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 };
 
 export const actions: Actions = {
-	update: async ({ request, params, fetch }) => {
+	update: async ({ request, params, fetch, locals }) => {
+		const guard = requireAdminAction(locals, { resource: 'blog', action: 'update' });
+		if (!guard.ok) return guard.failure;
+
 		const { id } = params;
 
 		try {
@@ -136,7 +133,10 @@ export const actions: Actions = {
 		}
 	},
 
-	delete: async ({ params, fetch }) => {
+	delete: async ({ params, fetch, locals }) => {
+		const guard = requireAdminAction(locals, { resource: 'blog', action: 'delete' });
+		if (!guard.ok) return guard.failure;
+
 		const { id } = params;
 
 		try {

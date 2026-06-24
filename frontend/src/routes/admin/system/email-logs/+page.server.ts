@@ -4,14 +4,12 @@
  * Loads email logs with filters and computes inline stats.
  */
 
-import { redirect } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
+import { requireAdmin } from '$lib/server/adminGuard';
 import type { EmailType, EmailStatus } from '$lib/types/email-audit';
 
 export const load = async ({ locals, url }: any) => {
-	if (!locals.user || locals.user.role !== 'admin') {
-		throw redirect(302, '/login');
-	}
+	requireAdmin(locals, { resource: 'audit_log', action: 'read' });
 
 	// Parse query params
 	const page = Math.max(1, parseInt(url.searchParams.get('page') || '1'));

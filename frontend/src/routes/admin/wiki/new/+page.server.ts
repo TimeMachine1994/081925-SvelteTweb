@@ -1,16 +1,10 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
+import { requireAdmin, requireAdminAction } from '$lib/server/adminGuard';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
-	// Check authentication - same pattern as /admin page
-	if (!locals.user) {
-		throw redirect(302, '/login');
-	}
-
-	if (locals.user.role !== 'admin') {
-		throw redirect(302, '/profile');
-	}
+	requireAdmin(locals, { resource: 'system', action: 'read' });
 
 	try {
 
@@ -36,9 +30,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 export const actions: Actions = {
 	default: async ({ request, locals }) => {
-		if (!locals.user || locals.user.role !== 'admin') {
-			return fail(403, { error: 'Unauthorized' });
-		}
+		const guard = requireAdminAction(locals, { resource: 'system', action: 'create' });
+		if (!guard.ok) return guard.failure;
 
 		try {
 
@@ -88,11 +81,11 @@ export const actions: Actions = {
 				content,
 				category: category || null,
 				tags,
-				createdBy: locals.user.uid,
-				createdByEmail: locals.user.email || '',
+				createdBy: guard.user.uid,
+				createdByEmail: guard.user.email || '',
 				createdAt: now,
-				updatedBy: locals.user.uid,
-				updatedByEmail: locals.user.email || '',
+				updatedBy: guard.user.uid,
+				updatedByEmail: guard.user.email || '',
 				updatedAt: now,
 				version: 1,
 				viewCount: 0,

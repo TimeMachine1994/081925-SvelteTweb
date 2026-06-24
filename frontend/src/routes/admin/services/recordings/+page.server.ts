@@ -1,6 +1,7 @@
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
+import { requireAdmin } from '$lib/server/adminGuard';
 
 /**
  * Standalone Recording Picker page.
@@ -9,9 +10,7 @@ import { adminDb } from '$lib/server/firebase';
  * memorial's streams (with Mux recording data) for the RecordingPicker.
  */
 export const load: PageServerLoad = async ({ locals, url }) => {
-	if (!locals.user || locals.user.role !== 'admin') {
-		throw error(403, 'Unauthorized access');
-	}
+	requireAdmin(locals, { resource: 'stream', action: 'read' });
 
 	const toISO = (val: unknown): string | null => {
 		if (!val) return null;

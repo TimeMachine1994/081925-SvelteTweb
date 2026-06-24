@@ -1,23 +1,23 @@
 import { redirect } from '@sveltejs/kit';
+import { requireAdmin, requireAdminAction } from '$lib/server/adminGuard';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
-	// Auth check
-	if (!locals.user || locals.user.role !== 'admin') {
-		throw redirect(302, '/login');
-	}
+	requireAdmin(locals, { resource: 'blog', action: 'create' });
 
 	// Return default author info
 	return {
 		author: {
-			name: locals.user.displayName || '',
-			email: locals.user.email || ''
+			name: locals.user!.displayName || '',
+			email: locals.user!.email || ''
 		}
 	};
 };
 
 export const actions: Actions = {
-	create: async ({ request, fetch }) => {
+	create: async ({ request, fetch, locals }) => {
+		const guard = requireAdminAction(locals, { resource: 'blog', action: 'create' });
+		if (!guard.ok) return guard.failure;
 		try {
 			const formData = await request.formData();
 			

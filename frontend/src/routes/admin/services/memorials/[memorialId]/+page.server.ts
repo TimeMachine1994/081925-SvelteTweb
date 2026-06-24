@@ -1,5 +1,6 @@
-import { error, redirect } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
+import { requireAdmin } from '$lib/server/adminGuard';
 import type { PageServerLoad } from './$types';
 
 /**
@@ -13,13 +14,7 @@ import type { PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const { memorialId } = params;
 
-	console.log('🏛️ [MEMORIAL DETAIL] Loading memorial:', memorialId);
-
-	// Check authentication
-	if (!locals.user || locals.user.role !== 'admin') {
-		console.log('🚫 [MEMORIAL DETAIL] Unauthorized access attempt');
-		throw redirect(302, '/admin');
-	}
+	requireAdmin(locals, { resource: 'memorial', action: 'read' });
 
 	try {
 		// Load all data in parallel for performance
@@ -34,13 +29,11 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 		// Check if memorial exists
 		if (!memorialDoc.exists) {
-			console.log('❌ [MEMORIAL DETAIL] Memorial not found:', memorialId);
 			throw error(404, 'Memorial not found');
 		}
 
 		const memorialData = memorialDoc.data();
 		if (!memorialData) {
-			console.log('❌ [MEMORIAL DETAIL] Memorial data is empty:', memorialId);
 			throw error(404, 'Memorial data not found');
 		}
 
@@ -268,34 +261,23 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		// Get follower count
 		const followerCount = followersSnap.size;
 
-		console.log('✅ [MEMORIAL DETAIL] Data loaded successfully:', {
-			memorialId,
-			streams: streams.length,
-			slideshows: slideshows.length,
-			followers: followerCount
-		});
-
 		return {
 			memorial,
 			streams,
 			slideshows,
 			followerCount,
 			adminUser: {
-				email: locals.user.email,
-				uid: locals.user.uid
+				email: locals.user!.email,
+				uid: locals.user!.uid
 			}
 		};
 	} catch (err: any) {
-		console.error('💥 [MEMORIAL DETAIL] Error loading memorial:', {
-			error: err.message,
-			stack: err.stack,
-			memorialId
-		});
-
 		// If it's already an error we threw, re-throw it
 		if (err.status) {
 			throw err;
 		}
+
+		console.error('Error loading memorial:', err);
 
 		// Otherwise return generic error
 		throw error(500, `Failed to load memorial: ${err.message}`);
