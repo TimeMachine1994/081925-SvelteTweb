@@ -11,7 +11,8 @@
 		JOURNEYS,
 		journeyScreens,
 		screenByPath,
-		type Journey
+		neighborsOf,
+		hubFor
 	} from './_lib/manifest';
 	import { publicUserFor, adminUserPersona } from './_lib/personas';
 	import { showcaseHref } from './_lib/routeMap';
@@ -28,6 +29,8 @@
 	let { children } = $props();
 
 	let viewport = $state<'desktop' | 'mobile'>('desktop');
+	// Measured so the spacer matches the (now wrap-capable) control bar height.
+	let barHeight = $state(44);
 
 	function onSelect(e: Event) {
 		const target = e.currentTarget as HTMLSelectElement;
@@ -37,14 +40,12 @@
 	const current = $derived(screenByPath($page.url.pathname));
 	const isLanding = $derived($page.url.pathname === '/showcase');
 
-	// Active journey for the stepper.
-	const activeJourney = $derived<Journey>(current ? current.journey : 'public');
-	const steps = $derived(journeyScreens(activeJourney));
-	const stepIndex = $derived(current ? steps.findIndex((s) => s.id === current.id) : -1);
-	const prevStep = $derived(stepIndex > 0 ? steps[stepIndex - 1] : undefined);
-	const nextStep = $derived(
-		stepIndex >= 0 && stepIndex < steps.length - 1 ? steps[stepIndex + 1] : undefined
-	);
+	// Branching navigation: the current screen's outgoing connections (spokes).
+	const neighbors = $derived(current ? neighborsOf(current) : []);
+	// The journey hub (squid body); offered as a "return" button when off-hub.
+	const hubButton = $derived(current && !current.hub ? hubFor(current.journey) : undefined);
+	// Avoid showing the hub twice when it is also a regular neighbor.
+	const spokes = $derived(neighbors.filter((n) => !hubButton || n.id !== hubButton.id));
 
 	const chrome = $derived(current?.chrome ?? 'none');
 
@@ -273,7 +274,7 @@
 </script>
 
 <!-- Showcase control bar (fixed) -->
-<div class="sc-bar">
+<div class="sc-bar" bind:clientHeight={barHeight}>
 	<a class="sc-brand" href="/showcase">◆ UI Showcase</a>
 
 	<select
@@ -292,15 +293,21 @@
 	</select>
 
 	<div class="sc-steps">
-		<button class="sc-btn" disabled={!prevStep} onclick={() => prevStep && goto(prevStep.path)}>
-			‹ Prev
-		</button>
-		<span class="sc-step-label">
-			{#if current}{stepIndex + 1}/{steps.length} · {current.label}{:else}Sitemap{/if}
-		</span>
-		<button class="sc-btn" disabled={!nextStep} onclick={() => nextStep && goto(nextStep.path)}>
-			Next ›
-		</button>
+		{#if current}
+			{#if hubButton}
+				<button class="sc-btn sc-hub" title="Return to journey hub" onclick={() => goto(hubButton.path)}>
+					↩ {hubButton.label}
+				</button>
+			{/if}
+			{#each spokes as n (n.id)}
+				<button class="sc-btn sc-goto" onclick={() => goto(n.path)}>{n.label} ›</button>
+			{/each}
+			{#if spokes.length === 0 && !hubButton}
+				<span class="sc-step-label">No outgoing links</span>
+			{/if}
+		{:else}
+			<span class="sc-step-label">Sitemap</span>
+		{/if}
 	</div>
 
 	<div class="sc-right">
@@ -327,7 +334,7 @@
 	</div>
 </div>
 
-<div class="sc-spacer"></div>
+<div class="sc-spacer" style="height: {barHeight}px"></div>
 
 <div class="sc-viewport" class:mobile={viewport === 'mobile'}>
 	{#if chrome === 'family' && !isLanding}
@@ -360,11 +367,11 @@
 		left: 0;
 		right: 0;
 		z-index: 9999;
-		height: 44px;
+		min-height: 44px;
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
-		padding: 0 0.75rem;
+		padding: 0.35rem 0.75rem;
 		background: #0f172a;
 		color: #e2e8f0;
 		font-family: ui-sans-serif, system-ui, sans-serif;
@@ -392,8 +399,23 @@
 	.sc-steps {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 0.4rem;
 		margin: 0 auto;
+		max-width: 60%;
+	}
+	.sc-hub {
+		background: #334155;
+		border-color: #475569;
+		font-weight: 600;
+	}
+	.sc-goto {
+		background: #1d2b45;
+		border-color: #2f4368;
+	}
+	.sc-goto:hover:not(:disabled) {
+		background: #2f4368;
 	}
 	.sc-step-label {
 		min-width: 160px;
@@ -455,5 +477,17 @@
 		border-right: 1px solid #e2e8f0;
 		min-height: 100vh;
 		box-shadow: 0 0 0 100vmax rgba(15, 23, 42, 0.06);
+	}
+	/* Print: drop the fixed control bar so printed pages start at the content. */
+	@media print {
+		.sc-bar,
+		.sc-spacer {
+			display: none !important;
+		}
+		.sc-viewport.mobile {
+			max-width: none;
+			border: none;
+			box-shadow: none;
+		}
 	}
 </style>

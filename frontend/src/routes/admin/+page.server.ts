@@ -31,9 +31,31 @@ interface DashboardMemorial {
  *
  * Access is enforced server-side via `requireAdmin`.
  */
-export const load: PageServerLoad = async ({ locals }) => {
-	const admin = requireAdmin(locals, { resource: 'memorial', action: 'read' });
-	log.info('Loading dashboard for', admin.email);
+interface DashboardData {
+	incompleteMemorials: DashboardMemorial[];
+	recentMemorials: DashboardMemorial[];
+	stats: {
+		totalMemorials: number;
+		totalFuneralDirectors: number;
+		totalUsers: number;
+		incompleteMemorials: number;
+		unpaidMemorials: number;
+	};
+	error?: string;
+}
+
+/**
+ * Heavy Firestore work, isolated so it can be streamed to the client. The page
+ * shell + sidebar render immediately while this resolves in the background.
+ */
+async function loadDashboardData(): Promise<DashboardData> {
+	const emptyStats = {
+		totalMemorials: 0,
+		totalFuneralDirectors: 0,
+		totalUsers: 0,
+		incompleteMemorials: 0,
+		unpaidMemorials: 0
+	};
 
 	try {
 		const [recentMemorialsSnap, totalMemorialsSnap, totalDirectorsSnap, totalUsersSnap] =
@@ -87,34 +109,34 @@ export const load: PageServerLoad = async ({ locals }) => {
 		return {
 			incompleteMemorials,
 			recentMemorials: recentMemorials.filter((m) => !m.isArchived),
-			stats,
-			adminUser: {
-				email: locals.user!.email,
-				uid: locals.user!.uid,
-				adminRole: locals.user!.adminRole
-			}
+			stats
 		};
-	} catch (error: any) {
+	} catch (error) {
+		const message = error instanceof Error ? error.message : 'Unknown error';
 		log.error('Failed to load dashboard', error);
 
 		return {
-			incompleteMemorials: [] as DashboardMemorial[],
-			recentMemorials: [] as DashboardMemorial[],
-			stats: {
-				totalMemorials: 0,
-				totalFuneralDirectors: 0,
-				totalUsers: 0,
-				incompleteMemorials: 0,
-				unpaidMemorials: 0
-			},
-			adminUser: {
-				email: locals.user?.email || '',
-				uid: locals.user?.uid || '',
-				adminRole: locals.user?.adminRole
-			},
-			error: `Failed to load admin data: ${error.message}`
+			incompleteMemorials: [],
+			recentMemorials: [],
+			stats: emptyStats,
+			error: `Failed to load admin data: ${message}`
 		};
 	}
+}
+
+export const load: PageServerLoad = async ({ locals }) => {
+	const admin = requireAdmin(locals, { resource: 'memorial', action: 'read' });
+	log.info('Loading dashboard for', admin.email);
+
+	return {
+		adminUser: {
+			email: locals.user!.email,
+			uid: locals.user!.uid,
+			adminRole: locals.user!.adminRole
+		},
+		// Streamed: the page shell renders immediately; this resolves later.
+		dashboard: loadDashboardData()
+	};
 };
 
 export const actions: Actions = {
