@@ -43,7 +43,12 @@ const routePatterns = walk(ROUTES)
 		return new RegExp('^/' + escaped + '/?$');
 	});
 
-const LINK_RE = /(?:href=|goto\(|redirect\(\s*\d+\s*,\s*)["'`](\/[^"'`\s]*)["'`]/g;
+// A root-level catch-all like /[fullSlug] matches any single-segment path, which would
+// hide typos in static links. Only let it satisfy links that are themselves dynamic.
+const ROOT_DYNAMIC = /^\^\/\[\^\/\]\+\/\?\$$/;
+const staticPatterns = routePatterns.filter((re) => !ROOT_DYNAMIC.test(re.source));
+
+const LINK_RE = /(?:href=\{?|goto\(|redirect\(\s*\d+\s*,\s*)["'`](\/[^"'`\s]*)["'`]/g;
 const problems = [];
 
 for (const file of walk(ROOT).filter((f) => /\.(svelte|ts)$/.test(f) && !/\.test\.ts$/.test(f))) {
@@ -53,9 +58,11 @@ for (const file of walk(ROOT).filter((f) => /\.(svelte|ts)$/.test(f) && !/\.test
 		// Template literal / svelte interpolation -> wildcard segment
 		// (an unclosed brace means the expression spanned lines; treat the rest as dynamic)
 		target = target.replace(/\$?\{[^}]*\}?/g, '__DYN__');
+		const isDynamic = target.includes('__DYN__');
 		const probe = target.replace(/__DYN__/g, 'x');
 		if (probe === '/' || probe === '') continue;
-		if (!routePatterns.some((re) => re.test(probe))) {
+		const patterns = isDynamic ? routePatterns : staticPatterns;
+		if (!patterns.some((re) => re.test(probe))) {
 			const line = src.slice(0, m.index).split('\n').length;
 			problems.push(`${relative(ROOT, file)}:${line}  ${m[1]}`);
 		}
