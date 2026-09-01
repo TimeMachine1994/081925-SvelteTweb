@@ -4,6 +4,7 @@ import { adminDb } from '$lib/server/firebase';
 import { getAuth } from 'firebase-admin/auth';
 import { Timestamp } from 'firebase-admin/firestore';
 import { sendEnhancedRegistrationEmail } from '$lib/server/email';
+import { hasPermission } from '$lib/admin/permissions';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	try {
@@ -13,6 +14,16 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		if (locals.user.role !== 'admin') {
 			return json({ error: 'Admin privileges required' }, { status: 403 });
+		}
+
+		if (
+			!hasPermission(
+				{ uid: locals.user.uid, email: locals.user.email || '', adminRole: locals.user.adminRole },
+				'memorial',
+				'create'
+			)
+		) {
+			return json({ error: 'Permission denied' }, { status: 403 });
 		}
 
 		const formData = await request.json();

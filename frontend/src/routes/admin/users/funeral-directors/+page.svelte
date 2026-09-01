@@ -8,7 +8,6 @@ Manage funeral home partners
 	import DataGrid from '$lib/components/admin/DataGrid.svelte';
 	import FilterBuilder from '$lib/components/admin/FilterBuilder.svelte';
 	import { can } from '$lib/stores/adminUser';
-	import { goto } from '$app/navigation';
 	import { applyFilters, type FilterRule } from '$lib/utils/filter-utils';
 
 	let { data } = $props();
@@ -89,9 +88,6 @@ Manage funeral home partners
 		}
 	];
 
-	function handleRowClick(director: any) {
-		goto(`/admin/users/funeral-directors/${director.id}`);
-	}
 </script>
 
 <AdminLayout
@@ -136,8 +132,6 @@ Manage funeral home partners
 		data={filteredDirectors}
 		selectable={$can('funeral_director', 'update')}
 		bind:selectedMemorials={selectedDirectors}
-		onRowClick={handleRowClick}
 		resourceType="funeral_director"
 	/>
-	<!-- onRowClick disabled until detail pages are created -->
 </AdminLayout>
