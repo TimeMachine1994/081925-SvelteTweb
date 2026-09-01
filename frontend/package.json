@@ -35,6 +35,7 @@
 		"test:setup": "node scripts/setup-test-data.js",
 		"test:clean": "node scripts/clean-test-data.js",
 		"test:emulator": "firebase emulators:start --only auth,firestore",
+		"audit:links:prod": "node scripts/link-audit.js https://www.tributestream.com",
 		"create-admin": "node scripts/create-admin.js",
 		"seed:dev-users": "node scripts/seed-dev-users.js"
 	},

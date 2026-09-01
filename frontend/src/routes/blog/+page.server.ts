@@ -1,6 +1,7 @@
 // frontend/src/routes/blog/+page.server.ts
 
 import { adminDb, adminStorage } from '$lib/server/admin';
+import { slugify } from '$lib/utils/calculator';
 import type { PageServerLoad } from './$types';
 
 // Helper function to convert storage path to public URL
@@ -23,7 +24,11 @@ async function getStorageUrl(storagePath: string): Promise<string> {
         return url;
     } catch (err) {
         console.error('Error getting storage URL for:', storagePath, err);
-        return storagePath; // Return original path as fallback
+        // Never return a raw storage path (it would render as a broken relative URL)
+        if (storagePath && !storagePath.startsWith('http')) {
+            return `https://firebasestorage.googleapis.com/v0/b/${adminStorage.bucket().name}/o/${encodeURIComponent(storagePath)}?alt=media`;
+        }
+        return storagePath;
     }
 }
 
@@ -79,6 +84,9 @@ export const load: PageServerLoad = async () => {
                     createdAt: postData.createdAt?.toDate() || new Date(),
                     updatedAt: postData.updatedAt?.toDate() || new Date()
                 } as BlogPost;
+
+                // Normalize slug so links never contain spaces or special characters
+                post.slug = slugify(post.slug || post.title || '');
 
                 // Convert storage paths to proper URLs
                 if (post.featuredImage) {
