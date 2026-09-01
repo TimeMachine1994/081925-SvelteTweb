@@ -14,9 +14,6 @@ export { default as Button } from './primitives/Button.svelte';
 export { default as Card } from './primitives/Card.svelte';
 export { default as Input } from './primitives/Input.svelte';
 
-// Navigation Components
-export { default as Navbar } from './navigation/Navbar.svelte';
-
 // Stream Components - REMOVED FOR REBUILD
 // TODO: Re-export new stream components here after rebuilding
 

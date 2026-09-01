@@ -8,7 +8,7 @@ process.env.FIREBASE_AUTH_EMULATOR_HOST = '127.0.0.1:9098';
 process.env.FIRESTORE_EMULATOR_HOST = '127.0.0.1:8081';
 
 admin.initializeApp({
-  projectId: 'tributestream-lemhr'
+  projectId: 'fir-tweb'
 });
 
 const auth = admin.auth();
