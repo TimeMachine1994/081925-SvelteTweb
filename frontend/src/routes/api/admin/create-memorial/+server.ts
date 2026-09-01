@@ -155,12 +155,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					email: formData.creatorEmail,
 					password: password,
 					lovedOneName: formData.lovedOneName,
-					familyContactEmail: formData.creatorEmail,
-					familyContactName: formData.creatorName || `${formData.lovedOneName} Family`,
-					familyContactPhone: '',
-					contactPreference: 'email',
-					directorName: 'Tributestream Admin',
-					funeralHomeName: 'Tributestream',
+					ownerName: formData.creatorName || `${formData.lovedOneName} Family`,
+					memorialUrl: `${baseUrl}/${fullSlug}`,
 					magicLink: magicLink // Pass magic link to email
 				});
 			} catch (emailError) {
