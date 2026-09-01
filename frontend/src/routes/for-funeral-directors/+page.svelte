@@ -33,6 +33,7 @@
 	const packages = [
 		{ 
 			name: "Basic Partnership", 
+			href: "/partnership/basic-partnership",
 			price: "No Cost", 
 			features: ["Free advertising materials", "Basic training", "Phone support", "Standard branding"],
 			popular: false,
@@ -41,6 +42,7 @@
 		},
 		{ 
 			name: "Premium Partnership", 
+			href: "/partnership/premium-partnership",
 			price: "Contact Us", 
 			popular: true,
 			features: ["On-site technical support", "Funeral home technical support", "Custom branding", "Marketing materials", "SEO optimization", "Social media marketing"],
@@ -203,7 +205,7 @@
 							
 							<div class="text-center">
 								<Button theme="minimal" class="w-full bg-[#D5BA7F] text-black hover:bg-[#C5AA6F] py-3">
-									<a href="/partnership/{pkg.name.toLowerCase().replace(' ', '-')}" class="no-underline text-black">
+									<a href={pkg.href} class="no-underline text-black">
 										{pkg.directorCta}
 									</a>
 								</Button>
