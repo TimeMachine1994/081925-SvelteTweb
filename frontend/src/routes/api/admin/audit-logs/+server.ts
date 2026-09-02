@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { adminDb } from '$lib/server/firebase';
+import * as audit from '$lib/server/db/repos/audit';
 import { logAuditEvent } from '$lib/server/auditLogger';
 
 export const GET: RequestHandler = async ({ request, locals, getClientAddress }) => {
@@ -39,39 +39,7 @@ export const GET: RequestHandler = async ({ request, locals, getClientAddress })
 			limit
 		});
 
-		// Build Firestore query
-		let query = adminDb.collection('audit_logs').orderBy('timestamp', 'desc');
-
-		// Apply filters
-		if (action) {
-			query = query.where('action', '==', action);
-		}
-		if (userEmail) {
-			query = query.where('userEmail', '==', userEmail);
-		}
-		if (resourceType) {
-			query = query.where('resourceType', '==', resourceType);
-		}
-		if (dateFrom) {
-			const fromDate = new Date(dateFrom);
-			fromDate.setHours(0, 0, 0, 0);
-			query = query.where('timestamp', '>=', fromDate);
-		}
-		if (dateTo) {
-			const toDate = new Date(dateTo);
-			toDate.setHours(23, 59, 59, 999);
-			query = query.where('timestamp', '<=', toDate);
-		}
-
-		// Apply limit
-		query = query.limit(Math.min(limit, 1000)); // Cap at 1000 for performance
-
-		// Execute query
-		const snapshot = await query.get();
-		const logs = snapshot.docs.map((doc) => ({
-			id: doc.id,
-			...doc.data()
-		}));
+		const logs = await audit.queryAuditEvents({ action, userEmail, resourceType, dateFrom, dateTo, limit });
 
 		console.log('✅ [ADMIN API] Retrieved audit logs:', logs.length);
 

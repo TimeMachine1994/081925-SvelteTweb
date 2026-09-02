@@ -1,5 +1,5 @@
 import { error, redirect } from '@sveltejs/kit';
-import { adminDb } from '$lib/server/firebase';
+import * as blog from '$lib/server/db/repos/blog';
 import { requireAdmin, requireAdminAction } from '$lib/server/adminGuard';
 import type { PageServerLoad, Actions } from './$types';
 
@@ -9,50 +9,16 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	requireAdmin(locals, { resource: 'blog', action: 'update' });
 
 	try {
-		// Load blog post
-		const postDoc = await adminDb.collection('blog').doc(id).get();
-		console.log('📝 [BLOG EDIT] Post doc exists:', postDoc.exists);
+		const post = await blog.getPostById(id);
+		console.log('📝 [BLOG EDIT] Post found:', !!post);
 
-		if (!postDoc.exists) {
-			console.error('❌ [BLOG EDIT] Blog post not found in Firestore:', id);
-			console.error('❌ [BLOG EDIT] Attempted path: blog/' + id);
+		if (!post) {
+			console.error('❌ [BLOG EDIT] Blog post not found:', id);
 			throw error(404, `Blog post not found: ${id}`);
 		}
 
-		const postData = postDoc.data();
-		if (!postData) {
-			throw error(404, 'Blog post data not found');
-		}
-
-		// Convert timestamps to ISO strings
-		const post = {
-			id: postDoc.id,
-			title: postData.title || '',
-			slug: postData.slug || '',
-			excerpt: postData.excerpt || '',
-			content: postData.content || '',
-			authorName: postData.authorName || '',
-			authorEmail: postData.authorEmail || '',
-			authorBio: postData.authorBio || '',
-			authorAvatar: postData.authorAvatar || '',
-			featuredImage: postData.featuredImage || '',
-			featuredImageAlt: postData.featuredImageAlt || '',
-			category: postData.category || 'memorial-planning',
-			tags: postData.tags || [],
-			status: postData.status || 'draft',
-			featured: postData.featured || false,
-			metaTitle: postData.metaTitle || '',
-			metaDescription: postData.metaDescription || '',
-			keywords: postData.keywords || [],
-			viewCount: postData.viewCount || 0,
-			readingTime: postData.readingTime || 0,
-			publishedAt: postData.publishedAt?.toDate?.()?.toISOString() || null,
-			createdAt: postData.createdAt?.toDate?.()?.toISOString() || null,
-			updatedAt: postData.updatedAt?.toDate?.()?.toISOString() || null
-		};
-
 		console.log('✅ [BLOG EDIT] Successfully loaded blog post:', post.title);
-		return { post };
+		return { post: { ...post, category: post.category || 'memorial-planning' } };
 	} catch (err) {
 		console.error('❌ [BLOG EDIT] Error loading blog post:', err);
 		

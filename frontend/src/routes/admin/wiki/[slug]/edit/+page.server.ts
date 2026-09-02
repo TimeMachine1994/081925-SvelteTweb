@@ -1,7 +1,7 @@
 import { error, fail, redirect } from '@sveltejs/kit';
-import { adminDb } from '$lib/server/firebase';
 import { requireAdmin, requireAdminAction } from '$lib/server/adminGuard';
-import type { WikiPage } from '$lib/types/wiki';
+import * as wiki from '$lib/server/db/repos/wiki';
+import { slugify, parseTags } from '$lib/utils/wiki/form';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
@@ -10,51 +10,15 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	const { slug } = params;
 
 	try {
-		// Fetch the wiki page by slug
-		const pagesSnapshot = await adminDb
-			.collection('wiki_pages')
-			.where('slug', '==', slug)
-			.limit(1)
-			.get();
-
-		if (pagesSnapshot.empty) {
+		const page = await wiki.getPageBySlug(slug);
+		if (!page) {
 			throw error(404, 'Page not found');
 		}
 
-		const doc = pagesSnapshot.docs[0];
-		const data = doc.data();
-
-		const page: WikiPage = {
-			id: doc.id,
-			slug: data.slug,
-			title: data.title,
-			content: data.content,
-			category: data.category || null,
-			tags: data.tags || [],
-			createdBy: data.createdBy,
-			createdByEmail: data.createdByEmail,
-			createdAt: data.createdAt?.toDate?.() || data.createdAt,
-			updatedBy: data.updatedBy,
-			updatedByEmail: data.updatedByEmail,
-			updatedAt: data.updatedAt?.toDate?.() || data.updatedAt,
-			version: data.version || 1,
-			viewCount: data.viewCount || 0,
-			parentPageId: data.parentPageId || null,
-			order: data.order || 0
-		};
-
 		// Load all pages to build wiki links map
-		const allPagesSnapshot = await adminDb.collection('wiki_pages').get();
-		const pageMap = new Map<string, string>();
-		allPagesSnapshot.docs.forEach((d) => {
-			const pageData = d.data();
-			pageMap.set(pageData.title.toLowerCase(), pageData.slug);
-		});
+		const pageMap = await wiki.getTitleSlugMap();
 
-		return {
-			page,
-			pageMap: Object.fromEntries(pageMap)
-		};
+		return { page, pageMap };
 	} catch (err) {
 		if (err instanceof Response) throw err;
 		console.error('Error loading wiki page:', err);
@@ -82,68 +46,31 @@ export const actions: Actions = {
 			}
 
 			// Find the page
-			const pagesSnapshot = await adminDb
-				.collection('wiki_pages')
-				.where('slug', '==', slug)
-				.limit(1)
-				.get();
-
-			if (pagesSnapshot.empty) {
+			const current = await wiki.getPageBySlug(slug);
+			if (!current) {
 				return fail(404, { error: 'Page not found' });
 			}
 
-			const doc = pagesSnapshot.docs[0];
-			const currentData = doc.data();
-
 			// Generate new slug if title changed
-			const newSlug =
-				title.toLowerCase() !== currentData.title.toLowerCase()
-					? title
-							.toLowerCase()
-							.replace(/[^\w\s-]/g, '')
-							.replace(/\s+/g, '-')
-							.replace(/-+/g, '-')
-							.trim()
-					: slug;
+			const newSlug = title.toLowerCase() !== current.title.toLowerCase() ? slugify(title) : slug;
 
 			// If slug changed, check if new slug exists
-			if (newSlug !== slug) {
-				const existingPage = await adminDb
-					.collection('wiki_pages')
-					.where('slug', '==', newSlug)
-					.limit(1)
-					.get();
-
-				if (!existingPage.empty) {
-					return fail(400, { error: 'A page with this title already exists' });
-				}
+			if (newSlug !== slug && (await wiki.slugExists(newSlug))) {
+				return fail(400, { error: 'A page with this title already exists' });
 			}
 
-			// Parse tags
-			const tags = tagsRaw
-				? tagsRaw
-						.split(',')
-						.map((t) => t.trim())
-						.filter(Boolean)
-				: [];
-
-			// Update page
-			const now = new Date();
-			const updateData = {
+			await wiki.updatePage(current.id, {
 				slug: newSlug,
 				title,
 				content,
 				category: category || null,
-				tags,
-				updatedBy: guard.user.uid,
-				updatedByEmail: guard.user.email || '',
-				updatedAt: now,
-				version: (currentData.version || 1) + 1
-			};
+				tags: parseTags(tagsRaw),
+				userId: guard.user.uid,
+				userEmail: guard.user.email || '',
+				version: (current.version || 1) + 1
+			});
 
-			await adminDb.collection('wiki_pages').doc(doc.id).update(updateData);
-
-			console.log('Updated wiki page:', doc.id);
+			console.log('Updated wiki page:', current.id);
 
 			// Redirect to the (possibly new) page slug
 			throw redirect(303, `/admin/wiki/${newSlug}`);
@@ -161,24 +88,15 @@ export const actions: Actions = {
 		const { slug } = params;
 
 		try {
-
 			// Find the page
-			const pagesSnapshot = await adminDb
-				.collection('wiki_pages')
-				.where('slug', '==', slug)
-				.limit(1)
-				.get();
-
-			if (pagesSnapshot.empty) {
+			const page = await wiki.getPageBySlug(slug);
+			if (!page) {
 				return fail(404, { error: 'Page not found' });
 			}
 
-			const doc = pagesSnapshot.docs[0];
+			await wiki.deletePage(page.id);
 
-			// Delete the page
-			await adminDb.collection('wiki_pages').doc(doc.id).delete();
-
-			console.log('Deleted wiki page:', doc.id);
+			console.log('Deleted wiki page:', page.id);
 
 			// Redirect to wiki homepage
 			throw redirect(303, '/admin/wiki');

@@ -1,4 +1,3 @@
-import type { Timestamp } from 'firebase/firestore';
 
 export interface WikiPage {
 	id: string;
@@ -13,10 +12,10 @@ export interface WikiPage {
 	// Metadata
 	createdBy: string;
 	createdByEmail: string;
-	createdAt: Date | Timestamp;
+	createdAt: string;
 	updatedBy: string;
 	updatedByEmail: string;
-	updatedAt: Date | Timestamp;
+	updatedAt: string;
 
 	// Version
 	version: number;
@@ -38,8 +37,8 @@ export interface WikiCategory {
 	icon: string | null;
 	order: number;
 	pageCount: number;
-	createdAt: Date | Timestamp;
-	updatedAt: Date | Timestamp;
+	createdAt: string;
+	updatedAt: string;
 }
 
 export interface WikiPageVersion {
@@ -50,7 +49,7 @@ export interface WikiPageVersion {
 	content: string;
 	editedBy: string;
 	editedByEmail: string;
-	editedAt: Date | Timestamp;
+	editedAt: string;
 	changeDescription: string | null;
 }
 

@@ -5,7 +5,7 @@
  * for admin review and debugging purposes.
  */
 
-import { adminDb } from './firebase';
+import { insertLog } from '$lib/server/db/repos/emailAudit';
 import { env } from '$env/dynamic/private';
 import type { EmailAuditLog, LogEmailParams, EmailEnvironment } from '$lib/types/email-audit';
 
@@ -106,9 +106,9 @@ export async function logEmailSent(
       environment: getEnvironment()
     };
 
-    const docRef = await adminDb.collection('email_audit_logs').add(logEntry);
-    console.log(`📧 [EMAIL AUDIT] Logged sent email: ${params.type} to ${params.to} (${docRef.id})`);
-    return docRef.id;
+    const id = await insertLog(logEntry);
+    console.log(`📧 [EMAIL AUDIT] Logged sent email: ${params.type} to ${params.to} (${id})`);
+    return id;
   } catch (error) {
     // Don't let audit logging failures break email sending
     console.error('📧 [EMAIL AUDIT] Failed to log sent email:', error);
@@ -148,9 +148,9 @@ export async function logEmailFailed(
       environment: getEnvironment()
     };
 
-    const docRef = await adminDb.collection('email_audit_logs').add(logEntry);
-    console.log(`📧 [EMAIL AUDIT] Logged FAILED email: ${params.type} to ${params.to} (${docRef.id})`);
-    return docRef.id;
+    const id = await insertLog(logEntry);
+    console.log(`📧 [EMAIL AUDIT] Logged FAILED email: ${params.type} to ${params.to} (${id})`);
+    return id;
   } catch (logError) {
     // Don't let audit logging failures mask the original error
     console.error('📧 [EMAIL AUDIT] Failed to log failed email:', logError);
@@ -184,9 +184,9 @@ export async function logEmailMocked(params: LogEmailParams): Promise<string> {
       environment: getEnvironment()
     };
 
-    const docRef = await adminDb.collection('email_audit_logs').add(logEntry);
-    console.log(`📧 [EMAIL AUDIT] Logged MOCKED email: ${params.type} to ${params.to} (${docRef.id})`);
-    return docRef.id;
+    const id = await insertLog(logEntry);
+    console.log(`📧 [EMAIL AUDIT] Logged MOCKED email: ${params.type} to ${params.to} (${id})`);
+    return id;
   } catch (error) {
     // Don't let audit logging failures break the flow
     console.error('📧 [EMAIL AUDIT] Failed to log mocked email:', error);

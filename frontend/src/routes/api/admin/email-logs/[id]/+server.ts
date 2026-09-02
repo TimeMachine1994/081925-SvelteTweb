@@ -6,7 +6,7 @@
  */
 
 import { json, error } from '@sveltejs/kit';
-import { adminDb } from '$lib/server/firebase';
+import * as emailAudit from '$lib/server/db/repos/emailAudit';
 import type { RequestHandler } from './$types';
 
 export const GET: RequestHandler = async ({ locals, params }) => {
@@ -17,17 +17,15 @@ export const GET: RequestHandler = async ({ locals, params }) => {
 	const { id } = params;
 
 	try {
-		const doc = await adminDb.collection('email_audit_logs').doc(id).get();
+		const data = await emailAudit.getLog(id);
 
-		if (!doc.exists) {
+		if (!data) {
 			throw error(404, 'Email log not found');
 		}
 
-		const data = doc.data()!;
-
 		return json({
 			log: {
-				id: doc.id,
+				id: data.id,
 				type: data.type,
 				templateId: data.templateId || null,
 				templateName: data.templateName || null,
@@ -36,7 +34,7 @@ export const GET: RequestHandler = async ({ locals, params }) => {
 				from: data.from,
 				subject: data.subject || null,
 				templateData: data.templateData || {},
-				sentAt: data.sentAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+				sentAt: data.sentAt,
 				triggeredBy: data.triggeredBy,
 				triggeredByUserId: data.triggeredByUserId || null,
 				triggeredByAdminId: data.triggeredByAdminId || null,

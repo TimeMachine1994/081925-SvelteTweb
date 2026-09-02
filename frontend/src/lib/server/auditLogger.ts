@@ -1,5 +1,5 @@
 // Site-wide audit logging system for Tributestream V1
-import { adminDb } from './firebase';
+import { insertAuditEvent } from '$lib/server/db/repos/audit';
 import type { RequestEvent } from '@sveltejs/kit';
 
 export interface AuditEvent {
@@ -78,8 +78,7 @@ export async function logAuditEvent(event: Omit<AuditEvent, 'id' | 'timestamp'>)
 			`🔍 [AUDIT] ${auditEvent.action} by ${auditEvent.userEmail} (${auditEvent.userRole}) on ${auditEvent.resourceType}:${auditEvent.resourceId}`
 		);
 
-		// Save to Firestore
-		await adminDb.collection('audit_logs').add(auditEvent);
+		await insertAuditEvent(auditEvent as unknown as Record<string, unknown>);
 	} catch (error) {
 		console.error('❌ [AUDIT] Failed to log audit event:', error);
 		// Don't throw - audit logging should not break the main flow

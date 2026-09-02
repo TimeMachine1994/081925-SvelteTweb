@@ -6,7 +6,8 @@
  */
 
 import { json, error } from '@sveltejs/kit';
-import { adminDb } from '$lib/server/firebase';
+import * as emailAudit from '$lib/server/db/repos/emailAudit';
+import * as audit from '$lib/server/db/repos/audit';
 import type { RequestHandler } from './$types';
 import type { EmailType } from '$lib/types/email-audit';
 
@@ -67,12 +68,11 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 		}
 
 		// Fetch original log
-		const doc = await adminDb.collection('email_audit_logs').doc(id).get();
-		if (!doc.exists) {
+		const logData = await emailAudit.getLog(id);
+		if (!logData) {
 			throw error(404, 'Email log not found');
 		}
 
-		const logData = doc.data()!;
 		const emailType = logData.type as EmailType;
 
 		// Reconstruct the original email data from templateData
@@ -91,7 +91,7 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 		await resendByType(emailType, reconstructedData, modifyData.email);
 
 		// Log the admin action
-		await adminDb.collection('admin_audit_logs').add({
+		await audit.insertAdminAudit({
 			adminId: locals.user.uid,
 			adminEmail: locals.user.email,
 			action: 'resend_email',
@@ -101,9 +101,8 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 				originalType: emailType,
 				originalTo: logData.to,
 				newTo: modifyData.email || logData.to,
-				originalSentAt: logData.sentAt?.toDate?.()?.toISOString()
-			},
-			timestamp: new Date()
+				originalSentAt: logData.sentAt
+			}
 		});
 
 		return json({

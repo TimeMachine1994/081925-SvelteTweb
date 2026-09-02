@@ -49,9 +49,11 @@
 			}
 
 			adminToast.success(
-				result.userCreated
-					? 'Memorial created. Welcome email sent to the family contact.'
-					: 'Memorial created and linked to the existing account.'
+				!result.hasOwner
+					? 'Memorial created. No owner assigned yet.'
+					: result.userCreated
+						? 'Memorial created. Welcome email sent to the family contact.'
+						: 'Memorial created and linked to the existing account.'
 			);
 			await goto(`/admin/services/memorials/${result.memorialId}`);
 		} catch (err) {
@@ -133,16 +135,19 @@
 			</div>
 
 			<div class="form-section">
-				<h3 class="section-title">Family Contact (Memorial Owner)</h3>
+				<h3 class="section-title">Family Contact (Memorial Owner) — optional</h3>
+				<p class="section-note">
+					Leave blank to create the memorial without an owner. You can assign a family member
+					later from the memorial's admin page.
+				</p>
 
 				<div class="form-row">
 					<div class="form-group">
-						<label for="creatorEmail">Email *</label>
+						<label for="creatorEmail">Email</label>
 						<input
 							type="email"
 							id="creatorEmail"
 							bind:value={formData.creatorEmail}
-							required
 							placeholder="family@example.com"
 						/>
 						<div class="field-hint">
@@ -215,6 +220,12 @@
 		margin: 0 0 1.5rem 0;
 		padding-bottom: 0.75rem;
 		border-bottom: 1px solid #e5e7eb;
+	}
+
+	.section-note {
+		font-size: 0.875rem;
+		color: #6b7280;
+		margin: -0.75rem 0 1.25rem 0;
 	}
 
 	.form-group {

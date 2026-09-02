@@ -8,7 +8,7 @@
 
 	// Pre-fill title from URL query parameter
 	const titleFromUrl = $page.url.searchParams.get('title') || '';
-	
+
 	let title = $state(titleFromUrl);
 	let content = $state('');
 	let category = $state('');
@@ -53,13 +53,16 @@
 		</header>
 
 		<!-- Form -->
-		<form method="POST" use:enhance={() => {
-			isSubmitting = true;
-			return async ({ update }) => {
-				await update();
-				isSubmitting = false;
-			};
-		}}>
+		<form
+			method="POST"
+			use:enhance={() => {
+				isSubmitting = true;
+				return async ({ update }) => {
+					await update();
+					isSubmitting = false;
+				};
+			}}
+		>
 			<!-- Metadata Section -->
 			<div class="form-section">
 				<div class="form-row">
@@ -135,11 +138,7 @@
 			<!-- Actions -->
 			<div class="form-actions">
 				<a href="/admin/wiki" class="btn-secondary">Cancel</a>
-				<button
-					type="submit"
-					class="btn-primary"
-					disabled={isSubmitting || !title || !content}
-				>
+				<button type="submit" class="btn-primary" disabled={isSubmitting || !title || !content}>
 					{#if isSubmitting}
 						<svg class="spinner" viewBox="0 0 24 24">
 							<circle

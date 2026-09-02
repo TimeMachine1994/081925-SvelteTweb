@@ -50,13 +50,17 @@
 		</header>
 
 		<!-- Form -->
-		<form method="POST" action="?/update" use:enhance={() => {
-			isSubmitting = true;
-			return async ({ update }) => {
-				await update();
-				isSubmitting = false;
-			};
-		}}>
+		<form
+			method="POST"
+			action="?/update"
+			use:enhance={() => {
+				isSubmitting = true;
+				return async ({ update }) => {
+					await update();
+					isSubmitting = false;
+				};
+			}}
+		>
 			<!-- Metadata Section -->
 			<div class="form-section">
 				<div class="form-row">
@@ -119,11 +123,7 @@
 
 			<!-- Actions -->
 			<div class="form-actions">
-				<button
-					type="button"
-					class="btn-danger"
-					onclick={() => (showDeleteConfirm = true)}
-				>
+				<button type="button" class="btn-danger" onclick={() => (showDeleteConfirm = true)}>
 					<svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							stroke-linecap="round"
@@ -137,11 +137,7 @@
 
 				<div class="actions-right">
 					<a href="/admin/wiki/{data.page.slug}" class="btn-secondary">Cancel</a>
-					<button
-						type="submit"
-						class="btn-primary"
-						disabled={isSubmitting || !title || !content}
-					>
+					<button type="submit" class="btn-primary" disabled={isSubmitting || !title || !content}>
 						{#if isSubmitting}
 							<svg class="spinner" viewBox="0 0 24 24">
 								<circle
@@ -200,9 +196,7 @@
 				<p class="modal-warning">This action cannot be undone.</p>
 			</div>
 			<div class="modal-actions">
-				<button class="btn-secondary" onclick={() => (showDeleteConfirm = false)}>
-					Cancel
-				</button>
+				<button class="btn-secondary" onclick={() => (showDeleteConfirm = false)}> Cancel </button>
 				<form method="POST" action="?/delete" use:enhance>
 					<button type="submit" class="btn-danger">Delete Page</button>
 				</form>

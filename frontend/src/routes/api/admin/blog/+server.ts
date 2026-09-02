@@ -1,5 +1,5 @@
 import { json } from '@sveltejs/kit';
-import { adminDb } from '$lib/server/firebase';
+import * as blog from '$lib/server/db/repos/blog';
 import type { RequestHandler } from './$types';
 
 /**
@@ -40,26 +40,12 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 			return json({ error: 'Missing blog post ID' }, { status: 400 });
 		}
 
-		const postDoc = await adminDb.collection('blog').doc(id).get();
+		const post = await blog.getPostById(id);
 
-		if (!postDoc.exists) {
+		if (!post) {
 			console.warn('❌ Blog post not found:', id);
 			return json({ error: 'Blog post not found' }, { status: 404 });
 		}
-
-		const postData = postDoc.data();
-		if (!postData) {
-			return json({ error: 'Blog post data not found' }, { status: 404 });
-		}
-
-		// Convert timestamps to ISO strings
-		const post = {
-			id: postDoc.id,
-			...postData,
-			publishedAt: postData.publishedAt?.toDate?.()?.toISOString() || null,
-			createdAt: postData.createdAt?.toDate?.()?.toISOString() || null,
-			updatedAt: postData.updatedAt?.toDate?.()?.toISOString() || null
-		};
 
 		console.log('✅ Blog post retrieved:', id);
 
@@ -94,8 +80,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		const slug = data.slug || generateSlug(data.title);
 
 		// Check if slug already exists
-		const existingSlug = await adminDb.collection('blog').where('slug', '==', slug).get();
-		if (!existingSlug.empty) {
+		if (await blog.slugOwner(slug)) {
 			return json({ error: 'Slug already exists' }, { status: 400 });
 		}
 
@@ -128,13 +113,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			updatedAt: new Date()
 		};
 
-		const docRef = await adminDb.collection('blog').add(blogPost);
+		const id = await blog.createPost(blogPost);
 
-		console.log('✅ Blog post created:', docRef.id);
+		console.log('✅ Blog post created:', id);
 
 		return json({
 			success: true,
-			id: docRef.id,
+			id,
 			post: blogPost
 		});
 	} catch (error) {
@@ -163,26 +148,21 @@ export const PUT: RequestHandler = async ({ request, locals }) => {
 		}
 
 		// Get existing post
-		const postDoc = await adminDb.collection('blog').doc(data.id).get();
-		if (!postDoc.exists) {
+		const existing = await blog.getPostById(data.id);
+		if (!existing) {
 			return json({ error: 'Blog post not found' }, { status: 404 });
 		}
 
 		// If slug is being changed, check for conflicts
-		if (data.slug && data.slug !== postDoc.data()?.slug) {
-			const existingSlug = await adminDb
-				.collection('blog')
-				.where('slug', '==', data.slug)
-				.get();
-			if (!existingSlug.empty && existingSlug.docs[0].id !== data.id) {
+		if (data.slug && data.slug !== existing.slug) {
+			const owner = await blog.slugOwner(data.slug);
+			if (owner && owner !== data.id) {
 				return json({ error: 'Slug already exists' }, { status: 400 });
 			}
 		}
 
 		// Calculate reading time if content changed
-		const readingTime = data.content
-			? calculateReadingTime(data.content)
-			: postDoc.data()?.readingTime || 0;
+		const readingTime = data.content ? calculateReadingTime(data.content) : existing.readingTime || 0;
 
 		// Prepare update data (only include fields that are provided)
 		const updateData: any = {
@@ -205,7 +185,7 @@ export const PUT: RequestHandler = async ({ request, locals }) => {
 		if (data.status) {
 			updateData.status = data.status;
 			// Set publishedAt when publishing for the first time
-			if (data.status === 'published' && !postDoc.data()?.publishedAt) {
+			if (data.status === 'published' && !existing.publishedAt) {
 				updateData.publishedAt = new Date();
 			}
 		}
@@ -215,7 +195,7 @@ export const PUT: RequestHandler = async ({ request, locals }) => {
 		if (data.keywords !== undefined) updateData.keywords = data.keywords;
 		updateData.readingTime = readingTime;
 
-		await adminDb.collection('blog').doc(data.id).update(updateData);
+		await blog.updatePost(data.id, updateData);
 
 		console.log('✅ Blog post updated:', data.id);
 
@@ -249,7 +229,7 @@ export const DELETE: RequestHandler = async ({ request, locals }) => {
 			return json({ error: 'Missing blog post ID' }, { status: 400 });
 		}
 
-		await adminDb.collection('blog').doc(id).delete();
+		await blog.deletePost(id);
 
 		console.log('✅ Blog post deleted:', id);
 

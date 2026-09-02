@@ -1,5 +1,5 @@
-import { adminDb } from '$lib/server/firebase';
 import { requireAdmin } from '$lib/server/adminGuard';
+import * as blog from '$lib/server/db/repos/blog';
 
 export const load = async ({ locals, url }: any) => {
 	requireAdmin(locals, { resource: 'blog', action: 'read' });
@@ -7,35 +7,27 @@ export const load = async ({ locals, url }: any) => {
 	// Get query params
 	const limit = parseInt(url.searchParams.get('limit') || '50');
 	const sortBy = url.searchParams.get('sortBy') || 'createdAt';
-	const sortDir = url.searchParams.get('sortDir') || 'desc';
+	const sortDir = (url.searchParams.get('sortDir') || 'desc') as 'asc' | 'desc';
 
-	// Load blog posts
-	let query = adminDb.collection('blog').orderBy(sortBy, sortDir as any).limit(limit);
+	const all = await blog.listAll({ limit, sortBy, sortDir });
+	console.log('📝 [BLOG LIST] Found', all.length, 'blog posts');
 
-	const snapshot = await query.get();
-	console.log('📝 [BLOG LIST] Found', snapshot.docs.length, 'blog posts');
+	const posts = all.map((p) => ({
+		id: p.id,
+		title: p.title || 'Untitled',
+		slug: p.slug,
+		author: p.author || 'Unknown',
+		category: p.category || 'uncategorized',
+		status: p.status,
+		featured: p.featured,
+		excerpt: p.excerpt,
+		featuredImage: p.featuredImage || null,
+		publishedAt: p.publishedAt,
+		createdAt: p.createdAt,
+		updatedAt: p.updatedAt
+	}));
 
-	const posts = snapshot.docs.map((doc) => {
-		console.log('📝 [BLOG LIST] Post ID:', doc.id, 'Title:', doc.data().title);
-		const data = doc.data();
-
-		return {
-			id: doc.id,
-			title: data.title || 'Untitled',
-			slug: data.slug || '',
-			author: data.author || 'Unknown',
-			category: data.category || 'uncategorized',
-			status: data.status || 'draft',
-			featured: data.featured || false,
-			excerpt: data.excerpt || '',
-			featuredImage: data.featuredImage || null,
-			publishedAt: data.publishedAt?.toDate?.()?.toISOString() || null,
-			createdAt: data.createdAt?.toDate?.()?.toISOString() || null,
-			updatedAt: data.updatedAt?.toDate?.()?.toISOString() || null
-		};
-	});
-
-	console.log('✅ [BLOG LIST] Loaded blog posts with IDs:', posts.map(p => p.id).join(', '));
+	console.log('✅ [BLOG LIST] Loaded blog posts with IDs:', posts.map((p) => p.id).join(', '));
 
 	// Calculate stats
 	const stats = {
@@ -45,8 +37,5 @@ export const load = async ({ locals, url }: any) => {
 		featured: posts.filter((p) => p.featured).length
 	};
 
-	return {
-		posts,
-		stats
-	};
+	return { posts, stats };
 };
