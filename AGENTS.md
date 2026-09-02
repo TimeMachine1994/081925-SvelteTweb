@@ -9,3 +9,11 @@
 - Firebase project is `fir-tweb`. Production deploys from `main` via Vercel.
 - Docs: `wiki/` is the maintained documentation. `docs/archive/` is historical and may describe code that no longer exists.
 - Do not commit database dumps, `.env*` files, `*-debug.log`, or service-account JSON.
+
+## Database (Firestore -> Turso migration in progress)
+
+- Turso/libSQL via Drizzle ORM. Schema: `frontend/src/lib/server/db/schema/*.ts`; migrations: `frontend/drizzle/`; client: `$lib/server/db/client.ts` (`getDb()`).
+- Commands (from `frontend/`): `npm run db:migrate` (apply to `TURSO_DATABASE_URL`, default `file:local.db`), `npm run db:seed` (local only), `npm run db:generate` (after schema edits), `npm run test:db` (node-env vitest suite against a temp SQLite file).
+- Hand-written SQL (FTS5, triggers) goes in a custom migration: `npx drizzle-kit generate --custom --name <name>` then edit the file.
+- Backend selection: `DB_BACKEND=firestore|turso` with per-table `DB_BACKEND_<TABLE>` overrides (`$lib/server/db/backend.ts`). Firebase Auth and Firebase Storage are NOT being replaced.
+- Data access should go through `$lib/server/db/repos/*`; do not add new direct `adminDb` call sites. `.svelte` files must not change as part of the migration.

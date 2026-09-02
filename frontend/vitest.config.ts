@@ -10,6 +10,8 @@ export default defineConfig({
 		],
 		exclude: [
 			'src/routes/**/+*.test.ts',
+			'tests/db/**/*',
+			'src/lib/server/db/**/*',
 			'e2e/**/*',
 			'node_modules/**/*'
 		],

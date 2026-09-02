@@ -25,3 +25,9 @@ vite.config.ts.timestamp-*
 
 # Service Account Keys (sensitive)
 service-account-key*.json
+
+# Local SQLite (Turso dev/test)
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
