@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { adminDb } from '$lib/server/firebase';
+import { getFuneralDirector } from '$lib/server/db/repos/funeralDirectors';
 import { Timestamp } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
 import { sendEnhancedRegistrationEmail } from '$lib/server/email';
@@ -12,15 +13,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 
 		// Verify user is an approved funeral director
-		const funeralDirectorDoc = await adminDb
-			.collection('funeral_directors')
-			.doc(locals.user.uid)
-			.get();
-		if (!funeralDirectorDoc.exists) {
+		const funeralDirector = await getFuneralDirector(locals.user.uid);
+		if (!funeralDirector) {
 			return json({ error: 'Funeral director profile not found' }, { status: 404 });
 		}
 
-		const funeralDirector = funeralDirectorDoc.data();
 		if (funeralDirector?.status !== 'approved') {
 			return json({ error: 'Funeral director account not approved' }, { status: 403 });
 		}

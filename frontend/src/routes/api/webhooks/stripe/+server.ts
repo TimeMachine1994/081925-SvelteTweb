@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import Stripe from 'stripe';
 import { adminDb, FieldValue } from '$lib/server/firebase';
+import { getInvoice, markPaid } from '$lib/server/db/repos/invoices';
 import { Timestamp } from 'firebase-admin/firestore';
 import { env } from '$env/dynamic/private';
 
@@ -9,16 +10,20 @@ const STRIPE_SECRET_KEY = env.STRIPE_SECRET_KEY;
 const STRIPE_WEBHOOK_SECRET = env.STRIPE_WEBHOOK_SECRET;
 
 if (!STRIPE_WEBHOOK_SECRET) {
-	console.error('⚠️ STRIPE_WEBHOOK_SECRET is not configured - webhook signature verification will fail');
+	console.error(
+		'⚠️ STRIPE_WEBHOOK_SECRET is not configured - webhook signature verification will fail'
+	);
 }
 
 if (!STRIPE_SECRET_KEY) {
 	console.error('⚠️ STRIPE_SECRET_KEY is not configured - Stripe webhooks will fail');
 }
 
-const stripe = STRIPE_SECRET_KEY ? new Stripe(STRIPE_SECRET_KEY, {
-	apiVersion: '2025-08-27.basil'
-}) : null;
+const stripe = STRIPE_SECRET_KEY
+	? new Stripe(STRIPE_SECRET_KEY, {
+			apiVersion: '2025-08-27.basil'
+		})
+	: null;
 
 export const POST: RequestHandler = async ({ request }) => {
 	if (!stripe) {
@@ -412,29 +417,21 @@ async function handleInvoicePaymentSuccess(session: Stripe.Checkout.Session) {
 				: session.payment_intent?.id;
 
 		// Update invoice status in Firestore
-		const invoiceRef = adminDb.collection('invoices').doc(invoiceId);
-		const invoiceDoc = await invoiceRef.get();
+		const invoice = await getInvoice(invoiceId);
 
-		if (!invoiceDoc.exists) {
+		if (!invoice) {
 			console.error(`❌ [WEBHOOK] Invoice not found: ${invoiceId}`);
 			return;
 		}
 
-		const invoice = invoiceDoc.data();
-
-		await invoiceRef.update({
-			status: 'paid',
-			paidAt: Timestamp.now(),
-			paymentIntentId: paymentIntentId,
-			stripeSessionId: session.id
-		});
+		await markPaid(invoiceId, { paymentIntentId, stripeSessionId: session.id });
 
 		console.log(`✅ [WEBHOOK] Invoice marked as paid: ${invoiceId}`);
 
 		// Send receipt email
 		try {
 			const { sendInvoiceReceiptEmail } = await import('$lib/server/email');
-			
+
 			const baseUrl = process.env.PUBLIC_BASE_URL || 'https://tributestream.com';
 			const receiptUrl = `${baseUrl}/pay/${invoiceId}/receipt`;
 
@@ -449,7 +446,9 @@ async function handleInvoicePaymentSuccess(session: Stripe.Checkout.Session) {
 				receiptUrl: receiptUrl
 			});
 
-			console.log(`📧 [WEBHOOK] Invoice receipt email sent to: ${customerEmail || invoice?.customerEmail}`);
+			console.log(
+				`📧 [WEBHOOK] Invoice receipt email sent to: ${customerEmail || invoice?.customerEmail}`
+			);
 		} catch (emailError) {
 			console.error('❌ [WEBHOOK] Failed to send invoice receipt email:', emailError);
 			// Don't fail the webhook if email fails

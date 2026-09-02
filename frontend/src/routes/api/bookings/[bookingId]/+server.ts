@@ -1,53 +1,43 @@
-import { getAdminDb } from '$lib/server/firebase';
+import { getUserBooking, updateUserBooking } from '$lib/server/db/repos/bookings';
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { Timestamp } from 'firebase-admin/firestore';
 
 export const PUT: RequestHandler = async ({ request, params, locals }) => {
-    console.log(`🚀 API PUT /api/bookings/${params.bookingId}: Updating draft booking...`);
-   
-    if (!locals.user) {
-    	throw error(401, 'Unauthorized');
-    }
-   
-    const db = getAdminDb();
-    const bookingRef = db.collection('users').doc(locals.user.uid).collection('bookings').doc(params.bookingId);
-   
-    try {
-    	const bookingSnap = await bookingRef.get();
+	console.log(`🚀 API PUT /api/bookings/${params.bookingId}: Updating draft booking...`);
 
-        if (!bookingSnap.exists) {
-            throw error(404, 'Booking not found.');
-        }
+	if (!locals.user) {
+		throw error(401, 'Unauthorized');
+	}
 
-        const bookingData = bookingSnap.data();
+	try {
+		const bookingData = await getUserBooking(locals.user.uid, params.bookingId);
 
-        // Security Check: Ensure the user owns this booking or is an admin
-        if (bookingData?.userId !== locals.user?.uid && !locals.user?.admin) {
-            throw error(403, 'Forbidden: You do not have permission to update this booking.');
-        }
+		if (!bookingData) {
+			throw error(404, 'Booking not found.');
+		}
 
-        // Security Check: Ensure we are only updating a draft
-        if (bookingData?.status !== 'draft') {
-            throw error(400, 'This booking has been confirmed and can no longer be updated.');
-        }
+		// Security Check: Ensure the user owns this booking or is an admin
+		if (bookingData?.userId !== locals.user?.uid && !locals.user?.admin) {
+			throw error(403, 'Forbidden: You do not have permission to update this booking.');
+		}
 
-        const updatedBookingData = await request.json();
+		// Security Check: Ensure we are only updating a draft
+		if (bookingData?.status !== 'draft') {
+			throw error(400, 'This booking has been confirmed and can no longer be updated.');
+		}
 
-        await bookingRef.update({
-            ...updatedBookingData,
-            updatedAt: Timestamp.now()
-        });
+		const updatedBookingData = await request.json();
 
-        console.log(`✅ Booking ${params.bookingId} updated successfully.`);
+		await updateUserBooking(locals.user.uid, params.bookingId, updatedBookingData);
 
-        return json({ success: true, bookingId: params.bookingId });
+		console.log(`✅ Booking ${params.bookingId} updated successfully.`);
 
-    } catch (e: any) {
-        console.error(`❌ API PUT /api/bookings/${params.bookingId}: Error updating booking`, e);
-        if (e.status) {
-            throw e; // Re-throw SvelteKit errors
-        }
-        throw error(500, 'Could not update the booking.');
-    }
+		return json({ success: true, bookingId: params.bookingId });
+	} catch (e: any) {
+		console.error(`❌ API PUT /api/bookings/${params.bookingId}: Error updating booking`, e);
+		if (e.status) {
+			throw e; // Re-throw SvelteKit errors
+		}
+		throw error(500, 'Could not update the booking.');
+	}
 };

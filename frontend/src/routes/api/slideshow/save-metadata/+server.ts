@@ -1,6 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { adminDb } from '$lib/server/firebase';
+import { getLatestSlideshow, getSlideshow, setSlideshow } from '$lib/server/db/repos/slideshows';
 
 /**
  * Lightweight API to save slideshow metadata only
@@ -20,7 +21,18 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	const userRole = locals.user.role;
 
 	try {
-		const { memorialId, title, firebaseStoragePath, playbackUrl, thumbnailUrl, photos, settings, audio, status, isFirebaseHosted } = await request.json();
+		const {
+			memorialId,
+			title,
+			firebaseStoragePath,
+			playbackUrl,
+			thumbnailUrl,
+			photos,
+			settings,
+			audio,
+			status,
+			isFirebaseHosted
+		} = await request.json();
 
 		console.log('💾 [METADATA API] Metadata received:', {
 			memorialId,
@@ -34,7 +46,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		// Validate required fields
 		if (!firebaseStoragePath || !playbackUrl || !memorialId || !photos) {
-			return error(400, 'Missing required fields: firebaseStoragePath, playbackUrl, memorialId, photos');
+			return error(
+				400,
+				'Missing required fields: firebaseStoragePath, playbackUrl, memorialId, photos'
+			);
 		}
 
 		// Verify memorial exists and user has permission
@@ -47,9 +62,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 
 		const memorialData = memorialDoc.data();
-		
+
 		// Check user permissions
-		const hasPermission = 
+		const hasPermission =
 			userRole === 'admin' ||
 			memorialData?.ownerUid === userId ||
 			memorialData?.funeralDirectorUid === userId;
@@ -64,16 +79,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		let isUpdate = false;
 
 		try {
-			const existingSlideshowsSnapshot = await adminDb
-				.collection('memorials')
-				.doc(memorialId)
-				.collection('slideshows')
-				.orderBy('createdAt', 'desc')
-				.limit(1)
-				.get();
+			const latestSlideshow = await getLatestSlideshow(memorialId);
 
-			if (!existingSlideshowsSnapshot.empty) {
-				slideshowId = existingSlideshowsSnapshot.docs[0].id;
+			if (latestSlideshow) {
+				slideshowId = latestSlideshow.id;
 				isUpdate = true;
 				console.log('💾 [METADATA API] Updating existing slideshow:', slideshowId);
 			} else {
@@ -89,14 +98,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		let existingData: any = {};
 		if (isUpdate) {
 			try {
-				const existingRef = adminDb
-					.collection('memorials')
-					.doc(memorialId)
-					.collection('slideshows')
-					.doc(slideshowId);
-				const existingDoc = await existingRef.get();
-				if (existingDoc.exists) {
-					existingData = existingDoc.data() || {};
+				const existingDoc = await getSlideshow(memorialId, slideshowId);
+				if (existingDoc) {
+					existingData = existingDoc;
 				}
 			} catch (err) {
 				console.warn('Could not fetch existing slideshow data:', err);
@@ -112,13 +116,15 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			firebaseStoragePath,
 			playbackUrl, // Firebase Storage WebM video URL
 			thumbnailUrl: thumbnailUrl || null,
-			photos: Array.isArray(photos) ? photos.map((photo: any) => ({
-				id: photo.id || '',
-				caption: photo.caption || '',
-				duration: photo.duration || 3,
-				url: photo.url || '',
-				storagePath: photo.storagePath || ''
-			})) : [],
+			photos: Array.isArray(photos)
+				? photos.map((photo: any) => ({
+						id: photo.id || '',
+						caption: photo.caption || '',
+						duration: photo.duration || 3,
+						url: photo.url || '',
+						storagePath: photo.storagePath || ''
+					}))
+				: [],
 			settings: settings || {
 				photoDuration: 3,
 				transitionType: 'fade',
@@ -140,13 +146,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		const cleanSlideshowDoc = removeUndefinedValues(slideshowDoc);
 
 		// Save to Firestore
-		const slideshowRef = adminDb
-			.collection('memorials')
-			.doc(memorialId)
-			.collection('slideshows')
-			.doc(slideshowId);
-			
-		await slideshowRef.set(cleanSlideshowDoc);
+		await setSlideshow(memorialId, slideshowId, cleanSlideshowDoc);
 
 		// Update memorial to indicate it has slideshows
 		await memorialRef.update({
@@ -154,7 +154,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			updatedAt: new Date().toISOString()
 		});
 
-		console.log(`✅ [METADATA API] Slideshow ${isUpdate ? 'updated' : 'created'} successfully:`, slideshowId);
+		console.log(
+			`✅ [METADATA API] Slideshow ${isUpdate ? 'updated' : 'created'} successfully:`,
+			slideshowId
+		);
 
 		return json({
 			success: true,
@@ -164,15 +167,14 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			thumbnailUrl,
 			message: `Slideshow ${isUpdate ? 'updated' : 'created'} successfully`
 		});
-
 	} catch (err) {
 		console.error('💾 [METADATA API] Error:', err);
-		
+
 		// Re-throw SvelteKit errors
 		if (err && typeof err === 'object' && 'status' in err) {
 			throw err;
 		}
-		
+
 		const message = err instanceof Error ? err.message : 'Unknown error';
 		return error(500, `Failed to save slideshow: ${message}`);
 	}
@@ -185,11 +187,11 @@ function removeUndefinedValues(obj: any): any {
 	if (obj === null || obj === undefined) {
 		return null;
 	}
-	
+
 	if (Array.isArray(obj)) {
-		return obj.map(item => removeUndefinedValues(item));
+		return obj.map((item) => removeUndefinedValues(item));
 	}
-	
+
 	if (typeof obj === 'object') {
 		const cleaned: any = {};
 		for (const [key, value] of Object.entries(obj)) {
@@ -199,6 +201,6 @@ function removeUndefinedValues(obj: any): any {
 		}
 		return cleaned;
 	}
-	
+
 	return obj;
 }

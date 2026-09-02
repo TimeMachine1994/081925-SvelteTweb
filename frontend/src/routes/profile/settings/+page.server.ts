@@ -1,6 +1,7 @@
 import { redirect, fail } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import { adminDb } from '$lib/server/firebase';
+import { getFuneralDirector } from '$lib/server/db/repos/funeralDirectors';
 import { getAuth } from 'firebase-admin/auth';
 import { sendEmailChangeConfirmation } from '$lib/server/emailConfirmation';
 
@@ -33,11 +34,11 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	try {
 		console.log('🔧 [SETTINGS] Fetching user profile for UID:', locals.user.uid);
-		
+
 		// Get user profile data
 		const userDoc = await adminDb.collection('users').doc(locals.user.uid).get();
 		const userData = userDoc.data();
-		
+
 		console.log('🔧 [SETTINGS] User document exists:', userDoc.exists);
 		console.log('🔧 [SETTINGS] User data keys:', userData ? Object.keys(userData) : 'null');
 
@@ -45,9 +46,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 		let additionalData = {};
 		if (locals.user.role === 'funeral_director') {
 			console.log('🔧 [SETTINGS] User is funeral director, fetching FD profile');
-			const fdDoc = await adminDb.collection('funeral_directors').doc(locals.user.uid).get();
-			if (fdDoc.exists) {
-				additionalData = { funeralDirector: sanitizeData(fdDoc.data()) };
+			const fdData = await getFuneralDirector(locals.user.uid);
+			if (fdData) {
+				additionalData = { funeralDirector: sanitizeData(fdData) };
 				console.log('🔧 [SETTINGS] FD profile loaded');
 			} else {
 				console.log('🔧 [SETTINGS] FD profile not found');
@@ -64,7 +65,10 @@ export const load: PageServerLoad = async ({ locals }) => {
 		return result;
 	} catch (error) {
 		console.error('❌ [SETTINGS] Error loading profile settings:', error);
-		console.error('❌ [SETTINGS] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+		console.error(
+			'❌ [SETTINGS] Error stack:',
+			error instanceof Error ? error.stack : 'No stack trace'
+		);
 		throw redirect(302, '/profile');
 	}
 };
@@ -87,18 +91,18 @@ export const actions: Actions = {
 
 			// Validate required fields
 			if (!displayName || !email) {
-				return fail(400, { 
-					message: 'Display name and email are required', 
-					success: false 
+				return fail(400, {
+					message: 'Display name and email are required',
+					success: false
 				});
 			}
 
 			// Validate email format
 			const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 			if (!emailRegex.test(email)) {
-				return fail(400, { 
-					message: 'Please enter a valid email address', 
-					success: false 
+				return fail(400, {
+					message: 'Please enter a valid email address',
+					success: false
 				});
 			}
 
@@ -119,7 +123,7 @@ export const actions: Actions = {
 			// If email changed, initiate email change verification process
 			if (email !== locals.user.email) {
 				console.log('📧 [SETTINGS] Email change requested from', locals.user.email, 'to', email);
-				
+
 				// Store pending email change in user document (don't update Firebase Auth yet)
 				updateData.pendingEmailChange = {
 					newEmail: email,
@@ -127,12 +131,14 @@ export const actions: Actions = {
 					expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
 					confirmed: false
 				};
-				
+
 				// Keep the old email in the profile for now
 				updateData.email = locals.user.email;
-				
-				console.log('⏳ [SETTINGS] Email change pending confirmation. User stays logged in with current email.');
-				
+
+				console.log(
+					'⏳ [SETTINGS] Email change pending confirmation. User stays logged in with current email.'
+				);
+
 				// Send confirmation email to new address
 				try {
 					await sendEmailChangeConfirmation(locals.user.uid, email, displayName || 'User');
@@ -150,12 +156,11 @@ export const actions: Actions = {
 				message: 'Profile updated successfully!',
 				success: true
 			};
-
 		} catch (error) {
 			console.error('Error updating profile:', error);
-			return fail(500, { 
-				message: 'Failed to update profile. Please try again.', 
-				success: false 
+			return fail(500, {
+				message: 'Failed to update profile. Please try again.',
+				success: false
 			});
 		}
 	},
@@ -173,25 +178,25 @@ export const actions: Actions = {
 
 			// Validate required fields
 			if (!currentPassword || !newPassword || !confirmPassword) {
-				return fail(400, { 
-					message: 'All password fields are required', 
-					success: false 
+				return fail(400, {
+					message: 'All password fields are required',
+					success: false
 				});
 			}
 
 			// Validate password match
 			if (newPassword !== confirmPassword) {
-				return fail(400, { 
-					message: 'New passwords do not match', 
-					success: false 
+				return fail(400, {
+					message: 'New passwords do not match',
+					success: false
 				});
 			}
 
 			// Validate password strength
 			if (newPassword.length < 6) {
-				return fail(400, { 
-					message: 'Password must be at least 6 characters long', 
-					success: false 
+				return fail(400, {
+					message: 'Password must be at least 6 characters long',
+					success: false
 				});
 			}
 
@@ -214,29 +219,27 @@ export const actions: Actions = {
 					message: 'Password updated successfully!',
 					success: true
 				};
-
 			} catch (authError: any) {
 				console.error('Error updating password:', authError);
-				
+
 				// Handle specific Firebase Auth errors
 				if (authError.code === 'auth/weak-password') {
-					return fail(400, { 
-						message: 'Password is too weak. Please choose a stronger password.', 
-						success: false 
+					return fail(400, {
+						message: 'Password is too weak. Please choose a stronger password.',
+						success: false
 					});
 				}
-				
-				return fail(500, { 
-					message: 'Failed to update password. Please try again.', 
-					success: false 
+
+				return fail(500, {
+					message: 'Failed to update password. Please try again.',
+					success: false
 				});
 			}
-
 		} catch (error) {
 			console.error('Error changing password:', error);
-			return fail(500, { 
-				message: 'Failed to change password. Please try again.', 
-				success: false 
+			return fail(500, {
+				message: 'Failed to change password. Please try again.',
+				success: false
 			});
 		}
 	}

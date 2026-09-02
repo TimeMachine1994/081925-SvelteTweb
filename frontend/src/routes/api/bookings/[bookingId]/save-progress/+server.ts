@@ -1,6 +1,5 @@
-import { getAdminDb } from '$lib/server/firebase';
+import { saveUserBookingProgress } from '$lib/server/db/repos/bookings';
 import { json, error } from '@sveltejs/kit';
-import { Timestamp } from 'firebase-admin/firestore';
 
 export async function POST({ request, params, locals }) {
 	console.log('💾 Save progress endpoint hit');
@@ -15,15 +14,7 @@ export async function POST({ request, params, locals }) {
 			throw error(400, 'Booking ID and data are required.');
 		}
 
-		const bookingRef = getAdminDb().collection('users').doc(locals.user.uid).collection('bookings').doc(bookingId);
-
-		await bookingRef.set(
-			{
-				...bookingData,
-				updatedAt: Timestamp.now()
-			},
-			{ merge: true }
-		);
+		await saveUserBookingProgress(locals.user.uid, bookingId, bookingData);
 
 		console.log('✅ Booking progress saved successfully for booking ID:', bookingId);
 		return json({ success: true });

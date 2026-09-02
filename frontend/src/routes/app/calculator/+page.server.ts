@@ -1,4 +1,5 @@
-import { getFirestore, Timestamp } from 'firebase-admin/firestore';
+import { getFirestore } from 'firebase-admin/firestore';
+import { getConfiguration, saveConfiguration } from '$lib/server/db/repos/livestreamConfigurations';
 import type { PageServerLoad, Actions } from './$types';
 import type { Memorial } from '$lib/types/memorial';
 import { fail, json, redirect } from '@sveltejs/kit';
@@ -14,19 +15,11 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
 	if (locals.user && memorialId) {
 		// First, try to load an existing livestream configuration
-		const configRef = db.collection('livestreamConfigurations').doc(memorialId);
-		const configSnap = await configRef.get();
+		const configData = await getConfiguration(memorialId);
 
-		if (configSnap.exists) {
-			console.log('✅ Found existing livestream config:', configSnap.id);
-			const configData = configSnap.data();
-			if (configData) {
-				// Convert Firestore Timestamps to serializable format
-				if (configData.createdAt && typeof configData.createdAt.toDate === 'function') {
-					(configData.createdAt as any) = configData.createdAt.toDate().toISOString();
-				}
-				config = { ...(configData as Omit<LivestreamConfig, 'id'>), id: configSnap.id };
-			}
+		if (configData) {
+			console.log('✅ Found existing livestream config:', configData.id);
+			config = configData as LivestreamConfig;
 		}
 
 		// Then, load the memorial data
@@ -181,38 +174,29 @@ export const actions: Actions = {
 			console.log('  - bookingItems length:', payload.bookingItems.length);
 			console.log('  - total:', payload.total);
 
-			// Initialize Firestore
-			console.log('🔥 Initializing Firestore...');
-			const db = getFirestore();
-			console.log('✅ Firestore initialized successfully');
-
 			// Prepare document data
 			const docData = {
 				formData: payload.formData,
 				bookingItems: payload.bookingItems,
 				total: payload.total,
 				userId: locals.user.uid,
-				status: 'saved',
-				createdAt: Timestamp.now(),
+				status: 'saved' as const,
 				memorialId: memorialId
 			};
 
 			console.log('📄 Document data prepared:');
 			console.log('  - userId:', docData.userId);
 			console.log('  - status:', docData.status);
-			console.log('  - createdAt:', docData.createdAt);
 			console.log('  - total:', docData.total);
 			console.log('  - bookingItems count:', docData.bookingItems.length);
 
 			// Save to Firestore
 			console.log('💾 Saving to Firestore collection: livestreamConfigurations');
-			const docRef = db.collection('livestreamConfigurations').doc(memorialId);
-			await docRef.set(docData, { merge: true });
+			const docId = await saveConfiguration(docData);
 			console.log('✅ Configuration saved successfully!');
-			console.log('📄 Document ID:', docRef.id);
-			console.log('📍 Document path:', docRef.path);
+			console.log('📄 Document ID:', docId);
 
-			const response = { success: true, action: 'saved', docId: docRef.id };
+			const response = { success: true, action: 'saved', docId };
 			console.log('🎉 Configuration saved, preparing to redirect...', response);
 		} catch (error) {
 			console.error('💥 Error in saveAndPayLater action:', error);
@@ -244,28 +228,25 @@ export const actions: Actions = {
 			const { formData, total, memorialId, bookingItems } = await request.json();
 			console.log('💳 Received payment payload:', { formData, total, memorialId, bookingItems });
 
-			const db = getFirestore();
 			const configData = {
 				formData,
 				bookingItems,
 				total,
 				userId: locals.user.uid,
 				memorialId,
-				status: 'pending_payment',
-				createdAt: Timestamp.now()
+				status: 'pending_payment' as const
 			};
 
 			// Use memorialId as the document ID for the livestream configuration
-			const configRef = db.collection('livestreamConfigurations').doc(memorialId);
-			await configRef.set(configData, { merge: true });
+			const configId = await saveConfiguration(configData);
 
-			console.log('📄 Created/Updated config document:', configRef.id);
+			console.log('📄 Created/Updated config document:', configId);
 
 			const paymentIntent = await stripe.paymentIntents.create({
 				amount: total * 100,
 				currency: 'usd',
 				metadata: {
-					configId: configRef.id,
+					configId,
 					memorialId: memorialId
 				}
 			});
@@ -276,7 +257,7 @@ export const actions: Actions = {
 				success: true,
 				action: 'paymentInitiated',
 				clientSecret: paymentIntent.client_secret,
-				configId: configRef.id
+				configId
 			});
 		} catch (error) {
 			console.error('🔥 Error processing payment:', error);

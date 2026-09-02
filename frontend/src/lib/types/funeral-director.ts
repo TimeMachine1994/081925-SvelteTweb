@@ -1,5 +1,3 @@
-import type { Timestamp } from 'firebase/firestore';
-
 export interface FuneralDirector {
 	id: string;
 
@@ -21,8 +19,8 @@ export interface FuneralDirector {
 	status: 'approved' | 'suspended' | 'inactive';
 
 	// Metadata
-	createdAt: Timestamp;
-	updatedAt: Timestamp;
+	createdAt: string;
+	updatedAt: string;
 }
 
 export interface ServiceDetails {

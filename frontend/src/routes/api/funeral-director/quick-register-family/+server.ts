@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { adminDb, adminAuth } from '$lib/server/firebase';
+import { getFuneralDirector } from '$lib/server/db/repos/funeralDirectors';
 import { Timestamp } from 'firebase-admin/firestore';
 import { sendEnhancedRegistrationEmail } from '$lib/server/email';
 import { validateEmail } from '$lib/utils/email-validation';
@@ -28,23 +29,21 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		// Pre-validate email before expensive operations
 		const emailValidation = await validateEmail(familyEmail, 'familyEmail');
 		if (!emailValidation.isValid) {
-			return json({ 
-				error: emailValidation.error,
-				field: emailValidation.field
-			}, { status: 400 });
+			return json(
+				{
+					error: emailValidation.error,
+					field: emailValidation.field
+				},
+				{ status: 400 }
+			);
 		}
 
 		// Get funeral director profile
-		const funeralDirectorDoc = await adminDb
-			.collection('funeral_directors')
-			.doc(locals.user.uid)
-			.get();
+		const funeralDirector = await getFuneralDirector(locals.user.uid);
 
-		if (!funeralDirectorDoc.exists) {
+		if (!funeralDirector) {
 			return json({ error: 'Funeral director profile not found' }, { status: 404 });
 		}
-
-		const funeralDirector = funeralDirectorDoc.data();
 
 		// Generate temporary password for family
 		const tempPassword = Math.random().toString(36).slice(-8);
@@ -70,10 +69,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			createdByFuneralDirector: true
 		});
 
-		await adminDb
-			.collection('users')
-			.doc(userRecord.uid)
-			.set(userProfile);
+		await adminDb.collection('users').doc(userRecord.uid).set(userProfile);
 
 		// Generate unique memorial slug
 		const memorialSlug = await generateUniqueMemorialSlug(lovedOneName);
@@ -148,17 +144,23 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		});
 	} catch (error: any) {
 		console.error('Quick family registration error:', error);
-		
+
 		// Handle specific Firebase Auth errors
 		if (error.code === 'auth/email-already-exists') {
-			return json({ 
-				error: `An account with the provided email already exists. Please use a different email or sign in to your existing account.`,
-				field: 'familyEmail'
-			}, { status: 400 });
+			return json(
+				{
+					error: `An account with the provided email already exists. Please use a different email or sign in to your existing account.`,
+					field: 'familyEmail'
+				},
+				{ status: 400 }
+			);
 		}
-		
-		return json({ 
-			error: 'Failed to create family memorial. Please try again.'
-		}, { status: 500 });
+
+		return json(
+			{
+				error: 'Failed to create family memorial. Please try again.'
+			},
+			{ status: 500 }
+		);
 	}
 };

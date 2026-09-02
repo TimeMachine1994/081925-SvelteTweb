@@ -27,6 +27,27 @@ export function toIsoOrNow(value: unknown): string {
 	return toIso(value) ?? new Date().toISOString();
 }
 
+function isTimestampLike(v: unknown): v is { toDate: () => Date } {
+	return !!v && typeof v === 'object' && typeof (v as { toDate?: unknown }).toDate === 'function';
+}
+
+/**
+ * Deep-converts every Firestore Timestamp / Date inside a document to an ISO
+ * string, leaving all other values untouched. Use for loosely-typed documents
+ * whose field set varies by call site (users, memorials legacy fields, ...).
+ */
+export function normalizeDoc<T = Record<string, any>>(value: unknown): T {
+	if (value === null || value === undefined) return value as T;
+	if (value instanceof Date || isTimestampLike(value)) return toIso(value) as unknown as T;
+	if (Array.isArray(value)) return value.map((v) => normalizeDoc(v)) as unknown as T;
+	if (typeof value === 'object') {
+		const out: Record<string, unknown> = {};
+		for (const [k, v] of Object.entries(value as Record<string, unknown>)) out[k] = normalizeDoc(v);
+		return out as T;
+	}
+	return value as T;
+}
+
 export type Snap = DocumentSnapshot | QueryDocumentSnapshot;
 
 export function docData<T = Record<string, any>>(snap: Snap): (T & { id: string }) | null {

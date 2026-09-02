@@ -1,6 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { adminDb } from '$lib/server/firebase';
+import { getLatestSlideshow, getSlideshow, setSlideshow } from '$lib/server/db/repos/slideshows';
 import { getStorage } from 'firebase-admin/storage';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -43,7 +44,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 
 		const memorialData = memorialDoc.data();
-		const hasPermission = 
+		const hasPermission =
 			userRole === 'admin' ||
 			memorialData?.ownerUid === userId ||
 			memorialData?.funeralDirectorUid === userId;
@@ -58,21 +59,17 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		if (!existingSlideshowId) {
 			console.log(' [FIREBASE SLIDESHOW API] Checking for existing slideshows to overwrite...');
 			try {
-				const existingSlideshowsSnapshot = await adminDb
-					.collection('memorials')
-					.doc(memorialId)
-					.collection('slideshows')
-					.orderBy('createdAt', 'desc')
-					.limit(1)
-					.get();
+				const latestSlideshow = await getLatestSlideshow(memorialId);
 
-				if (!existingSlideshowsSnapshot.empty) {
-					const existingDoc = existingSlideshowsSnapshot.docs[0];
+				if (latestSlideshow) {
 					existingSlideshowToOverwrite = {
-						id: existingDoc.id,
-						data: existingDoc.data()
+						id: latestSlideshow.id,
+						data: latestSlideshow
 					};
-					console.log(' [FIREBASE SLIDESHOW API] Found existing slideshow to overwrite:', existingSlideshowToOverwrite.id);
+					console.log(
+						' [FIREBASE SLIDESHOW API] Found existing slideshow to overwrite:',
+						existingSlideshowToOverwrite.id
+					);
 				} else {
 					console.log(' [FIREBASE SLIDESHOW API] No existing slideshows found, creating new one');
 				}
@@ -85,7 +82,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		// Parse photos from FormData and settings
 		const photos = [];
 		let settings = {};
-		
+
 		// Extract photos from FormData
 		let photoIndex = 0;
 		while (formData.has(`photo_${photoIndex}_id`)) {
@@ -95,14 +92,14 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			const photoDuration = formData.get(`photo_${photoIndex}_duration`) as string;
 			const photoUrl = formData.get(`photo_${photoIndex}_url`) as string;
 			const photoStoragePath = formData.get(`photo_${photoIndex}_storagePath`) as string;
-			
+
 			if (photoId) {
 				const photoData: any = {
 					id: photoId,
 					caption: photoCaption || '',
 					duration: parseFloat(photoDuration) || 3
 				};
-				
+
 				// New photo with file
 				if (photoFile) {
 					photoData.file = photoFile;
@@ -112,19 +109,19 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 					photoData.url = photoUrl;
 					photoData.storagePath = photoStoragePath;
 				}
-				
+
 				photos.push(photoData);
 			}
 			photoIndex++;
 		}
-		
+
 		// Parse settings
 		try {
 			if (settingsData) settings = JSON.parse(settingsData);
 		} catch (parseError) {
 			console.warn('Failed to parse settings data:', parseError);
 		}
-		
+
 		console.log('🔥 [FIREBASE SLIDESHOW API] Parsed photos:', photos.length, 'files');
 
 		// Upload individual photos to Firebase Storage for editing capability
@@ -138,9 +135,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		console.log('🔥 [FIREBASE SLIDESHOW API] Firebase result:', firebaseResult);
 
 		// Use existing slideshow ID (from form data, found existing, or create new one)
-		const slideshowId = existingSlideshowId || existingSlideshowToOverwrite?.id || crypto.randomUUID();
+		const slideshowId =
+			existingSlideshowId || existingSlideshowToOverwrite?.id || crypto.randomUUID();
 		const isUpdate = !!existingSlideshowId || !!existingSlideshowToOverwrite;
-		
+
 		// Get existing slideshow data if updating
 		let existingData: any = {};
 		if (isUpdate) {
@@ -151,22 +149,19 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			} else {
 				// Fetch from Firestore for explicit slideshow ID updates
 				try {
-					const existingRef = adminDb
-						.collection('memorials')
-						.doc(memorialId)
-						.collection('slideshows')
-						.doc(slideshowId);
-					const existingDoc = await existingRef.get();
-					if (existingDoc.exists) {
-						existingData = existingDoc.data() || {};
-						console.log('📝 [FIREBASE SLIDESHOW API] Fetched existing slideshow data from Firestore');
+					const existingDoc = await getSlideshow(memorialId, slideshowId);
+					if (existingDoc) {
+						existingData = existingDoc;
+						console.log(
+							'📝 [FIREBASE SLIDESHOW API] Fetched existing slideshow data from Firestore'
+						);
 					}
 				} catch (err) {
 					console.warn('Could not fetch existing slideshow data:', err);
 				}
 			}
 		}
-		
+
 		// Ensure no undefined values for Firestore
 		const slideshowDoc = {
 			id: slideshowId,
@@ -175,13 +170,15 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			firebaseStoragePath: firebaseResult.storagePath,
 			playbackUrl: firebaseResult.downloadURL,
 			thumbnailUrl: null, // Firebase Storage doesn't auto-generate thumbnails
-			photos: Array.isArray(uploadedPhotos) ? uploadedPhotos.map((photo: any) => ({
-				id: photo.id || '',
-				caption: photo.caption || '',
-				duration: photo.duration || 3,
-				url: photo.downloadURL || '', // Firebase Storage URL for editing
-				storagePath: photo.storagePath || '' // Storage path for management
-			})) : [],
+			photos: Array.isArray(uploadedPhotos)
+				? uploadedPhotos.map((photo: any) => ({
+						id: photo.id || '',
+						caption: photo.caption || '',
+						duration: photo.duration || 3,
+						url: photo.downloadURL || '', // Firebase Storage URL for editing
+						storagePath: photo.storagePath || '' // Storage path for management
+					}))
+				: [],
 			settings: settings || {
 				photoDuration: 3,
 				transitionType: 'fade',
@@ -196,21 +193,21 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			updatedAt: new Date().toISOString()
 		};
 
-		console.log('📝 [FIREBASE SLIDESHOW API] Slideshow document to save:', JSON.stringify(slideshowDoc, null, 2));
+		console.log(
+			'📝 [FIREBASE SLIDESHOW API] Slideshow document to save:',
+			JSON.stringify(slideshowDoc, null, 2)
+		);
 
 		// Remove any undefined values recursively (Firestore safety)
 		const cleanSlideshowDoc = removeUndefinedValues(slideshowDoc);
-		
-		console.log('📝 [FIREBASE SLIDESHOW API] Cleaned slideshow document:', JSON.stringify(cleanSlideshowDoc, null, 2));
+
+		console.log(
+			'📝 [FIREBASE SLIDESHOW API] Cleaned slideshow document:',
+			JSON.stringify(cleanSlideshowDoc, null, 2)
+		);
 
 		// Save to memorial's slideshows subcollection
-		const slideshowRef = adminDb
-			.collection('memorials')
-			.doc(memorialId)
-			.collection('slideshows')
-			.doc(slideshowId);
-			
-		await slideshowRef.set(cleanSlideshowDoc);
+		await setSlideshow(memorialId, slideshowId, cleanSlideshowDoc);
 
 		// Update memorial to indicate it has slideshows
 		await memorialRef.update({
@@ -232,14 +229,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			downloadURL: firebaseResult.downloadURL,
 			message: 'Slideshow uploaded to Firebase Storage successfully'
 		});
-
 	} catch (err: any) {
 		console.error('🔥 [FIREBASE SLIDESHOW API] Error:', err);
-		
+
 		if (err.status) {
 			throw err; // Re-throw SvelteKit errors
 		}
-		
+
 		throw error(500, `Failed to upload slideshow: ${err.message}`);
 	}
 };
@@ -256,7 +252,7 @@ async function uploadPhotosToFirebaseStorage(photos: any[], memorialId: string, 
 
 		for (let i = 0; i < photos.length; i++) {
 			const photo = photos[i];
-			
+
 			// If photo already has URL (existing photo), just return its data
 			if (photo.url && photo.storagePath) {
 				uploadedPhotos.push({
@@ -269,7 +265,7 @@ async function uploadPhotosToFirebaseStorage(photos: any[], memorialId: string, 
 				console.log(`✅ [FIREBASE STORAGE] Photo ${i + 1} already stored, using existing URL`);
 				continue;
 			}
-			
+
 			// Skip photos that don't have file data
 			if (!photo.file && !photo.data) {
 				console.warn(`Photo ${i + 1} has no file data, skipping`);
@@ -278,7 +274,7 @@ async function uploadPhotosToFirebaseStorage(photos: any[], memorialId: string, 
 
 			// Create unique filename for each photo
 			const filename = `slideshows/${memorialId}/photos/${timestamp}-${photo.id}.jpg`;
-			
+
 			console.log(`🔥 [FIREBASE STORAGE] Uploading photo ${i + 1} to:`, filename);
 
 			let buffer: Buffer;
@@ -333,7 +329,6 @@ async function uploadPhotosToFirebaseStorage(photos: any[], memorialId: string, 
 
 		console.log(`✅ [FIREBASE STORAGE] All photos uploaded. Total: ${uploadedPhotos.length}`);
 		return uploadedPhotos;
-
 	} catch (err: any) {
 		console.error('🔥 [FIREBASE STORAGE] Photo upload failed:', err);
 		throw new Error(`Firebase Storage photo upload failed: ${err.message}`);
@@ -352,7 +347,7 @@ async function uploadToFirebaseStorage(videoBlob: File, memorialId: string, titl
 		// Create unique filename
 		const timestamp = Date.now();
 		const filename = `slideshows/${memorialId}/${timestamp}-${title.replace(/[^a-zA-Z0-9]/g, '-')}.webm`;
-		
+
 		console.log('🔥 [FIREBASE STORAGE] Uploading to path:', filename);
 
 		// Convert File to Buffer
@@ -386,10 +381,11 @@ async function uploadToFirebaseStorage(videoBlob: File, memorialId: string, titl
 			downloadURL,
 			bucket: bucket.name
 		};
-
 	} catch (error) {
 		console.error('🔥 [FIREBASE STORAGE] Upload failed:', error);
-		throw new Error(`Firebase Storage upload failed: ${error instanceof Error ? error.message : String(error)}`);
+		throw new Error(
+			`Firebase Storage upload failed: ${error instanceof Error ? error.message : String(error)}`
+		);
 	}
 }
 
@@ -400,11 +396,11 @@ function removeUndefinedValues(obj: any): any {
 	if (obj === null || obj === undefined) {
 		return null;
 	}
-	
+
 	if (Array.isArray(obj)) {
-		return obj.map(item => removeUndefinedValues(item));
+		return obj.map((item) => removeUndefinedValues(item));
 	}
-	
+
 	if (typeof obj === 'object') {
 		const cleaned: any = {};
 		for (const [key, value] of Object.entries(obj)) {
@@ -414,6 +410,6 @@ function removeUndefinedValues(obj: any): any {
 		}
 		return cleaned;
 	}
-	
+
 	return obj;
 }

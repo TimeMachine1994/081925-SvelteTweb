@@ -1,18 +1,27 @@
 /**
  * Stream Chat Messages API - Firestore-based
- * 
+ *
  * Created: January 22, 2026
  * Handles real-time chat messaging for live streams via Firestore
- * 
+ *
  * Note: Mux does not have a native chat API, so chat is stored in Firestore
  * as a subcollection under each stream document.
- * 
+ *
  * Endpoints:
  * - GET: Retrieve chat messages for a stream
  * - POST: Send a new message to the chat (guests can provide userName)
  */
 
 import { adminDb } from '$lib/server/firebase';
+import {
+	createStreamChatMessage,
+	deleteStreamChatMessage,
+	getStreamChatMessage,
+	listStreamChatMessages,
+	softDeleteStreamChatMessage,
+	updateStreamChatMessage,
+	type StreamChatMessageUpdate
+} from '$lib/server/db/repos/chat';
 import { error as svelteKitError, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import type { StreamChatMessage } from '$lib/types/chat';
@@ -21,7 +30,7 @@ console.log('💬 [CHAT API] Chat messages endpoint loaded - Firestore-based');
 
 /**
  * GET - Retrieve chat messages for a stream
- * 
+ *
  * Query params:
  * - limit: Number of messages to retrieve (default: 100)
  * - before: Pagination cursor (messageId)
@@ -29,21 +38,21 @@ console.log('💬 [CHAT API] Chat messages endpoint loaded - Firestore-based');
  */
 export const GET: RequestHandler = async ({ params, url, locals }) => {
 	const { streamId } = params;
-	
+
 	console.log('💬 [CHAT API] GET - Fetching messages for stream:', streamId);
-	
+
 	// Parse query parameters
 	const limit = parseInt(url.searchParams.get('limit') || '100');
 	const before = url.searchParams.get('before');
 	const includeDeleted = url.searchParams.get('includeDeleted') === 'true';
-	
+
 	console.log('💬 [CHAT API] Query params:', { limit, before, includeDeleted });
 
 	try {
 		// Get stream document to verify it exists
 		console.log('🔍 [CHAT API] Fetching stream document:', streamId);
 		const streamDoc = await adminDb.collection('streams').doc(streamId).get();
-		
+
 		if (!streamDoc.exists) {
 			console.log('❌ [CHAT API] Stream not found:', streamId);
 			throw svelteKitError(404, 'Stream not found');
@@ -52,53 +61,25 @@ export const GET: RequestHandler = async ({ params, url, locals }) => {
 		const stream = streamDoc.data();
 		console.log('✅ [CHAT API] Stream found, chat enabled:', stream?.chat?.enabled);
 
-		// Build query for chat messages
-		let query = adminDb
-			.collection('streams')
-			.doc(streamId)
-			.collection('chat_messages')
-			.orderBy('timestamp', 'desc')
-			.limit(limit);
-
 		// Apply pagination if cursor provided
 		if (before) {
 			console.log('📄 [CHAT API] Applying pagination before:', before);
-			const beforeDoc = await adminDb
-				.collection('streams')
-				.doc(streamId)
-				.collection('chat_messages')
-				.doc(before)
-				.get();
-			
-			if (beforeDoc.exists) {
-				query = query.startAfter(beforeDoc);
-			}
 		}
 
 		// Execute query
 		console.log('🔍 [CHAT API] Executing Firestore query...');
-		const snapshot = await query.get();
-		
-		console.log('✅ [CHAT API] Retrieved', snapshot.size, 'messages');
-
-		// Process messages
-		const messages: StreamChatMessage[] = [];
-		snapshot.forEach(doc => {
-			const data = doc.data() as StreamChatMessage;
-			
-			// Filter deleted messages unless admin explicitly requests them
-			if (includeDeleted || !data.deleted) {
-				messages.push({
-					id: doc.id,
-					...data
-				});
-			}
+		const { messages, fetched } = await listStreamChatMessages(streamId, {
+			limit,
+			beforeId: before,
+			includeDeleted
 		});
+
+		console.log('✅ [CHAT API] Retrieved', fetched, 'messages');
 
 		console.log('💬 [CHAT API] Returning', messages.length, 'messages (after filtering)');
 
 		// Determine if there are more messages
-		const hasMore = snapshot.size === limit;
+		const hasMore = fetched === limit;
 
 		return json({
 			success: true,
@@ -106,7 +87,6 @@ export const GET: RequestHandler = async ({ params, url, locals }) => {
 			hasMore,
 			nextCursor: hasMore ? messages[messages.length - 1]?.id : null
 		});
-
 	} catch (error: any) {
 		console.error('❌ [CHAT API] Error fetching messages:', error);
 		console.error('❌ [CHAT API] Error details:', {
@@ -124,7 +104,7 @@ export const GET: RequestHandler = async ({ params, url, locals }) => {
 
 /**
  * POST - Send a new message to the stream chat
- * 
+ *
  * Request body:
  * - message: Message content (required)
  * - userName: Display name (required if not authenticated)
@@ -132,7 +112,7 @@ export const GET: RequestHandler = async ({ params, url, locals }) => {
  */
 export const POST: RequestHandler = async ({ params, request, locals }) => {
 	const { streamId } = params;
-	
+
 	console.log('💬 [CHAT API] POST - Sending message to stream:', streamId);
 
 	try {
@@ -168,7 +148,7 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 		// Get stream document
 		console.log('🔍 [CHAT API] Fetching stream document:', streamId);
 		const streamDoc = await adminDb.collection('streams').doc(streamId).get();
-		
+
 		if (!streamDoc.exists) {
 			console.log('❌ [CHAT API] Stream not found:', streamId);
 			throw svelteKitError(404, 'Stream not found');
@@ -202,13 +182,9 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 			flagged: false
 		};
 
-		const messageRef = await adminDb
-			.collection('streams')
-			.doc(streamId)
-			.collection('chat_messages')
-			.add(chatMessage);
+		const messageId = await createStreamChatMessage(streamId, chatMessage);
 
-		console.log('✅ [CHAT API] Message saved to Firestore:', messageRef.id);
+		console.log('✅ [CHAT API] Message saved to Firestore:', messageId);
 
 		// Update stream chat stats
 		console.log('📊 [CHAT API] Updating chat statistics...');
@@ -222,11 +198,10 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 		return json({
 			success: true,
 			message: {
-				id: messageRef.id,
+				id: messageId,
 				...chatMessage
 			}
 		});
-
 	} catch (error: any) {
 		console.error('❌ [CHAT API] Error sending message:', error);
 		console.error('❌ [CHAT API] Error details:', {
@@ -245,7 +220,7 @@ export const POST: RequestHandler = async ({ params, request, locals }) => {
 /**
  * DELETE - Delete (soft-delete) a chat message
  * Requires admin, owner, or funeral director permissions
- * 
+ *
  * Query params:
  * - messageId: ID of message to delete (required)
  * - permanent: If true, permanently delete instead of soft-delete (admin only)
@@ -254,7 +229,7 @@ export const DELETE: RequestHandler = async ({ params, url, locals }) => {
 	const { streamId } = params;
 	const messageId = url.searchParams.get('messageId');
 	const permanent = url.searchParams.get('permanent') === 'true';
-	
+
 	console.log('🗑️ [CHAT API] DELETE - Deleting message:', messageId, 'from stream:', streamId);
 
 	// Require authentication
@@ -277,7 +252,7 @@ export const DELETE: RequestHandler = async ({ params, url, locals }) => {
 		// Get stream document
 		console.log('🔍 [CHAT API] Fetching stream document:', streamId);
 		const streamDoc = await adminDb.collection('streams').doc(streamId).get();
-		
+
 		if (!streamDoc.exists) {
 			console.log('❌ [CHAT API] Stream not found:', streamId);
 			throw svelteKitError(404, 'Stream not found');
@@ -288,7 +263,7 @@ export const DELETE: RequestHandler = async ({ params, url, locals }) => {
 		// Get memorial to check permissions
 		console.log('🔍 [CHAT API] Fetching memorial document...');
 		const memorialDoc = await adminDb.collection('memorials').doc(stream?.memorialId).get();
-		
+
 		if (!memorialDoc.exists) {
 			console.log('❌ [CHAT API] Memorial not found');
 			throw svelteKitError(404, 'Memorial not found');
@@ -310,15 +285,9 @@ export const DELETE: RequestHandler = async ({ params, url, locals }) => {
 		console.log('✅ [CHAT API] User has permission to delete messages');
 
 		// Get message document
-		const messageRef = adminDb
-			.collection('streams')
-			.doc(streamId)
-			.collection('chat_messages')
-			.doc(messageId);
+		const messageDoc = await getStreamChatMessage(streamId, messageId);
 
-		const messageDoc = await messageRef.get();
-
-		if (!messageDoc.exists) {
+		if (!messageDoc) {
 			console.log('❌ [CHAT API] Message not found:', messageId);
 			throw svelteKitError(404, 'Message not found');
 		}
@@ -331,7 +300,7 @@ export const DELETE: RequestHandler = async ({ params, url, locals }) => {
 			}
 
 			console.log('🗑️ [CHAT API] Permanently deleting message:', messageId);
-			await messageRef.delete();
+			await deleteStreamChatMessage(streamId, messageId);
 			console.log('✅ [CHAT API] Message permanently deleted');
 
 			return json({
@@ -344,11 +313,7 @@ export const DELETE: RequestHandler = async ({ params, url, locals }) => {
 
 		// Soft-delete: mark as deleted
 		console.log('🗑️ [CHAT API] Soft-deleting message:', messageId);
-		await messageRef.update({
-			deleted: true,
-			deletedAt: new Date().toISOString(),
-			deletedBy: userId
-		});
+		await softDeleteStreamChatMessage(streamId, messageId, userId);
 
 		console.log('✅ [CHAT API] Message soft-deleted');
 
@@ -358,7 +323,6 @@ export const DELETE: RequestHandler = async ({ params, url, locals }) => {
 			permanent: false,
 			message: 'Message deleted'
 		});
-
 	} catch (error: any) {
 		console.error('❌ [CHAT API] Error deleting message:', error);
 		console.error('❌ [CHAT API] Error details:', {
@@ -377,7 +341,7 @@ export const DELETE: RequestHandler = async ({ params, url, locals }) => {
 /**
  * PATCH - Restore a soft-deleted message or update message flags
  * Requires admin, owner, or funeral director permissions
- * 
+ *
  * Request body:
  * - messageId: ID of message to update (required)
  * - restore: If true, restore a soft-deleted message
@@ -385,7 +349,7 @@ export const DELETE: RequestHandler = async ({ params, url, locals }) => {
  */
 export const PATCH: RequestHandler = async ({ params, request, locals }) => {
 	const { streamId } = params;
-	
+
 	console.log('✏️ [CHAT API] PATCH - Updating message in stream:', streamId);
 
 	// Require authentication
@@ -414,7 +378,7 @@ export const PATCH: RequestHandler = async ({ params, request, locals }) => {
 		// Get stream document
 		console.log('🔍 [CHAT API] Fetching stream document:', streamId);
 		const streamDoc = await adminDb.collection('streams').doc(streamId).get();
-		
+
 		if (!streamDoc.exists) {
 			console.log('❌ [CHAT API] Stream not found:', streamId);
 			throw svelteKitError(404, 'Stream not found');
@@ -425,7 +389,7 @@ export const PATCH: RequestHandler = async ({ params, request, locals }) => {
 		// Get memorial to check permissions
 		console.log('🔍 [CHAT API] Fetching memorial document...');
 		const memorialDoc = await adminDb.collection('memorials').doc(stream?.memorialId).get();
-		
+
 		if (!memorialDoc.exists) {
 			console.log('❌ [CHAT API] Memorial not found');
 			throw svelteKitError(404, 'Memorial not found');
@@ -447,21 +411,15 @@ export const PATCH: RequestHandler = async ({ params, request, locals }) => {
 		console.log('✅ [CHAT API] User has permission to update messages');
 
 		// Get message document
-		const messageRef = adminDb
-			.collection('streams')
-			.doc(streamId)
-			.collection('chat_messages')
-			.doc(messageId);
+		const messageDoc = await getStreamChatMessage(streamId, messageId);
 
-		const messageDoc = await messageRef.get();
-
-		if (!messageDoc.exists) {
+		if (!messageDoc) {
 			console.log('❌ [CHAT API] Message not found:', messageId);
 			throw svelteKitError(404, 'Message not found');
 		}
 
 		// Build update object
-		const updates: Record<string, any> = {
+		const updates: StreamChatMessageUpdate = {
 			updatedAt: new Date().toISOString(),
 			updatedBy: userId
 		};
@@ -479,7 +437,7 @@ export const PATCH: RequestHandler = async ({ params, request, locals }) => {
 		}
 
 		// Apply updates
-		await messageRef.update(updates);
+		await updateStreamChatMessage(streamId, messageId, updates);
 		console.log('✅ [CHAT API] Message updated');
 
 		return json({
@@ -488,7 +446,6 @@ export const PATCH: RequestHandler = async ({ params, request, locals }) => {
 			updates: Object.keys(updates),
 			message: 'Message updated'
 		});
-
 	} catch (error: any) {
 		console.error('❌ [CHAT API] Error updating message:', error);
 		console.error('❌ [CHAT API] Error details:', {

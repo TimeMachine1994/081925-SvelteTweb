@@ -1,5 +1,5 @@
 import type { PageServerLoad } from './$types';
-import { adminDb } from '$lib/server/firebase';
+import { getInvoice } from '$lib/server/db/repos/invoices';
 import type { InvoicePublicData } from '$lib/types/invoice';
 
 export const load: PageServerLoad = async ({ params }) => {
@@ -13,21 +13,12 @@ export const load: PageServerLoad = async ({ params }) => {
 	}
 
 	try {
-		const invoiceDoc = await adminDb.collection('invoices').doc(invoiceId).get();
-
-		if (!invoiceDoc.exists) {
-			return {
-				invoice: null,
-				error: 'Invoice not found'
-			};
-		}
-
-		const data = invoiceDoc.data();
+		const data = await getInvoice(invoiceId);
 
 		if (!data) {
 			return {
 				invoice: null,
-				error: 'Invoice data not found'
+				error: 'Invoice not found'
 			};
 		}
 
@@ -38,7 +29,7 @@ export const load: PageServerLoad = async ({ params }) => {
 			customerEmail: data.customerEmail,
 			customerName: data.customerName,
 			status: data.status,
-			createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString()
+			createdAt: data.createdAt
 		};
 
 		return {

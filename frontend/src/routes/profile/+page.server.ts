@@ -1,4 +1,5 @@
 import { adminDb } from '$lib/server/firebase';
+import { getFuneralDirector } from '$lib/server/db/repos/funeralDirectors';
 import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 import type { Memorial } from '$lib/types/memorial';
@@ -43,10 +44,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		// Fetch funeral director profile if user is a funeral director
 		let funeralDirectorData = null;
 		if (role === 'funeral_director') {
-			const directorDoc = await adminDb.collection('funeral_directors').doc(uid).get();
-			if (directorDoc.exists) {
-				funeralDirectorData = directorDoc.data();
-			}
+			funeralDirectorData = await getFuneralDirector(uid);
 		}
 
 		// Fetch memorials based on role
@@ -57,16 +55,16 @@ export const load: PageServerLoad = async ({ locals }) => {
 				.collection('memorials')
 				.where('funeralDirectorUid', '==', uid)
 				.get();
-		
+
 			// Also query using funeralDirector.id for newer format
 			const memorialsSnap2 = await adminDb
 				.collection('memorials')
 				.where('funeralDirector.id', '==', uid)
 				.get();
-		
+
 			// Combine results and deduplicate by memorial ID
 			const memorialMap = new Map();
-		
+
 			[...memorialsSnap.docs, ...memorialsSnap2.docs].forEach((doc) => {
 				if (!memorialMap.has(doc.id)) {
 					const data = doc.data();
@@ -76,7 +74,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 					memorialMap.set(doc.id, { id: doc.id, ...data } as Memorial);
 				}
 			});
-		
+
 			memorials = Array.from(memorialMap.values());
 		} else if (role === 'owner') {
 			const memorialsSnap = await adminDb
@@ -149,7 +147,7 @@ export const actions: Actions = {
 	createMemorial: async ({ request, locals }) => {
 		console.log('🎯 [PROFILE_SERVER] createMemorial action called');
 		console.log('🎯 [PROFILE_SERVER] User:', locals.user);
-		
+
 		if (!locals.user || locals.user.role !== 'owner') {
 			console.error('❌ [PROFILE_SERVER] Unauthorized user or not owner:', locals.user);
 			return fail(401, { message: 'Only owners can create memorials' });
@@ -175,7 +173,9 @@ export const actions: Actions = {
 				});
 			}
 
-			console.log(`[PROFILE_SERVER] reCAPTCHA verified successfully. Score: ${recaptchaResult.score}`);
+			console.log(
+				`[PROFILE_SERVER] reCAPTCHA verified successfully. Score: ${recaptchaResult.score}`
+			);
 		} else {
 			console.warn('[PROFILE_SERVER] No reCAPTCHA token provided');
 			return fail(400, {
@@ -194,9 +194,9 @@ export const actions: Actions = {
 				.where('ownerUid', '==', locals.user.uid)
 				.limit(1)
 				.get();
-			
+
 			const firstMemorialId = memorialsSnap.docs[0]?.id;
-			
+
 			return fail(400, {
 				message: 'You must complete payment for your existing memorial before creating a new one.',
 				needsPayment: true,
@@ -205,7 +205,7 @@ export const actions: Actions = {
 		}
 
 		const lovedOneName = data.get('lovedOneName')?.toString().trim();
-		
+
 		console.log('🎯 [PROFILE_SERVER] Form data received:', { lovedOneName });
 
 		if (!lovedOneName) {
@@ -224,7 +224,7 @@ export const actions: Actions = {
 				fullSlug,
 				ownerUid: locals.user.uid,
 				ownerEmail: locals.user.email,
-				
+
 				// Memorial metadata
 				title: `Celebration of Life for ${lovedOneName}`,
 				description: `A celebration of life dedicated to ${lovedOneName}`,
@@ -244,7 +244,7 @@ export const actions: Actions = {
 				content: `<h1>Celebration of Life for ${lovedOneName}</h1><p>This page is dedicated to celebrating the life and legacy of ${lovedOneName}.</p>`,
 				custom_html: null,
 				isPaid: false, // Track payment status
-				
+
 				// Additional fields for memorial page
 				photos: [],
 				embeds: [],

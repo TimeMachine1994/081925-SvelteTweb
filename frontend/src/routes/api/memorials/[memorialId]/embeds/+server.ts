@@ -1,6 +1,5 @@
 import { json, error } from '@sveltejs/kit';
-import { adminDb } from '$lib/server/firebase';
-import { FieldValue } from 'firebase-admin/firestore';
+import { createEmbed, deleteEmbed, updateEmbed } from '$lib/server/db/repos/memorialEmbeds';
 import type { RequestHandler } from './$types';
 
 // Helper function to check for admin privileges
@@ -22,20 +21,8 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 	}
 
 	try {
-		const embedRef = await adminDb
-			.collection('memorials')
-			.doc(memorialId)
-			.collection('embeds')
-			.add({
-				title,
-				type,
-				embedUrl,
-				createdAt: FieldValue.serverTimestamp(),
-				updatedAt: FieldValue.serverTimestamp()
-			});
-
-		const newEmbed = await embedRef.get();
-		return json({ id: newEmbed.id, ...newEmbed.data() }, { status: 201 });
+		const newEmbed = await createEmbed(memorialId, { title, type, embedUrl });
+		return json(newEmbed, { status: 201 });
 	} catch (err) {
 		console.error('Error creating embed:', err);
 		throw error(500, 'Failed to create embed.');
@@ -54,18 +41,8 @@ export const PUT: RequestHandler = async ({ locals, params, request }) => {
 	}
 
 	try {
-		const embedRef = adminDb
-			.collection('memorials')
-			.doc(memorialId)
-			.collection('embeds')
-			.doc(embedId);
-		await embedRef.update({
-			...data,
-			updatedAt: FieldValue.serverTimestamp()
-		});
-
-		const updatedEmbed = await embedRef.get();
-		return json({ id: updatedEmbed.id, ...updatedEmbed.data() });
+		const updatedEmbed = await updateEmbed(memorialId, embedId, data);
+		return json(updatedEmbed);
 	} catch (err) {
 		console.error('Error updating embed:', err);
 		throw error(500, 'Failed to update embed.');
@@ -84,12 +61,7 @@ export const DELETE: RequestHandler = async ({ locals, params, request }) => {
 	}
 
 	try {
-		await adminDb
-			.collection('memorials')
-			.doc(memorialId)
-			.collection('embeds')
-			.doc(embedId)
-			.delete();
+		await deleteEmbed(memorialId, embedId);
 		return json({ success: true }, { status: 200 });
 	} catch (err) {
 		console.error('Error deleting embed:', err);

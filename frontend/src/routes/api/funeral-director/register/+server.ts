@@ -1,8 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { adminDb } from '$lib/server/firebase';
+import { upsert as upsertFuneralDirector } from '$lib/server/db/repos/funeralDirectors';
 import type { FuneralDirector } from '$lib/types/funeral-director';
-import { Timestamp } from 'firebase-admin/firestore';
 import { validateUserProfileData } from '$lib/utils/user-profile';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -34,14 +33,17 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		if (!profileValidation.isValid) {
 			const firstError = profileValidation.errors[0];
-			return json({ 
-				error: firstError.message,
-				field: firstError.field
-			}, { status: 400 });
+			return json(
+				{
+					error: firstError.message,
+					field: firstError.field
+				},
+				{ status: 400 }
+			);
 		}
 
 		// Create funeral director document (V1: simplified)
-		const funeralDirector: Omit<FuneralDirector, 'id'> = {
+		const funeralDirector: Omit<FuneralDirector, 'id' | 'createdAt' | 'updatedAt'> = {
 			companyName: data.companyName,
 			contactPerson: data.contactPerson,
 			email: data.email,
@@ -52,14 +54,11 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				state: data.address.state,
 				zipCode: data.address.zipCode
 			},
-			status: 'approved', // V1: auto-approved
-			createdAt: Timestamp.now(),
-			updatedAt: Timestamp.now()
+			status: 'approved' // V1: auto-approved
 		};
 
 		// Save to Firestore
-		const docRef = adminDb.collection('funeral_directors').doc(locals.user.uid);
-		await docRef.set(funeralDirector);
+		await upsertFuneralDirector(locals.user.uid, funeralDirector);
 
 		// Update user's custom claims to include funeral_director role
 		const auth = (await import('firebase-admin/auth')).getAuth();
@@ -74,10 +73,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		});
 	} catch (error: any) {
 		console.error('Error registering funeral director:', error);
-		
+
 		// Enhanced error handling
 		let errorMessage = 'Internal server error';
-		
+
 		if (error.message?.includes('PERMISSION_DENIED')) {
 			errorMessage = 'Database permission denied. Please contact support.';
 		} else if (error.message?.includes('QUOTA_EXCEEDED')) {
@@ -85,9 +84,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		} else if (error.message) {
 			errorMessage = `Registration failed: ${error.message}`;
 		}
-		
-		return json({ 
-			error: errorMessage
-		}, { status: 500 });
+
+		return json(
+			{
+				error: errorMessage
+			},
+			{ status: 500 }
+		);
 	}
 };

@@ -1,5 +1,6 @@
 import { error } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
+import { listSlideshows } from '$lib/server/db/repos/slideshows';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
@@ -18,7 +19,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		console.log('🏠 [MEMORIAL_PAGE] Querying memorials collection for fullSlug:', fullSlug);
 		const memorialsRef = adminDb.collection('memorials');
 		const snapshot = await memorialsRef.where('fullSlug', '==', fullSlug).limit(1).get();
-		
+
 		console.log('🏠 [MEMORIAL_PAGE] Memorial query completed, found docs:', snapshot.docs.length);
 
 		if (snapshot.empty) {
@@ -31,11 +32,16 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		console.log('🏠 [MEMORIAL_PAGE] Memorial data keys:', Object.keys(memorialData));
 
 		// Simplified legacy detection - just check for valid custom_html content
-		const hasCustomHtml = !!(memorialData.custom_html && 
-			typeof memorialData.custom_html === 'string' && 
-			memorialData.custom_html.trim().length > 0);
-		
-		console.log('🏠 [MEMORIAL_PAGE] Memorial type:', hasCustomHtml ? 'Legacy (custom_html)' : 'Standard');
+		const hasCustomHtml = !!(
+			memorialData.custom_html &&
+			typeof memorialData.custom_html === 'string' &&
+			memorialData.custom_html.trim().length > 0
+		);
+
+		console.log(
+			'🏠 [MEMORIAL_PAGE] Memorial type:',
+			hasCustomHtml ? 'Legacy (custom_html)' : 'Standard'
+		);
 		console.log('🏠 [MEMORIAL_PAGE] Has custom_html:', !!memorialData.custom_html);
 		console.log('🏠 [MEMORIAL_PAGE] Custom HTML length:', memorialData.custom_html?.length || 0);
 
@@ -105,10 +111,10 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 				.collection('streams')
 				.where('memorialId', '==', memorial.id)
 				.get();
-		
+
 			streams = streamsSnapshot.docs
-				.filter(doc => doc.data().isDeleted !== true) // Filter deleted in JS (avoids Firestore index requirement)
-				.map(doc => {
+				.filter((doc) => doc.data().isDeleted !== true) // Filter deleted in JS (avoids Firestore index requirement)
+				.map((doc) => {
 					const data = doc.data();
 					const stream = {
 						id: doc.id,
@@ -123,7 +129,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 						startedAt: convertTimestamp(data.startedAt),
 						endedAt: convertTimestamp(data.endedAt)
 					};
-					
+
 					// DEBUG: Log each stream's details including Mux recording data
 					console.log('📺 [STREAM DEBUG]', {
 						id: stream.id,
@@ -139,14 +145,15 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 						// Legacy fields
 						playbackUrl: stream.playbackUrl,
 						embedUrl: stream.embedUrl,
-						cloudflareInputId: stream.streamCredentials?.cloudflareInputId || stream.cloudflareInputId
+						cloudflareInputId:
+							stream.streamCredentials?.cloudflareInputId || stream.cloudflareInputId
 					});
-					
+
 					return stream;
 				})
 				// Filter out hidden streams
-				.filter(stream => stream.isVisible !== false);
-			
+				.filter((stream) => stream.isVisible !== false);
+
 			console.log('🎬 [MEMORIAL_PAGE] Loaded', streams.length, 'streams after filtering');
 		} catch (error) {
 			console.error('🎬 [MEMORIAL_PAGE] Error loading streams:', error);
@@ -158,23 +165,17 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		console.log('📸 [MEMORIAL_PAGE] Loading slideshows for memorial:', memorial.id);
 		let slideshows = [];
 		try {
-			const slideshowsSnapshot = await adminDb
-				.collection('memorials')
-				.doc(memorial.id)
-				.collection('slideshows')
-				.orderBy('createdAt', 'desc')
-				.get();
-			
-			slideshows = slideshowsSnapshot.docs.map(doc => {
-				const data = doc.data();
+			const slideshowRecords = await listSlideshows(memorial.id);
+
+			slideshows = slideshowRecords.map((data) => {
 				console.log('📸 [MEMORIAL_PAGE] Processing slideshow:', {
-					id: doc.id,
+					id: data.id,
 					title: data.title,
 					status: data.status,
 					hasPhotos: Array.isArray(data.photos) && data.photos.length > 0
 				});
 				return {
-					id: doc.id,
+					id: data.id,
 					title: data.title || 'Memorial Slideshow',
 					memorialId: data.memorialId || memorial.id,
 					cloudflareStreamId: data.cloudflareStreamId || null,
@@ -197,7 +198,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 					updatedAt: convertTimestamp(data.updatedAt) || new Date().toISOString()
 				};
 			});
-			
+
 			console.log('📸 [MEMORIAL_PAGE] Loaded', slideshows.length, 'slideshows');
 		} catch (error) {
 			console.error('📸 [MEMORIAL_PAGE] Error loading slideshows:', error);
@@ -208,8 +209,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		// Check if user has permission to view private memorial content
 		const userId = locals.user?.uid;
 		const userRole = locals.user?.role;
-		const hasPermission = 
-			memorial.isPublic === true || 
+		const hasPermission =
+			memorial.isPublic === true ||
 			userRole === 'admin' ||
 			memorialData.ownerUid === userId ||
 			memorialData.funeralDirectorUid === userId;
@@ -223,7 +224,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 		// Security check: Only show full content to authorized users
 		if (!hasPermission) {
-			console.log('🔒 [MEMORIAL_PAGE] Memorial is private and user lacks permission, returning basic info only');
+			console.log(
+				'🔒 [MEMORIAL_PAGE] Memorial is private and user lacks permission, returning basic info only'
+			);
 			return {
 				memorial: {
 					id: memorial.id,
@@ -250,11 +253,13 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			memorial,
 			streams,
 			slideshows,
-			user: locals.user ? {
-				uid: locals.user.uid,
-				role: locals.user.role,
-				email: locals.user.email
-			} : null
+			user: locals.user
+				? {
+						uid: locals.user.uid,
+						role: locals.user.role,
+						email: locals.user.email
+					}
+				: null
 		};
 	} catch (err: any) {
 		console.error('🏠 [MEMORIAL_PAGE] Error loading memorial:', err);
@@ -263,7 +268,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			code: err?.code,
 			stack: err?.stack
 		});
-		
+
 		// More specific error handling
 		if (err?.code === 'permission-denied') {
 			console.error('🏠 [MEMORIAL_PAGE] Firebase permission denied - check service account');

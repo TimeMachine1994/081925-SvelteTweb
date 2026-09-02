@@ -1,5 +1,6 @@
 import { fail } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
+import { countAll as countFuneralDirectors } from '$lib/server/db/repos/funeralDirectors';
 import { requireAdmin, requireAdminAction } from '$lib/server/adminGuard';
 import { logAdminAction, extractUserContext } from '$lib/server/auditLogger';
 import { createLogger } from '$lib/admin/logger';
@@ -58,11 +59,11 @@ async function loadDashboardData(): Promise<DashboardData> {
 	};
 
 	try {
-		const [recentMemorialsSnap, totalMemorialsSnap, totalDirectorsSnap, totalUsersSnap] =
+		const [recentMemorialsSnap, totalMemorialsSnap, totalDirectors, totalUsersSnap] =
 			await Promise.all([
 				adminDb.collection('memorials').orderBy('createdAt', 'desc').limit(50).get(),
 				adminDb.collection('memorials').count().get(),
-				adminDb.collection('funeral_directors').count().get(),
+				countFuneralDirectors(),
 				adminDb.collection('users').count().get()
 			]);
 
@@ -73,10 +74,7 @@ async function loadDashboardData(): Promise<DashboardData> {
 				data.services?.main?.location?.name || data.memorialLocationName || 'Not specified';
 
 			const isPaid =
-				data.isPaid ||
-				data.calculatorConfig?.isPaid ||
-				data.paymentStatus === 'paid' ||
-				false;
+				data.isPaid || data.calculatorConfig?.isPaid || data.paymentStatus === 'paid' || false;
 
 			return {
 				id: doc.id,
@@ -98,7 +96,7 @@ async function loadDashboardData(): Promise<DashboardData> {
 
 		const stats = {
 			totalMemorials: totalMemorialsSnap.data().count,
-			totalFuneralDirectors: totalDirectorsSnap.data().count,
+			totalFuneralDirectors: totalDirectors,
 			totalUsers: totalUsersSnap.data().count,
 			incompleteMemorials: incompleteMemorials.length,
 			unpaidMemorials: unpaidCount

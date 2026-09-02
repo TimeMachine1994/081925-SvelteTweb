@@ -1,4 +1,5 @@
 import { adminDb } from '$lib/server/firebase';
+import { getFuneralDirector, updateProfile } from '$lib/server/db/repos/funeralDirectors';
 import { fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad, Actions } from './$types';
 
@@ -30,7 +31,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		console.log('🔍 Fetching funeral director profile for UID:', locals.user.uid);
 
 		// Fetch funeral director profile
-		const directorDoc = await adminDb.collection('funeral_directors').doc(locals.user.uid).get();
+		const directorData = await getFuneralDirector(locals.user.uid);
 
 		// Fetch memorials assigned to this funeral director
 		console.log('🔍 Fetching memorials for FD:', locals.user.uid);
@@ -62,9 +63,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 		console.log('✅ Found', memorials.length, 'memorials for FD');
 
-		console.log('🔍 Director doc exists:', directorDoc.exists);
+		console.log('🔍 Director doc exists:', !!directorData);
 
-		if (!directorDoc.exists) {
+		if (!directorData) {
 			console.log('❌ Funeral director profile not found');
 			// Instead of fail, return empty data to allow creation
 			return {
@@ -85,12 +86,11 @@ export const load: PageServerLoad = async ({ locals }) => {
 			};
 		}
 
-		const directorData = directorDoc.data();
 		console.log('✅ Director data loaded:', Object.keys(directorData || {}));
 
 		return {
 			funeralDirector: {
-				id: directorDoc.id,
+				id: directorData.id,
 				companyName: directorData?.companyName || '',
 				contactPerson: directorData?.contactPerson || '',
 				email: directorData?.email || '',
@@ -153,8 +153,7 @@ export const actions: Actions = {
 					city: formData.get('city')?.toString() || '',
 					state: formData.get('state')?.toString() || '',
 					zipCode: formData.get('zipCode')?.toString() || ''
-				},
-				updatedAt: new Date()
+				}
 			};
 
 			// Validate required fields
@@ -168,7 +167,7 @@ export const actions: Actions = {
 			}
 
 			// Update funeral director profile
-			await adminDb.collection('funeral_directors').doc(locals.user.uid).update(updateData);
+			await updateProfile(locals.user.uid, updateData);
 
 			return { success: true, message: 'Profile updated successfully' };
 		} catch (error) {

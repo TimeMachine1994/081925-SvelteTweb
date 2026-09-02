@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { adminDb } from '$lib/server/firebase';
-import { Timestamp } from 'firebase-admin/firestore';
+import { countRecentByUser, createRequest } from '$lib/server/db/repos/scheduleEditRequests';
 
 export const POST: RequestHandler = async ({ request, params, locals }) => {
 	console.log('📝 [EDIT REQUEST] Received schedule edit request for memorial:', params.memorialId);
@@ -20,7 +20,7 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 
 		// Parse request body
 		const { requestDetails } = await request.json();
-		
+
 		if (!requestDetails || !requestDetails.trim()) {
 			return json({ error: 'Request details are required' }, { status: 400 });
 		}
@@ -60,21 +60,27 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 
 		// Verify memorial is paid
 		if (!memorial?.isPaid) {
-			return json({ error: 'Edit requests are only available for paid memorials' }, { status: 400 });
+			return json(
+				{ error: 'Edit requests are only available for paid memorials' },
+				{ status: 400 }
+			);
 		}
 
 		// Rate limiting: Check for recent requests from same user for same memorial
-		const recentRequestsQuery = await adminDb
-			.collection('schedule_edit_requests')
-			.where('memorialId', '==', memorialId)
-			.where('requestedBy', '==', userId)
-			.where('createdAt', '>=', Timestamp.fromDate(new Date(Date.now() - 24 * 60 * 60 * 1000))) // Last 24 hours
-			.get();
+		const recentRequestCount = await countRecentByUser(
+			memorialId,
+			userId,
+			24 * 60 * 60 * 1000 // Last 24 hours
+		);
 
-		if (recentRequestsQuery.size >= 3) {
-			return json({ 
-				error: 'You have reached the maximum number of edit requests (3) for this memorial in the last 24 hours' 
-			}, { status: 429 });
+		if (recentRequestCount >= 3) {
+			return json(
+				{
+					error:
+						'You have reached the maximum number of edit requests (3) for this memorial in the last 24 hours'
+				},
+				{ status: 429 }
+			);
 		}
 
 		// Create edit request document
@@ -84,9 +90,7 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 			requestedBy: userId,
 			requestedByEmail: locals.user.email || '',
 			requestDetails: requestDetails.trim(),
-			status: 'pending',
-			createdAt: Timestamp.now(),
-			
+
 			// Snapshot of current config for reference
 			currentConfig: {
 				tier: memorial?.calculatorConfig?.formData?.selectedTier || '',
@@ -96,18 +100,17 @@ export const POST: RequestHandler = async ({ request, params, locals }) => {
 			}
 		};
 
-		const requestRef = await adminDb.collection('schedule_edit_requests').add(editRequest);
+		const requestId = await createRequest(editRequest);
 
-		console.log('✅ [EDIT REQUEST] Edit request created:', requestRef.id);
+		console.log('✅ [EDIT REQUEST] Edit request created:', requestId);
 
 		// TODO: Send email notification to admin (future enhancement)
 
 		return json({
 			success: true,
-			requestId: requestRef.id,
+			requestId,
 			message: 'Edit request submitted successfully'
 		});
-
 	} catch (error) {
 		console.error('💥 [EDIT REQUEST] Error creating edit request:', error);
 		return json(

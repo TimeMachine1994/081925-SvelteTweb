@@ -1,8 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { adminDb } from '$lib/server/firebase';
+import { getFuneralDirector, updateProfile } from '$lib/server/db/repos/funeralDirectors';
 import type { FuneralDirector } from '$lib/types/funeral-director';
-import { Timestamp } from 'firebase-admin/firestore';
 
 export const GET: RequestHandler = async ({ locals }) => {
 	try {
@@ -10,14 +9,12 @@ export const GET: RequestHandler = async ({ locals }) => {
 			return json({ error: 'Authentication required' }, { status: 401 });
 		}
 
-		const docRef = adminDb.collection('funeral_directors').doc(locals.user.uid);
-		const doc = await docRef.get();
+		const funeralDirector = (await getFuneralDirector(locals.user.uid)) as FuneralDirector | null;
 
-		if (!doc.exists) {
+		if (!funeralDirector) {
 			return json({ error: 'Funeral director profile not found' }, { status: 404 });
 		}
 
-		const funeralDirector = { id: doc.id, ...doc.data() } as FuneralDirector;
 		return json(funeralDirector);
 	} catch (error) {
 		console.error('Error fetching funeral director profile:', error);
@@ -40,11 +37,8 @@ export const PATCH: RequestHandler = async ({ request, locals }) => {
 		delete updates.verificationStatus;
 		delete updates.permissions;
 
-		// Add updated timestamp
-		updates.updatedAt = Timestamp.now();
-
-		const docRef = adminDb.collection('funeral_directors').doc(locals.user.uid);
-		await docRef.update(updates);
+		// Repo stamps updatedAt
+		await updateProfile(locals.user.uid, updates);
 
 		return json({ success: true, message: 'Profile updated successfully' });
 	} catch (error) {

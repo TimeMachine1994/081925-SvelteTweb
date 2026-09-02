@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { adminDb } from '$lib/server/firebase';
+import { getToken } from '$lib/server/db/repos/passwordResetTokens';
 
 export const POST: RequestHandler = async ({ request }) => {
 	try {
@@ -11,17 +11,16 @@ export const POST: RequestHandler = async ({ request }) => {
 		}
 
 		// Check if token exists and is valid
-		const tokenDoc = await adminDb.collection('passwordResetTokens').doc(token).get();
+		const tokenData = await getToken(token);
 
-		if (!tokenDoc.exists) {
+		if (!tokenData) {
 			return json({ valid: false, error: 'Invalid token' });
 		}
 
-		const tokenData = tokenDoc.data();
 		const now = new Date();
 
 		// Check if token is expired or already used
-		if (tokenData.expiresAt.toDate() < now) {
+		if (new Date(tokenData.expiresAt) < now) {
 			return json({ valid: false, error: 'Token has expired' });
 		}
 
@@ -30,7 +29,6 @@ export const POST: RequestHandler = async ({ request }) => {
 		}
 
 		return json({ valid: true });
-
 	} catch (error) {
 		console.error('💥 Token validation error:', error);
 		return json({ valid: false, error: 'Error validating token' }, { status: 500 });

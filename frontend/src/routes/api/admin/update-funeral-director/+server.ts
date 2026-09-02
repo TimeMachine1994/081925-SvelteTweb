@@ -1,5 +1,5 @@
 import { json } from '@sveltejs/kit';
-import { adminDb } from '$lib/server/firebase';
+import { getFuneralDirector, updateProfile } from '$lib/server/db/repos/funeralDirectors';
 
 /**
  * UPDATE FUNERAL DIRECTOR
@@ -33,18 +33,16 @@ export async function POST({ request, locals }: any) {
 		}
 
 		// === UPDATE FUNERAL DIRECTOR ===
-		const directorRef = adminDb.collection('funeral_directors').doc(directorId);
-		const directorDoc = await directorRef.get();
+		const director = await getFuneralDirector(directorId);
 
-		if (!directorDoc.exists) {
+		if (!director) {
 			console.log('❌ [ADMIN API] Funeral director not found');
 			return json({ error: 'Funeral director not found' }, { status: 404 });
 		}
 
 		// Update with timestamp
-		await directorRef.update({
+		await updateProfile(directorId, {
 			...updates,
-			updatedAt: new Date(),
 			updatedBy: locals.user.email
 		});
 

@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { adminDb } from '$lib/server/firebase';
+import { getInvoice } from '$lib/server/db/repos/invoices';
 import type { InvoicePublicData } from '$lib/types/invoice';
 
 // GET - Public endpoint to fetch invoice details for checkout
@@ -12,16 +12,10 @@ export const GET: RequestHandler = async ({ params }) => {
 			return json({ error: 'Invoice ID is required' }, { status: 400 });
 		}
 
-		const invoiceDoc = await adminDb.collection('invoices').doc(invoiceId).get();
-
-		if (!invoiceDoc.exists) {
-			return json({ error: 'Invoice not found' }, { status: 404 });
-		}
-
-		const data = invoiceDoc.data();
+		const data = await getInvoice(invoiceId);
 
 		if (!data) {
-			return json({ error: 'Invoice data not found' }, { status: 404 });
+			return json({ error: 'Invoice not found' }, { status: 404 });
 		}
 
 		// Return only public-safe data
@@ -32,7 +26,7 @@ export const GET: RequestHandler = async ({ params }) => {
 			customerEmail: data.customerEmail,
 			customerName: data.customerName,
 			status: data.status,
-			createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString()
+			createdAt: data.createdAt
 		};
 
 		return json(publicData);

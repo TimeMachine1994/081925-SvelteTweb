@@ -1,4 +1,4 @@
-import { adminDb } from '$lib/server/firebase';
+import { getConfiguration } from '$lib/server/db/repos/livestreamConfigurations';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { sendEnhancedRegistrationEmail } from '$lib/server/email';
@@ -16,22 +16,20 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 		throw error(400, 'Missing configuration ID');
 	}
 
-	const configDoc = await adminDb.collection('livestreamConfigurations').doc(configId).get();
+	const configData = await getConfiguration(configId);
 
-	if (!configDoc.exists) {
+	if (!configData) {
 		throw error(404, 'Configuration not found');
 	}
-
-	const configData = configDoc.data();
 
 	if (configData?.userId !== locals.user.uid) {
 		throw error(403, 'Forbidden');
 	}
 
 	const config: LivestreamConfig = {
-		id: configDoc.id,
 		...(configData as Omit<LivestreamConfig, 'id' | 'createdAt'>),
-		createdAt: configData?.createdAt?.toDate ? configData.createdAt.toDate().toISOString() : null
+		id: configData.id,
+		createdAt: configData.createdAt ?? undefined
 	};
 
 	if (locals.user.email && configData) {

@@ -1,5 +1,5 @@
 import type { PageServerLoad } from './$types';
-import { adminDb } from '$lib/server/firebase';
+import { getInvoice, markPaid } from '$lib/server/db/repos/invoices';
 import { stripe } from '$lib/server/stripe';
 
 export const load: PageServerLoad = async ({ params, url }) => {
@@ -14,21 +14,12 @@ export const load: PageServerLoad = async ({ params, url }) => {
 	}
 
 	try {
-		const invoiceDoc = await adminDb.collection('invoices').doc(invoiceId).get();
-
-		if (!invoiceDoc.exists) {
-			return {
-				receipt: null,
-				error: 'Invoice not found'
-			};
-		}
-
-		const invoice = invoiceDoc.data();
+		const invoice = await getInvoice(invoiceId);
 
 		if (!invoice) {
 			return {
 				receipt: null,
-				error: 'Invoice data not found'
+				error: 'Invoice not found'
 			};
 		}
 
@@ -36,18 +27,19 @@ export const load: PageServerLoad = async ({ params, url }) => {
 		if (sessionId && invoice.status !== 'paid') {
 			try {
 				const session = await stripe.checkout.sessions.retrieve(sessionId);
-				
+
 				if (session.payment_status === 'paid') {
+					const paymentIntentId =
+						typeof session.payment_intent === 'string'
+							? session.payment_intent
+							: session.payment_intent?.id;
+
 					// Update invoice status
-					await adminDb.collection('invoices').doc(invoiceId).update({
-						status: 'paid',
-						paidAt: new Date(),
-						paymentIntentId: session.payment_intent
-					});
-					
+					await markPaid(invoiceId, { paymentIntentId });
+
 					invoice.status = 'paid';
-					invoice.paidAt = new Date();
-					invoice.paymentIntentId = session.payment_intent;
+					invoice.paidAt = new Date().toISOString();
+					invoice.paymentIntentId = paymentIntentId;
 				}
 			} catch (stripeError) {
 				console.error('Failed to verify Stripe session:', stripeError);
@@ -70,7 +62,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
 				total: invoice.total,
 				customerEmail: invoice.customerEmail,
 				customerName: invoice.customerName,
-				paidAt: invoice.paidAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+				paidAt: invoice.paidAt || new Date().toISOString(),
 				paymentIntentId: invoice.paymentIntentId || 'N/A'
 			},
 			error: null

@@ -1,9 +1,9 @@
 /**
  * Stream Analytics API - Mux Data Integration
- * 
+ *
  * Created: January 22, 2026
  * Retrieves real-time and historical analytics from Mux Data API
- * 
+ *
  * Endpoints:
  * - GET: Fetch analytics for a stream
  */
@@ -12,6 +12,7 @@ import { adminDb } from '$lib/server/firebase';
 import { error as svelteKitError, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getMuxAnalytics } from '$lib/server/mux';
+import { listStreamAnalyticsTimeline } from '$lib/server/db/repos/analytics';
 
 console.log('📊 [ANALYTICS API] Stream analytics endpoint loaded - Mux Data integration active');
 
@@ -21,7 +22,7 @@ console.log('📊 [ANALYTICS API] Stream analytics endpoint loaded - Mux Data in
  */
 export const GET: RequestHandler = async ({ params, locals }) => {
 	const { streamId } = params;
-	
+
 	console.log('📊 [ANALYTICS API] GET - Fetching analytics for stream:', streamId);
 
 	// Require authentication for analytics
@@ -38,7 +39,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		// Get stream document
 		console.log('🔍 [ANALYTICS API] Fetching stream document...');
 		const streamDoc = await adminDb.collection('streams').doc(streamId).get();
-		
+
 		if (!streamDoc.exists) {
 			console.log('❌ [ANALYTICS API] Stream not found:', streamId);
 			throw svelteKitError(404, 'Stream not found');
@@ -51,7 +52,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		// Get memorial to check permissions
 		console.log('🔍 [ANALYTICS API] Fetching memorial document...');
 		const memorialDoc = await adminDb.collection('memorials').doc(stream?.memorialId).get();
-		
+
 		if (!memorialDoc.exists) {
 			console.log('❌ [ANALYTICS API] Memorial not found');
 			throw svelteKitError(404, 'Memorial not found');
@@ -105,31 +106,14 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 
 		// Get historical analytics from Firestore cache
 		console.log('🔍 [ANALYTICS API] Fetching timeline from Firestore...');
-		const analyticsSnapshot = await adminDb
-			.collection('streams')
-			.doc(streamId)
-			.collection('analytics')
-			.orderBy('timestamp', 'desc')
-			.limit(60) // Last 60 data points
-			.get();
-
-		const timeline: any[] = [];
-		analyticsSnapshot.forEach(doc => {
-			timeline.push({
-				timestamp: doc.data().timestamp,
-				viewerCount: doc.data().viewerCount || 0,
-				chatMessages: doc.data().chatMessages || 0
-			});
-		});
-
-		// Reverse timeline to show oldest first
-		timeline.reverse();
+		// Last 60 data points, oldest first
+		const timeline = await listStreamAnalyticsTimeline(streamId, 60);
 		console.log('✅ [ANALYTICS API] Timeline retrieved:', timeline.length, 'data points');
 
 		// Calculate chat activity (messages per minute)
 		const chatActivity = stream?.chat?.messageCount || 0;
-		const streamDuration = stream?.liveStartedAt 
-			? (new Date().getTime() - new Date(stream.liveStartedAt).getTime()) / 60000 
+		const streamDuration = stream?.liveStartedAt
+			? (new Date().getTime() - new Date(stream.liveStartedAt).getTime()) / 60000
 			: 1;
 		const chatMessagesPerMinute = Math.round(chatActivity / streamDuration);
 
@@ -142,7 +126,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 			realTime: {
 				viewerCount: muxAnalytics.viewerCount,
 				playbackQuality: 100, // Default to 100% until we can parse quality data
-				bufferingRate: 0,     // Will be populated from quality metrics
+				bufferingRate: 0, // Will be populated from quality metrics
 				chatActivity: chatMessagesPerMinute
 			},
 			historical: stream?.analytics || {
@@ -162,7 +146,6 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		console.log('✅ [ANALYTICS API] Response prepared, returning analytics');
 
 		return json(response);
-
 	} catch (error: any) {
 		console.error('❌ [ANALYTICS API] Error fetching analytics:', error);
 		console.error('❌ [ANALYTICS API] Error details:', {

@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { adminDb } from '$lib/server/firebase';
+import { getToken, markUsed } from '$lib/server/db/repos/passwordResetTokens';
 import { getAuth } from 'firebase-admin/auth';
 
 export const POST: RequestHandler = async ({ request }) => {
@@ -16,16 +17,15 @@ export const POST: RequestHandler = async ({ request }) => {
 		}
 
 		// Validate token
-		const tokenDoc = await adminDb.collection('passwordResetTokens').doc(token).get();
+		const tokenData = await getToken(token);
 
-		if (!tokenDoc.exists) {
+		if (!tokenData) {
 			return json({ error: 'Invalid token' }, { status: 400 });
 		}
 
-		const tokenData = tokenDoc.data();
 		const now = new Date();
 
-		if (tokenData.expiresAt.toDate() < now) {
+		if (new Date(tokenData.expiresAt) < now) {
 			return json({ error: 'Token has expired' }, { status: 400 });
 		}
 
@@ -40,10 +40,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		});
 
 		// Mark token as used
-		await adminDb.collection('passwordResetTokens').doc(token).update({
-			used: true,
-			usedAt: new Date()
-		});
+		await markUsed(token);
 
 		// Update user document
 		await adminDb.collection('users').doc(tokenData.userId).update({
@@ -54,7 +51,6 @@ export const POST: RequestHandler = async ({ request }) => {
 		console.log(`✅ Password reset completed for user: ${tokenData.userId}`);
 
 		return json({ message: 'Password reset successful' });
-
 	} catch (error) {
 		console.error('💥 Password reset confirmation error:', error);
 		return json({ error: 'Failed to reset password' }, { status: 500 });

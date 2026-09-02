@@ -1,6 +1,7 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import { adminDb } from '$lib/server/firebase';
+import { upsert as upsertFuneralDirector } from '$lib/server/db/repos/funeralDirectors';
 import { Timestamp } from 'firebase-admin/firestore';
 import { getAuth } from 'firebase-admin/auth';
 
@@ -103,15 +104,13 @@ export const actions: Actions = {
 					maxConcurrentStreams: 1,
 					streamingEnabled: true
 				},
-				createdAt: Timestamp.now(),
-				updatedAt: Timestamp.now(),
 				approvedAt: Timestamp.now(),
 				approvedBy: 'system_auto_approve',
 				userId: uid,
 				isActive: true
 			};
 
-			await adminDb.collection('funeral_directors').doc(uid).set(fdDoc);
+			await upsertFuneralDirector(uid, fdDoc);
 			console.log('💾 [FUNERAL HOME REG] Saved funeral_directors doc with uid:', uid);
 
 			// Set custom claim for funeral director role

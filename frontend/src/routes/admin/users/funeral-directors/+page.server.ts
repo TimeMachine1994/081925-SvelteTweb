@@ -1,6 +1,6 @@
 import { adminDb } from '$lib/server/firebase';
 import { requireAdmin } from '$lib/server/adminGuard';
-import type { QueryDocumentSnapshot, DocumentData } from 'firebase-admin/firestore';
+import { listAll } from '$lib/server/db/repos/funeralDirectors';
 
 export const load = async ({ locals, url }: any) => {
 	requireAdmin(locals, { resource: 'funeral_director', action: 'read' });
@@ -13,28 +13,15 @@ export const load = async ({ locals, url }: any) => {
 	const statusFilter = url.searchParams.get('status');
 
 	// Load funeral directors
-	let snapshot;
-	try {
-		let query: any = adminDb.collection('funeral_directors');
-
-		// Apply status filter if provided
-		if (statusFilter) {
-			query = query.where('status', '==', statusFilter);
-		}
-
-		snapshot = await query.orderBy(sortBy, sortDir as any).limit(limit).get();
-	} catch (error) {
-		console.error('Error loading funeral directors with sorting:', error);
-		// Fallback: try without sorting
-		let query: any = adminDb.collection('funeral_directors');
-		if (statusFilter) {
-			query = query.where('status', '==', statusFilter);
-		}
-		snapshot = await query.limit(limit).get();
-	}
+	const directors = await listAll({
+		status: statusFilter,
+		sortBy,
+		sortDir: sortDir as 'asc' | 'desc',
+		limit
+	});
 
 	// Count memorials created by each director
-	const directorIds = snapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => doc.id);
+	const directorIds = directors.map((d) => d.id);
 	const memorialCounts = new Map();
 
 	if (directorIds.length > 0) {
@@ -50,18 +37,16 @@ export const load = async ({ locals, url }: any) => {
 		}
 	}
 
-	const funeralDirectors = snapshot.docs.map((doc: QueryDocumentSnapshot<DocumentData>) => {
-		const data = doc.data();
-
+	const funeralDirectors = directors.map((data) => {
 		return {
-			id: doc.id,
+			id: data.id,
 			companyName: data.companyName || 'Unknown',
 			contactPerson: data.contactPerson || data.name || 'Unknown',
 			email: data.email || '',
 			phone: data.phone || null,
 			status: data.status || 'approved',
-			memorialsCreated: memorialCounts.get(doc.id) || 0,
-			createdAt: data.createdAt?.toDate?.()?.toISOString() || null,
+			memorialsCreated: memorialCounts.get(data.id) || 0,
+			createdAt: data.createdAt || null,
 			address: data.address || null,
 			website: data.website || null
 		};

@@ -31,3 +31,4 @@ service-account-key*.json
 *.db-journal
 *.db-wal
 *.db-shm
+.svelte-check-baseline.txt

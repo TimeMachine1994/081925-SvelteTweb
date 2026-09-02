@@ -1,9 +1,8 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { adminDb } from '$lib/server/firebase';
-import { Timestamp } from 'firebase-admin/firestore';
+import { createInvoice, listInvoices } from '$lib/server/db/repos/invoices';
 import { nanoid } from 'nanoid';
-import type { CreateInvoiceRequest, Invoice, InvoiceItem } from '$lib/types/invoice';
+import type { CreateInvoiceRequest, InvoiceItem } from '$lib/types/invoice';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	try {
@@ -48,22 +47,22 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		const total = invoiceItems.reduce((sum, item) => sum + item.total, 0);
 
 		// Create invoice document
-		const invoice: Omit<Invoice, 'id'> & { id: string } = {
+		const invoice = {
 			id: invoiceId,
 			items: invoiceItems,
 			total,
 			customerEmail: customerEmail.toLowerCase().trim(),
 			customerName: customerName?.trim() || undefined,
-			status: 'pending',
-			createdAt: Timestamp.now(),
 			createdBy: locals.user.uid,
 			memorialId: memorialId || undefined
 		};
 
 		// Save to Firestore
-		await adminDb.collection('invoices').doc(invoiceId).set(invoice);
+		await createInvoice(invoice);
 
-		console.log(`✅ Invoice created: ${invoiceId} for ${customerEmail} - $${(total / 100).toFixed(2)}`);
+		console.log(
+			`✅ Invoice created: ${invoiceId} for ${customerEmail} - $${(total / 100).toFixed(2)}`
+		);
 
 		// Generate payment URL
 		const origin = request.headers.get('origin') || 'https://tributestream.com';
@@ -120,21 +119,7 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 		const status = url.searchParams.get('status');
 		const limit = parseInt(url.searchParams.get('limit') || '50');
 
-		let query = adminDb.collection('invoices').orderBy('createdAt', 'desc').limit(limit);
-
-		if (status) {
-			query = query.where('status', '==', status);
-		}
-
-		const snapshot = await query.get();
-		const invoices = snapshot.docs.map((doc) => {
-			const data = doc.data();
-			return {
-				...data,
-				createdAt: data.createdAt?.toDate?.()?.toISOString() || null,
-				paidAt: data.paidAt?.toDate?.()?.toISOString() || null
-			};
-		});
+		const invoices = await listInvoices({ status, limit });
 
 		return json({ invoices });
 	} catch (error) {

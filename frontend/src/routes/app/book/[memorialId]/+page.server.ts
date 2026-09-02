@@ -1,5 +1,6 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { getAdminDb } from '$lib/server/firebase';
+import { createBooking } from '$lib/server/db/repos/bookings';
 import type { Memorial } from '$lib/types/memorial';
 import type { PageServerLoad, Actions } from './$types';
 
@@ -47,16 +48,13 @@ export const actions: Actions = {
 		}
 
 		try {
-			const db = getAdminDb();
-			const bookingRef = await db.collection('bookings').add({
+			const bookingId = await createBooking({
 				memorialId,
 				servicePackage,
 				dateTime,
-				specialRequests,
-				createdAt: new Date(),
-				status: 'pending' // or some initial status
+				specialRequests
 			});
-			console.log(`✅ Successfully created booking with ID: ${bookingRef.id}`);
+			console.log(`✅ Successfully created booking with ID: ${bookingId}`);
 		} catch (err) {
 			console.error('🔥 Error creating booking in Firestore:', err);
 			return fail(500, { error: 'Could not create booking.' });

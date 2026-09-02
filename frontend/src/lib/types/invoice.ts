@@ -1,5 +1,3 @@
-import type { Timestamp } from 'firebase/firestore';
-
 export interface InvoiceItem {
 	name: string;
 	quantity: number;
@@ -14,13 +12,13 @@ export interface Invoice {
 	customerEmail: string;
 	customerName?: string;
 	status: 'pending' | 'paid' | 'expired' | 'cancelled';
-	createdAt: Timestamp;
-	paidAt?: Timestamp;
+	createdAt: string; // ISO string
+	paidAt?: string; // ISO string
 	createdBy: string; // Admin UID who created it
 	memorialId?: string; // Optional link to memorial
 	stripeSessionId?: string;
 	paymentIntentId?: string;
-	expiresAt?: Timestamp; // Optional expiration date
+	expiresAt?: string; // Optional expiration date (ISO string)
 }
 
 export interface CreateInvoiceRequest {

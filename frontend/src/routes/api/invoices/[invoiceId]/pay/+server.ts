@@ -1,8 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { adminDb } from '$lib/server/firebase';
+import { getInvoice, setStripeSession } from '$lib/server/db/repos/invoices';
 import { stripe } from '$lib/server/stripe';
-import { Timestamp } from 'firebase-admin/firestore';
 
 // POST - Create Stripe checkout session for invoice payment
 export const POST: RequestHandler = async ({ params, request }) => {
@@ -13,17 +12,10 @@ export const POST: RequestHandler = async ({ params, request }) => {
 			return json({ error: 'Invoice ID is required' }, { status: 400 });
 		}
 
-		const invoiceRef = adminDb.collection('invoices').doc(invoiceId);
-		const invoiceDoc = await invoiceRef.get();
-
-		if (!invoiceDoc.exists) {
-			return json({ error: 'Invoice not found' }, { status: 404 });
-		}
-
-		const invoice = invoiceDoc.data();
+		const invoice = await getInvoice(invoiceId);
 
 		if (!invoice) {
-			return json({ error: 'Invoice data not found' }, { status: 404 });
+			return json({ error: 'Invoice not found' }, { status: 404 });
 		}
 
 		// Check if already paid
@@ -63,10 +55,7 @@ export const POST: RequestHandler = async ({ params, request }) => {
 		});
 
 		// Update invoice with checkout session ID
-		await invoiceRef.update({
-			stripeSessionId: session.id,
-			lastModified: Timestamp.now()
-		});
+		await setStripeSession(invoiceId, session.id);
 
 		console.log(`💳 Checkout session created for invoice ${invoiceId}: ${session.id}`);
 

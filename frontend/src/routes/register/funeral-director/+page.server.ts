@@ -1,4 +1,5 @@
 import { adminAuth, adminDb } from '$lib/server/firebase';
+import { getFuneralDirector } from '$lib/server/db/repos/funeralDirectors';
 import { fail, redirect, isRedirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { sendFuneralDirectorRegistrationEmail } from '$lib/server/email';
@@ -25,7 +26,6 @@ function generateRandomPassword(length = 12) {
 	return password;
 }
 
-
 export const load: PageServerLoad = async ({ locals }) => {
 	// Check if user is logged in
 	if (!locals.user) {
@@ -50,27 +50,17 @@ export const load: PageServerLoad = async ({ locals }) => {
 			console.log('🔍 Attempting to fetch funeral director profile...');
 			console.log('🔍 adminDb defined?', !!adminDb);
 			console.log('🔍 User UID:', locals.user.uid);
-			
-			const fdDoc = await adminDb
-				.collection('funeral_directors')
-				.doc(locals.user.uid)
-				.get();
-			
-			console.log('🔍 FD doc exists?', fdDoc.exists);
-			
-			if (fdDoc.exists) {
-				const rawData: any = fdDoc.data();
-				
-				// Convert Firestore Timestamps to ISO strings for serialization
-				funeralDirectorProfile = {
-					...rawData,
-					createdAt: rawData?.createdAt?.toDate?.()?.toISOString() || null,
-					updatedAt: rawData?.updatedAt?.toDate?.()?.toISOString() || null,
-					approvedAt: rawData?.approvedAt?.toDate?.()?.toISOString() || null
-				} as any;
-				
+
+			const rawData: any = await getFuneralDirector(locals.user.uid);
+
+			console.log('🔍 FD doc exists?', !!rawData);
+
+			if (rawData) {
+				// Timestamps are already ISO strings for serialization
+				funeralDirectorProfile = rawData as any;
+
 				console.log('✅ FD profile loaded:', Object.keys(funeralDirectorProfile || {}));
-				
+
 				// Prepopulate form data from funeral director profile
 				prepopulatedData = {
 					directorName: rawData?.contactPerson || locals.user.displayName || '',
@@ -104,7 +94,7 @@ export const actions: Actions = {
 	default: async ({ request, locals }) => {
 		console.log('🎯 Enhanced funeral director registration started');
 		const data = await request.formData();
-		
+
 		// Extract all form fields
 		console.log('📝 Extracting form data...');
 		const lovedOneName = (data.get('lovedOneName') as string)?.trim();
@@ -136,7 +126,7 @@ export const actions: Actions = {
 		console.log('🔍 Validating required fields...');
 		const validationErrors: string[] = [];
 
-		if (!lovedOneName) validationErrors.push('Loved one\'s name is required');
+		if (!lovedOneName) validationErrors.push("Loved one's name is required");
 		if (!directorName) validationErrors.push('Director name is required');
 		if (!familyContactEmail) validationErrors.push('Family contact email is required');
 		if (!familyContactPhone) validationErrors.push('Family contact phone is required');
@@ -164,7 +154,9 @@ export const actions: Actions = {
 			} catch (error: any) {
 				if (error.code === 'auth/user-not-found') {
 					// User doesn't exist, create new one
-					console.log(`👤 Creating new user account with family contact email: ${familyContactEmail}`);
+					console.log(
+						`👤 Creating new user account with family contact email: ${familyContactEmail}`
+					);
 					password = generateRandomPassword();
 					userRecord = await adminAuth.createUser({
 						email: familyContactEmail,
@@ -188,7 +180,7 @@ export const actions: Actions = {
 				// Get existing profile
 				const existingProfileDoc = await adminDb.collection('users').doc(userRecord.uid).get();
 				const existingProfile = existingProfileDoc.data() || {};
-				
+
 				// Update with new information (merge with existing)
 				const updatedProfile = {
 					...existingProfile,
@@ -225,8 +217,7 @@ export const actions: Actions = {
 			// Get funeral director profile for tracking
 			let funeralDirectorProfile = null;
 			if (locals.user) {
-				const funeralDirectorDoc = await adminDb.collection('funeral_directors').doc(locals.user.uid).get();
-				funeralDirectorProfile = funeralDirectorDoc.exists ? funeralDirectorDoc.data() : null;
+				funeralDirectorProfile = await getFuneralDirector(locals.user.uid);
 			}
 
 			// 4. Create comprehensive memorial with all service details
@@ -240,7 +231,7 @@ export const actions: Actions = {
 				createdByUserId: userRecord.uid,
 				creatorEmail: familyContactEmail,
 				creatorName: familyContactName || directorName,
-				
+
 				// Service information structure (required)
 				services: {
 					main: {
@@ -258,7 +249,7 @@ export const actions: Actions = {
 					},
 					additional: [] // Empty initially
 				},
-				
+
 				// Service information fields (legacy)
 				directorFullName: directorName,
 				funeralHomeName: funeralHomeName,
@@ -266,45 +257,49 @@ export const actions: Actions = {
 				memorialTime: memorialTime || null,
 				memorialLocationName: locationName || null,
 				memorialLocationAddress: locationAddress || null,
-				
+
 				// Family contact fields
 				familyContactName: familyContactName,
 				familyContactEmail: familyContactEmail,
 				familyContactPhone: familyContactPhone,
 				familyContactPreference: contactPreference as 'phone' | 'email',
-				
+
 				// Director information
 				directorEmail: directorEmail || null,
-				
+
 				// Funeral director tracking (CRITICAL FIX)
 				funeralDirectorUid: locals.user?.uid || null, // For profile page queries
-				funeralDirector: locals.user ? {
-					id: locals.user.uid,
-					companyName: funeralDirectorProfile?.companyName || funeralHomeName,
-					contactPerson: funeralDirectorProfile?.contactPerson || directorName,
-					phone: funeralDirectorProfile?.phone || '',
-					email: funeralDirectorProfile?.email || directorEmail || ''
-				} : null, // For API endpoint queries
-				
+				funeralDirector: locals.user
+					? {
+							id: locals.user.uid,
+							companyName: funeralDirectorProfile?.companyName || funeralHomeName,
+							contactPerson: funeralDirectorProfile?.contactPerson || directorName,
+							phone: funeralDirectorProfile?.phone || '',
+							email: funeralDirectorProfile?.email || directorEmail || ''
+						}
+					: null, // For API endpoint queries
+
 				// Additional information
 				additionalNotes: additionalNotes || null,
-				
+
 				// Required fields
 				isPublic: true,
 				isComplete: false, // Required field
 				content: '',
 				custom_html: null,
-				
+
 				// Timestamps
 				createdAt: new Date(),
 				updatedAt: new Date(),
-				
+
 				// Legacy compatibility
 				creatorUid: userRecord.uid // Keep for backward compatibility
 			};
 
 			const memorialRef = await adminDb.collection('memorials').add(memorialData);
-			console.log(`✅ Comprehensive memorial created for ${lovedOneName} with ID: ${memorialRef.id}`);
+			console.log(
+				`✅ Comprehensive memorial created for ${lovedOneName} with ID: ${memorialRef.id}`
+			);
 			console.log(`🔗 Memorial fullSlug: ${fullSlug}`);
 
 			// Index the new memorial in Algolia
@@ -322,7 +317,9 @@ export const actions: Actions = {
 			console.log('🔗 Calculator magic link created for memorial:', memorialRef.id);
 
 			// 6. Send funeral director registration email with magic link
-			console.log(`📧 Sending funeral director registration email to ${isExistingUser ? 'existing' : 'new'} user...`);
+			console.log(
+				`📧 Sending funeral director registration email to ${isExistingUser ? 'existing' : 'new'} user...`
+			);
 			await sendFuneralDirectorRegistrationEmail({
 				email: familyContactEmail,
 				familyName: familyContactName || 'Family',
@@ -332,7 +329,9 @@ export const actions: Actions = {
 				additionalNotes: additionalNotes,
 				calculatorMagicLink: calculatorMagicLink // Add magic link to calculator
 			});
-			console.log('✅ Funeral director registration email sent successfully with calculator magic link');
+			console.log(
+				'✅ Funeral director registration email sent successfully with calculator magic link'
+			);
 
 			// 6. Create a custom token for auto-login
 			console.log('🎟️ Creating custom token for auto-login...');
@@ -341,13 +340,13 @@ export const actions: Actions = {
 
 			// 7. Return success to show to user, then redirect to profile
 			console.log(`🚀 Memorial created successfully: ${fullSlug}`);
-			
+
 			if (isExistingUser) {
 				console.log('🎉 Additional memorial created for existing user successfully!');
 			} else {
 				console.log('🎉 Enhanced funeral director registration completed successfully!');
 			}
-			
+
 			// For authenticated funeral directors completing their profile, show success then redirect to profile
 			return {
 				success: true,
@@ -355,18 +354,17 @@ export const actions: Actions = {
 				memorialSlug: fullSlug,
 				familyContactEmail: familyContactEmail
 			};
-			
 		} catch (error: any) {
 			if (isRedirect(error)) {
 				throw error;
 			}
-			
+
 			console.error('💥 Error during enhanced registration process:', error);
-			
+
 			// Enhanced error handling with specific messages
 			let errorMessage = 'Registration failed. Please try again.';
 			let fieldName = undefined;
-			
+
 			// Since we pre-validated email, this should rarely happen
 			if (error.code === 'auth/email-already-exists') {
 				errorMessage = `An account with email ${familyContactEmail} already exists. Please use a different email or sign in to your existing account.`;
@@ -381,14 +379,14 @@ export const actions: Actions = {
 			} else if (error.message?.includes('QUOTA_EXCEEDED')) {
 				errorMessage = 'Service quota exceeded. Please try again later.';
 			}
-			
+
 			console.error('❌ Specific error details:', {
 				code: error.code,
 				message: error.message,
 				stack: error.stack
 			});
-			
-			return fail(500, { 
+
+			return fail(500, {
 				error: errorMessage,
 				...(fieldName && { field: fieldName })
 			});

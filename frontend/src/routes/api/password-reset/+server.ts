@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { adminDb } from '$lib/server/firebase';
+import { createToken } from '$lib/server/db/repos/passwordResetTokens';
 import { sendPasswordResetEmail } from '$lib/server/email';
 import crypto from 'crypto';
 
@@ -23,15 +24,16 @@ export const POST: RequestHandler = async ({ request }) => {
 		}
 
 		// Check if user exists in Firestore
-		const usersSnapshot = await adminDb.collection('users')
+		const usersSnapshot = await adminDb
+			.collection('users')
 			.where('email', '==', email)
 			.limit(1)
 			.get();
 
 		if (usersSnapshot.empty) {
 			// For security, don't reveal if email exists or not
-			return json({ 
-				message: 'If an account with that email exists, a password reset link has been sent.' 
+			return json({
+				message: 'If an account with that email exists, a password reset link has been sent.'
 			});
 		}
 
@@ -44,12 +46,11 @@ export const POST: RequestHandler = async ({ request }) => {
 		const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour from now
 
 		// Store reset token in Firestore
-		await adminDb.collection('passwordResetTokens').doc(resetToken).set({
+		await createToken({
+			token: resetToken,
 			userId: userId,
 			email: email,
-			createdAt: new Date(),
-			expiresAt: resetTokenExpiry,
-			used: false
+			expiresAt: resetTokenExpiry
 		});
 
 		// Generate reset link
@@ -65,14 +66,16 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		console.log(`✅ Password reset email sent to: ${email}`);
 
-		return json({ 
-			message: 'If an account with that email exists, a password reset link has been sent.' 
+		return json({
+			message: 'If an account with that email exists, a password reset link has been sent.'
 		});
-
 	} catch (error) {
 		console.error('💥 Password reset error:', error);
-		return json({ 
-			error: 'An error occurred while processing your request. Please try again.' 
-		}, { status: 500 });
+		return json(
+			{
+				error: 'An error occurred while processing your request. Please try again.'
+			},
+			{ status: 500 }
+		);
 	}
 };

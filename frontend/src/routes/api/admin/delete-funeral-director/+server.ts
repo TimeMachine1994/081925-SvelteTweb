@@ -1,5 +1,9 @@
 import { json } from '@sveltejs/kit';
 import { adminDb, adminAuth } from '$lib/server/firebase';
+import {
+	getFuneralDirector,
+	remove as removeFuneralDirector
+} from '$lib/server/db/repos/funeralDirectors';
 
 /**
  * DELETE FUNERAL DIRECTOR
@@ -29,18 +33,15 @@ export async function POST({ request, locals }: any) {
 		}
 
 		// === GET FUNERAL DIRECTOR DATA ===
-		const directorRef = adminDb.collection('funeral_directors').doc(directorId);
-		const directorDoc = await directorRef.get();
+		const directorData = await getFuneralDirector(directorId);
 
-		if (!directorDoc.exists) {
+		if (!directorData) {
 			console.log('❌ [ADMIN API] Funeral director not found');
 			return json({ error: 'Funeral director not found' }, { status: 404 });
 		}
 
-		const directorData = directorDoc.data();
-
 		// === DELETE FROM FIRESTORE ===
-		await directorRef.delete();
+		await removeFuneralDirector(directorId);
 		console.log('✅ [ADMIN API] Funeral director document deleted from Firestore');
 
 		// === UPDATE USER ROLE (if user exists) ===
