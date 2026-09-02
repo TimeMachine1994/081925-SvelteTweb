@@ -28,9 +28,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		const formData = await request.json();
 
-		if (!formData.lovedOneName || !formData.creatorEmail) {
-			return json({ error: 'Loved one name and creator email are required' }, { status: 400 });
+		if (!formData.lovedOneName) {
+			return json({ error: 'Loved one name is required' }, { status: 400 });
 		}
+
+		const creatorEmail: string | null = formData.creatorEmail?.trim() || null;
+		const creatorName: string = formData.creatorName || formData.lovedOneName + ' Family';
 
 		const baseSlug = formData.lovedOneName
 			.toLowerCase()
@@ -42,41 +45,44 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		const fullSlug = `celebration-of-life-for-${baseSlug}`;
 
 		const auth = getAuth();
-		let userUid = null;
+		let userUid: string | null = null;
 		let userExists = false;
 		let password = '';
 
-		try {
-			const existingUser = await auth.getUserByEmail(formData.creatorEmail);
-			userUid = existingUser.uid;
-			userExists = true;
-		} catch (userNotFoundError) {
-			password = Math.random().toString(36).slice(-12);
-			const newUser = await auth.createUser({
-				email: formData.creatorEmail,
-				displayName: formData.creatorName || formData.lovedOneName + ' Family',
-				password: password
-			});
-			userUid = newUser.uid;
-			await auth.setCustomUserClaims(userUid, {
-				role: 'owner',
-				canCreateMemorials: true
-			});
-		}
-
-		if (!userExists) {
-			await adminDb
-				.collection('users')
-				.doc(userUid)
-				.set({
-					email: formData.creatorEmail,
-					displayName: formData.creatorName || formData.lovedOneName + ' Family',
-					role: 'owner',
-					createdAt: Timestamp.now(),
-					updatedAt: Timestamp.now(),
-					createdByAdmin: true,
-					createdBy: locals.user.uid
+		// Owner is optional: an admin can create an unowned memorial and assign a family member later.
+		if (creatorEmail) {
+			try {
+				const existingUser = await auth.getUserByEmail(creatorEmail);
+				userUid = existingUser.uid;
+				userExists = true;
+			} catch (userNotFoundError) {
+				password = Math.random().toString(36).slice(-12);
+				const newUser = await auth.createUser({
+					email: creatorEmail,
+					displayName: creatorName,
+					password: password
 				});
+				userUid = newUser.uid;
+				await auth.setCustomUserClaims(userUid, {
+					role: 'owner',
+					canCreateMemorials: true
+				});
+			}
+
+			if (!userExists) {
+				await adminDb
+					.collection('users')
+					.doc(userUid)
+					.set({
+						email: creatorEmail,
+						displayName: creatorName,
+						role: 'owner',
+						createdAt: Timestamp.now(),
+						updatedAt: Timestamp.now(),
+						createdByAdmin: true,
+						createdBy: locals.user.uid
+					});
+			}
 		}
 
 		const memorial = {
@@ -84,8 +90,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			slug: baseSlug,
 			fullSlug: fullSlug,
 			ownerUid: userUid, // V1: Single source of truth for ownership
-			creatorEmail: formData.creatorEmail,
-			creatorName: formData.creatorName || formData.lovedOneName + ' Family',
+			creatorEmail,
+			creatorName,
 			content: formData.content || '',
 			isPublic: true, // Always set to true for new memorials
 			isComplete: false, // New memorials start as incomplete/scheduled
@@ -127,22 +133,22 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				timestamp: Timestamp.now(),
 				details: {
 					lovedOneName: formData.lovedOneName,
-					creatorEmail: formData.creatorEmail,
+					creatorEmail,
 					fullSlug: fullSlug,
-					userCreated: !userExists
+					userCreated: !!creatorEmail && !userExists
 				}
 			});
 		} catch (auditError) {
 			console.error('⚠️ [ADMIN API] Failed to create audit log:', auditError);
 		}
 
-		if (!userExists && password) {
+		if (creatorEmail && userUid && !userExists && password) {
 			try {
 				// Generate custom token for magic link authentication
 				console.log('🎟️ [ADMIN API] Generating magic link token...');
 				const customToken = await auth.createCustomToken(userUid, {
 					role: 'owner',
-					email: formData.creatorEmail,
+					email: creatorEmail,
 					memorial_id: memorialId
 				});
 
@@ -152,10 +158,10 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				console.log('🔗 [ADMIN API] Magic link created for memorial page:', fullSlug);
 
 				await sendEnhancedRegistrationEmail({
-					email: formData.creatorEmail,
+					email: creatorEmail,
 					password: password,
 					lovedOneName: formData.lovedOneName,
-					ownerName: formData.creatorName || `${formData.lovedOneName} Family`,
+					ownerName: creatorName,
 					memorialUrl: `${baseUrl}/${fullSlug}`,
 					magicLink: magicLink // Pass magic link to email
 				});
@@ -170,7 +176,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			memorialId,
 			fullSlug,
 			userUid,
-			userCreated: !userExists,
+			hasOwner: !!userUid,
+			userCreated: !!creatorEmail && !userExists,
 			memorialUrl: `/${fullSlug}`
 		});
 	} catch (error: any) {
