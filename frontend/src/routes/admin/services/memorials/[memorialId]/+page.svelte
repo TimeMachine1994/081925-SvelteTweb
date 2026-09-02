@@ -15,6 +15,40 @@
 	// Mutable streams for block editor updates
 	let streams = $state(data.streams);
 
+	// Owner assignment
+	let showAssignOwner = $state(false);
+	let assignEmail = $state('');
+	let assignName = $state('');
+	let isAssigning = $state(false);
+	let assignError = $state('');
+
+	async function handleAssignOwner(event: SubmitEvent) {
+		event.preventDefault();
+		isAssigning = true;
+		assignError = '';
+		try {
+			const response = await fetch(`/api/memorials/${memorial.id}/assign`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ email: assignEmail, name: assignName })
+			});
+			const result = await response.json();
+			if (!response.ok) {
+				assignError = result.error || 'Failed to assign owner';
+				return;
+			}
+			showAssignOwner = false;
+			assignEmail = '';
+			assignName = '';
+			await invalidateAll();
+		} catch (err) {
+			console.error('Failed to assign owner:', err);
+			assignError = 'Network error. Please try again.';
+		} finally {
+			isAssigning = false;
+		}
+	}
+
 	function formatDate(isoString: string | null) {
 		if (!isoString) return 'N/A';
 		return new Date(isoString).toLocaleString();
@@ -220,7 +254,7 @@
 		<h1>💝 {memorial.lovedOneName}</h1>
 		<p>{publicUrl}</p>
 		<p>
-			Created by 
+			Owner:
 			{#if memorial.ownerUid}
 				<button 
 					class="owner-link" 
@@ -229,10 +263,33 @@
 					{memorial.creatorEmail}
 				</button>
 			{:else}
-				{memorial.creatorEmail}
+				<em>none assigned</em>
 			{/if}
-			 • {formatDate(memorial.createdAt)}
+			<button class="owner-link" onclick={() => (showAssignOwner = !showAssignOwner)}>
+				{memorial.ownerUid ? 'Change' : 'Assign owner'}
+			</button>
+			 • Created {formatDate(memorial.createdAt)}
 		</p>
+		{#if showAssignOwner}
+			<form class="assign-owner" onsubmit={handleAssignOwner}>
+				<input
+					type="email"
+					placeholder="family@example.com"
+					bind:value={assignEmail}
+					required
+				/>
+				<input type="text" placeholder="Name (optional)" bind:value={assignName} />
+				<button type="submit" disabled={isAssigning}>
+					{isAssigning ? 'Assigning...' : 'Save'}
+				</button>
+				<button type="button" onclick={() => (showAssignOwner = false)}>Cancel</button>
+				{#if assignError}<span class="assign-error">{assignError}</span>{/if}
+			</form>
+			<p class="assign-hint">
+				If no account exists for this email, one is created and a welcome email with login
+				details is sent.
+			</p>
+		{/if}
 		<div class="badges">
 			<span class:complete={memorial.isComplete}>{memorial.isComplete ? '✅ Complete' : '⚠️ Incomplete'}</span>
 			<span class:paid={memorial.isPaid}>{memorial.isPaid ? '✅ Paid' : `❌ Unpaid ($${memorial.totalPrice})`}</span>
@@ -678,6 +735,53 @@
 	}
 	
 	/* Clickable owner link styling */
+	.assign-owner {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		align-items: center;
+		margin: 0.5rem 0 0.25rem;
+	}
+
+	.assign-owner input {
+		padding: 0.4rem 0.6rem;
+		border: 1px solid #d1d5db;
+		border-radius: 6px;
+		font-size: 0.875rem;
+		min-width: 220px;
+	}
+
+	.assign-owner button {
+		padding: 0.4rem 0.9rem;
+		border-radius: 6px;
+		border: 1px solid #d1d5db;
+		background: white;
+		font-size: 0.875rem;
+		cursor: pointer;
+	}
+
+	.assign-owner button[type='submit'] {
+		background: #d5ba7f;
+		border-color: #d5ba7f;
+		color: white;
+	}
+
+	.assign-owner button:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.assign-error {
+		color: #c33;
+		font-size: 0.875rem;
+	}
+
+	.assign-hint {
+		font-size: 0.75rem;
+		color: #6b7280;
+		margin: 0;
+	}
+
 	button.owner-link {
 		background: none;
 		border: none;

@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { adminDb } from '$lib/server/firebase';
 import { getAuth } from 'firebase-admin/auth';
+import { findOrCreateOwner } from '$lib/server/memorialOwner';
 import { Timestamp } from 'firebase-admin/firestore';
 import { sendEnhancedRegistrationEmail } from '$lib/server/email';
 import { hasPermission } from '$lib/admin/permissions';
@@ -44,46 +45,13 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		const fullSlug = `celebration-of-life-for-${baseSlug}`;
 
-		const auth = getAuth();
-		let userUid: string | null = null;
-		let userExists = false;
-		let password = '';
-
 		// Owner is optional: an admin can create an unowned memorial and assign a family member later.
-		if (creatorEmail) {
-			try {
-				const existingUser = await auth.getUserByEmail(creatorEmail);
-				userUid = existingUser.uid;
-				userExists = true;
-			} catch (userNotFoundError) {
-				password = Math.random().toString(36).slice(-12);
-				const newUser = await auth.createUser({
-					email: creatorEmail,
-					displayName: creatorName,
-					password: password
-				});
-				userUid = newUser.uid;
-				await auth.setCustomUserClaims(userUid, {
-					role: 'owner',
-					canCreateMemorials: true
-				});
-			}
-
-			if (!userExists) {
-				await adminDb
-					.collection('users')
-					.doc(userUid)
-					.set({
-						email: creatorEmail,
-						displayName: creatorName,
-						role: 'owner',
-						createdAt: Timestamp.now(),
-						updatedAt: Timestamp.now(),
-						createdByAdmin: true,
-						createdBy: locals.user.uid
-					});
-			}
-		}
+		const owner = creatorEmail
+			? await findOrCreateOwner(creatorEmail, creatorName, locals.user.uid)
+			: null;
+		const userUid = owner?.uid ?? null;
+		const userExists = owner ? !owner.created : false;
+		const password = owner?.password ?? '';
 
 		const memorial = {
 			lovedOneName: formData.lovedOneName,
@@ -146,7 +114,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 			try {
 				// Generate custom token for magic link authentication
 				console.log('🎟️ [ADMIN API] Generating magic link token...');
-				const customToken = await auth.createCustomToken(userUid, {
+				const customToken = await getAuth().createCustomToken(userUid, {
 					role: 'owner',
 					email: creatorEmail,
 					memorial_id: memorialId
