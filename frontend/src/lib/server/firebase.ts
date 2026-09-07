@@ -54,6 +54,9 @@ if (admin.apps.length) {
 	}
 }
 
+// Ignore undefined properties when writing to Firestore (prevents errors on partial updates).
+admin.firestore().settings({ ignoreUndefinedProperties: true });
+
 console.log('--- SERVER FIREBASE INITIALIZATION END ---');
 
 export const adminAuth = admin.auth();
