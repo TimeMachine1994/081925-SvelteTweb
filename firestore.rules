@@ -1,198 +1,166 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // ============================================
-    // 🔧 HELPER FUNCTIONS
-    // ============================================
-    
-    // Check if user is authenticated
-    function isSignedIn() {
-      return request.auth != null;
-    }
-    
-    // Check for admin custom claim
+
+    // Helper function to check for admin custom claim
     function isAdmin() {
-      return request.auth != null && request.auth.token.admin == true;
+      return request.auth.token.admin == true;
     }
-    
-    // Check if user owns the memorial (creator or createdBy)
-    function isOwner(memorialId) {
-      return request.auth != null && (
-        request.auth.uid == get(/databases/$(database)/documents/memorials/$(memorialId)).data.creatorUid ||
-        request.auth.uid == get(/databases/$(database)/documents/memorials/$(memorialId)).data.createdByUserId
-      );
-    }
-    
-    // Check if user is a family member of the memorial
-    function isFamilyMember(memorialId) {
+
+    // Helper function to check for admin emails
+    function isAdminEmail() {
       return request.auth != null && 
-        exists(/databases/$(database)/documents/memorials/$(memorialId)/familyMembers/$(request.auth.uid));
+        (request.auth.token.email == 'austinbryanfilm@gmail.com' ||
+         request.auth.token.email.matches('.*@tributestream.com'));
     }
-    
-    // Combined check for edit permissions
-    function canEditMemorial(memorialId) {
-      return isAdmin() || isOwner(memorialId) || isFamilyMember(memorialId);
+
+    // Global admin override - admins can access everything
+    match /{document=**} {
+      allow read, write: if isAdmin() || isAdminEmail();
     }
-    
-    // Check if only updating allowed photo fields
-    function onlyUpdatingPhotoFields() {
-      let changedFields = request.resource.data.diff(resource.data).affectedKeys();
-      // Allow updates to photos, photoMetadata, and updatedAt fields
-      return changedFields.hasOnly(['photos', 'photoMetadata', 'updatedAt']);
-    }
-    
-    // Check if memorial is public
-    function isPublicMemorial() {
-      return resource.data.isPublic == true;
-    }
-    
-    // ============================================
-    // 👥 USER DOCUMENTS
-    // ============================================
-    
+
     match /users/{userId} {
-      // Admins can read/write any user document
-      // Regular users can only read/write their own
-      allow read, write: if isAdmin() || (isSignedIn() && request.auth.uid == userId);
+      // Admins can read/write any user document.
+      // Regular users can only read/write their own.
+      allow read, write: if isAdmin() || (request.auth != null && request.auth.uid == userId);
     }
-    
-    // ============================================
-    // 🕯️ MEMORIAL DOCUMENTS
-    // ============================================
-    
-    match /memorials/{memorialId} {
-      // Read access: public memorials, owners, family members, or admins
-      allow read: if isPublicMemorial() || canEditMemorial(memorialId);
-      
-      // Create: any authenticated user can create a memorial
-      allow create: if isSignedIn();
-      
-      // Update: differentiated by user role
-      allow update: if canEditMemorial(memorialId) && (
-        // Owners and admins can update anything
-        isAdmin() || isOwner(memorialId) ||
-        // Family members can only update photo-related fields
-        (isFamilyMember(memorialId) && onlyUpdatingPhotoFields())
-      );
-      
-      // Delete: only owners and admins
-      allow delete: if isAdmin() || isOwner(memorialId);
-      
-      // ============================================
-      // 👨‍👩‍👧‍👦 FAMILY MEMBERS SUBCOLLECTION
-      // ============================================
-      
-      match /familyMembers/{userId} {
-        // Read: owners, admins, and the family member themselves
-        allow read: if canEditMemorial(memorialId) || request.auth.uid == userId;
-        
-        // Write: only owners and admins can add/remove family members
-        allow create, update, delete: if isOwner(memorialId) || isAdmin();
-      }
-      
-      // ============================================
-      // 👥 FOLLOWERS SUBCOLLECTION
-      // ============================================
-      
-      match /followers/{userId} {
-        // Users can only manage their own follow status
-        allow read, create, delete: if isSignedIn() && request.auth.uid == userId;
-        // No updates allowed once following
-        allow update: if false;
-      }
-    }
-      
-      // ============================================
-      // 🛒 BOOKING DOCUMENTS (NEW)
-      // ============================================
-      
-      match /bookings/{bookingId} {
-        // Admins can read any booking
-        // Users can read/write their own bookings
-        allow read, write: if isAdmin() || (isSignedIn() && request.auth.uid == resource.data.userId);
-        
-        // Create: any authenticated user can create a booking
-        allow create: if isSignedIn();
-      }
-    
-    // ============================================
-    // ✉️ INVITATION DOCUMENTS
-    // ============================================
-    
+
+
     match /invitations/{invitationId} {
-      // Read access: admins, sender, or recipient
-      allow read: if isAdmin() ||
-        (isSignedIn() && request.auth.uid == resource.data.invitedByUid) ||
-        (isSignedIn() && request.auth.token.email == resource.data.inviteeEmail);
-      
-      // Create: only memorial owners can send invitations
-      allow create: if isSignedIn() && 
-        request.auth.uid == request.resource.data.invitedByUid &&
-        isOwner(request.resource.data.memorialId);
-      
-      // Update: only recipients can accept invitations
-      allow update: if isSignedIn() && 
-        request.auth.token.email == resource.data.inviteeEmail &&
-        request.resource.data.status == 'accepted' &&
-        // Ensure only status and acceptedAt fields are being updated
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'acceptedAt']);
-      
-      // Delete: disabled for security (maintain audit trail)
+      // Read: Allowed if you sent the invitation or if you are the recipient.
+      allow read: if request.auth != null && (request.auth.uid == resource.data.invitedByUid || request.auth.token.email == resource.data.inviteeEmail);
+      // Create: Allowed if you are the sender.
+      allow create: if request.auth != null && request.resource.data.invitedByUid == request.auth.uid;
+      // Update: Allowed only by the recipient to accept it.
+      allow update: if request.auth != null && request.auth.token.email == resource.data.inviteeEmail;
+      // Delete: Not allowed for clients.
       allow delete: if false;
     }
-    
-    // ============================================
-    // 📊 LIVESTREAM CONFIGURATIONS (DEPRECATED)
-    // ============================================
-    
-    match /livestreamConfigurations/{configId} {
-      // Read: public for memorials that are public, otherwise restricted
-      allow read: if isAdmin() ||
-        (resource.data.memorialId != null &&
-          (get(/databases/$(database)/documents/memorials/$(resource.data.memorialId)).data.isPublic == true ||
-           canEditMemorial(resource.data.memorialId)));
+
+    // Funeral Directors collection rules
+    match /funeral_directors/{funeralDirectorId} {
+      // Only the funeral director can read/write their own document
+      allow read, write: if request.auth != null && request.auth.uid == funeralDirectorId;
       
-      // Write: only owners and admins
-      allow create, update: if isSignedIn() &&
-        (isAdmin() || isOwner(request.resource.data.memorialId));
-      
-      allow delete: if isAdmin() ||
-        (resource.data.memorialId != null && isOwner(resource.data.memorialId));
+      // Admins can read/write all funeral director documents
+      allow read, write: if isAdmin();
     }
-    
-    // ============================================
-    // 📸 PHOTO UPLOAD LOGS
-    // ============================================
-    
-    match /photoUploads/{uploadId} {
-      // Read: admins and memorial editors
+
+    match /memorials/{memorialId} {
+      // Admin emails have full access
+      function isAdminEmail() {
+        return request.auth != null && 
+          (request.auth.token.email == 'austinbryanfilm@gmail.com' ||
+           request.auth.token.email.matches('.*@tributestream.com'));
+      }
+      
+      // Admins can read/write any memorial.
+      // Otherwise, apply existing logic plus funeral director permissions.
       allow read: if isAdmin() || 
-        (resource.data.memorialId != null && canEditMemorial(resource.data.memorialId));
+                     isAdminEmail() ||
+                     resource.data.isPublic == true || 
+                     request.auth.uid == resource.data.creatorUid ||
+                     request.auth.uid == resource.data.ownerUid ||
+                     (request.auth != null && resource.data.funeralDirectorUid == request.auth.uid) ||
+                     (request.auth != null && resource.data.funeralDirector.id == request.auth.uid);
       
-      // Create: handled by server-side functions only
-      allow create: if false;
+      allow create: if request.auth != null;
       
-      // No updates or deletes allowed (audit trail)
-      allow update, delete: if false;
+      allow update, delete: if isAdmin() || 
+                              isAdminEmail() ||
+                              (request.auth != null && request.auth.uid == resource.data.creatorUid) ||
+                              (request.auth != null && request.auth.uid == resource.data.ownerUid) ||
+                              (request.auth != null && resource.data.funeralDirectorUid == request.auth.uid) ||
+                              (request.auth != null && resource.data.funeralDirector.id == request.auth.uid && resource.data.permissions.funeralDirectorCanEdit == true);
+      
+      match /followers/{userId} {
+        // A user can only follow/unfollow for themselves.
+        allow read, create, delete: if request.auth != null && request.auth.uid == userId;
+        allow update: if false; // No updates allowed.
+      }
+
     }
-    
-    // ============================================
-    // 📈 ANALYTICS (read-only for clients)
-    // ============================================
-    
-    match /analytics/{docId} {
-      allow read: if isAdmin();
-      allow write: if false; // Server-side only
+
+    // Blog collection rules - for FireCMS admin access
+    match /blog/{blogId} {
+      // Allow admin emails to read/write blog posts
+      allow read, write: if request.auth != null && 
+        (request.auth.token.email == 'austinbryanfilm@gmail.com' ||
+         request.auth.token.email.matches('.*@tributestream.com') ||
+         isAdmin());
+      
+      // Allow public read access for published posts (for website display)
+      allow read: if resource.data.status == 'published';
     }
-    
-    // ============================================
-    // 🔍 AUDIT LOGS (read-only for clients)
-    // ============================================
-    
-    match /auditLogs/{logId} {
-      allow read: if isAdmin();
-      allow write: if false; // Server-side only
+
+    // Chat collection rules - for memorial chat
+    match /memorials/{memorialId}/chat/{chatId} {
+      // Helper to check if memorial is public
+      function memorialIsPublic() {
+        return get(/databases/$(database)/documents/memorials/$(memorialId)).data.isPublic == true;
+      }
+      
+      // Helper to check if user is memorial owner
+      function isMemorialOwner() {
+        let memorial = get(/databases/$(database)/documents/memorials/$(memorialId)).data;
+        return request.auth != null && 
+               (request.auth.uid == memorial.ownerUid || 
+                request.auth.uid == memorial.funeralDirectorUid);
+      }
+      
+      // Anyone can read chat messages in public memorials
+      // Authenticated users can read chat in their own memorials
+      allow read: if memorialIsPublic() || isAdmin() || isAdminEmail() || isMemorialOwner();
+      
+      // Authenticated users can create messages in public memorials
+      allow create: if request.auth != null && 
+                       (memorialIsPublic() || isAdmin() || isAdminEmail() || isMemorialOwner()) &&
+                       request.resource.data.userId == request.auth.uid &&
+                       request.resource.data.message.size() > 0 &&
+                       request.resource.data.message.size() <= 500;
+      
+      // Users can update their own messages
+      allow update: if request.auth != null && 
+                       request.auth.uid == resource.data.userId &&
+                       request.resource.data.userId == resource.data.userId;
+      
+      // Users can delete their own messages, memorial owners can delete any message
+      allow delete: if request.auth != null && 
+                       (request.auth.uid == resource.data.userId || 
+                        isMemorialOwner() || 
+                        isAdmin() || 
+                        isAdminEmail());
     }
+
+    // Schedule edit requests rules
+    match /schedule_edit_requests/{requestId} {
+      // Users can read their own requests
+      allow read: if request.auth != null && request.auth.uid == resource.data.requestedBy;
+      
+      // Users can create requests (API will validate permissions)
+      allow create: if request.auth != null;
+      
+      // Only admins can update/delete requests
+      allow update, delete: if isAdmin() || isAdminEmail();
+      
+      // Admins can read all requests
+      allow read: if isAdmin() || isAdminEmail();
+    }
+
+    // Wiki pages - Admin only
+    match /wiki_pages/{pageId} {
+      allow read, write: if isAdmin() || isAdminEmail();
+    }
+
+    // Wiki categories - Admin only
+    match /wiki_categories/{categoryId} {
+      allow read, write: if isAdmin() || isAdminEmail();
+    }
+
+    // Wiki page versions - Admin only (for future use)
+    match /wiki_page_versions/{versionId} {
+      allow read, write: if isAdmin() || isAdminEmail();
+    }
+
   }
 }

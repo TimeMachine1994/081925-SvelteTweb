@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Generation Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            margin: 20px 0;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .log {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        video {
+            width: 100%;
+            max-width: 400px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Video Generation Test</h1>
+    
+    <p>This test verifies that MediaRecorder can capture canvas content and generate a video.</p>
+    
+    <canvas id="testCanvas" width="640" height="360"></canvas>
+    
+    <div>
+        <button onclick="startTest()">Start Video Generation Test</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+    
+    <div id="log" class="log"></div>
+    
+    <video id="resultVideo" controls style="display: none;"></video>
+
+    <script>
+        const canvas = document.getElementById('testCanvas');
+        const ctx = canvas.getContext('2d');
+        const log = document.getElementById('log');
+        const video = document.getElementById('resultVideo');
+        
+        let mediaRecorder;
+        let recordedChunks = [];
+        
+        function logMessage(message) {
+            console.log(message);
+            log.textContent += new Date().toLocaleTimeString() + ': ' + message + '\n';
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        function clearLog() {
+            log.textContent = '';
+        }
+        
+        function drawFrame(frameNumber) {
+            // Clear canvas
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw animated content
+            const time = frameNumber * 0.1;
+            
+            // Moving circle
+            ctx.fillStyle = '#ff6b6b';
+            const x = (Math.sin(time) + 1) * 0.5 * (canvas.width - 100) + 50;
+            const y = (Math.cos(time * 0.7) + 1) * 0.5 * (canvas.height - 100) + 50;
+            ctx.beginPath();
+            ctx.arc(x, y, 30, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Frame counter
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '24px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`Frame ${frameNumber}`, canvas.width / 2, 50);
+            
+            // Rotating rectangle
+            ctx.save();
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate(time);
+            ctx.fillStyle = '#4ecdc4';
+            ctx.fillRect(-40, -40, 80, 80);
+            ctx.restore();
+        }
+        
+        async function startTest() {
+            try {
+                logMessage('🚀 Starting video generation test...');
+                
+                // Draw initial frame
+                drawFrame(0);
+                logMessage('✅ Initial frame drawn');
+                
+                // Get canvas stream
+                const stream = canvas.captureStream(30);
+                logMessage(`📹 Canvas stream created with ${stream.getTracks().length} tracks`);
+                
+                const videoTrack = stream.getVideoTracks()[0];
+                if (videoTrack) {
+                    logMessage(`📺 Video track: ${videoTrack.readyState}, enabled: ${videoTrack.enabled}`);
+                } else {
+                    logMessage('❌ No video track found!');
+                    return;
+                }
+                
+                // Check codec support
+                const codecs = [
+                    'video/webm;codecs=vp8',
+                    'video/webm;codecs=vp9',
+                    'video/webm',
+                    'video/mp4'
+                ];
+                
+                let selectedCodec = '';
+                logMessage('🔍 Checking codec support:');
+                for (const codec of codecs) {
+                    const supported = MediaRecorder.isTypeSupported(codec);
+                    logMessage(`  ${codec}: ${supported}`);
+                    if (supported && !selectedCodec) {
+                        selectedCodec = codec;
+                    }
+                }
+                
+                if (!selectedCodec) {
+                    logMessage('❌ No supported codecs found!');
+                    return;
+                }
+                
+                logMessage(`✅ Using codec: ${selectedCodec}`);
+                
+                // Create MediaRecorder
+                recordedChunks = [];
+                mediaRecorder = new MediaRecorder(stream, {
+                    mimeType: selectedCodec,
+                    videoBitsPerSecond: 1000000 // 1 Mbps
+                });
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    logMessage(`📦 Data chunk: ${event.data.size} bytes`);
+                    if (event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+                
+                mediaRecorder.onstart = () => {
+                    logMessage('🎬 Recording started');
+                };
+                
+                mediaRecorder.onstop = () => {
+                    logMessage(`🛑 Recording stopped, ${recordedChunks.length} chunks collected`);
+                    
+                    const blob = new Blob(recordedChunks, { type: selectedCodec });
+                    logMessage(`📹 Final video blob: ${blob.size} bytes`);
+                    
+                    if (blob.size > 0) {
+                        const url = URL.createObjectURL(blob);
+                        video.src = url;
+                        video.style.display = 'block';
+                        logMessage('✅ Video generated successfully! Check the video player below.');
+                    } else {
+                        logMessage('❌ Generated video is empty!');
+                    }
+                };
+                
+                mediaRecorder.onerror = (event) => {
+                    logMessage(`❌ MediaRecorder error: ${event.error}`);
+                };
+                
+                // Start recording
+                mediaRecorder.start(1000); // 1 second timeslice
+                
+                // Animate for 3 seconds (90 frames at 30 FPS)
+                let frameCount = 0;
+                const maxFrames = 90;
+                
+                const animate = () => {
+                    drawFrame(frameCount);
+                    frameCount++;
+                    
+                    if (frameCount < maxFrames) {
+                        setTimeout(animate, 1000 / 30); // 30 FPS
+                    } else {
+                        // Stop recording after animation
+                        setTimeout(() => {
+                            logMessage('🏁 Animation complete, stopping recording...');
+                            mediaRecorder.stop();
+                        }, 500);
+                    }
+                };
+                
+                // Start animation
+                animate();
+                
+            } catch (error) {
+                logMessage(`❌ Test failed: ${error.message}`);
+                console.error('Test error:', error);
+            }
+        }
+        
+        // Draw initial frame on load
+        drawFrame(0);
+        logMessage('🎨 Test canvas initialized');
+    </script>
+</body>
+</html>

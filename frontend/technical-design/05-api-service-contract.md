@@ -2,139 +2,106 @@
 
 ## 1. Purpose
 
-This document defines the interfaces for all backend interactions within the Tributestream application. Its goal is to provide a clear and comprehensive reference for both frontend and backend development, ensuring consistency and predictability in data exchange. This includes interactions with Firebase Cloud Functions and direct data access to Firestore from the client.
+This document defines the interfaces for backend interactions **as actually implemented** in `frontend/src/routes/api/*` and the various `+page.server.ts` form actions. There are **no Firebase Cloud Functions in this repository** — everything below is a SvelteKit `+server.ts` REST endpoint or a form `action`, both running Firebase Admin SDK / Stripe SDK code directly on the SvelteKit server.
 
 ## 2. Content
 
-### 2.1. Cloud Functions
-
-This section details the callable Cloud Functions that are invoked from the client application.
+### 2.1. SvelteKit Form Actions (Server-Rendered Forms)
 
 ---
 
-#### **`createMemorial`**
+#### **`register` (`/register`, actions: `register`, `registerAdmin`)**
 
-*   **Purpose:** Creates a new memorial, along with associated user and event configuration documents. Handles both new and existing user scenarios.
-*   **Inputs (Request Body):**
-    *   `memorialData` (object): Contains details about the memorial and its creator.
-        *   `creatorEmail` (string, required)
-        *   `creatorName` (string, required)
-        *   `lovedOneName` (string, required)
-    *   `eventConfigData` (object): Initial event configuration. Can be an empty object.
-    *   `privateNoteData` (object): Initial private note. Can be an empty object.
-    *   `formType` (string): Identifier for the form used to create the memorial (e.g., "create-memorial").
-    *   `tempPassword` (string, optional): A temporary password for a new user.
-*   **Outputs (Response Body):**
-    *   `success` (boolean): Indicates if the operation was successful.
-    *   `message` (string): A descriptive message about the result.
-    *   `slug` (string): The generated slug for the new memorial page.
-    *   `isNewUser` (boolean): Indicates if a new user was created.
-*   **Error Codes:**
-    *   `invalid-argument`: Missing or invalid required fields.
-    *   `already-exists`: A user with the provided email already exists, or the logged-in user already has a memorial.
-    *   `internal`: A server-side error occurred.
+*   **Purpose:** Creates a Firebase Auth user (and, for `registerAdmin`, sets `isAdmin: true`) plus a minimal `users/{uid}` doc.
+*   **Inputs (form data):** `email`, `password`.
+*   **Behavior:** Uses Admin SDK `createUser`, mints a custom token, redirects to `/auth/session?token=...`.
+*   **Errors:** `fail(400, { message })` for missing fields or Firebase errors.
 
 ---
 
-#### **`saveCalculatorConfiguration`**
+#### **`register/loved-one` (default action)**
 
-*   **Purpose:** Saves or updates a user's event configuration from the livestream calculator.
-*   **Inputs (Request Body):**
-    *   An object containing the fields from the `SaveCalculatorConfigurationPayload` interface, including `lovedOneName`, `serviceDate`, `totalCalculatedAmount`, `package`, etc.
-*   **Outputs (Response Body):**
-    *   `success` (boolean): Indicates if the operation was successful.
-    *   `message` (string): A descriptive message about the result.
-    *   `eventId` (string): The ID of the saved event configuration document.
-*   **Error Codes:**
-    *   `unauthenticated`: The user is not logged in.
-    *   `invalid-argument`: Missing required fields in the payload.
-    *   `not-found`: No memorial record found for the user.
-    *   `internal`: A server-side error occurred.
+*   **Purpose:** Full "family member" self-registration — creates user, `users` doc, top-level `memorials` doc, Algolia index entry, sends registration email, redirects to booking.
+*   **Inputs (form data):** `lovedOneName`, `name`, `email`, `phone` (all required except phone).
+*   **Outputs:** `redirect(303, '/app/book/{memorialId}?token={customToken}')` on success; `fail(400|500|503, { error })` on failure.
+*   **Side effects:** Sets `session` is **not** created here — the redirect target signs in via custom token, same as the general registration flow. Sets a `first_visit_memorial_popup` cookie.
 
 ---
 
-#### **`getLatestCalculatorConfiguration`**
+#### **`register/funeral-director` (default action)**
 
-*   **Purpose:** Retrieves the most recent calculator configuration for the logged-in user.
-*   **Inputs:** None (authentication context is used).
-*   **Outputs (Response Body):**
-    *   `data` (object | null): The latest configuration object, or `null` if none is found.
-*   **Error Codes:**
-    *   `unauthenticated`: The user is not logged in.
-    *   `internal`: A server-side error occurred.
+*   **Purpose:** Funeral-director-initiated registration with full service details.
+*   **Inputs (form data):** `lovedOneName`, `familyContactName`, `familyContactEmail`, `familyContactPhone`, `directorName`, `directorEmail`, `funeralHomeName`, `locationName`, `locationAddress`, `memorialDate`, `memorialTime`, `contactPreference`, `additionalNotes`.
+*   **Behavior:** Same shape as `loved-one` but writes the memorial to `users/{uid}/memorials/{id}` (a subcollection) instead of the top-level `memorials` collection — see `03-data-model-schema.md` for why this is a bug relative to how public tribute pages are queried.
+*   **Outputs:** `redirect(303, '/auth/session?token={customToken}&slug={slug}')`.
 
 ---
 
-#### **`processStripePayment`**
+#### **`login` (`/login`, action: `login`)**
 
-*   **Purpose:** Creates a Stripe Payment Intent to initiate a payment.
-*   **Inputs (Request Body):**
-    *   `bookingId` (string, required): The ID of the event configuration to be paid for.
-    *   `billingInfo` (object, optional): The user's billing address.
-*   **Outputs (Response Body):**
-    *   `success` (boolean): Indicates if the operation was successful.
-    *   `paymentIntentId` (string): The ID of the created Stripe Payment Intent.
-    *   `clientSecret` (string): The client secret for the Payment Intent.
-    *   `status` (string): The status of the Payment Intent.
-*   **Error Codes:**
-    *   `unauthenticated`: The user is not logged in.
-    *   `invalid-argument`: Missing or invalid required fields.
-    *   `already-exists`: Payment has already been processed for this booking.
-    *   `internal`: A server-side error occurred.
+*   **Inputs (form data):** `idToken` (required), `bookingId` (optional, for claiming an anonymous booking).
+*   **Behavior:** Verifies ID token, creates session cookie directly (separate code path from `/api/session`), optionally updates a top-level `bookings/{bookingId}` doc, redirects to `redirectTo` query param or `/my-portal` (route does not currently exist).
 
 ---
 
-#### **`confirmStripePayment`**
+### 2.2. `/api/session` (`+server.ts`)
 
-*   **Purpose:** Confirms a Stripe payment after it has been processed on the client.
-*   **Inputs (Request Body):**
-    *   `bookingId` (string, required): The ID of the event configuration.
-    *   `paymentIntentId` (string, required): The ID of the Stripe Payment Intent.
-*   **Outputs (Response Body):**
-    *   `success` (boolean): Indicates if the operation was successful.
-    *   `paymentId` (string): The ID of the confirmed payment.
-    *   `status` (string): The final status of the payment.
-*   **Error Codes:**
-    *   `unauthenticated`: The user is not logged in.
-    *   `invalid-argument`: Missing or invalid required fields.
-    *   `failed-precondition`: The payment is not in a "succeeded" state.
-    *   `internal`: A server-side error occurred.
+*   **`POST`** — Body: `{ token: string, slug?: string }`. Verifies the Firebase ID token, creates a 5-day `HttpOnly` session cookie. Returns `{ status: 'signedIn', redirectUrl? }` — `redirectUrl` is `/tributes/{slug}` if `slug` was provided.
+*   **`DELETE`** — Clears the `session` cookie. Returns `{ status: 'signedOut' }`.
 
----
+### 2.3. `/logout` (`+server.ts`)
 
-### 2.2. Firestore Direct Access
+*   Clears the session cookie (separate implementation from `/api/session` `DELETE`).
 
-This section documents the queries and mutations performed directly from the client-side application.
+### 2.4. `/api/user/mark-memorial-visit-complete` (`POST`)
 
-#### **Reads**
+*   **Auth:** Requires `locals.user`.
+*   **Behavior:** Sets `users/{uid}.firstTimeMemorialVisit = false` and expires the `first_visit_memorial_popup` cookie.
 
-*   **`users` collection:**
-    *   **Get by ID:** Fetches a single user document by its UID.
-        *   *Location:* `src/app/my-portal/page.tsx`, `src/app/calculator/components/CalculatorView.tsx`
-*   **`memorials` collection:**
-    *   **Query by `createdByUserId`:** Fetches the most recent memorial created by the current user.
-        *   *Location:* `src/app/my-portal/page.tsx`, `src/app/calculator/components/CalculatorView.tsx`
-*   **`emailTemplates` collection:**
-    *   **Get by ID:** Fetches a single email template document by its ID.
-        *   *Location:* `src/app/admin/email-templates/[templateId]/page.tsx`
-*   **`receipts` collection:**
-    *   **Get by ID:** Fetches a single receipt document by its ID.
-        *   *Location:* `src/app/receipt/[receiptId]/page.tsx`
-*   **`contacts` sub-collection:**
-    *   **Get all:** Fetches all documents in the `contacts` sub-collection of a memorial.
-        *   *Location:* `src/app/my-portal/page.tsx`
-*   **`privateNotes` sub-collection:**
-    *   **Query and order by `submittedAt`:** Fetches all private notes for a given event configuration, ordered by submission time.
-        *   *Location:* `src/app/my-portal/page.tsx`
+### 2.5. `/api/contact` (`POST`)
 
-#### **Writes**
+*   **Purpose:** Contact form submission. Sends a confirmation email to the submitter and a notification to a hardcoded `admin@tributestream.com` address (marked `TODO` to move to env var) via `$lib/server/email.ts`.
+*   **Inputs:** `{ name, email, subject, message }` (all required).
 
-*   **`users` collection:**
-    *   **Set with merge:** Creates or updates a user document.
-        *   *Location:* `src/app/create-memorial/page.tsx` (Note: This is a fallback, primary creation is in the `createMemorial` function).
+### 2.6. `/api/set-admin-claim` (`POST`)
+
+*   **Auth:** Requires `locals.user` (⚠️ does **not** verify the caller is themselves an admin — code comment flags this as needing production hardening).
+*   **Inputs:** `{ email }`. Sets `admin: true` custom claim on the target user, preserving existing claims.
+
+### 2.7. `/api/set-role-claim` (`POST`)
+
+*   **Auth:** Manually re-parses the `session` cookie from request headers (does not use `locals`) and requires `admin: true` in the decoded claims.
+*   **Inputs:** `{ uid, role }`. Sets the `role` custom claim and updates `users/{uid}.role` in Firestore.
+
+### 2.8. `/api/memorials/[memorialId]/*`
+
+| Endpoint | Method(s) | Auth | Purpose |
+|---|---|---|---|
+| `/follow` | `POST`, `DELETE` | Any logged-in user | Add/remove `memorials/{id}/followers/{uid}` |
+| `/invite` | `POST` | Memorial owner (`creatorUid === locals.user.uid`) | Create an `invitations` doc for a `family_member` role (email sending is a `TODO`, not implemented) |
+| `/invite/[invitationId]` | (see file) | — | Accept/manage a specific invitation |
+| `/embeds` | `POST`, `PUT`, `DELETE` | Admin only (`locals.user?.admin`) | CRUD for `memorials/{id}/embeds/{embedId}` (YouTube/Vimeo) |
+| `/assign` | `POST` | Admin only | Reassigns `creatorUid` on a memorial (ownership transfer) |
+| `/update-details` | `PUT` | Owner (`creatorUid` or `userId` match) or admin | Updates a fixed allow-list of memorial fields (date, time, location, website, livestream URL/date/time) |
+
+### 2.9. `/api/bookings/*`
+
+*   **`/api/bookings` (`POST`) — removed.** The file explicitly states: *"The POST handler has been removed to prevent the creation of draft bookings from the calculator. A memorial is already created upon user registration, so this functionality is redundant."*
+*   **`/api/bookings/[bookingId]` (`PUT`)** — Auth required. Updates a draft booking at `users/{uid}/bookings/{bookingId}`; rejects the update with `400` if `status !== 'draft'`. Ownership or admin required.
+*   **`/api/bookings/[bookingId]/save-progress` (`POST`)** — Auth required. `set(..., { merge: true })`s booking data to `users/{uid}/bookings/{bookingId}`.
+*   **`/api/bookings/[bookingId]/autosave` (`POST`)** — Auth required. Writes `livestreamConfig` directly onto a **`memorials/{bookingId}`** document (note: uses the top-level `memorials` collection and treats the URL param as a memorial ID, not a `users` subcollection booking — inconsistent with the other two booking endpoints).
+*   **`/api/bookings/[bookingId]/confirm` (`POST`)** — Auth required. Body: `{ memorialId }`. Creates a Stripe `paymentIntent` for `bookingData.total * 100` cents, sets booking `status: 'pending_payment'`, stores `paymentIntentId`. Returns `{ success, clientSecret }`. **No webhook or confirmation endpoint was found** to move status from `pending_payment` to `confirmed` after Stripe succeeds — this appears to be an incomplete flow (see `/app/checkout/success` page, which may handle this client-side).
+
+### 2.10. Firestore Access Pattern
+
+All Firestore reads/writes originate from **server-side code** (`+page.server.ts` / `+server.ts`) using the Firebase Admin SDK (`getAdminDb()` from `frontend/src/lib/server/firebase.ts`). No client-side Firestore SDK calls were found — the browser only uses the Firebase client SDK for Authentication (`frontend/src/lib/firebase.ts`).
 
 ## 3. Key Question
 
-**Are there any existing Next.js API routes that need to be re-implemented as SvelteKit server endpoints or Cloud Functions?**
+**What is missing or inconsistent relative to a complete API surface?**
 
-Yes. The existing Next.js API routes under `/api/admin` are essential for the admin portal's functionality. These routes handle fetching audit logs, tributes, and users. As the application is migrated to SvelteKit, these endpoints will need to be re-implemented as SvelteKit server endpoints to maintain the admin portal's functionality. The `/api/login` and `/api/search-livestreams` routes will also need to be migrated. The `/api/admin/email-templates/preview` route, which handles server-side rendering of email templates, will also need a SvelteKit equivalent.
+*   **No payment confirmation/webhook path:** `confirm` creates a PaymentIntent but nothing was found that transitions a booking to `status: 'confirmed'` after Stripe reports success — verify `frontend/src/routes/app/checkout/success/+page.server.ts` or add a Stripe webhook endpoint.
+*   **No invitation email sending** despite the `invitations` collection and endpoint existing.
+*   **`autosave` vs `save-progress` vs the `PUT` booking endpoint** use two different collections (`memorials` top-level vs `users/{uid}/bookings`) for conceptually similar "save my progress" actions — needs consolidation.
+*   **Weak authorization on `/api/set-admin-claim`** — any authenticated user can currently grant admin to any email address; should require the caller to already be an admin, matching the pattern already used in `/api/set-role-claim`.
+*   **No admin-portal read endpoints** (audit logs, user lists, tribute lists) exist at all — if an admin UI is planned, this entire surface needs to be built new, not "re-implemented" from the old Next.js `/api/admin/*` routes referenced in earlier planning docs.

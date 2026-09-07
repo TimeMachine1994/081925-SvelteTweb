@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Generator Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-area {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .log {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+        video {
+            width: 100%;
+            max-width: 400px;
+            margin: 20px 0;
+        }
+        canvas {
+            border: 1px solid #ddd;
+            margin: 10px 0;
+        }
+        .progress {
+            width: 100%;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background: #007bff;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <h1>Simple Slideshow Generator Test</h1>
+    
+    <div class="test-area">
+        <h3>Test with Sample Images</h3>
+        <button onclick="runTest()">Generate Test Slideshow</button>
+        <button onclick="clearLog()">Clear Log</button>
+        
+        <div class="progress">
+            <div id="progressBar" class="progress-bar" style="width: 0%"></div>
+        </div>
+        <div id="progressText">Ready to test...</div>
+        
+        <canvas id="testCanvas" width="640" height="360" style="display: none;"></canvas>
+        
+        <div id="log" class="log"></div>
+        
+        <video id="resultVideo" controls style="display: none;"></video>
+    </div>
+
+    <script type="module">
+        const log = document.getElementById('log');
+        const video = document.getElementById('resultVideo');
+        const canvas = document.getElementById('testCanvas');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        
+        function logMessage(message) {
+            console.log(message);
+            log.textContent += new Date().toLocaleTimeString() + ': ' + message + '\n';
+            log.scrollTop = log.scrollHeight;
+        }
+        
+        function clearLog() {
+            log.textContent = '';
+            progressBar.style.width = '0%';
+            progressText.textContent = 'Ready to test...';
+            video.style.display = 'none';
+        }
+        
+        function updateProgress(progress) {
+            progressBar.style.width = progress.progress + '%';
+            progressText.textContent = `${progress.phase} - ${Math.round(progress.progress)}%`;
+            if (progress.currentPhoto) {
+                progressText.textContent += ` (Photo ${progress.currentPhoto}/${progress.totalPhotos})`;
+            }
+        }
+        
+        // Create test images
+        function createTestImage(width, height, color, text) {
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            
+            // Background
+            ctx.fillStyle = color;
+            ctx.fillRect(0, 0, width, height);
+            
+            // Text
+            ctx.fillStyle = 'white';
+            ctx.font = '48px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(text, width / 2, height / 2);
+            
+            return canvas.toDataURL();
+        }
+        
+        async function runTest() {
+            try {
+                logMessage('🚀 Starting simple generator test...');
+                
+                // Create test photos
+                const testPhotos = [
+                    {
+                        id: '1',
+                        preview: createTestImage(800, 600, '#ff6b6b', 'Photo 1'),
+                        caption: 'First test photo',
+                        duration: 2
+                    },
+                    {
+                        id: '2', 
+                        preview: createTestImage(800, 600, '#4ecdc4', 'Photo 2'),
+                        caption: 'Second test photo',
+                        duration: 2
+                    },
+                    {
+                        id: '3',
+                        preview: createTestImage(800, 600, '#45b7d1', 'Photo 3'),
+                        caption: 'Third test photo', 
+                        duration: 2
+                    }
+                ];
+                
+                const settings = {
+                    photoDuration: 2,
+                    transitionType: 'fade',
+                    videoQuality: 'medium',
+                    aspectRatio: '16:9'
+                };
+                
+                logMessage(`📸 Created ${testPhotos.length} test photos`);
+                logMessage('⚙️ Settings: ' + JSON.stringify(settings));
+                
+                // Simple inline generator (simplified version)
+                const generator = new SimpleTestGenerator(canvas);
+                
+                const videoBlob = await generator.generateVideo(testPhotos, settings, updateProgress);
+                
+                logMessage(`✅ Video generated: ${videoBlob.size} bytes`);
+                
+                if (videoBlob.size > 0) {
+                    const url = URL.createObjectURL(videoBlob);
+                    video.src = url;
+                    video.style.display = 'block';
+                    logMessage('🎥 Video ready for playback!');
+                } else {
+                    logMessage('❌ Generated video is empty!');
+                }
+                
+            } catch (error) {
+                logMessage(`❌ Test failed: ${error.message}`);
+                console.error('Test error:', error);
+            }
+        }
+        
+        // Simplified test generator
+        class SimpleTestGenerator {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.recordedChunks = [];
+            }
+            
+            async generateVideo(photos, settings, onProgress) {
+                logMessage('🎬 Setting up canvas...');
+                
+                // Setup canvas
+                this.canvas.width = 1280;
+                this.canvas.height = 720;
+                this.canvas.style.display = 'block';
+                
+                // Load images
+                onProgress({ phase: 'loading', progress: 0, totalPhotos: photos.length });
+                
+                const images = [];
+                for (let i = 0; i < photos.length; i++) {
+                    const img = new Image();
+                    await new Promise((resolve, reject) => {
+                        img.onload = resolve;
+                        img.onerror = reject;
+                        img.src = photos[i].preview;
+                    });
+                    images.push(img);
+                    
+                    const progress = ((i + 1) / photos.length) * 100;
+                    onProgress({ phase: 'loading', progress, currentPhoto: i + 1, totalPhotos: photos.length });
+                    logMessage(`✅ Loaded image ${i + 1}/${photos.length}`);
+                }
+                
+                // Setup MediaRecorder
+                logMessage('📹 Setting up MediaRecorder...');
+                
+                const stream = this.canvas.captureStream(30);
+                logMessage(`📺 Stream tracks: ${stream.getTracks().length}`);
+                
+                const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp8') ? 
+                    'video/webm;codecs=vp8' : 'video/webm';
+                    
+                logMessage(`🎥 Using codec: ${mimeType}`);
+                
+                this.recordedChunks = [];
+                const mediaRecorder = new MediaRecorder(stream, {
+                    mimeType,
+                    videoBitsPerSecond: 1000000
+                });
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        logMessage(`📦 Chunk: ${event.data.size} bytes`);
+                        this.recordedChunks.push(event.data);
+                    }
+                };
+                
+                // Start recording
+                return new Promise((resolve, reject) => {
+                    mediaRecorder.onstop = () => {
+                        const blob = new Blob(this.recordedChunks, { type: mimeType });
+                        logMessage(`🛑 Recording complete: ${blob.size} bytes`);
+                        resolve(blob);
+                    };
+                    
+                    mediaRecorder.onerror = reject;
+                    
+                    logMessage('🔴 Starting recording...');
+                    mediaRecorder.start(1000);
+                    
+                    // Render slideshow
+                    this.renderSlideshow(images, photos, settings, onProgress).then(() => {
+                        logMessage('🏁 Rendering complete, stopping...');
+                        setTimeout(() => mediaRecorder.stop(), 500);
+                    }).catch(reject);
+                });
+            }
+            
+            async renderSlideshow(images, photos, settings, onProgress) {
+                onProgress({ phase: 'rendering', progress: 0, totalPhotos: photos.length });
+                
+                const fps = 30;
+                const frameDuration = 1000 / fps;
+                
+                for (let i = 0; i < images.length; i++) {
+                    logMessage(`🖼️ Rendering photo ${i + 1}/${images.length}`);
+                    
+                    const frames = Math.floor(photos[i].duration * fps);
+                    
+                    for (let frame = 0; frame < frames; frame++) {
+                        this.drawPhoto(images[i], photos[i].caption);
+                        await new Promise(resolve => setTimeout(resolve, frameDuration));
+                    }
+                    
+                    const progress = ((i + 1) / images.length) * 100;
+                    onProgress({ phase: 'rendering', progress, currentPhoto: i + 1, totalPhotos: photos.length });
+                }
+            }
+            
+            drawPhoto(image, caption) {
+                // Clear
+                this.ctx.fillStyle = '#000000';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw image (fit to canvas)
+                const canvasAspect = this.canvas.width / this.canvas.height;
+                const imageAspect = image.width / image.height;
+                
+                let drawWidth, drawHeight, drawX, drawY;
+                
+                if (imageAspect > canvasAspect) {
+                    drawWidth = this.canvas.width;
+                    drawHeight = drawWidth / imageAspect;
+                    drawX = 0;
+                    drawY = (this.canvas.height - drawHeight) / 2;
+                } else {
+                    drawHeight = this.canvas.height;
+                    drawWidth = drawHeight * imageAspect;
+                    drawX = (this.canvas.width - drawWidth) / 2;
+                    drawY = 0;
+                }
+                
+                this.ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight);
+                
+                // Caption
+                if (caption) {
+                    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                    this.ctx.fillRect(0, this.canvas.height - 80, this.canvas.width, 80);
+                    
+                    this.ctx.fillStyle = '#ffffff';
+                    this.ctx.font = '24px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText(caption, this.canvas.width / 2, this.canvas.height - 30);
+                }
+            }
+        }
+        
+        // Make functions global
+        window.runTest = runTest;
+        window.clearLog = clearLog;
+        
+        logMessage('🎨 Test ready - click "Generate Test Slideshow" to start');
+    </script>
+</body>
+</html>

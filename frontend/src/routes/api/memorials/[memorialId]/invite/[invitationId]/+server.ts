@@ -1,4 +1,5 @@
 import { getAdminDb } from '$lib/server/firebase';
+import { deleteInvitation, getInvitation } from '$lib/server/db/repos/invitations';
 import { error, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
@@ -21,7 +22,7 @@ export const DELETE: RequestHandler = async ({ locals, params }) => {
 		throw error(403, 'You do not have permission to manage this memorial');
 	}
 
-	await getAdminDb().collection('invitations').doc(invitationId).delete();
+	await deleteInvitation(invitationId);
 
 	return json({ success: true });
 };
@@ -45,17 +46,10 @@ export const POST: RequestHandler = async ({ locals, params }) => {
 		throw error(403, 'You do not have permission to manage this memorial');
 	}
 
-	const invitationRef = getAdminDb().collection('invitations').doc(invitationId);
-	const invitationSnap = await invitationRef.get();
-
-	if (!invitationSnap.exists) {
-		throw error(404, 'Invitation not found');
-	}
-
-	const invitation = invitationSnap.data();
+	const invitation = await getInvitation(invitationId);
 
 	if (!invitation) {
-		throw error(404, 'Invitation data not found');
+		throw error(404, 'Invitation not found');
 	}
 
 	await memorialRef.update({

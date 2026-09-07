@@ -1,0 +1,8 @@
+# Service account keys (sensitive)
+*-service-account.json
+
+# Node modules
+node_modules/
+
+# Logs
+*.log

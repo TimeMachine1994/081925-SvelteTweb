@@ -1,186 +1,95 @@
 rules_version = '2';
+
 service firebase.storage {
   match /b/{bucket}/o {
-    
-    // ============================================
-    // HELPER FUNCTIONS
-    // ============================================
-    
-    // Check if the request is authenticated
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-    
-    // Check if the authenticated user is an admin
+
+    // Helper function to check for admin custom claim
     function isAdmin() {
-      return isAuthenticated() && 
-             request.auth.token.admin == true;
+      return request.auth != null && request.auth.token.admin == true;
     }
-    
-    // Get memorial document from Firestore - with caching for performance
-    function getMemorial(memorialId) {
-      return firestore.get(/databases/(default)/documents/memorials/$(memorialId));
+
+    // Helper function to check for admin emails (for backend operations)
+    function isAdminEmail() {
+      return request.auth != null && 
+        (request.auth.token.email == 'austinbryanfilm@gmail.com' ||
+         request.auth.token.email.matches('.*@tributestream.com'));
     }
-    
-    // Check if the authenticated user is the owner of the memorial
+
     function isOwner(memorialId) {
-      let memorial = getMemorial(memorialId);
-      return isAuthenticated() && (
-        request.auth.uid == memorial.data.creatorUid ||
-        request.auth.uid == memorial.data.createdByUserId
-      );
+      return firestore.get(/databases/(default)/documents/memorials/$(memorialId)).data.ownerUid == request.auth.uid;
     }
-    
-    // Check if the authenticated user is a family member of the memorial
+
+    function isFuneralDirector(memorialId) {
+      return firestore.get(/databases/(default)/documents/memorials/$(memorialId)).data.funeralDirectorUid == request.auth.uid;
+    }
+
     function isFamilyMember(memorialId) {
-      return isAuthenticated() && 
-             firestore.exists(/databases/(default)/documents/memorials/$(memorialId)/familyMembers/$(request.auth.uid));
+      // Check if an accepted invitation exists for this user and memorial
+      let invitationId = request.auth.uid + '_' + memorialId;
+      return firestore.exists(/databases/(default)/documents/invitations/$(invitationId)) &&
+             firestore.get(/databases/(default)/documents/invitations/$(invitationId)).data.status == 'accepted';
+    }
+
+    // Blog images and assets - allow admin access for FireCMS
+    match /blog/{allPaths=**} {
+      allow read; // Public read for blog images
+      allow write: if isAdmin() || isAdminEmail();
+    }
+
+    // Blog featured images - allow admin access for FireCMS
+    match /blog-featured/{allPaths=**} {
+      allow read; // Public read for blog featured images
+      allow write: if isAdmin() || isAdminEmail();
+    }
+
+    // Blog author avatars - allow admin access for FireCMS
+    match /blog-authors/{allPaths=**} {
+      allow read; // Public read for blog author avatars
+      allow write: if isAdmin() || isAdminEmail();
+    }
+
+    // Public videos (homepage background, about us, etc.)
+    // - Publicly readable for marketing/promotional content
+    // - Writable by admins for content management
+    match /tributestream_advertisment/{allPaths=**} {
+      allow read;
+      allow write: if isAdmin() || isAdminEmail();
     }
     
-    // Check if user can upload photos (owner, family member, or admin)
-    function canUploadPhotos(memorialId) {
-      return isAuthenticated() && (
-        isAdmin() ||
-        isOwner(memorialId) ||
-        isFamilyMember(memorialId)
-      );
+    match /tributestream_-_about_us/{allPaths=**} {
+      allow read;
+      allow write: if isAdmin() || isAdminEmail();
     }
     
-    // Check if user can delete photos (owner or admin only)
-    function canDeletePhotos(memorialId) {
-      return isAuthenticated() && (
-        isAdmin() || 
-        isOwner(memorialId)
-      );
+    match /Background.jpg {
+      allow read;
+      allow write: if isAdmin() || isAdminEmail();
     }
-    
-    // Validate file is an image with proper size
-    function isValidImageUpload() {
-      return request.resource.size < 10 * 1024 * 1024 && // Max 10MB
-             request.resource.contentType.matches('image/.*'); // Images only
+
+    // General admin uploads folder
+    match /admin/{allPaths=**} {
+      allow read, write: if isAdmin() || isAdminEmail();
     }
-    
-    // Validate allowed image types more strictly
-    function isAllowedImageType() {
-      return request.resource.contentType in [
-        'image/jpeg',
-        'image/jpg', 
-        'image/png',
-        'image/gif',
-        'image/webp',
-        'image/svg+xml',
-        'image/heic',
-        'image/heif'
-      ];
-    }
-    
-    // ============================================
-    // MEMORIAL PHOTOS RULES
-    // ============================================
-    
-    // Rules for memorial photo storage
+
+    // Memorial photos:
+    // - Publicly readable.
+    // - Writable by the memorial owner OR an invited family member OR funeral director OR admins.
     match /memorials/{memorialId}/{allPaths=**} {
-      // Public read access for all memorial photos
-      allow read: if true;
-      
-      // Create/Update: Restricted to authenticated users with proper roles
-      // Must be valid image file under 10MB
-      allow create: if canUploadPhotos(memorialId) &&
-                      isValidImageUpload() &&
-                      isAllowedImageType();
-                      
-      allow update: if canUploadPhotos(memorialId) &&
-                      isValidImageUpload() &&
-                      isAllowedImageType();
-      
-      // Delete: Only owners and admins can delete photos
-      allow delete: if canDeletePhotos(memorialId);
+      allow read;
+      allow write: if request.auth != null && (isOwner(memorialId) || isFamilyMember(memorialId) || isFuneralDirector(memorialId) || isAdmin() || isAdminEmail());
     }
-    
-    // ============================================
-    // MEMORIAL THUMBNAILS (if needed)
-    // ============================================
-    
-    // Rules for auto-generated thumbnails (if using Firebase Extensions)
-    match /memorials/{memorialId}/thumbnails/{thumbnail} {
-      // Public read access for thumbnails
-      allow read: if true;
-      
-      // Only system/admin can create thumbnails
-      allow create, update: if isAdmin();
-      
-      // Same delete permissions as original photos
-      allow delete: if canDeletePhotos(memorialId);
+
+    // Memorial slideshows (videos and photos):
+    // - Publicly readable so slideshows can be viewed on memorial pages
+    // - Writable by the memorial owner OR an invited family member OR funeral director OR admins
+    match /slideshows/{memorialId}/{allPaths=**} {
+      allow read;
+      allow write: if request.auth != null && (isOwner(memorialId) || isFamilyMember(memorialId) || isFuneralDirector(memorialId) || isAdmin() || isAdminEmail());
     }
-    
-    // ============================================
-    // TEMPORARY UPLOADS (for processing)
-    // ============================================
-    
-    // Temporary upload area for photo processing
-    match /temp/{userId}/{tempFile} {
-      // Users can only access their own temp files
-      allow read: if isAuthenticated() && request.auth.uid == userId;
-      
-      // Users can upload to their own temp directory
-      allow create: if isAuthenticated() && 
-                      request.auth.uid == userId &&
-                      isValidImageUpload() &&
-                      isAllowedImageType();
-      
-      // Users can update their own temp files
-      allow update: if isAuthenticated() && 
-                      request.auth.uid == userId &&
-                      isValidImageUpload() &&
-                      isAllowedImageType();
-      
-      // Users can delete their own temp files
-      allow delete: if isAuthenticated() && request.auth.uid == userId;
-    }
-    
-    // ============================================
-    // PROFILE PHOTOS (if needed)
-    // ============================================
-    
-    // User profile photos
-    match /users/{userId}/profile/{fileName} {
-      // Public read for profile photos
-      allow read: if true;
-      
-      // Users can upload their own profile photo
-      allow create, update: if isAuthenticated() && 
-                              request.auth.uid == userId &&
-                              request.resource.size < 5 * 1024 * 1024 && // 5MB limit for profile photos
-                              request.resource.contentType.matches('image/.*');
-      
-      // Users can delete their own profile photo
-      allow delete: if isAuthenticated() && 
-                      request.auth.uid == userId;
-    }
-    
-    // ============================================
-    // BACKUP/EXPORT FILES (admin only)
-    // ============================================
-    
-    // Backup and export files
-    match /backups/{backup=**} {
-      // Only admins can read backups
-      allow read: if isAdmin();
-      
-      // Only admins can create/update backups
-      allow create, update: if isAdmin();
-      
-      // Only admins can delete backups
-      allow delete: if isAdmin();
-    }
-    
-    // ============================================
-    // DEFAULT DENY RULE
-    // ============================================
-    
-    // Deny all other paths not explicitly defined
-    match /{document=**} {
-      allow read, write: if false;
+
+    // Fallback rule for admin access to any file (for backend operations)
+    match /{allPaths=**} {
+      allow read, write: if isAdmin() || isAdminEmail();
     }
   }
 }

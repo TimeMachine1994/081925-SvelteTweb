@@ -1,19 +1,36 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
-	import LiveUrlPreview from '$lib/components/LiveUrlPreview.svelte';
+	import { goto } from '$app/navigation';
+	import {
+		Heart,
+		User,
+		Mail,
+		Calendar,
+		Clock,
+		CheckCircle,
+		Building2,
+		Users,
+		AlertCircle
+	} from 'lucide-svelte';
+	import { Button } from '$lib/ui';
+	import type { PageData } from './$types';
 
-	console.log('🎯 Funeral Director Registration form initializing');
+	let {
+		data,
+		form
+	}: { 
+		data: PageData;
+		form?: { error?: any; success?: boolean; message?: string; memorialSlug?: string; familyEmail?: string } 
+	} = $props();
 
-	let { form } = $props();
-
-	// Form state
+	// Form state using Svelte 5 runes - with prepopulation
 	let lovedOneName = $state('');
 	let familyContactName = $state('');
 	let familyContactEmail = $state('');
 	let familyContactPhone = $state('');
-	let directorName = $state('');
-	let directorEmail = $state('');
-	let funeralHomeName = $state('');
+	let directorName = $state(data.prepopulatedData?.directorName || '');
+	let directorEmail = $state(data.prepopulatedData?.directorEmail || '');
+	let funeralHomeName = $state(data.prepopulatedData?.funeralHomeName || '');
 	let locationName = $state('');
 	let locationAddress = $state('');
 	let memorialDate = $state('');
@@ -21,206 +38,401 @@
 	let contactPreference = $state('email');
 	let additionalNotes = $state('');
 
-	console.log('📝 Form state initialized with runes');
+	// UI states
+	let isSubmitting = $state(false);
+
+	// Get today's date for minimum date input
+	const today = new Date().toISOString().split('T')[0];
 
 	// Form validation
-	let validationErrors: string[] = $state([]);
-
 	function validateForm() {
-		console.log('🔍 Validating form...');
-		const errors = [];
-
-		if (!lovedOneName.trim()) errors.push("Loved one's name is required");
-		if (!directorName.trim()) errors.push('Director name is required');
-		if (!familyContactEmail.trim()) errors.push('Family contact email is required');
-		if (!familyContactPhone.trim()) errors.push('Family contact phone is required');
-		if (!funeralHomeName.trim()) errors.push('Funeral home name is required');
-
+		if (!lovedOneName.trim()) return 'Loved one\'s name is required';
+		if (!directorName.trim()) return 'Director name is required';
+		if (!familyContactEmail.trim()) return 'Family contact email is required';
+		if (!familyContactPhone.trim()) return 'Family contact phone is required';
+		if (!funeralHomeName.trim()) return 'Funeral home name is required';
+		
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		if (familyContactEmail && !emailRegex.test(familyContactEmail)) {
-			errors.push('Family contact email must be a valid address');
-		}
-		if (directorEmail && !emailRegex.test(directorEmail)) {
-			errors.push('Director email must be a valid address');
-		}
-
-		validationErrors = errors;
-		console.log('✅ Validation complete. Errors:', errors.length);
-		return errors.length === 0;
+		if (!emailRegex.test(familyContactEmail)) return 'Family contact email must be valid';
+		if (directorEmail && !emailRegex.test(directorEmail)) return 'Director email must be valid';
+		
+		return null;
 	}
 
+	// Handle form submission
 	function handleSubmit(event: SubmitEvent) {
-		console.log('📤 Form submission started');
-		if (!validateForm()) {
+		// Prevent double submission
+		if (isSubmitting) {
 			event.preventDefault();
-			console.log('❌ Form validation failed, preventing submission');
-		} else {
-			console.log('✅ Form validation passed, proceeding with submission');
+			return;
+		}
+		
+		const error = validateForm();
+		if (error) {
+			event.preventDefault();
+			alert(error);
+			return;
 		}
 	}
 </script>
 
-<!-- PAGE WRAPPER -->
-<div class="min-h-screen bg-gray-50 flex justify-center items-center py-12 px-4">
-	<div class="w-full max-w-5xl bg-white shadow-2xl rounded-2xl overflow-hidden">
+<svelte:head>
+	<title>Quick Family Registration - Tributestream</title>
+	<meta
+		name="description"
+		content="Quickly register families and create memorial pages for funeral services. Professional tools for funeral directors."
+	/>
+</svelte:head>
 
-		<!-- HEADER -->
-		<header class="text-center px-8 py-10 bg-[#0f0f0f]">
-			<h1 class="text-3xl font-bold mb-4 text-[#D5BA7F]">✨ Funeral Director Registration</h1>
-			<p class="max-w-2xl mx-auto text-gray-200/90">
-				Create a memorial page on behalf of a family.
-			</p>
-		</header>
-
-		<form method="POST" use:enhance onsubmit={handleSubmit} class="grid grid-cols-1 md:grid-cols-2 gap-8 p-10">
-
-			<!-- LIVE PREVIEW -->
-			<section class="md:col-span-2">
-				<LiveUrlPreview bind:lovedOneName />
-			</section>
-
-			<!-- MEMORIAL DETAILS -->
-			<section class="bg-gray-50 p-6 rounded-xl shadow-sm space-y-6 md:col-span-2">
-				<div>
-					<h2 class="text-xl font-semibold mb-1 text-gray-700">📝 Memorial Details</h2>
-					<p class="text-gray-500 text-sm">Information about the loved one.</p>
-				</div>
-				<div>
-					<label for="lovedOneName" class="block text-sm font-medium mb-1 text-gray-600">Loved One's Full Name *</label>
-					<input
-						id="lovedOneName"
-						name="lovedOneName"
-						type="text"
-						required
-						bind:value={lovedOneName}
-						placeholder="Enter the full name of the deceased"
-						class="w-full border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
-				</div>
-			</section>
-
-			<!-- FAMILY CONTACT -->
-			<section class="bg-gray-50 p-6 rounded-xl shadow-sm space-y-6">
-				<div>
-					<h2 class="text-xl font-semibold mb-1 text-gray-700">👨‍👩‍👧‍👦 Family Contact</h2>
-					<p class="text-gray-500 text-sm">Primary contact for the family.</p>
-				</div>
-				<div class="space-y-4">
-					<div>
-						<label for="familyContactName" class="block text-sm font-medium mb-1 text-gray-600">Family Contact Name</label>
-						<input id="familyContactName" name="familyContactName" type="text" bind:value={familyContactName} placeholder="e.g., Jane Doe" class="w-full border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
-					</div>
-					<div>
-						<label for="familyContactEmail" class="block text-sm font-medium mb-1 text-gray-600">Family Contact Email *</label>
-						<input id="familyContactEmail" name="familyContactEmail" type="email" required bind:value={familyContactEmail} placeholder="family@example.com" class="w-full border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
-					</div>
-					<div>
-						<label for="familyContactPhone" class="block text-sm font-medium mb-1 text-gray-600">Family Contact Phone *</label>
-						<input id="familyContactPhone" name="familyContactPhone" type="tel" required bind:value={familyContactPhone} placeholder="(555) 123-4567" class="w-full border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
-					</div>
-				</div>
-			</section>
-
-			<!-- FUNERAL DIRECTOR -->
-			<section class="bg-gray-50 p-6 rounded-xl shadow-sm space-y-6">
-				<div>
-					<h2 class="text-xl font-semibold mb-1 text-gray-700">👔 Funeral Director</h2>
-					<p class="text-gray-500 text-sm">Your information.</p>
-				</div>
-				<div class="space-y-4">
-					<div>
-						<label for="directorName" class="block text-sm font-medium mb-1 text-gray-600">Your Name *</label>
-						<input id="directorName" name="directorName" type="text" required bind:value={directorName} placeholder="Your full name" class="w-full border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
-					</div>
-					<div>
-						<label for="directorEmail" class="block text-sm font-medium mb-1 text-gray-600">Your Email</label>
-						<input id="directorEmail" name="directorEmail" type="email" bind:value={directorEmail} placeholder="your@email.com" class="w-full border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
-					</div>
-					<div>
-						<label for="funeralHomeName" class="block text-sm font-medium mb-1 text-gray-600">Funeral Home Name *</label>
-						<input id="funeralHomeName" name="funeralHomeName" type="text" required bind:value={funeralHomeName} placeholder="e.g., Serenity Funeral Home" class="w-full border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
-					</div>
-				</div>
-			</section>
-
-			<!-- SERVICE DETAILS -->
-			<section class="bg-gray-50 p-6 rounded-xl shadow-sm space-y-6 md:col-span-2">
-				<div>
-					<h2 class="text-xl font-semibold mb-1 text-gray-700">📅 Service Details</h2>
-					<p class="text-gray-500 text-sm">Optional information about the memorial service.</p>
-				</div>
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-					<div>
-						<label for="locationName" class="block text-sm font-medium mb-1 text-gray-600">Location Name</label>
-						<input id="locationName" name="locationName" type="text" bind:value={locationName} placeholder="e.g., Chapel of Memories" class="w-full border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
-					</div>
-					<div>
-						<label for="locationAddress" class="block text-sm font-medium mb-1 text-gray-600">Location Address</label>
-						<input id="locationAddress" name="locationAddress" type="text" bind:value={locationAddress} placeholder="123 Main St, Anytown, USA" class="w-full border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
-					</div>
-					<div>
-						<label for="memorialDate" class="block text-sm font-medium mb-1 text-gray-600">Memorial Date</label>
-						<input id="memorialDate" name="memorialDate" type="date" bind:value={memorialDate} class="w-full border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
-					</div>
-					<div>
-						<label for="memorialTime" class="block text-sm font-medium mb-1 text-gray-600">Memorial Time</label>
-						<input id="memorialTime" name="memorialTime" type="time" bind:value={memorialTime} class="w-full border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
-					</div>
-				</div>
-			</section>
-
-			<!-- ADDITIONAL INFO -->
-			<section class="bg-gray-50 p-6 rounded-xl shadow-sm space-y-6 md:col-span-2">
-				<div>
-					<h2 class="text-xl font-semibold mb-1 text-gray-700">ℹ️ Additional Information</h2>
-				</div>
-				<div>
-					<label for="contactPreference" class="block text-sm font-medium mb-1 text-gray-600">Preferred Contact Method</label>
-					<select id="contactPreference" name="contactPreference" bind:value={contactPreference} class="w-full border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-						<option value="email">Email</option>
-						<option value="phone">Phone</option>
-					</select>
-				</div>
-				<div>
-					<label for="additionalNotes" class="block text-sm font-medium mb-1 text-gray-600">Additional Notes</label>
-					<textarea id="additionalNotes" name="additionalNotes" bind:value={additionalNotes} rows="4" placeholder="Any other details..." class="w-full border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
-				</div>
-			</section>
-
-			<!-- ERRORS -->
-			{#if validationErrors.length > 0}
-				<div class="md:col-span-2 bg-red-50 border border-red-300 text-red-700 rounded-lg p-4 space-y-2">
-					<h3 class="font-semibold">❌ Please correct the following errors:</h3>
-					<ul class="list-disc list-inside">
-						{#each validationErrors as error}
-							<li>{error}</li>
-						{/each}
-					</ul>
-				</div>
-			{/if}
-
-			<!-- MESSAGES -->
-			{#if form?.error}
-				<div class="md:col-span-2 bg-red-100 border border-red-300 text-red-600 p-4 rounded-lg">
-					❌ {form.error}
-				</div>
-			{/if}
-			{#if (form as any)?.success}
-				<div class="md:col-span-2 bg-green-100 border border-green-300 text-green-700 p-4 rounded-lg">
-					✅ Success! You will be redirected shortly. Please check the family contact's email for login details.
-				</div>
-			{/if}
-
-			<!-- SUBMIT -->
-			<div class="md:col-span-2 text-center space-y-4">
-				<button
-					type="submit"
-					class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-8 py-3 rounded-lg shadow-md transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-					🚀 Create Memorial
-				</button>
-				<p class="text-sm text-gray-500 max-w-prose mx-auto">
-					By submitting this form, you'll create an account for the family and set up the memorial page. Login credentials will be emailed to the family contact.
-				</p>
+<div class="min-h-screen bg-gradient-to-br from-yellow-50 to-white">
+	<div class="container mx-auto px-4 py-12">
+		<!-- Header -->
+		<div class="mb-12 text-center">
+			<div
+				class="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-yellow-600 to-amber-600"
+			>
+				<Heart class="h-8 w-8 text-white" />
 			</div>
-		</form>
+			<h1 class="mb-4 text-4xl font-bold text-gray-900">Quick Family Registration</h1>
+			<p class="mx-auto max-w-2xl text-xl text-gray-600">
+				Quickly register families and create memorial pages for their loved ones. This will create their account, memorial page, and send them login credentials via email.
+			</p>
+			
+			<!-- User Info Display -->
+			{#if data.user}
+				<div class="mt-6 inline-flex items-center gap-3 rounded-lg bg-blue-50 px-4 py-2 text-sm text-blue-800">
+					{#if data.user.role === 'funeral_director'}
+						<Building2 class="h-4 w-4" />
+						<span>Logged in as: {data.funeralDirectorProfile?.companyName || 'Funeral Director'}</span>
+					{:else if data.user.role === 'admin'}
+						<Users class="h-4 w-4" />
+						<span>Logged in as: Administrator</span>
+					{/if}
+				</div>
+			{/if}
+		</div>
+
+		<!-- Form -->
+		<div class="mx-auto max-w-4xl">
+			<div class="rounded-2xl bg-white p-8 shadow-xl">
+				<!-- Success Message -->
+				{#if form?.success}
+					<div class="mb-6 rounded-xl border border-green-200 bg-green-50 p-4">
+						<div class="flex items-center gap-3">
+							<CheckCircle class="h-6 w-6 text-green-600" />
+							<div class="flex-1">
+								<h3 class="text-lg font-semibold text-green-800">Memorial Created Successfully!</h3>
+								<p class="text-sm text-green-700 mt-1">{form.message}</p>
+								{#if form.memorialSlug}
+									<div class="mt-3 space-y-2">
+										<p class="text-sm text-green-700">
+											<strong>Memorial URL:</strong> 
+											<a href="/{form.memorialSlug}" target="_blank" class="underline hover:text-green-800">
+												tributestream.com/{form.memorialSlug}
+											</a>
+										</p>
+										{#if form.familyContactEmail}
+											<p class="text-sm text-green-700">
+												<strong>Family Email:</strong> {form.familyContactEmail}
+											</p>
+										{/if}
+										<p class="text-sm text-green-700 font-medium mt-3">
+											Redirecting to your profile in 3 seconds...
+										</p>
+									</div>
+								{/if}
+							</div>
+						</div>
+					</div>
+				{/if}
+
+				<form
+					method="POST"
+					onsubmit={handleSubmit}
+					use:enhance={() => {
+						isSubmitting = true;
+						return async ({ result, update }) => {
+							await update({ reset: false });
+							isSubmitting = false;
+							
+							// If successful, redirect to profile after showing success message
+							if (result.type === 'success' && result.data?.success) {
+								setTimeout(() => {
+									window.location.href = '/profile';
+								}, 3000);
+							}
+						};
+					}}
+				>
+					<div class="space-y-6">
+						<div class="mb-8 text-center">
+							<h2 class="mb-2 text-2xl font-bold text-gray-900">Enhanced Memorial Registration</h2>
+							<p class="text-gray-600">Complete memorial setup with family contact, director, and service information.</p>
+						</div>
+
+						<!-- Memorial Information -->
+						<div class="space-y-4">
+							<h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+								<Heart class="h-5 w-5" />
+								Memorial Information
+							</h3>
+							<div class="grid grid-cols-1 gap-4">
+								<div>
+									<label for="lovedOneName" class="mb-2 block text-sm font-medium text-gray-700">
+										Loved One's Name *
+									</label>
+									<input
+										type="text"
+										id="lovedOneName"
+										name="lovedOneName"
+										bind:value={lovedOneName}
+										required
+										class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
+										placeholder="John Smith"
+									/>
+								</div>
+							</div>
+						</div>
+
+						<!-- Family Contact Information -->
+						<div class="space-y-4">
+							<h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+								<User class="h-5 w-5" />
+								Family Contact Information
+							</h3>
+							<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+								<div>
+									<label for="familyContactName" class="mb-2 block text-sm font-medium text-gray-700">
+										Family Contact Name
+									</label>
+									<input
+										type="text"
+										id="familyContactName"
+										name="familyContactName"
+										bind:value={familyContactName}
+										class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
+										placeholder="Jane Smith"
+									/>
+								</div>
+								<div>
+									<label for="familyContactEmail" class="mb-2 block text-sm font-medium text-gray-700">
+										Family Contact Email *
+									</label>
+									<input
+										type="email"
+										id="familyContactEmail"
+										name="familyContactEmail"
+										bind:value={familyContactEmail}
+										required
+										class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
+										placeholder="family@email.com"
+									/>
+								</div>
+								<div>
+									<label for="familyContactPhone" class="mb-2 block text-sm font-medium text-gray-700">
+										Family Contact Phone *
+									</label>
+									<input
+										type="tel"
+										id="familyContactPhone"
+										name="familyContactPhone"
+										bind:value={familyContactPhone}
+										required
+										class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
+										placeholder="(555) 123-4567"
+									/>
+								</div>
+								<div>
+									<label for="contactPreference" class="mb-2 block text-sm font-medium text-gray-700">
+										Preferred Contact Method
+									</label>
+									<select
+										id="contactPreference"
+										name="contactPreference"
+										bind:value={contactPreference}
+										class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
+									>
+										<option value="email">Email</option>
+										<option value="phone">Phone</option>
+									</select>
+								</div>
+							</div>
+						</div>
+
+						<!-- Director Information -->
+						<div class="space-y-4">
+							<h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+								<Building2 class="h-5 w-5" />
+								Director & Funeral Home Information
+							</h3>
+							<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+								<div>
+									<label for="directorName" class="mb-2 block text-sm font-medium text-gray-700">
+										Director Name *
+									</label>
+									<input
+										type="text"
+										id="directorName"
+										name="directorName"
+										bind:value={directorName}
+										required
+										class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
+										placeholder="Director Name"
+									/>
+								</div>
+								<div>
+									<label for="directorEmail" class="mb-2 block text-sm font-medium text-gray-700">
+										Director Email
+									</label>
+									<input
+										type="email"
+										id="directorEmail"
+										name="directorEmail"
+										bind:value={directorEmail}
+										class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
+										placeholder="director@funeralhome.com"
+									/>
+								</div>
+								<div class="md:col-span-2">
+									<label for="funeralHomeName" class="mb-2 block text-sm font-medium text-gray-700">
+										Funeral Home Name *
+									</label>
+									<input
+										type="text"
+										id="funeralHomeName"
+										name="funeralHomeName"
+										bind:value={funeralHomeName}
+										required
+										class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
+										placeholder="Smith & Sons Funeral Home"
+									/>
+								</div>
+							</div>
+						</div>
+
+						<!-- Service Information -->
+						<div class="space-y-4">
+							<h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+								<Calendar class="h-5 w-5" />
+								Service Information (Optional)
+							</h3>
+							<div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+								<div>
+									<label for="memorialDate" class="mb-2 block text-sm font-medium text-gray-700">
+										Memorial Date
+									</label>
+									<input
+										type="date"
+										id="memorialDate"
+										name="memorialDate"
+										bind:value={memorialDate}
+										min={today}
+										class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
+									/>
+								</div>
+								<div>
+									<label for="memorialTime" class="mb-2 block text-sm font-medium text-gray-700">
+										Memorial Time
+									</label>
+									<input
+										type="time"
+										id="memorialTime"
+										name="memorialTime"
+										bind:value={memorialTime}
+										class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
+									/>
+								</div>
+								<div>
+									<label for="locationName" class="mb-2 block text-sm font-medium text-gray-700">
+										Location Name
+									</label>
+									<input
+										type="text"
+										id="locationName"
+										name="locationName"
+										bind:value={locationName}
+										class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
+										placeholder="Chapel Name or Venue"
+									/>
+								</div>
+								<div>
+									<label for="locationAddress" class="mb-2 block text-sm font-medium text-gray-700">
+										Location Address
+									</label>
+									<input
+										type="text"
+										id="locationAddress"
+										name="locationAddress"
+										bind:value={locationAddress}
+										class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
+										placeholder="123 Main St, City, State"
+									/>
+								</div>
+							</div>
+						</div>
+
+						<!-- Additional Notes -->
+						<div class="space-y-4">
+							<h3 class="text-lg font-semibold text-gray-900">Additional Notes</h3>
+							<div>
+								<label for="additionalNotes" class="mb-2 block text-sm font-medium text-gray-700">
+									Special Instructions or Notes
+								</label>
+								<textarea
+									id="additionalNotes"
+									name="additionalNotes"
+									bind:value={additionalNotes}
+									rows="3"
+									class="w-full rounded-xl border border-gray-200 px-4 py-3 transition-all focus:border-transparent focus:ring-2 focus:ring-yellow-500"
+									placeholder="Any special instructions or additional information..."
+								></textarea>
+							</div>
+						</div>
+
+						<!-- Information Box -->
+						<div class="border-t pt-6">
+							<div class="rounded-lg bg-blue-50 p-4">
+								<div class="flex items-start gap-3">
+									<AlertCircle class="h-5 w-5 text-blue-600 mt-0.5" />
+									<div class="flex-1">
+										<h3 class="text-sm font-semibold text-blue-800">What happens next?</h3>
+										<ul class="mt-2 text-sm text-blue-700 space-y-1">
+											<li>• Family account will be created with temporary password</li>
+											<li>• Memorial page will be set up with the loved one's information</li>
+											<li>• Welcome email with login credentials will be sent to the family</li>
+											<li>• Family will have full control to customize their memorial</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					{#if form?.error}
+						<div class="mt-6 rounded-xl border border-red-200 bg-red-50 p-4">
+							<div class="flex items-center gap-3">
+								<AlertCircle class="h-5 w-5 text-red-600" />
+								<p class="text-red-800">{form.error}</p>
+							</div>
+						</div>
+					{/if}
+
+					<!-- Submit Button -->
+					<div class="mt-8 flex justify-center border-t pt-6">
+						<Button
+							type="submit"
+							variant="role"
+							role="funeral_director"
+							size="lg"
+							rounded="lg"
+							disabled={isSubmitting}
+							loading={isSubmitting}
+						>
+							{isSubmitting ? 'Creating Memorial...' : 'Create Family Memorial'}
+						</Button>
+					</div>
+				</form>
+			</div>
+		</div>
 	</div>
 </div>

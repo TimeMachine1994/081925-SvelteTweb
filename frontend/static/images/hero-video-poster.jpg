@@ -1,0 +1,5 @@
+# This is a placeholder for the optimized hero video poster image
+# The actual image needs to be downloaded from Firebase Storage and optimized
+# Original: https://firebasestorage.googleapis.com/v0/b/fir-tweb.firebasestorage.app/o/image_assets%2Fthumb%20for%20homevid%20001.png
+# Size: 1,955 KiB -> Target: ~200 KiB (90% reduction)
+# Dimensions: 1333x751 -> Responsive sizes: 400w, 800w, 1200w

@@ -1,31 +1,28 @@
-import { algoliasearch } from 'algoliasearch';
-import { PUBLIC_ALGOLIA_APP_ID, PUBLIC_ALGOLIA_SEARCH_ONLY_API_KEY } from '$env/static/public';
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = ({ url }) => {
-	console.log('--- Search Page Load Function ---');
-	console.log('Received URL:', url.toString());
-
+export const load: PageLoad = async ({ url, fetch }) => {
 	const query = url.searchParams.get('q') || '';
-	console.log('Search Query:', query);
 
-	console.log('Initializing Algolia client with App ID:', PUBLIC_ALGOLIA_APP_ID ? 'Provided' : 'Missing');
-	console.log('Algolia Search-Only API Key:', PUBLIC_ALGOLIA_SEARCH_ONLY_API_KEY ? 'Provided' : 'Missing');
+	try {
+		// Use server-side API to load memorials
+		const response = await fetch('/api/memorials/search');
+		
+		if (!response.ok) {
+			throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+		}
+		
+		const data = await response.json();
+		const memorials = data.memorials || [];
 
-	const client = algoliasearch(PUBLIC_ALGOLIA_APP_ID, PUBLIC_ALGOLIA_SEARCH_ONLY_API_KEY);
-	console.log('Algolia client initialized:', client ? 'Yes' : 'No');
-
-	const returnProps = {
-		query,
-		client,
-		indexName: 'memorials'
-	};
-	console.log('Returning props to the page:', {
-		query: returnProps.query,
-		client: 'AlgoliaClient object',
-		indexName: returnProps.indexName
-	});
-	console.log('--- End Search Page Load Function ---');
-
-	return returnProps;
+		return {
+			query,
+			memorials
+		};
+	} catch (error) {
+		console.error('Error loading memorials:', error);
+		return {
+			query,
+			memorials: []
+		};
+	}
 };

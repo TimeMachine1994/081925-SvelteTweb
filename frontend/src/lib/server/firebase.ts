@@ -1,79 +1,69 @@
 import admin from 'firebase-admin';
-import { dev, building } from '$app/environment';
+import type { FieldValue } from 'firebase-admin/firestore';
+import { dev } from '$app/environment';
 import { env } from '$env/dynamic/private';
 
-let firebaseAdminApp: admin.app.App | undefined;
+// ALWAYS use production Firebase - clear any emulator env vars
+delete process.env['FIREBASE_AUTH_EMULATOR_HOST'];
+delete process.env['FIRESTORE_EMULATOR_HOST'];
+delete process.env['FIREBASE_STORAGE_EMULATOR_HOST'];
 
 console.log('--- SERVER FIREBASE INITIALIZATION START ---');
+console.log('🔥 [FIREBASE] Mode: PRODUCTION (emulators disabled)');
+console.log('🔥 [FIREBASE] Current admin apps count:', admin.apps.length);
 
-if (admin.apps.length === 0) {
-	console.log('Firebase Admin SDK not initialized. Starting setup...');
-	console.log(`SvelteKit dev mode: ${dev}`);
-
-	if (building) {
-		console.log('Running in build mode. Skipping Firebase Admin SDK initialization.');
-	} else {
-		if (dev) {
-			console.log('Running in development mode. Preparing to connect to emulators.');
-			delete process.env['GOOGLE_APPLICATION_CREDENTIALS'];
-			process.env['FIREBASE_AUTH_EMULATOR_HOST'] = '127.0.0.1:9099';
-
-			firebaseAdminApp = admin.initializeApp({
-			});
-
-			const firestore = firebaseAdminApp.firestore();
-			firestore.settings({
-				host: '127.0.0.1:8080',
-				ssl: false,
-				ignoreUndefinedProperties: true
-			});
-			console.log('✅ Firebase Admin initialized for local development with emulators.');
-		} else {
-			console.log('Running in production mode.');
-			const serviceAccountJson = env.PRIVATE_FIREBASE_SERVICE_ACCOUNT_KEY;
-			const storageBucket = env.PRIVATE_FIREBASE_STORAGE_BUCKET;
-
-			console.log(`PRIVATE_FIREBASE_SERVICE_ACCOUNT_KEY length: ${serviceAccountJson ? serviceAccountJson.length : 'undefined'}`);
-			console.log(`PRIVATE_FIREBASE_STORAGE_BUCKET: ${storageBucket ? storageBucket : 'undefined'}`);
-
-			if (serviceAccountJson) {
-				try {
-					console.log('Found service account key. Initializing with service account.');
-					const serviceAccount = JSON.parse(serviceAccountJson);
-					firebaseAdminApp = admin.initializeApp({
-						credential: admin.credential.cert(serviceAccount),
-						projectId: serviceAccount.project_id, // Explicitly set projectId from service account
-						storageBucket: storageBucket
-					});
-					// Configure Firestore to ignore undefined properties
-					firebaseAdminApp.firestore().settings({
-						ignoreUndefinedProperties: true
-					});
-					console.log(`✅ Firebase Admin initialized for production. Project ID from service account: ${serviceAccount.project_id}`);
-				} catch (parseError) {
-					console.error('❌ ERROR: Failed to parse PRIVATE_FIREBASE_SERVICE_ACCOUNT_KEY:', parseError);
-				}
-			} else {
-				console.error(
-					'❌ ERROR: Production environment detected, but PRIVATE_FIREBASE_SERVICE_ACCOUNT_KEY is not set or is empty.'
-				);
-			}
-		}
-	}
+if (admin.apps.length) {
+	console.log('🔥 [FIREBASE] Firebase Admin SDK already initialized.');
+	console.log(
+		'🔥 [FIREBASE] Existing app names:',
+		admin.apps.filter((app): app is admin.app.App => app !== null).map((app) => app.name)
+	);
 } else {
-	console.log('Firebase Admin SDK already initialized.');
-	firebaseAdminApp = admin.app(); // Get the default app if already initialized
+	const serviceAccountJson = env.PRIVATE_FIREBASE_SERVICE_ACCOUNT_KEY;
+	const storageBucket = env.PRIVATE_FIREBASE_STORAGE_BUCKET || 'fir-tweb.firebasestorage.app';
+
+	console.log('🔥 [FIREBASE] Service account key present:', !!serviceAccountJson);
+	console.log('🔥 [FIREBASE] Service account key length:', serviceAccountJson?.length || 0);
+
+	if (serviceAccountJson && serviceAccountJson.length > 100) {
+		try {
+			const serviceAccount = JSON.parse(serviceAccountJson);
+			console.log('🔥 [FIREBASE] Parsed service account project_id:', serviceAccount.project_id);
+
+			admin.initializeApp({
+				credential: admin.credential.cert(serviceAccount),
+				storageBucket: storageBucket
+			});
+			console.log('✅ [FIREBASE] Firebase Admin initialized with service account credentials.');
+		} catch (parseError) {
+			console.error('❌ [FIREBASE] Error parsing service account JSON:', parseError);
+			admin.initializeApp({
+				projectId: 'fir-tweb',
+				storageBucket: storageBucket
+			});
+			console.log('⚠️ [FIREBASE] Firebase Admin initialized with fallback configuration.');
+		}
+	} else {
+		console.error('❌ [FIREBASE] Service account key missing or too short!');
+		console.error('❌ [FIREBASE] Please add full service account JSON to PRIVATE_FIREBASE_SERVICE_ACCOUNT_KEY in .env');
+		admin.initializeApp({
+			projectId: 'fir-tweb',
+			storageBucket: storageBucket
+		});
+		console.log('⚠️ [FIREBASE] Firebase Admin initialized WITHOUT credentials (auth will fail).');
+	}
 }
 
 console.log('--- SERVER FIREBASE INITIALIZATION END ---');
 
-function ensureFirebaseAppInitialized(): admin.app.App {
-    if (!firebaseAdminApp) {
-        throw new Error('Firebase Admin SDK has not been initialized. Ensure it runs in a server environment.');
-    }
-    return firebaseAdminApp;
+export const adminAuth = admin.auth();
+export const adminDb = admin.firestore();
+export const adminStorage = admin.storage();
+
+// Accessor used throughout the API routes. Returns the initialized Firestore instance.
+export function getAdminDb() {
+	return adminDb;
 }
 
-export const getAdminAuth = () => ensureFirebaseAppInitialized().auth();
-export const getAdminDb = () => ensureFirebaseAppInitialized().firestore();
-export const getAdminStorage = () => ensureFirebaseAppInitialized().storage();
+// Export FieldValue for array operations
+export { FieldValue } from 'firebase-admin/firestore';

@@ -4,7 +4,7 @@ export interface Invitation {
 	id: string;
 	memorialId: string;
 	inviteeEmail: string;
-	roleToAssign: 'family_member'; // Currently only supports inviting family members
+	roleToAssign: 'owner'; // V1: Simplified to owner role only
 	status: 'pending' | 'accepted';
 	invitedByUid: string;
 	createdAt: Timestamp;

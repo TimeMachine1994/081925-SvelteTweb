@@ -1,3 +1,27 @@
+<script lang="ts">
+	import { user } from '$lib/auth';
+	import { goto } from '$app/navigation';
+	import { getTheme } from '$lib/design-tokens/minimal-modern-theme';
+
+	const theme = getTheme('minimal');
+
+	function handleFuneralDirectorClick() {
+		if ($user) {
+			// User is logged in - check their role
+			if ($user.role === 'funeral_director' || $user.role === 'admin') {
+				// Funeral director or admin - go to quick family registration tool
+				goto('/register/funeral-director');
+			} else {
+				// Other logged-in users - go to funeral director information page
+				goto('/for-funeral-directors');
+			}
+		} else {
+			// User not logged in - go to funeral director information page
+			goto('/for-funeral-directors');
+		}
+	}
+</script>
+
 <footer class="footer">
 	<div class="footer-container">
 		<div class="footer-section">
@@ -7,11 +31,15 @@
 				families and friends to a celebration of life.
 			</p>
 			<p>We don't make videos, we make documentaries.</p>
-			<a href="/register/funeral-director" class="footer-link">Funeral Director Form</a>
+			<button onclick={handleFuneralDirectorClick} class="footer-link funeral-director-btn"
+				>Funeral Director Form</button
+			>
 		</div>
 		<div class="footer-section">
 			<h3 class="footer-heading">COVERAGE LOCATIONS</h3>
-			<p>Orange, Lake, Osceola, Seminole, Marion, Sumter, Volusia, Flagler, and Brevard counties.</p>
+			<p>
+				Orange, Lake, Osceola, Seminole, Marion, Sumter, Volusia, Flagler, and Brevard counties.
+			</p>
 			<p>Please call if your location is not listed:</p>
 			<p>(407) 221-5922</p>
 			<p>Email: Contact@tributestream.com</p>
@@ -29,11 +57,13 @@
 				If you appreciated the service we provided you and your family please consider leaving us a
 				five-star review on Google!
 			</p>
-			<a href="https://google.com/search?q=tributestream" class="review-btn">Review Us</a>
+			<a href="https://g.page/r/CT2e1k0NJGeKEBM/review" class="review-btn" target="_blank" rel="noopener noreferrer">Review Us</a>
 		</div>
 	</div>
 	<div class="footer-bottom">
-		<p>© {new Date().getFullYear()} All rights reserved | Tributestream is a Registered Trademark</p>
+		<p>
+			© {new Date().getFullYear()} All rights reserved | Tributestream is a Registered Trademark
+		</p>
 	</div>
 </footer>
 
@@ -74,6 +104,15 @@
 
 	.footer-link:hover {
 		text-decoration: underline;
+	}
+
+	.funeral-director-btn {
+		background: none;
+		border: none;
+		padding: 0;
+		font: inherit;
+		cursor: pointer;
+		text-align: left;
 	}
 
 	.review-btn {

@@ -1,7 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getAdminDb } from '$lib/server/firebase';
-import { Timestamp } from 'firebase-admin/firestore';
+import { createInvitation } from '$lib/server/db/repos/invitations';
 
 export const POST: RequestHandler = async ({ request, locals, params }) => {
 	console.log('📨 Received request to send invitation...');
@@ -41,19 +41,15 @@ export const POST: RequestHandler = async ({ request, locals, params }) => {
 			memorialId,
 			inviteeEmail,
 			roleToAssign,
-			status: 'pending',
-			invitedByUid: locals.user.uid,
-			createdAt: Timestamp.now(),
-			updatedAt: Timestamp.now()
+			invitedByUid: locals.user.uid
 		};
 
-		const newInvitationRef = await getAdminDb().collection('invitations').add(invitationData);
-		console.log(`✅ Invitation created with ID: ${newInvitationRef.id}`);
+		const invitationId = await createInvitation(invitationData);
+		console.log(`✅ Invitation created with ID: ${invitationId}`);
 
 		// TODO: In a real application, send an email to the inviteeEmail here.
 
-		return json({ success: true, invitationId: newInvitationRef.id }, { status: 201 });
-
+		return json({ success: true, invitationId }, { status: 201 });
 	} catch (err: any) {
 		console.error('🔥 An unexpected error occurred:', err);
 		// Re-throw SvelteKit errors, otherwise throw a generic 500

@@ -6,22 +6,23 @@ declare global {
 		interface Locals {
 			user: {
 				uid: string;
-				email: string | null | undefined;
-				displayName: string | undefined;
-				role?: string;
-				admin?: boolean;
+				email: string | null;
+				displayName?: string;
+				role: 'admin' | 'owner' | 'funeral_director';
+				isAdmin: boolean;
+				/** Granular admin RBAC role (super_admin, content_admin, etc.). Only set for admins. */
+				adminRole?: string;
 			} | null;
-			showFirstVisitPopup?: boolean; // Added for first-time visit tracking
 		}
 		interface PageData {
 			user: {
 				uid: string;
-				email: string | null | undefined;
-				displayName: string | undefined;
-				role?: string;
-				admin?: boolean;
+				email: string | null;
+				displayName?: string;
+				role: 'admin' | 'owner' | 'funeral_director';
+				isAdmin: boolean;
+				adminRole?: string;
 			} | null;
-			showFirstVisitPopup?: boolean; // Added for first-time visit tracking
 		}
 		// interface PageState {}
 		// interface Platform {}

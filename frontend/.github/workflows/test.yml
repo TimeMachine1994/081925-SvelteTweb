@@ -1,0 +1,183 @@
+name: Test Suite
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+          
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+          
+      - name: Run unit tests
+        run: |
+          cd frontend
+          npm run test:unit
+          
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          directory: frontend/coverage
+          flags: unit-tests
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+          
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+          
+      - name: Setup Firebase emulators
+        run: |
+          cd frontend
+          npm install -g firebase-tools
+          firebase emulators:start --only auth,firestore --detached
+          
+      - name: Setup test data
+        run: |
+          cd frontend
+          npm run test:setup
+          
+      - name: Run integration tests
+        run: |
+          cd frontend
+          npm run test:integration
+          
+      - name: Cleanup test data
+        run: |
+          cd frontend
+          npm run test:clean
+          
+      - name: Stop emulators
+        run: firebase emulators:stop
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+          
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+          
+      - name: Install Playwright browsers
+        run: |
+          cd frontend
+          npx playwright install --with-deps
+          
+      - name: Setup Firebase emulators
+        run: |
+          cd frontend
+          npm install -g firebase-tools
+          firebase emulators:start --only auth,firestore --detached
+          
+      - name: Setup test data
+        run: |
+          cd frontend
+          npm run test:setup
+          
+      - name: Run E2E tests
+        run: |
+          cd frontend
+          npm run test:e2e
+          
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 30
+          
+      - name: Cleanup test data
+        run: |
+          cd frontend
+          npm run test:clean
+          
+      - name: Stop emulators
+        run: firebase emulators:stop
+
+  component-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+          
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+          
+      - name: Run component tests
+        run: |
+          cd frontend
+          npm run test:components
+          
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v3
+        with:
+          directory: frontend/coverage
+          flags: component-tests
+
+  test-summary:
+    runs-on: ubuntu-latest
+    needs: [unit-tests, integration-tests, e2e-tests, component-tests]
+    if: always()
+    
+    steps:
+      - name: Test Results Summary
+        run: |
+          echo "## Test Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Test Type | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Unit Tests | ${{ needs.unit-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Integration Tests | ${{ needs.integration-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| E2E Tests | ${{ needs.e2e-tests.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Component Tests | ${{ needs.component-tests.result }} |" >> $GITHUB_STEP_SUMMARY

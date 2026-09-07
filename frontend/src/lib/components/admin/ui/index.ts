@@ -1,0 +1,16 @@
+/**
+ * ADMIN UI PRIMITIVES
+ *
+ * Shared Tailwind + Lucide building blocks for admin pages.
+ */
+export { default as AdminIcon } from './AdminIcon.svelte';
+export { default as Button } from './Button.svelte';
+export { default as Badge } from './Badge.svelte';
+export { default as Card } from './Card.svelte';
+export { default as StatCard } from './StatCard.svelte';
+export { default as EmptyState } from './EmptyState.svelte';
+export { default as Spinner } from './Spinner.svelte';
+export { default as Alert } from './Alert.svelte';
+export { default as SectionHeader } from './SectionHeader.svelte';
+export { default as ConfirmDialog } from './ConfirmDialog.svelte';
+export { default as ToastContainer } from './ToastContainer.svelte';

@@ -1,7 +1,9 @@
-import { getAdminDb } from '$lib/server/firebase';
+import { getConfiguration } from '$lib/server/db/repos/livestreamConfigurations';
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { sendReceiptEmail } from '$lib/server/email';
+import { sendEnhancedRegistrationEmail } from '$lib/server/email';
+// Use fallback for PUBLIC_BASE_URL if not set
+const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL || 'http://localhost:5173';
 import type { LivestreamConfig } from '$lib/types/livestream';
 
 export const load: PageServerLoad = async ({ url, locals }) => {
@@ -14,28 +16,29 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 		throw error(400, 'Missing configuration ID');
 	}
 
-	const configDoc = await getAdminDb().collection('livestreamConfigurations').doc(configId).get();
+	const configData = await getConfiguration(configId);
 
-	if (!configDoc.exists) {
+	if (!configData) {
 		throw error(404, 'Configuration not found');
 	}
-
-	const configData = configDoc.data();
 
 	if (configData?.userId !== locals.user.uid) {
 		throw error(403, 'Forbidden');
 	}
 
 	const config: LivestreamConfig = {
-		id: configDoc.id,
 		...(configData as Omit<LivestreamConfig, 'id' | 'createdAt'>),
-		createdAt: configData?.createdAt?.toDate ? configData.createdAt.toDate().toISOString() : null
+		id: configData.id,
+		createdAt: configData.createdAt ?? undefined
 	};
 
-	if (locals.user.email) {
-		// We can send the raw configData to the email function if needed,
-		// but the page needs the serialized version.
-		await sendReceiptEmail(locals.user.email, { id: configDoc.id, ...configData });
+	if (locals.user.email && configData) {
+		await sendEnhancedRegistrationEmail({
+			email: locals.user.email,
+			ownerName: locals.user.name || 'Tributestream User',
+			lovedOneName: configData.formData.lovedOneName,
+			memorialUrl: `${PUBLIC_BASE_URL}/memorials/${configData.memorialId}`
+		});
 	}
 
 	return {

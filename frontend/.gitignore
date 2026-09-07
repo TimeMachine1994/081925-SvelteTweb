@@ -12,7 +12,6 @@ node_modules
 # OS
 .DS_Store
 Thumbs.db
-/scripts/fir-tweb-firebase-adminsdk-fbsvc-5ff490e0ea.json
 
 # Env
 .env
@@ -23,3 +22,13 @@ Thumbs.db
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Service Account Keys (sensitive)
+service-account-key*.json
+
+# Local SQLite (Turso dev/test)
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+.svelte-check-baseline.txt

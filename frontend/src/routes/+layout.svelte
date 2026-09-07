@@ -3,59 +3,62 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import Navbar from '$lib/components/Navbar.svelte';
 	import Footer from '$lib/components/Footer.svelte';
-	import ThemeToggle from '$lib/components/ThemeToggle.svelte';
-	import { user, initializeAuth } from '$lib/auth';
+	import RecaptchaProvider from '$lib/components/RecaptchaProvider.svelte';
+	import DevModeBanner from '$lib/components/DevModeBanner.svelte';
+	import DevQuickLogin from '$lib/components/DevQuickLogin.svelte';
+	import NavProgress from '$lib/components/NavProgress.svelte';
+	import { getTheme } from '$lib/design-tokens/minimal-modern-theme';
+
+	import { user } from '$lib/auth';
 	import { page } from '$app/stores';
-	import { browser } from '$app/environment'; // Import browser environment variable
 	import type { LayoutData } from './$types';
 	import type { Snippet } from 'svelte';
 
 	let { children, data }: { children: Snippet; data: LayoutData } = $props();
 
-	// Initialize the client-side auth listener that syncs with the server session
-	initializeAuth();
+	const theme = getTheme('minimal');
 
-	// Initialize the user store immediately with server data to prevent hydration mismatch
-	console.log('🔧 Setting user store from layout data:', data.user);
-	user.set(data.user);
-	
-	// Log for debugging (only in browser)
-	if (browser) {
-		console.log('HTML data-mode:', document.documentElement.getAttribute('data-mode'));
-	}
-	
-	// Keep the $effect only if we need to react to data changes
 	$effect(() => {
-		console.log('📊 Layout data updated - user:', data.user?.email);
 		user.set(data.user);
 	});
 </script>
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
-	<script>
-		// Ensure this script only runs in the browser
-		if (typeof document !== 'undefined' && typeof localStorage !== 'undefined') {
-			const mode = localStorage.getItem('mode') || 'light';
-			document.documentElement.setAttribute('data-mode', mode);
-		}
-	</script>
+	<script type="text/javascript" src="//script.crazyegg.com/pages/scripts/0130/3684.js" async></script>
 </svelte:head>
 
-<div class="app-container">
-	<Navbar />
-	<main
-		class="main-content"
-		class:full-width={$page.route.id?.includes('/app/book')}
-		class:homepage={$page.route.id === '/'}
-	>
-		{@render children?.()}
-	</main>
-	<Footer />
-	<div class="fixed bottom-4 left-4 z-50">
-		<ThemeToggle />
+<NavProgress />
+
+<RecaptchaProvider>
+	<!-- Dev Mode Banner - shows at top in development -->
+	<DevModeBanner />
+	
+	<div class="app-container {theme.root}" style="font-family: {theme.font.body}">
+		<!-- Hide navbar in admin panel -->
+		{#if !$page.route.id?.startsWith('/admin')}
+			<Navbar />
+		{/if}
+	
+		<main
+			class="main-content"
+			class:full-width={$page.route.id?.includes('/app/calculator')}
+			class:homepage={$page.route.id === '/'}
+			class:memorial-page={$page.route.id === '/[fullSlug]'}
+			class:admin-panel={$page.route.id?.startsWith('/admin')}
+		>
+			{@render children?.()}
+		</main>
+	
+		<!-- Hide footer in admin panel -->
+		{#if !$page.route.id?.startsWith('/admin')}
+			<Footer />
+		{/if}
 	</div>
-</div>
+	
+	<!-- Dev Quick Login - floating widget in development -->
+	<DevQuickLogin />
+</RecaptchaProvider>
 
 <style>
 	.app-container {
@@ -81,4 +84,14 @@
 		padding: 0;
 	}
 
+	.main-content.memorial-page {
+		max-width: none;
+		padding: 0;
+	}
+
+	/* Admin panel full-width styling */
+	.main-content.admin-panel {
+		max-width: none;
+		padding: 0;
+	}
 </style>
