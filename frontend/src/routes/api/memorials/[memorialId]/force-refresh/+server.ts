@@ -8,10 +8,25 @@
 
 import { adminDb } from '$lib/server/firebase';
 import { error as svelteKitError, json } from '@sveltejs/kit';
+import { hasPermission } from '$lib/admin/permissions';
 import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ params, locals }) => {
 	const { memorialId } = params;
+
+	if (!locals.user) {
+		return json({ error: 'Authentication required' }, { status: 401 });
+	}
+	if (
+		locals.user.role !== 'admin' ||
+		!hasPermission(
+			{ uid: locals.user.uid, email: locals.user.email || '', adminRole: locals.user.adminRole },
+			'memorial',
+			'update'
+		)
+	) {
+		return json({ error: 'Permission denied' }, { status: 403 });
+	}
 
 	console.log('🔄 [FORCE REFRESH] Request for memorial:', memorialId);
 

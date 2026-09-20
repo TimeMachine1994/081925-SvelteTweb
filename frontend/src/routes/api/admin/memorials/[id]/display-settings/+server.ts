@@ -1,6 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { adminDb } from '$lib/server/firebase';
+import { hasPermission } from '$lib/admin/permissions';
 
 /**
  * GET - Fetch current display settings for a memorial
@@ -10,6 +11,15 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 	// Check admin authentication
 	if (!locals.user || locals.user.role !== 'admin') {
 		throw error(403, 'Admin access required');
+	}
+	if (
+		!hasPermission(
+			{ uid: locals.user.uid, email: locals.user.email || '', adminRole: locals.user.adminRole },
+			'memorial',
+			'read'
+		)
+	) {
+		throw error(403, 'Insufficient permissions');
 	}
 
 	const memorialId = params.id;
@@ -45,6 +55,15 @@ export const POST: RequestHandler = async ({ params, locals, request }) => {
 	// Check admin authentication
 	if (!locals.user || locals.user.role !== 'admin') {
 		throw error(403, 'Admin access required');
+	}
+	if (
+		!hasPermission(
+			{ uid: locals.user.uid, email: locals.user.email || '', adminRole: locals.user.adminRole },
+			'memorial',
+			'update'
+		)
+	) {
+		throw error(403, 'Insufficient permissions');
 	}
 
 	const memorialId = params.id;
@@ -115,6 +134,15 @@ export const DELETE: RequestHandler = async ({ params, locals }) => {
 	// Check admin authentication
 	if (!locals.user || locals.user.role !== 'admin') {
 		throw error(403, 'Admin access required');
+	}
+	if (
+		!hasPermission(
+			{ uid: locals.user.uid, email: locals.user.email || '', adminRole: locals.user.adminRole },
+			'memorial',
+			'update'
+		)
+	) {
+		throw error(403, 'Insufficient permissions');
 	}
 
 	const memorialId = params.id;

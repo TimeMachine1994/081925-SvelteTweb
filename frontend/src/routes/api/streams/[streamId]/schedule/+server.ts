@@ -1,9 +1,16 @@
-import { adminDb } from '$lib/server/firebase';
+import { adminDb, FieldValue } from '$lib/server/firebase';
 import { error as SvelteKitError, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
 /**
- * Update stream scheduled start time
+ * Update (or clear) a stream's scheduled start time.
+ *
+ * Body: { scheduledStartTime: string | null }
+ * - A valid ISO/parseable date string sets the schedule.
+ * - `null` (or an empty string) clears it.
+ *
+ * `status` is auto-synced between 'ready' <-> 'scheduled' only, so this never
+ * clobbers 'live' / 'completed' / 'ended' / 'error' streams.
  */
 export const PATCH: RequestHandler = async ({ locals, params, request }) => {
 	console.log('📅 [SCHEDULE API] PATCH - Updating stream schedule:', params.streamId);
@@ -19,19 +26,22 @@ export const PATCH: RequestHandler = async ({ locals, params, request }) => {
 
 	try {
 		// Parse request body
-		const { scheduledStartTime } = await request.json();
+		const body = await request.json();
+		const rawScheduledStartTime = body?.scheduledStartTime;
+		const isClearing = rawScheduledStartTime === null || rawScheduledStartTime === '';
 
-		if (!scheduledStartTime) {
-			throw SvelteKitError(400, 'Scheduled start time is required');
+		let startDate: Date | null = null;
+		if (!isClearing) {
+			startDate = new Date(rawScheduledStartTime);
+			if (isNaN(startDate.getTime())) {
+				throw SvelteKitError(400, 'Invalid date format');
+			}
 		}
 
-		// Validate date
-		const startDate = new Date(scheduledStartTime);
-		if (isNaN(startDate.getTime())) {
-			throw SvelteKitError(400, 'Invalid date format');
-		}
-
-		console.log('📅 [SCHEDULE API] New scheduled time:', startDate.toISOString());
+		console.log(
+			'📅 [SCHEDULE API] New scheduled time:',
+			isClearing ? 'cleared' : startDate!.toISOString()
+		);
 
 		// Get stream document
 		const streamDoc = await adminDb.collection('streams').doc(streamId).get();
@@ -60,18 +70,34 @@ export const PATCH: RequestHandler = async ({ locals, params, request }) => {
 			throw SvelteKitError(403, 'Permission denied');
 		}
 
-		// Update stream schedule
-		await streamDoc.ref.update({
-			scheduledStartTime: startDate.toISOString(),
+		// Auto-sync status between 'ready' <-> 'scheduled' only; never touch
+		// live/completed/ended/error streams.
+		const currentStatus = streamData.status;
+		const update: Record<string, unknown> = {
 			updatedAt: new Date().toISOString()
-		});
+		};
+
+		if (isClearing) {
+			update.scheduledStartTime = FieldValue.delete();
+			if (currentStatus === 'scheduled') {
+				update.status = 'ready';
+			}
+		} else {
+			update.scheduledStartTime = startDate!.toISOString();
+			if (currentStatus === 'ready' || currentStatus === 'scheduled') {
+				update.status = 'scheduled';
+			}
+		}
+
+		await streamDoc.ref.update(update);
 
 		console.log('✅ [SCHEDULE API] Stream schedule updated');
 
 		return json({
 			success: true,
 			streamId,
-			scheduledStartTime: startDate.toISOString()
+			scheduledStartTime: isClearing ? null : startDate!.toISOString(),
+			status: update.status ?? currentStatus
 		});
 	} catch (err: any) {
 		console.error('❌ [SCHEDULE API] Error updating schedule:', err);

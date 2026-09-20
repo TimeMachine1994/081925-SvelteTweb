@@ -26,11 +26,10 @@ export async function POST({ request, locals }) {
 		return json({ error: 'Invalid request' }, { status: 400 });
 	}
 
-	// Set default adminRole if not present (for backwards compatibility)
 	const userWithRole: any = {
 		...locals.user,
 		email: locals.user.email || '',
-		adminRole: (locals.user as any).adminRole || 'super_admin'
+		adminRole: (locals.user as any).adminRole
 	};
 
 	// Check permissions

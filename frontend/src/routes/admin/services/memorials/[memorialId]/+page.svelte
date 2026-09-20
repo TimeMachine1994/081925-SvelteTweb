@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AdminLayout from '$lib/components/admin/AdminLayout.svelte';
 	import StreamCard from '$lib/components/streaming/StreamCard.svelte';
+	import LivestreamScheduleEditor from '$lib/components/admin/LivestreamScheduleEditor.svelte';
 	import CustomPricingEditor from '$lib/components/admin/CustomPricingEditor.svelte';
 	import AdminScheduleEditor from '$lib/components/admin/AdminScheduleEditor.svelte';
 	import AdminChatPanel from '$lib/components/admin/AdminChatPanel.svelte';
@@ -308,6 +309,9 @@
 		</div>
 	</div>
 
+	<!-- Livestream Schedule Editor -->
+	<LivestreamScheduleEditor {streams} />
+
 	<!-- Display Settings Editor -->
 	<div class="card">
 		<div class="section-header">
@@ -385,7 +389,7 @@
 	<CustomPricingEditor memorial={memorial} onUpdate={handlePricingUpdate} />
 
 	<!-- WYSIWYG Block Editor for Memorial Content -->
-	<div class="card">
+	<div class="card" id="memorial-content">
 		<div class="section-header">
 			<h2>📦 Memorial Content</h2>
 			<p class="section-subtitle">Drag blocks to reorder how content appears on the public memorial page.</p>
