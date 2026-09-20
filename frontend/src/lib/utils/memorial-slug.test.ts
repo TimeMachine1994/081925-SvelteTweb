@@ -89,6 +89,26 @@ describe('Memorial Slug Utilities', () => {
 			const result = await checkSlugExists('error-slug');
 			expect(result).toBe(true);
 		});
+
+		it('should return false when the only match is the excluded memorial', async () => {
+			mockGet.mockResolvedValue({
+				empty: false,
+				docs: [{ id: 'memorial-123' }]
+			});
+
+			const result = await checkSlugExists('own-slug', 'memorial-123');
+			expect(result).toBe(false);
+		});
+
+		it('should return true when a different memorial owns the slug, even with excludeMemorialId set', async () => {
+			mockGet.mockResolvedValue({
+				empty: false,
+				docs: [{ id: 'someone-else' }]
+			});
+
+			const result = await checkSlugExists('taken-slug', 'memorial-123');
+			expect(result).toBe(true);
+		});
 	});
 
 	describe('generateUniqueMemorialSlug', () => {

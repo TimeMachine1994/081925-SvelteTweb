@@ -77,6 +77,13 @@
 	let displaySuccess = $state<string | null>(null);
 	let customTitleInput = $state(memorial.customTitle || '');
 
+	// Slug editing state
+	let isEditingSlug = $state(false);
+	let isSavingSlug = $state(false);
+	let slugError = $state<string | null>(null);
+	let slugSuccess = $state<string | null>(null);
+	let slugInput = $state(memorial.fullSlug || '');
+
 	// Handle custom pricing updates
 	async function handlePricingUpdate() {
 		console.log('💰 [PRICING] Custom pricing updated, reloading page data...');
@@ -200,6 +207,45 @@
 		displayError = null;
 	}
 
+	// Slug handlers
+	async function handleSaveSlug() {
+		isSavingSlug = true;
+		slugError = null;
+		slugSuccess = null;
+
+		try {
+			const response = await fetch(`/api/admin/memorials/${memorial.id}/slug`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ newSlug: slugInput.trim() })
+			});
+
+			const result = await response.json();
+
+			if (!response.ok) {
+				throw new Error(result.message || 'Failed to update slug');
+			}
+
+			slugSuccess = 'Slug updated successfully!';
+			isEditingSlug = false;
+			await invalidateAll();
+
+			setTimeout(() => {
+				slugSuccess = null;
+			}, 3000);
+		} catch (err: any) {
+			slugError = err.message || 'Failed to update slug';
+		} finally {
+			isSavingSlug = false;
+		}
+	}
+
+	function cancelSlugEdit() {
+		isEditingSlug = false;
+		slugInput = memorial.fullSlug || '';
+		slugError = null;
+	}
+
 	async function clearDisplaySettings() {
 		if (!confirm('Clear custom title? This will revert to defaults.')) {
 			return;
@@ -306,6 +352,64 @@
 			<div><strong>Created:</strong> {formatDate(memorial.createdAt)}</div>
 			<div><strong>Updated:</strong> {formatDate(memorial.updatedAt)} ({formatRelativeTime(memorial.updatedAt)})</div>
 		</div>
+	</div>
+
+	<!-- URL Slug Editor -->
+	<div class="card">
+		<div class="section-header">
+			<h2>🔗 URL Slug</h2>
+			{#if !isEditingSlug}
+				<button class="edit-btn-small" onclick={() => (isEditingSlug = true)}>
+					✏️ Edit
+				</button>
+			{/if}
+		</div>
+
+		{#if slugSuccess}
+			<div class="success-message">{slugSuccess}</div>
+		{/if}
+
+		{#if slugError}
+			<div class="error-message">{slugError}</div>
+		{/if}
+
+		{#if isEditingSlug}
+			<div class="display-form">
+				<div class="form-group">
+					<label for="memorial-slug">URL Slug</label>
+					<input
+						id="memorial-slug"
+						type="text"
+						bind:value={slugInput}
+						placeholder="celebration-of-life-for-john-smith"
+						disabled={isSavingSlug}
+						maxlength="100"
+					/>
+					<p class="help-text">
+						Lowercase letters, numbers, and hyphens only. Public URL will be
+						https://tributestream.com/{slugInput}
+					</p>
+					<p class="help-text warning-text">
+						⚠️ Changing the slug immediately breaks any previously shared links to this memorial's
+						page — there is no automatic redirect from the old URL.
+					</p>
+				</div>
+
+				<div class="form-actions">
+					<button class="primary-btn" onclick={handleSaveSlug} disabled={isSavingSlug}>
+						{isSavingSlug ? '⏳ Saving...' : '💾 Save Slug'}
+					</button>
+					<button onclick={cancelSlugEdit} disabled={isSavingSlug}>Cancel</button>
+				</div>
+			</div>
+		{:else}
+			<div class="display-preview">
+				<div class="preview-row">
+					<strong>Public URL:</strong>
+					<span class="custom-value">{publicUrl}</span>
+				</div>
+			</div>
+		{/if}
 	</div>
 
 	<!-- Display Settings Editor -->
@@ -732,6 +836,12 @@
 		font-size: 0.75rem;
 		color: #718096;
 		font-style: italic;
+	}
+
+	.warning-text {
+		color: #c05621;
+		font-weight: 600;
+		font-style: normal;
 	}
 	
 	/* Clickable owner link styling */

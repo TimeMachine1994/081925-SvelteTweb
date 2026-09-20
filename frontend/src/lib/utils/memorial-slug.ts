@@ -21,17 +21,30 @@ export function generateBaseSlug(lovedOneName: string): string {
 /**
  * Check if a memorial slug already exists in Firestore
  * @param slug - Slug to check
+ * @param excludeMemorialId - Optional memorial ID to exclude from the check
+ *   (e.g. when re-saving a memorial's own current slug during an edit)
  * @returns Promise<boolean> - true if slug exists, false if available
  */
-export async function checkSlugExists(slug: string): Promise<boolean> {
+export async function checkSlugExists(
+	slug: string,
+	excludeMemorialId?: string
+): Promise<boolean> {
 	try {
 		const existingMemorial = await adminDb
 			.collection('memorials')
 			.where('fullSlug', '==', slug)
 			.limit(1)
 			.get();
-		
-		return !existingMemorial.empty;
+
+		if (existingMemorial.empty) {
+			return false;
+		}
+
+		if (excludeMemorialId && existingMemorial.docs[0].id === excludeMemorialId) {
+			return false;
+		}
+
+		return true;
 	} catch (error) {
 		console.error('Error checking slug existence:', error);
 		// On error, assume slug exists to be safe
