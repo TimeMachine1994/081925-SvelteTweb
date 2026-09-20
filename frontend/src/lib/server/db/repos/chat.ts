@@ -1,229 +1,278 @@
-import type { SerializedChatMessage, StreamChatMessage } from '$lib/types/chat';
-import { adminDb, toIso, toIsoOrNow } from './_shared';
+import { randomUUID } from 'node:crypto';
+import { and, asc, desc, eq, gt, inArray, lt, sql } from 'drizzle-orm';
+import { getDb } from '../client';
+import { memorialChatMessages, memorialChatSettings } from '../schema';
+import type { ChatAuthorType, ChatSettings, MemorialChatMessage } from '$lib/types/chat';
 
 /**
- * Two chat stores:
- *  - Stream chat:   `streams/{streamId}/chat_messages`
- *  - Memorial chat: `memorials/{memorialId}/chat`
+ * Unified memorial chat repo (Turso/Drizzle).
+ *
+ * Replaces the old, separate Firestore-backed stream chat
+ * (`streams/{id}/chat_messages`) and memorial chat (`memorials/{id}/chat`)
+ * implementations. There is exactly one chat thread per memorial now,
+ * independent of any specific livestream.
  */
-const STREAM_COLLECTION = 'chat_messages';
-const MEMORIAL_COLLECTION = 'chat';
 
-// ---------------------------------------------------------------------------
-// Stream chat (`streams/{streamId}/chat_messages`)
-// ---------------------------------------------------------------------------
+const DEFAULT_SETTINGS: Omit<ChatSettings, 'memorialId'> = {
+	enabled: true,
+	locked: false,
+	archived: false
+};
 
-export interface StreamChatPage {
-	messages: StreamChatMessage[];
-	/** Number of raw documents returned by the query (before deleted filtering). */
-	fetched: number;
-}
-
-export interface StreamChatMessageUpdate {
-	updatedAt: string;
-	updatedBy: string;
-	deleted?: boolean;
-	deletedAt?: string | null;
-	deletedBy?: string | null;
-	flagged?: boolean;
-}
-
-function streamChatRef(streamId: string) {
-	return adminDb.collection('streams').doc(streamId).collection(STREAM_COLLECTION);
-}
-
-function mapStreamMessage(id: string, data: Record<string, any>): StreamChatMessage {
+function mapMessage(row: typeof memorialChatMessages.$inferSelect): MemorialChatMessage {
 	return {
-		...(data as StreamChatMessage),
-		id
+		id: row.id,
+		memorialId: row.memorialId,
+		authorType: row.authorType as ChatAuthorType,
+		userId: row.userId ?? undefined,
+		userName: row.userName,
+		userRole: (row.userRole as MemorialChatMessage['userRole']) ?? undefined,
+		guestSessionId: row.guestSessionId ?? undefined,
+		message: row.message,
+		isEdited: row.isEdited,
+		editedAt: row.editedAt ?? undefined,
+		isDeleted: row.isDeleted,
+		deletedAt: row.deletedAt ?? undefined,
+		deletedBy: row.deletedBy ?? undefined,
+		flagged: row.flagged,
+		flagReason: row.flagReason ?? undefined,
+		replyTo: row.replyTo ?? undefined,
+		sourceStreamId: row.sourceStreamId ?? undefined,
+		createdAt: row.createdAt
 	};
 }
 
-/**
- * Newest-first page of stream chat messages. When `beforeId` is provided and
- * the referenced message exists, results start after that document.
- */
-export async function listStreamChatMessages(
-	streamId: string,
-	opts: { limit: number; beforeId?: string | null; includeDeleted?: boolean }
-): Promise<StreamChatPage> {
-	let query = streamChatRef(streamId).orderBy('timestamp', 'desc').limit(opts.limit);
+// ─── Settings ────────────────────────────────────────────────────────────
 
-	if (opts.beforeId) {
-		const beforeDoc = await streamChatRef(streamId).doc(opts.beforeId).get();
-		if (beforeDoc.exists) {
-			query = query.startAfter(beforeDoc);
-		}
-	}
+export async function getChatSettings(memorialId: string): Promise<ChatSettings> {
+	const db = getDb();
+	const [row] = await db
+		.select()
+		.from(memorialChatSettings)
+		.where(eq(memorialChatSettings.memorialId, memorialId))
+		.limit(1);
 
-	const snapshot = await query.get();
+	if (!row) return { memorialId, ...DEFAULT_SETTINGS };
 
-	const messages: StreamChatMessage[] = [];
-	snapshot.forEach((doc) => {
-		const data = doc.data() as StreamChatMessage;
-		if (opts.includeDeleted || !data.deleted) {
-			messages.push(mapStreamMessage(doc.id, data));
-		}
-	});
-
-	return { messages, fetched: snapshot.size };
+	return {
+		memorialId: row.memorialId,
+		enabled: row.enabled,
+		locked: row.locked,
+		archived: row.archived
+	};
 }
 
-export async function getStreamChatMessage(
-	streamId: string,
-	messageId: string
-): Promise<StreamChatMessage | null> {
-	const snap = await streamChatRef(streamId).doc(messageId).get();
-	if (!snap.exists) return null;
-	return mapStreamMessage(snap.id, snap.data() || {});
+export async function upsertChatSettings(
+	memorialId: string,
+	patch: Partial<Omit<ChatSettings, 'memorialId'>>
+): Promise<ChatSettings> {
+	const db = getDb();
+	const now = new Date().toISOString();
+	const current = await getChatSettings(memorialId);
+	const next = { ...current, ...patch };
+
+	await db
+		.insert(memorialChatSettings)
+		.values({
+			memorialId,
+			enabled: next.enabled,
+			locked: next.locked,
+			archived: next.archived,
+			createdAt: now,
+			updatedAt: now
+		})
+		.onConflictDoUpdate({
+			target: memorialChatSettings.memorialId,
+			set: {
+				enabled: next.enabled,
+				locked: next.locked,
+				archived: next.archived,
+				updatedAt: now
+			}
+		});
+
+	return next;
 }
 
-export async function createStreamChatMessage(
-	streamId: string,
-	message: Omit<StreamChatMessage, 'id'>
-): Promise<string> {
-	const ref = await streamChatRef(streamId).add(message);
-	return ref.id;
-}
+// ─── Messages ────────────────────────────────────────────────────────────
 
-export async function softDeleteStreamChatMessage(
-	streamId: string,
-	messageId: string,
-	deletedBy: string
-): Promise<void> {
-	await streamChatRef(streamId).doc(messageId).update({
-		deleted: true,
-		deletedAt: new Date().toISOString(),
-		deletedBy
-	});
-}
-
-export async function deleteStreamChatMessage(streamId: string, messageId: string): Promise<void> {
-	await streamChatRef(streamId).doc(messageId).delete();
-}
-
-export async function updateStreamChatMessage(
-	streamId: string,
-	messageId: string,
-	updates: StreamChatMessageUpdate
-): Promise<void> {
-	await streamChatRef(streamId)
-		.doc(messageId)
-		.update({ ...updates });
-}
-
-// ---------------------------------------------------------------------------
-// Memorial chat (`memorials/{memorialId}/chat`)
-// ---------------------------------------------------------------------------
-
-export interface MemorialChatMessageInput {
+export interface CreateChatMessageInput {
 	memorialId: string;
-	userId: string;
+	authorType: ChatAuthorType;
+	userId?: string;
 	userName: string;
-	userRole: SerializedChatMessage['userRole'];
+	userRole?: MemorialChatMessage['userRole'];
+	guestSessionId?: string;
 	message: string;
 	replyTo?: string;
+	sourceStreamId?: string;
 }
 
-function memorialChatRef(memorialId: string) {
-	return adminDb.collection('memorials').doc(memorialId).collection(MEMORIAL_COLLECTION);
-}
-
-function mapMemorialMessage(id: string, data: Record<string, any>): SerializedChatMessage {
-	return {
-		id,
-		memorialId: data.memorialId,
-		userId: data.userId,
-		userName: data.userName,
-		userRole: data.userRole,
-		message: data.message,
-		timestamp: toIsoOrNow(data.timestamp),
-		isEdited: data.isEdited || false,
-		editedAt: toIso(data.editedAt) ?? undefined,
-		isDeleted: data.isDeleted || false,
-		deletedAt: toIso(data.deletedAt) ?? undefined,
-		replyTo: data.replyTo
-	};
-}
-
-/**
- * Newest-first memorial chat messages (including soft-deleted ones; callers
- * filter). If the query fails (e.g. collection not created yet) returns null.
- */
+/** Newest-first page of messages (including soft-deleted ones; callers filter for public display). */
 export async function listMemorialChatMessages(
 	memorialId: string,
-	opts: { limit: number; beforeTimestamp?: string | null }
-): Promise<SerializedChatMessage[] | null> {
-	let query = memorialChatRef(memorialId).orderBy('timestamp', 'desc').limit(opts.limit);
-
-	if (opts.beforeTimestamp) {
-		query = query.startAfter(new Date(opts.beforeTimestamp));
+	opts: { limit: number; beforeCreatedAt?: string | null }
+): Promise<MemorialChatMessage[]> {
+	const db = getDb();
+	const conditions = [eq(memorialChatMessages.memorialId, memorialId)];
+	if (opts.beforeCreatedAt) {
+		conditions.push(lt(memorialChatMessages.createdAt, opts.beforeCreatedAt));
 	}
 
-	let snapshot;
-	try {
-		snapshot = await query.get();
-	} catch {
-		return null;
-	}
+	const rows = await db
+		.select()
+		.from(memorialChatMessages)
+		.where(and(...conditions))
+		.orderBy(desc(memorialChatMessages.createdAt))
+		.limit(opts.limit);
 
-	return snapshot.docs.map((doc) => mapMemorialMessage(doc.id, doc.data()));
+	return rows.map(mapMessage);
+}
+
+/** Ascending messages created strictly after `sinceCreatedAt` — used by the SSE poller. */
+export async function listMemorialChatMessagesSince(
+	memorialId: string,
+	sinceCreatedAt: string
+): Promise<MemorialChatMessage[]> {
+	const db = getDb();
+	const rows = await db
+		.select()
+		.from(memorialChatMessages)
+		.where(
+			and(
+				eq(memorialChatMessages.memorialId, memorialId),
+				gt(memorialChatMessages.createdAt, sinceCreatedAt)
+			)
+		)
+		.orderBy(asc(memorialChatMessages.createdAt));
+
+	return rows.map(mapMessage);
 }
 
 export async function getMemorialChatMessage(
 	memorialId: string,
-	chatId: string
-): Promise<SerializedChatMessage | null> {
-	const snap = await memorialChatRef(memorialId).doc(chatId).get();
-	if (!snap.exists) return null;
-	return mapMemorialMessage(snap.id, snap.data() || {});
+	id: string
+): Promise<MemorialChatMessage | null> {
+	const db = getDb();
+	const [row] = await db
+		.select()
+		.from(memorialChatMessages)
+		.where(and(eq(memorialChatMessages.memorialId, memorialId), eq(memorialChatMessages.id, id)))
+		.limit(1);
+	return row ? mapMessage(row) : null;
 }
 
-/** Creates a memorial chat message and returns the stored (serialized) message. */
+/**
+ * Timestamp of the sender's most recent message in this memorial's chat, if
+ * any — used for a lightweight post-rate throttle. Identified by `userId`
+ * for signed-in users or `guestSessionId` for guests.
+ */
+export async function getLastMessageCreatedAt(
+	memorialId: string,
+	identity: { userId?: string; guestSessionId?: string }
+): Promise<string | null> {
+	if (!identity.userId && !identity.guestSessionId) return null;
+
+	const db = getDb();
+	const identityCondition = identity.userId
+		? eq(memorialChatMessages.userId, identity.userId)
+		: eq(memorialChatMessages.guestSessionId, identity.guestSessionId!);
+
+	const [row] = await db
+		.select({ createdAt: memorialChatMessages.createdAt })
+		.from(memorialChatMessages)
+		.where(and(eq(memorialChatMessages.memorialId, memorialId), identityCondition))
+		.orderBy(desc(memorialChatMessages.createdAt))
+		.limit(1);
+
+	return row?.createdAt ?? null;
+}
+
 export async function createMemorialChatMessage(
-	input: MemorialChatMessageInput
-): Promise<SerializedChatMessage> {
-	const timestamp = new Date();
-	const doc = {
+	input: CreateChatMessageInput
+): Promise<MemorialChatMessage> {
+	const db = getDb();
+	const id = randomUUID();
+	const createdAt = new Date().toISOString();
+
+	const row = {
+		id,
 		memorialId: input.memorialId,
-		userId: input.userId,
+		authorType: input.authorType,
+		userId: input.userId ?? null,
 		userName: input.userName,
-		userRole: input.userRole,
+		userRole: input.userRole ?? null,
+		guestSessionId: input.guestSessionId ?? null,
 		message: input.message,
-		timestamp,
 		isEdited: false,
+		editedAt: null,
 		isDeleted: false,
-		...(input.replyTo && { replyTo: input.replyTo })
+		deletedAt: null,
+		deletedBy: null,
+		flagged: false,
+		flagReason: null,
+		replyTo: input.replyTo ?? null,
+		sourceStreamId: input.sourceStreamId ?? null,
+		createdAt
 	};
 
-	const ref = await memorialChatRef(input.memorialId).add(doc);
+	await db.insert(memorialChatMessages).values(row);
 
-	return {
-		id: ref.id,
-		...doc,
-		timestamp: timestamp.toISOString()
-	};
+	return mapMessage(row as typeof memorialChatMessages.$inferSelect);
 }
 
 export async function editMemorialChatMessage(
 	memorialId: string,
-	chatId: string,
+	id: string,
 	message: string
 ): Promise<void> {
-	await memorialChatRef(memorialId).doc(chatId).update({
-		message,
-		isEdited: true,
-		editedAt: new Date()
-	});
+	const db = getDb();
+	await db
+		.update(memorialChatMessages)
+		.set({ message, isEdited: true, editedAt: new Date().toISOString() })
+		.where(and(eq(memorialChatMessages.memorialId, memorialId), eq(memorialChatMessages.id, id)));
 }
 
 export async function softDeleteMemorialChatMessage(
 	memorialId: string,
-	chatId: string
+	id: string,
+	deletedBy: string
 ): Promise<void> {
-	await memorialChatRef(memorialId).doc(chatId).update({
-		isDeleted: true,
-		deletedAt: new Date(),
-		message: '[Message deleted]'
-	});
+	const db = getDb();
+	await db
+		.update(memorialChatMessages)
+		.set({ isDeleted: true, deletedAt: new Date().toISOString(), deletedBy })
+		.where(and(eq(memorialChatMessages.memorialId, memorialId), eq(memorialChatMessages.id, id)));
+}
+
+/** Total (non-deleted) messages a user has sent, optionally restricted to a set of memorials. */
+export async function countMemorialChatMessagesByUser(
+	userId: string,
+	memorialIds?: string[]
+): Promise<number> {
+	if (memorialIds && memorialIds.length === 0) return 0;
+
+	const db = getDb();
+	const conditions = [eq(memorialChatMessages.userId, userId)];
+	if (memorialIds) conditions.push(inArray(memorialChatMessages.memorialId, memorialIds));
+
+	const [row] = await db
+		.select({ count: sql<number>`count(*)` })
+		.from(memorialChatMessages)
+		.where(and(...conditions));
+
+	return row?.count ?? 0;
+}
+
+export async function setMemorialChatMessageFlag(
+	memorialId: string,
+	id: string,
+	flagged: boolean,
+	flagReason?: string | null
+): Promise<void> {
+	const db = getDb();
+	await db
+		.update(memorialChatMessages)
+		.set({ flagged, flagReason: flagged ? (flagReason ?? null) : null })
+		.where(and(eq(memorialChatMessages.memorialId, memorialId), eq(memorialChatMessages.id, id)));
 }

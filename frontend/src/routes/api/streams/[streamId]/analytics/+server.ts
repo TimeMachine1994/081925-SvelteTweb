@@ -110,8 +110,9 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		const timeline = await listStreamAnalyticsTimeline(streamId, 60);
 		console.log('✅ [ANALYTICS API] Timeline retrieved:', timeline.length, 'data points');
 
-		// Calculate chat activity (messages per minute)
-		const chatActivity = stream?.chat?.messageCount || 0;
+		// Chat is now tracked per-memorial, not per-stream (see MemorialChatWidget /
+		// admin chat moderation panel), so per-stream chat activity is no longer available here.
+		const chatActivity = 0;
 		const streamDuration = stream?.liveStartedAt
 			? (new Date().getTime() - new Date(stream.liveStartedAt).getTime()) / 60000
 			: 1;

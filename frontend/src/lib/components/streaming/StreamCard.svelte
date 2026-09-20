@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Stream } from '$lib/types/stream';
-	import { Video, Eye, EyeOff, Archive, StopCircle, Copy, Check, ChevronDown, Calendar, ExternalLink, MessageCircle, MessageCircleOff, Pencil, Film } from 'lucide-svelte';
+	import { Video, Eye, EyeOff, Archive, StopCircle, Copy, Check, ChevronDown, Calendar, ExternalLink, Pencil, Film } from 'lucide-svelte';
 	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
 
@@ -17,10 +17,6 @@
 	let showEditTitle = $state(false);
 	let editedTitle = $state(stream.title);
 	
-	// Chat toggle state
-	let chatEnabled = $state(stream.chat?.enabled ?? true);
-	let togglingChat = $state(false);
-
 	// Embed state
 	let showEmbedForm = $state(false);
 	let embedCode = $state(stream.embed?.code || '');
@@ -278,32 +274,6 @@
 			clearInterval(liveCheckInterval);
 		}
 	});
-
-	// Toggle chat enabled/disabled
-	async function handleChatToggle() {
-		togglingChat = true;
-		try {
-			const newState = !chatEnabled;
-			const response = await fetch(`/api/streams/${stream.id}/chat/toggle`, {
-				method: 'PATCH',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ enabled: newState })
-			});
-
-			if (response.ok) {
-				chatEnabled = newState;
-				console.log('💬 [StreamCard] Chat toggled to:', newState);
-			} else {
-				const data = await response.json();
-				alert(`Failed to toggle chat: ${data.message || 'Unknown error'}`);
-			}
-		} catch (error) {
-			console.error('❌ [StreamCard] Error toggling chat:', error);
-			alert('Failed to toggle chat');
-		} finally {
-			togglingChat = false;
-		}
-	}
 
 	// Embed management functions
 	function openEmbedForm() {
@@ -635,23 +605,8 @@
 					</button>
 				{/if}
 
-				<!-- Chat Toggle Button -->
-				{#if stream.mux?.playbackId}
-					<button
-						onclick={handleChatToggle}
-						disabled={togglingChat}
-						class="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50 {chatEnabled ? 'border border-green-300 bg-green-50 text-green-700 hover:bg-green-100' : 'border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100'}"
-						title="{chatEnabled ? 'Disable' : 'Enable'} chat for viewers"
-					>
-						{#if chatEnabled}
-							<MessageCircle class="h-4 w-4" />
-							Chat On
-						{:else}
-							<MessageCircleOff class="h-4 w-4" />
-							Chat Off
-						{/if}
-					</button>
-				{/if}
+				<!-- Chat is now managed at the memorial level (see the admin memorial page's
+				     "Chat Moderation" section), not per-stream. -->
 
 				<!-- Embed Button -->
 				<button
@@ -867,7 +822,7 @@ or
 						</label>
 					</div>
 					<p class="mt-1 text-xs text-gray-500">
-						"Replace stream" shows the embed instead of the video player, keeping chat if enabled.
+						"Replace stream" shows the embed instead of the video player.
 					</p>
 				</div>
 			</div>

@@ -436,25 +436,15 @@
 	{/if}
 
 	<!-- Chat Moderation Section -->
-	{#if streams.length > 0}
-		<div class="card">
-			<div class="section-header">
-				<h2>💬 Chat Moderation</h2>
-			</div>
-			<div class="chat-panels">
-				{#each streams as stream}
-					<div class="chat-panel-wrapper">
-						<h3 class="stream-chat-title">{stream.title}</h3>
-						<AdminChatPanel 
-							streamId={stream.id} 
-							chatEnabled={stream.chat?.enabled ?? true}
-							chatLocked={stream.chat?.locked ?? false}
-						/>
-					</div>
-				{/each}
-			</div>
+	<!-- Chat is one thread per memorial (not per stream) — see MemorialChatWidget on the public page. -->
+	<div class="card">
+		<div class="section-header">
+			<h2>💬 Chat Moderation</h2>
 		</div>
-	{/if}
+		<div class="chat-panels">
+			<AdminChatPanel memorialId={memorial.id} />
+		</div>
+	</div>
 
 	<div class="card">
 		<div class="section-header">
@@ -559,19 +549,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1.5rem;
-	}
-	
-	.chat-panel-wrapper {
-		border: 1px solid #e2e8f0;
-		border-radius: 0.5rem;
-		padding: 1rem;
-		background: #f7fafc;
-	}
-	
-	.stream-chat-title {
-		margin: 0 0 0.75rem 0;
-		font-size: 1rem;
-		color: #4a5568;
 	}
 	
 	/* Slideshows list */

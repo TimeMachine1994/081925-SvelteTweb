@@ -235,16 +235,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 					calculatorServiceType: data.calculatorServiceType || null,
 					calculatorServiceIndex: data.calculatorServiceIndex || null,
 
-					// Chat configuration
-					chat: data.chat
-						? {
-								enabled: data.chat.enabled ?? true,
-								locked: data.chat.locked ?? false,
-								archived: data.chat.archived ?? false,
-								messageCount: data.chat.messageCount ?? 0,
-								participantCount: data.chat.participantCount ?? 0
-							}
-						: null,
+					// Note: chat is no longer per-stream — see the memorial-level
+					// "Chat Moderation" section, backed by /api/admin/memorials/[memorialId]/chat/*.
 
 					createdAt: data.createdAt || null,
 					updatedAt: data.updatedAt || null

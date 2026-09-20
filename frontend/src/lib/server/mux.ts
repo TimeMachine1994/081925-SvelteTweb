@@ -96,8 +96,8 @@ export async function createMuxLiveStream(
 }
 
 // NOTE: Mux does not have a native chat API.
-// Chat functionality is implemented via Firestore.
-// See: /api/streams/[streamId]/chat/messages/+server.ts
+// Chat is a single thread per memorial (not per stream) — see
+// $lib/server/db/repos/chat.ts and /api/memorials/[memorialId]/chat/+server.ts.
 
 /**
  * Get live stream details from Mux

@@ -15,6 +15,13 @@
       "when": 1788308508944,
       "tag": "0001_search_fts",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1789935950925,
+      "tag": "0002_unify_memorial_chat",
+      "breakpoints": true
     }
   ]
 }

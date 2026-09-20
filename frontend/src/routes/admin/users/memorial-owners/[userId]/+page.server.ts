@@ -1,6 +1,7 @@
 import { error } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
 import { requireAdmin } from '$lib/server/adminGuard';
+import { countMemorialChatMessagesByUser } from '$lib/server/db/repos/chat';
 
 // Helper to safely serialize Firestore data
 function safeSerialize(data: any): any {
@@ -176,25 +177,14 @@ export const load = async ({ locals, params }: any) => {
 			console.warn('Error fetching admin actions:', actionErr);
 		}
 
-		// 9. Get chat messages count (across all memorials)
+		// 9. Get chat messages count (across all memorials the user owns)
 		let totalChatMessages = 0;
 		try {
 			if (memorials.length > 0) {
-				const chatMessagesPromises = memorials.map(async (memorial) => {
-					try {
-						const messagesSnapshot = await adminDb
-							.collection('memorials')
-							.doc(memorial.id)
-							.collection('chat')
-							.where('userId', '==', userId)
-							.get();
-						return messagesSnapshot.size;
-					} catch {
-						return 0;
-					}
-				});
-				const chatMessageCounts = await Promise.all(chatMessagesPromises);
-				totalChatMessages = chatMessageCounts.reduce((sum, count) => sum + count, 0);
+				totalChatMessages = await countMemorialChatMessagesByUser(
+					userId,
+					memorials.map((m) => m.id)
+				);
 			}
 		} catch (chatErr) {
 			console.warn('Error fetching chat messages:', chatErr);

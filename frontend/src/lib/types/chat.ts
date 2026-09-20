@@ -1,135 +1,93 @@
-import type { Timestamp } from 'firebase/firestore';
-
 /**
- * Chat message interface for memorial chat system
+ * Unified memorial chat.
+ *
+ * There is exactly one chat thread per memorial, independent of any specific
+ * livestream. Both signed-in users and anonymous guests (who supply a
+ * display name) can participate.
  */
-export interface ChatMessage {
-	/** Unique message ID */
+
+export type ChatAuthorType = 'user' | 'guest';
+export type ChatUserRole = 'admin' | 'owner' | 'funeral_director' | 'viewer';
+
+export interface MemorialChatMessage {
+	/** Unique message id */
 	id: string;
-	
+
 	/** Memorial this message belongs to */
 	memorialId: string;
-	
-	/** User who sent the message */
-	userId: string;
-	
-	/** Display name of the user */
+
+	/** 'user' = authenticated account, 'guest' = anonymous visitor with a display name */
+	authorType: ChatAuthorType;
+
+	/** Set when authorType === 'user' */
+	userId?: string;
+
+	/** Display name (account display name, or guest-chosen name) */
 	userName: string;
-	
-	/** User's role (for badge display) */
-	userRole: 'admin' | 'owner' | 'funeral_director' | 'viewer';
-	
+
+	/** Role badge — only set for authorType === 'user' */
+	userRole?: ChatUserRole;
+
+	/** Stable per-browser-session id for guests, used for moderation grouping */
+	guestSessionId?: string;
+
 	/** Message content (max 500 characters) */
 	message: string;
-	
-	/** When the message was sent */
-	timestamp: Timestamp | Date;
-	
+
+	/** ISO timestamp the message was sent */
+	createdAt: string;
+
 	/** Whether the message has been edited */
 	isEdited: boolean;
-	
-	/** When the message was edited (if applicable) */
-	editedAt?: Timestamp | Date;
-	
-	/** Whether the message has been deleted (soft delete) */
-	isDeleted: boolean;
-	
-	/** When the message was deleted (if applicable) */
-	deletedAt?: Timestamp | Date;
-	
-	/** ID of message being replied to (for threading) */
-	replyTo?: string;
-}
 
-/**
- * Input type for creating a new chat message
- */
-export interface CreateChatMessageInput {
-	message: string;
-	replyTo?: string;
-}
-
-/**
- * Input type for updating an existing chat message
- */
-export interface UpdateChatMessageInput {
-	message: string;
-}
-
-/**
- * Chat statistics for a memorial
- */
-export interface ChatStats {
-	/** Total number of messages */
-	messageCount: number;
-	
-	/** Number of active participants */
-	participantCount: number;
-	
-	/** Most recent message timestamp */
-	lastMessageAt?: Timestamp | Date;
-}
-
-/**
- * User's unread message tracking
- */
-export interface UnreadChatInfo {
-	/** Memorial ID */
-	memorialId: string;
-	
-	/** Number of unread messages */
-	unreadCount: number;
-	
-	/** Last message timestamp user has seen */
-	lastSeenAt: Timestamp | Date;
-}
-
-/**
- * Serialized chat message (for client-side use)
- */
-export interface SerializedChatMessage extends Omit<ChatMessage, 'timestamp' | 'editedAt' | 'deletedAt'> {
-	timestamp: string;
+	/** ISO timestamp when the message was edited, if applicable */
 	editedAt?: string;
-	deletedAt?: string;
-}
 
-/**
- * Stream Chat Message
- * Messages sent during live streams, stored in Firestore
- * Note: Mux does not have a native chat API, so we use Firestore
- */
-export interface StreamChatMessage {
-	/** Unique message ID */
-	id: string;
-	
-	/** Stream this message belongs to */
-	streamId: string;
-	
-	/** User ID (if authenticated) */
-	userId?: string;
-	
-	/** Display name */
-	userName: string;
-	
-	/** User avatar URL */
-	userAvatar?: string;
-	
-	/** User role for badge display */
-	userRole?: 'admin' | 'guest';
-	
-	/** Is this an anonymous viewer (guest)? */
-	isAnonymous: boolean;
-	
-	/** Message content */
-	message: string;
-	
-	/** When the message was sent */
-	timestamp: string;
-	
-	/** Moderation status */
-	deleted: boolean;
-	deletedBy?: string;
+	/** Whether the message has been soft-deleted */
+	isDeleted: boolean;
+
+	/** ISO timestamp when the message was deleted, if applicable */
 	deletedAt?: string;
+
+	/** uid of whoever deleted the message (self, memorial owner/FD, or admin) */
+	deletedBy?: string;
+
+	/** Moderation flag, e.g. reported by another visitor */
 	flagged: boolean;
 	flagReason?: string;
+
+	/** id of message being replied to (for threading) */
+	replyTo?: string;
+
+	/**
+	 * Provenance only — which stream (if any) was live when this message was
+	 * posted or migrated from. Never used to scope/filter the chat itself.
+	 */
+	sourceStreamId?: string;
+}
+
+/** Per-memorial chat configuration, managed from the admin panel. */
+export interface ChatSettings {
+	memorialId: string;
+	/** Show/hide chat entirely */
+	enabled: boolean;
+	/** Read-only mode: existing messages remain visible, new ones are blocked */
+	locked: boolean;
+	/** Chat is archived (kept for history, hidden from active view) */
+	archived: boolean;
+}
+
+/** Input type for sending a new chat message via the public API. */
+export interface CreateChatMessageInput {
+	message: string;
+	/** Required when the sender isn't authenticated */
+	guestName?: string;
+	/** Stable per-browser-session id for guests (generated client-side, persisted in sessionStorage) */
+	guestSessionId?: string;
+	replyTo?: string;
+}
+
+/** Input type for editing an existing chat message. */
+export interface UpdateChatMessageInput {
+	message: string;
 }
