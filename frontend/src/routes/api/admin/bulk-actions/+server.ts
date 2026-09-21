@@ -100,7 +100,8 @@ async function performAction(
 				paidAt: new Date(),
 				'manualPayment.markedPaidBy': user.email,
 				'manualPayment.markedPaidAt': new Date(),
-				'manualPayment.method': params?.method || 'manual'
+				'manualPayment.method': params?.method || 'manual',
+				'manualPayment.notes': params?.notes || null
 			});
 			break;
 
