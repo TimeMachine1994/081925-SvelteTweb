@@ -6,3 +6,4 @@ export * from './commerce';
 export * from './slideshows';
 export * from './content';
 export * from './logs';
+export * from './chat';

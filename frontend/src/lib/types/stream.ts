@@ -62,23 +62,6 @@ export interface MuxStreamConfig {
 }
 
 /**
- * Stream Chat Configuration
- * Contains chat settings and stats (stored in Firestore, not Mux)
- * Note: Mux does not have a native chat API
- */
-export interface StreamChatConfig {
-	enabled: boolean;             // Show/hide chat entirely
-	locked?: boolean;             // Prevent new messages (read-only mode) - manually controlled by admin
-	archived?: boolean;           // Chat is archived (stream ended)
-	messageCount?: number;        // Total messages sent
-	participantCount?: number;    // Unique participants
-	moderationMode?: 'off' | 'auto' | 'manual'; // Moderation mode
-}
-
-// Alias for backward compatibility
-export type MuxChatConfig = StreamChatConfig;
-
-/**
  * Stream Embed Configuration
  * Allows embedding external video content above or below the stream
  */
@@ -128,7 +111,8 @@ export interface Stream {
 	
 	// Mux Platform Integration (NEW)
 	mux?: MuxStreamConfig;        // Mux live stream configuration
-	chat?: MuxChatConfig;          // Mux chat configuration
+	// Note: chat is no longer per-stream — see $lib/types/chat.ts (ChatSettings / MemorialChatMessage),
+	// which is scoped to the memorial as a whole.
 	analytics?: StreamAnalytics;   // Cached analytics data
 	embed?: StreamEmbed;           // Optional external embed (above/below video)
 	

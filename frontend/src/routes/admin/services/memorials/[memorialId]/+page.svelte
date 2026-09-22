@@ -1,6 +1,7 @@
 <script lang="ts">
 	import AdminLayout from '$lib/components/admin/AdminLayout.svelte';
 	import StreamCard from '$lib/components/streaming/StreamCard.svelte';
+	import LivestreamScheduleEditor from '$lib/components/admin/LivestreamScheduleEditor.svelte';
 	import CustomPricingEditor from '$lib/components/admin/CustomPricingEditor.svelte';
 	import AdminScheduleEditor from '$lib/components/admin/AdminScheduleEditor.svelte';
 	import AdminChatPanel from '$lib/components/admin/AdminChatPanel.svelte';
@@ -412,6 +413,9 @@
 		{/if}
 	</div>
 
+	<!-- Livestream Schedule Editor -->
+	<LivestreamScheduleEditor {streams} />
+
 	<!-- Display Settings Editor -->
 	<div class="card">
 		<div class="section-header">
@@ -489,7 +493,7 @@
 	<CustomPricingEditor memorial={memorial} onUpdate={handlePricingUpdate} />
 
 	<!-- WYSIWYG Block Editor for Memorial Content -->
-	<div class="card">
+	<div class="card" id="memorial-content">
 		<div class="section-header">
 			<h2>📦 Memorial Content</h2>
 			<p class="section-subtitle">Drag blocks to reorder how content appears on the public memorial page.</p>
@@ -536,25 +540,15 @@
 	{/if}
 
 	<!-- Chat Moderation Section -->
-	{#if streams.length > 0}
-		<div class="card">
-			<div class="section-header">
-				<h2>💬 Chat Moderation</h2>
-			</div>
-			<div class="chat-panels">
-				{#each streams as stream}
-					<div class="chat-panel-wrapper">
-						<h3 class="stream-chat-title">{stream.title}</h3>
-						<AdminChatPanel 
-							streamId={stream.id} 
-							chatEnabled={stream.chat?.enabled ?? true}
-							chatLocked={stream.chat?.locked ?? false}
-						/>
-					</div>
-				{/each}
-			</div>
+	<!-- Chat is one thread per memorial (not per stream) — see MemorialChatWidget on the public page. -->
+	<div class="card">
+		<div class="section-header">
+			<h2>💬 Chat Moderation</h2>
 		</div>
-	{/if}
+		<div class="chat-panels">
+			<AdminChatPanel memorialId={memorial.id} />
+		</div>
+	</div>
 
 	<div class="card">
 		<div class="section-header">
@@ -659,19 +653,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: 1.5rem;
-	}
-	
-	.chat-panel-wrapper {
-		border: 1px solid #e2e8f0;
-		border-radius: 0.5rem;
-		padding: 1rem;
-		background: #f7fafc;
-	}
-	
-	.stream-chat-title {
-		margin: 0 0 0.75rem 0;
-		font-size: 1rem;
-		color: #4a5568;
 	}
 	
 	/* Slideshows list */

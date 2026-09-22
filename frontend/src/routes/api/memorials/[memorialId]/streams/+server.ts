@@ -209,14 +209,9 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 				reconnectWindow: 60
 			},
 			
-			// Firestore Chat Configuration (Mux doesn't have native chat)
-			chat: {
-				enabled: true,  // Chat enabled by default
-				archived: false, // New streams have live chat, not archived
-				messageCount: 0,
-				participantCount: 0,
-				moderationMode: 'manual'
-			},
+			// Note: chat is no longer per-stream — it's one thread per memorial
+			// (memorial_chat_settings / memorial_chat_messages), managed from the
+			// admin memorial page and shown via MemorialChatWidget on the public page.
 			
 			// Metadata
 			createdBy: userId,
@@ -228,7 +223,6 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 
 		console.log('💾 [STREAMS API - MUX] Stream data structure complete');
 		console.log('💾 [STREAMS API - MUX] Contains Mux config:', !!streamData.mux);
-		console.log('💾 [STREAMS API] Chat enabled:', streamData.chat.enabled);
 
 		// Only add optional fields if they have values (avoid undefined)
 		if (scheduledStartTime) {

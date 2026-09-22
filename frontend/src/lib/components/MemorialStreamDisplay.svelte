@@ -3,7 +3,6 @@
 	import { browser } from '$app/environment';
 	import CountdownVideoPlayer from './CountdownVideoPlayer.svelte';
 	import MuxVideoPlayer from './streaming/MuxVideoPlayer.svelte';
-	import LiveChatWidget from './streaming/LiveChatWidget.svelte';
 	import { selectDisplayRecordings } from '$lib/utils/recording-selection';
 	
 	console.log('🎬 [MEMORIAL STREAM DISPLAY] Component loaded - Mux integration active');
@@ -53,12 +52,8 @@
 			publishedRecordings?: string[];
 		};
 		
-		// Chat configuration (FIX-C)
-		chat?: {
-			enabled: boolean;
-			locked?: boolean;
-			archived?: boolean;
-		};
+		// Note: chat is no longer per-stream — see MemorialChatWidget, which
+		// renders once per memorial regardless of stream state.
 		
 		// Per-stream embed (above/below/replace video)
 		embed?: {
@@ -386,8 +381,8 @@
 				{#each categorizedLiveStreams as stream (stream.id)}
 					<div class="stream-item">
 						{#if stream.mux?.playbackId}
-							<!-- MUX PLATFORM - New integrated player with chat -->
-							<div class="mux-stream-container {!stream.chat?.enabled ? 'no-chat' : ''}">
+							<!-- MUX PLATFORM - New integrated player. Chat is now memorial-wide (see MemorialChatWidget), not per-stream. -->
+							<div class="mux-stream-container">
 								<div class="video-column">
 									{#if stream.embed && stream.embed.position === 'replace'}
 										<!-- Per-stream embed - REPLACE video (keeps chat) -->
@@ -427,17 +422,6 @@
 										{/if}
 									{/if}
 								</div>
-								
-								{#if stream.chat?.enabled}
-									<div class="chat-column">
-										<LiveChatWidget 
-											streamId={stream.id} 
-											enabled={true}
-											locked={stream.chat?.locked ?? false}
-											live={stream.status === 'live' || stream.mux?.streamingStatus === 'active'}
-										/>
-									</div>
-								{/if}
 							</div>
 						{:else}
 							<!-- LEGACY CLOUDFLARE - Fallback iframe player -->
@@ -502,7 +486,7 @@
 					<div class="stream-item">
 						{#if stream.mux?.recordingReady && (stream.mux?.recordings?.length || stream.mux?.vodPlaybackId)}
 							<!-- MUX PLATFORM - Recorded video player with archived chat -->
-							<div class="mux-stream-container {!stream.chat?.enabled ? 'no-chat' : ''}">
+							<div class="mux-stream-container">
 								<div class="video-column">
 									{#if stream.embed && stream.embed.position === 'replace'}
 										<!-- Per-stream embed - REPLACE video (keeps chat) -->
@@ -595,21 +579,10 @@
 										{/if}
 									{/if}
 								</div>
-								
-								{#if stream.chat?.enabled}
-									<div class="chat-column">
-										<LiveChatWidget 
-											streamId={stream.id} 
-											enabled={true}
-											locked={stream.chat?.locked ?? false}
-											live={stream.status === 'live' || stream.mux?.streamingStatus === 'active'}
-										/>
-									</div>
-								{/if}
 							</div>
 						{:else if stream.status === 'ended' && !stream.mux?.recordingReady}
 							<!-- Stream ended but recording still processing -->
-							<div class="mux-stream-container {!stream.chat?.enabled ? 'no-chat' : ''}">
+							<div class="mux-stream-container">
 								<div class="video-column">
 									<div class="recording-processing">
 										<div class="processing-content">
@@ -620,17 +593,6 @@
 										</div>
 									</div>
 								</div>
-								
-								{#if stream.chat?.enabled}
-									<div class="chat-column">
-										<LiveChatWidget 
-											streamId={stream.id} 
-											enabled={true}
-											locked={stream.chat?.locked ?? false}
-											live={false}
-										/>
-									</div>
-								{/if}
 							</div>
 						{:else}
 							<!-- LEGACY CLOUDFLARE - Fallback iframe player -->
@@ -1094,26 +1056,15 @@
 		font-style: italic;
 	}
 	
-	/* Mux Stream Container - Video + Chat Layout */
+	/* Mux Stream Container - video only; chat is memorial-wide (MemorialChatWidget), not per-stream */
 	.mux-stream-container {
 		display: grid;
-		grid-template-columns: 1fr 400px;
-		gap: 1.5rem;
-		margin-top: 1rem;
-	}
-	
-	.mux-stream-container.no-chat {
 		grid-template-columns: 1fr;
 		max-width: 800px;
-		margin-left: auto;
-		margin-right: auto;
+		margin: 1rem auto 0;
 	}
 	
 	.video-column {
-		min-width: 0; /* Prevent grid overflow */
-	}
-	
-	.chat-column {
 		min-width: 0; /* Prevent grid overflow */
 	}
 	
@@ -1132,12 +1083,7 @@
 		}
 		
 		.mux-stream-container {
-			grid-template-columns: 1fr;
 			gap: 1rem;
-		}
-		
-		.chat-column {
-			max-height: 500px;
 		}
 		
 		.stream-description {

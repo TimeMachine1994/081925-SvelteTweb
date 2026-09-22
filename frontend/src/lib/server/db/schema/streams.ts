@@ -47,11 +47,8 @@ export const streams = sqliteTable(
 		muxReconnectWindow: integer('mux_reconnect_window'),
 		muxStreamingStatus: text('mux_streaming_status'),
 
-		// Chat config (flattened from stream.chat)
-		chatEnabled: bool('chat_enabled').notNull().default(false),
-		chatLocked: bool('chat_locked').notNull().default(false),
-		chatArchived: bool('chat_archived').notNull().default(false),
-		chatModerationMode: text('chat_moderation_mode'),
+		// Note: chat is no longer per-stream — see schema/chat.ts
+		// (memorial_chat_settings / memorial_chat_messages).
 
 		// Optional external embed (flattened from stream.embed)
 		embedCode: text('embed_code'),
@@ -86,43 +83,7 @@ export const streamRecordings = sqliteTable(
 	(t) => [index('sr_stream_idx').on(t.streamId), index('sr_asset_idx').on(t.assetId)]
 );
 
-export const streamChatMessages = sqliteTable(
-	'stream_chat_messages',
-	{
-		id: text('id').primaryKey(),
-		streamId: text('stream_id').notNull(),
-		userId: text('user_id'),
-		userName: text('user_name').notNull().default(''),
-		userAvatar: text('user_avatar'),
-		userRole: text('user_role'),
-		isAnonymous: bool('is_anonymous').notNull().default(false),
-		message: text('message').notNull(),
-		deleted: bool('deleted').notNull().default(false),
-		deletedBy: text('deleted_by'),
-		deletedAt: text('deleted_at'),
-		flagged: bool('flagged').notNull().default(false),
-		flagReason: text('flag_reason'),
-		createdAt: text('created_at').notNull()
-	},
-	(t) => [index('scm_stream_idx').on(t.streamId, t.createdAt)]
-);
-
-// From the `chat` / `chat_messages` collections (memorial-level chat).
-export const memorialChatMessages = sqliteTable(
-	'memorial_chat_messages',
-	{
-		id: text('id').primaryKey(),
-		memorialId: text('memorial_id').notNull(),
-		userId: text('user_id').notNull(),
-		userName: text('user_name').notNull().default(''),
-		userRole: text('user_role').notNull().default('viewer'),
-		message: text('message').notNull(),
-		isEdited: bool('is_edited').notNull().default(false),
-		editedAt: text('edited_at'),
-		isDeleted: bool('is_deleted').notNull().default(false),
-		deletedAt: text('deleted_at'),
-		replyTo: text('reply_to'),
-		createdAt: text('created_at').notNull()
-	},
-	(t) => [index('mcm_memorial_idx').on(t.memorialId, t.createdAt)]
-);
+// Chat tables live in ./chat.ts (memorialChatSettings / memorialChatMessages) —
+// chat is unified at the memorial level, not per-stream. See that file for the
+// tables that replaced `stream_chat_messages` and the old `memorial_chat_messages`
+// definitions that used to live here.

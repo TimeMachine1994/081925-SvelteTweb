@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Stream } from '$lib/types/stream';
-	import { Video, Eye, EyeOff, Archive, StopCircle, Copy, Check, ChevronDown, Calendar, ExternalLink, MessageCircle, MessageCircleOff, Pencil, Film } from 'lucide-svelte';
+	import { Video, Eye, EyeOff, Archive, StopCircle, Copy, Check, ChevronDown, Calendar, ExternalLink, Pencil, Film } from 'lucide-svelte';
 	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
 
@@ -17,10 +17,6 @@
 	let showEditTitle = $state(false);
 	let editedTitle = $state(stream.title);
 	
-	// Chat toggle state
-	let chatEnabled = $state(stream.chat?.enabled ?? true);
-	let togglingChat = $state(false);
-
 	// Embed state
 	let showEmbedForm = $state(false);
 	let embedCode = $state(stream.embed?.code || '');
@@ -206,6 +202,32 @@
 		}
 	}
 
+	async function handleClearTime() {
+		if (!confirm('Clear the scheduled start time for this stream?')) return;
+
+		loading = true;
+		try {
+			const response = await fetch(`/api/streams/${stream.id}/schedule`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ scheduledStartTime: null })
+			});
+
+			if (response.ok) {
+				showEditTime = false;
+				window.location.reload();
+			} else {
+				const data = await response.json();
+				alert(`Failed to clear schedule: ${data.error || 'Unknown error'}`);
+			}
+		} catch (error) {
+			console.error('Error clearing schedule:', error);
+			alert('Failed to clear schedule');
+		} finally {
+			loading = false;
+		}
+	}
+
 	async function checkIfLive() {
 		if (checkingLive) return; // Prevent overlapping checks
 		
@@ -252,32 +274,6 @@
 			clearInterval(liveCheckInterval);
 		}
 	});
-
-	// Toggle chat enabled/disabled
-	async function handleChatToggle() {
-		togglingChat = true;
-		try {
-			const newState = !chatEnabled;
-			const response = await fetch(`/api/streams/${stream.id}/chat/toggle`, {
-				method: 'PATCH',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ enabled: newState })
-			});
-
-			if (response.ok) {
-				chatEnabled = newState;
-				console.log('💬 [StreamCard] Chat toggled to:', newState);
-			} else {
-				const data = await response.json();
-				alert(`Failed to toggle chat: ${data.message || 'Unknown error'}`);
-			}
-		} catch (error) {
-			console.error('❌ [StreamCard] Error toggling chat:', error);
-			alert('Failed to toggle chat');
-		} finally {
-			togglingChat = false;
-		}
-	}
 
 	// Embed management functions
 	function openEmbedForm() {
@@ -387,6 +383,8 @@
 					<p class="mt-2 text-xs text-gray-500">
 						Scheduled: {new Date(stream.scheduledStartTime).toLocaleString()}
 					</p>
+				{:else if canManage}
+					<p class="mt-2 text-xs italic text-gray-400">Not scheduled yet</p>
 				{/if}
 				<p class="mt-1 text-xs text-gray-500">
 					Created {new Date(stream.createdAt).toLocaleDateString()}
@@ -588,16 +586,14 @@
 					Edit Title
 				</button>
 
-				{#if stream.scheduledStartTime}
-					<button
-						onclick={openEditTime}
-						disabled={loading}
-						class="flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:opacity-50"
-					>
-						<Calendar class="h-4 w-4" />
-						Edit Start Time
-					</button>
-				{/if}
+				<button
+					onclick={openEditTime}
+					disabled={loading}
+					class="flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 disabled:opacity-50"
+				>
+					<Calendar class="h-4 w-4" />
+					{stream.scheduledStartTime ? 'Edit Start Time' : 'Set Start Time'}
+				</button>
 				{#if (stream.visibility || 'public') !== 'archived'}
 					<button
 						onclick={handleVisibilityToggle}
@@ -609,23 +605,8 @@
 					</button>
 				{/if}
 
-				<!-- Chat Toggle Button -->
-				{#if stream.mux?.playbackId}
-					<button
-						onclick={handleChatToggle}
-						disabled={togglingChat}
-						class="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50 {chatEnabled ? 'border border-green-300 bg-green-50 text-green-700 hover:bg-green-100' : 'border border-gray-300 bg-gray-50 text-gray-700 hover:bg-gray-100'}"
-						title="{chatEnabled ? 'Disable' : 'Enable'} chat for viewers"
-					>
-						{#if chatEnabled}
-							<MessageCircle class="h-4 w-4" />
-							Chat On
-						{:else}
-							<MessageCircleOff class="h-4 w-4" />
-							Chat Off
-						{/if}
-					</button>
-				{/if}
+				<!-- Chat is now managed at the memorial level (see the admin memorial page's
+				     "Chat Moderation" section), not per-stream. -->
 
 				<!-- Embed Button -->
 				<button
@@ -668,7 +649,9 @@
 {#if showEditTime}
 	<div class="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50" onclick={() => (showEditTime = false)}>
 		<div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl" onclick={(e) => e.stopPropagation()}>
-			<h3 class="mb-4 text-lg font-semibold text-gray-900">Edit Start Time</h3>
+			<h3 class="mb-4 text-lg font-semibold text-gray-900">
+				{stream.scheduledStartTime ? 'Edit Start Time' : 'Set Start Time'}
+			</h3>
 			
 			<div class="mb-4">
 				<label for="start-time" class="mb-2 block text-sm font-medium text-gray-700">
@@ -680,6 +663,9 @@
 					bind:value={editedStartTime}
 					class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
 				/>
+				<p class="mt-1 text-xs text-gray-500">
+					This drives the countdown and live swap shown on the public memorial page.
+				</p>
 			</div>
 
 			<div class="flex gap-3">
@@ -688,7 +674,7 @@
 					disabled={loading}
 					class="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
 				>
-					{loading ? 'Updating...' : 'Update'}
+					{loading ? 'Saving...' : 'Save'}
 				</button>
 				<button
 					onclick={() => (showEditTime = false)}
@@ -698,6 +684,15 @@
 					Cancel
 				</button>
 			</div>
+			{#if stream.scheduledStartTime}
+				<button
+					onclick={handleClearTime}
+					disabled={loading}
+					class="mt-3 w-full rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
+				>
+					Clear Schedule
+				</button>
+			{/if}
 		</div>
 	</div>
 {/if}
@@ -827,7 +822,7 @@ or
 						</label>
 					</div>
 					<p class="mt-1 text-xs text-gray-500">
-						"Replace stream" shows the embed instead of the video player, keeping chat if enabled.
+						"Replace stream" shows the embed instead of the video player.
 					</p>
 				</div>
 			</div>

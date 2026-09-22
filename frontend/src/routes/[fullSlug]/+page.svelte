@@ -3,6 +3,7 @@
 	import SlideshowSection from '$lib/components/SlideshowSection.svelte';
 	import MemorialStreamDisplay from '$lib/components/MemorialStreamDisplay.svelte';
 	import BlockRenderer from '$lib/components/memorial/BlockRenderer.svelte';
+	import { MemorialChatWidget } from '$lib/components/chat';
 	import BookingReminderBanner from '$lib/components/BookingReminderBanner.svelte';
 	import { shouldShowBookingBanner, markBannerAsSeen, debugBannerState } from '$lib/utils/bookingBanner';
 	import { getEnabledBlocks } from '$lib/utils/block-utils';
@@ -28,6 +29,16 @@
 	let canEditSlideshows = $derived(() => {
 		if (!user || !memorial) return false;
 		
+		return (
+			user.role === 'admin' ||
+			memorial.ownerUid === user.uid ||
+			memorial.funeralDirectorUid === user.uid
+		);
+	});
+
+	// Determine if user can moderate chat (delete any message, not just their own)
+	let isMemorialChatOwner = $derived(() => {
+		if (!user || !memorial) return false;
 		return (
 			user.role === 'admin' ||
 			memorial.ownerUid === user.uid ||
@@ -355,6 +366,14 @@
 							/>
 						{/if}
 					</div>
+					<div class="chat-section">
+						<MemorialChatWidget
+							memorialId={memorial.id}
+							memorialName={(memorial as any).customTitle || memorial.lovedOneName}
+							currentUserId={user?.uid}
+							isMemorialOwner={isMemorialChatOwner()}
+						/>
+					</div>
 				</div>
 				
 				<!-- Legacy Custom HTML Content -->
@@ -462,6 +481,14 @@
 								memorialName={(memorial as any).customTitle || memorial.lovedOneName}
 							/>
 						{/if}
+					</div>
+					<div class="chat-section">
+						<MemorialChatWidget
+							memorialId={memorial.id}
+							memorialName={(memorial as any).customTitle || memorial.lovedOneName}
+							currentUserId={user?.uid}
+							isMemorialOwner={isMemorialChatOwner()}
+						/>
 					</div>
 				</div>
 			</div>
@@ -616,6 +643,12 @@
 		margin-bottom: 2rem;
 		max-width: 1000px;
 		margin: 0 auto;
+		width: 100%;
+	}
+
+	.chat-section {
+		max-width: 1000px;
+		margin: 0 auto 2rem;
 		width: 100%;
 	}
 

@@ -1,168 +1,143 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { adminDb } from '$lib/server/firebase';
-import { createMemorialChatMessage, listMemorialChatMessages } from '$lib/server/db/repos/chat';
+import {
+	createMemorialChatMessage,
+	getChatSettings,
+	getLastMessageCreatedAt,
+	listMemorialChatMessages
+} from '$lib/server/db/repos/chat';
 import type { CreateChatMessageInput } from '$lib/types/chat';
+
+const MIN_POST_INTERVAL_MS = 3000;
 
 /**
  * GET /api/memorials/[memorialId]/chat
- * Fetch chat messages for a memorial
+ * Fetch chat history + current settings for a memorial's unified chat thread.
  */
 export const GET: RequestHandler = async ({ params, url, locals }) => {
 	const { memorialId } = params;
 
 	try {
-		// Get pagination parameters
-		const limit = parseInt(url.searchParams.get('limit') || '50');
-		const beforeTimestamp = url.searchParams.get('before');
+		const limit = Math.min(parseInt(url.searchParams.get('limit') || '50'), 100);
+		const before = url.searchParams.get('before');
 
-		// Validate limit
-		if (limit > 100) {
-			throw error(400, 'Limit cannot exceed 100 messages');
-		}
-
-		// Get memorial to check if it exists and is public
 		const memorialDoc = await adminDb.collection('memorials').doc(memorialId).get();
-
-		if (!memorialDoc.exists) {
-			throw error(404, 'Memorial not found');
-		}
+		if (!memorialDoc.exists) throw error(404, 'Memorial not found');
 
 		const memorialData = memorialDoc.data();
 		const isPublic = memorialData?.isPublic === true;
-
-		// Check access permissions
-		const userRole = locals.user?.role;
 		const userId = locals.user?.uid;
 		const isOwner = memorialData?.ownerUid === userId;
 		const isFuneralDirector = memorialData?.funeralDirectorUid === userId;
-		const isAdmin = userRole === 'admin';
+		const isAdmin = locals.user?.role === 'admin';
 
-		// Allow access if: public memorial, or user is owner/FD/admin
 		if (!isPublic && !isOwner && !isFuneralDirector && !isAdmin) {
 			throw error(403, 'You do not have permission to view this chat');
 		}
 
-		// Build query - simplified to avoid requiring composite index
-		// We'll just order by timestamp and filter deleted messages client-side
-		// Execute query - handle case where collection might not exist yet
-		const fetchedMessages = await listMemorialChatMessages(memorialId, {
-			limit: limit * 2, // Get more to account for deleted messages
-			beforeTimestamp
+		const settings = await getChatSettings(memorialId);
+
+		const fetched = await listMemorialChatMessages(memorialId, {
+			limit: limit * 2,
+			beforeCreatedAt: before
 		});
-
-		if (!fetchedMessages) {
-			// If the collection doesn't exist or has no documents, return empty array
-			console.log('[Chat API] No messages found or collection not created yet:', memorialId);
-			return json({
-				messages: [],
-				hasMore: false
-			});
-		}
-
-		// Transform and filter messages
-		const allMessages = fetchedMessages.filter((msg) => !msg.isDeleted); // Filter out deleted messages
-
-		// Limit to requested amount after filtering
-		const messages = allMessages.slice(0, limit);
-
-		// Reverse to get chronological order (oldest first)
-		messages.reverse();
+		const visible = fetched
+			.filter((m) => !m.isDeleted)
+			.slice(0, limit)
+			.reverse();
 
 		return json({
-			messages,
-			hasMore: messages.length === limit
+			messages: visible,
+			hasMore: fetched.length > limit,
+			settings
 		});
 	} catch (err: any) {
-		console.error('[Chat API] Error fetching messages:', {
-			error: err,
-			message: err?.message,
-			code: err?.code,
-			details: err?.details,
-			memorialId
-		});
-
-		if (err.status) {
-			throw err;
-		}
-
-		// Provide more helpful error message
-		const errorMessage = err?.message || 'Failed to fetch chat messages';
-		throw error(500, errorMessage);
+		if (err.status) throw err;
+		console.error('[Chat API] Error fetching messages:', err);
+		throw error(500, err?.message || 'Failed to fetch chat messages');
 	}
 };
 
 /**
  * POST /api/memorials/[memorialId]/chat
- * Send a new chat message
+ * Send a new chat message. Works for signed-in users and anonymous guests
+ * (guests must supply `guestName`).
  */
 export const POST: RequestHandler = async ({ params, request, locals }) => {
 	const { memorialId } = params;
 
-	// Require authentication
-	if (!locals.user) {
-		throw error(401, 'You must be signed in to send messages');
-	}
-
 	try {
 		const body = (await request.json()) as CreateChatMessageInput;
-		const { message, replyTo } = body;
+		const message = body.message?.trim();
 
-		// Validate message
-		if (!message || typeof message !== 'string') {
-			throw error(400, 'Message is required');
-		}
+		if (!message) throw error(400, 'Message is required');
+		if (message.length > 500) throw error(400, 'Message cannot exceed 500 characters');
 
-		const trimmedMessage = message.trim();
-
-		if (trimmedMessage.length === 0) {
-			throw error(400, 'Message cannot be empty');
-		}
-
-		if (trimmedMessage.length > 500) {
-			throw error(400, 'Message cannot exceed 500 characters');
-		}
-
-		// Get memorial to check permissions
 		const memorialDoc = await adminDb.collection('memorials').doc(memorialId).get();
-
-		if (!memorialDoc.exists) {
-			throw error(404, 'Memorial not found');
-		}
+		if (!memorialDoc.exists) throw error(404, 'Memorial not found');
 
 		const memorialData = memorialDoc.data();
 		const isPublic = memorialData?.isPublic === true;
-
-		// Check if user can post (must be public memorial or have owner/FD/admin access)
-		const userRole = locals.user.role;
-		const userId = locals.user.uid;
+		const userId = locals.user?.uid;
 		const isOwner = memorialData?.ownerUid === userId;
 		const isFuneralDirector = memorialData?.funeralDirectorUid === userId;
-		const isAdmin = userRole === 'admin';
+		const isAdmin = locals.user?.role === 'admin';
 
 		if (!isPublic && !isOwner && !isFuneralDirector && !isAdmin) {
 			throw error(403, 'You do not have permission to post in this chat');
 		}
 
-		// Create message document
-		const created = await createMemorialChatMessage({
-			memorialId,
-			userId,
-			userName: locals.user.displayName || 'Anonymous',
-			userRole,
-			message: trimmedMessage,
-			...(replyTo && { replyTo })
-		});
+		const settings = await getChatSettings(memorialId);
+		if (!settings.enabled) throw error(403, 'Chat is disabled for this memorial');
+		if (settings.locked && !isAdmin) throw error(403, 'Chat is currently locked');
 
-		// Return created message
-		return json(created, { status: 201 });
-	} catch (err: any) {
-		console.error('[Chat API] Error sending message:', err);
+		let identity: {
+			authorType: 'user' | 'guest';
+			userId?: string;
+			userName: string;
+			userRole?: 'admin' | 'owner' | 'funeral_director' | 'viewer';
+			guestSessionId?: string;
+		};
 
-		if (err.status) {
-			throw err;
+		if (locals.user) {
+			identity = {
+				authorType: 'user',
+				userId: locals.user.uid,
+				userName: locals.user.displayName || 'Anonymous',
+				userRole: locals.user.role
+			};
+		} else {
+			const guestName = body.guestName?.trim();
+			if (!guestName || guestName.length < 2 || guestName.length > 30) {
+				throw error(400, 'A display name (2-30 characters) is required to chat as a guest');
+			}
+			identity = {
+				authorType: 'guest',
+				userName: guestName,
+				guestSessionId: body.guestSessionId
+			};
 		}
 
+		const lastMessageAt = await getLastMessageCreatedAt(memorialId, {
+			userId: identity.userId,
+			guestSessionId: identity.guestSessionId
+		});
+		if (lastMessageAt && Date.now() - new Date(lastMessageAt).getTime() < MIN_POST_INTERVAL_MS) {
+			throw error(429, 'You are posting too quickly — please wait a moment');
+		}
+
+		const created = await createMemorialChatMessage({
+			memorialId,
+			...identity,
+			message,
+			...(body.replyTo && { replyTo: body.replyTo })
+		});
+
+		return json(created, { status: 201 });
+	} catch (err: any) {
+		if (err.status) throw err;
+		console.error('[Chat API] Error sending message:', err);
 		throw error(500, 'Failed to send message');
 	}
 };

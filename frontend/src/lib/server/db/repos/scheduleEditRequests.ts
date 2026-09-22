@@ -1,5 +1,5 @@
 import { Timestamp } from 'firebase-admin/firestore';
-import { adminDb } from './_shared';
+import { adminDb, normalizeDoc } from './_shared';
 
 const COLLECTION = 'schedule_edit_requests';
 
@@ -41,4 +41,27 @@ export async function createRequest(input: ScheduleEditRequestInput): Promise<st
 		createdAt: Timestamp.now()
 	});
 	return ref.id;
+}
+
+export type ScheduleEditRequestRecord = ScheduleEditRequestInput & {
+	id: string;
+	status: string;
+	createdAt: string;
+	reviewedAt?: string | null;
+	reviewedBy?: string | null;
+	reviewedByEmail?: string | null;
+	adminNotes?: string | null;
+};
+
+/** Newest-first list of edit requests submitted for a given memorial. */
+export async function listByMemorial(memorialId: string): Promise<ScheduleEditRequestRecord[]> {
+	const snap = await adminDb
+		.collection(COLLECTION)
+		.where('memorialId', '==', memorialId)
+		.orderBy('createdAt', 'desc')
+		.get();
+
+	return snap.docs.map(
+		(doc) => ({ id: doc.id, ...normalizeDoc(doc.data()) }) as ScheduleEditRequestRecord
+	);
 }

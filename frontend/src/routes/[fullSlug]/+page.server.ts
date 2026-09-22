@@ -121,7 +121,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 						...data,
 						// Mux streaming platform data (explicit for serialization)
 						mux: data.mux || null,
-						chat: data.chat || null,
+						// Note: chat is no longer per-stream — see MemorialChatWidget.
 						// Timestamp conversions
 						createdAt: convertTimestamp(data.createdAt),
 						updatedAt: convertTimestamp(data.updatedAt),

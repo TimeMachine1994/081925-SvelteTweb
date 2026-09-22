@@ -1,6 +1,7 @@
 import { error } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
 import { listAllSlideshows } from '$lib/server/db/repos/slideshows';
+import { listByMemorial as listScheduleRequestsByMemorial } from '$lib/server/db/repos/scheduleEditRequests';
 import { requireAdmin } from '$lib/server/adminGuard';
 import type { PageServerLoad } from './$types';
 
@@ -19,12 +20,14 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 	try {
 		// Load all data in parallel for performance
-		const [memorialDoc, streamsSnap, slideshowRecords, followersSnap] = await Promise.all([
-			adminDb.collection('memorials').doc(memorialId).get(),
-			adminDb.collection('streams').where('memorialId', '==', memorialId).get(),
-			listAllSlideshows(memorialId),
-			adminDb.collection('memorials').doc(memorialId).collection('followers').get()
-		]);
+		const [memorialDoc, streamsSnap, slideshowRecords, followersSnap, scheduleRequests] =
+			await Promise.all([
+				adminDb.collection('memorials').doc(memorialId).get(),
+				adminDb.collection('streams').where('memorialId', '==', memorialId).get(),
+				listAllSlideshows(memorialId),
+				adminDb.collection('memorials').doc(memorialId).collection('followers').get(),
+				listScheduleRequestsByMemorial(memorialId)
+			]);
 
 		// Check if memorial exists
 		if (!memorialDoc.exists) {
@@ -141,6 +144,21 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			isPublic: memorialData.isPublic !== false,
 			isComplete: memorialData.isComplete || false,
 
+			// Identity / contact (editable via Basic Information)
+			birthDate: memorialData.birthDate || null,
+			deathDate: memorialData.deathDate || null,
+			familyContactName: memorialData.familyContactName || null,
+			familyContactEmail: memorialData.familyContactEmail || null,
+			familyContactPhone: memorialData.familyContactPhone || null,
+			familyContactPreference: memorialData.familyContactPreference || null,
+			additionalNotes: memorialData.additionalNotes || null,
+
+			// URL aliases (see /api/admin/memorials/[id]/slug*)
+			additionalSlugs: memorialData.additionalSlugs || [],
+
+			// Manual payment record (method/notes), if marked paid manually
+			manualPayment: memorialData.manualPayment || null,
+
 			// Services (new structure)
 			services: memorialData.services || null,
 
@@ -235,16 +253,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 					calculatorServiceType: data.calculatorServiceType || null,
 					calculatorServiceIndex: data.calculatorServiceIndex || null,
 
-					// Chat configuration
-					chat: data.chat
-						? {
-								enabled: data.chat.enabled ?? true,
-								locked: data.chat.locked ?? false,
-								archived: data.chat.archived ?? false,
-								messageCount: data.chat.messageCount ?? 0,
-								participantCount: data.chat.participantCount ?? 0
-							}
-						: null,
+					// Note: chat is no longer per-stream — see the memorial-level
+					// "Chat Moderation" section, backed by /api/admin/memorials/[memorialId]/chat/*.
 
 					createdAt: data.createdAt || null,
 					updatedAt: data.updatedAt || null
@@ -276,6 +286,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			streams,
 			slideshows,
 			followerCount,
+			scheduleRequests,
 			adminUser: {
 				email: locals.user!.email,
 				uid: locals.user!.uid
