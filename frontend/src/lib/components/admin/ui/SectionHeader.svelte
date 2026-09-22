@@ -26,7 +26,7 @@
 	};
 </script>
 
-<div class="mb-4 flex items-center justify-between gap-3">
+<div class="mb-4 flex flex-wrap items-center justify-between gap-3">
 	<div class="flex items-center gap-2">
 		{#if icon}
 			<span class="text-slate-500"><AdminIcon name={icon} size={20} /></span>
@@ -39,6 +39,6 @@
 		{/if}
 	</div>
 	{#if actions}
-		<div class="flex items-center gap-2">{@render actions()}</div>
+		<div class="flex w-full flex-wrap items-center gap-2 sm:w-auto">{@render actions()}</div>
 	{/if}
 </div>

@@ -33,6 +33,20 @@
       ]
     },
     {
+      "collectionGroup": "schedule_edit_requests",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "memorialId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createdAt",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
       "collectionGroup": "memorials",
       "queryScope": "COLLECTION",
       "fields": [

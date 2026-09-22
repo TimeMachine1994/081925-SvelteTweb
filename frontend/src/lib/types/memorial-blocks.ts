@@ -117,4 +117,7 @@ export interface CreateLivestreamBlockRequest {
 	scheduledStartTime: string;
 	description?: string;
 	insertAt?: number;
+	// 'rtmp' (default, OBS/hardware broadcast) or 'upload' (premiere: upload a
+	// file, schedule it, and it plays back synced for everyone at start time).
+	sourceType?: 'rtmp' | 'upload';
 }

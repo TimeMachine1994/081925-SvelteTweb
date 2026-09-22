@@ -14,3 +14,8 @@ export { default as Alert } from './Alert.svelte';
 export { default as SectionHeader } from './SectionHeader.svelte';
 export { default as ConfirmDialog } from './ConfirmDialog.svelte';
 export { default as ToastContainer } from './ToastContainer.svelte';
+export { default as CopyButton } from './CopyButton.svelte';
+export { default as QrCodePanel } from './QrCodePanel.svelte';
+export { default as SectionNav } from './SectionNav.svelte';
+export { default as Disclosure } from './Disclosure.svelte';
+export { default as ReadinessChecklist } from './ReadinessChecklist.svelte';

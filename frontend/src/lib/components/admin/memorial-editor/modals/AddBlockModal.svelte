@@ -16,6 +16,7 @@
 	let streamTitle = $state('');
 	let streamDate = $state('');
 	let streamTime = $state('');
+	let streamSourceType = $state<'rtmp' | 'upload'>('rtmp');
 
 	// Embed config
 	let embedTitle = $state('');
@@ -51,7 +52,8 @@
 				onAdd('livestream', {
 					title: streamTitle.trim(),
 					scheduledStartTime,
-					description: ''
+					description: '',
+					sourceType: streamSourceType
 				});
 				break;
 
@@ -136,6 +138,36 @@
 				</div>
 
 			{:else if selectedType === 'livestream'}
+				<div class="form-group">
+					<label for="stream-source-type">Source</label>
+					<div class="source-toggle" id="stream-source-type">
+						<button
+							type="button"
+							class="source-option"
+							class:selected={streamSourceType === 'rtmp'}
+							onclick={() => (streamSourceType = 'rtmp')}
+						>
+							📡 Live broadcast (OBS/RTMP)
+						</button>
+						<button
+							type="button"
+							class="source-option"
+							class:selected={streamSourceType === 'upload'}
+							onclick={() => (streamSourceType = 'upload')}
+						>
+							⬆️ Upload &amp; Schedule (Premiere)
+						</button>
+					</div>
+					<p class="help-text">
+						{#if streamSourceType === 'rtmp'}
+							Creates RTMP credentials for OBS/hardware encoders — you go live in real time.
+						{:else}
+							Upload a pre-recorded video after creating this block. It "premieres" for
+							everyone at the scheduled time, then becomes a normal downloadable recording.
+						{/if}
+					</p>
+				</div>
+
 				<div class="form-group">
 					<label for="stream-title">Stream Title *</label>
 					<input
@@ -377,6 +409,34 @@
 		display: grid;
 		grid-template-columns: 1fr 1fr;
 		gap: 1rem;
+	}
+
+	.source-toggle {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 0.5rem;
+	}
+
+	.source-option {
+		padding: 0.625rem 0.5rem;
+		border: 2px solid #e2e8f0;
+		border-radius: 0.375rem;
+		background: white;
+		font-size: 0.8125rem;
+		font-weight: 500;
+		color: #4a5568;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+
+	.source-option:hover {
+		border-color: #cbd5e0;
+	}
+
+	.source-option.selected {
+		border-color: #3182ce;
+		background: #ebf8ff;
+		color: #2c5282;
 	}
 
 	.help-text {

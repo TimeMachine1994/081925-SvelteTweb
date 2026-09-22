@@ -30,6 +30,58 @@
 	let checkingLive = $state(false);
 	let liveCheckInterval: NodeJS.Timeout | null = null;
 
+	// Upload/premiere state (stream.sourceType === 'upload')
+	let uploadFile = $state<File | null>(null);
+	let uploadState = $state<'idle' | 'requesting' | 'uploading' | 'done' | 'error'>('idle');
+	let uploadProgress = $state(0);
+	let uploadErrorMessage = $state('');
+
+	function handleFileSelected(e: Event) {
+		const input = e.target as HTMLInputElement;
+		uploadFile = input.files?.[0] || null;
+	}
+
+	async function handleStartUpload() {
+		if (!uploadFile) return;
+
+		uploadState = 'requesting';
+		uploadErrorMessage = '';
+		uploadProgress = 0;
+
+		try {
+			const response = await fetch(`/api/streams/${stream.id}/upload-url`, {
+				method: 'POST'
+			});
+
+			if (!response.ok) {
+				const data = await response.json().catch(() => ({}));
+				throw new Error(data.error || 'Failed to get upload URL');
+			}
+
+			const { url } = await response.json();
+			const { createUpload } = await import('@mux/upchunk');
+
+			uploadState = 'uploading';
+
+			const upload = createUpload({ endpoint: url, file: uploadFile });
+
+			upload.on('progress', (evt) => {
+				uploadProgress = Math.round(evt.detail);
+			});
+			upload.on('success', () => {
+				uploadState = 'done';
+			});
+			upload.on('error', (evt) => {
+				uploadState = 'error';
+				uploadErrorMessage = evt.detail?.message || 'Upload failed';
+			});
+		} catch (error) {
+			console.error('❌ [StreamCard] Upload error:', error);
+			uploadState = 'error';
+			uploadErrorMessage = error instanceof Error ? error.message : 'Upload failed';
+		}
+	}
+
 	// Status badge styling
 	const statusColor = $derived({
 		ready: 'bg-green-100 text-green-800',
@@ -429,7 +481,7 @@
 									{stream.mux.rtmpUrl}
 								</code>
 								<button
-									onclick={() => copyToClipboard(stream.mux!.rtmpUrl, 'rtmp')}
+									onclick={() => copyToClipboard(stream.mux!.rtmpUrl!, 'rtmp')}
 									class="flex items-center gap-1.5 rounded-lg bg-purple-600 px-4 py-3 text-sm font-medium text-white transition-all hover:bg-purple-700 hover:shadow-md"
 									title="Copy RTMP URL"
 								>
@@ -451,7 +503,7 @@
 									{stream.mux.streamKey}
 								</code>
 								<button
-									onclick={() => copyToClipboard(stream.mux!.streamKey, 'streamKey')}
+									onclick={() => copyToClipboard(stream.mux!.streamKey!, 'streamKey')}
 									class="flex items-center gap-1.5 rounded-lg bg-purple-600 px-4 py-3 text-sm font-medium text-white transition-all hover:bg-purple-700 hover:shadow-md"
 									title="Copy Stream Key"
 								>
@@ -506,8 +558,70 @@
 					</p>
 			{/if}
 
+			<!-- Upload/Premiere flow -->
+			{#if stream.sourceType === 'upload'}
+				<div class="rounded-lg border-2 border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-5">
+					<h3 class="mb-3 flex items-center gap-2 text-base font-semibold text-amber-900">
+						<Video class="h-5 w-5" />
+						Premiere Video
+					</h3>
+
+					{#if stream.mux?.vodPlaybackId}
+						<p class="text-sm text-green-800">
+							✅ Video uploaded and ready. It will premiere for visitors at the scheduled
+							start time{#if stream.mux?.duration} ({Math.floor(stream.mux.duration / 60)}m {Math.floor(stream.mux.duration % 60)}s){/if}.
+						</p>
+					{:else if stream.mux?.uploadStatus === 'asset_created'}
+						<p class="text-sm text-amber-800">
+							⏳ Video uploaded — Mux is still processing it. This can take a few minutes for
+							longer videos. Refresh this page to check again.
+						</p>
+					{:else if uploadState === 'uploading'}
+						<p class="mb-2 text-sm text-amber-800">Uploading… do not close this tab.</p>
+						<div class="h-2 w-full overflow-hidden rounded-full bg-amber-200">
+							<div
+								class="h-full rounded-full bg-amber-600 transition-all"
+								style="width: {uploadProgress}%"
+							></div>
+						</div>
+						<p class="mt-1 text-xs text-amber-700">{uploadProgress}%</p>
+					{:else if uploadState === 'done'}
+						<p class="text-sm text-amber-800">
+							⏳ Upload complete — waiting for Mux to finish processing. Refresh this page to
+							check again.
+						</p>
+					{:else}
+						<p class="mb-3 text-sm text-amber-800">
+							Upload the video file for this premiere. It stays private until it goes live at
+							the scheduled start time.
+						</p>
+						{#if uploadState === 'error'}
+							<p class="mb-2 text-sm text-red-700">⚠️ {uploadErrorMessage}</p>
+						{/if}
+						<div class="flex flex-wrap items-center gap-2">
+							<input
+								type="file"
+								accept="video/*"
+								onchange={handleFileSelected}
+								disabled={uploadState === 'requesting'}
+								class="text-sm"
+							/>
+							<button
+								onclick={handleStartUpload}
+								disabled={!uploadFile || uploadState === 'requesting'}
+								class="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-amber-700 disabled:opacity-50"
+							>
+								{uploadState === 'requesting' ? 'Starting…' : 'Upload Video'}
+							</button>
+						</div>
+					{/if}
+				</div>
+			{/if}
+
 	
-			<!-- Status Info -->
+			<!-- Status Info (RTMP streams only — upload/premiere streams show their own
+			     "Premiere Video" card above, which already covers ready/processing state) -->
+			{#if stream.sourceType !== 'upload'}
 			{#if stream.status === 'live'}
 				<div class="rounded-lg bg-red-50 p-4">
 					<p class="text-sm text-red-800">
@@ -548,6 +662,7 @@
 						 <strong>⏳ Processing Recording</strong> - Stream ended, recording is being prepared...
 					</p>
 				</div>
+			{/if}
 			{/if}
 		</div>
 	</div>

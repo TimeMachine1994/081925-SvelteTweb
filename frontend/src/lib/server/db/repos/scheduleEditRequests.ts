@@ -53,15 +53,34 @@ export type ScheduleEditRequestRecord = ScheduleEditRequestInput & {
 	adminNotes?: string | null;
 };
 
-/** Newest-first list of edit requests submitted for a given memorial. */
+/**
+ * Newest-first list of edit requests submitted for a given memorial.
+ *
+ * The `memorialId ==` + `orderBy('createdAt')` combination requires a
+ * Firestore composite index. If it hasn't been created yet (or was dropped),
+ * Firestore throws `FAILED_PRECONDITION` — fall back to an unsorted query
+ * (sorted client-side) rather than 500ing the whole page, matching the
+ * pattern already used for the streams/memorials list pages.
+ */
 export async function listByMemorial(memorialId: string): Promise<ScheduleEditRequestRecord[]> {
-	const snap = await adminDb
-		.collection(COLLECTION)
-		.where('memorialId', '==', memorialId)
-		.orderBy('createdAt', 'desc')
-		.get();
+	const mapDoc = (doc: FirebaseFirestore.QueryDocumentSnapshot) =>
+		({ ...normalizeDoc(doc.data()), id: doc.id }) as ScheduleEditRequestRecord;
 
-	return snap.docs.map(
-		(doc) => ({ id: doc.id, ...normalizeDoc(doc.data()) }) as ScheduleEditRequestRecord
-	);
+	try {
+		const snap = await adminDb
+			.collection(COLLECTION)
+			.where('memorialId', '==', memorialId)
+			.orderBy('createdAt', 'desc')
+			.get();
+		return snap.docs.map(mapDoc);
+	} catch (err) {
+		console.error(
+			'[scheduleEditRequests.listByMemorial] Sorted query failed (likely missing composite index) — falling back to unsorted:',
+			err
+		);
+		const snap = await adminDb.collection(COLLECTION).where('memorialId', '==', memorialId).get();
+		return snap.docs
+			.map(mapDoc)
+			.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+	}
 }

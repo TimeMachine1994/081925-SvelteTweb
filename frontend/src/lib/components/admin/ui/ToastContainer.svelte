@@ -16,7 +16,7 @@
 	};
 </script>
 
-<div class="pointer-events-none fixed bottom-4 right-4 z-[300] flex flex-col gap-2">
+<div class="pointer-events-none fixed bottom-20 right-4 z-[300] flex flex-col gap-2 md:bottom-4">
 	{#each $adminToast as toast (toast.id)}
 		<div
 			class="pointer-events-auto flex items-center gap-2.5 rounded-md border px-4 py-3 text-sm shadow-md {styles[

@@ -17,6 +17,7 @@ import { error as svelteKitError, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { verifyMuxWebhookSignature } from '$lib/server/mux';
 import { env } from '$env/dynamic/private';
+import { findByMuxAssetId, findByMuxUploadId } from '$lib/server/db/repos/streams';
 
 console.log('🔔 [MUX WEBHOOK] Webhook handler loaded and ready');
 
@@ -79,6 +80,15 @@ export const POST: RequestHandler = async ({ request }) => {
 
 			case 'video.asset.errored':
 				await handleRecordingError(event);
+				break;
+
+			case 'video.upload.asset_created':
+				await handleUploadAssetCreated(event);
+				break;
+
+			case 'video.upload.errored':
+			case 'video.upload.cancelled':
+				await handleUploadFailed(event);
 				break;
 
 			default:
@@ -219,28 +229,52 @@ async function handleRecordingReady(event: any) {
 	
 	const assetId = event.data.id;
 	const liveStreamId = event.data.live_stream_id;
+	const passthrough = event.data.passthrough;
 	
 	console.log('📼 [MUX WEBHOOK] Asset ID:', assetId);
 	console.log('📼 [MUX WEBHOOK] Original live stream ID:', liveStreamId);
+	console.log('📼 [MUX WEBHOOK] Passthrough (upload/premiere streams):', passthrough);
 
 	try {
-		// Find stream by Mux live stream ID (exclude deleted streams)
+		// Find the stream document. Three cases, in priority order:
+		// 1. RTMP/live streams — resolve via `live_stream_id` (existing behavior).
+		// 2. Upload/premiere streams — `passthrough` IS our stream ID directly
+		//    (set at upload creation time in createMuxDirectUpload()).
+		// 3. Fallback — an asset we've already linked via `mux.assetId` (e.g. a
+		//    retried/duplicate webhook, or a passthrough that got lost).
 		console.log('🔍 [MUX WEBHOOK] Searching for stream in Firestore...');
-		const streamSnapshot = await adminDb
-			.collection('streams')
-			.where('mux.liveStreamId', '==', liveStreamId)
-			.get();
+		let streamDoc: FirebaseFirestore.QueryDocumentSnapshot | FirebaseFirestore.DocumentSnapshot | null = null;
+		let isUploadStream = false;
 
-		// Filter out deleted streams in JS
-		const validStreams = streamSnapshot.docs.filter(doc => doc.data().isDeleted !== true);
+		if (liveStreamId) {
+			const streamSnapshot = await adminDb
+				.collection('streams')
+				.where('mux.liveStreamId', '==', liveStreamId)
+				.get();
+			const validStreams = streamSnapshot.docs.filter((doc) => doc.data().isDeleted !== true);
+			streamDoc = validStreams[0] ?? null;
+		} else if (passthrough) {
+			isUploadStream = true;
+			const doc = await adminDb.collection('streams').doc(passthrough).get();
+			if (doc.exists && doc.data()?.isDeleted !== true) {
+				streamDoc = doc;
+			}
+		}
 
-		if (validStreams.length === 0) {
-			console.warn('⚠️ [MUX WEBHOOK] No active stream found for live stream ID:', liveStreamId);
+		if (!streamDoc) {
+			const record = await findByMuxAssetId(assetId);
+			if (record) {
+				isUploadStream = record.sourceType === 'upload';
+				streamDoc = await adminDb.collection('streams').doc(record.id).get();
+			}
+		}
+
+		if (!streamDoc) {
+			console.warn('⚠️ [MUX WEBHOOK] No stream found for asset (live_stream_id, passthrough, and assetId lookups all failed):', assetId);
 			return;
 		}
 
-		const streamDoc = validStreams[0];
-		console.log('✅ [MUX WEBHOOK] Stream found:', streamDoc.id);
+		console.log('✅ [MUX WEBHOOK] Stream found:', streamDoc.id, '| upload/premiere stream:', isUploadStream);
 
 		// Extract playback ID and duration
 		const playbackId = event.data.playback_ids?.[0]?.id;
@@ -250,10 +284,10 @@ async function handleRecordingReady(event: any) {
 		console.log('📼 [MUX WEBHOOK] Duration:', duration, 'seconds');
 
 		// Read current stream status to guard against race conditions
-		const currentData = streamDoc.data();
+		const currentData = streamDoc.data()!;
 		const isCurrentlyLive = currentData.status === 'live';
 
-		console.log('� [MUX WEBHOOK] Current stream status:', currentData.status);
+		console.log('📼 [MUX WEBHOOK] Current stream status:', currentData.status);
 		console.log('📼 [MUX WEBHOOK] Is currently live:', isCurrentlyLive);
 
 		// Build recording entry for the recordings array
@@ -278,9 +312,17 @@ async function handleRecordingReady(event: any) {
 			updatedAt: new Date().toISOString()
 		};
 
-		// RACE GUARD: Only set status to 'completed' if NOT currently live
-		// (a new session may have started while this recording was processing)
-		if (!isCurrentlyLive) {
+		if (isUploadStream) {
+			// Upload/premiere streams: the asset being "ready" just means the
+			// file has finished processing and is ready to premiere at its
+			// scheduledStartTime. The public page derives live/recorded state
+			// from scheduledStartTime + duration, not from `status` — so leave
+			// `status` as 'scheduled'/'ready' rather than flipping to 'completed'.
+			updateData['mux.uploadStatus'] = 'asset_created';
+			console.log('📼 [MUX WEBHOOK] Upload/premiere asset ready — leaving status as-is:', currentData.status);
+		} else if (!isCurrentlyLive) {
+			// RACE GUARD: Only set status to 'completed' if NOT currently live
+			// (a new session may have started while this recording was processing)
 			updateData.status = 'completed';
 			console.log('📼 [MUX WEBHOOK] Setting status to completed');
 		} else {
@@ -300,6 +342,68 @@ async function handleRecordingReady(event: any) {
 }
 
 /**
+ * Handle a direct upload's asset being created (upload/premiere streams only).
+ * Fired as soon as the file finishes uploading and Mux starts transcoding it —
+ * `video.asset.ready` (handled above) fires later once transcoding completes.
+ */
+async function handleUploadAssetCreated(event: any) {
+	console.log('📤 [MUX WEBHOOK] Processing UPLOAD ASSET CREATED event');
+
+	const uploadId = event.data.id;
+	const assetId = event.data.asset_id;
+
+	console.log('📤 [MUX WEBHOOK] Upload ID:', uploadId, '| Asset ID:', assetId);
+
+	try {
+		const record = await findByMuxUploadId(uploadId);
+		if (!record) {
+			console.warn('⚠️ [MUX WEBHOOK] No stream found for upload ID:', uploadId);
+			return;
+		}
+
+		await adminDb.collection('streams').doc(record.id).update({
+			'mux.assetId': assetId,
+			'mux.uploadStatus': 'asset_created',
+			updatedAt: new Date().toISOString()
+		});
+
+		console.log('✅ [MUX WEBHOOK] Linked upload to asset for stream:', record.id);
+	} catch (error) {
+		console.error('❌ [MUX WEBHOOK] Error handling upload asset created:', error);
+		throw error;
+	}
+}
+
+/**
+ * Handle a direct upload failing or being cancelled (upload/premiere streams only).
+ */
+async function handleUploadFailed(event: any) {
+	console.log('❌ [MUX WEBHOOK] Processing UPLOAD FAILED/CANCELLED event:', event.type);
+
+	const uploadId = event.data.id;
+	const status = event.type === 'video.upload.cancelled' ? 'cancelled' : 'errored';
+
+	try {
+		const record = await findByMuxUploadId(uploadId);
+		if (!record) {
+			console.warn('⚠️ [MUX WEBHOOK] No stream found for upload ID:', uploadId);
+			return;
+		}
+
+		await adminDb.collection('streams').doc(record.id).update({
+			status: 'error',
+			'mux.uploadStatus': status,
+			updatedAt: new Date().toISOString()
+		});
+
+		console.error('❌ [MUX WEBHOOK] Upload failed for stream:', record.id, '| status:', status);
+	} catch (error) {
+		console.error('❌ [MUX WEBHOOK] Error handling upload failure:', error);
+		throw error;
+	}
+}
+
+/**
  * Handle recording error
  */
 async function handleRecordingError(event: any) {
@@ -307,6 +411,7 @@ async function handleRecordingError(event: any) {
 	
 	const assetId = event.data.id;
 	const liveStreamId = event.data.live_stream_id;
+	const passthrough = event.data.passthrough;
 	const errorMessage = event.data.errors?.messages?.[0] || 'Unknown error';
 	
 	console.log('❌ [MUX WEBHOOK] Asset ID:', assetId);
@@ -314,22 +419,37 @@ async function handleRecordingError(event: any) {
 	console.log('❌ [MUX WEBHOOK] Error:', errorMessage);
 
 	try {
-		// Find stream by Mux live stream ID (exclude deleted streams)
+		// Same three-tier lookup as handleRecordingReady (RTMP live_stream_id ->
+		// upload passthrough -> assetId fallback).
 		console.log('🔍 [MUX WEBHOOK] Searching for stream in Firestore...');
-		const streamSnapshot = await adminDb
-			.collection('streams')
-			.where('mux.liveStreamId', '==', liveStreamId)
-			.get();
+		let streamDoc: FirebaseFirestore.QueryDocumentSnapshot | FirebaseFirestore.DocumentSnapshot | null = null;
 
-		// Filter out deleted streams in JS
-		const validStreams = streamSnapshot.docs.filter(doc => doc.data().isDeleted !== true);
+		if (liveStreamId) {
+			const streamSnapshot = await adminDb
+				.collection('streams')
+				.where('mux.liveStreamId', '==', liveStreamId)
+				.get();
+			const validStreams = streamSnapshot.docs.filter((doc) => doc.data().isDeleted !== true);
+			streamDoc = validStreams[0] ?? null;
+		} else if (passthrough) {
+			const doc = await adminDb.collection('streams').doc(passthrough).get();
+			if (doc.exists && doc.data()?.isDeleted !== true) {
+				streamDoc = doc;
+			}
+		}
 
-		if (validStreams.length === 0) {
-			console.warn('⚠️ [MUX WEBHOOK] No active stream found for live stream ID:', liveStreamId);
+		if (!streamDoc) {
+			const record = await findByMuxAssetId(assetId);
+			if (record) {
+				streamDoc = await adminDb.collection('streams').doc(record.id).get();
+			}
+		}
+
+		if (!streamDoc) {
+			console.warn('⚠️ [MUX WEBHOOK] No stream found for asset:', assetId);
 			return;
 		}
 
-		const streamDoc = validStreams[0];
 		console.log('✅ [MUX WEBHOOK] Stream found:', streamDoc.id);
 
 		// Update stream with error status

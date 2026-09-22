@@ -7,11 +7,13 @@
 		variant = 'info',
 		title = undefined,
 		icon = undefined,
+		class: className = '',
 		children
 	}: {
 		variant?: 'info' | 'success' | 'warning' | 'danger';
 		title?: string;
 		icon?: string;
+		class?: string;
 		children?: Snippet;
 	} = $props();
 
@@ -30,7 +32,7 @@
 	};
 </script>
 
-<div class="flex items-start gap-3 rounded-md border px-4 py-3 {styles[variant]}" role="alert">
+<div class="flex items-start gap-3 rounded-md border px-4 py-3 {styles[variant]} {className}" role="alert">
 	<div class="mt-0.5 shrink-0">
 		<AdminIcon name={icon ?? defaultIcon[variant]} size={18} />
 	</div>

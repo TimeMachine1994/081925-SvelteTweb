@@ -40,6 +40,19 @@ import {
 	RefreshCw,
 	Globe,
 	Lock,
+	Copy,
+	Check,
+	QrCode,
+	ExternalLink,
+	Download,
+	Share2,
+	MessageSquare,
+	LayoutList,
+	Sliders,
+	Radio,
+	Upload,
+	ChevronDown,
+	Menu,
 	type IconProps
 } from '@lucide/svelte';
 import type { Component } from 'svelte';
@@ -78,7 +91,20 @@ export type IconKey =
 	| 'view'
 	| 'refresh'
 	| 'public'
-	| 'private';
+	| 'private'
+	| 'copy'
+	| 'check'
+	| 'qr'
+	| 'external'
+	| 'download'
+	| 'share'
+	| 'chat'
+	| 'content-blocks'
+	| 'settings-gear'
+	| 'live'
+	| 'upload'
+	| 'chevron-down'
+	| 'menu';
 
 export const ICONS: Record<IconKey, IconComponent> = {
 	dashboard: LayoutDashboard,
@@ -112,7 +138,20 @@ export const ICONS: Record<IconKey, IconComponent> = {
 	view: Eye,
 	refresh: RefreshCw,
 	public: Globe,
-	private: Lock
+	private: Lock,
+	copy: Copy,
+	check: Check,
+	qr: QrCode,
+	external: ExternalLink,
+	download: Download,
+	share: Share2,
+	chat: MessageSquare,
+	'content-blocks': LayoutList,
+	'settings-gear': Sliders,
+	live: Radio,
+	upload: Upload,
+	'chevron-down': ChevronDown,
+	menu: Menu
 };
 
 export function resolveIcon(key: string | undefined): IconComponent {

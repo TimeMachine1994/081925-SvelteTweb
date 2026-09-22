@@ -35,14 +35,18 @@ export interface StreamCredentials {
  * playback IDs, and recording information
  */
 export interface MuxStreamConfig {
-	// Mux identifiers
-	liveStreamId: string;        // Mux live stream ID
-	playbackId: string;           // HLS playback ID for live viewing
-	
-	// RTMP ingestion credentials
-	rtmpUrl: string;              // RTMP ingest URL
-	streamKey: string;            // RTMP stream key for OBS
-	
+	// Mux identifiers (RTMP/OBS streams only — absent for `sourceType: 'upload'`)
+	liveStreamId?: string;        // Mux live stream ID
+	playbackId?: string;          // HLS playback ID for live viewing
+
+	// RTMP ingestion credentials (RTMP/OBS streams only)
+	rtmpUrl?: string;             // RTMP ingest URL
+	streamKey?: string;           // RTMP stream key for OBS
+
+	// Direct Upload (premiere) streams only
+	uploadId?: string;            // Mux Direct Upload ID
+	uploadStatus?: 'awaiting_file' | 'waiting' | 'asset_created' | 'errored' | 'cancelled' | 'timed_out';
+
 	// Recording — legacy single fields (latest recording wins, for backward compat)
 	assetId?: string;             // Mux VOD asset ID
 	vodPlaybackId?: string;       // VOD playback ID for recordings
@@ -93,13 +97,20 @@ export interface StreamAnalytics {
 	};
 }
 
+/** How this stream's video gets to Mux. Absent/`'rtmp'` = today's OBS livestream flow. */
+export type StreamSourceType = 'rtmp' | 'upload';
+
 export interface Stream {
 	id: string;
 	title: string;
 	description?: string;
 	status: StreamStatus;
 	visibility?: StreamVisibility;
-	
+
+	// Source of the video: a live OBS/RTMP broadcast, or a pre-recorded file
+	// uploaded and scheduled as a "premiere". Absent means 'rtmp' (legacy streams).
+	sourceType?: StreamSourceType;
+
 	// Memorial association
 	memorialId: string;
 	

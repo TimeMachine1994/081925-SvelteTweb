@@ -3,6 +3,7 @@
 	import { browser } from '$app/environment';
 	import CountdownVideoPlayer from './CountdownVideoPlayer.svelte';
 	import MuxVideoPlayer from './streaming/MuxVideoPlayer.svelte';
+	import PremierePlayer from './streaming/PremierePlayer.svelte';
 	import { selectDisplayRecordings } from '$lib/utils/recording-selection';
 	
 	console.log('🎬 [MEMORIAL STREAM DISPLAY] Component loaded - Mux integration active');
@@ -14,6 +15,9 @@
 		status: string;
 		memorialId?: string;
 		scheduledStartTime?: string;
+		// 'rtmp' (default, OBS/hardware broadcast) or 'upload' (premiere: a
+		// pre-recorded file that plays back synced for everyone at start time).
+		sourceType?: 'rtmp' | 'upload';
 		cloudflareInputId?: string;
 		cloudflareStreamId?: string;
 		playbackUrl?: string;
@@ -228,14 +232,56 @@
 		}
 	}
 	
+	/**
+	 * Whether an upload/premiere stream's scheduled runtime has fully elapsed
+	 * (i.e. it has finished "airing" and should now appear as a normal
+	 * recording). Only meaningful for `sourceType === 'upload'` streams —
+	 * requires both a scheduled start time and a known asset duration.
+	 */
+	function uploadHasAired(s: Stream, now: Date): boolean {
+		if (s.sourceType !== 'upload') return false;
+		if (!s.scheduledStartTime || !s.mux?.duration) return false;
+		const startMs = new Date(s.scheduledStartTime).getTime();
+		return now.getTime() >= startMs + s.mux.duration * 1000;
+	}
+
+	/**
+	 * Whether a stream should be treated as "recorded" (its own bucket).
+	 * - RTMP streams: driven by status/recordingReady, same as always.
+	 * - Upload/premiere streams: only once its scheduled runtime has fully
+	 *   elapsed — NOT just because the underlying Mux asset finished
+	 *   processing (that can happen long before the scheduled premiere time).
+	 */
+	function isRecordedStream(s: Stream, now: Date): boolean {
+		if (s.sourceType === 'upload') {
+			return uploadHasAired(s, now);
+		}
+		return (
+			s.status === 'completed' ||
+			s.status === 'ended' ||
+			s.recordingReady === true ||
+			s.mux?.recordingReady === true ||
+			(s.mux?.recordings?.length ?? 0) > 0
+		);
+	}
+
 	// Categorize streams based on REAL-TIME status from liveStreams
 	// Live stream detection (respects scheduled times):
 	// 1. Status is explicitly 'live' (set by webhook when broadcast starts), OR
 	// 2. Mux streamingStatus is 'active' (immediate Mux webhook update), OR
 	// 3. Stream is 'scheduled'/'ready' AND past scheduled start time (fallback if webhook delayed)
+	// For upload/premiere streams: only "live" once the uploaded asset is
+	// actually ready AND its runtime hasn't fully elapsed yet (see uploadHasAired).
 	let categorizedLiveStreams = $derived(
 		liveStreams.filter(s => {
 			if (s.isVisible === false) return false;
+
+			if (s.sourceType === 'upload') {
+				if (!s.scheduledStartTime || !s.mux?.vodPlaybackId) return false;
+				const scheduledTime = new Date(s.scheduledStartTime).getTime();
+				const now = currentTime.getTime();
+				return now >= scheduledTime && !uploadHasAired(s, currentTime);
+			}
 			
 			// Explicitly marked as live by webhook
 			if (s.status === 'live') return true;
@@ -259,7 +305,10 @@
 	);
 	
 	// Scheduled streams: Show if FUTURE scheduled time OR status is 'ready'/'scheduled' without recording
-	// AND not already showing as live
+	// AND not already showing as live. For upload/premiere streams past their
+	// start time but not yet processed (or missing a duration), staying in
+	// this bucket keeps them visible with the existing countdown UI instead of
+	// disappearing entirely.
 	let scheduledStreams = $derived(
 		liveStreams.filter(s => {
 			if (s.isVisible === false) return false;
@@ -269,14 +318,18 @@
 			if (isInLiveStreams) return false;
 			
 			// If already recorded, don't show in scheduled
-			const isRecorded = s.status === 'completed' || s.status === 'ended' || 
-				s.recordingReady === true || s.mux?.recordingReady === true;
-			if (isRecorded) return false;
+			if (isRecordedStream(s, currentTime)) return false;
 			
 			// Show if future scheduled time
 			if (s.scheduledStartTime) {
 				const scheduledTime = new Date(s.scheduledStartTime).getTime();
 				const now = currentTime.getTime();
+				
+				if (s.sourceType === 'upload') {
+					// Past start time but the video isn't ready/live yet (still
+					// processing) — keep showing it here instead of dropping it.
+					return true;
+				}
 				
 				// Only show as scheduled if it's in the FUTURE
 				if (scheduledTime > now && (s.status === 'scheduled' || s.status === 'ready')) {
@@ -302,18 +355,14 @@
 			const isInLiveStreams = categorizedLiveStreams.some(live => live.id === s.id);
 			if (isInLiveStreams) return false;
 			
-			const isRecording = 
-				s.status === 'completed' || 
-				s.status === 'ended' ||
-				s.recordingReady === true || 
-				s.mux?.recordingReady === true ||
-				(s.mux?.recordings?.length ?? 0) > 0;
+			const isRecording = isRecordedStream(s, currentTime);
 			
 			// Debug logging for recording detection
 			if (s.mux?.vodPlaybackId || s.status === 'completed' || s.status === 'ended') {
 				console.log('📼 [RECORDING CHECK]', s.id, {
 					isRecording,
 					status: s.status,
+					sourceType: s.sourceType,
 					isVisible: s.isVisible,
 					isInLiveStreams,
 					recordingReady: s.recordingReady,
@@ -380,7 +429,20 @@
 				</h2>
 				{#each categorizedLiveStreams as stream (stream.id)}
 					<div class="stream-item">
-						{#if stream.mux?.playbackId}
+						{#if stream.sourceType === 'upload' && stream.mux?.vodPlaybackId}
+							<!-- PREMIERE (upload & schedule) - synced VOD playback, feels live -->
+							<div class="mux-stream-container">
+								<div class="video-column">
+									<PremierePlayer
+										playbackId={stream.mux.vodPlaybackId}
+										scheduledStartTime={stream.scheduledStartTime ?? ''}
+										duration={stream.mux.duration}
+										title={stream.title}
+										{currentTime}
+									/>
+								</div>
+							</div>
+						{:else if stream.mux?.playbackId}
 							<!-- MUX PLATFORM - New integrated player. Chat is now memorial-wide (see MemorialChatWidget), not per-stream. -->
 							<div class="mux-stream-container">
 								<div class="video-column">

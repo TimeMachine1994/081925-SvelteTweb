@@ -1,35 +1,32 @@
 import { error } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
-import { listAllSlideshows } from '$lib/server/db/repos/slideshows';
-import { listByMemorial as listScheduleRequestsByMemorial } from '$lib/server/db/repos/scheduleEditRequests';
 import { requireAdmin } from '$lib/server/adminGuard';
-import type { PageServerLoad } from './$types';
+import type { LayoutServerLoad } from './$types';
 
 /**
- * Memorial Detail Page Server Load
- * Loads comprehensive data for a single memorial including:
- * - Memorial document
- * - Associated streams
- * - Slideshows (subcollection)
- * - Followers count
+ * Shared load for every section of the memorial admin page (Overview,
+ * Content, Broadcast, Chat, Billing, Settings).
+ *
+ * Loads only what's needed by *multiple* sections — the memorial doc and its
+ * streams (used by Overview's readiness checklist, Content's block editor,
+ * and Broadcast). Data needed by only one section (slideshows, schedule edit
+ * requests) is loaded in that section's own `+page.server.ts` instead, so
+ * the default landing tab doesn't pay for reads it doesn't render.
  */
-export const load: PageServerLoad = async ({ params, locals }) => {
+export const load: LayoutServerLoad = async ({ params, locals }) => {
 	const { memorialId } = params;
 
 	requireAdmin(locals, { resource: 'memorial', action: 'read' });
 
 	try {
-		// Load all data in parallel for performance
-		const [memorialDoc, streamsSnap, slideshowRecords, followersSnap, scheduleRequests] =
-			await Promise.all([
-				adminDb.collection('memorials').doc(memorialId).get(),
-				adminDb.collection('streams').where('memorialId', '==', memorialId).get(),
-				listAllSlideshows(memorialId),
-				adminDb.collection('memorials').doc(memorialId).collection('followers').get(),
-				listScheduleRequestsByMemorial(memorialId)
-			]);
+		const [memorialDoc, streamsSnap, followersCountSnap] = await Promise.all([
+			adminDb.collection('memorials').doc(memorialId).get(),
+			adminDb.collection('streams').where('memorialId', '==', memorialId).get(),
+			// Cheap aggregate count (not a full document read) — used only for the
+			// Overview analytics stat.
+			adminDb.collection('memorials').doc(memorialId).collection('followers').count().get()
+		]);
 
-		// Check if memorial exists
 		if (!memorialDoc.exists) {
 			throw error(404, 'Memorial not found');
 		}
@@ -39,26 +36,11 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			throw error(404, 'Memorial data not found');
 		}
 
-		// Helper function to convert any timestamp format to ISO string
 		const convertTimestamp = (value: any): string | null => {
 			if (!value) return null;
-
-			// Firestore Timestamp with toDate method
-			if (value.toDate && typeof value.toDate === 'function') {
-				return value.toDate().toISOString();
-			}
-
-			// Raw timestamp object with _seconds
-			if (value._seconds !== undefined) {
-				return new Date(value._seconds * 1000).toISOString();
-			}
-
-			// Already a string
-			if (typeof value === 'string') {
-				return value;
-			}
-
-			// Try to parse as Date
+			if (value.toDate && typeof value.toDate === 'function') return value.toDate().toISOString();
+			if (value._seconds !== undefined) return new Date(value._seconds * 1000).toISOString();
+			if (typeof value === 'string') return value;
 			try {
 				return new Date(value).toISOString();
 			} catch {
@@ -66,69 +48,32 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			}
 		};
 
-		// Helper function to clean custom pricing timestamps
 		const cleanCustomPricing = (pricing: any) => {
 			if (!pricing) return null;
-
-			return {
-				...pricing,
-				setAt: convertTimestamp(pricing.setAt)
-			};
+			return { ...pricing, setAt: convertTimestamp(pricing.setAt) };
 		};
 
-		// Helper function to clean calculator config timestamps
 		const cleanCalculatorConfig = (config: any) => {
 			if (!config) return null;
-
 			const cleaned = { ...config };
-
-			// Convert timestamps in formData
 			if (cleaned.formData) {
 				cleaned.formData = { ...cleaned.formData };
-				if (cleaned.formData.updatedAt) {
-					cleaned.formData.updatedAt = convertTimestamp(cleaned.formData.updatedAt);
-				}
-				if (cleaned.formData.createdAt) {
-					cleaned.formData.createdAt = convertTimestamp(cleaned.formData.createdAt);
-				}
+				if (cleaned.formData.updatedAt) cleaned.formData.updatedAt = convertTimestamp(cleaned.formData.updatedAt);
+				if (cleaned.formData.createdAt) cleaned.formData.createdAt = convertTimestamp(cleaned.formData.createdAt);
 			}
-
-			// Convert top-level timestamps
-			if (cleaned.lastModified) {
-				cleaned.lastModified = convertTimestamp(cleaned.lastModified);
-			}
-			if (cleaned.paymentDate) {
-				cleaned.paymentDate = convertTimestamp(cleaned.paymentDate);
-			}
-			if (cleaned.paidAt) {
-				cleaned.paidAt = convertTimestamp(cleaned.paidAt);
-			}
-
-			// Convert timestamps in autoSave
+			if (cleaned.lastModified) cleaned.lastModified = convertTimestamp(cleaned.lastModified);
+			if (cleaned.paymentDate) cleaned.paymentDate = convertTimestamp(cleaned.paymentDate);
+			if (cleaned.paidAt) cleaned.paidAt = convertTimestamp(cleaned.paidAt);
 			if (cleaned.autoSave) {
 				cleaned.autoSave = { ...cleaned.autoSave };
-				if (cleaned.autoSave.lastModified) {
-					cleaned.autoSave.lastModified = convertTimestamp(cleaned.autoSave.lastModified);
-				}
-				if (cleaned.autoSave.timestamp) {
-					cleaned.autoSave.timestamp = convertTimestamp(cleaned.autoSave.timestamp);
-				}
-				if (cleaned.autoSave.formData?.updatedAt) {
-					cleaned.autoSave.formData.updatedAt = convertTimestamp(
-						cleaned.autoSave.formData.updatedAt
-					);
-				}
-				if (cleaned.autoSave.formData?.createdAt) {
-					cleaned.autoSave.formData.createdAt = convertTimestamp(
-						cleaned.autoSave.formData.createdAt
-					);
-				}
+				if (cleaned.autoSave.lastModified) cleaned.autoSave.lastModified = convertTimestamp(cleaned.autoSave.lastModified);
+				if (cleaned.autoSave.timestamp) cleaned.autoSave.timestamp = convertTimestamp(cleaned.autoSave.timestamp);
+				if (cleaned.autoSave.formData?.updatedAt) cleaned.autoSave.formData.updatedAt = convertTimestamp(cleaned.autoSave.formData.updatedAt);
+				if (cleaned.autoSave.formData?.createdAt) cleaned.autoSave.formData.createdAt = convertTimestamp(cleaned.autoSave.formData.createdAt);
 			}
-
 			return cleaned;
 		};
 
-		// Process memorial data
 		const memorial = {
 			id: memorialDoc.id,
 			lovedOneName: memorialData.lovedOneName || 'Unknown',
@@ -140,11 +85,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			createdAt: convertTimestamp(memorialData.createdAt),
 			updatedAt: convertTimestamp(memorialData.updatedAt),
 
-			// Status flags
 			isPublic: memorialData.isPublic !== false,
 			isComplete: memorialData.isComplete || false,
 
-			// Identity / contact (editable via Basic Information)
 			birthDate: memorialData.birthDate || null,
 			deathDate: memorialData.deathDate || null,
 			familyContactName: memorialData.familyContactName || null,
@@ -153,55 +96,43 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			familyContactPreference: memorialData.familyContactPreference || null,
 			additionalNotes: memorialData.additionalNotes || null,
 
-			// URL aliases (see /api/admin/memorials/[id]/slug*)
 			additionalSlugs: memorialData.additionalSlugs || [],
 
-			// Manual payment record (method/notes), if marked paid manually
 			manualPayment: memorialData.manualPayment || null,
 
-			// Services (new structure)
 			services: memorialData.services || null,
 
-			// Legacy service fields
 			memorialDate: memorialData.memorialDate || null,
 			memorialTime: memorialData.memorialTime || null,
 			memorialLocationName: memorialData.memorialLocationName || null,
 			memorialLocationAddress: memorialData.memorialLocationAddress || null,
 
-			// Livestream legacy field (mostly replaced by streams collection)
 			livestream: memorialData.livestream || null,
 
-			// Admin display overrides
 			customTitle: memorialData.customTitle || null,
 
-			// Calculator/Payment - properly cleaned
 			calculatorConfig: cleanCalculatorConfig(memorialData.calculatorConfig),
 			isPaid: memorialData.isPaid || memorialData.calculatorConfig?.isPaid || false,
 			paymentStatus: memorialData.calculatorConfig?.status || 'draft',
 			totalPrice: memorialData.calculatorConfig?.totalPrice || memorialData.totalPrice || 0,
 			paymentDate: convertTimestamp(memorialData.calculatorConfig?.paymentDate),
 
-			// Schedule data for admin editor
 			schedule:
 				memorialData.calculatorConfig?.autoSave?.formData ||
 				memorialData.calculatorConfig?.formData ||
 				null,
 
-			// Custom pricing overrides
 			customPricing: cleanCustomPricing(memorialData.customPricing),
 
-			// Contact info
 			funeralDirectorName:
 				memorialData.funeralDirectorName ||
 				memorialData.calculatorConfig?.formData?.funeralDirectorName ||
 				'',
 
-			// Content blocks for WYSIWYG editor
 			contentBlocks: memorialData.contentBlocks || [],
 			contentBlocksVersion: memorialData.contentBlocksVersion || 0
 		};
 
-		// Process streams - filter deleted in JS to handle missing isDeleted field
 		const streams = streamsSnap.docs
 			.filter((doc) => doc.data().isDeleted !== true)
 			.map((doc) => {
@@ -213,19 +144,16 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 					description: data.description || '',
 					status: data.status || 'scheduled',
 					visibility: data.visibility || 'public',
+					sourceType: data.sourceType || 'rtmp',
 					scheduledStartTime: data.scheduledStartTime || null,
 					startedAt: data.startedAt || null,
 					endedAt: data.endedAt || null,
 					liveStartedAt: data.liveStartedAt || null,
 					liveEndedAt: data.liveEndedAt || null,
 
-					// Legacy credentials
 					streamCredentials: data.streamCredentials || null,
-
-					// Mux streaming platform data
 					mux: data.mux || null,
 
-					// Legacy streaming config
 					streamingMethod: data.streamingMethod || null,
 					cloudflareStreamId: data.cloudflareStreamId || null,
 					rtmpUrl: data.rtmpUrl || null,
@@ -233,74 +161,39 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 					playbackUrl: data.playbackUrl || null,
 					embedUrl: data.embedUrl || null,
 
-					// Phone source (dual stream)
 					phoneSourceStreamId: data.phoneSourceStreamId || null,
 					phoneSourcePlaybackUrl: data.phoneSourcePlaybackUrl || null,
 					phoneSourceWhipUrl: data.phoneSourceWhipUrl || null,
 
-					// Recording
 					recordingReady: data.recordingReady || false,
 					recordingUrl: data.recordingUrl || null,
 					recordingPlaybackUrl: data.recordingPlaybackUrl || null,
 					recordingDuration: data.recordingDuration || null,
 
-					// Analytics
 					viewerCount: data.viewerCount || 0,
 					peakViewerCount: data.peakViewerCount || 0,
 					totalViews: data.totalViews || 0,
 
-					// Calculator linking
 					calculatorServiceType: data.calculatorServiceType || null,
 					calculatorServiceIndex: data.calculatorServiceIndex || null,
-
-					// Note: chat is no longer per-stream — see the memorial-level
-					// "Chat Moderation" section, backed by /api/admin/memorials/[memorialId]/chat/*.
 
 					createdAt: data.createdAt || null,
 					updatedAt: data.updatedAt || null
 				};
 			});
 
-		// Process slideshows
-		const slideshows = slideshowRecords.map((data) => {
-			return {
-				id: data.id,
-				title: data.title || 'Untitled Slideshow',
-				status: data.status || 'ready',
-				playbackUrl: data.playbackUrl || null,
-				thumbnailUrl: data.thumbnailUrl || null,
-				photos: data.photos || [],
-				audio: data.audio || null,
-				settings: data.settings || {},
-				createdBy: data.createdBy || '',
-				createdAt: data.createdAt || null,
-				updatedAt: data.updatedAt || null
-			};
-		});
-
-		// Get follower count
-		const followerCount = followersSnap.size;
-
 		return {
 			memorial,
 			streams,
-			slideshows,
-			followerCount,
-			scheduleRequests,
+			followerCount: followersCountSnap.data().count,
 			adminUser: {
 				email: locals.user!.email,
 				uid: locals.user!.uid
 			}
 		};
 	} catch (err: any) {
-		// If it's already an error we threw, re-throw it
-		if (err.status) {
-			throw err;
-		}
-
+		if (err.status) throw err;
 		console.error('Error loading memorial:', err);
-
-		// Otherwise return generic error
 		throw error(500, `Failed to load memorial: ${err.message}`);
 	}
 };

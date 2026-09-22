@@ -21,11 +21,16 @@ Based on ADMIN_REFACTOR_1_ARCHITECTURE.md
 		title,
 		subtitle,
 		actions = [],
+		breadcrumbs: breadcrumbsProp,
 		children
 	}: {
 		title: string;
 		subtitle?: string;
 		actions?: Array<{ label: string; onclick: () => void; variant?: string; icon?: string }>;
+		/** Override the auto-computed breadcrumb trail — needed on dynamic detail
+		 * pages (e.g. a specific memorial), which `getBreadcrumbs()` can't resolve
+		 * from the URL pattern alone. */
+		breadcrumbs?: Array<{ label: string; href: string }>;
 		children?: Snippet;
 	} = $props();
 
@@ -38,8 +43,9 @@ Based on ADMIN_REFACTOR_1_ARCHITECTURE.md
 		getAccessibleNav((resource, action) => $can(resource, action))
 	);
 
-	// Breadcrumbs for current page
-	let breadcrumbs = $derived(getBreadcrumbs($page.url.pathname));
+	// Breadcrumbs for current page — pages can override via the `breadcrumbs`
+	// prop (dynamic detail pages), otherwise computed from the nav config.
+	let breadcrumbs = $derived(breadcrumbsProp ?? getBreadcrumbs($page.url.pathname));
 
 	// Recently viewed items (stored in localStorage)
 	let recentlyViewed = $state<Array<{ label: string; href: string }>>([]);

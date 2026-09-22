@@ -180,7 +180,7 @@
 									: 'N/A'}</td
 							>
 							<td>
-								<a href="/{memorial.fullSlug}" target="_blank" class="btn-link">View</a>
+								<a href="/{memorial.fullSlug}" target="_blank" rel="noopener noreferrer" class="btn-link">View</a>
 								<a href="/admin/services/memorials/{memorial.id}" class="btn-link">Manage</a>
 							</td>
 						</tr>

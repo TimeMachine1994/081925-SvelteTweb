@@ -34,9 +34,62 @@ export async function listAll(opts: ListStreamsOptions = {}): Promise<StreamReco
 	return snap.docs.map((d) => mapStream(d.id, d.data()));
 }
 
+/**
+ * Streams explicitly marked `status: 'live'` by a webhook — a single-field
+ * equality filter, no composite index required.
+ */
+export async function listLive(): Promise<StreamRecord[]> {
+	try {
+		const snap = await adminDb.collection(COLLECTION).where('status', '==', 'live').get();
+		return snap.docs.map((d) => mapStream(d.id, d.data())).filter((s) => !(s as any).isDeleted);
+	} catch (err) {
+		console.error('[streams.listLive] Query failed:', err);
+		return [];
+	}
+}
+
+/**
+ * Streams scheduled to start within `[fromIso, toIso]` — a single-field
+ * range + orderBy on `scheduledStartTime`, which Firestore serves from its
+ * automatic per-field index (no composite index needed). Deleted streams are
+ * filtered out in JS rather than adding a second `where`, which would force
+ * a composite index.
+ */
+export async function listScheduledBetween(fromIso: string, toIso: string): Promise<StreamRecord[]> {
+	try {
+		const snap = await adminDb
+			.collection(COLLECTION)
+			.where('scheduledStartTime', '>=', fromIso)
+			.where('scheduledStartTime', '<=', toIso)
+			.orderBy('scheduledStartTime', 'asc')
+			.get();
+		return snap.docs.map((d) => mapStream(d.id, d.data())).filter((s) => !(s as any).isDeleted);
+	} catch (err) {
+		console.error('[streams.listScheduledBetween] Query failed:', err);
+		return [];
+	}
+}
+
 /** Used by the Mux webhook to resolve a live stream event to our stream document. */
 export async function findByMuxLiveStreamId(liveStreamId: string): Promise<StreamRecord | null> {
 	const snap = await adminDb.collection(COLLECTION).where('mux.liveStreamId', '==', liveStreamId).limit(1).get();
+	return snap.empty ? null : mapStream(snap.docs[0].id, snap.docs[0].data());
+}
+
+/** Used by the Mux webhook to resolve a `video.upload.*` event (premiere/upload streams). */
+export async function findByMuxUploadId(uploadId: string): Promise<StreamRecord | null> {
+	const snap = await adminDb.collection(COLLECTION).where('mux.uploadId', '==', uploadId).limit(1).get();
+	return snap.empty ? null : mapStream(snap.docs[0].id, snap.docs[0].data());
+}
+
+/**
+ * Fallback lookup for `video.asset.ready`/`video.asset.errored` events with no
+ * `live_stream_id` (i.e. direct-upload/premiere assets). Prefer resolving via
+ * the asset's `passthrough` field (set to our stream ID at upload creation
+ * time) — this is only a fallback for older assets or missed passthroughs.
+ */
+export async function findByMuxAssetId(assetId: string): Promise<StreamRecord | null> {
+	const snap = await adminDb.collection(COLLECTION).where('mux.assetId', '==', assetId).limit(1).get();
 	return snap.empty ? null : mapStream(snap.docs[0].id, snap.docs[0].data());
 }
 

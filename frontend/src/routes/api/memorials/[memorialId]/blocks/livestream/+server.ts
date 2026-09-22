@@ -25,7 +25,8 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 
 	try {
 		const body: CreateLivestreamBlockRequest = await request.json();
-		const { title, scheduledStartTime, description, insertAt } = body;
+		const { title, scheduledStartTime, description, insertAt, sourceType } = body;
+		const isUpload = sourceType === 'upload';
 
 		// Validate required fields
 		if (!title || !title.trim()) {
@@ -47,23 +48,48 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 		const streamsRef = adminDb.collection('streams');
 		const now = new Date().toISOString();
 
-		// === MUX INTEGRATION: Create Live Stream with RTMP credentials ===
-		console.log('🎬 [BLOCKS] Creating Mux live stream for:', title.trim());
+		// === MUX INTEGRATION ===
+		// Two source types:
+		// - 'rtmp' (default): create a Mux Live Stream now, with RTMP credentials for OBS.
+		// - 'upload': no live stream is created here — the admin uploads a file
+		//   afterward via /api/streams/[streamId]/upload-url, and the resulting
+		//   Mux Asset is what gets scheduled/played back as a "premiere".
+		let muxConfig: Record<string, unknown>;
 
-		let muxLiveStream;
-		try {
-			muxLiveStream = await createMuxLiveStream(title.trim(), {
-				reconnectWindow: 60,
-				reducedLatency: true
-			});
+		if (isUpload) {
+			console.log('📤 [BLOCKS] Creating upload/premiere stream (no live stream yet):', title.trim());
+			muxConfig = {
+				recordingReady: false,
+				uploadStatus: 'awaiting_file'
+			};
+		} else {
+			console.log('🎬 [BLOCKS] Creating Mux live stream for:', title.trim());
 
-			console.log('✅ [BLOCKS] Mux live stream created:', muxLiveStream.id);
-			console.log('🎬 [BLOCKS] Playback ID:', muxLiveStream.playbackId);
-			console.log('📺 [BLOCKS] RTMP URL:', muxLiveStream.rtmpUrl);
-			console.log('🔑 [BLOCKS] Stream Key length:', muxLiveStream.streamKey?.length || 0);
-		} catch (muxError) {
-			console.error('❌ [BLOCKS] Failed to create Mux live stream:', muxError);
-			throw svelteError(500, `Failed to create Mux live stream: ${muxError instanceof Error ? muxError.message : 'Unknown error'}`);
+			let muxLiveStream;
+			try {
+				muxLiveStream = await createMuxLiveStream(title.trim(), {
+					reconnectWindow: 60,
+					reducedLatency: true
+				});
+
+				console.log('✅ [BLOCKS] Mux live stream created:', muxLiveStream.id);
+				console.log('🎬 [BLOCKS] Playback ID:', muxLiveStream.playbackId);
+				console.log('📺 [BLOCKS] RTMP URL:', muxLiveStream.rtmpUrl);
+				console.log('🔑 [BLOCKS] Stream Key length:', muxLiveStream.streamKey?.length || 0);
+			} catch (muxError) {
+				console.error('❌ [BLOCKS] Failed to create Mux live stream:', muxError);
+				throw svelteError(500, `Failed to create Mux live stream: ${muxError instanceof Error ? muxError.message : 'Unknown error'}`);
+			}
+
+			muxConfig = {
+				liveStreamId: muxLiveStream.id,
+				playbackId: muxLiveStream.playbackId,
+				rtmpUrl: muxLiveStream.rtmpUrl,
+				streamKey: muxLiveStream.streamKey,
+				recordingReady: false,
+				streamingStatus: 'idle',
+				reconnectWindow: 60
+			};
 		}
 
 		const streamData = {
@@ -73,21 +99,14 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 			status: scheduledStartTime ? 'scheduled' : 'ready',
 			visibility: 'public',
 			memorialId,
+			sourceType: isUpload ? 'upload' : 'rtmp',
 			createdAt: now,
 			updatedAt: now,
 			createdBy: locals.user.uid,
 			createdByEmail: locals.user.email,
 
-			// Mux Platform Configuration (RTMP credentials for OBS)
-			mux: {
-				liveStreamId: muxLiveStream.id,
-				playbackId: muxLiveStream.playbackId,
-				rtmpUrl: muxLiveStream.rtmpUrl,
-				streamKey: muxLiveStream.streamKey,
-				recordingReady: false,
-				streamingStatus: 'idle',
-				reconnectWindow: 60
-			},
+			// Mux Platform Configuration (RTMP credentials for OBS, or upload state)
+			mux: muxConfig,
 
 			// Firestore Chat Configuration
 			chat: {

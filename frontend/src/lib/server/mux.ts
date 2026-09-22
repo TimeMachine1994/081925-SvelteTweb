@@ -95,6 +95,42 @@ export async function createMuxLiveStream(
 	}
 }
 
+/**
+ * Create a Mux Direct Upload for a "premiere" stream (upload a file instead
+ * of broadcasting live via RTMP). Returns a one-time signed URL the client
+ * PUTs the file to directly (see @mux/upchunk usage in StreamCard.svelte) —
+ * this never proxies the file through our server.
+ *
+ * @param passthroughStreamId - our Firestore stream ID, round-tripped via
+ *   Mux's `passthrough` field so the webhook handler can link the resulting
+ *   asset back to the right stream without relying on event ordering.
+ * @param corsOrigin - origin allowed to PUT to the upload URL (our own site)
+ */
+export async function createMuxDirectUpload(passthroughStreamId: string, corsOrigin: string) {
+	console.log('🎬 [MUX SERVICE] Creating direct upload for stream:', passthroughStreamId);
+
+	try {
+		const upload = await mux.video.uploads.create({
+			cors_origin: corsOrigin,
+			new_asset_settings: {
+				playback_policy: ['public'],
+				mp4_support: 'standard', // Enable MP4 downloads — matches createMuxLiveStream()
+				passthrough: passthroughStreamId
+			}
+		});
+
+		console.log('✅ [MUX SERVICE] Direct upload created:', upload.id);
+
+		return {
+			uploadId: upload.id,
+			url: upload.url
+		};
+	} catch (error) {
+		console.error('❌ [MUX SERVICE] Failed to create direct upload:', error);
+		throw error;
+	}
+}
+
 // NOTE: Mux does not have a native chat API.
 // Chat is a single thread per memorial (not per stream) — see
 // $lib/server/db/repos/chat.ts and /api/memorials/[memorialId]/chat/+server.ts.
