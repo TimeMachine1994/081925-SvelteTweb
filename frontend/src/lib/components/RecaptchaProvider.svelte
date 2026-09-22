@@ -3,8 +3,9 @@
   Loads the reCAPTCHA script and provides context for forms
 -->
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { env } from '$env/dynamic/public';
+	import { page } from '$app/stores';
+	import { browser } from '$app/environment';
 
 	const PUBLIC_RECAPTCHA_SITE_KEY = env.PUBLIC_RECAPTCHA_SITE_KEY;
 
@@ -12,8 +13,12 @@
 
 	let scriptLoaded = false;
 	let scriptError = false;
+	let scriptRequested = false;
 
-	onMount(() => {
+	function loadRecaptchaScript(): void {
+		if (scriptRequested) return;
+		scriptRequested = true;
+
 		// Check if reCAPTCHA is already loaded
 		if (window.grecaptcha) {
 			scriptLoaded = true;
@@ -37,15 +42,22 @@
 		};
 
 		document.head.appendChild(script);
+	}
 
-		// Cleanup on component destroy
-		return () => {
-			// Remove script if component is destroyed
-			if (script.parentNode) {
-				script.parentNode.removeChild(script);
-			}
-		};
-	});
+	// reCAPTCHA isn't used anywhere under /admin (only public forms like
+	// /register, /contact, /book-demo, /profile call executeRecaptcha), and
+	// its fixed bottom-right badge overlaps admin UI (e.g. the mobile bottom
+	// tab bar on memorial pages). Skip loading it there entirely, and hide
+	// the badge via CSS if it was already loaded from a prior public-page
+	// visit earlier in the same session.
+	$: isAdminRoute = $page.route.id?.startsWith('/admin') ?? false;
+
+	$: if (browser) {
+		document.body.classList.toggle('admin-recaptcha-hidden', isAdminRoute);
+		if (!isAdminRoute) {
+			loadRecaptchaScript();
+		}
+	}
 </script>
 
 <!-- Slot for child components -->
@@ -62,15 +74,21 @@
 	:global(.grecaptcha-badge) {
 		z-index: 1000;
 	}
-	
+
 	:global(.grecaptcha-badge.bottomright) {
 		bottom: 14px;
 		right: 14px;
 	}
-	
+
 	:global(.grecaptcha-badge.bottomleft) {
 		bottom: 14px;
 		left: 14px;
+	}
+
+	/* reCAPTCHA isn't used in the admin panel and its badge overlaps admin
+	   UI (e.g. the mobile bottom tab bar on memorial pages) - hide it there. */
+	:global(body.admin-recaptcha-hidden .grecaptcha-badge) {
+		display: none !important;
 	}
 
 	.recaptcha-error {

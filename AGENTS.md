@@ -10,6 +10,11 @@
 - Docs: `wiki/` is the maintained documentation. `docs/archive/` is historical and may describe code that no longer exists.
 - Do not commit database dumps, `.env*` files, `*-debug.log`, or service-account JSON.
 
+## Third-party scripts
+
+- CrazyEgg (account `0130`, script `3684`, loaded in `frontend/src/routes/+layout.svelte`) is installed site-wide for heatmaps/recordings. Its remotely-configured "Surveys" add-on shows a "How can we improve this page?" popup; we don't currently have CrazyEgg dashboard access to disable it at the source, so `frontend/src/lib/utils/suppressCrazyEggSurvey.ts` (invoked from `+layout.svelte`'s `onMount`) is a best-effort client-side stopgap that detects and hides the survey widget. Once dashboard access is recovered, disable the survey under Add-ons -> Surveys — that's the authoritative fix, and the stopgap can then be removed (or left as a harmless safety net).
+- reCAPTCHA v3 (`frontend/src/lib/components/RecaptchaProvider.svelte`) is loaded globally but skips loading/hides its badge under `/admin/**`, since no admin route calls `executeRecaptcha` (only `/register`, `/register/loved-one`, `/contact`, `/book-demo`, `/profile` do). If a future admin feature needs reCAPTCHA, remove the `/admin` exclusion there.
+
 ## Database (Firestore -> Turso migration in progress)
 
 - Turso/libSQL via Drizzle ORM. Schema: `frontend/src/lib/server/db/schema/*.ts`; migrations: `frontend/drizzle/`; client: `$lib/server/db/client.ts` (`getDb()`).
