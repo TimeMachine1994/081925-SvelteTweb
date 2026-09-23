@@ -1,4 +1,8 @@
 <script lang="ts">
+	import { Card, SectionHeader, Button, Alert, CopyButton, ConfirmDialog } from './ui';
+	import { memorialPublicUrl, PUBLIC_SITE_ORIGIN } from '$lib/utils/memorial-url';
+	import { adminToast } from '$lib/stores/adminToast';
+
 	interface Memorial {
 		id: string;
 		lovedOneName: string;
@@ -12,8 +16,6 @@
 	}
 
 	let { memorial, onUpdate }: Props = $props();
-
-	const baseUrl = 'https://tributestream.com';
 
 	function suggestSlug(name: string): string {
 		return `celebration-of-life-for-${name
@@ -30,10 +32,8 @@
 	let newSlugInput = $state('');
 	let changeUrlChecking = $state(false);
 	let changeUrlAvailable = $state<boolean | null>(null);
-	let changeUrlCleaned = $state('');
 	let isChangingUrl = $state(false);
 	let changeUrlError = $state<string | null>(null);
-	let changeUrlSuccess = $state<string | null>(null);
 	let checkDebounce: ReturnType<typeof setTimeout>;
 
 	// Add mirror form
@@ -41,13 +41,11 @@
 	let mirrorInput = $state('');
 	let mirrorChecking = $state(false);
 	let mirrorAvailable = $state<boolean | null>(null);
-	let mirrorCleaned = $state('');
 	let isAddingMirror = $state(false);
 	let mirrorError = $state<string | null>(null);
-	let mirrorSuccess = $state<string | null>(null);
 
-	let removingAlias = $state<string | null>(null);
-	let removeError = $state<string | null>(null);
+	let aliasPendingRemoval = $state<string | null>(null);
+	let isRemovingAlias = $state(false);
 
 	async function checkAvailability(slug: string) {
 		const response = await fetch(
@@ -77,7 +75,6 @@
 			changeUrlChecking = true;
 			try {
 				const result = await checkAvailability(value);
-				changeUrlCleaned = result.cleanedSlug || '';
 				changeUrlAvailable = result.cleanedSlug === memorial.fullSlug ? true : result.available;
 				if (result.error) changeUrlError = result.error;
 			} finally {
@@ -89,7 +86,6 @@
 	async function submitChangeUrl() {
 		isChangingUrl = true;
 		changeUrlError = null;
-		changeUrlSuccess = null;
 
 		try {
 			const response = await fetch(`/api/admin/memorials/${memorial.id}/slug`, {
@@ -103,13 +99,9 @@
 				throw new Error(data.message || 'Failed to change URL');
 			}
 
-			changeUrlSuccess = 'URL changed! The previous link now mirrors this one automatically.';
+			adminToast.success('URL changed — the previous link now mirrors this one automatically');
 			showChangeUrl = false;
 			await onUpdate?.();
-
-			setTimeout(() => {
-				changeUrlSuccess = null;
-			}, 5000);
 		} catch (err: any) {
 			changeUrlError = err.message || 'Failed to change URL';
 		} finally {
@@ -134,7 +126,6 @@
 			mirrorChecking = true;
 			try {
 				const result = await checkAvailability(value);
-				mirrorCleaned = result.cleanedSlug || '';
 				mirrorAvailable = result.available;
 				if (result.error) mirrorError = result.error;
 			} finally {
@@ -146,7 +137,6 @@
 	async function submitAddMirror() {
 		isAddingMirror = true;
 		mirrorError = null;
-		mirrorSuccess = null;
 
 		try {
 			const response = await fetch(`/api/admin/memorials/${memorial.id}/slug/aliases`, {
@@ -160,13 +150,9 @@
 				throw new Error(data.message || 'Failed to add mirror link');
 			}
 
-			mirrorSuccess = 'Mirror link added — both URLs now work.';
+			adminToast.success('Mirror link added — both URLs now work');
 			showAddMirror = false;
 			await onUpdate?.();
-
-			setTimeout(() => {
-				mirrorSuccess = null;
-			}, 5000);
 		} catch (err: any) {
 			mirrorError = err.message || 'Failed to add mirror link';
 		} finally {
@@ -174,17 +160,13 @@
 		}
 	}
 
-	async function removeAlias(alias: string) {
-		if (!confirm(`Remove mirror link "${baseUrl}/${alias}"? It will stop working immediately.`)) {
-			return;
-		}
-
-		removingAlias = alias;
-		removeError = null;
+	async function confirmRemoveAlias() {
+		if (!aliasPendingRemoval) return;
+		isRemovingAlias = true;
 
 		try {
 			const response = await fetch(
-				`/api/admin/memorials/${memorial.id}/slug/aliases/${encodeURIComponent(alias)}`,
+				`/api/admin/memorials/${memorial.id}/slug/aliases/${encodeURIComponent(aliasPendingRemoval)}`,
 				{ method: 'DELETE' }
 			);
 
@@ -193,116 +175,146 @@
 				throw new Error(data.message || 'Failed to remove mirror link');
 			}
 
+			adminToast.success('Mirror link removed');
 			await onUpdate?.();
 		} catch (err: any) {
-			removeError = err.message || 'Failed to remove mirror link';
+			adminToast.error(err.message || 'Failed to remove mirror link');
 		} finally {
-			removingAlias = null;
-		}
-	}
-
-	async function copyToClipboard(text: string) {
-		try {
-			await navigator.clipboard.writeText(text);
-		} catch {
-			// Clipboard API unavailable — ignore, the URL is still visible to copy manually.
+			isRemovingAlias = false;
+			aliasPendingRemoval = null;
 		}
 	}
 </script>
 
-<div class="card">
-	<div class="section-header">
-		<h2>🔗 Public URL</h2>
-	</div>
+<Card class="mb-6">
+	<SectionHeader title="Public URL" icon="external" />
 
-	<div class="url-row primary-url">
-		<span class="url-badge">Primary</span>
-		<code>{baseUrl}/{memorial.fullSlug}</code>
-		<button class="icon-btn" onclick={() => copyToClipboard(`${baseUrl}/${memorial.fullSlug}`)}>
-			📋 Copy
-		</button>
-	</div>
-
-	{#if memorial.additionalSlugs && memorial.additionalSlugs.length > 0}
-		<div class="mirrors-list">
-			{#each memorial.additionalSlugs as alias (alias)}
-				<div class="url-row">
-					<span class="url-badge mirror-badge">Mirror</span>
-					<code>{baseUrl}/{alias}</code>
-					<button class="icon-btn" onclick={() => copyToClipboard(`${baseUrl}/${alias}`)}>
-						📋 Copy
-					</button>
-					<button
-						class="icon-btn danger"
-						onclick={() => removeAlias(alias)}
-						disabled={removingAlias === alias}
-					>
-						{removingAlias === alias ? '⏳' : '🗑️ Remove'}
-					</button>
-				</div>
-			{/each}
+	<div class="flex flex-col gap-2">
+		<div class="flex flex-wrap items-center gap-3">
+			<span class="rounded-md bg-sky-100 px-2 py-0.5 text-xs font-semibold text-sky-800"
+				>Primary</span
+			>
+			<a
+				href={memorialPublicUrl(memorial.fullSlug)}
+				target="_blank"
+				rel="noopener noreferrer"
+				class="min-w-0 flex-1 text-sm font-medium break-all text-sky-700 hover:underline"
+			>
+				{memorialPublicUrl(memorial.fullSlug)}
+			</a>
+			<CopyButton
+				value={memorialPublicUrl(memorial.fullSlug)}
+				label="Copy"
+				toastMessage="Memorial link copied"
+			/>
 		</div>
-	{/if}
 
-	{#if removeError}<div class="error-message">{removeError}</div>{/if}
-	{#if changeUrlSuccess}<div class="success-message">{changeUrlSuccess}</div>{/if}
-	{#if mirrorSuccess}<div class="success-message">{mirrorSuccess}</div>{/if}
+		{#each memorial.additionalSlugs || [] as alias (alias)}
+			<div class="flex flex-wrap items-center gap-3 border-t border-slate-100 pt-2">
+				<span class="rounded-md bg-violet-100 px-2 py-0.5 text-xs font-semibold text-violet-800"
+					>Mirror</span
+				>
+				<a
+					href={memorialPublicUrl(alias)}
+					target="_blank"
+					rel="noopener noreferrer"
+					class="min-w-0 flex-1 text-sm font-medium break-all text-sky-700 hover:underline"
+				>
+					{memorialPublicUrl(alias)}
+				</a>
+				<CopyButton
+					value={memorialPublicUrl(alias)}
+					label="Copy"
+					toastMessage="Mirror link copied"
+					size="sm"
+				/>
+				<Button
+					variant="danger"
+					size="sm"
+					icon="delete"
+					onclick={() => (aliasPendingRemoval = alias)}
+				>
+					Remove
+				</Button>
+			</div>
+		{/each}
+	</div>
 
-	<div class="url-actions">
+	<div class="mt-4 flex flex-wrap gap-2 border-t border-slate-200 pt-4">
 		{#if !showChangeUrl}
-			<button onclick={openChangeUrl}>✏️ Change URL</button>
+			<Button size="sm" variant="secondary" icon="edit" onclick={openChangeUrl}>Change URL</Button>
 		{/if}
 		{#if !showAddMirror}
-			<button onclick={openAddMirror}>➕ Add Mirror Link</button>
+			<Button size="sm" variant="secondary" icon="add" onclick={openAddMirror}>
+				Add Mirror Link
+			</Button>
 		{/if}
 	</div>
 
 	{#if showChangeUrl}
-		<div class="url-form">
-			<p class="warn-text">
-				⚠️ The old link will keep working automatically as a mirror unless you remove it below after
+		<div class="mt-4 flex flex-col gap-3 border-t border-slate-200 pt-4">
+			<Alert variant="warning">
+				The old link will keep working automatically as a mirror unless you remove it below after
 				saving.
-			</p>
-			<div class="form-group">
-				<label for="new-slug">New URL slug</label>
-				<div class="slug-input-row">
-					<span class="slug-prefix">{baseUrl}/</span>
+			</Alert>
+			<div>
+				<label for="new-slug" class="mb-1 block text-sm font-semibold text-slate-700"
+					>New URL slug</label
+				>
+				<div class="flex items-stretch overflow-hidden rounded-md border border-slate-300">
+					<span class="flex items-center bg-slate-50 px-3 text-sm text-slate-500"
+						>{PUBLIC_SITE_ORIGIN}/</span
+					>
 					<input
 						id="new-slug"
 						type="text"
 						bind:value={newSlugInput}
 						oninput={onChangeUrlInput}
 						disabled={isChangingUrl}
+						class="min-w-0 flex-1 border-0 px-3 py-2 text-base focus:ring-2 focus:ring-sky-200 focus:outline-none"
 					/>
 				</div>
 				{#if changeUrlChecking}
-					<p class="help-text">Checking availability…</p>
+					<p class="mt-1 text-xs text-slate-500">Checking availability…</p>
 				{:else if changeUrlAvailable === true}
-					<p class="help-text available">✅ Available</p>
+					<p class="mt-1 text-xs text-green-700">✓ Available</p>
 				{:else if changeUrlAvailable === false}
-					<p class="help-text unavailable">❌ Already in use</p>
+					<p class="mt-1 text-xs text-red-600">✕ Already in use</p>
 				{/if}
-				{#if changeUrlError}<div class="error-message">{changeUrlError}</div>{/if}
+				{#if changeUrlError}<p class="mt-1 text-xs text-red-600">{changeUrlError}</p>{/if}
 			</div>
-			<div class="form-actions">
-				<button
-					class="primary-btn"
+			<div class="flex flex-wrap gap-2">
+				<Button
+					variant="primary"
+					loading={isChangingUrl}
+					disabled={changeUrlAvailable === false || !newSlugInput.trim()}
 					onclick={submitChangeUrl}
-					disabled={isChangingUrl || changeUrlAvailable === false || !newSlugInput.trim()}
+					class="min-h-11 sm:min-h-0"
 				>
-					{isChangingUrl ? '⏳ Saving...' : '💾 Save New URL'}
-				</button>
-				<button onclick={() => (showChangeUrl = false)} disabled={isChangingUrl}>Cancel</button>
+					Save New URL
+				</Button>
+				<Button
+					variant="secondary"
+					disabled={isChangingUrl}
+					onclick={() => (showChangeUrl = false)}
+					class="min-h-11 sm:min-h-0"
+				>
+					Cancel
+				</Button>
 			</div>
 		</div>
 	{/if}
 
 	{#if showAddMirror}
-		<div class="url-form">
-			<div class="form-group">
-				<label for="mirror-slug">Mirror URL slug</label>
-				<div class="slug-input-row">
-					<span class="slug-prefix">{baseUrl}/</span>
+		<div class="mt-4 flex flex-col gap-3 border-t border-slate-200 pt-4">
+			<div>
+				<label for="mirror-slug" class="mb-1 block text-sm font-semibold text-slate-700"
+					>Mirror URL slug</label
+				>
+				<div class="flex items-stretch overflow-hidden rounded-md border border-slate-300">
+					<span class="flex items-center bg-slate-50 px-3 text-sm text-slate-500"
+						>{PUBLIC_SITE_ORIGIN}/</span
+					>
 					<input
 						id="mirror-slug"
 						type="text"
@@ -310,187 +322,48 @@
 						oninput={onMirrorInput}
 						placeholder="e.g. john-smith-memorial"
 						disabled={isAddingMirror}
+						class="min-w-0 flex-1 border-0 px-3 py-2 text-base focus:ring-2 focus:ring-sky-200 focus:outline-none"
 					/>
 				</div>
 				{#if mirrorChecking}
-					<p class="help-text">Checking availability…</p>
+					<p class="mt-1 text-xs text-slate-500">Checking availability…</p>
 				{:else if mirrorAvailable === true}
-					<p class="help-text available">✅ Available</p>
+					<p class="mt-1 text-xs text-green-700">✓ Available</p>
 				{:else if mirrorAvailable === false}
-					<p class="help-text unavailable">❌ Already in use</p>
+					<p class="mt-1 text-xs text-red-600">✕ Already in use</p>
 				{/if}
-				{#if mirrorError}<div class="error-message">{mirrorError}</div>{/if}
+				{#if mirrorError}<p class="mt-1 text-xs text-red-600">{mirrorError}</p>{/if}
 			</div>
-			<div class="form-actions">
-				<button
-					class="primary-btn"
+			<div class="flex flex-wrap gap-2">
+				<Button
+					variant="primary"
+					loading={isAddingMirror}
+					disabled={mirrorAvailable === false || !mirrorInput.trim()}
 					onclick={submitAddMirror}
-					disabled={isAddingMirror || mirrorAvailable === false || !mirrorInput.trim()}
+					class="min-h-11 sm:min-h-0"
 				>
-					{isAddingMirror ? '⏳ Saving...' : '💾 Add Mirror Link'}
-				</button>
-				<button onclick={() => (showAddMirror = false)} disabled={isAddingMirror}>Cancel</button>
+					Add Mirror Link
+				</Button>
+				<Button
+					variant="secondary"
+					disabled={isAddingMirror}
+					onclick={() => (showAddMirror = false)}
+					class="min-h-11 sm:min-h-0"
+				>
+					Cancel
+				</Button>
 			</div>
 		</div>
 	{/if}
-</div>
+</Card>
 
-<style>
-	.card {
-		background: white;
-		border: 1px solid #e2e8f0;
-		border-radius: 0.5rem;
-		padding: 1.5rem;
-		margin-bottom: 1.5rem;
-	}
-	h2 {
-		font-size: 1.25rem;
-		margin: 0;
-	}
-	.section-header {
-		margin-bottom: 1rem;
-	}
-	.url-row {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		padding: 0.625rem 0;
-		flex-wrap: wrap;
-	}
-	.url-row code {
-		flex: 1;
-		min-width: 200px;
-		background: #f7fafc;
-		padding: 0.375rem 0.625rem;
-		border-radius: 0.25rem;
-		font-size: 0.875rem;
-	}
-	.url-badge {
-		font-size: 0.75rem;
-		font-weight: 600;
-		padding: 0.125rem 0.5rem;
-		border-radius: 999px;
-		background: #bee3f8;
-		color: #2a4365;
-	}
-	.mirror-badge {
-		background: #e9d8fd;
-		color: #44337a;
-	}
-	.mirrors-list {
-		border-top: 1px solid #e2e8f0;
-		margin-top: 0.5rem;
-	}
-	.url-actions {
-		display: flex;
-		gap: 0.75rem;
-		margin-top: 1rem;
-	}
-	.url-form {
-		margin-top: 1rem;
-		padding-top: 1rem;
-		border-top: 1px solid #e2e8f0;
-	}
-	.warn-text {
-		font-size: 0.8125rem;
-		color: #975a16;
-		background: #fefcbf;
-		padding: 0.625rem 0.875rem;
-		border-radius: 0.375rem;
-		margin: 0 0 1rem 0;
-	}
-	.form-group {
-		margin-bottom: 1rem;
-	}
-	.form-group label {
-		display: block;
-		margin-bottom: 0.5rem;
-		font-weight: 600;
-		color: #4a5568;
-		font-size: 0.875rem;
-	}
-	.slug-input-row {
-		display: flex;
-		align-items: center;
-		border: 1px solid #cbd5e0;
-		border-radius: 0.375rem;
-		overflow: hidden;
-	}
-	.slug-prefix {
-		padding: 0.625rem;
-		background: #edf2f7;
-		color: #718096;
-		font-size: 0.8125rem;
-		white-space: nowrap;
-	}
-	.slug-input-row input {
-		flex: 1;
-		border: none;
-		padding: 0.625rem;
-		font-size: 0.875rem;
-	}
-	.slug-input-row input:focus {
-		outline: none;
-	}
-	.help-text {
-		margin: 0.375rem 0 0 0;
-		font-size: 0.8125rem;
-		color: #718096;
-	}
-	.help-text.available {
-		color: #22543d;
-	}
-	.help-text.unavailable {
-		color: #742a2a;
-	}
-	.form-actions {
-		display: flex;
-		gap: 0.75rem;
-	}
-	button {
-		padding: 0.5rem 1rem;
-		border: 1px solid #e2e8f0;
-		border-radius: 0.375rem;
-		background: white;
-		cursor: pointer;
-		transition: all 0.2s;
-	}
-	button:hover {
-		background: #f7fafc;
-	}
-	button:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-	button.primary-btn {
-		background: #3182ce;
-		color: white;
-		border-color: #3182ce;
-		font-weight: 600;
-	}
-	button.primary-btn:hover {
-		background: #2c5282;
-	}
-	.icon-btn {
-		padding: 0.25rem 0.625rem;
-		font-size: 0.8125rem;
-	}
-	.icon-btn.danger {
-		color: #c53030;
-	}
-	.success-message {
-		padding: 0.75rem 1rem;
-		background: #c6f6d5;
-		color: #22543d;
-		border-radius: 0.375rem;
-		margin-top: 0.75rem;
-	}
-	.error-message {
-		padding: 0.5rem 0.75rem;
-		background: #fed7d7;
-		color: #742a2a;
-		border-radius: 0.375rem;
-		margin-top: 0.5rem;
-		font-size: 0.8125rem;
-	}
-</style>
+<ConfirmDialog
+	open={!!aliasPendingRemoval}
+	title="Remove mirror link"
+	message={`Remove "${memorialPublicUrl(aliasPendingRemoval)}"? It will stop working immediately.`}
+	confirmLabel="Remove"
+	variant="danger"
+	loading={isRemovingAlias}
+	onConfirm={confirmRemoveAlias}
+	onCancel={() => (aliasPendingRemoval = null)}
+/>
