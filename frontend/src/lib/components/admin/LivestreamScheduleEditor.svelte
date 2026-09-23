@@ -68,7 +68,7 @@
 
 			if (!response.ok) {
 				const data = await response.json().catch(() => ({}));
-				throw new Error(data.error || 'Failed to save start time');
+				throw new Error(data.message || data.error || 'Failed to save start time');
 			}
 
 			// Full reload so every consumer of `streams` on this page (StreamCard,
@@ -96,7 +96,7 @@
 
 			if (!response.ok) {
 				const data = await response.json().catch(() => ({}));
-				throw new Error(data.error || 'Failed to clear start time');
+				throw new Error(data.message || data.error || 'Failed to clear start time');
 			}
 
 			window.location.reload();

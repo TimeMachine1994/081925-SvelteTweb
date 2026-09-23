@@ -55,7 +55,9 @@
 
 			if (!response.ok) {
 				const data = await response.json().catch(() => ({}));
-				throw new Error(data.error || 'Failed to get upload URL');
+				// SvelteKit's error() helper serializes to { message }, not { error } —
+				// check both so the real server-side error surfaces instead of a generic one.
+				throw new Error(data.message || data.error || 'Failed to get upload URL');
 			}
 
 			const { url } = await response.json();
@@ -213,7 +215,7 @@
 				window.location.reload();
 			} else {
 				const data = await response.json();
-				alert(`Failed to update title: ${data.error || 'Unknown error'}`);
+				alert(`Failed to update title: ${data.message || data.error || 'Unknown error'}`);
 			}
 		} catch (error) {
 			console.error('Error updating title:', error);
@@ -244,7 +246,7 @@
 				window.location.reload();
 			} else {
 				const data = await response.json();
-				alert(`Failed to update time: ${data.error || 'Unknown error'}`);
+				alert(`Failed to update time: ${data.message || data.error || 'Unknown error'}`);
 			}
 		} catch (error) {
 			console.error('Error updating time:', error);
@@ -270,7 +272,7 @@
 				window.location.reload();
 			} else {
 				const data = await response.json();
-				alert(`Failed to clear schedule: ${data.error || 'Unknown error'}`);
+				alert(`Failed to clear schedule: ${data.message || data.error || 'Unknown error'}`);
 			}
 		} catch (error) {
 			console.error('Error clearing schedule:', error);
