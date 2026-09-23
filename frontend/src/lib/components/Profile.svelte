@@ -20,7 +20,9 @@
 		Sparkles,
 		Eye,
 		Play,
-		Camera
+		Camera,
+		Download,
+		Loader2
 	} from 'lucide-svelte';
 	import { onMount } from 'svelte';
 	import { getTheme } from '$lib/design-tokens/minimal-modern-theme';
@@ -319,6 +321,27 @@
 														<Camera class="mr-1 h-3 w-3" />
 														Slideshow
 													</a>
+												{/if}
+												{#if (userRole === 'owner' || userRole === 'funeral_director') && memorial.downloadableRecordings?.length}
+													{#each memorial.downloadableRecordings as recording, i (recording.assetId)}
+														{#if recording.mp4Status === 'ready'}
+															<a
+																href={`https://stream.mux.com/${recording.vodPlaybackId}/high.mp4?download=${encodeURIComponent(`${memorial.lovedOneName || memorial.title || 'recording'}${memorial.downloadableRecordings.length > 1 ? `-part-${i + 1}` : ''}.mp4`)}`}
+																class="flex items-center justify-center rounded-xl bg-amber-500 px-4 py-3 font-medium text-white transition-all duration-300 hover:scale-105 hover:shadow-lg min-h-[44px]"
+															>
+																<Download class="mr-1 h-3 w-3" />
+																{memorial.downloadableRecordings.length > 1 ? `Download Part ${i + 1}` : 'Download Recording'}
+															</a>
+														{:else if recording.mp4Status === 'preparing'}
+															<span
+																class="flex items-center justify-center rounded-xl bg-gray-300 px-4 py-3 font-medium text-gray-600 min-h-[44px] cursor-default"
+																title="Mux is still generating the downloadable file — check back in a few minutes."
+															>
+																<Loader2 class="mr-1 h-3 w-3 animate-spin" />
+																Preparing Download
+															</span>
+														{/if}
+													{/each}
 												{/if}
 												<a
 													href={`/schedule/${memorial.id}`}
