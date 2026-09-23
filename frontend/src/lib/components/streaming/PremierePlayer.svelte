@@ -13,8 +13,21 @@
 	 *
 	 * Periodically re-syncs playback position in case of buffering, a paused
 	 * tab being throttled in the background, etc.
+	 *
+	 * Seek-lock: viewers must not be able to scrub backward/forward while the
+	 * premiere is "live". The scrubber, seek-forward/backward buttons, and
+	 * Picture-in-Picture button are hidden via Mux Player's CSS custom
+	 * properties, and keyboard seek hotkeys are disabled (`nohotkeys`). As a
+	 * defense-in-depth backstop — since those only hide the obvious
+	 * affordances (e.g. iOS Safari's native fullscreen chrome bypasses our
+	 * CSS, and OS media-session lock-screen scrubbers aren't stylable at
+	 * all) — an `onseeking` handler snaps playback back to the correct live
+	 * offset the instant any seek is detected, regardless of how it was
+	 * triggered. Pausing is allowed, but resuming snaps forward to the
+	 * current live position rather than continuing from where it was paused.
 	 */
 	import '@mux/mux-player';
+	import { elapsedPremiereSeconds } from '$lib/utils/premiere';
 
 	interface Props {
 		playbackId: string;
@@ -32,12 +45,23 @@
 
 	const RESYNC_INTERVAL_MS = 15000;
 	const RESYNC_DRIFT_THRESHOLD_S = 4;
+	// Tighter threshold for the resume-snap check — any noticeable pause
+	// should snap forward, not just large drift from buffering.
+	const RESUME_DRIFT_THRESHOLD_S = 2;
 
 	function elapsedSeconds(now: Date): number {
-		const startMs = new Date(scheduledStartTime).getTime();
-		const elapsed = (now.getTime() - startMs) / 1000;
-		const max = duration ?? Number.POSITIVE_INFINITY;
-		return Math.min(Math.max(elapsed, 0), max);
+		return elapsedPremiereSeconds(scheduledStartTime, now, duration);
+	}
+
+	function snapToLive(reason: string) {
+		if (!playerEl || typeof playerEl.currentTime !== 'number') return;
+		const expected = elapsedSeconds(new Date());
+		console.log(`🎬 [PREMIERE PLAYER] Snapping to live position (${reason}):`, expected);
+		try {
+			playerEl.currentTime = expected;
+		} catch (err) {
+			console.error('❌ [PREMIERE PLAYER] Failed to snap to live position:', err);
+		}
 	}
 
 	function handleLoadedMetadata() {
@@ -51,6 +75,25 @@
 			});
 		} catch (err) {
 			console.error('❌ [PREMIERE PLAYER] Failed to seek on load:', err);
+		}
+	}
+
+	// Fires the instant currentTime is changed by ANY means (scrubber,
+	// keyboard, OS media-session controls, PiP, iOS native-fullscreen
+	// chrome, etc.) — the real backstop behind the hidden/disabled UI.
+	function handleSeeking() {
+		snapToLive('seek detected');
+	}
+
+	// Whenever playback (re)starts — including resuming after a pause —
+	// snap forward if we've drifted so a viewer can't "catch up" from
+	// wherever they paused.
+	function handlePlay() {
+		if (!playerEl || typeof playerEl.currentTime !== 'number') return;
+		const expected = elapsedSeconds(new Date());
+		const drift = Math.abs(playerEl.currentTime - expected);
+		if (drift > RESUME_DRIFT_THRESHOLD_S) {
+			snapToLive('resume drift');
 		}
 	}
 
@@ -99,13 +142,17 @@
 	{:else}
 		<mux-player
 			bind:this={playerEl}
+			class="premiere-locked"
 			playback-id={playbackId}
 			metadata-video-title={title}
 			metadata-viewer-user-id="anonymous"
 			stream-type="on-demand"
 			muted={false}
 			controls
+			nohotkeys
 			onloadedmetadata={handleLoadedMetadata}
+			onseeking={handleSeeking}
+			onplay={handlePlay}
 		></mux-player>
 	{/if}
 </div>
@@ -147,6 +194,20 @@
 		aspect-ratio: 16 / 9;
 		--media-object-fit: contain;
 		--media-object-position: center;
+	}
+
+	/* Seek-lock: hide the scrubber, seek-forward/backward buttons, and
+	   Picture-in-Picture button (PiP has its own native scrubber we can't
+	   style). Play/pause, mute/volume, and fullscreen stay available. This
+	   is UI-level only — the real enforcement is the onseeking/onplay
+	   handlers in the script above, since a determined viewer can still
+	   trigger a seek via keyboard, OS media-session controls, or (on iOS)
+	   native fullscreen chrome that bypasses this CSS entirely. */
+	mux-player.premiere-locked {
+		--time-range: none;
+		--seek-backward-button: none;
+		--seek-forward-button: none;
+		--pip-button: none;
 	}
 
 	.join-button {

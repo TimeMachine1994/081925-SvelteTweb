@@ -5,6 +5,7 @@
 	import MuxVideoPlayer from './streaming/MuxVideoPlayer.svelte';
 	import PremierePlayer from './streaming/PremierePlayer.svelte';
 	import { selectDisplayRecordings } from '$lib/utils/recording-selection';
+	import { hasPremiereAired, isRecordedStream as isRecordedStreamShared } from '$lib/utils/premiere';
 	
 	console.log('🎬 [MEMORIAL STREAM DISPLAY] Component loaded - Mux integration active');
 	
@@ -237,12 +238,12 @@
 	 * (i.e. it has finished "airing" and should now appear as a normal
 	 * recording). Only meaningful for `sourceType === 'upload'` streams —
 	 * requires both a scheduled start time and a known asset duration.
+	 *
+	 * Delegates to the shared, unit-tested helper in `$lib/utils/premiere`.
 	 */
 	function uploadHasAired(s: Stream, now: Date): boolean {
 		if (s.sourceType !== 'upload') return false;
-		if (!s.scheduledStartTime || !s.mux?.duration) return false;
-		const startMs = new Date(s.scheduledStartTime).getTime();
-		return now.getTime() >= startMs + s.mux.duration * 1000;
+		return hasPremiereAired(s.scheduledStartTime, s.mux?.duration, now);
 	}
 
 	/**
@@ -251,18 +252,11 @@
 	 * - Upload/premiere streams: only once its scheduled runtime has fully
 	 *   elapsed — NOT just because the underlying Mux asset finished
 	 *   processing (that can happen long before the scheduled premiere time).
+	 *
+	 * Delegates to the shared, unit-tested helper in `$lib/utils/premiere`.
 	 */
 	function isRecordedStream(s: Stream, now: Date): boolean {
-		if (s.sourceType === 'upload') {
-			return uploadHasAired(s, now);
-		}
-		return (
-			s.status === 'completed' ||
-			s.status === 'ended' ||
-			s.recordingReady === true ||
-			s.mux?.recordingReady === true ||
-			(s.mux?.recordings?.length ?? 0) > 0
-		);
+		return isRecordedStreamShared(s, now);
 	}
 
 	// Categorize streams based on REAL-TIME status from liveStreams
