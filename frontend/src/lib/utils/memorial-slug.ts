@@ -14,37 +14,32 @@ export function generateBaseSlug(lovedOneName: string): string {
 		.replace(/-+/g, '-') // Replace multiple hyphens with single
 		.replace(/^-|-$/g, '')}` // Remove leading/trailing hyphens
 		.substring(0, 80); // Limit length
-	
+
 	return baseSlug;
 }
 
 /**
- * Check if a memorial slug already exists in Firestore
+ * Check if a memorial slug already exists in Firestore — either as another
+ * memorial's primary `fullSlug` or as one of its `additionalSlugs` mirrors.
  * @param slug - Slug to check
- * @param excludeMemorialId - Optional memorial ID to exclude from the check
- *   (e.g. when re-saving a memorial's own current slug during an edit)
- * @returns Promise<boolean> - true if slug exists, false if available
+ * @param excludeMemorialId - Memorial id to ignore (e.g. when re-checking its own current slug)
+ * @returns Promise<boolean> - true if slug is taken, false if available
  */
-export async function checkSlugExists(
-	slug: string,
-	excludeMemorialId?: string
-): Promise<boolean> {
+export async function checkSlugExists(slug: string, excludeMemorialId?: string): Promise<boolean> {
 	try {
-		const existingMemorial = await adminDb
-			.collection('memorials')
-			.where('fullSlug', '==', slug)
-			.limit(1)
-			.get();
+		const [byFullSlug, byAlias] = await Promise.all([
+			adminDb.collection('memorials').where('fullSlug', '==', slug).limit(5).get(),
+			adminDb
+				.collection('memorials')
+				.where('additionalSlugs', 'array-contains', slug)
+				.limit(5)
+				.get()
+		]);
 
-		if (existingMemorial.empty) {
-			return false;
-		}
+		const matches = [...byFullSlug.docs, ...byAlias.docs];
+		if (!excludeMemorialId) return matches.length > 0;
 
-		if (excludeMemorialId && existingMemorial.docs[0].id === excludeMemorialId) {
-			return false;
-		}
-
-		return true;
+		return matches.some((doc) => doc.id !== excludeMemorialId);
 	} catch (error) {
 		console.error('Error checking slug existence:', error);
 		// On error, assume slug exists to be safe
@@ -59,11 +54,11 @@ export async function checkSlugExists(
  * @returns Promise<string> - Unique slug guaranteed to not exist in database
  */
 export async function generateUniqueMemorialSlug(
-	lovedOneName: string, 
+	lovedOneName: string,
 	maxAttempts: number = 100
 ): Promise<string> {
 	console.log('🔗 Generating unique slug for:', lovedOneName);
-	
+
 	const baseSlug = generateBaseSlug(lovedOneName);
 	let fullSlug = baseSlug;
 	let counter = 1;
@@ -71,12 +66,12 @@ export async function generateUniqueMemorialSlug(
 
 	while (attempts < maxAttempts) {
 		const exists = await checkSlugExists(fullSlug);
-		
+
 		if (!exists) {
 			console.log('🔗 Generated unique slug:', fullSlug);
 			return fullSlug;
 		}
-		
+
 		// Slug exists, try with counter
 		fullSlug = `${baseSlug}-${counter}`;
 		counter++;
@@ -87,7 +82,7 @@ export async function generateUniqueMemorialSlug(
 	const timestamp = Date.now().toString().slice(-6);
 	const fallbackSlug = `${baseSlug}-${timestamp}`;
 	console.warn('🔗 Using timestamp fallback slug:', fallbackSlug);
-	
+
 	return fallbackSlug;
 }
 

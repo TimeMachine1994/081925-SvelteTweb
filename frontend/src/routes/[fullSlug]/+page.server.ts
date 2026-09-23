@@ -15,10 +15,20 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	}
 
 	try {
-		// Find memorial by fullSlug only - no legacy slug fallback
+		// Find memorial by fullSlug (primary URL); fall back to additionalSlugs
+		// (admin-created mirror links — see /api/admin/memorials/[id]/slug*).
 		console.log('🏠 [MEMORIAL_PAGE] Querying memorials collection for fullSlug:', fullSlug);
 		const memorialsRef = adminDb.collection('memorials');
-		const snapshot = await memorialsRef.where('fullSlug', '==', fullSlug).limit(1).get();
+		let snapshot = await memorialsRef.where('fullSlug', '==', fullSlug).limit(1).get();
+		let isAlias = false;
+
+		if (snapshot.empty) {
+			snapshot = await memorialsRef
+				.where('additionalSlugs', 'array-contains', fullSlug)
+				.limit(1)
+				.get();
+			isAlias = true;
+		}
 
 		console.log('🏠 [MEMORIAL_PAGE] Memorial query completed, found docs:', snapshot.docs.length);
 
@@ -244,7 +254,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 					funeralDirectorUid: null // Don't expose for unauthorized users
 				},
 				streams: [], // No streams for unauthorized users
-				slideshows: [] // No slideshows for unauthorized users
+				slideshows: [], // No slideshows for unauthorized users
+				canonicalSlug: memorial.fullSlug,
+				isAlias
 			};
 		}
 
@@ -253,6 +265,11 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			memorial,
 			streams,
 			slideshows,
+			// The primary/canonical URL for this memorial, and whether the
+			// requested fullSlug was a mirror link (see additionalSlugs) rather
+			// than the canonical one — used for the <link rel="canonical"> tag.
+			canonicalSlug: memorial.fullSlug,
+			isAlias,
 			user: locals.user
 				? {
 						uid: locals.user.uid,

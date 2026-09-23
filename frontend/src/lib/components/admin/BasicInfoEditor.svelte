@@ -130,8 +130,8 @@
 					required
 				/>
 				<p class="help-text">
-					This never changes the memorial's URL. Use "Change URL" below if the link itself needs
-					to change.
+					This never changes the memorial's URL. Use "Change URL" below if the link itself needs to
+					change.
 				</p>
 			</div>
 
@@ -220,7 +220,7 @@
 			<div><strong>Created:</strong> {formatDate(memorial.createdAt)}</div>
 			<div><strong>Updated:</strong> {formatDate(memorial.updatedAt)}</div>
 		</div>
-		<div class="grid contact-grid">
+		<div class="contact-grid grid">
 			<div>
 				<strong>Family Contact:</strong>
 				{#if memorial.familyContactName}

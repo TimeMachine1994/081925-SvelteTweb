@@ -1,6 +1,6 @@
 /**
  * BULK ACTIONS API
- * 
+ *
  * Handles bulk operations on admin resources
  * Based on ADMIN_REFACTOR_2_DATA_OPERATIONS.md
  */
@@ -11,7 +11,7 @@ import { hasPermission } from '$lib/admin/permissions';
 
 export async function POST({ request, locals }) {
 	console.log('🔧 [BULK ACTION] Request received');
-	
+
 	// Auth check
 	if (!locals.user || locals.user.role !== 'admin') {
 		console.log('🚫 [BULK ACTION] Unauthorized access attempt');
@@ -95,14 +95,17 @@ async function performAction(
 
 	switch (action) {
 		case 'markPaid':
-			await adminDb.collection(collection).doc(id).update({
-				isPaid: true,
-				paidAt: new Date(),
-				'manualPayment.markedPaidBy': user.email,
-				'manualPayment.markedPaidAt': new Date(),
-				'manualPayment.method': params?.method || 'manual',
-				'manualPayment.notes': params?.notes || null
-			});
+			await adminDb
+				.collection(collection)
+				.doc(id)
+				.update({
+					isPaid: true,
+					paidAt: new Date(),
+					'manualPayment.markedPaidBy': user.email,
+					'manualPayment.markedPaidAt': new Date(),
+					'manualPayment.method': params?.method || 'manual',
+					'manualPayment.notes': params?.notes || null
+				});
 			break;
 
 		case 'markUnpaid':

@@ -5,7 +5,11 @@
 	import BlockRenderer from '$lib/components/memorial/BlockRenderer.svelte';
 	import { MemorialChatWidget } from '$lib/components/chat';
 	import BookingReminderBanner from '$lib/components/BookingReminderBanner.svelte';
-	import { shouldShowBookingBanner, markBannerAsSeen, debugBannerState } from '$lib/utils/bookingBanner';
+	import {
+		shouldShowBookingBanner,
+		markBannerAsSeen,
+		debugBannerState
+	} from '$lib/utils/bookingBanner';
 	import { getEnabledBlocks } from '$lib/utils/block-utils';
 	import { onMount, onDestroy } from 'svelte';
 	import { Facebook, Twitter, Linkedin, Share2, X } from 'lucide-svelte';
@@ -18,17 +22,18 @@
 	let streams = $derived((data.streams || []) as any);
 	let slideshows = $derived((data.slideshows || []) as any);
 	let user = $derived(data.user);
-	
+	let canonicalSlug = $derived(data.canonicalSlug || memorial?.fullSlug);
+
 	// Check if memorial has content blocks configured
 	let hasContentBlocks = $derived(() => {
 		const blocks = (memorial as any)?.contentBlocks || [];
 		return blocks.length > 0 && getEnabledBlocks(blocks).length > 0;
 	});
-	
+
 	// Determine if user can edit slideshows
 	let canEditSlideshows = $derived(() => {
 		if (!user || !memorial) return false;
-		
+
 		return (
 			user.role === 'admin' ||
 			memorial.ownerUid === user.uid ||
@@ -45,8 +50,7 @@
 			memorial.funeralDirectorUid === user.uid
 		);
 	});
-	
-	
+
 	// Force refresh listener — reloads page when admin triggers force refresh
 	let forceRefreshUnsub: (() => void) | null = null;
 	let initialForceRefreshAt: string | null = null;
@@ -157,14 +161,14 @@
 	// Close popup when clicking outside
 	$effect(() => {
 		if (!browser || !showSharePopup) return;
-		
+
 		const handleClickOutside = (e) => {
 			const target = e.target;
 			if (!target.closest('.share-container')) {
 				showSharePopup = false;
 			}
 		};
-		
+
 		document.addEventListener('click', handleClickOutside);
 		return () => document.removeEventListener('click', handleClickOutside);
 	});
@@ -214,12 +218,12 @@
 			if (memorial?.id) {
 				debugBannerState(memorial.id);
 			}
-			
+
 			const timer = setTimeout(() => {
 				console.log('🎯 [BOOKING_BANNER] Showing booking banner');
 				showBookingBanner = true;
 				bannerVisible = true;
-				
+
 				// Increment view counter when banner is shown
 				if (memorial?.id) {
 					markBannerAsSeen(memorial.id);
@@ -240,8 +244,9 @@
 				hasCustomHtml: hasCustomHtml,
 				layoutType: hasCustomHtml ? 'Legacy (custom HTML only)' : 'Standard',
 				custom_html_length: (memorial as any)?.custom_html?.length || 0,
-				custom_html_preview: (memorial as any)?.custom_html ? 
-					(memorial as any).custom_html.substring(0, 100) + '...' : null,
+				custom_html_preview: (memorial as any)?.custom_html
+					? (memorial as any).custom_html.substring(0, 100) + '...'
+					: null,
 				bannerState: bannerState()
 			});
 		}
@@ -249,29 +254,47 @@
 </script>
 
 <svelte:head>
-	<title>{memorial?.lovedOneName ? `Celebration of Life for ${memorial.lovedOneName}` : 'Memorial'}</title>
+	<title
+		>{memorial?.lovedOneName
+			? `Celebration of Life for ${memorial.lovedOneName}`
+			: 'Memorial'}</title
+	>
 	<meta name="description" content={memorial?.content || 'Memorial service information'} />
-	
+	{#if canonicalSlug}
+		<!-- This memorial may be reachable at more than one URL (mirror links set
+		     by an admin); always point search engines at the canonical one. -->
+		<link rel="canonical" href={`https://tributestream.com/${canonicalSlug}`} />
+	{/if}
+
 	{#if memorial}
 		<!-- Open Graph / Facebook -->
 		<meta property="og:type" content="website" />
 		<meta property="og:site_name" content="Tributestream" />
 		<meta property="og:title" content={`Celebration of Life for ${memorial.lovedOneName}`} />
-		<meta property="og:description" content={memorial.content || `Join us in celebrating the life of ${memorial.lovedOneName}`} />
-		<meta property="og:url" content={browser ? window.location.href : `https://tributestream.com/${memorial.fullSlug}`} />
+		<meta
+			property="og:description"
+			content={memorial.content || `Join us in celebrating the life of ${memorial.lovedOneName}`}
+		/>
+		<meta
+			property="og:url"
+			content={browser ? window.location.href : `https://tributestream.com/${memorial.fullSlug}`}
+		/>
 		{#if memorial.imageUrl}
 			<meta property="og:image" content={memorial.imageUrl} />
 			<meta property="og:image:alt" content={memorial.lovedOneName} />
 			<meta property="og:image:width" content="1200" />
 			<meta property="og:image:height" content="630" />
 		{/if}
-		
+
 		<!-- Twitter Card -->
 		<meta name="twitter:card" content="summary_large_image" />
 		<meta name="twitter:site" content="@tributestream" />
 		<meta name="twitter:creator" content="@tributestream" />
 		<meta name="twitter:title" content={`Celebration of Life for ${memorial.lovedOneName}`} />
-		<meta name="twitter:description" content={memorial.content || `Join us in celebrating the life of ${memorial.lovedOneName}`} />
+		<meta
+			name="twitter:description"
+			content={memorial.content || `Join us in celebrating the life of ${memorial.lovedOneName}`}
+		/>
 		{#if memorial.imageUrl}
 			<meta name="twitter:image" content={memorial.imageUrl} />
 			<meta name="twitter:image:alt" content={memorial.lovedOneName} />
@@ -281,7 +304,7 @@
 
 <!-- Booking Reminder Banner -->
 {#if showBookingBanner && memorial}
-	<BookingReminderBanner 
+	<BookingReminderBanner
 		memorialId={memorial.id}
 		memorialName={memorial.lovedOneName}
 		onDismiss={handleBannerDismiss}
@@ -301,13 +324,15 @@
 							{#if !(memorial as any).customTitle}
 								<span class="celebration-prefix">Celebration of Life for</span>
 							{/if}
-							<span class="loved-one-name">{(memorial as any).customTitle || memorial.lovedOneName}</span>
+							<span class="loved-one-name"
+								>{(memorial as any).customTitle || memorial.lovedOneName}</span
+							>
 						</h1>
 					</div>
-					
+
 					<!-- Share Button with Popup -->
 					<div class="share-container">
-						<button 
+						<button
 							class="share-button"
 							onclick={toggleSharePopup}
 							title="Share memorial"
@@ -315,18 +340,30 @@
 						>
 							<Share2 size={18} />
 						</button>
-						
+
 						{#if showSharePopup}
 							<div class="share-popup">
-								<button onclick={shareOnFacebook} class="share-option facebook" title="Share on Facebook">
+								<button
+									onclick={shareOnFacebook}
+									class="share-option facebook"
+									title="Share on Facebook"
+								>
 									<Facebook size={18} />
 									<span>Facebook</span>
 								</button>
-								<button onclick={shareOnTwitter} class="share-option twitter" title="Share on X (Twitter)">
+								<button
+									onclick={shareOnTwitter}
+									class="share-option twitter"
+									title="Share on X (Twitter)"
+								>
 									<Twitter size={18} />
 									<span>Twitter</span>
 								</button>
-								<button onclick={shareOnLinkedIn} class="share-option linkedin" title="Share on LinkedIn">
+								<button
+									onclick={shareOnLinkedIn}
+									class="share-option linkedin"
+									title="Share on LinkedIn"
+								>
 									<Linkedin size={18} />
 									<span>LinkedIn</span>
 								</button>
@@ -337,11 +374,11 @@
 							</div>
 						{/if}
 					</div>
-					
+
 					<!-- Hero Slideshow Section - Outside glass box -->
 					<div class="hero-slideshow">
-						<SlideshowSection 
-							{slideshows} 
+						<SlideshowSection
+							{slideshows}
 							memorialName={memorial.lovedOneName || 'Unknown'}
 							memorialId={memorial.id}
 							editable={canEditSlideshows()}
@@ -354,14 +391,10 @@
 				<div class="memorial-body">
 					<div class="streaming-section">
 						{#if hasContentBlocks()}
-							<BlockRenderer 
-								blocks={(memorial as any).contentBlocks || []}
-								{streams}
-								{memorial}
-							/>
+							<BlockRenderer blocks={(memorial as any).contentBlocks || []} {streams} {memorial} />
 						{:else}
-							<MemorialStreamDisplay 
-								streams={streams || []} 
+							<MemorialStreamDisplay
+								streams={streams || []}
 								memorialName={(memorial as any).customTitle || memorial.lovedOneName}
 							/>
 						{/if}
@@ -375,7 +408,7 @@
 						/>
 					</div>
 				</div>
-				
+
 				<!-- Legacy Custom HTML Content -->
 				{#if (memorial as any).custom_html}
 					<div class="memorial-content-container">
@@ -395,10 +428,10 @@
 							<img src={memorial.imageUrl} alt={memorial.lovedOneName} />
 						</div>
 					{/if}
-					
+
 					<!-- Share Button with Popup -->
 					<div class="share-container">
-						<button 
+						<button
 							class="share-button"
 							onclick={toggleSharePopup}
 							title="Share memorial"
@@ -406,18 +439,30 @@
 						>
 							<Share2 size={18} />
 						</button>
-						
+
 						{#if showSharePopup}
 							<div class="share-popup">
-								<button onclick={shareOnFacebook} class="share-option facebook" title="Share on Facebook">
+								<button
+									onclick={shareOnFacebook}
+									class="share-option facebook"
+									title="Share on Facebook"
+								>
 									<Facebook size={18} />
 									<span>Facebook</span>
 								</button>
-								<button onclick={shareOnTwitter} class="share-option twitter" title="Share on X (Twitter)">
+								<button
+									onclick={shareOnTwitter}
+									class="share-option twitter"
+									title="Share on X (Twitter)"
+								>
 									<Twitter size={18} />
 									<span>Twitter</span>
 								</button>
-								<button onclick={shareOnLinkedIn} class="share-option linkedin" title="Share on LinkedIn">
+								<button
+									onclick={shareOnLinkedIn}
+									class="share-option linkedin"
+									title="Share on LinkedIn"
+								>
 									<Linkedin size={18} />
 									<span>LinkedIn</span>
 								</button>
@@ -428,14 +473,16 @@
 							</div>
 						{/if}
 					</div>
-					
+
 					<div class="memorial-header-content">
 						<!-- Glass box wrapper for title and dates only -->
 						<div class="glass-box">
 							<h1 class="memorial-title">
- 								<span class="loved-one-name">{(memorial as any).customTitle || memorial.lovedOneName}</span>
+								<span class="loved-one-name"
+									>{(memorial as any).customTitle || memorial.lovedOneName}</span
+								>
 							</h1>
-							
+
 							{#if memorial.birthDate || memorial.deathDate}
 								<div class="dates">
 									{#if memorial.birthDate}
@@ -450,18 +497,18 @@
 								</div>
 							{/if}
 						</div>
-						
+
 						<!-- Hero Slideshow Section - Outside glass box but inside header content -->
-					<div class="hero-slideshow">
-						<SlideshowSection 
-							{slideshows} 
-							memorialName={memorial.lovedOneName || 'Unknown'}
-							memorialId={memorial.id}
-							editable={canEditSlideshows()}
-							currentUserId={user?.uid}
-							heroMode={true}
-						/>
-					</div>
+						<div class="hero-slideshow">
+							<SlideshowSection
+								{slideshows}
+								memorialName={memorial.lovedOneName || 'Unknown'}
+								memorialId={memorial.id}
+								editable={canEditSlideshows()}
+								currentUserId={user?.uid}
+								heroMode={true}
+							/>
+						</div>
 					</div>
 				</div>
 
@@ -470,14 +517,10 @@
 					<!-- Stream Section - Use BlockRenderer if blocks exist, otherwise MemorialStreamDisplay -->
 					<div class="streaming-section">
 						{#if hasContentBlocks()}
-							<BlockRenderer 
-								blocks={(memorial as any).contentBlocks || []}
-								{streams}
-								{memorial}
-							/>
+							<BlockRenderer blocks={(memorial as any).contentBlocks || []} {streams} {memorial} />
 						{:else}
-							<MemorialStreamDisplay 
-								streams={streams || []} 
+							<MemorialStreamDisplay
+								streams={streams || []}
 								memorialName={(memorial as any).customTitle || memorial.lovedOneName}
 							/>
 						{/if}
@@ -567,7 +610,7 @@
 		align-items: center;
 		gap: 1.5rem;
 	}
-	
+
 	.glass-box {
 		padding: 2rem;
 		background: rgba(0, 0, 0, 0.3);
@@ -625,7 +668,7 @@
 		flex-direction: column;
 		gap: 2rem;
 	}
-	
+
 	/* Remove bottom padding when emergency embed is active */
 	.memorial-body:has(.emergency-active) {
 		padding-bottom: 0;
@@ -689,7 +732,7 @@
 		min-height: 400px;
 	}
 
-	.legacy-content :global(div[style*="position:relative"]) {
+	.legacy-content :global(div[style*='position:relative']) {
 		width: 100% !important;
 		max-width: 800px;
 		margin: 0 auto;
@@ -729,44 +772,43 @@
 			min-height: 250px;
 		}
 	}
-	
+
 	/* Hero Slideshow Styles */
 	.hero-slideshow {
 		display: flex;
 		justify-content: center;
 		padding: 0 2rem; /* Side padding for mobile */
 	}
-	
+
 	.hero-slideshow :global(.slideshow-section) {
 		margin: 0;
 	}
-	
+
 	.hero-slideshow :global(.slideshows-container) {
 		max-width: 300px; /* About 1/8 viewport */
 	}
-	
+
 	/* Float nicely outside the glass box */
 	.memorial-header .hero-slideshow {
 		position: relative;
 		z-index: 10; /* Above background elements */
 	}
-	
+
 	/* Spacing handled by flex gap in memorial-header-content */
 	.memorial-header-content .hero-slideshow {
 		margin: 0;
 	}
-	
+
 	@media (max-width: 768px) {
 		.hero-slideshow {
 			margin: 1.5rem 0 1rem 0;
 			padding: 0 1rem;
 		}
-		
+
 		.hero-slideshow :global(.slideshows-container) {
 			max-width: 200px; /* Smaller on mobile */
 		}
 	}
-	
 
 	/* Social Share Styles */
 	.share-container {
@@ -865,7 +907,7 @@
 	}
 
 	.share-option.copy:hover {
-		background: #D5BA7F;
+		background: #d5ba7f;
 		color: white;
 	}
 
