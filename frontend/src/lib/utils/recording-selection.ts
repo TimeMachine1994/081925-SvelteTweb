@@ -5,11 +5,14 @@
  * API so the "which recording plays" logic lives in one tested place.
  */
 
+export type Mp4Status = 'preparing' | 'ready' | 'errored';
+
 export interface MuxRecordingLike {
 	assetId: string;
 	vodPlaybackId: string;
 	duration?: number;
 	createdAt: string;
+	mp4Status?: Mp4Status;
 }
 
 export interface MuxLike {
@@ -17,6 +20,7 @@ export interface MuxLike {
 	vodPlaybackId?: string | null;
 	publishedRecordings?: string[];
 	assetId?: string;
+	mp4Status?: Mp4Status;
 }
 
 /**
@@ -43,7 +47,14 @@ export function selectDisplayRecordings(mux: MuxLike | null | undefined): MuxRec
 	// Fallback: latest recording only
 	if (recordings.length) return [recordings[recordings.length - 1]];
 	if (mux.vodPlaybackId) {
-		return [{ assetId: mux.assetId ?? '', vodPlaybackId: mux.vodPlaybackId, createdAt: '' }];
+		return [
+			{
+				assetId: mux.assetId ?? '',
+				vodPlaybackId: mux.vodPlaybackId,
+				createdAt: '',
+				mp4Status: mux.mp4Status
+			}
+		];
 	}
 	return [];
 }

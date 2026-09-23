@@ -222,6 +222,34 @@ export async function getMuxAnalytics(assetId: string) {
 }
 
 /**
+ * Look up the readiness of an asset's MP4 static rendition(s) (requested via
+ * the deprecated-but-functional `mp4_support: 'standard'` option — see
+ * new_asset_settings above). Used as a safety net when the
+ * `video.asset.static_renditions.*` webhook was missed, or for recordings
+ * created before this tracking existed.
+ *
+ * @param assetId - Mux asset ID
+ * @returns 'ready' | 'preparing' | 'errored' | 'disabled' (mirrors Mux's
+ *   `static_renditions.status` field; 'disabled' means mp4_support was never
+ *   requested for this asset)
+ */
+export async function getMuxAssetMp4Status(
+	assetId: string
+): Promise<'ready' | 'preparing' | 'errored' | 'disabled'> {
+	console.log('🎬 [MUX SERVICE] Checking MP4 rendition status for asset:', assetId);
+
+	try {
+		const asset = await mux.video.assets.retrieve(assetId);
+		const status = asset.static_renditions?.status ?? 'disabled';
+		console.log('🎬 [MUX SERVICE] MP4 rendition status:', status);
+		return status;
+	} catch (error) {
+		console.error('❌ [MUX SERVICE] Failed to check MP4 rendition status:', error);
+		throw error;
+	}
+}
+
+/**
  * Verify Mux webhook signature (Updated for @mux/mux-node v12+)
  * 
  * @param body - Raw request body string

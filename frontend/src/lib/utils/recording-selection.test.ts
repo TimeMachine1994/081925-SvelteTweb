@@ -34,6 +34,19 @@ describe('selectDisplayRecordings', () => {
 		expect(out[0].assetId).toBe('legacy-asset');
 	});
 
+	it('threads mp4Status through for both the recordings array and the legacy fallback', () => {
+		const fromArray = selectDisplayRecordings({
+			recordings: [rec('a', { mp4Status: 'preparing' })]
+		});
+		expect(fromArray[0].mp4Status).toBe('preparing');
+
+		const fromLegacy = selectDisplayRecordings({
+			vodPlaybackId: 'legacy',
+			mp4Status: 'ready'
+		});
+		expect(fromLegacy[0].mp4Status).toBe('ready');
+	});
+
 	it('honors a single published selection over the latest', () => {
 		const mux: MuxLike = {
 			recordings: [rec('a'), rec('b'), rec('c')],

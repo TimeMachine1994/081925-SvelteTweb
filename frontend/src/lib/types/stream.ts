@@ -7,12 +7,22 @@ export type StreamVisibility = 'public' | 'hidden' | 'archived';
 // Mux-specific streaming status
 export type MuxStreamingStatus = 'idle' | 'active' | 'disconnected';
 
+/**
+ * Status of the downloadable MP4 static rendition for a recording. Mux
+ * generates MP4s asynchronously *after* the HLS/asset itself is ready, so
+ * this tracks that separately (see `video.asset.static_renditions.*`
+ * webhooks). Absent means the recording predates this tracking — treated as
+ * unknown/preparing until resolved via the mp4-status safety-net endpoint.
+ */
+export type Mp4Status = 'preparing' | 'ready' | 'errored';
+
 /** Individual VOD recording from a stream session */
 export interface MuxRecording {
 	assetId: string;              // Mux asset ID for this recording
 	vodPlaybackId: string;        // Playback ID for this VOD
 	duration?: number;            // Duration in seconds
 	createdAt: string;            // ISO timestamp when recording was processed
+	mp4Status?: Mp4Status;        // Readiness of the downloadable MP4 (see above)
 }
 
 export interface StreamCredentials {
@@ -52,6 +62,7 @@ export interface MuxStreamConfig {
 	vodPlaybackId?: string;       // VOD playback ID for recordings
 	recordingReady: boolean;      // Is recording processed and ready?
 	duration?: number;            // Recording duration in seconds
+	mp4Status?: Mp4Status;        // Readiness of the latest recording's downloadable MP4
 	
 	// Multiple recordings (one per stream session, newest last)
 	recordings?: MuxRecording[];

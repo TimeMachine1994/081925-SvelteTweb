@@ -8,8 +8,13 @@
  * - video.live_stream.active - Stream started broadcasting
  * - video.live_stream.idle - Stream stopped
  * - video.live_stream.disconnected - Stream disconnected
- * - video.asset.ready - Recording processed and ready
+ * - video.asset.ready - Recording processed and ready (HLS playback ready;
+ *   the downloadable MP4 is NOT necessarily ready yet — see below)
  * - video.asset.errored - Recording processing failed
+ * - video.asset.static_renditions.preparing/.ready/.errored - MP4 download
+ *   (`mp4_support`) lifecycle, which completes asynchronously *after*
+ *   video.asset.ready. See $lib/server/mux.ts `getMuxAssetMp4Status` for the
+ *   equivalent on-demand check.
  */
 
 import { adminDb } from '$lib/server/firebase';
@@ -81,6 +86,18 @@ export const POST: RequestHandler = async ({ request }) => {
 
 			case 'video.asset.errored':
 				await handleRecordingError(event);
+				break;
+
+			case 'video.asset.static_renditions.preparing':
+				await handleMp4RenditionUpdate(event, 'preparing');
+				break;
+
+			case 'video.asset.static_renditions.ready':
+				await handleMp4RenditionUpdate(event, 'ready');
+				break;
+
+			case 'video.asset.static_renditions.errored':
+				await handleMp4RenditionUpdate(event, 'errored');
 				break;
 
 			case 'video.upload.asset_created':
@@ -290,7 +307,11 @@ async function handleRecordingReady(event: any) {
 			assetId,
 			vodPlaybackId: playbackId,
 			duration: duration || 0,
-			createdAt: new Date().toISOString()
+			createdAt: new Date().toISOString(),
+			// mp4_support was requested at asset creation (see $lib/server/mux.ts),
+			// so the MP4 is always still generating when the HLS asset first
+			// becomes ready — video.asset.static_renditions.ready arrives later.
+			mp4Status: 'preparing' as const
 		};
 
 		// Mux delivers webhooks at-least-once, so `video.asset.ready` can be
@@ -314,7 +335,13 @@ async function handleRecordingReady(event: any) {
 			console.log('📼 [MUX WEBHOOK] Current stream status:', currentData.status);
 			console.log('📼 [MUX WEBHOOK] Is currently live:', isCurrentlyLive);
 
-			const mergedRecordings = mergeRecording(currentData.mux?.recordings, recording);
+			const previousRecordings = currentData.mux?.recordings;
+			const mergedRecordings = mergeRecording(previousRecordings, recording);
+			// mergeRecording returns the same array reference on a no-op (retry
+			// of an already-seen assetId) — only a genuinely new recording
+			// should (re)initialize mp4Status, so a retried webhook doesn't
+			// clobber a status that's already progressed past 'preparing'.
+			const isNewRecording = mergedRecordings !== previousRecordings;
 
 			const updateData: Record<string, any> = {
 				// Legacy single-recording fields (latest recording wins)
@@ -328,6 +355,10 @@ async function handleRecordingReady(event: any) {
 				recordingReady: true,  // Legacy field for backward compatibility
 				updatedAt: new Date().toISOString()
 			};
+
+			if (isNewRecording) {
+				updateData['mux.mp4Status'] = 'preparing';
+			}
 
 			if (isUploadStream) {
 				// Upload/premiere streams: the asset being "ready" just means the
@@ -355,6 +386,61 @@ async function handleRecordingReady(event: any) {
 
 	} catch (error) {
 		console.error('❌ [MUX WEBHOOK] Error handling recording ready:', error);
+		throw error;
+	}
+}
+
+/**
+ * Handle an MP4 static rendition (`mp4_support`) lifecycle update. These
+ * fire *after* `video.asset.ready` — the MP4 download isn't ready until
+ * `video.asset.static_renditions.ready` arrives (or is confirmed via the
+ * on-demand `getMuxAssetMp4Status` check for missed webhooks / recordings
+ * created before this tracking existed).
+ */
+async function handleMp4RenditionUpdate(event: any, status: 'preparing' | 'ready' | 'errored') {
+	console.log('📼 [MUX WEBHOOK] Processing MP4 RENDITION', status.toUpperCase(), 'event');
+
+	const assetId = event.data.id;
+	console.log('📼 [MUX WEBHOOK] Asset ID:', assetId);
+
+	try {
+		const record = await findByMuxAssetId(assetId);
+		if (!record) {
+			console.warn('⚠️ [MUX WEBHOOK] No stream found for asset (mp4 rendition update):', assetId);
+			return;
+		}
+
+		const streamRef = adminDb.collection('streams').doc(record.id);
+		await adminDb.runTransaction(async (tx) => {
+			const freshDoc = await tx.get(streamRef);
+			if (!freshDoc.exists) {
+				console.warn('⚠️ [MUX WEBHOOK] Stream disappeared before transaction could run:', streamRef.id);
+				return;
+			}
+
+			const currentData = freshDoc.data()!;
+			const recordings: any[] = currentData.mux?.recordings ?? [];
+			const updatedRecordings = recordings.map((r) =>
+				r.assetId === assetId ? { ...r, mp4Status: status } : r
+			);
+
+			const updateData: Record<string, any> = {
+				'mux.recordings': updatedRecordings,
+				updatedAt: new Date().toISOString()
+			};
+
+			// Mirror onto the legacy top-level field when this asset is the
+			// "current" one referenced there (matches the recordingReady pattern).
+			if (currentData.mux?.assetId === assetId) {
+				updateData['mux.mp4Status'] = status;
+			}
+
+			tx.update(streamRef, updateData);
+		});
+
+		console.log('✅ [MUX WEBHOOK] MP4 rendition status saved:', status, 'for stream:', record.id);
+	} catch (error) {
+		console.error('❌ [MUX WEBHOOK] Error handling MP4 rendition update:', error);
 		throw error;
 	}
 }
