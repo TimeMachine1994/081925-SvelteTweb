@@ -60,3 +60,27 @@ export function getAvailableVodIds(mux: MuxLike | null | undefined): string[] {
 	}
 	return ids;
 }
+
+/**
+ * Merge a newly-arrived `video.asset.ready` recording into the existing
+ * `recordings` array, de-duplicating by `assetId`.
+ *
+ * Mux delivers webhooks at-least-once, so the same `video.asset.ready` event
+ * can be retried. The previous implementation appended unconditionally via
+ * Firestore's `arrayUnion`, which only de-dupes on exact object equality —
+ * since each attempt stamps a fresh `createdAt`, retries always looked like
+ * "new" recordings and accumulated duplicates. This keeps genuinely distinct
+ * sessions (different `assetId`s, e.g. multiple RTMP broadcasts) appending
+ * as before, but a retry of the same asset is a no-op (keeping the
+ * originally-recorded entry, including its original `createdAt`).
+ */
+export function mergeRecording(
+	existing: MuxRecordingLike[] | undefined,
+	incoming: MuxRecordingLike
+): MuxRecordingLike[] {
+	const recordings = existing ?? [];
+	if (recordings.some((r) => r.assetId === incoming.assetId)) {
+		return recordings;
+	}
+	return [...recordings, incoming];
+}

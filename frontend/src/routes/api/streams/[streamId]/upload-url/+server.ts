@@ -2,7 +2,6 @@ import { adminDb } from '$lib/server/firebase';
 import { error as SvelteKitError, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { createMuxDirectUpload } from '$lib/server/mux';
-import { env } from '$env/dynamic/private';
 
 /**
  * Issue a Mux Direct Upload URL for a "premiere" (upload & schedule) stream.
@@ -14,7 +13,7 @@ import { env } from '$env/dynamic/private';
  *
  * POST body: {} (no fields needed — the stream ID comes from the route)
  */
-export const POST: RequestHandler = async ({ locals, params }) => {
+export const POST: RequestHandler = async ({ locals, params, url }) => {
 	console.log('📤 [UPLOAD URL API] POST - Requesting upload URL for stream:', params.streamId);
 
 	if (!locals.user) {
@@ -51,8 +50,12 @@ export const POST: RequestHandler = async ({ locals, params }) => {
 			throw SvelteKitError(400, 'This stream is not an upload/premiere stream');
 		}
 
-		const corsOrigin = env.PUBLIC_BASE_URL || 'https://tributestream.com';
-		const { uploadId, url } = await createMuxDirectUpload(streamId, corsOrigin);
+		// Use the actual origin the request came in on (prod, www vs. non-www,
+		// or a Vercel preview deploy) rather than an env var — this is always
+		// exactly correct and avoids a CORS mismatch if the domain ever
+		// differs from a hardcoded/env-configured value.
+		const corsOrigin = url.origin;
+		const { uploadId, url: uploadUrl } = await createMuxDirectUpload(streamId, corsOrigin);
 
 		await streamDoc.ref.update({
 			'mux.uploadId': uploadId,
@@ -62,7 +65,7 @@ export const POST: RequestHandler = async ({ locals, params }) => {
 
 		console.log('✅ [UPLOAD URL API] Upload URL issued for stream:', streamId);
 
-		return json({ uploadId, url });
+		return json({ uploadId, url: uploadUrl });
 	} catch (err: any) {
 		console.error('❌ [UPLOAD URL API] Error:', err);
 

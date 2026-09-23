@@ -6,6 +6,7 @@
 	import PremierePlayer from './streaming/PremierePlayer.svelte';
 	import { selectDisplayRecordings } from '$lib/utils/recording-selection';
 	import { hasPremiereAired, isRecordedStream as isRecordedStreamShared } from '$lib/utils/premiere';
+	import { createServerClock } from '$lib/utils/serverClock';
 	
 	console.log('🎬 [MEMORIAL STREAM DISPLAY] Component loaded - Mux integration active');
 	
@@ -80,8 +81,12 @@
 	// Real-time stream updates - this will be updated by Firestore listeners
 	let liveStreams = $state<Stream[]>(streams || []);
 	
-	// Current time for countdown
-	let currentTime = $state(new Date());
+	// Current time for countdown — corrected against the server's clock so
+	// viewers with an inaccurate device clock still see a synced premiere
+	// (see $lib/utils/serverClock.ts). Falls back to the uncorrected local
+	// clock until the first sync completes, and forever if it fails.
+	const serverClock = createServerClock();
+	let currentTime = $state(serverClock.now());
 	
 	// Download state tracking
 	let downloadingStreamId = $state<string | null>(null);
@@ -158,8 +163,13 @@
 	
 	// Update time every second for countdown
 	onMount(() => {
+		// Sync once up front, then periodically re-sync in case of long
+		// sessions or throttled background tabs drifting the estimate.
+		serverClock.sync();
+		const clockSyncInterval = setInterval(() => serverClock.sync(), 5 * 60 * 1000);
+
 		const timeInterval = setInterval(() => {
-			currentTime = new Date();
+			currentTime = serverClock.now();
 		}, 1000);
 		
 		// Setup Firestore real-time listeners for all streams
@@ -169,6 +179,7 @@
 		
 		return () => {
 			clearInterval(timeInterval);
+			clearInterval(clockSyncInterval);
 			// Cleanup Firestore listeners
 			firestoreUnsubscribes.forEach(unsub => unsub());
 		};
@@ -433,6 +444,7 @@
 										duration={stream.mux.duration}
 										title={stream.title}
 										{currentTime}
+										getNow={() => serverClock.now()}
 									/>
 								</div>
 							</div>

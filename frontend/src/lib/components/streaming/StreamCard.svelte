@@ -31,19 +31,33 @@
 	let liveCheckInterval: NodeJS.Timeout | null = null;
 
 	// Upload/premiere state (stream.sourceType === 'upload')
-	let uploadFile = $state<File | null>(null);
+	let uploadFileInputEl: HTMLInputElement | null = $state(null);
+	let uploadFileName = $state<string | null>(null);
 	let uploadState = $state<'idle' | 'requesting' | 'uploading' | 'done' | 'error'>('idle');
 	let uploadProgress = $state(0);
 	let uploadErrorMessage = $state('');
 
-	function handleFileSelected(e: Event) {
-		const input = e.target as HTMLInputElement;
-		uploadFile = input.files?.[0] || null;
+	// Single visible "Choose Video & Upload" button opens the hidden file
+	// input; the upload then starts immediately once a file is picked — no
+	// separate "Upload" click required.
+	function openFilePicker() {
+		uploadFileInputEl?.click();
 	}
 
-	async function handleStartUpload() {
-		if (!uploadFile) return;
+	function handleFileSelected(e: Event) {
+		const input = e.target as HTMLInputElement;
+		const file = input.files?.[0] || null;
+		// Reset immediately so re-picking the SAME file after a failed
+		// attempt still fires a `change` event (the browser otherwise treats
+		// an identical selection as a no-op).
+		input.value = '';
+		if (file) {
+			startUpload(file);
+		}
+	}
 
+	async function startUpload(file: File) {
+		uploadFileName = file.name;
 		uploadState = 'requesting';
 		uploadErrorMessage = '';
 		uploadProgress = 0;
@@ -65,7 +79,7 @@
 
 			uploadState = 'uploading';
 
-			const upload = createUpload({ endpoint: url, file: uploadFile });
+			const upload = createUpload({ endpoint: url, file });
 
 			upload.on('progress', (evt) => {
 				uploadProgress = Math.round(evt.detail);
@@ -598,24 +612,32 @@
 							the scheduled start time.
 						</p>
 						{#if uploadState === 'error'}
-							<p class="mb-2 text-sm text-red-700">⚠️ {uploadErrorMessage}</p>
+							<p class="mb-2 text-sm text-red-700">
+								⚠️ {uploadErrorMessage}
+								{#if uploadFileName}({uploadFileName}){/if}
+							</p>
 						{/if}
-						<div class="flex flex-wrap items-center gap-2">
-							<input
-								type="file"
-								accept="video/*"
-								onchange={handleFileSelected}
-								disabled={uploadState === 'requesting'}
-								class="text-sm"
-							/>
-							<button
-								onclick={handleStartUpload}
-								disabled={!uploadFile || uploadState === 'requesting'}
-								class="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-amber-700 disabled:opacity-50"
-							>
-								{uploadState === 'requesting' ? 'Starting…' : 'Upload Video'}
-							</button>
-						</div>
+						<!-- Hidden file input, triggered by the single visible button below;
+						     the upload starts immediately as soon as a file is chosen. -->
+						<input
+							bind:this={uploadFileInputEl}
+							type="file"
+							accept="video/*"
+							onchange={handleFileSelected}
+							disabled={uploadState === 'requesting'}
+							class="hidden"
+						/>
+						<button
+							onclick={openFilePicker}
+							disabled={uploadState === 'requesting'}
+							class="rounded-lg bg-amber-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-amber-700 disabled:opacity-50"
+						>
+							{uploadState === 'requesting'
+								? 'Starting…'
+								: uploadState === 'error'
+									? 'Try Again'
+									: 'Choose Video & Upload'}
+						</button>
 					{/if}
 				</div>
 			{/if}

@@ -25,6 +25,15 @@
 	 * offset the instant any seek is detected, regardless of how it was
 	 * triggered. Pausing is allowed, but resuming snaps forward to the
 	 * current live position rather than continuing from where it was paused.
+	 *
+	 * iOS Safari: `playsinline` keeps playback inline instead of handing off
+	 * to the OS's native fullscreen player on play (which would show a real,
+	 * unstyleable scrubber). The Fullscreen button itself is additionally
+	 * hidden when the Fullscreen API isn't available at all — true on iPhone
+	 * Safari, which only offers `webkitEnterFullscreen` — since entering
+	 * fullscreen there falls back to that same native, unstyleable chrome.
+	 * Desktop, Android, and iPad keep the Fullscreen API (and therefore our
+	 * Media Chrome controls, with the scrubber still hidden) in fullscreen.
 	 */
 	import '@mux/mux-player';
 	import { elapsedPremiereSeconds } from '$lib/utils/premiere';
@@ -35,13 +44,35 @@
 		duration?: number;
 		title?: string;
 		currentTime: Date;
+		/**
+		 * Returns the current time, corrected for client/server clock skew
+		 * (see `$lib/utils/serverClock.ts`). Defaults to the viewer's raw
+		 * device clock if not provided.
+		 */
+		getNow?: () => Date;
 	}
 
-	let { playbackId, scheduledStartTime, duration, title, currentTime }: Props = $props();
+	let {
+		playbackId,
+		scheduledStartTime,
+		duration,
+		title,
+		currentTime,
+		getNow = () => new Date()
+	}: Props = $props();
 
 	let joined = $state(false);
 	let playerEl: any = $state(null);
 	let resyncInterval: ReturnType<typeof setInterval> | null = null;
+	// True on browsers with no real Fullscreen API (i.e. iPhone Safari) —
+	// only there does the Fullscreen button need to be hidden entirely.
+	let hideFullscreenButton = $state(false);
+
+	$effect(() => {
+		if (typeof document !== 'undefined') {
+			hideFullscreenButton = document.fullscreenEnabled === false;
+		}
+	});
 
 	const RESYNC_INTERVAL_MS = 15000;
 	const RESYNC_DRIFT_THRESHOLD_S = 4;
@@ -55,7 +86,7 @@
 
 	function snapToLive(reason: string) {
 		if (!playerEl || typeof playerEl.currentTime !== 'number') return;
-		const expected = elapsedSeconds(new Date());
+		const expected = elapsedSeconds(getNow());
 		console.log(`🎬 [PREMIERE PLAYER] Snapping to live position (${reason}):`, expected);
 		try {
 			playerEl.currentTime = expected;
@@ -66,7 +97,7 @@
 
 	function handleLoadedMetadata() {
 		if (!playerEl) return;
-		const offset = elapsedSeconds(new Date());
+		const offset = elapsedSeconds(getNow());
 		console.log('🎬 [PREMIERE PLAYER] Seeking to elapsed offset:', offset);
 		try {
 			playerEl.currentTime = offset;
@@ -90,7 +121,7 @@
 	// wherever they paused.
 	function handlePlay() {
 		if (!playerEl || typeof playerEl.currentTime !== 'number') return;
-		const expected = elapsedSeconds(new Date());
+		const expected = elapsedSeconds(getNow());
 		const drift = Math.abs(playerEl.currentTime - expected);
 		if (drift > RESUME_DRIFT_THRESHOLD_S) {
 			snapToLive('resume drift');
@@ -99,7 +130,7 @@
 
 	function resync() {
 		if (!playerEl || typeof playerEl.currentTime !== 'number') return;
-		const expected = elapsedSeconds(new Date());
+		const expected = elapsedSeconds(getNow());
 		const drift = Math.abs(playerEl.currentTime - expected);
 		if (drift > RESYNC_DRIFT_THRESHOLD_S) {
 			console.log('🎬 [PREMIERE PLAYER] Drift detected, resyncing:', {
@@ -143,6 +174,7 @@
 		<mux-player
 			bind:this={playerEl}
 			class="premiere-locked"
+			class:hide-fullscreen={hideFullscreenButton}
 			playback-id={playbackId}
 			metadata-video-title={title}
 			metadata-viewer-user-id="anonymous"
@@ -150,6 +182,7 @@
 			muted={false}
 			controls
 			nohotkeys
+			playsinline
 			onloadedmetadata={handleLoadedMetadata}
 			onseeking={handleSeeking}
 			onplay={handlePlay}
@@ -208,6 +241,13 @@
 		--seek-backward-button: none;
 		--seek-forward-button: none;
 		--pip-button: none;
+	}
+
+	/* iPhone Safari has no real Fullscreen API — entering "fullscreen" there
+	   falls back to native, unstyleable chrome with a real scrubber. Hide the
+	   button entirely rather than let it open that. */
+	mux-player.premiere-locked.hide-fullscreen {
+		--fullscreen-button: none;
 	}
 
 	.join-button {

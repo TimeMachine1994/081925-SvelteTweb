@@ -53,12 +53,14 @@ export async function createMuxLiveStream(
 	try {
 		// Create live stream with automatic recording enabled
 		const liveStream = await mux.video.liveStreams.create({
-			// Public playback policy - no authentication required
-			playback_policy: ['public'],
+			// Public playback policy - no authentication required.
+			// `playback_policies` (plural) is the current field name;
+			// `playback_policy` is deprecated in the Mux API.
+			playback_policies: ['public'],
 			
 			// Automatic asset creation settings for recording
 			new_asset_settings: {
-				playback_policy: ['public'],
+				playback_policies: ['public'],
 				mp4_support: 'standard' // Enable MP4 downloads
 			},
 			
@@ -108,12 +110,15 @@ export async function createMuxLiveStream(
  */
 export async function createMuxDirectUpload(passthroughStreamId: string, corsOrigin: string) {
 	console.log('🎬 [MUX SERVICE] Creating direct upload for stream:', passthroughStreamId);
+	console.log('🎬 [MUX SERVICE] cors_origin:', corsOrigin);
 
 	try {
 		const upload = await mux.video.uploads.create({
 			cors_origin: corsOrigin,
 			new_asset_settings: {
-				playback_policy: ['public'],
+				// `playback_policies` (plural) is the current field name;
+				// `playback_policy` is deprecated in the Mux API.
+				playback_policies: ['public'],
 				mp4_support: 'standard', // Enable MP4 downloads — matches createMuxLiveStream()
 				passthrough: passthroughStreamId
 			}
@@ -126,7 +131,19 @@ export async function createMuxDirectUpload(passthroughStreamId: string, corsOri
 			url: upload.url
 		};
 	} catch (error) {
+		// Mux validation errors nest the useful detail under error.error.messages,
+		// which Node's console collapses to "messages: [Array]" at default log
+		// depth — log it explicitly so the real cause is always visible.
+		const nestedError = error as { error?: { error?: { messages?: unknown }; messages?: unknown } };
+		const muxMessages = nestedError?.error?.error?.messages ?? nestedError?.error?.messages;
 		console.error('❌ [MUX SERVICE] Failed to create direct upload:', error);
+		if (muxMessages) {
+			console.error('❌ [MUX SERVICE] Mux validation messages:', JSON.stringify(muxMessages));
+		}
+
+		if (Array.isArray(muxMessages) && muxMessages.length > 0) {
+			throw new Error(`Mux rejected the upload request: ${muxMessages.join('; ')}`);
+		}
 		throw error;
 	}
 }

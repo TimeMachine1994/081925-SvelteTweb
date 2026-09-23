@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
 	selectDisplayRecordings,
 	getAvailableVodIds,
+	mergeRecording,
 	type MuxLike,
 	type MuxRecordingLike
 } from './recording-selection';
@@ -96,5 +97,31 @@ describe('getAvailableVodIds', () => {
 	it('includes the legacy vodPlaybackId without duplicating', () => {
 		expect(getAvailableVodIds({ recordings: [rec('a')], vodPlaybackId: 'b' })).toEqual(['a', 'b']);
 		expect(getAvailableVodIds({ recordings: [rec('a')], vodPlaybackId: 'a' })).toEqual(['a']);
+	});
+});
+
+describe('mergeRecording', () => {
+	it('appends when there are no existing recordings', () => {
+		const result = mergeRecording(undefined, rec('a'));
+		expect(result.map((r) => r.vodPlaybackId)).toEqual(['a']);
+	});
+
+	it('appends a genuinely new recording (different assetId)', () => {
+		const result = mergeRecording([rec('a')], rec('b'));
+		expect(result.map((r) => r.vodPlaybackId)).toEqual(['a', 'b']);
+	});
+
+	it('is a no-op when the same assetId is delivered again (webhook retry)', () => {
+		const original = rec('a', { createdAt: '2026-01-01T00:00:00.000Z' });
+		const retry = rec('a', { createdAt: '2026-01-01T00:05:00.000Z' }); // same assetId, later createdAt
+		const result = mergeRecording([original], retry);
+		expect(result).toHaveLength(1);
+		expect(result[0]).toEqual(original); // keeps the original entry, doesn't overwrite with the retry
+	});
+
+	it('does not mutate the existing array', () => {
+		const existing = [rec('a')];
+		mergeRecording(existing, rec('b'));
+		expect(existing).toHaveLength(1);
 	});
 });
