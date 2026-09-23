@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { onMount, onDestroy, tick } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
 	import CountdownVideoPlayer from './CountdownVideoPlayer.svelte';
 	import MuxVideoPlayer from './streaming/MuxVideoPlayer.svelte';
 	import PremierePlayer from './streaming/PremierePlayer.svelte';
-	import { selectDisplayRecordings, type Mp4Status } from '$lib/utils/recording-selection';
+	import { selectDisplayRecordings } from '$lib/utils/recording-selection';
 	import { hasPremiereAired, isRecordedStream as isRecordedStreamShared } from '$lib/utils/premiere';
 	import { createServerClock } from '$lib/utils/serverClock';
 	
@@ -54,8 +54,7 @@
 			vodPlaybackId?: string;
 			recordingReady?: boolean;
 			duration?: number;
-			mp4Status?: Mp4Status;
-			recordings?: { assetId: string; vodPlaybackId: string; duration?: number; createdAt: string; mp4Status?: Mp4Status }[];
+			recordings?: { assetId: string; vodPlaybackId: string; duration?: number; createdAt: string }[];
 			publishedRecordings?: string[];
 		};
 		
@@ -89,171 +88,6 @@
 	const serverClock = createServerClock();
 	let currentTime = $state(serverClock.now());
 	
-	// Download state tracking
-	let downloadingStreamId = $state<string | null>(null);
-	let downloadProgress = $state(0); // 0-100, only meaningful when content-length is known
-
-	// Mux generates the downloadable MP4 asynchronously *after* the recording
-	// is playable — `mp4Status` (set by the mux webhook, see
-	// /api/webhooks/mux) tracks that separately so we don't attempt (and
-	// fail) a download before the file actually exists.
-	function getMp4Status(stream: Stream, recording?: RecordingItem): Mp4Status | undefined {
-		return recording?.mp4Status ?? stream.mux?.mp4Status;
-	}
-
-	// In-flight/complete polls, keyed by assetId — plain (non-reactive) state
-	// just to avoid starting duplicate polling loops.
-	const mp4PollAttempts: Record<string, number> = {};
-	const MAX_MP4_POLL_ATTEMPTS = 10;
-	const MP4_POLL_INTERVAL_MS = 20_000;
-	let destroyed = false;
-
-	async function checkMp4Status(streamId: string, assetId: string): Promise<Mp4Status | null> {
-		try {
-			const res = await fetch(`/api/streams/${streamId}/mp4-status?assetId=${encodeURIComponent(assetId)}`);
-			if (!res.ok) return null;
-			const data = await res.json();
-			return (data?.mp4Status as Mp4Status) ?? null;
-		} catch (error) {
-			console.error('❌ [MP4 STATUS] Check failed:', error);
-			return null;
-		}
-	}
-
-	// Applies a resolved mp4Status directly to local state for immediate UI
-	// feedback. The Mux webhook (or this same check) also persists it to
-	// Firestore, so the existing real-time listener will confirm the same
-	// value shortly after — this is just so the button doesn't wait on that.
-	function applyMp4StatusLocally(streamId: string, assetId: string, status: Mp4Status) {
-		liveStreams = liveStreams.map((s) => {
-			if (s.id !== streamId || !s.mux) return s;
-			const recordings = s.mux.recordings?.map((r) =>
-				r.assetId === assetId ? { ...r, mp4Status: status } : r
-			);
-			return {
-				...s,
-				mux: {
-					...s.mux,
-					recordings,
-					...(s.mux.assetId === assetId ? { mp4Status: status } : {})
-				}
-			};
-		});
-	}
-
-	async function pollMp4Status(streamId: string, assetId: string) {
-		if (destroyed) return;
-		const attempts = (mp4PollAttempts[assetId] ?? 0) + 1;
-		mp4PollAttempts[assetId] = attempts;
-
-		const status = await checkMp4Status(streamId, assetId);
-		if (destroyed) return;
-		if (status) applyMp4StatusLocally(streamId, assetId, status);
-
-		if (status === 'ready' || status === 'errored' || attempts >= MAX_MP4_POLL_ATTEMPTS) {
-			delete mp4PollAttempts[assetId];
-			return;
-		}
-
-		setTimeout(() => pollMp4Status(streamId, assetId), MP4_POLL_INTERVAL_MS);
-	}
-
-	// Kicks off a status check (+ polling until resolved) for a recording
-	// whose mp4Status is missing/unresolved — either the webhook hasn't
-	// caught up yet, or this recording predates mp4Status tracking entirely.
-	function ensureMp4StatusChecked(streamId: string, assetId: string) {
-		if (assetId in mp4PollAttempts) return; // already checking/polling
-		mp4PollAttempts[assetId] = 0;
-		pollMp4Status(streamId, assetId);
-	}
-
-	// Proactively resolve MP4 readiness for every displayed recording that
-	// doesn't already have a definitive status, so the button reflects
-	// reality without requiring the viewer to click it first.
-	$effect(() => {
-		for (const stream of recordedStreams) {
-			for (const recording of getDisplayRecordings(stream)) {
-				const status = getMp4Status(stream, recording);
-				if (status !== 'ready' && status !== 'errored' && recording.assetId) {
-					ensureMp4StatusChecked(stream.id, recording.assetId);
-				}
-			}
-		}
-	});
-
-	/**
-	 * Handle video download - streams file (with progress) and triggers save dialog
-	 */
-	async function handleDownload(stream: Stream, recording?: RecordingItem) {
-		const playbackId = recording?.vodPlaybackId || stream.mux?.vodPlaybackId;
-		const assetId = recording?.assetId || stream.mux?.assetId;
-		if (!playbackId || downloadingStreamId) return;
-
-		// Don't attempt the download until Mux has actually confirmed the MP4
-		// exists — kick off (or rely on) the status check/poll instead.
-		if (getMp4Status(stream, recording) !== 'ready') {
-			if (assetId) ensureMp4StatusChecked(stream.id, assetId);
-			return;
-		}
-
-		const url = `https://stream.mux.com/${playbackId}/high.mp4`;
-		const filename = `${stream.title || 'recording'}-${playbackId}.mp4`;
-		
-		downloadingStreamId = stream.id;
-		downloadProgress = 0;
-		// Ensure the spinner paints before the heavy network work begins
-		await tick();
-		
-		try {
-			console.log('📥 [DOWNLOAD] Starting download for:', filename);
-			
-			const response = await fetch(url);
-			if (!response.ok) throw new Error(`Download failed: ${response.status}`);
-			
-			const total = Number(response.headers.get('content-length')) || 0;
-			const reader = response.body?.getReader();
-			let blob: Blob;
-			
-			if (reader) {
-				const chunks: Uint8Array[] = [];
-				let received = 0;
-				for (;;) {
-					const { done, value } = await reader.read();
-					if (done) break;
-					if (value) {
-						chunks.push(value);
-						received += value.length;
-						if (total) downloadProgress = Math.round((received / total) * 100);
-					}
-				}
-				blob = new Blob(chunks as BlobPart[]);
-			} else {
-				// Fallback when the response body isn't a readable stream
-				blob = await response.blob();
-			}
-			
-			const blobUrl = URL.createObjectURL(blob);
-			
-			// Create temporary link and trigger download
-			const link = document.createElement('a');
-			link.href = blobUrl;
-			link.download = filename;
-			document.body.appendChild(link);
-			link.click();
-			document.body.removeChild(link);
-			
-			// Cleanup
-			URL.revokeObjectURL(blobUrl);
-			console.log('✅ [DOWNLOAD] Download completed:', filename);
-		} catch (error) {
-			console.error('❌ [DOWNLOAD] Failed:', error);
-			alert('Download failed due to a network error. Please try again in a moment.');
-		} finally {
-			downloadingStreamId = null;
-			downloadProgress = 0;
-		}
-	}
-	
 	// Firestore unsubscribe functions
 	let firestoreUnsubscribes: (() => void)[] = [];
 	
@@ -278,8 +112,6 @@
 			clearInterval(clockSyncInterval);
 			// Cleanup Firestore listeners
 			firestoreUnsubscribes.forEach(unsub => unsub());
-			// Stop any in-flight MP4 status polling
-			destroyed = true;
 		};
 	});
 	
@@ -510,7 +342,7 @@
 	// Resolve which recordings to actually display for a recorded stream.
 	// Honors admin-curated `publishedRecordings` (ordered); otherwise falls back
 	// to the latest recording (preserves prior behavior).
-	type RecordingItem = { assetId: string; vodPlaybackId: string; duration?: number; createdAt: string; mp4Status?: Mp4Status };
+	type RecordingItem = { assetId: string; vodPlaybackId: string; duration?: number; createdAt: string };
 	function getDisplayRecordings(stream: Stream): RecordingItem[] {
 		return selectDisplayRecordings(stream.mux) as RecordingItem[];
 	}
@@ -680,78 +512,6 @@
 										{#each displayRecordings as recording, i (recording.vodPlaybackId)}
 											<MuxVideoPlayer stream={stream} autoplay={false} showTitle={i === 0} forcedVodPlaybackId={recording.vodPlaybackId} />
 										{/each}
-										
-										<!-- Download Buttons -->
-										{#if displayRecordings.length}
-											<div class="download-button-container">
-												{#each displayRecordings as recording, i}
-													{@const mp4Status = getMp4Status(stream, recording)}
-													<button 
-														type="button"
-														class="download-master-button"
-														class:download-master-button--pending={mp4Status !== 'ready'}
-														disabled={downloadingStreamId === stream.id || mp4Status === 'errored'}
-														title={mp4Status === 'errored' ? 'Download unavailable for this recording' : mp4Status !== 'ready' ? 'Preparing download — check back soon' : undefined}
-														onclick={() => handleDownload(stream, recording)}
-													>
-														{#if downloadingStreamId === stream.id}
-															<svg class="spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-																<circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="20"/>
-															</svg>
-															{downloadProgress > 0 ? `Downloading... ${downloadProgress}%` : 'Downloading...'}
-														{:else if mp4Status === 'errored'}
-															Download unavailable
-														{:else if mp4Status !== 'ready'}
-															<svg class="spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-																<circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="20"/>
-															</svg>
-															Preparing download... check back soon
-														{:else}
-															<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-																<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-																<polyline points="7 10 12 15 17 10"/>
-																<line x1="12" y1="15" x2="12" y2="3"/>
-															</svg>
-															{displayRecordings.length > 1 ? `Download Part ${i + 1}` : 'Download Recording'}
-														{/if}
-													</button>
-												{/each}
-											</div>
-										{:else if stream.mux?.vodPlaybackId}
-											{@const mp4Status = getMp4Status(stream)}
-											<div class="download-button-container">
-												<button 
-													type="button"
-													class="download-master-button"
-													class:download-master-button--pending={mp4Status !== 'ready'}
-													disabled={downloadingStreamId === stream.id || mp4Status === 'errored'}
-													title={mp4Status === 'errored' ? 'Download unavailable for this recording' : mp4Status !== 'ready' ? 'Preparing download — check back soon' : undefined}
-													onclick={() => handleDownload(stream)}
-												>
-													{#if downloadingStreamId === stream.id}
-														<svg class="spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-															<circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="20"/>
-														</svg>
-														{downloadProgress > 0 ? `Downloading... ${downloadProgress}%` : 'Downloading...'}
-													{:else if mp4Status === 'errored'}
-														Download unavailable
-													{:else if mp4Status !== 'ready'}
-														<svg class="spinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-															<circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="20"/>
-														</svg>
-														Preparing download... check back soon
-													{:else}
-														<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-															<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-															<polyline points="7 10 12 15 17 10"/>
-															<line x1="12" y1="15" x2="12" y2="3"/>
-														</svg>
-														Download Master
-													{/if}
-												</button>
-											</div>
-										{/if}
-										
 										<!-- Per-stream embed - BELOW video -->
 										{#if stream.embed && stream.embed.position === 'below'}
 											<div class="stream-embed-container embed-below">
@@ -1294,70 +1054,6 @@
 		}
 	}
 	
-	/* Download Master Button - Centered below video */
-	.download-button-container {
-		display: flex;
-		justify-content: center;
-		padding: 1rem 0;
-	}
-
-	.download-master-button {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.5rem;
-		padding: 0.75rem 1.5rem;
-		background: linear-gradient(135deg, #D5BA7F 0%, #c4a96e 100%);
-		color: #1a1a1a;
-		font-weight: 600;
-		font-size: 0.95rem;
-		border-radius: 8px;
-		text-decoration: none;
-		transition: all 0.2s ease;
-		box-shadow: 0 2px 8px rgba(213, 186, 127, 0.3);
-	}
-
-	.download-master-button:hover {
-		background: linear-gradient(135deg, #e5ca8f 0%, #d4b97e 100%);
-		transform: translateY(-2px);
-		box-shadow: 0 4px 12px rgba(213, 186, 127, 0.4);
-	}
-
-	.download-master-button svg {
-		flex-shrink: 0;
-	}
-
-	.download-master-button:disabled {
-		opacity: 0.7;
-		cursor: wait;
-	}
-
-	.download-master-button--pending {
-		background: linear-gradient(135deg, #d9d9d9 0%, #c4c4c4 100%);
-		cursor: progress;
-	}
-
-	.download-master-button--pending:hover {
-		background: linear-gradient(135deg, #d9d9d9 0%, #c4c4c4 100%);
-		transform: none;
-		box-shadow: none;
-	}
-
-	.download-master-button .spinner {
-		animation: spin 1s linear infinite;
-	}
-
-	@keyframes spin {
-		from { transform: rotate(0deg); }
-		to { transform: rotate(360deg); }
-	}
-
-	@media (max-width: 768px) {
-		.download-master-button {
-			padding: 0.625rem 1.25rem;
-			font-size: 0.875rem;
-		}
-	}
-
 	/* Per-stream Embed Styles */
 	.stream-embed-container {
 		margin: 1rem 0;
