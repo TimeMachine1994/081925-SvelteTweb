@@ -12,12 +12,13 @@
  * - video.asset.errored - Recording processing failed
  */
 
-import { adminDb, FieldValue } from '$lib/server/firebase';
+import { adminDb } from '$lib/server/firebase';
 import { error as svelteKitError, json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { verifyMuxWebhookSignature } from '$lib/server/mux';
 import { env } from '$env/dynamic/private';
 import { findByMuxAssetId, findByMuxUploadId } from '$lib/server/db/repos/streams';
+import { mergeRecording } from '$lib/utils/recording-selection';
 
 console.log('🔔 [MUX WEBHOOK] Webhook handler loaded and ready');
 
@@ -283,14 +284,8 @@ async function handleRecordingReady(event: any) {
 		console.log('📼 [MUX WEBHOOK] VOD Playback ID:', playbackId);
 		console.log('📼 [MUX WEBHOOK] Duration:', duration, 'seconds');
 
-		// Read current stream status to guard against race conditions
-		const currentData = streamDoc.data()!;
-		const isCurrentlyLive = currentData.status === 'live';
-
-		console.log('📼 [MUX WEBHOOK] Current stream status:', currentData.status);
-		console.log('📼 [MUX WEBHOOK] Is currently live:', isCurrentlyLive);
-
-		// Build recording entry for the recordings array
+		// New recording entry (candidate — only actually appended if this
+		// assetId isn't already present, see mergeRecording below).
 		const recording = {
 			assetId,
 			vodPlaybackId: playbackId,
@@ -298,41 +293,64 @@ async function handleRecordingReady(event: any) {
 			createdAt: new Date().toISOString()
 		};
 
-		// Build update — append to recordings array + update legacy fields
-		const updateData: Record<string, any> = {
-			// Legacy single-recording fields (latest recording wins)
-			'mux.assetId': assetId,
-			'mux.vodPlaybackId': playbackId,
-			'mux.recordingReady': true,
-			'mux.duration': duration,
-			// Append to recordings array (one entry per stream session)
-			'mux.recordings': FieldValue.arrayUnion(recording),
-			// NOTE: chat.locked is NOT auto-set - admin controls chat lock status
-			recordingReady: true,  // Legacy field for backward compatibility
-			updatedAt: new Date().toISOString()
-		};
+		// Mux delivers webhooks at-least-once, so `video.asset.ready` can be
+		// retried for the same asset. Run the read-merge-write in a
+		// transaction so concurrent deliveries can't race each other, and
+		// de-dupe on `assetId` (mergeRecording) instead of Firestore's
+		// `arrayUnion`, which only de-dupes on exact object equality — since
+		// each attempt stamps a fresh `createdAt`, a plain arrayUnion treated
+		// every retry as a "new" recording and accumulated duplicates.
+		const streamRef = streamDoc.ref;
+		await adminDb.runTransaction(async (tx) => {
+			const freshDoc = await tx.get(streamRef);
+			if (!freshDoc.exists) {
+				console.warn('⚠️ [MUX WEBHOOK] Stream disappeared before transaction could run:', streamRef.id);
+				return;
+			}
 
-		if (isUploadStream) {
-			// Upload/premiere streams: the asset being "ready" just means the
-			// file has finished processing and is ready to premiere at its
-			// scheduledStartTime. The public page derives live/recorded state
-			// from scheduledStartTime + duration, not from `status` — so leave
-			// `status` as 'scheduled'/'ready' rather than flipping to 'completed'.
-			updateData['mux.uploadStatus'] = 'asset_created';
-			console.log('📼 [MUX WEBHOOK] Upload/premiere asset ready — leaving status as-is:', currentData.status);
-		} else if (!isCurrentlyLive) {
-			// RACE GUARD: Only set status to 'completed' if NOT currently live
-			// (a new session may have started while this recording was processing)
-			updateData.status = 'completed';
-			console.log('📼 [MUX WEBHOOK] Setting status to completed');
-		} else {
-			console.log('⚠️ [MUX WEBHOOK] Stream is currently LIVE — NOT overwriting status to completed');
-		}
+			const currentData = freshDoc.data()!;
+			const isCurrentlyLive = currentData.status === 'live';
 
-		console.log('💾 [MUX WEBHOOK] Updating stream with recording data...');
-		await streamDoc.ref.update(updateData);
+			console.log('📼 [MUX WEBHOOK] Current stream status:', currentData.status);
+			console.log('📼 [MUX WEBHOOK] Is currently live:', isCurrentlyLive);
 
-		console.log('✅ [MUX WEBHOOK] Recording information saved (session appended to recordings array)');
+			const mergedRecordings = mergeRecording(currentData.mux?.recordings, recording);
+
+			const updateData: Record<string, any> = {
+				// Legacy single-recording fields (latest recording wins)
+				'mux.assetId': assetId,
+				'mux.vodPlaybackId': playbackId,
+				'mux.recordingReady': true,
+				'mux.duration': duration,
+				// De-duped recordings array (one entry per distinct asset)
+				'mux.recordings': mergedRecordings,
+				// NOTE: chat.locked is NOT auto-set - admin controls chat lock status
+				recordingReady: true,  // Legacy field for backward compatibility
+				updatedAt: new Date().toISOString()
+			};
+
+			if (isUploadStream) {
+				// Upload/premiere streams: the asset being "ready" just means the
+				// file has finished processing and is ready to premiere at its
+				// scheduledStartTime. The public page derives live/recorded state
+				// from scheduledStartTime + duration, not from `status` — so leave
+				// `status` as 'scheduled'/'ready' rather than flipping to 'completed'.
+				updateData['mux.uploadStatus'] = 'asset_created';
+				console.log('📼 [MUX WEBHOOK] Upload/premiere asset ready — leaving status as-is:', currentData.status);
+			} else if (!isCurrentlyLive) {
+				// RACE GUARD: Only set status to 'completed' if NOT currently live
+				// (a new session may have started while this recording was processing)
+				updateData.status = 'completed';
+				console.log('📼 [MUX WEBHOOK] Setting status to completed');
+			} else {
+				console.log('⚠️ [MUX WEBHOOK] Stream is currently LIVE — NOT overwriting status to completed');
+			}
+
+			console.log('💾 [MUX WEBHOOK] Updating stream with recording data...');
+			tx.update(streamRef, updateData);
+		});
+
+		console.log('✅ [MUX WEBHOOK] Recording information saved (de-duped by assetId)');
 		console.log('📼 [MUX WEBHOOK] Stream:', streamDoc.id, 'recording is ready for playback');
 
 	} catch (error) {
