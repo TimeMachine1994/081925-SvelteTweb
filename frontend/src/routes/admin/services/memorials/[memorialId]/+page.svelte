@@ -7,12 +7,15 @@
 	import AdminChatPanel from '$lib/components/admin/AdminChatPanel.svelte';
 	import MemorialBlockEditor from '$lib/components/admin/memorial-editor/MemorialBlockEditor.svelte';
 	import RecordingPicker from '$lib/components/admin/RecordingPicker.svelte';
+	import BasicInfoEditor from '$lib/components/admin/BasicInfoEditor.svelte';
+	import ScheduleRequestsPanel from '$lib/components/admin/ScheduleRequestsPanel.svelte';
+	import SlugManager from '$lib/components/admin/SlugManager.svelte';
 	import { goto } from '$app/navigation';
 	import { invalidateAll } from '$app/navigation';
-	
+
 	let { data } = $props();
-	const { memorial, slideshows, followerCount } = data;
-	
+	const { memorial, slideshows, followerCount, scheduleRequests } = data;
+
 	// Mutable streams for block editor updates
 	let streams = $state(data.streams);
 
@@ -62,7 +65,7 @@
 		const diffMins = Math.floor(diffMs / 60000);
 		const diffHours = Math.floor(diffMs / 3600000);
 		const diffDays = Math.floor(diffMs / 86400000);
-		
+
 		if (diffMins < 1) return 'just now';
 		if (diffMins < 60) return `${diffMins} min${diffMins !== 1 ? 's' : ''} ago`;
 		if (diffHours < 24) return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
@@ -84,23 +87,77 @@
 		await invalidateAll();
 	}
 
+	// Mark paid / unpaid
+	let showMarkPaid = $state(false);
+	let markPaidMethod = $state<'cash' | 'check' | 'venmo' | 'zelle' | 'manual'>('manual');
+	let markPaidNotes = $state('');
+	let isMarkingPaid = $state(false);
+	let markPaidError = $state<string | null>(null);
+
+	async function submitMarkPaid() {
+		isMarkingPaid = true;
+		markPaidError = null;
+		try {
+			const response = await fetch('/api/admin/bulk-actions', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					action: 'markPaid',
+					ids: [memorial.id],
+					resourceType: 'memorial',
+					params: { method: markPaidMethod, notes: markPaidNotes.trim() || null }
+				})
+			});
+			const result = await response.json();
+			if (!response.ok || result.failed?.length > 0) {
+				throw new Error(result.failed?.[0]?.error || 'Failed to mark as paid');
+			}
+			showMarkPaid = false;
+			markPaidNotes = '';
+			await invalidateAll();
+		} catch (err: any) {
+			markPaidError = err.message || 'Failed to mark as paid';
+		} finally {
+			isMarkingPaid = false;
+		}
+	}
+
+	async function markUnpaid() {
+		if (!confirm('Mark this memorial as unpaid? This clears the manual payment record.')) return;
+
+		try {
+			const response = await fetch('/api/admin/bulk-actions', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ action: 'markUnpaid', ids: [memorial.id], resourceType: 'memorial' })
+			});
+			const result = await response.json();
+			if (!response.ok || result.failed?.length > 0) {
+				throw new Error(result.failed?.[0]?.error || 'Failed to mark as unpaid');
+			}
+			await invalidateAll();
+		} catch (err: any) {
+			alert(err.message || 'Failed to mark as unpaid');
+		}
+	}
+
 	async function handleDelete() {
 		const confirmMessage = `Are you sure you want to delete "${memorial.lovedOneName}"?\n\nThis will mark it as deleted and hide it from the admin list.`;
-		
+
 		if (!confirm(confirmMessage)) {
 			return;
 		}
 
 		try {
 			console.log('🗑️ [DELETE] Attempting to delete memorial:', memorial.id);
-			
+
 			const response = await fetch('/api/admin/bulk-actions', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ 
-					action: 'delete', 
-					ids: [memorial.id], 
-					resourceType: 'memorial' 
+				body: JSON.stringify({
+					action: 'delete',
+					ids: [memorial.id],
+					resourceType: 'memorial'
 				})
 			});
 
@@ -128,7 +185,6 @@
 			alert('An error occurred while deleting the memorial. Check the console for details.');
 		}
 	}
-
 
 	// Display settings handlers
 	async function handleSaveDisplaySettings() {
@@ -185,7 +241,9 @@
 			}
 
 			forceRefreshSuccess = true;
-			setTimeout(() => { forceRefreshSuccess = false; }, 3000);
+			setTimeout(() => {
+				forceRefreshSuccess = false;
+			}, 3000);
 			console.log('✅ [FORCE REFRESH] Triggered successfully');
 		} catch (err: any) {
 			console.error('❌ [FORCE REFRESH] Error:', err);
@@ -233,19 +291,18 @@
 			isSavingDisplay = false;
 		}
 	}
-	
 </script>
 
 <AdminLayout title="Memorial Details" subtitle="View and manage all aspects of this memorial">
 	<div class="header-actions">
 		<button onclick={() => goto('/admin/services/memorials')}>← Back</button>
 		<div style="display: flex; gap: 0.5rem; align-items: center;">
-			<button 
-				class="refresh-btn" 
-				onclick={handleForceRefresh}
-				disabled={isForceRefreshing}
-			>
-				{isForceRefreshing ? '⏳ Refreshing...' : forceRefreshSuccess ? '✅ Sent!' : '🔄 Force Refresh Viewers'}
+			<button class="refresh-btn" onclick={handleForceRefresh} disabled={isForceRefreshing}>
+				{isForceRefreshing
+					? '⏳ Refreshing...'
+					: forceRefreshSuccess
+						? '✅ Sent!'
+						: '🔄 Force Refresh Viewers'}
 			</button>
 			<button class="danger-btn" onclick={handleDelete}>🗑️ Delete</button>
 		</div>
@@ -257,8 +314,8 @@
 		<p>
 			Owner:
 			{#if memorial.ownerUid}
-				<button 
-					class="owner-link" 
+				<button
+					class="owner-link"
 					onclick={() => goto(`/admin/users/memorial-owners/${memorial.ownerUid}`)}
 				>
 					{memorial.creatorEmail}
@@ -269,16 +326,11 @@
 			<button class="owner-link" onclick={() => (showAssignOwner = !showAssignOwner)}>
 				{memorial.ownerUid ? 'Change' : 'Assign owner'}
 			</button>
-			 • Created {formatDate(memorial.createdAt)}
+			• Created {formatDate(memorial.createdAt)}
 		</p>
 		{#if showAssignOwner}
 			<form class="assign-owner" onsubmit={handleAssignOwner}>
-				<input
-					type="email"
-					placeholder="family@example.com"
-					bind:value={assignEmail}
-					required
-				/>
+				<input type="email" placeholder="family@example.com" bind:value={assignEmail} required />
 				<input type="text" placeholder="Name (optional)" bind:value={assignName} />
 				<button type="submit" disabled={isAssigning}>
 					{isAssigning ? 'Assigning...' : 'Save'}
@@ -287,27 +339,74 @@
 				{#if assignError}<span class="assign-error">{assignError}</span>{/if}
 			</form>
 			<p class="assign-hint">
-				If no account exists for this email, one is created and a welcome email with login
-				details is sent.
+				If no account exists for this email, one is created and a welcome email with login details
+				is sent.
 			</p>
 		{/if}
 		<div class="badges">
-			<span class:complete={memorial.isComplete}>{memorial.isComplete ? '✅ Complete' : '⚠️ Incomplete'}</span>
-			<span class:paid={memorial.isPaid}>{memorial.isPaid ? '✅ Paid' : `❌ Unpaid ($${memorial.totalPrice})`}</span>
+			<span class:complete={memorial.isComplete}
+				>{memorial.isComplete ? '✅ Complete' : '⚠️ Incomplete'}</span
+			>
+			<span class:paid={memorial.isPaid}
+				>{memorial.isPaid ? '✅ Paid' : `❌ Unpaid ($${memorial.totalPrice})`}</span
+			>
 			<span>{memorial.isPublic ? '👁️ Public' : '🔒 Private'}</span>
+			{#if memorial.isPaid}
+				<button class="link-btn" onclick={markUnpaid}>Mark Unpaid</button>
+			{:else if !showMarkPaid}
+				<button class="link-btn" onclick={() => (showMarkPaid = true)}>💳 Mark Paid</button>
+			{/if}
 		</div>
+
+		{#if memorial.isPaid && memorial.manualPayment}
+			<p class="manual-payment-note">
+				Marked paid manually via <strong>{memorial.manualPayment.method}</strong>
+				by {memorial.manualPayment.markedPaidBy}
+				{#if memorial.manualPayment.notes}— "{memorial.manualPayment.notes}"{/if}
+			</p>
+		{/if}
+
+		{#if showMarkPaid}
+			<div class="mark-paid-form">
+				{#if markPaidError}<div class="error-message">{markPaidError}</div>{/if}
+				<div class="form-group">
+					<label for="mark-paid-method">Payment method</label>
+					<select id="mark-paid-method" bind:value={markPaidMethod} disabled={isMarkingPaid}>
+						<option value="cash">Cash</option>
+						<option value="check">Check</option>
+						<option value="venmo">Venmo</option>
+						<option value="zelle">Zelle</option>
+						<option value="manual">Other / Manual</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<label for="mark-paid-notes">Notes (optional)</label>
+					<textarea
+						id="mark-paid-notes"
+						bind:value={markPaidNotes}
+						rows="2"
+						placeholder="e.g. Check #1234 received in person"
+						disabled={isMarkingPaid}
+					></textarea>
+				</div>
+				<div class="form-actions">
+					<button class="primary-btn" onclick={submitMarkPaid} disabled={isMarkingPaid}>
+						{isMarkingPaid ? '⏳ Saving...' : '💾 Confirm Paid'}
+					</button>
+					<button onclick={() => (showMarkPaid = false)} disabled={isMarkingPaid}>Cancel</button>
+				</div>
+			</div>
+		{/if}
 	</div>
 
-	<div class="card">
-		<h2>📋 Basic Information</h2>
-		<div class="grid">
-			<div><strong>ID:</strong> {memorial.id}</div>
-			<div><strong>Loved One:</strong> {memorial.lovedOneName}</div>
-			<div><strong>Slug:</strong> {memorial.fullSlug}</div>
-			<div><strong>Created:</strong> {formatDate(memorial.createdAt)}</div>
-			<div><strong>Updated:</strong> {formatDate(memorial.updatedAt)} ({formatRelativeTime(memorial.updatedAt)})</div>
-		</div>
-	</div>
+	<!-- Public URL / Mirror Links -->
+	<SlugManager {memorial} onUpdate={() => invalidateAll()} />
+
+	<!-- Basic Information (editable) -->
+	<BasicInfoEditor {memorial} {formatDate} onUpdate={() => invalidateAll()} />
+
+	<!-- Schedule Change Requests (submitted by family/FD from the public schedule page) -->
+	<ScheduleRequestsPanel requests={scheduleRequests} />
 
 	<!-- Livestream Schedule Editor -->
 	<LivestreamScheduleEditor {streams} />
@@ -317,9 +416,7 @@
 		<div class="section-header">
 			<h2>🎨 Display Settings</h2>
 			{#if !isEditingDisplay}
-				<button class="edit-btn-small" onclick={() => isEditingDisplay = true}>
-					✏️ Edit
-				</button>
+				<button class="edit-btn-small" onclick={() => (isEditingDisplay = true)}> ✏️ Edit </button>
 			{/if}
 		</div>
 
@@ -347,21 +444,16 @@
 				</div>
 
 				<div class="form-actions">
-					<button 
-						class="primary-btn" 
+					<button
+						class="primary-btn"
 						onclick={handleSaveDisplaySettings}
 						disabled={isSavingDisplay}
 					>
 						{isSavingDisplay ? '⏳ Saving...' : '💾 Save Display Settings'}
 					</button>
-					<button 
-						onclick={cancelDisplayEdit}
-						disabled={isSavingDisplay}
-					>
-						Cancel
-					</button>
+					<button onclick={cancelDisplayEdit} disabled={isSavingDisplay}> Cancel </button>
 					{#if memorial.customTitle}
-						<button 
+						<button
 							class="danger-btn-small"
 							onclick={clearDisplaySettings}
 							disabled={isSavingDisplay}
@@ -386,13 +478,15 @@
 	</div>
 
 	<!-- Custom Pricing Editor -->
-	<CustomPricingEditor memorial={memorial} onUpdate={handlePricingUpdate} />
+	<CustomPricingEditor {memorial} onUpdate={handlePricingUpdate} />
 
 	<!-- WYSIWYG Block Editor for Memorial Content -->
 	<div class="card" id="memorial-content">
 		<div class="section-header">
 			<h2>📦 Memorial Content</h2>
-			<p class="section-subtitle">Drag blocks to reorder how content appears on the public memorial page.</p>
+			<p class="section-subtitle">
+				Drag blocks to reorder how content appears on the public memorial page.
+			</p>
 		</div>
 		<MemorialBlockEditor
 			memorialId={memorial.id}
@@ -407,7 +501,9 @@
 		<div class="card">
 			<div class="section-header">
 				<h2>🎞️ Published Recordings</h2>
-				<p class="section-subtitle">Choose which Mux recording(s) appear on the public page. Unselected sessions stay hidden.</p>
+				<p class="section-subtitle">
+					Choose which Mux recording(s) appear on the public page. Unselected sessions stay hidden.
+				</p>
 			</div>
 			<RecordingPicker memorialId={memorial.id} {streams} onSaved={() => invalidateAll()} />
 		</div>
@@ -418,8 +514,8 @@
 		<div class="card">
 			<div class="section-header">
 				<h2>� Livestreams ({streams.length})</h2>
-				<button 
-					class="switcher-btn" 
+				<button
+					class="switcher-btn"
 					onclick={() => goto(`/admin/services/memorials/${memorial.id}/switcher`)}
 				>
 					🎬 Open Video Switcher
@@ -450,15 +546,17 @@
 		<div class="section-header">
 			<h2>🖼️ Slideshows ({slideshows.length})</h2>
 		</div>
-		
+
 		{#if slideshows.length === 0}
-			<p class="empty-message">No slideshows yet. Create one to commemorate {memorial.lovedOneName}.</p>
+			<p class="empty-message">
+				No slideshows yet. Create one to commemorate {memorial.lovedOneName}.
+			</p>
 		{/if}
-		
+
 		<div class="slideshows-list">
 			{#each slideshows as slideshow}
-				<a 
-					href="/slideshow-generator?memorialId={memorial.id}&slideshowId={slideshow.id}" 
+				<a
+					href="/slideshow-generator?memorialId={memorial.id}&slideshowId={slideshow.id}"
 					class="slideshow-item"
 					title="Click to edit slideshow"
 				>
@@ -478,7 +576,7 @@
 	</div>
 
 	<!-- Schedule & Billing Editor -->
-	<AdminScheduleEditor memorial={memorial} onUpdate={handlePricingUpdate} />
+	<AdminScheduleEditor {memorial} onUpdate={handlePricingUpdate} />
 
 	<div class="card">
 		<h2>📊 Analytics</h2>
@@ -490,67 +588,246 @@
 	</div>
 </AdminLayout>
 
-
 <style>
-	.header-actions { display: flex; justify-content: space-between; margin-bottom: 1.5rem; }
-	.card { background: white; border: 1px solid #e2e8f0; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 1.5rem; }
-	h1 { font-size: 2rem; margin: 0 0 0.5rem 0; }
-	h2 { font-size: 1.25rem; margin: 0 0 1rem 0; }
-	h3 { font-size: 1.125rem; margin: 0 0 0.5rem 0; }
-	.badges { display: flex; gap: 0.5rem; margin-top: 1rem; }
-	.badges span { padding: 0.375rem 0.75rem; border-radius: 0.25rem; background: #e2e8f0; font-size: 0.8125rem; }
-	.badges .complete { background: #c6f6d5; color: #22543d; }
-	.badges .paid { background: #c6f6d5; color: #22543d; }
-	.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
-	.item { border: 1px solid #e2e8f0; padding: 1rem; border-radius: 0.375rem; margin-bottom: 0.75rem; }
-	.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; text-align: center; }
-	
+	.header-actions {
+		display: flex;
+		justify-content: space-between;
+		margin-bottom: 1.5rem;
+	}
+	.card {
+		background: white;
+		border: 1px solid #e2e8f0;
+		border-radius: 0.5rem;
+		padding: 1.5rem;
+		margin-bottom: 1.5rem;
+	}
+	h1 {
+		font-size: 2rem;
+		margin: 0 0 0.5rem 0;
+	}
+	h2 {
+		font-size: 1.25rem;
+		margin: 0 0 1rem 0;
+	}
+	h3 {
+		font-size: 1.125rem;
+		margin: 0 0 0.5rem 0;
+	}
+	.badges {
+		display: flex;
+		gap: 0.5rem;
+		margin-top: 1rem;
+		align-items: center;
+		flex-wrap: wrap;
+	}
+	.badges span {
+		padding: 0.375rem 0.75rem;
+		border-radius: 0.25rem;
+		background: #e2e8f0;
+		font-size: 0.8125rem;
+	}
+	.badges .complete {
+		background: #c6f6d5;
+		color: #22543d;
+	}
+	.badges .paid {
+		background: #c6f6d5;
+		color: #22543d;
+	}
+	.link-btn {
+		background: none;
+		border: none;
+		color: #3182ce;
+		text-decoration: underline;
+		padding: 0;
+		font-size: 0.8125rem;
+		cursor: pointer;
+	}
+	.link-btn:hover {
+		color: #2c5282;
+		background: none;
+	}
+	.manual-payment-note {
+		margin: 0.75rem 0 0 0;
+		font-size: 0.8125rem;
+		color: #718096;
+	}
+	.mark-paid-form {
+		margin-top: 1rem;
+		padding-top: 1rem;
+		border-top: 1px solid #e2e8f0;
+		max-width: 400px;
+	}
+	.mark-paid-form select,
+	.mark-paid-form textarea {
+		width: 100%;
+		padding: 0.5rem;
+		border: 1px solid #cbd5e0;
+		border-radius: 0.375rem;
+		font-family: inherit;
+		font-size: 0.875rem;
+	}
+	.grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+		gap: 1rem;
+	}
+	.item {
+		border: 1px solid #e2e8f0;
+		padding: 1rem;
+		border-radius: 0.375rem;
+		margin-bottom: 0.75rem;
+	}
+	.stats {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 1rem;
+		text-align: center;
+	}
+
 	/* Buttons */
-	button { padding: 0.5rem 1rem; border: 1px solid #e2e8f0; border-radius: 0.375rem; background: white; cursor: pointer; transition: all 0.2s; }
-	button:hover { background: #f7fafc; }
-	button:disabled { opacity: 0.5; cursor: not-allowed; }
-	button.danger-btn { background: #e53e3e; color: white; border-color: #e53e3e; }
-	button.danger-btn:hover { background: #c53030; }
-	button.primary-btn { background: #3182ce; color: white; border-color: #3182ce; font-weight: 600; }
-	button.primary-btn:hover { background: #2c5282; }
-	button.switcher-btn { background: #805ad5; color: white; border-color: #805ad5; font-weight: 600; }
-	button.switcher-btn:hover { background: #6b46c1; }
-	button.refresh-btn { background: #38a169; color: white; border-color: #38a169; font-weight: 600; }
-	button.refresh-btn:hover { background: #2f855a; }
-	button.danger-btn-small { background: #e53e3e; color: white; border-color: #e53e3e; padding: 0.375rem 0.75rem; font-size: 0.875rem; }
-	button.danger-btn-small:hover { background: #c53030; }
+	button {
+		padding: 0.5rem 1rem;
+		border: 1px solid #e2e8f0;
+		border-radius: 0.375rem;
+		background: white;
+		cursor: pointer;
+		transition: all 0.2s;
+	}
+	button:hover {
+		background: #f7fafc;
+	}
+	button:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+	button.danger-btn {
+		background: #e53e3e;
+		color: white;
+		border-color: #e53e3e;
+	}
+	button.danger-btn:hover {
+		background: #c53030;
+	}
+	button.primary-btn {
+		background: #3182ce;
+		color: white;
+		border-color: #3182ce;
+		font-weight: 600;
+	}
+	button.primary-btn:hover {
+		background: #2c5282;
+	}
+	button.switcher-btn {
+		background: #805ad5;
+		color: white;
+		border-color: #805ad5;
+		font-weight: 600;
+	}
+	button.switcher-btn:hover {
+		background: #6b46c1;
+	}
+	button.refresh-btn {
+		background: #38a169;
+		color: white;
+		border-color: #38a169;
+		font-weight: 600;
+	}
+	button.refresh-btn:hover {
+		background: #2f855a;
+	}
+	button.danger-btn-small {
+		background: #e53e3e;
+		color: white;
+		border-color: #e53e3e;
+		padding: 0.375rem 0.75rem;
+		font-size: 0.875rem;
+	}
+	button.danger-btn-small:hover {
+		background: #c53030;
+	}
 
 	/* Section header */
-	.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem; }
-	.section-header h2 { margin: 0; }
-	.section-subtitle { margin: 0; font-size: 0.875rem; color: #718096; width: 100%; }
-
-	.form-group { margin-bottom: 1rem; }
-	.form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #4a5568; font-size: 0.875rem; }
-	.form-group input { width: 100%; padding: 0.625rem; border: 1px solid #cbd5e0; border-radius: 0.375rem; font-size: 0.875rem; }
-	.form-group input:focus { outline: none; border-color: #3182ce; box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1); }
-	.form-group input:disabled { background: #edf2f7; cursor: not-allowed; }
-	.form-actions { display: flex; gap: 0.75rem; margin-top: 1.5rem; }
-	.form-actions button { flex: 0 0 auto; }
-
-	.empty-message { color: #718096; font-style: italic; padding: 1rem 0; }
-	
-	.streams-grid { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1rem; }
-	
-	.stream-item { 
-		border: 1px solid #e2e8f0; 
-		border-radius: 0.5rem; 
-		padding: 1rem; 
-		background: white; 
+	.section-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1rem;
+		flex-wrap: wrap;
+		gap: 0.5rem;
 	}
-	
+	.section-header h2 {
+		margin: 0;
+	}
+	.section-subtitle {
+		margin: 0;
+		font-size: 0.875rem;
+		color: #718096;
+		width: 100%;
+	}
+
+	.form-group {
+		margin-bottom: 1rem;
+	}
+	.form-group label {
+		display: block;
+		margin-bottom: 0.5rem;
+		font-weight: 600;
+		color: #4a5568;
+		font-size: 0.875rem;
+	}
+	.form-group input {
+		width: 100%;
+		padding: 0.625rem;
+		border: 1px solid #cbd5e0;
+		border-radius: 0.375rem;
+		font-size: 0.875rem;
+	}
+	.form-group input:focus {
+		outline: none;
+		border-color: #3182ce;
+		box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+	}
+	.form-group input:disabled {
+		background: #edf2f7;
+		cursor: not-allowed;
+	}
+	.form-actions {
+		display: flex;
+		gap: 0.75rem;
+		margin-top: 1.5rem;
+	}
+	.form-actions button {
+		flex: 0 0 auto;
+	}
+
+	.empty-message {
+		color: #718096;
+		font-style: italic;
+		padding: 1rem 0;
+	}
+
+	.streams-grid {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+		margin-top: 1rem;
+	}
+
+	.stream-item {
+		border: 1px solid #e2e8f0;
+		border-radius: 0.5rem;
+		padding: 1rem;
+		background: white;
+	}
+
 	/* Chat panels */
 	.chat-panels {
 		display: flex;
 		flex-direction: column;
 		gap: 1.5rem;
 	}
-	
+
 	/* Slideshows list */
 	.slideshows-list {
 		display: flex;
@@ -558,7 +835,7 @@
 		gap: 0.75rem;
 		margin-top: 1rem;
 	}
-	
+
 	.slideshow-item {
 		display: flex;
 		justify-content: space-between;
@@ -572,52 +849,52 @@
 		transition: all 0.2s;
 		cursor: pointer;
 	}
-	
+
 	.slideshow-item:hover {
-		border-color: #D5BA7F;
+		border-color: #d5ba7f;
 		background: #fffbf5;
 		transform: translateX(4px);
 		box-shadow: 0 2px 8px rgba(213, 186, 127, 0.2);
 	}
-	
+
 	.slideshow-info {
 		flex: 1;
 	}
-	
+
 	.slideshow-info h3 {
 		margin: 0 0 0.25rem 0;
 		font-size: 1rem;
 		color: #2d3748;
 	}
-	
+
 	.slideshow-info p {
 		margin: 0.25rem 0;
 		font-size: 0.875rem;
 		color: #718096;
 	}
-	
+
 	.music-info {
-		color: #D5BA7F;
+		color: #d5ba7f;
 		font-weight: 500;
 	}
-	
+
 	.slideshow-actions {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
 	}
-	
+
 	.edit-icon {
 		color: #3182ce;
 		font-size: 0.875rem;
 		font-weight: 600;
 		white-space: nowrap;
 	}
-	
+
 	.slideshow-item:hover .edit-icon {
 		color: #2c5282;
 	}
-	
+
 	.form-group select {
 		width: 100%;
 		padding: 0.625rem;
@@ -627,18 +904,18 @@
 		background: white;
 		cursor: pointer;
 	}
-	
+
 	.form-group select:focus {
 		outline: none;
 		border-color: #3182ce;
 		box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
 	}
-	
+
 	.form-group select:disabled {
 		background: #edf2f7;
 		cursor: not-allowed;
 	}
-	
+
 	/* Edit button */
 	button.edit-btn-small {
 		background: #3182ce;
@@ -647,7 +924,7 @@
 		padding: 0.375rem 0.75rem;
 		font-size: 0.875rem;
 	}
-	
+
 	button.edit-btn-small:hover {
 		background: #2c5282;
 	}
@@ -714,7 +991,7 @@
 		color: #718096;
 		font-style: italic;
 	}
-	
+
 	/* Clickable owner link styling */
 	.assign-owner {
 		display: flex;

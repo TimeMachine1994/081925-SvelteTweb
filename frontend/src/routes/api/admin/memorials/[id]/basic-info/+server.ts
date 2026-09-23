@@ -66,7 +66,8 @@ export const PATCH: RequestHandler = async ({ params, request, locals }) => {
 
 		if (body.familyContactEmail !== undefined) {
 			const v = String(body.familyContactEmail || '').trim();
-			if (v && !EMAIL_RE.test(v)) throw error(400, 'Family contact email is not a valid email address');
+			if (v && !EMAIL_RE.test(v))
+				throw error(400, 'Family contact email is not a valid email address');
 			patch.familyContactEmail = v || null;
 		}
 

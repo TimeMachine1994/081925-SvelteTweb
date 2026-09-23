@@ -62,6 +62,6 @@ export async function listByMemorial(memorialId: string): Promise<ScheduleEditRe
 		.get();
 
 	return snap.docs.map(
-		(doc) => ({ id: doc.id, ...normalizeDoc(doc.data()) }) as ScheduleEditRequestRecord
+		(doc) => ({ ...normalizeDoc(doc.data()), id: doc.id }) as ScheduleEditRequestRecord
 	);
 }
