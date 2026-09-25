@@ -1,0 +1,357 @@
+[
+  {
+    "urlPath": "/",
+    "ok": false,
+    "error": "TimeoutError: page.goto: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:5173/\", waiting until \"networkidle\"\u001b[22m\n"
+  },
+  {
+    "urlPath": "/how-it-works",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/how-it-works",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\how-it-works.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/for-families",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/for-families",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\for-families.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/for-funeral-directors",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/for-funeral-directors",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\for-funeral-directors.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/why-tributestream",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/why-tributestream",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\why-tributestream.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/pricing-breakdown",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/pricing-breakdown",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\pricing-breakdown.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/book-demo",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/book-demo",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\book-demo.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/contact",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/contact",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\contact.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/contact/confirmation",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/contact/confirmation",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\contact-confirmation.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/contact/success",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/contact/success",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\contact-success.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/blog",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/blog",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\blog.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/partnership/basic-partnership",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/partnership/basic-partnership",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\partnership-basic.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/partnership/premium-partnership",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/partnership/premium-partnership",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\partnership-premium.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/login",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/login",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\login.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/register",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/register",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\register.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/register/funeral-director",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/login?redirect=/register/funeral-director",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\register-funeral-director.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/register/funeral-home",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/register/funeral-home",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\register-funeral-home.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/register/loved-one",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/register/loved-one",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\register-loved-one.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/reset-password",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/reset-password",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\reset-password.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/email-confirmed",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/email-confirmed",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\email-confirmed.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/emergency",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/emergency",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\emergency.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/search",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/search",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\search.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/schedule",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/login",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\schedule.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/schedule/new",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/schedule/new",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\schedule-new.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/slideshow-generator",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/slideshow-generator",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\slideshow-generator.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/profile",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/login",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\profile.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/profile/settings",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/login",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\profile-settings.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/my-portal",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/login",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\my-portal.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/funeral-director/dashboard",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/login",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\funeral-director-dashboard.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/app/book",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/login",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\app-book.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/app/calculator",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/app/calculator",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\app-calculator.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/app/checkout/success",
+    "status": 401,
+    "finalUrl": "http://localhost:5173/app/checkout/success",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\app-checkout-success.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/payment",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/login",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\payment.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/payment/receipt",
+    "status": 400,
+    "finalUrl": "http://localhost:5173/payment/receipt",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\payment-receipt.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/auth/login-with-token",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/auth/login-with-token",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\auth-login-with-token.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/auth/session",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/auth/session",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\auth-session.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/admin",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/login",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\admin-root.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/admin/wiki",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/login",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\admin-wiki.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/admin/wiki/new",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/login",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\admin-wiki-new.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/admin/content/blog",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/login",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\admin-content-blog.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/admin/content/blog/create",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/login",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\admin-content-blog-create.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/admin/services/memorials",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/login",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\admin-services-memorials.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/admin/services/memorials/create",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/login",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\admin-services-memorials-create.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/admin/services/receipts",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/login",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\admin-services-receipts.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/admin/services/recordings",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/login",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\admin-services-recordings.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/admin/services/streams",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/login",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\admin-services-streams.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/admin/system/audit-logs",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/login",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\admin-system-audit-logs.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/admin/system/database",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/login",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\admin-system-database.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/admin/system/email-logs",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/login",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\admin-system-email-logs.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/admin/users/funeral-directors",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/login",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\admin-users-funeral-directors.png",
+    "ok": true
+  },
+  {
+    "urlPath": "/admin/users/memorial-owners",
+    "status": 200,
+    "finalUrl": "http://localhost:5173/login",
+    "outFile": "C:\\Users\\tribu\\OneDrive\\Documents\\Working\\Code\\Tributestream Versions\\V2\\081925-SvelteTweb\\frontend\\ui-renders\\admin-users-memorial-owners.png",
+    "ok": true
+  }
+]
