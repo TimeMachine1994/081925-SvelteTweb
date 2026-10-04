@@ -44,7 +44,15 @@ export interface GalleryImage {
 	storagePath?: string;
 	caption?: string;
 	order: number;
+	// Intrinsic dimensions, captured at upload (or backfilled on first load
+	// in the editor for older items). Used by the masonry renderer to size
+	// each tile without a layout-shifting re-measure.
+	width?: number;
+	height?: number;
 }
+
+// How a video gallery item's thumbnail was obtained
+export type VideoThumbnailKind = 'derived' | 'custom';
 
 // A single video embed within a video-gallery block
 export interface GalleryVideoItem {
@@ -52,6 +60,17 @@ export interface GalleryVideoItem {
 	title?: string;
 	embedCode: string;
 	order: number;
+	// Thumbnail shown in the gallery strip before the video is activated.
+	// Optional/back-compatible — older items fall back to sync derivation
+	// (e.g. YouTube) at render time when absent.
+	thumbnailUrl?: string;
+	thumbnailKind?: VideoThumbnailKind;
+	// Frame time in seconds used to derive the thumbnail (Mux / direct file
+	// sources only; ignored for YouTube/Vimeo).
+	thumbnailTime?: number;
+	// Set when the thumbnail was uploaded/captured to Firebase Storage, so
+	// it can be cleaned up or regenerated.
+	thumbnailStoragePath?: string;
 }
 
 // Image gallery block configuration

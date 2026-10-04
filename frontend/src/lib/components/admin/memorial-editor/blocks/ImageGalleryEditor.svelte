@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { flip } from 'svelte/animate';
+	import { dndzone } from 'svelte-dnd-action';
 	import type { GalleryImage } from '$lib/types/memorial-blocks';
 	import { uploadGalleryImageToFirebaseStorage } from '$lib/utils/clientFirebaseStorage';
 	import { addGalleryItem, removeGalleryItem, moveGalleryItem } from '$lib/utils/block-utils';
@@ -20,6 +22,28 @@
 
 	const sortedImages = $derived([...images].sort((a, b) => a.order - b.order));
 
+	// Local dnd copy — kept in sync with the sorted prop, mutated during
+	// drag, and committed back via onImagesChange on finalize.
+	let dndItems = $state<GalleryImage[]>([]);
+	$effect(() => {
+		dndItems = sortedImages;
+	});
+
+	const flipDurationMs = 200;
+
+	// Disabled while an input is focused (so text selection/typing isn't
+	// hijacked by the drag handler) or while an upload is in flight.
+	let dragDisabled = $state(false);
+
+	function handleDndConsider(e: CustomEvent<{ items: GalleryImage[] }>) {
+		dndItems = e.detail.items;
+	}
+
+	function handleDndFinalize(e: CustomEvent<{ items: GalleryImage[] }>) {
+		dndItems = e.detail.items;
+		onImagesChange(dndItems.map((img, index) => ({ ...img, order: index })));
+	}
+
 	async function handleFiles(e: Event) {
 		const input = e.target as HTMLInputElement;
 		const files = Array.from(input.files || []);
@@ -32,14 +56,16 @@
 		try {
 			for (let i = 0; i < files.length; i++) {
 				uploadProgress = { current: i + 1, total: files.length };
-				const { downloadURL, storagePath } = await uploadGalleryImageToFirebaseStorage(
+				const { downloadURL, storagePath, width, height } = await uploadGalleryImageToFirebaseStorage(
 					files[i],
 					memorialId
 				);
 				current = addGalleryItem(current, {
 					id: crypto.randomUUID(),
 					url: downloadURL,
-					storagePath
+					storagePath,
+					width,
+					height
 				});
 				onImagesChange(current);
 			}
@@ -63,6 +89,19 @@
 
 	function handleCaptionInput(id: string, caption: string) {
 		onImagesChange(images.map((img) => (img.id === id ? { ...img, caption } : img)));
+	}
+
+	// Backfill intrinsic dimensions for images added before this feature, so
+	// the public masonry can size them correctly without a visible reflow.
+	function handleThumbLoad(image: GalleryImage, e: Event) {
+		if (image.width && image.height) return;
+		const img = e.target as HTMLImageElement;
+		if (!img.naturalWidth || !img.naturalHeight) return;
+		onImagesChange(
+			images.map((i) =>
+				i.id === image.id ? { ...i, width: img.naturalWidth, height: img.naturalHeight } : i
+			)
+		);
 	}
 </script>
 
@@ -96,12 +135,27 @@
 		{/if}
 	</div>
 
-	{#if sortedImages.length > 0}
-		<div class="thumb-grid">
-			{#each sortedImages as image, index (image.id)}
-				<div class="thumb-item">
+	{#if dndItems.length > 0}
+		<p class="help-text drag-hint">Drag to reorder, or use the arrow buttons.</p>
+		<div
+			class="thumb-grid"
+			use:dndzone={{
+				items: dndItems,
+				flipDurationMs,
+				dragDisabled: dragDisabled || isUploading,
+				dropTargetStyle: { outline: '2px dashed #d5ba7f' }
+			}}
+			onconsider={handleDndConsider}
+			onfinalize={handleDndFinalize}
+		>
+			{#each dndItems as image, index (image.id)}
+				<div class="thumb-item" animate:flip={{ duration: flipDurationMs }}>
 					<div class="thumb-image-wrap">
-						<img src={image.url} alt={image.caption || 'Gallery image'} />
+						<img
+							src={image.url}
+							alt={image.caption || 'Gallery image'}
+							onload={(e) => handleThumbLoad(image, e)}
+						/>
 					</div>
 					<div class="thumb-actions">
 						<button
@@ -109,14 +163,16 @@
 							onclick={() => handleMove(image.id, 'up')}
 							disabled={index === 0}
 							title="Move earlier"
+							aria-label="Move image earlier"
 						>
 							←
 						</button>
 						<button
 							type="button"
 							onclick={() => handleMove(image.id, 'down')}
-							disabled={index === sortedImages.length - 1}
+							disabled={index === dndItems.length - 1}
 							title="Move later"
+							aria-label="Move image later"
 						>
 							→
 						</button>
@@ -125,6 +181,7 @@
 							class="remove-btn"
 							onclick={() => handleRemove(image.id)}
 							title="Remove image"
+							aria-label="Remove image"
 						>
 							✕
 						</button>
@@ -135,7 +192,11 @@
 							class="caption-input"
 							value={image.caption || ''}
 							oninput={(e) => handleCaptionInput(image.id, (e.target as HTMLInputElement).value)}
-							onblur={() => (captionOpenFor = image.caption ? captionOpenFor : null)}
+							onfocus={() => (dragDisabled = true)}
+							onblur={() => {
+								dragDisabled = false;
+								captionOpenFor = image.caption ? captionOpenFor : null;
+							}}
 							placeholder="Caption (optional)"
 						/>
 					{:else}
@@ -146,7 +207,7 @@
 				</div>
 			{/each}
 		</div>
-		<p class="count-text">{sortedImages.length} photo{sortedImages.length === 1 ? '' : 's'} added</p>
+		<p class="count-text">{dndItems.length} photo{dndItems.length === 1 ? '' : 's'} added</p>
 	{/if}
 </div>
 
@@ -189,6 +250,10 @@
 		font-style: italic;
 	}
 
+	.drag-hint {
+		margin: 0;
+	}
+
 	.error-text {
 		margin: 0.5rem 0 0 0;
 		font-size: 0.75rem;
@@ -205,6 +270,11 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.25rem;
+		cursor: grab;
+	}
+
+	.thumb-item:active {
+		cursor: grabbing;
 	}
 
 	.thumb-image-wrap {
@@ -277,6 +347,7 @@
 		border: 1px solid #cbd5e0;
 		border-radius: 0.25rem;
 		font-size: 0.75rem;
+		cursor: text;
 	}
 
 	.count-text {

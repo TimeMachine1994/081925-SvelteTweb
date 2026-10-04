@@ -1,6 +1,7 @@
 <script lang="ts">
-	import type { VideoGalleryConfig } from '$lib/types/memorial-blocks';
+	import type { VideoGalleryConfig, GalleryVideoItem } from '$lib/types/memorial-blocks';
 	import { buildEmbedIframeHtml } from '$lib/utils/block-utils';
+	import { deriveThumbnailSync } from '$lib/utils/video-thumbnails';
 
 	interface Props {
 		config: VideoGalleryConfig;
@@ -18,12 +19,12 @@
 		activeIds = new Set(activeIds).add(id);
 	}
 
-	// Best-effort YouTube thumbnail extraction for the placeholder card.
-	function getYouTubeThumbnail(embedCode: string): string | null {
-		const match = embedCode.match(
-			/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{6,})/
-		);
-		return match ? `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg` : null;
+	// Prefer the thumbnail stored on the item (derived or custom, set in the
+	// admin editor). Falls back to sync derivation for items saved before
+	// that existed (covers YouTube/Mux; Vimeo/file sources fall through to
+	// the generic placeholder — no network calls from the public page).
+	function thumbnailFor(video: GalleryVideoItem): string | null {
+		return video.thumbnailUrl || deriveThumbnailSync(video.embedCode, video.thumbnailTime);
 	}
 </script>
 
@@ -35,7 +36,7 @@
 
 		<div class="video-strip">
 			{#each sortedVideos as video (video.id)}
-				{@const thumbnail = getYouTubeThumbnail(video.embedCode)}
+				{@const thumbnail = thumbnailFor(video)}
 				<div class="video-card">
 					{#if activeIds.has(video.id)}
 						<div class="video-embed">

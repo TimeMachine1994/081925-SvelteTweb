@@ -290,6 +290,12 @@ export function validateBlockConfig(type: BlockType, config: BlockConfig): strin
 				if (!img.url || typeof img.url !== 'string') {
 					return 'Each gallery image requires a valid url';
 				}
+				if (img.width !== undefined && typeof img.width !== 'number') {
+					return 'Gallery image width must be a number';
+				}
+				if (img.height !== undefined && typeof img.height !== 'number') {
+					return 'Gallery image height must be a number';
+				}
 			}
 			break;
 		}
@@ -301,6 +307,21 @@ export function validateBlockConfig(type: BlockType, config: BlockConfig): strin
 			for (const vid of c.videos) {
 				if (!vid.embedCode || typeof vid.embedCode !== 'string') {
 					return 'Each gallery video requires embedCode';
+				}
+				if (vid.thumbnailUrl !== undefined && typeof vid.thumbnailUrl !== 'string') {
+					return 'Gallery video thumbnailUrl must be a string';
+				}
+				if (
+					vid.thumbnailKind !== undefined &&
+					!['derived', 'custom'].includes(vid.thumbnailKind)
+				) {
+					return 'Gallery video thumbnailKind must be derived or custom';
+				}
+				if (
+					vid.thumbnailTime !== undefined &&
+					(typeof vid.thumbnailTime !== 'number' || !Number.isFinite(vid.thumbnailTime) || vid.thumbnailTime < 0)
+				) {
+					return 'Gallery video thumbnailTime must be a non-negative number';
 				}
 			}
 			break;
@@ -417,7 +438,8 @@ export function sanitizeEmbedCode(embedCode: string): string {
 		'cloudflare.com',
 		'cloudflarestream.com',
 		'iframe.videodelivery.net',
-		'tributestream.com'
+		'tributestream.com',
+		'mux.com'
 	];
 	
 	try {

@@ -13,11 +13,12 @@
 
 	interface Props {
 		memorialId: string;
+		streams?: any[];
 		onClose: () => void;
 		onAdd: (type: BlockType, config: any) => void;
 	}
 
-	let { memorialId, onClose, onAdd }: Props = $props();
+	let { memorialId, streams = [], onClose, onAdd }: Props = $props();
 
 	// Step state
 	let step = $state<'select' | 'configure'>('select');
@@ -313,6 +314,8 @@
 
 			{:else if selectedType === 'video-gallery'}
 				<VideoGalleryEditor
+					{memorialId}
+					{streams}
 					title={videoGalleryTitle}
 					videos={galleryVideos}
 					onTitleChange={(t) => (videoGalleryTitle = t)}

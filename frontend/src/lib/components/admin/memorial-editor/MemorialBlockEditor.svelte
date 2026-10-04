@@ -258,6 +258,7 @@
 {#if showAddModal}
 	<AddBlockModal
 		{memorialId}
+		{streams}
 		onClose={() => showAddModal = false}
 		onAdd={handleAddBlock}
 	/>
@@ -294,6 +295,8 @@
 	{:else if editingBlock.type === 'video-gallery'}
 		<EditVideoGalleryModal
 			block={editingBlock}
+			{memorialId}
+			{streams}
 			onClose={() => editingBlock = null}
 			onSave={(updates) => handleSaveEdit(editingBlock!.id, updates)}
 		/>

@@ -4,11 +4,13 @@
 
 	interface Props {
 		block: MemorialBlock;
+		memorialId: string;
+		streams?: any[];
 		onClose: () => void;
 		onSave: (updates: Partial<VideoGalleryConfig>) => void;
 	}
 
-	let { block, onClose, onSave }: Props = $props();
+	let { block, memorialId, streams = [], onClose, onSave }: Props = $props();
 
 	const config = block.config as VideoGalleryConfig;
 
@@ -37,6 +39,8 @@
 
 		<div class="modal-body">
 			<VideoGalleryEditor
+				{memorialId}
+				{streams}
 				{title}
 				{videos}
 				onTitleChange={(t) => (title = t)}
