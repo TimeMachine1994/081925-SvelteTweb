@@ -7,6 +7,8 @@
 	import EditLivestreamModal from './modals/EditLivestreamModal.svelte';
 	import EditEmbedModal from './modals/EditEmbedModal.svelte';
 	import EditTextModal from './modals/EditTextModal.svelte';
+	import EditImageGalleryModal from './modals/EditImageGalleryModal.svelte';
+	import EditVideoGalleryModal from './modals/EditVideoGalleryModal.svelte';
 
 	interface Props {
 		memorialId: string;
@@ -234,7 +236,7 @@
 	{#if blocks.length === 0}
 		<div class="empty-state">
 			<p>📦 No content blocks yet.</p>
-			<p>Click "+ Add Block" to add livestreams, embeds, or text content.</p>
+			<p>Click "+ Add Block" to add livestreams, embeds, text, or media galleries.</p>
 		</div>
 	{:else}
 		<BlockList
@@ -255,6 +257,7 @@
 <!-- Add Block Modal -->
 {#if showAddModal}
 	<AddBlockModal
+		{memorialId}
 		onClose={() => showAddModal = false}
 		onAdd={handleAddBlock}
 	/>
@@ -277,6 +280,19 @@
 		/>
 	{:else if editingBlock.type === 'text'}
 		<EditTextModal
+			block={editingBlock}
+			onClose={() => editingBlock = null}
+			onSave={(updates) => handleSaveEdit(editingBlock!.id, updates)}
+		/>
+	{:else if editingBlock.type === 'image-gallery'}
+		<EditImageGalleryModal
+			block={editingBlock}
+			{memorialId}
+			onClose={() => editingBlock = null}
+			onSave={(updates) => handleSaveEdit(editingBlock!.id, updates)}
+		/>
+	{:else if editingBlock.type === 'video-gallery'}
+		<EditVideoGalleryModal
 			block={editingBlock}
 			onClose={() => editingBlock = null}
 			onSave={(updates) => handleSaveEdit(editingBlock!.id, updates)}

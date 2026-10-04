@@ -119,6 +119,58 @@ export async function uploadPhotosToFirebaseStorage(
 }
 
 /**
+ * Upload a single image directly to Firebase Storage from client, for use in
+ * memorial content blocks (e.g. the Image Gallery block). Bypasses Vercel's
+ * serverless function upload limit the same way the slideshow uploads do.
+ */
+export async function uploadGalleryImageToFirebaseStorage(
+	file: File,
+	memorialId: string,
+	onProgress?: (progress: number) => void
+): Promise<{ downloadURL: string; storagePath: string }> {
+	if (!file.type.startsWith('image/')) {
+		throw new Error('Only image files can be added to an image gallery');
+	}
+
+	try {
+		const storage = getStorage(clientAuth.app);
+
+		const timestamp = Date.now();
+		const randomId = Math.random().toString(36).slice(2, 8);
+		const sanitizedName = file.name.replace(/[^a-zA-Z0-9.\-]/g, '-');
+		const storagePath = `memorial-blocks/${memorialId}/image-gallery/${timestamp}-${randomId}-${sanitizedName}`;
+
+		const storageRef = ref(storage, storagePath);
+
+		if (onProgress) {
+			onProgress(0);
+		}
+
+		const metadata = {
+			contentType: file.type || 'image/jpeg',
+			customMetadata: {
+				memorialId,
+				uploadedAt: new Date().toISOString(),
+				type: 'memorial-image-gallery'
+			}
+		};
+
+		const uploadResult = await uploadBytes(storageRef, file, metadata);
+
+		if (onProgress) {
+			onProgress(100);
+		}
+
+		const downloadURL = await getDownloadURL(uploadResult.ref);
+
+		return { downloadURL, storagePath };
+	} catch (error) {
+		console.error('❌ [CLIENT UPLOAD] Gallery image upload failed:', error);
+		throw new Error(`Firebase Storage upload failed: ${error instanceof Error ? error.message : String(error)}`);
+	}
+}
+
+/**
  * Upload audio file directly to Firebase Storage from client
  */
 export async function uploadAudioToFirebaseStorage(

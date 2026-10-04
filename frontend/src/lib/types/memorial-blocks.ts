@@ -6,7 +6,7 @@
  */
 
 // Block type discriminator
-export type BlockType = 'livestream' | 'embed' | 'text';
+export type BlockType = 'livestream' | 'embed' | 'text' | 'image-gallery' | 'video-gallery';
 
 // Embed subtypes for styling/icons
 export type EmbedType = 'video' | 'chat' | 'other';
@@ -37,8 +37,42 @@ export interface TextConfig {
 	textAlign?: 'left' | 'center' | 'right';
 }
 
+// A single image within an image-gallery block
+export interface GalleryImage {
+	id: string;
+	url: string;
+	storagePath?: string;
+	caption?: string;
+	order: number;
+}
+
+// A single video embed within a video-gallery block
+export interface GalleryVideoItem {
+	id: string;
+	title?: string;
+	embedCode: string;
+	order: number;
+}
+
+// Image gallery block configuration
+export interface ImageGalleryConfig {
+	title?: string;
+	images: GalleryImage[];
+}
+
+// Video gallery block configuration (aka "Tribute Gallery (Video)")
+export interface VideoGalleryConfig {
+	title?: string;
+	videos: GalleryVideoItem[];
+}
+
 // Union type for block configurations
-export type BlockConfig = LivestreamConfig | EmbedConfig | TextConfig;
+export type BlockConfig =
+	| LivestreamConfig
+	| EmbedConfig
+	| TextConfig
+	| ImageGalleryConfig
+	| VideoGalleryConfig;
 
 // Base memorial block interface
 export interface MemorialBlock {
@@ -64,6 +98,14 @@ export function isTextConfig(config: BlockConfig): config is TextConfig {
 	return 'content' in config && 'style' in config;
 }
 
+export function isImageGalleryConfig(config: BlockConfig): config is ImageGalleryConfig {
+	return 'images' in config;
+}
+
+export function isVideoGalleryConfig(config: BlockConfig): config is VideoGalleryConfig {
+	return 'videos' in config;
+}
+
 // Typed block interfaces for convenience
 export interface LivestreamBlock extends MemorialBlock {
 	type: 'livestream';
@@ -78,6 +120,16 @@ export interface EmbedBlock extends MemorialBlock {
 export interface TextBlock extends MemorialBlock {
 	type: 'text';
 	config: TextConfig;
+}
+
+export interface ImageGalleryBlock extends MemorialBlock {
+	type: 'image-gallery';
+	config: ImageGalleryConfig;
+}
+
+export interface VideoGalleryBlock extends MemorialBlock {
+	type: 'video-gallery';
+	config: VideoGalleryConfig;
 }
 
 // API request/response types

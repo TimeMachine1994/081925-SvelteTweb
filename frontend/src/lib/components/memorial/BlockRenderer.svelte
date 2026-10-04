@@ -1,9 +1,11 @@
 <script lang="ts">
-	import type { MemorialBlock, LivestreamConfig, EmbedConfig, TextConfig } from '$lib/types/memorial-blocks';
+	import type { MemorialBlock, LivestreamConfig, EmbedConfig, TextConfig, ImageGalleryConfig, VideoGalleryConfig } from '$lib/types/memorial-blocks';
 	import { getEnabledBlocks } from '$lib/utils/block-utils';
 	import MemorialStreamDisplay from '$lib/components/MemorialStreamDisplay.svelte';
 	import EmbedRenderer from './EmbedRenderer.svelte';
 	import TextRenderer from './TextRenderer.svelte';
+	import ImageGalleryRenderer from './ImageGalleryRenderer.svelte';
+	import VideoGalleryRenderer from './VideoGalleryRenderer.svelte';
 
 	interface Props {
 		blocks: MemorialBlock[];
@@ -48,6 +50,14 @@
 			{:else if block.type === 'text'}
 				<TextRenderer 
 					config={block.config as TextConfig} 
+				/>
+			{:else if block.type === 'image-gallery'}
+				<ImageGalleryRenderer
+					config={block.config as ImageGalleryConfig}
+				/>
+			{:else if block.type === 'video-gallery'}
+				<VideoGalleryRenderer
+					config={block.config as VideoGalleryConfig}
 				/>
 			{/if}
 		</div>

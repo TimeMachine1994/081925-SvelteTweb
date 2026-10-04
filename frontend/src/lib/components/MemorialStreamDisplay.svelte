@@ -478,10 +478,11 @@
 		<!-- Recorded Streams -->
 		{#if recordedStreams.length > 0}
 			<div class="stream-section recorded-section">
-				<h2 class="stream-section-title">Service Recording</h2>
 				{#each recordedStreams as stream (stream.id)}
 					{@const displayRecordings = getDisplayRecordings(stream)}
 					<div class="stream-item">
+						<!-- Heading uses this recording's own (admin-editable) title, not a generic label -->
+						<h2 class="stream-section-title">{stream.title}</h2>
 						{#if stream.mux?.recordingReady && (stream.mux?.recordings?.length || stream.mux?.vodPlaybackId)}
 							<!-- MUX PLATFORM - Recorded video player with archived chat -->
 							<div class="mux-stream-container">
@@ -510,7 +511,7 @@
 										{/if}
 										
 										{#each displayRecordings as recording, i (recording.vodPlaybackId)}
-											<MuxVideoPlayer stream={stream} autoplay={false} showTitle={i === 0} forcedVodPlaybackId={recording.vodPlaybackId} />
+											<MuxVideoPlayer stream={stream} autoplay={false} showTitle={false} forcedVodPlaybackId={recording.vodPlaybackId} />
 										{/each}
 										<!-- Per-stream embed - BELOW video -->
 										{#if stream.embed && stream.embed.position === 'below'}
@@ -533,7 +534,6 @@
 									<div class="recording-processing">
 										<div class="processing-content">
 											<div class="processing-spinner"></div>
-											<h3 class="stream-title">{stream.title}</h3>
 											<p class="processing-message">The service has ended. Recording is being processed...</p>
 											<p class="processing-submessage">This usually takes a few minutes. The page will update automatically.</p>
 										</div>
@@ -542,7 +542,6 @@
 							</div>
 						{:else}
 							<!-- LEGACY CLOUDFLARE - Fallback iframe player -->
-							<h3 class="stream-title">{stream.title}</h3>
 							{#if stream.description}
 								<p class="stream-description">{stream.description}</p>
 							{/if}

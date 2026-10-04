@@ -1,12 +1,23 @@
 <script lang="ts">
-	import type { BlockType, EmbedConfig, TextConfig } from '$lib/types/memorial-blocks';
+	import type {
+		BlockType,
+		EmbedConfig,
+		TextConfig,
+		GalleryImage,
+		GalleryVideoItem,
+		ImageGalleryConfig,
+		VideoGalleryConfig
+	} from '$lib/types/memorial-blocks';
+	import ImageGalleryEditor from '../blocks/ImageGalleryEditor.svelte';
+	import VideoGalleryEditor from '../blocks/VideoGalleryEditor.svelte';
 
 	interface Props {
+		memorialId: string;
 		onClose: () => void;
 		onAdd: (type: BlockType, config: any) => void;
 	}
 
-	let { onClose, onAdd }: Props = $props();
+	let { memorialId, onClose, onAdd }: Props = $props();
 
 	// Step state
 	let step = $state<'select' | 'configure'>('select');
@@ -26,6 +37,14 @@
 	// Text config
 	let textContent = $state('');
 	let textStyle = $state<'paragraph' | 'heading' | 'note'>('paragraph');
+
+	// Image gallery config
+	let galleryTitle = $state('');
+	let galleryImages = $state<GalleryImage[]>([]);
+
+	// Video gallery config
+	let videoGalleryTitle = $state('');
+	let galleryVideos = $state<GalleryVideoItem[]>([]);
 
 	function selectType(type: BlockType) {
 		selectedType = type;
@@ -84,6 +103,24 @@
 				};
 				onAdd('text', textConfig);
 				break;
+
+			case 'image-gallery':
+				onAdd('image-gallery', {
+					title: galleryTitle.trim() || undefined,
+					images: galleryImages
+				} as ImageGalleryConfig);
+				break;
+
+			case 'video-gallery':
+				if (galleryVideos.length === 0 || galleryVideos.every((v) => !v.embedCode.trim())) {
+					alert('Please add at least one video embed');
+					return;
+				}
+				onAdd('video-gallery', {
+					title: videoGalleryTitle.trim() || undefined,
+					videos: galleryVideos
+				} as VideoGalleryConfig);
+				break;
 		}
 	}
 
@@ -108,6 +145,10 @@
 					Add Embed
 				{:else if selectedType === 'text'}
 					Add Text
+				{:else if selectedType === 'image-gallery'}
+					Add Image Gallery
+				{:else if selectedType === 'video-gallery'}
+					Add Tribute Video Gallery
 				{/if}
 			</h3>
 			<button class="close-btn" onclick={onClose}>✕</button>
@@ -134,6 +175,18 @@
 						<span class="type-icon">📝</span>
 						<span class="type-name">Text</span>
 						<span class="type-desc">Add a text message or announcement</span>
+					</button>
+
+					<button class="type-option" onclick={() => selectType('image-gallery')}>
+						<span class="type-icon">🖼️</span>
+						<span class="type-name">Image Gallery</span>
+						<span class="type-desc">Upload multiple photos in a masonry gallery with lightbox view</span>
+					</button>
+
+					<button class="type-option" onclick={() => selectType('video-gallery')}>
+						<span class="type-icon">🎞️</span>
+						<span class="type-name">Tribute Video Gallery</span>
+						<span class="type-desc">Add multiple videos in a horizontally scrollable gallery</span>
 					</button>
 				</div>
 
@@ -248,6 +301,23 @@
 						rows="6"
 					></textarea>
 				</div>
+
+			{:else if selectedType === 'image-gallery'}
+				<ImageGalleryEditor
+					{memorialId}
+					title={galleryTitle}
+					images={galleryImages}
+					onTitleChange={(t) => (galleryTitle = t)}
+					onImagesChange={(imgs) => (galleryImages = imgs)}
+				/>
+
+			{:else if selectedType === 'video-gallery'}
+				<VideoGalleryEditor
+					title={videoGalleryTitle}
+					videos={galleryVideos}
+					onTitleChange={(t) => (videoGalleryTitle = t)}
+					onVideosChange={(v) => (galleryVideos = v)}
+				/>
 			{/if}
 		</div>
 
