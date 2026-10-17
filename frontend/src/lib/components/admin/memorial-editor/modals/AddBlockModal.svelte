@@ -63,7 +63,7 @@
 					return;
 				}
 				onAdd('embed', {
-					title: embedTitle.trim() || 'Embed',
+					title: embedTitle.trim(),
 					embedCode: embedCode.trim(),
 					embedType
 				} as EmbedConfig);
@@ -174,7 +174,7 @@
 						id="stream-title"
 						type="text"
 						bind:value={streamTitle}
-						placeholder="e.g., Memorial Service for John Smith"
+						placeholder="e.g., Celebration of Life for John Smith"
 					/>
 				</div>
 
@@ -200,7 +200,7 @@
 
 			{:else if selectedType === 'embed'}
 				<div class="form-group">
-					<label for="embed-title">Title</label>
+					<label for="embed-title">Title (optional)</label>
 					<input
 						id="embed-title"
 						type="text"

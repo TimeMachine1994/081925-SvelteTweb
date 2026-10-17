@@ -21,7 +21,7 @@ export interface LivestreamConfig {
 
 // Embed block configuration
 export interface EmbedConfig {
-	title: string;
+	title?: string;
 	embedCode: string;
 	embedType: EmbedType;
 }

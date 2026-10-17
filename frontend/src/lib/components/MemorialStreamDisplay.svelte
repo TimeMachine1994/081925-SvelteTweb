@@ -200,6 +200,20 @@
 		return isRecordedStreamShared(s, now);
 	}
 
+	/**
+	 * A stream whose embed is set to "replace" the video player. These are
+	 * shown on their own, without a "Live Now" / "Upcoming Service" heading
+	 * or countdown, regardless of the stream's schedule or status — the
+	 * embed is the intended content for the whole lifetime of the stream.
+	 */
+	function hasReplaceEmbed(s: Stream): boolean {
+		return s.embed?.position === 'replace' && !!s.embed.code?.trim();
+	}
+
+	let replaceEmbedStreams = $derived(
+		liveStreams.filter(s => s.isVisible !== false && hasReplaceEmbed(s))
+	);
+
 	// Categorize streams based on REAL-TIME status from liveStreams
 	// Live stream detection (respects scheduled times):
 	// 1. Status is explicitly 'live' (set by webhook when broadcast starts), OR
@@ -210,6 +224,7 @@
 	let categorizedLiveStreams = $derived(
 		liveStreams.filter(s => {
 			if (s.isVisible === false) return false;
+			if (hasReplaceEmbed(s)) return false;
 
 			if (s.sourceType === 'upload') {
 				if (!s.scheduledStartTime || !s.mux?.vodPlaybackId) return false;
@@ -247,6 +262,7 @@
 	let scheduledStreams = $derived(
 		liveStreams.filter(s => {
 			if (s.isVisible === false) return false;
+			if (hasReplaceEmbed(s)) return false;
 			
 			// If already in live streams, don't show in scheduled
 			const isInLiveStreams = categorizedLiveStreams.some(live => live.id === s.id);
@@ -285,6 +301,7 @@
 	let recordedStreams = $derived(
 		liveStreams.filter(s => {
 			if (s.isVisible === false) return false;
+			if (hasReplaceEmbed(s)) return false;
 			
 			// Exclude streams that are currently showing as live (mutual exclusion)
 			const isInLiveStreams = categorizedLiveStreams.some(live => live.id === s.id);
@@ -349,12 +366,38 @@
 
 	// Determine if we should show any streams section
 	let hasVisibleStreams = $derived(
-		categorizedLiveStreams.length > 0 || scheduledStreams.length > 0 || recordedStreams.length > 0
+		replaceEmbedStreams.length > 0 ||
+			categorizedLiveStreams.length > 0 ||
+			scheduledStreams.length > 0 ||
+			recordedStreams.length > 0
 	);
 </script>
 
 {#if hasVisibleStreams}
 	<div class="memorial-streams">
+		<!-- Streams whose video has been replaced with an embed - shown with no
+		     heading/countdown, independent of schedule or live status. -->
+		{#if replaceEmbedStreams.length > 0}
+			<div class="stream-section embed-section">
+				{#each replaceEmbedStreams as stream (stream.id)}
+					<div class="stream-item">
+						<div class="mux-stream-container">
+							<div class="video-column">
+								<div class="stream-embed-container embed-replace">
+									{#if stream.embed?.title}
+										<h4 class="stream-embed-title">{stream.embed.title}</h4>
+									{/if}
+									<div class="stream-embed-content">
+										{@html stream.embed?.code}
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				{/each}
+			</div>
+		{/if}
+
 		<!-- Live Streams -->
 		{#if categorizedLiveStreams.length > 0}
 			<div class="stream-section live-section">
@@ -382,9 +425,9 @@
 							<!-- MUX PLATFORM - New integrated player. Chat is now memorial-wide (see MemorialChatWidget), not per-stream. -->
 							<div class="mux-stream-container">
 								<div class="video-column">
-									{#if stream.embed && stream.embed.position === 'replace'}
-										<!-- Per-stream embed - REPLACE video (keeps chat) -->
-										<div class="stream-embed-container embed-replace">
+									<!-- Per-stream embed - ABOVE video -->
+									{#if stream.embed && stream.embed.position === 'above'}
+										<div class="stream-embed-container embed-above">
 											{#if stream.embed.title}
 												<h4 class="stream-embed-title">{stream.embed.title}</h4>
 											{/if}
@@ -392,32 +435,20 @@
 												{@html stream.embed.code}
 											</div>
 										</div>
-									{:else}
-										<!-- Per-stream embed - ABOVE video -->
-										{#if stream.embed && stream.embed.position === 'above'}
-											<div class="stream-embed-container embed-above">
-												{#if stream.embed.title}
-													<h4 class="stream-embed-title">{stream.embed.title}</h4>
-												{/if}
-												<div class="stream-embed-content">
-													{@html stream.embed.code}
-												</div>
+									{/if}
+
+									<MuxVideoPlayer stream={stream} autoplay={true} showTitle={true} />
+
+									<!-- Per-stream embed - BELOW video -->
+									{#if stream.embed && stream.embed.position === 'below'}
+										<div class="stream-embed-container embed-below">
+											{#if stream.embed.title}
+												<h4 class="stream-embed-title">{stream.embed.title}</h4>
+											{/if}
+											<div class="stream-embed-content">
+												{@html stream.embed.code}
 											</div>
-										{/if}
-										
-										<MuxVideoPlayer stream={stream} autoplay={true} showTitle={true} />
-										
-										<!-- Per-stream embed - BELOW video -->
-										{#if stream.embed && stream.embed.position === 'below'}
-											<div class="stream-embed-container embed-below">
-												{#if stream.embed.title}
-													<h4 class="stream-embed-title">{stream.embed.title}</h4>
-												{/if}
-												<div class="stream-embed-content">
-													{@html stream.embed.code}
-												</div>
-											</div>
-										{/if}
+										</div>
 									{/if}
 								</div>
 							</div>
@@ -486,9 +517,9 @@
 							<!-- MUX PLATFORM - Recorded video player with archived chat -->
 							<div class="mux-stream-container">
 								<div class="video-column">
-									{#if stream.embed && stream.embed.position === 'replace'}
-										<!-- Per-stream embed - REPLACE video (keeps chat) -->
-										<div class="stream-embed-container embed-replace">
+									<!-- Per-stream embed - ABOVE video -->
+									{#if stream.embed && stream.embed.position === 'above'}
+										<div class="stream-embed-container embed-above">
 											{#if stream.embed.title}
 												<h4 class="stream-embed-title">{stream.embed.title}</h4>
 											{/if}
@@ -496,33 +527,21 @@
 												{@html stream.embed.code}
 											</div>
 										</div>
-									{:else}
-										<!-- Per-stream embed - ABOVE video -->
-										{#if stream.embed && stream.embed.position === 'above'}
-											<div class="stream-embed-container embed-above">
-												{#if stream.embed.title}
-													<h4 class="stream-embed-title">{stream.embed.title}</h4>
-												{/if}
-												<div class="stream-embed-content">
-													{@html stream.embed.code}
-												</div>
+									{/if}
+
+									{#each displayRecordings as recording, i (recording.vodPlaybackId)}
+										<MuxVideoPlayer stream={stream} autoplay={false} showTitle={i === 0} forcedVodPlaybackId={recording.vodPlaybackId} />
+									{/each}
+									<!-- Per-stream embed - BELOW video -->
+									{#if stream.embed && stream.embed.position === 'below'}
+										<div class="stream-embed-container embed-below">
+											{#if stream.embed.title}
+												<h4 class="stream-embed-title">{stream.embed.title}</h4>
+											{/if}
+											<div class="stream-embed-content">
+												{@html stream.embed.code}
 											</div>
-										{/if}
-										
-										{#each displayRecordings as recording, i (recording.vodPlaybackId)}
-											<MuxVideoPlayer stream={stream} autoplay={false} showTitle={i === 0} forcedVodPlaybackId={recording.vodPlaybackId} />
-										{/each}
-										<!-- Per-stream embed - BELOW video -->
-										{#if stream.embed && stream.embed.position === 'below'}
-											<div class="stream-embed-container embed-below">
-												{#if stream.embed.title}
-													<h4 class="stream-embed-title">{stream.embed.title}</h4>
-												{/if}
-												<div class="stream-embed-content">
-													{@html stream.embed.code}
-												</div>
-											</div>
-										{/if}
+										</div>
 									{/if}
 								</div>
 							</div>

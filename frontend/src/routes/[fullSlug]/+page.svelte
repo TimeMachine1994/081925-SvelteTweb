@@ -478,6 +478,9 @@
 						<!-- Glass box wrapper for title and dates only -->
 						<div class="glass-box">
 							<h1 class="memorial-title">
+								{#if !(memorial as any).customTitle}
+									<span class="celebration-prefix">Celebration of Life for</span>
+								{/if}
 								<span class="loved-one-name"
 									>{(memorial as any).customTitle || memorial.lovedOneName}</span
 								>

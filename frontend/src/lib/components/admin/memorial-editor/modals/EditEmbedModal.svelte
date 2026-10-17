@@ -23,7 +23,7 @@
 		}
 
 		onSave({
-			title: title.trim() || 'Embed',
+			title: title.trim(),
 			embedCode: embedCode.trim(),
 			embedType
 		});
@@ -47,7 +47,7 @@
 
 		<div class="modal-body">
 			<div class="form-group">
-				<label for="embed-title">Title</label>
+				<label for="embed-title">Title (optional)</label>
 				<input
 					id="embed-title"
 					type="text"

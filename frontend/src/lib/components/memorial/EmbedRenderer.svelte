@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { EmbedConfig } from '$lib/types/memorial-blocks';
+	import { getEmbedDisplayTitle } from '$lib/utils/block-utils';
 
 	interface Props {
 		config: EmbedConfig;
@@ -19,11 +20,12 @@
 	}
 
 	const safeHtml = $derived(getSafeEmbedHtml(config.embedCode));
+	const displayTitle = $derived(getEmbedDisplayTitle(config.title));
 </script>
 
 <div class="embed-renderer" class:video={config.embedType === 'video'} class:chat={config.embedType === 'chat'}>
-	{#if config.title}
-		<h3 class="embed-title">{config.title}</h3>
+	{#if displayTitle}
+		<h3 class="embed-title">{displayTitle}</h3>
 	{/if}
 	
 	<div class="embed-container">
@@ -40,7 +42,8 @@
 		margin: 0 0 0.75rem 0;
 		font-size: 1.125rem;
 		font-weight: 600;
-		color: #2d3748;
+		color: #fff;
+		text-align: center;
 	}
 
 	.embed-container {

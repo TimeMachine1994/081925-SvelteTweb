@@ -147,12 +147,22 @@ export function createLivestreamBlock(streamId: string, order: number): Memorial
  * Create an embed block
  */
 export function createEmbedBlock(
-	title: string,
+	title: string | undefined,
 	embedCode: string,
 	embedType: EmbedType,
 	order: number
 ): MemorialBlock {
 	return createBlock('embed', { title, embedCode, embedType } as EmbedConfig, order);
+}
+
+/**
+ * Title to render for an embed block. Blank titles and the legacy
+ * auto-generated default of "Embed" (previously applied whenever an admin
+ * left the title field empty) both render as "no title".
+ */
+export function getEmbedDisplayTitle(title?: string | null): string {
+	const trimmed = title?.trim() ?? '';
+	return trimmed === 'Embed' ? '' : trimmed;
 }
 
 /**

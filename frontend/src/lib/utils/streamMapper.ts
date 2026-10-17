@@ -154,7 +154,9 @@ function createStreamFromService(
 
 	switch (serviceType) {
 		case 'main':
-			title = `${locationName} Service`;
+			title = memorialName?.trim()
+				? `Celebration of Life for ${memorialName.trim()}`
+				: `${locationName} Service`;
 			description = `Memorial service at ${locationName}`;
 			break;
 		case 'location':
