@@ -6,7 +6,7 @@
  */
 
 // Block type discriminator
-export type BlockType = 'livestream' | 'embed' | 'text';
+export type BlockType = 'livestream' | 'embed' | 'text' | 'image-gallery' | 'video-gallery';
 
 // Embed subtypes for styling/icons
 export type EmbedType = 'video' | 'chat' | 'other';
@@ -37,8 +37,61 @@ export interface TextConfig {
 	textAlign?: 'left' | 'center' | 'right';
 }
 
+// A single image within an image-gallery block
+export interface GalleryImage {
+	id: string;
+	url: string;
+	storagePath?: string;
+	caption?: string;
+	order: number;
+	// Intrinsic dimensions, captured at upload (or backfilled on first load
+	// in the editor for older items). Used by the masonry renderer to size
+	// each tile without a layout-shifting re-measure.
+	width?: number;
+	height?: number;
+}
+
+// How a video gallery item's thumbnail was obtained
+export type VideoThumbnailKind = 'derived' | 'custom';
+
+// A single video embed within a video-gallery block
+export interface GalleryVideoItem {
+	id: string;
+	title?: string;
+	embedCode: string;
+	order: number;
+	// Thumbnail shown in the gallery strip before the video is activated.
+	// Optional/back-compatible — older items fall back to sync derivation
+	// (e.g. YouTube) at render time when absent.
+	thumbnailUrl?: string;
+	thumbnailKind?: VideoThumbnailKind;
+	// Frame time in seconds used to derive the thumbnail (Mux / direct file
+	// sources only; ignored for YouTube/Vimeo).
+	thumbnailTime?: number;
+	// Set when the thumbnail was uploaded/captured to Firebase Storage, so
+	// it can be cleaned up or regenerated.
+	thumbnailStoragePath?: string;
+}
+
+// Image gallery block configuration
+export interface ImageGalleryConfig {
+	title?: string;
+	images: GalleryImage[];
+}
+
+// Video gallery block configuration (aka "Tribute Gallery (Video)")
+export interface VideoGalleryConfig {
+	title?: string;
+	videos: GalleryVideoItem[];
+}
+
 // Union type for block configurations
-export type BlockConfig = LivestreamConfig | EmbedConfig | TextConfig;
+export type BlockConfig =
+	| LivestreamConfig
+	| EmbedConfig
+	| TextConfig
+	| ImageGalleryConfig
+	| VideoGalleryConfig;
 
 // Base memorial block interface
 export interface MemorialBlock {
@@ -64,6 +117,14 @@ export function isTextConfig(config: BlockConfig): config is TextConfig {
 	return 'content' in config && 'style' in config;
 }
 
+export function isImageGalleryConfig(config: BlockConfig): config is ImageGalleryConfig {
+	return 'images' in config;
+}
+
+export function isVideoGalleryConfig(config: BlockConfig): config is VideoGalleryConfig {
+	return 'videos' in config;
+}
+
 // Typed block interfaces for convenience
 export interface LivestreamBlock extends MemorialBlock {
 	type: 'livestream';
@@ -78,6 +139,16 @@ export interface EmbedBlock extends MemorialBlock {
 export interface TextBlock extends MemorialBlock {
 	type: 'text';
 	config: TextConfig;
+}
+
+export interface ImageGalleryBlock extends MemorialBlock {
+	type: 'image-gallery';
+	config: ImageGalleryConfig;
+}
+
+export interface VideoGalleryBlock extends MemorialBlock {
+	type: 'video-gallery';
+	config: VideoGalleryConfig;
 }
 
 // API request/response types

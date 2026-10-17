@@ -12,7 +12,11 @@ import type {
 	EmbedConfig,
 	TextConfig,
 	EmbedType,
-	TextStyle
+	TextStyle,
+	GalleryImage,
+	GalleryVideoItem,
+	ImageGalleryConfig,
+	VideoGalleryConfig
 } from '$lib/types/memorial-blocks';
 
 export interface TextCustomStyles {
@@ -179,6 +183,71 @@ export function createTextBlock(
 }
 
 /**
+ * Create an image gallery block
+ */
+export function createImageGalleryBlock(
+	images: GalleryImage[],
+	order: number,
+	title?: string
+): MemorialBlock {
+	const config: ImageGalleryConfig = { title, images };
+	return createBlock('image-gallery', config, order);
+}
+
+/**
+ * Create a video gallery (tribute video gallery) block
+ */
+export function createVideoGalleryBlock(
+	videos: GalleryVideoItem[],
+	order: number,
+	title?: string
+): MemorialBlock {
+	const config: VideoGalleryConfig = { title, videos };
+	return createBlock('video-gallery', config, order);
+}
+
+/**
+ * Add an item to a gallery items array (generic over images/videos)
+ */
+export function addGalleryItem<T extends { id: string; order: number }>(
+	items: T[],
+	item: Omit<T, 'order'>
+): T[] {
+	return [...items, { ...item, order: items.length } as T];
+}
+
+/**
+ * Remove an item from a gallery items array by id, recomputing order
+ */
+export function removeGalleryItem<T extends { id: string; order: number }>(
+	items: T[],
+	id: string
+): T[] {
+	return items
+		.filter((item) => item.id !== id)
+		.map((item, index) => ({ ...item, order: index }));
+}
+
+/**
+ * Move an item within a gallery items array, recomputing order
+ */
+export function moveGalleryItem<T extends { id: string; order: number }>(
+	items: T[],
+	id: string,
+	direction: 'up' | 'down'
+): T[] {
+	const sorted = [...items].sort((a, b) => a.order - b.order);
+	const idx = sorted.findIndex((item) => item.id === id);
+	if (idx < 0) return items;
+
+	const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+	if (targetIdx < 0 || targetIdx >= sorted.length) return items;
+
+	[sorted[idx], sorted[targetIdx]] = [sorted[targetIdx], sorted[idx]];
+	return sorted.map((item, index) => ({ ...item, order: index }));
+}
+
+/**
  * Validate block config based on type
  */
 export function validateBlockConfig(type: BlockType, config: BlockConfig): string | null {
@@ -222,6 +291,51 @@ export function validateBlockConfig(type: BlockType, config: BlockConfig): strin
 			}
 			break;
 		}
+		case 'image-gallery': {
+			const c = config as ImageGalleryConfig;
+			if (!Array.isArray(c.images)) {
+				return 'Image gallery block requires an images array';
+			}
+			for (const img of c.images) {
+				if (!img.url || typeof img.url !== 'string') {
+					return 'Each gallery image requires a valid url';
+				}
+				if (img.width !== undefined && typeof img.width !== 'number') {
+					return 'Gallery image width must be a number';
+				}
+				if (img.height !== undefined && typeof img.height !== 'number') {
+					return 'Gallery image height must be a number';
+				}
+			}
+			break;
+		}
+		case 'video-gallery': {
+			const c = config as VideoGalleryConfig;
+			if (!Array.isArray(c.videos)) {
+				return 'Video gallery block requires a videos array';
+			}
+			for (const vid of c.videos) {
+				if (!vid.embedCode || typeof vid.embedCode !== 'string') {
+					return 'Each gallery video requires embedCode';
+				}
+				if (vid.thumbnailUrl !== undefined && typeof vid.thumbnailUrl !== 'string') {
+					return 'Gallery video thumbnailUrl must be a string';
+				}
+				if (
+					vid.thumbnailKind !== undefined &&
+					!['derived', 'custom'].includes(vid.thumbnailKind)
+				) {
+					return 'Gallery video thumbnailKind must be derived or custom';
+				}
+				if (
+					vid.thumbnailTime !== undefined &&
+					(typeof vid.thumbnailTime !== 'number' || !Number.isFinite(vid.thumbnailTime) || vid.thumbnailTime < 0)
+				) {
+					return 'Gallery video thumbnailTime must be a non-negative number';
+				}
+			}
+			break;
+		}
 		default:
 			return `Unknown block type: ${type}`;
 	}
@@ -239,6 +353,10 @@ export function getBlockIcon(type: BlockType): string {
 			return '🔗';
 		case 'text':
 			return '📝';
+		case 'image-gallery':
+			return '🖼️';
+		case 'video-gallery':
+			return '🎞️';
 		default:
 			return '📦';
 	}
@@ -255,6 +373,10 @@ export function getBlockTypeLabel(type: BlockType): string {
 			return 'Embed';
 		case 'text':
 			return 'Text';
+		case 'image-gallery':
+			return 'Image Gallery';
+		case 'video-gallery':
+			return 'Tribute Video Gallery';
 		default:
 			return 'Unknown';
 	}
@@ -282,6 +404,18 @@ export function hasStreamBlock(blocks: MemorialBlock[], streamId: string): boole
 	return blocks.some(
 		b => b.type === 'livestream' && (b.config as LivestreamConfig).streamId === streamId
 	);
+}
+
+/**
+ * Build safe iframe HTML from an embed code or bare URL.
+ * If it's just a URL, wrap it in an iframe; otherwise return as-is
+ * (it should already be an iframe/embed snippet).
+ */
+export function buildEmbedIframeHtml(embedCode: string, height: number = 400): string {
+	if (embedCode.startsWith('http') && !embedCode.includes('<')) {
+		return `<iframe src="${embedCode}" width="100%" height="${height}" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="aspect-ratio: 16/9;"></iframe>`;
+	}
+	return embedCode;
 }
 
 /**
@@ -314,7 +448,8 @@ export function sanitizeEmbedCode(embedCode: string): string {
 		'cloudflare.com',
 		'cloudflarestream.com',
 		'iframe.videodelivery.net',
-		'tributestream.com'
+		'tributestream.com',
+		'mux.com'
 	];
 	
 	try {

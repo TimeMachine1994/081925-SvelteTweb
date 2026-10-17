@@ -70,8 +70,9 @@ export const POST: RequestHandler = async ({ locals, params, request }) => {
 		const { type, config, insertAt } = body;
 
 		// Validate block type
-		if (!type || !['livestream', 'embed', 'text'].includes(type)) {
-			throw svelteError(400, 'Invalid block type. Must be: livestream, embed, or text');
+		const validTypes = ['livestream', 'embed', 'text', 'image-gallery', 'video-gallery'];
+		if (!type || !validTypes.includes(type)) {
+			throw svelteError(400, `Invalid block type. Must be one of: ${validTypes.join(', ')}`);
 		}
 
 		// Validate config

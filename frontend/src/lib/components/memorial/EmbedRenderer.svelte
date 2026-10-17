@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { EmbedConfig } from '$lib/types/memorial-blocks';
-	import { getEmbedDisplayTitle } from '$lib/utils/block-utils';
+	import { buildEmbedIframeHtml, getEmbedDisplayTitle } from '$lib/utils/block-utils';
 
 	interface Props {
 		config: EmbedConfig;
@@ -8,18 +8,7 @@
 
 	let { config }: Props = $props();
 
-	// Sanitize and prepare embed code
-	function getSafeEmbedHtml(embedCode: string): string {
-		// If it's just a URL, wrap it in an iframe
-		if (embedCode.startsWith('http') && !embedCode.includes('<')) {
-			return `<iframe src="${embedCode}" width="100%" height="450" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="aspect-ratio: 16/9;"></iframe>`;
-		}
-		
-		// Return the embed code as-is (it should already be an iframe)
-		return embedCode;
-	}
-
-	const safeHtml = $derived(getSafeEmbedHtml(config.embedCode));
+	const safeHtml = $derived(buildEmbedIframeHtml(config.embedCode, 450));
 	const displayTitle = $derived(getEmbedDisplayTitle(config.title));
 </script>
 

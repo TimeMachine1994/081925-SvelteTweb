@@ -1,9 +1,11 @@
 <script lang="ts">
-	import type { MemorialBlock, EmbedConfig, TextConfig, LivestreamConfig } from '$lib/types/memorial-blocks';
+	import type { MemorialBlock, EmbedConfig, TextConfig, LivestreamConfig, ImageGalleryConfig, VideoGalleryConfig } from '$lib/types/memorial-blocks';
 	import { getBlockIcon, getBlockTypeLabel } from '$lib/utils/block-utils';
 	import LivestreamBlock from './blocks/LivestreamBlock.svelte';
 	import EmbedBlock from './blocks/EmbedBlock.svelte';
 	import TextBlock from './blocks/TextBlock.svelte';
+	import ImageGalleryBlock from './blocks/ImageGalleryBlock.svelte';
+	import VideoGalleryBlock from './blocks/VideoGalleryBlock.svelte';
 
 	interface Props {
 		block: MemorialBlock;
@@ -29,6 +31,16 @@
 			case 'text': {
 				const content = (block.config as TextConfig).content;
 				return content.length > 50 ? content.substring(0, 50) + '...' : content || 'Text';
+			}
+			case 'image-gallery': {
+				const config = block.config as ImageGalleryConfig;
+				const count = config.images?.length || 0;
+				return config.title || `${count} photo${count === 1 ? '' : 's'}`;
+			}
+			case 'video-gallery': {
+				const config = block.config as VideoGalleryConfig;
+				const count = config.videos?.length || 0;
+				return config.title || `${count} video${count === 1 ? '' : 's'}`;
 			}
 			default:
 				return 'Block';
@@ -58,6 +70,10 @@
 				<EmbedBlock {block} />
 			{:else if block.type === 'text'}
 				<TextBlock {block} />
+			{:else if block.type === 'image-gallery'}
+				<ImageGalleryBlock {block} />
+			{:else if block.type === 'video-gallery'}
+				<VideoGalleryBlock {block} />
 			{/if}
 		</div>
 	</div>

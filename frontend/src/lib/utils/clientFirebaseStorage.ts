@@ -119,6 +119,104 @@ export async function uploadPhotosToFirebaseStorage(
 }
 
 /**
+ * Read a File's/Blob's intrinsic pixel dimensions in the browser. Returns
+ * null (rather than throwing) on failure — callers treat dimensions as a
+ * nice-to-have, never a hard requirement.
+ */
+async function measureImageDimensions(
+	file: Blob
+): Promise<{ width: number; height: number } | null> {
+	try {
+		if (typeof createImageBitmap === 'function') {
+			const bitmap = await createImageBitmap(file);
+			const dims = { width: bitmap.width, height: bitmap.height };
+			bitmap.close?.();
+			return dims;
+		}
+	} catch {
+		// fall through to the <img> fallback below
+	}
+
+	return new Promise((resolve) => {
+		const url = URL.createObjectURL(file);
+		const img = new Image();
+		img.onload = () => {
+			resolve({ width: img.naturalWidth, height: img.naturalHeight });
+			URL.revokeObjectURL(url);
+		};
+		img.onerror = () => {
+			resolve(null);
+			URL.revokeObjectURL(url);
+		};
+		img.src = url;
+	});
+}
+
+/**
+ * Upload a single image directly to Firebase Storage from client, for use in
+ * memorial content blocks (e.g. the Image Gallery block, or a video gallery
+ * item's thumbnail). Bypasses Vercel's serverless function upload limit the
+ * same way the slideshow uploads do.
+ */
+export async function uploadGalleryImageToFirebaseStorage(
+	file: File | Blob,
+	memorialId: string,
+	onProgress?: (progress: number) => void,
+	kind: 'image-gallery' | 'video-thumbnail' = 'image-gallery'
+): Promise<{ downloadURL: string; storagePath: string; width?: number; height?: number }> {
+	const contentType = (file as File).type || 'image/jpeg';
+	if (!contentType.startsWith('image/')) {
+		throw new Error('Only image files can be added to an image gallery');
+	}
+
+	try {
+		const storage = getStorage(clientAuth.app);
+
+		const timestamp = Date.now();
+		const randomId = Math.random().toString(36).slice(2, 8);
+		const originalName = (file as File).name || `${kind}.jpg`;
+		const sanitizedName = originalName.replace(/[^a-zA-Z0-9.\-]/g, '-');
+		const storagePath = `memorial-blocks/${memorialId}/${kind}/${timestamp}-${randomId}-${sanitizedName}`;
+
+		const storageRef = ref(storage, storagePath);
+
+		if (onProgress) {
+			onProgress(0);
+		}
+
+		const metadata = {
+			contentType,
+			customMetadata: {
+				memorialId,
+				uploadedAt: new Date().toISOString(),
+				type: kind === 'video-thumbnail' ? 'memorial-video-gallery-thumbnail' : 'memorial-image-gallery'
+			}
+		};
+
+		const [uploadResult, dimensions] = await Promise.all([
+			uploadBytes(storageRef, file, metadata),
+			measureImageDimensions(file)
+		]);
+
+		if (onProgress) {
+			onProgress(100);
+		}
+
+		const downloadURL = await getDownloadURL(uploadResult.ref);
+
+		return {
+			downloadURL,
+			storagePath,
+			width: dimensions?.width,
+			height: dimensions?.height
+		};
+	} catch (error) {
+		console.error('❌ [CLIENT UPLOAD] Gallery image upload failed:', error);
+		throw new Error(`Firebase Storage upload failed: ${error instanceof Error ? error.message : String(error)}`);
+	}
+}
+
+/**
  * Upload audio file directly to Firebase Storage from client
  */
 export async function uploadAudioToFirebaseStorage(
