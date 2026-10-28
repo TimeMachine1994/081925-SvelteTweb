@@ -31,7 +31,12 @@
 		<p class="mb-4 -mt-2 text-sm text-slate-500">
 			Choose which Mux recording(s) appear on the public page. Unselected sessions stay hidden.
 		</p>
-		<RecordingPicker memorialId={memorial.id} {streams} onSaved={() => invalidateAll()} />
+		<RecordingPicker
+			memorialId={memorial.id}
+			memorialName={memorial.lovedOneName}
+			{streams}
+			onSaved={() => invalidateAll()}
+		/>
 	</Card>
 {/if}
 

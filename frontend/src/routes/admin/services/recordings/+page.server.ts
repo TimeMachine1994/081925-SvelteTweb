@@ -2,6 +2,7 @@ import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
 import { requireAdmin } from '$lib/server/adminGuard';
+import type { Mp4Status } from '$lib/utils/recording-selection';
 
 /**
  * Standalone Recording Picker page.
@@ -47,6 +48,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 		vodPlaybackId: string;
 		duration?: number;
 		createdAt: string;
+		mp4Status?: Mp4Status;
 	}
 
 	const selectedId = url.searchParams.get('memorialId');
@@ -59,6 +61,8 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 			recordings: Recording[];
 			vodPlaybackId: string | null;
 			publishedRecordings: string[];
+			assetId: string | null;
+			mp4Status: Mp4Status | null;
 		} | null;
 	}> = [];
 
@@ -94,7 +98,9 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 								vodPlaybackId: mux.vodPlaybackId || null,
 								publishedRecordings: Array.isArray(mux.publishedRecordings)
 									? mux.publishedRecordings
-									: []
+									: [],
+								assetId: mux.assetId || null,
+								mp4Status: mux.mp4Status || null
 							}
 						: null
 				};

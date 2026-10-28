@@ -53,6 +53,7 @@
 			{:else}
 				<RecordingPicker
 					memorialId={data.selectedMemorial.id}
+					memorialName={data.selectedMemorial.lovedOneName}
 					streams={data.streams}
 					onSaved={() => invalidateAll()}
 				/>

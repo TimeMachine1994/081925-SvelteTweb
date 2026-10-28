@@ -6,12 +6,22 @@
 	 * the public memorial page, and in what order. Persists to
 	 * `mux.publishedRecordings` via the admin recordings API.
 	 */
+	import { onMount } from 'svelte';
+	import { Download, Loader2 } from 'lucide-svelte';
+	import type { Mp4Status } from '$lib/utils/recording-selection';
+	import {
+		buildMp4DownloadUrl,
+		buildRecordingFilename,
+		mp4DisplayState,
+		needsMp4StatusCheck
+	} from '$lib/utils/recording-download';
 
 	interface Recording {
 		assetId: string;
 		vodPlaybackId: string;
 		duration?: number;
 		createdAt: string;
+		mp4Status?: Mp4Status | null;
 	}
 
 	interface Stream {
@@ -22,14 +32,18 @@
 			recordings?: Recording[];
 			vodPlaybackId?: string | null;
 			publishedRecordings?: string[];
+			assetId?: string | null;
+			mp4Status?: Mp4Status | null;
 		} | null;
 	}
 
 	let {
 		memorialId,
+		memorialName,
 		streams = [],
 		onSaved
-	}: { memorialId: string; streams: Stream[]; onSaved?: () => void } = $props();
+	}: { memorialId: string; memorialName?: string; streams: Stream[]; onSaved?: () => void } =
+		$props();
 
 	// Only streams that actually have recordings are pickable
 	const recordedStreams = $derived(
@@ -40,7 +54,14 @@
 		const recs = stream.mux?.recordings ?? [];
 		if (recs.length) return recs;
 		if (stream.mux?.vodPlaybackId) {
-			return [{ assetId: '', vodPlaybackId: stream.mux.vodPlaybackId, createdAt: '' }];
+			return [
+				{
+					assetId: stream.mux.assetId ?? '',
+					vodPlaybackId: stream.mux.vodPlaybackId,
+					createdAt: '',
+					mp4Status: stream.mux.mp4Status
+				}
+			];
 		}
 		return [];
 	}
@@ -101,6 +122,39 @@
 		return isNaN(d.getTime()) ? '' : d.toLocaleString();
 	}
 
+	// MP4 statuses resolved in the browser, keyed by assetId ('unknown' = check failed).
+	let mp4Overrides = $state<Record<string, Mp4Status | 'unknown'>>({});
+	let checkingMp4 = $state<Record<string, boolean>>({});
+
+	function mp4StateOf(rec: Recording) {
+		return mp4DisplayState(mp4Overrides[rec.assetId] ?? rec.mp4Status, !!rec.assetId);
+	}
+
+	async function checkMp4(streamId: string, assetId: string) {
+		checkingMp4[assetId] = true;
+		try {
+			const res = await fetch(
+				`/api/streams/${streamId}/mp4-status?assetId=${encodeURIComponent(assetId)}`
+			);
+			if (!res.ok) throw new Error(`Failed (${res.status})`);
+			const data: { mp4Status: Mp4Status } = await res.json();
+			mp4Overrides[assetId] = data.mp4Status;
+		} catch (err) {
+			console.error('Failed to check MP4 status:', assetId, err);
+			mp4Overrides[assetId] = 'unknown';
+		} finally {
+			checkingMp4[assetId] = false;
+		}
+	}
+
+	onMount(() => {
+		for (const stream of recordedStreams) {
+			for (const rec of recordingsOf(stream)) {
+				if (needsMp4StatusCheck(rec.mp4Status, !!rec.assetId)) checkMp4(stream.id, rec.assetId);
+			}
+		}
+	});
+
 	async function save(stream: Stream) {
 		savingStreamId = stream.id;
 		messages = { ...messages, [stream.id]: undefined as never };
@@ -148,6 +202,7 @@
 				<div class="recordings">
 					{#each recs as rec, i (rec.vodPlaybackId)}
 						{@const order = orderOf(stream.id, rec.vodPlaybackId)}
+						{@const mp4State = mp4StateOf(rec)}
 						<div class="recording {order >= 0 ? 'selected' : ''}">
 							<label class="select">
 								<input
@@ -167,6 +222,50 @@
 								<div class="meta-line">{formatDuration(rec.duration)}</div>
 								<div class="meta-line muted">{formatDate(rec.createdAt)}</div>
 								<div class="meta-line id">{rec.vodPlaybackId}</div>
+								<div class="download">
+									{#if mp4State === 'ready'}
+										<a
+											class="download-btn"
+											href={buildMp4DownloadUrl(
+												rec.vodPlaybackId,
+												buildRecordingFilename({
+													memorialName,
+													streamTitle: stream.title,
+													sessionNumber: i + 1
+												})
+											)}
+											title="Download MP4"
+										>
+											<Download size={14} />
+											Download MP4
+										</a>
+									{:else if mp4State === 'preparing'}
+										<span
+											class="mp4-pill"
+											title="Mux is still generating the downloadable file — check back in a few minutes."
+										>
+											<Loader2 size={14} class="spin" />
+											Preparing MP4…
+										</span>
+										<button
+											type="button"
+											class="recheck"
+											disabled={checkingMp4[rec.assetId]}
+											onclick={() => checkMp4(stream.id, rec.assetId)}
+										>
+											{checkingMp4[rec.assetId] ? 'Checking…' : 'Re-check'}
+										</button>
+									{:else if mp4State === 'errored'}
+										<span
+											class="mp4-pill error"
+											title="Mux could not generate a downloadable file for this recording"
+										>
+											MP4 unavailable
+										</span>
+									{:else}
+										<span class="meta-line muted">MP4 status unknown</span>
+									{/if}
+								</div>
 							</div>
 
 							{#if order >= 0}
@@ -312,6 +411,71 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+	}
+
+	.download {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.4rem;
+		margin-top: 0.4rem;
+	}
+
+	.download-btn,
+	.mp4-pill,
+	.recheck {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		min-height: 2.25rem;
+		padding: 0 0.7rem;
+		border-radius: 0.375rem;
+		font-size: 0.8rem;
+		font-weight: 600;
+	}
+
+	.download-btn {
+		border: 1px solid #d5ba7f;
+		color: #1a202c;
+		background: #fdf8ee;
+		text-decoration: none;
+	}
+
+	.download-btn:hover {
+		background: #d5ba7f;
+	}
+
+	.mp4-pill {
+		background: #edf2f7;
+		color: #4a5568;
+		cursor: default;
+	}
+
+	.mp4-pill.error {
+		background: #fef2f2;
+		color: #b91c1c;
+	}
+
+	.recheck {
+		border: 1px solid #cbd5e0;
+		background: white;
+		color: #4a5568;
+		cursor: pointer;
+	}
+
+	.recheck:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+
+	.download :global(.spin) {
+		animation: spin 1s linear infinite;
+	}
+
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
 	}
 
 	.reorder {
