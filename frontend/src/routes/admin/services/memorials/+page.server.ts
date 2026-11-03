@@ -1,8 +1,12 @@
 import { adminDb } from '$lib/server/firebase';
 import { requireAdmin } from '$lib/server/adminGuard';
+import { hasPermission } from '$lib/admin/permissions';
+import { getUsersByIds } from '$lib/server/db/repos/users';
+import { contactPhones, formatPhones } from '$lib/admin/contact';
 
 export const load = async ({ locals, url }: any) => {
-	requireAdmin(locals, { resource: 'memorial', action: 'read' });
+	const admin = requireAdmin(locals, { resource: 'memorial', action: 'read' });
+	const canViewUsers = hasPermission(admin, 'user', 'read');
 
 	// Get query params for filtering/sorting
 	const page = parseInt(url.searchParams.get('page') || '1');
@@ -76,6 +80,9 @@ export const load = async ({ locals, url }: any) => {
 				fullSlug: data.fullSlug,
 				creatorEmail: data.creatorEmail || '',
 				creatorName: data.creatorName || '',
+				ownerUid: (data.ownerUid as string) || '',
+				familyContactName: data.familyContactName || '',
+				familyContactPhone: data.familyContactPhone || '',
 				createdAt: data.createdAt?.toDate?.()?.toISOString() || null,
 				isPublic: data.isPublic !== false,
 				isComplete: data.isComplete || false,
@@ -86,14 +93,40 @@ export const load = async ({ locals, url }: any) => {
 			};
 		});
 
+	const owners = canViewUsers
+		? await getUsersByIds(rawMemorials.map((m) => m.ownerUid)).catch((err) => {
+				console.error('Error loading memorial owners:', err);
+				return new Map();
+			})
+		: new Map();
+
+	const enriched = rawMemorials.map((m) => {
+		const owner = owners.get(m.ownerUid);
+		const ownerName = owner ? owner.displayName || (owner as any).name || '' : '';
+		const ownerPhone = (owner?.phone as string) || '';
+		return {
+			...m,
+			ownerName,
+			ownerPhone,
+			contactName: m.familyContactName || ownerName || m.creatorName || '',
+			phoneDisplay: formatPhones(
+				contactPhones({ familyContactPhone: m.familyContactPhone, ownerPhone })
+			)
+		};
+	});
+
 	// In-memory search across key fields (memorial + owner) for now
 	const memorials = searchQuery
-		? rawMemorials.filter((memorial) => {
+		? enriched.filter((memorial) => {
 			const haystack = [
 				memorial.lovedOneName,
 				memorial.fullSlug,
 				memorial.creatorEmail,
 				memorial.creatorName,
+				memorial.contactName,
+				memorial.ownerName,
+				memorial.familyContactPhone,
+				memorial.ownerPhone,
 				memorial.location
 			]
 				.filter(Boolean)
@@ -102,11 +135,12 @@ export const load = async ({ locals, url }: any) => {
 
 			return haystack.includes(searchQuery);
 		})
-		: rawMemorials;
+		: enriched;
 
 	return {
 		memorials,
 		searchQuery,
+		canViewUsers,
 		pagination: {
 			page,
 			limit,

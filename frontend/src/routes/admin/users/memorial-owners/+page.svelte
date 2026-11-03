@@ -40,6 +40,13 @@ Manage users who own memorial pages
 			sortable: true
 		},
 		{
+			id: 'phone',
+			label: 'Phone',
+			field: 'phone',
+			width: 150,
+			formatter: (val: string | null) => val || '—'
+		},
+		{
 			id: 'memorialCount',
 			label: 'Memorials',
 			field: 'memorialCount',

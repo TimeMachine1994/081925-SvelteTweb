@@ -5,6 +5,9 @@ import { listLive, listScheduledBetween, listAll as listAllStreams } from '$lib/
 import { requireAdmin, requireAdminAction } from '$lib/server/adminGuard';
 import { logAdminAction, extractUserContext } from '$lib/server/auditLogger';
 import { createLogger } from '$lib/admin/logger';
+import { hasPermission } from '$lib/admin/permissions';
+import { getUsersByIds } from '$lib/server/db/repos/users';
+import { contactPhones, formatPhones } from '$lib/admin/contact';
 import type { Actions, PageServerLoad } from './$types';
 
 const log = createLogger('Dashboard');
@@ -15,6 +18,9 @@ interface DashboardMemorial {
 	fullSlug?: string;
 	creatorEmail: string;
 	creatorName: string;
+	ownerUid: string;
+	ownerName: string;
+	phoneDisplay: string;
 	createdAt: string | null;
 	isComplete: boolean;
 	isArchived: boolean;
@@ -41,7 +47,7 @@ interface TriageStream {
  * Heavy Firestore work, isolated so it can be streamed to the client. The page
  * shell + sidebar render immediately while this resolves in the background.
  */
-async function loadDashboardData() {
+async function loadDashboardData(canViewUsers: boolean) {
 	const emptyStats = {
 		totalMemorials: 0,
 		totalFuneralDirectors: 0,
@@ -76,8 +82,25 @@ async function loadDashboardData() {
 			listAllStreams({ status: 'ready', limit: 100 })
 		]);
 
+		let owners = new Map<string, any>();
+		if (canViewUsers) {
+			try {
+				owners = await getUsersByIds(
+					recentMemorialsSnap.docs.map((d) => (d.data().ownerUid as string) || '')
+				);
+			} catch (err) {
+				log.error('Failed to load memorial owners', err);
+			}
+		}
+
 		const recentMemorials: DashboardMemorial[] = recentMemorialsSnap.docs.map((doc) => {
 			const data = doc.data();
+			const ownerUid = (data.ownerUid as string) || '';
+			const owner = owners.get(ownerUid);
+			const ownerName: string = owner?.displayName || owner?.name || data.familyContactName || '';
+			const phoneDisplay = formatPhones(
+				contactPhones({ familyContactPhone: data.familyContactPhone, ownerPhone: owner?.phone })
+			);
 
 			const location =
 				data.services?.main?.location?.name || data.memorialLocationName || 'Not specified';
@@ -97,6 +120,9 @@ async function loadDashboardData() {
 				fullSlug: data.fullSlug,
 				creatorEmail: data.creatorEmail || '',
 				creatorName: data.creatorName || '',
+				ownerUid,
+				ownerName,
+				phoneDisplay,
 				createdAt: data.createdAt?.toDate?.()?.toISOString() || null,
 				isComplete: data.isComplete || false,
 				isArchived: data.isArchived || false,
@@ -216,6 +242,7 @@ async function loadDashboardData() {
 		log.info('Dashboard loaded', stats);
 
 		return {
+			canViewUsers,
 			incompleteMemorials,
 			recentMemorials: recentMemorials.filter((m) => !m.isArchived),
 			stats,
@@ -232,6 +259,7 @@ async function loadDashboardData() {
 		log.error('Failed to load dashboard', error);
 
 		return {
+			canViewUsers,
 			incompleteMemorials: [],
 			recentMemorials: [],
 			stats: emptyStats,
@@ -257,7 +285,7 @@ export const load: PageServerLoad = async ({ locals, depends }) => {
 			adminRole: locals.user!.adminRole
 		},
 		// Streamed: the page shell renders immediately; this resolves later.
-		dashboard: loadDashboardData()
+		dashboard: loadDashboardData(hasPermission(admin, 'user', 'read'))
 	};
 };
 

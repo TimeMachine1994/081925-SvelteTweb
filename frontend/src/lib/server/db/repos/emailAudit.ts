@@ -80,6 +80,31 @@ export async function listLogs(
 	return { logs: docs.map((d) => mapLog(d.id, d.data())), hasMore };
 }
 
+/**
+ * Most recent logs sent to any of the given addresses. Uses an `in` query without
+ * orderBy (no composite index needed) and sorts in memory. Matches both the
+ * original and lowercased forms since log `to` values are raw form input.
+ */
+export async function listLogsForRecipients(
+	emails: Array<string | null | undefined>,
+	limit = 20
+): Promise<EmailAuditLog[]> {
+	const list = [
+		...new Set(
+			emails.flatMap((e) => {
+				const t = (e || '').trim();
+				return t ? [t, t.toLowerCase()] : [];
+			})
+		)
+	].slice(0, 10);
+	if (list.length === 0) return [];
+	const snap = await adminDb.collection(COLLECTION).where('to', 'in', list).limit(200).get();
+	return snap.docs
+		.map((d) => mapLog(d.id, d.data()))
+		.sort((a, b) => String(b.sentAt).localeCompare(String(a.sentAt)))
+		.slice(0, limit);
+}
+
 export async function countLogs(filters: EmailLogFilters = {}): Promise<number> {
 	const snap = await applyFilters(adminDb.collection(COLLECTION), filters).count().get();
 	return snap.data().count;

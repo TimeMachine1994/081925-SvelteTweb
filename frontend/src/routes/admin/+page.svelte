@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { enhance } from '$app/forms';
-	import { invalidate } from '$app/navigation';
+	import { invalidate, goto } from '$app/navigation';
+	import { memorialRowHref, memorialAdminHref } from '$lib/admin/contact';
 	import AdminLayout from '$lib/components/admin/AdminLayout.svelte';
 	import {
 		StatCard,
@@ -325,15 +326,17 @@
 								class="flex flex-col gap-3 rounded-md border border-l-4 border-slate-200 border-l-amber-400 bg-amber-50/50 p-4 sm:flex-row sm:items-center sm:justify-between"
 							>
 								<a
-									href="/admin/services/memorials/{memorial.id}"
+									href={memorialRowHref(memorial, d.canViewUsers)}
 									class="min-w-0 flex-1 hover:underline"
 								>
 									<div class="font-semibold text-slate-800">{memorial.lovedOneName}</div>
 									<div class="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500">
 										<span class="inline-flex items-center gap-1">
 											<AdminIcon name="user" size={13} />
-											{memorial.creatorEmail || 'No owner'}
+											{memorial.ownerName ? `${memorial.ownerName} · ` : ''}{memorial.creatorEmail ||
+												'No owner'}
 										</span>
+										<span>{memorial.phoneDisplay}</span>
 										<span class="inline-flex items-center gap-1">
 											<AdminIcon name="calendar" size={13} />
 											{formatDate(memorial.createdAt)}
@@ -345,6 +348,14 @@
 										{memorial.isPaid ? 'Paid' : 'Unpaid'}
 									</Badge>
 									<Badge variant="warning" icon="incomplete">Incomplete</Badge>
+									<Button
+										variant="secondary"
+										size="sm"
+										href={memorialAdminHref(memorial.id)}
+										class="min-h-11 sm:min-h-0"
+									>
+										Manage memorial
+									</Button>
 									<Button
 										variant="secondary"
 										size="sm"
@@ -376,20 +387,31 @@
 									<th class="px-3 py-2 font-semibold">Owner</th>
 									<th class="px-3 py-2 font-semibold">Created</th>
 									<th class="px-3 py-2 font-semibold">Status</th>
+									<th class="px-3 py-2 font-semibold"><span class="sr-only">Actions</span></th>
 								</tr>
 							</thead>
 							<tbody>
 								{#each d.recentMemorials.slice(0, 10) as memorial (memorial.id)}
-									<tr class="border-b border-slate-100 hover:bg-slate-50">
+									<tr
+										class="cursor-pointer border-b border-slate-100 hover:bg-slate-50"
+										onclick={(e) => {
+											if ((e.target as HTMLElement).closest('a,button')) return;
+											goto(memorialRowHref(memorial, d.canViewUsers));
+										}}
+									>
 										<td class="px-3 py-2.5">
 											<a
-												href="/admin/services/memorials/{memorial.id}"
+												href={memorialRowHref(memorial, d.canViewUsers)}
 												class="font-medium text-sky-700 hover:underline"
 											>
 												{memorial.lovedOneName}
 											</a>
 										</td>
-										<td class="px-3 py-2.5 text-slate-600">{memorial.creatorEmail || '—'}</td>
+										<td class="px-3 py-2.5 text-slate-600">
+											{#if memorial.ownerName}<div class="font-medium">{memorial.ownerName}</div>{/if}
+											<div>{memorial.creatorEmail || '—'}</div>
+											<div class="text-xs text-slate-500">{memorial.phoneDisplay}</div>
+										</td>
 										<td class="px-3 py-2.5 text-slate-500">{formatDate(memorial.createdAt)}</td>
 										<td class="px-3 py-2.5">
 											<div class="flex gap-1.5">
@@ -401,6 +423,11 @@
 												</Badge>
 											</div>
 										</td>
+										<td class="px-3 py-2.5 text-right">
+											<Button size="sm" variant="secondary" href={memorialAdminHref(memorial.id)}>
+												Manage memorial
+											</Button>
+										</td>
 									</tr>
 								{/each}
 							</tbody>
@@ -410,23 +437,32 @@
 					<!-- Mobile: stacked cards -->
 					<div class="flex flex-col gap-2 sm:hidden">
 						{#each d.recentMemorials.slice(0, 10) as memorial (memorial.id)}
-							<a
-								href="/admin/services/memorials/{memorial.id}"
-								class="flex flex-col gap-1.5 rounded-md border border-slate-200 p-3"
-							>
-								<div class="font-medium text-sky-700">{memorial.lovedOneName}</div>
-								<div class="text-xs text-slate-500">
-									{memorial.creatorEmail || 'No owner'} • {formatDate(memorial.createdAt)}
-								</div>
-								<div class="flex gap-1.5">
+							<div class="flex flex-col gap-1.5 rounded-md border border-slate-200 p-3">
+								<a href={memorialRowHref(memorial, d.canViewUsers)} class="flex flex-col gap-1.5">
+									<div class="font-medium text-sky-700">{memorial.lovedOneName}</div>
+									<div class="text-xs text-slate-500">
+										{memorial.ownerName ? `${memorial.ownerName} · ` : ''}{memorial.creatorEmail ||
+											'No owner'} • {formatDate(memorial.createdAt)}
+									</div>
+									<div class="text-xs text-slate-500">{memorial.phoneDisplay}</div>
+								</a>
+								<div class="flex flex-wrap items-center gap-1.5">
 									<Badge variant={memorial.isComplete ? 'success' : 'warning'}>
 										{memorial.isComplete ? 'Complete' : 'Incomplete'}
 									</Badge>
 									<Badge variant={memorial.isPaid ? 'success' : 'neutral'}>
 										{memorial.isPaid ? 'Paid' : 'Unpaid'}
 									</Badge>
+									<Button
+										size="sm"
+										variant="secondary"
+										href={memorialAdminHref(memorial.id)}
+										class="ml-auto min-h-11"
+									>
+										Manage memorial
+									</Button>
 								</div>
-							</a>
+							</div>
 						{/each}
 					</div>
 				{/if}

@@ -3,12 +3,53 @@
 	import RecordLink from '$lib/components/admin/RecordLink.svelte';
 	import { databaseDeepLink } from '$lib/admin/relationships';
 	import { goto } from '$app/navigation';
+	import { CopyButton, Button } from '$lib/components/admin/ui';
+	import { contactPhones, toTel, memorialAdminHref } from '$lib/admin/contact';
 
 	let { data } = $props();
 
 	function goBack() {
 		goto('/admin/users/memorial-owners');
 	}
+
+	const fmtDate = (v: unknown) => {
+		if (!v) return 'N/A';
+		const d = new Date(v as string);
+		return isNaN(d.getTime()) ? 'N/A' : d.toLocaleDateString();
+	};
+	const fmtDateTime = (v: unknown) => {
+		if (!v) return 'N/A';
+		const d = new Date(v as string);
+		return isNaN(d.getTime()) ? 'N/A' : d.toLocaleString();
+	};
+
+	const accountPhones = $derived(contactPhones({ ownerPhone: data.user.phone }));
+
+	const familyContacts = $derived(
+		data.memorials
+			.filter(
+				(m: any) => m.familyContactName || m.familyContactEmail || m.familyContactPhone
+			)
+			.map((m: any) => ({
+				memorial: m,
+				phones: contactPhones({
+					familyContactPhone: m.familyContactPhone,
+					ownerPhone: data.user.phone
+				}).filter((p) => p.label === 'family')
+			}))
+	);
+
+	function serviceSummary(m: any): string {
+		const main = m.services?.main;
+		const parts: string[] = [];
+		if (main?.time && !main.time.isUnknown && main.time.date) {
+			parts.push(`${main.time.date}${main.time.time ? ' ' + main.time.time : ''}`);
+		}
+		if (main?.location?.name) parts.push(main.location.name);
+		return parts.length ? parts.join(' — ') : 'Not set';
+	}
+
+	const statusVariant = (s: string) => (s === 'sent' ? 'success' : s === 'failed' ? 'danger' : 'neutral');
 </script>
 
 <AdminLayout
@@ -19,22 +60,12 @@
 			label: '← Back to Memorial Owners',
 			icon: '◀',
 			onclick: goBack
-		},
-		{
-			label: 'Edit User',
-			icon: '✏️',
-			onclick: () => console.log('Edit user')
-		},
-		{
-			label: 'Suspend User',
-			icon: '🚫',
-			onclick: () => console.log('Suspend user')
 		}
 	]}
 >
-	<!-- User Profile Card -->
+	<!-- Contact Card -->
 	<div class="card">
-		<h2>Profile Information</h2>
+		<h2>Contact</h2>
 		<div class="profile-grid">
 			<div class="field">
 				<label>Name:</label>
@@ -42,42 +73,164 @@
 			</div>
 			<div class="field">
 				<label>Email:</label>
-				<span>{data.user.email}</span>
-			</div>
-			<div class="field">
-				<label>Role:</label>
-				<span class="badge role-{data.user.role}">{data.user.role}</span>
-			</div>
-			<div class="field">
-				<label>Phone:</label>
-				<span>{data.user.phone || 'N/A'}</span>
-			</div>
-			<div class="field">
-				<label>Status:</label>
-				<span class="badge status-{data.user.suspended ? 'suspended' : 'active'}">
-					{data.user.suspended ? '🚫 Suspended' : '✅ Active'}
+				<span class="contact-line">
+					{#if data.user.email}
+						<a class="btn-link" href="mailto:{data.user.email}">{data.user.email}</a>
+						<CopyButton value={data.user.email} size="sm" iconOnly label="Copy email" toastMessage="Email copied" />
+					{:else}
+						N/A
+					{/if}
 				</span>
 			</div>
 			<div class="field">
-				<label>Has Paid:</label>
-				<span>{data.user.hasPaidForMemorial ? '✅ Yes' : '❌ No'}</span>
+				<label>Phone (account):</label>
+				<span class="contact-line">
+					{#if accountPhones.length}
+						{#each accountPhones as p (p.tel)}
+							<a class="btn-link" href="tel:{toTel(p.value)}">{p.value}</a>
+							<CopyButton value={p.value} size="sm" iconOnly label="Copy phone" toastMessage="Phone copied" />
+						{/each}
+					{:else}
+						Not provided
+					{/if}
+				</span>
 			</div>
 			<div class="field">
+				<label>Role / Status:</label>
+				<span>
+					<span class="badge role-{data.user.role}">{data.user.role}</span>
+					<span class="badge status-{data.user.suspended ? 'suspended' : 'active'}">
+						{data.user.suspended ? 'Suspended' : 'Active'}
+					</span>
+				</span>
+			</div>
+		</div>
+
+		{#each familyContacts as fc (fc.memorial.id)}
+			<div class="family-contact">
+				<strong>Family contact for {fc.memorial.lovedOneName}:</strong>
+				<span>{fc.memorial.familyContactName || 'No name'}</span>
+				{#if fc.memorial.familyContactEmail}
+					<span class="contact-line">
+						<a class="btn-link" href="mailto:{fc.memorial.familyContactEmail}">{fc.memorial.familyContactEmail}</a>
+						<CopyButton value={fc.memorial.familyContactEmail} size="sm" iconOnly label="Copy email" toastMessage="Email copied" />
+					</span>
+				{/if}
+				{#each fc.phones as p (p.tel)}
+					<span class="contact-line">
+						<a class="btn-link" href="tel:{p.tel}">{p.value}</a>
+						<CopyButton value={p.value} size="sm" iconOnly label="Copy phone" toastMessage="Phone copied" />
+					</span>
+				{/each}
+				{#if fc.memorial.familyContactPreference}
+					<span>Prefers {fc.memorial.familyContactPreference}</span>
+				{/if}
+			</div>
+		{/each}
+	</div>
+
+	<!-- Signup Summary -->
+	<div class="card">
+		<h2>Signup Summary</h2>
+		<div class="profile-grid">
+			<div class="field">
 				<label>Joined:</label>
-				<span
-					>{data.user.createdAt ? new Date(data.user.createdAt).toLocaleDateString() : 'N/A'}</span
-				>
+				<span>{fmtDate(data.user.createdAt)}</span>
 			</div>
 			<div class="field">
 				<label>Last Login:</label>
-				<span
-					>{data.user.lastLoginAt
-						? new Date(data.user.lastLoginAt).toLocaleDateString()
-						: 'Never'}</span
-				>
+				<span>{data.user.lastLoginAt ? fmtDate(data.user.lastLoginAt) : 'Never'}</span>
+			</div>
+			<div class="field">
+				<label>Has Paid:</label>
+				<span>{data.user.hasPaidForMemorial ? 'Yes' : 'No'}</span>
 			</div>
 		</div>
+		{#if data.memorials.length > 0}
+			<table class="data-table summary-table">
+				<thead>
+					<tr>
+						<th>Loved One</th>
+						<th>Custom Link</th>
+						<th>Service</th>
+						<th>Payment</th>
+						<th>Created</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each data.memorials as memorial (memorial.id)}
+						<tr>
+							<td>{memorial.lovedOneName}</td>
+							<td>
+								<code>tributestream.com/{memorial.fullSlug}</code>
+								<a
+									href="/{memorial.fullSlug}"
+									target="_blank"
+									rel="noopener noreferrer"
+									class="btn-link">Public page ↗</a
+								>
+							</td>
+							<td>{serviceSummary(memorial)}</td>
+							<td>
+								<span class="badge payment-{memorial.isPaid ? 'paid' : 'unpaid'}">
+									{memorial.isPaid ? 'Paid' : 'Unpaid'}
+								</span>
+							</td>
+							<td>{fmtDate(memorial.createdAt)}</td>
+							<td>
+								<Button size="sm" variant="secondary" href={memorialAdminHref(memorial.id)}>
+									Manage memorial
+								</Button>
+							</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+		{:else}
+			<p class="empty-state">No memorials created yet</p>
+		{/if}
 	</div>
+
+	<!-- Emails Sent -->
+	{#if data.canViewEmailLogs}
+		<div class="card">
+			<h2>Emails Sent ({data.emailLogs.length})</h2>
+			{#if data.emailLogs.length > 0}
+				<table class="data-table">
+					<thead>
+						<tr>
+							<th>Type</th>
+							<th>Sent</th>
+							<th>Status</th>
+							<th>Error</th>
+						</tr>
+					</thead>
+					<tbody>
+						{#each data.emailLogs as log (log.id)}
+							<tr>
+								<td>{log.type}</td>
+								<td>{fmtDateTime(log.sentAt)}</td>
+								<td>
+									<span class="badge email-{log.status}">{log.status}</span>
+								</td>
+								<td>{log.error || ''}</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			{:else}
+				<p class="empty-state">No emails logged for this address</p>
+			{/if}
+			{#if data.user.email}
+				<a
+					class="btn-link"
+					href="/admin/system/email-logs?to={encodeURIComponent(data.user.email)}"
+					>View all in Email Logs</a
+				>
+			{/if}
+		</div>
+	{/if}
 
 	<!-- Funeral Director Info (if applicable) -->
 	{#if data.funeralDirector}
@@ -144,54 +297,6 @@
 		</div>
 	</div>
 
-	<!-- Memorials Table -->
-	<div class="card">
-		<h2>Memorials ({data.memorials.length})</h2>
-		{#if data.memorials.length > 0}
-			<table class="data-table">
-				<thead>
-					<tr>
-						<th>Loved One Name</th>
-						<th>Full Slug</th>
-						<th>Status</th>
-						<th>Payment</th>
-						<th>Created</th>
-						<th>Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					{#each data.memorials as memorial}
-						<tr>
-							<td>{memorial.lovedOneName}</td>
-							<td><code>{memorial.fullSlug}</code></td>
-							<td>
-								<span class="badge status-{memorial.isPublic ? 'public' : 'private'}">
-									{memorial.isPublic ? '🌍 Public' : '🔒 Private'}
-								</span>
-							</td>
-							<td>
-								<span class="badge payment-{memorial.isPaid ? 'paid' : 'unpaid'}">
-									{memorial.isPaid ? '✅ Paid' : '❌ Unpaid'}
-								</span>
-							</td>
-							<td
-								>{memorial.createdAt
-									? new Date(memorial.createdAt.seconds * 1000).toLocaleDateString()
-									: 'N/A'}</td
-							>
-							<td>
-								<a href="/{memorial.fullSlug}" target="_blank" rel="noopener noreferrer" class="btn-link">View</a>
-								<a href="/admin/services/memorials/{memorial.id}" class="btn-link">Manage</a>
-							</td>
-						</tr>
-					{/each}
-				</tbody>
-			</table>
-		{:else}
-			<p class="empty-state">No memorials created yet</p>
-		{/if}
-	</div>
-
 	<!-- Streams Table -->
 	<div class="card">
 		<h2>Streams ({data.streams.length})</h2>
@@ -225,7 +330,7 @@
 								</span>
 							</td>
 							<td>{stream.scheduledStartTime || 'N/A'}</td>
-							<td>{new Date(stream.createdAt).toLocaleDateString()}</td>
+							<td>{fmtDate(stream.createdAt)}</td>
 							<td>
 								<a class="btn-link" href={databaseDeepLink('streams', { document: stream.id })}>
 									View in DB
@@ -265,7 +370,7 @@
 								</span>
 							</td>
 							<td>{slideshow.photos?.length || 0}</td>
-							<td>{new Date(slideshow.createdAt).toLocaleDateString()}</td>
+							<td>{fmtDate(slideshow.createdAt)}</td>
 						</tr>
 					{/each}
 				</tbody>
@@ -298,7 +403,7 @@
 									{request.status}
 								</span>
 							</td>
-							<td>{new Date(request.createdAt.seconds * 1000).toLocaleDateString()}</td>
+							<td>{fmtDate(request.createdAt)}</td>
 						</tr>
 					{/each}
 				</tbody>
@@ -325,7 +430,7 @@
 							<td>{action.action}</td>
 							<td>{action.targetType}</td>
 							<td><code>{action.targetId}</code></td>
-							<td>{new Date(action.timestamp.seconds * 1000).toLocaleString()}</td>
+							<td>{fmtDateTime(action.timestamp)}</td>
 						</tr>
 					{/each}
 				</tbody>
@@ -503,6 +608,39 @@
 	.badge.status-denied {
 		background: #fed7d7;
 		color: #c53030;
+	}
+
+	.contact-line {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+	}
+
+	.family-contact {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.75rem;
+		margin-top: 1rem;
+		padding-top: 1rem;
+		border-top: 1px solid #e2e8f0;
+		font-size: 0.875rem;
+	}
+
+	.badge.email-sent {
+		background: #c6f6d5;
+		color: #276749;
+	}
+
+	.badge.email-failed {
+		background: #fed7d7;
+		color: #c53030;
+	}
+
+	.badge.email-mocked {
+		background: #e2e8f0;
+		color: #4a5568;
 	}
 
 	.btn-link {

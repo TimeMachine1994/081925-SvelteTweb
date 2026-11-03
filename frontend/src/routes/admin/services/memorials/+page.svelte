@@ -14,6 +14,7 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 	import { can } from '$lib/stores/adminUser';
 	import { goto } from '$app/navigation';
 	import { applyFilters, type FilterRule } from '$lib/utils/filter-utils';
+	import { memorialRowHref, memorialAdminHref } from '$lib/admin/contact';
 
 	let { data } = $props();
 
@@ -72,13 +73,6 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 		}
 	}
 
-	// Navigate to user detail page
-	function viewUserDetails(row: any) {
-		if (row.ownerUid) {
-			goto(`/admin/users/memorial-owners/${row.ownerUid}`);
-		}
-	}
-
 	// Column configuration
 	const columns = [
 		{
@@ -91,13 +85,26 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 			formatter: (val: string, row: any) => row.customTitle || val
 		},
 		{
+			id: 'contactName',
+			label: 'Contact',
+			field: 'contactName',
+			width: 160,
+			sortable: true,
+			formatter: (val: string) => val || '—'
+		},
+		{
 			id: 'ownerEmail',
 			label: 'Owner',
 			field: 'creatorEmail',
 			width: 200,
 			sortable: true,
-			onClick: viewUserDetails,
 			formatter: (val: string) => val || 'Unknown'
+		},
+		{
+			id: 'phone',
+			label: 'Phone',
+			field: 'phoneDisplay',
+			width: 220
 		},
 		{
 			id: 'isPaid',
@@ -146,6 +153,14 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 				const timePart = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 				return `${datePart} ${timePart}`;
 			}
+		},
+		{
+			id: 'manage',
+			label: 'Manage',
+			field: 'id',
+			width: 160,
+			formatter: () => 'Manage memorial →',
+			onClick: (row: any) => goto(memorialAdminHref(row.id))
 		}
 	];
 
@@ -193,7 +208,7 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 	}
 
 	function handleRowClick(memorial: any) {
-		goto(`/admin/services/memorials/${memorial.id}`);
+		goto(memorialRowHref(memorial, data.canViewUsers));
 	}
 </script>
 
@@ -223,7 +238,7 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 		<input
 			type="text"
 			name="q"
-			placeholder="Search by name, slug, owner, location..."
+			placeholder="Search by name, slug, owner, phone, location..."
 			value={search}
 			oninput={(event) => {
 				const target = event.currentTarget as HTMLInputElement;
@@ -257,6 +272,7 @@ Implements ADMIN_REFACTOR_2_DATA_OPERATIONS.md features
 			<FilterBuilder
 				fields={[
 					{ id: 'lovedOneName', label: 'Name', type: 'string' },
+					{ id: 'contactName', label: 'Contact', type: 'string' },
 					{ id: 'creatorEmail', label: 'Owner Email', type: 'string' },
 					{ id: 'isPaid', label: 'Payment Status', type: 'boolean' },
 					{ id: 'isPublic', label: 'Visibility', type: 'boolean' },

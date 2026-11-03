@@ -39,6 +39,18 @@ export async function getUser(uid: string): Promise<UserRecord | null> {
 	return snap.exists ? mapUser(snap.id, snap.data() || {}) : null;
 }
 
+/** Batched lookup by uid (chunks of 100). Missing users are omitted from the map. */
+export async function getUsersByIds(uids: string[]): Promise<Map<string, UserRecord>> {
+	const ids = [...new Set(uids.filter(Boolean))];
+	const out = new Map<string, UserRecord>();
+	for (let i = 0; i < ids.length; i += 100) {
+		const refs = ids.slice(i, i + 100).map((id) => adminDb.collection(COLLECTION).doc(id));
+		const snaps = await adminDb.getAll(...refs);
+		for (const s of snaps) if (s.exists) out.set(s.id, mapUser(s.id, s.data() || {}));
+	}
+	return out;
+}
+
 export async function userExists(uid: string): Promise<boolean> {
 	return (await adminDb.collection(COLLECTION).doc(uid).get()).exists;
 }

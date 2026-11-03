@@ -2,6 +2,8 @@ import { error } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
 import { requireAdmin } from '$lib/server/adminGuard';
 import { countMemorialChatMessagesByUser } from '$lib/server/db/repos/chat';
+import { listLogsForRecipients } from '$lib/server/db/repos/emailAudit';
+import { hasPermission } from '$lib/admin/permissions';
 
 // Helper to safely serialize Firestore data
 function safeSerialize(data: any): any {
@@ -40,7 +42,8 @@ function safeSerialize(data: any): any {
 }
 
 export const load = async ({ locals, params }: any) => {
-	requireAdmin(locals, { resource: 'user', action: 'read' });
+	const admin = requireAdmin(locals, { resource: 'user', action: 'read' });
+	const canViewEmailLogs = hasPermission(admin, 'audit_log', 'read');
 
 	const { userId } = params;
 
@@ -190,6 +193,34 @@ export const load = async ({ locals, params }: any) => {
 			console.warn('Error fetching chat messages:', chatErr);
 		}
 
+		// 9b. Emails sent to this user (audit log)
+		let emailLogs: Array<{
+			id: string;
+			type: string;
+			to: string;
+			sentAt: string;
+			status: string;
+			error: string | null;
+		}> = [];
+		if (canViewEmailLogs) {
+			try {
+				const logs = await listLogsForRecipients(
+					[userData?.email, ...memorials.map((m) => m.creatorEmail)],
+					20
+				);
+				emailLogs = logs.map((l) => ({
+					id: l.id,
+					type: l.type,
+					to: l.to,
+					sentAt: String(l.sentAt),
+					status: l.status,
+					error: l.error || null
+				}));
+			} catch (logErr) {
+				console.warn('Error fetching email logs:', logErr);
+			}
+		}
+
 		// 10. Get follower count (memorials user follows) - simplified
 		let followedMemorialsCount = 0;
 
@@ -215,6 +246,8 @@ export const load = async ({ locals, params }: any) => {
 			invitations: serializedInvitations,
 			scheduleRequests: serializedScheduleRequests,
 			adminActions: serializedAdminActions,
+			emailLogs,
+			canViewEmailLogs,
 			stats: {
 				memorialCount: memorials.length,
 				streamCount: streams.length,
