@@ -249,6 +249,54 @@ export async function getMuxAssetMp4Status(
 	}
 }
 
+export type MuxMasterStatus = 'none' | 'preparing' | 'ready' | 'errored';
+
+export interface MuxMasterState {
+	status: MuxMasterStatus;
+	/** Temporary (~24h) URL to the original master MP4. Only present when `status` is 'ready'. */
+	url?: string;
+}
+
+function toMasterState(asset: {
+	master_access?: 'temporary' | 'none';
+	master?: { status?: 'ready' | 'preparing' | 'errored'; url?: string };
+}): MuxMasterState {
+	if (!asset.master) {
+		return { status: asset.master_access === 'temporary' ? 'preparing' : 'none' };
+	}
+	const status = asset.master.status ?? 'preparing';
+	return status === 'ready' && asset.master.url ? { status, url: asset.master.url } : { status };
+}
+
+/**
+ * Current state of an asset's original ("master") MP4 download. Master access
+ * is temporary: Mux reverts it to `none` ~24h after it is requested.
+ */
+export async function getMuxAssetMaster(assetId: string): Promise<MuxMasterState> {
+	const asset = await mux.video.assets.retrieve(assetId);
+	return toMasterState(asset);
+}
+
+/**
+ * Ensure temporary master access is requested for an asset and return its
+ * current state. Idempotent: a no-op when access is already granted.
+ */
+export async function requestMuxAssetMaster(assetId: string): Promise<MuxMasterState> {
+	console.log('🎬 [MUX SERVICE] Requesting master access for asset:', assetId);
+	try {
+		const asset = await mux.video.assets.retrieve(assetId);
+		if (asset.master_access === 'temporary' && asset.master?.status !== 'errored') {
+			return toMasterState(asset);
+		}
+		return toMasterState(
+			await mux.video.assets.updateMasterAccess(assetId, { master_access: 'temporary' })
+		);
+	} catch (error) {
+		console.error('❌ [MUX SERVICE] Failed to request master access:', error);
+		throw error;
+	}
+}
+
 /**
  * Verify Mux webhook signature (Updated for @mux/mux-node v12+)
  * 

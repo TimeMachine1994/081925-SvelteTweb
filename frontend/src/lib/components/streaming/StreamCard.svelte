@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Stream } from '$lib/types/stream';
-	import { Video, Eye, EyeOff, Archive, StopCircle, Copy, Check, ChevronDown, Calendar, ExternalLink, Pencil, Film } from 'lucide-svelte';
+	import { Video, Eye, EyeOff, Archive, StopCircle, Copy, Check, ChevronDown, Calendar, ExternalLink, Pencil, Film, Download, Loader2 } from 'lucide-svelte';
 	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
 
@@ -36,6 +36,61 @@
 	let uploadState = $state<'idle' | 'requesting' | 'uploading' | 'done' | 'error'>('idle');
 	let uploadProgress = $state(0);
 	let uploadErrorMessage = $state('');
+
+	// Original (master) recording download, keyed by Mux asset ID. Mux prepares
+	// the master asynchronously, so we request it then poll until it's ready.
+	type MasterDownload = {
+		status: 'requesting' | 'preparing' | 'ready' | 'errored';
+		url?: string;
+		error?: string;
+	};
+	let masterDownloads = $state<Record<string, MasterDownload>>({});
+	let masterPollTimers: ReturnType<typeof setTimeout>[] = [];
+	let masterPollingStopped = false;
+	const MASTER_POLL_MS = 5000;
+
+	function masterEndpoint(assetId: string) {
+		return `/api/admin/memorials/${memorialId}/streams/${stream.id}/recordings/${assetId}/master`;
+	}
+
+	async function masterRequest(assetId: string, method: 'GET' | 'POST') {
+		const res = await fetch(masterEndpoint(assetId), { method });
+		const data = await res.json().catch(() => ({}));
+		if (!res.ok) throw new Error(data.message || `Request failed (${res.status})`);
+		return data as { status: 'none' | 'preparing' | 'ready' | 'errored'; url?: string };
+	}
+
+	function applyMasterState(assetId: string, data: { status: string; url?: string }) {
+		if (data.status === 'ready' && data.url) {
+			masterDownloads[assetId] = { status: 'ready', url: data.url };
+		} else if (data.status === 'errored') {
+			masterDownloads[assetId] = { status: 'errored', error: 'Mux failed to prepare the original file.' };
+		} else {
+			masterDownloads[assetId] = { status: 'preparing' };
+			masterPollTimers.push(
+				setTimeout(() => {
+					if (!masterPollingStopped) pollMaster(assetId);
+				}, MASTER_POLL_MS)
+			);
+		}
+	}
+
+	async function pollMaster(assetId: string) {
+		try {
+			applyMasterState(assetId, await masterRequest(assetId, 'GET'));
+		} catch (err) {
+			masterDownloads[assetId] = { status: 'errored', error: err instanceof Error ? err.message : 'Check failed' };
+		}
+	}
+
+	async function prepareMaster(assetId: string) {
+		masterDownloads[assetId] = { status: 'requesting' };
+		try {
+			applyMasterState(assetId, await masterRequest(assetId, 'POST'));
+		} catch (err) {
+			masterDownloads[assetId] = { status: 'errored', error: err instanceof Error ? err.message : 'Request failed' };
+		}
+	}
 
 	// Single visible "Choose Video & Upload" button opens the hidden file
 	// input; the upload then starts immediately once a file is picked — no
@@ -338,6 +393,8 @@
 	});
 
 	onDestroy(() => {
+		masterPollingStopped = true;
+		masterPollTimers.forEach(clearTimeout);
 		if (liveCheckInterval) {
 			clearInterval(liveCheckInterval);
 		}
@@ -409,6 +466,45 @@
 		}
 	}
 </script>
+
+{#snippet masterDownloadButton(assetId: string | undefined)}
+	{#if canManage && assetId}
+		{@const master = masterDownloads[assetId]}
+		<div class="mt-2 flex flex-wrap items-center gap-2">
+			{#if master?.status === 'ready' && master.url}
+				<a
+					href={master.url}
+					download
+					class="inline-flex items-center gap-1.5 rounded-md bg-green-700 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-green-800"
+				>
+					<Download class="h-3.5 w-3.5" />
+					Download Original
+				</a>
+				<span class="text-xs text-green-700">Link expires in about 24 hours.</span>
+			{:else if master?.status === 'requesting' || master?.status === 'preparing'}
+				<span class="inline-flex items-center gap-1.5 rounded-md bg-green-200 px-3 py-1.5 text-xs font-medium text-green-900">
+					<Loader2 class="h-3.5 w-3.5 animate-spin" />
+					{master.status === 'requesting' ? 'Requesting…' : 'Preparing original file…'}
+				</span>
+				{#if master.status === 'preparing'}
+					<span class="text-xs text-green-700">Can take several minutes for long recordings. Keep this page open.</span>
+				{/if}
+			{:else}
+				<button
+					type="button"
+					onclick={() => prepareMaster(assetId)}
+					class="inline-flex items-center gap-1.5 rounded-md border border-green-700 bg-white px-3 py-1.5 text-xs font-medium text-green-800 transition-colors hover:bg-green-50"
+				>
+					<Download class="h-3.5 w-3.5" />
+					{master?.status === 'errored' ? 'Try Again' : 'Prepare Original Download'}
+				</button>
+				{#if master?.status === 'errored'}
+					<span class="text-xs text-red-700">{master.error}</span>
+				{/if}
+			{/if}
+		</div>
+	{/if}
+{/snippet}
 
 <div
 	class="overflow-hidden rounded-2xl border transition-all duration-300 hover:shadow-xl {isSelected ? 'border-blue-500 shadow-xl bg-blue-50' : 'border-gray-200 bg-white shadow-lg'}"
@@ -668,6 +764,7 @@
 											— {Math.floor(recording.duration / 60)}m {Math.floor(recording.duration % 60)}s
 										{/if}
 									</p>
+									{@render masterDownloadButton(recording.assetId)}
 								</div>
 							{/each}
 						</div>
@@ -677,6 +774,7 @@
 							{#if stream.mux?.duration}
 								<p class="mt-1"><strong>Duration:</strong> {Math.floor(stream.mux.duration / 60)}m {Math.floor(stream.mux.duration % 60)}s</p>
 							{/if}
+							{@render masterDownloadButton(stream.mux.assetId)}
 						</div>
 					{/if}
 				</div>
