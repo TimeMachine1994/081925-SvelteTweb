@@ -98,7 +98,23 @@ export const load: LayoutServerLoad = async ({ params, locals }) => {
 
 			additionalSlugs: memorialData.additionalSlugs || [],
 
-			manualPayment: memorialData.manualPayment || null,
+			manualPayment: memorialData.manualPayment
+				? {
+						...memorialData.manualPayment,
+						markedPaidAt: convertTimestamp(memorialData.manualPayment.markedPaidAt)
+					}
+				: null,
+			paymentHistory: (Array.isArray(memorialData.paymentHistory) ? memorialData.paymentHistory : []).map(
+				(p: any) => ({
+					source: p.source || 'checkout',
+					invoiceId: p.invoiceId || null,
+					checkoutSessionId: p.checkoutSessionId || null,
+					paymentIntentId: p.paymentIntentId || null,
+					status: p.status || null,
+					amount: typeof p.amount === 'number' ? p.amount : 0, // dollars
+					paidAt: convertTimestamp(p.paidAt)
+				})
+			),
 
 			services: memorialData.services || null,
 

@@ -154,6 +154,36 @@ await adminAuth.setCustomUserClaims(uid, {});
 - Stream starts/stops
 - Payment completions
 
+#### 5. "Next 7 Days"
+
+Built from two sources in `src/routes/admin/+page.server.ts`:
+
+1. **Streams**: `listScheduledBetween()` (`repos/streams.ts`). `scheduledStartTime` is stored in mixed formats: UTC ISO, timezone-less wall-clock strings such as `2026-11-13T08:30:00`, and occasionally Firestore Timestamps. The repo fetches a padded window and parses each value with `parseScheduleTime()` (`$lib/utils/scheduleTime.ts`). Timezone-less values are read as `BUSINESS_TIMEZONE` (`America/New_York`).
+2. **Memorial main-service dates**: `listWithMainServiceBetween()` (`repos/memorials.ts`) checks `services.main.time`, `calculatorConfig.autoSave.formData.mainService.time`, and `calculatorConfig.formData.mainService.time`. A memorial whose service is in the window but has no stream there is listed with one of two flags:
+   - **"No livestream set up"**: the memorial has no streams at all.
+   - **"Stream time not set"**: it has streams, but none are scheduled in the window.
+
+   `time.isUnknown` is ignored because it defaults to `true` and is never cleared. Additional locations/days are not covered.
+
+All times display in ET.
+
+#### 6. Invoices (memorial → Billing tab)
+
+`MemorialInvoicesPanel` lists every charge for the memorial:
+
+- invoices (`repos/invoices.listByMemorial`)
+- the original online-booking checkout (`memorial.paymentHistory`)
+- any manual "Mark Paid" record
+
+Admins can create invoices with free-form line items, emailed or not, then copy/open the pay link, resend the email, or void a pending invoice. The APIs are `/api/admin/invoices`, `/api/admin/invoices/[id]/resend`, and `/api/admin/invoices/[id]/cancel`. They are guarded by the `invoice` RBAC resource, which super, content, and financial admins have.
+
+Invoice `kind`:
+
+- `booking`: paying it marks the memorial paid, via `applyInvoicePaid` in `$lib/server/invoicePayments.ts`. Legacy invoices with no `kind` count as booking.
+- `additional`: add-on/custom charges. These never change the memorial's paid flag.
+
+Memorial owners see their pending and paid invoices, with Pay now / View receipt links, on `/profile`.
+
 ## MVP Dashboard (`/admin/mvp-dashboard`)
 
 Enhanced version with additional features:

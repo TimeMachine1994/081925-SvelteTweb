@@ -2,7 +2,8 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import Stripe from 'stripe';
 import { adminDb, FieldValue } from '$lib/server/firebase';
-import { getInvoice, markPaid } from '$lib/server/db/repos/invoices';
+import { getInvoice } from '$lib/server/db/repos/invoices';
+import { applyInvoicePaid } from '$lib/server/invoicePayments';
 import { Timestamp } from 'firebase-admin/firestore';
 import { env } from '$env/dynamic/private';
 
@@ -424,7 +425,7 @@ async function handleInvoicePaymentSuccess(session: Stripe.Checkout.Session) {
 			return;
 		}
 
-		await markPaid(invoiceId, { paymentIntentId, stripeSessionId: session.id });
+		await applyInvoicePaid(invoice, { paymentIntentId, stripeSessionId: session.id });
 
 		console.log(`✅ [WEBHOOK] Invoice marked as paid: ${invoiceId}`);
 

@@ -10,12 +10,17 @@ export const invoices = sqliteTable(
 		customerName: text('customer_name'),
 		total: integer('total').notNull().default(0), // cents
 		status: text('status').notNull().default('pending'),
+		kind: text('kind').notNull().default('additional'), // 'booking' | 'additional'
+		note: text('note'),
 		createdBy: text('created_by').notNull(),
 		memorialId: text('memorial_id'),
 		stripeSessionId: text('stripe_session_id'),
 		paymentIntentId: text('payment_intent_id'),
 		expiresAt: text('expires_at'),
 		paidAt: text('paid_at'),
+		cancelledAt: text('cancelled_at'),
+		cancelledBy: text('cancelled_by'),
+		lastSentAt: text('last_sent_at'),
 		...timestamps
 	},
 	(t) => [

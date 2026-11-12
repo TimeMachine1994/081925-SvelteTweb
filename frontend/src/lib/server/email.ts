@@ -1284,6 +1284,7 @@ export interface InvoiceEmailData {
 	items: Array<{ name: string; quantity: number; price: number; total: number }>;
 	total: number;
 	paymentUrl: string;
+	memorialName?: string;
 }
 
 export interface InvoiceReceiptEmailData {
@@ -1304,10 +1305,21 @@ function formatCentsToUSD(cents: number): string {
 	}).format(cents / 100);
 }
 
+/** Invoice item names / memorial names are admin free text — escape for HTML. */
+function escapeInvoiceHtml(value: string): string {
+	return value
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&#39;');
+}
+
 /**
  * Send invoice email with payment link (simple HTML, no template)
  */
 export async function sendInvoiceEmail(data: InvoiceEmailData) {
+	const memorialSuffix = data.memorialName ? ` for the memorial of ${data.memorialName}` : '';
 	const templateData = {
 		customerEmail: data.customerEmail,
 		customerName: data.customerName || '',
@@ -1322,7 +1334,7 @@ export async function sendInvoiceEmail(data: InvoiceEmailData) {
 		data.customerEmail,
 		templateData,
 		{
-			subject: `Invoice from Tributestream - ${formatCentsToUSD(data.total)}`,
+			subject: `Invoice from Tributestream - ${formatCentsToUSD(data.total)}${data.memorialName ? ` (${data.memorialName})` : ''}`,
 			cc: ['tributestream@gmail.com'],
 			triggeredBy: 'admin_invoice',
 			invoiceId: data.invoiceId
@@ -1339,7 +1351,7 @@ export async function sendInvoiceEmail(data: InvoiceEmailData) {
 		.map(
 			(item) =>
 				`<tr>
-					<td style="padding: 8px; border-bottom: 1px solid #eee;">${item.name}</td>
+					<td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeInvoiceHtml(item.name)}</td>
 					<td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
 					<td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${formatCentsToUSD(item.total)}</td>
 				</tr>`
@@ -1359,9 +1371,9 @@ export async function sendInvoiceEmail(data: InvoiceEmailData) {
 		<p style="color: #64748b; margin: 5px 0;">Invoice</p>
 	</div>
 	
-	<p>Hi${data.customerName ? ` ${data.customerName}` : ''},</p>
+	<p>Hi${data.customerName ? ` ${escapeInvoiceHtml(data.customerName)}` : ''},</p>
 	
-	<p>You have received an invoice from Tributestream for <strong>${formatCentsToUSD(data.total)}</strong>.</p>
+	<p>You have received an invoice from Tributestream for <strong>${formatCentsToUSD(data.total)}</strong>${escapeInvoiceHtml(memorialSuffix)}.</p>
 	
 	<div style="background: #f8fafc; border-radius: 8px; padding: 20px; margin: 20px 0;">
 		<p style="margin: 0 0 10px; color: #64748b; font-size: 14px;">Invoice ID: ${data.invoiceId}</p>
@@ -1411,7 +1423,7 @@ Tributestream Invoice
 
 Hi${data.customerName ? ` ${data.customerName}` : ''},
 
-You have received an invoice from Tributestream for ${formatCentsToUSD(data.total)}.
+You have received an invoice from Tributestream for ${formatCentsToUSD(data.total)}${memorialSuffix}.
 
 Invoice ID: ${data.invoiceId}
 
@@ -1494,7 +1506,7 @@ export async function sendInvoiceReceiptEmail(data: InvoiceReceiptEmailData) {
 		.map(
 			(item) =>
 				`<tr>
-					<td style="padding: 8px; border-bottom: 1px solid #eee;">${item.name}</td>
+					<td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeInvoiceHtml(item.name)}</td>
 					<td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
 					<td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">${formatCentsToUSD(item.total)}</td>
 				</tr>`
@@ -1514,7 +1526,7 @@ export async function sendInvoiceReceiptEmail(data: InvoiceReceiptEmailData) {
 		<p style="color: #16a34a; margin: 5px 0;">✓ Payment Received</p>
 	</div>
 	
-	<p>Hi${data.customerName ? ` ${data.customerName}` : ''},</p>
+	<p>Hi${data.customerName ? ` ${escapeInvoiceHtml(data.customerName)}` : ''},</p>
 	
 	<p>Thank you for your payment of <strong>${formatCentsToUSD(data.total)}</strong>.</p>
 	

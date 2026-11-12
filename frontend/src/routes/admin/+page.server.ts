@@ -1,7 +1,14 @@
 import { fail } from '@sveltejs/kit';
 import { adminDb } from '$lib/server/firebase';
 import { countAll as countFuneralDirectors } from '$lib/server/db/repos/funeralDirectors';
-import { listLive, listScheduledBetween, listAll as listAllStreams } from '$lib/server/db/repos/streams';
+import {
+	listLive,
+	listScheduledBetween,
+	listAll as listAllStreams,
+	listByMemorial as listStreamsByMemorial
+} from '$lib/server/db/repos/streams';
+import { listWithMainServiceBetween } from '$lib/server/db/repos/memorials';
+import { businessDate, serviceStart } from '$lib/utils/scheduleTime';
 import { requireAdmin, requireAdminAction } from '$lib/server/adminGuard';
 import { logAdminAction, extractUserContext } from '$lib/server/auditLogger';
 import { createLogger } from '$lib/admin/logger';
@@ -44,6 +51,24 @@ interface TriageStream {
 }
 
 /**
+ * A row in "Next 7 Days": either a scheduled stream, or a memorial whose main
+ * service falls in the window but has no stream scheduled for it (`issue`).
+ */
+interface UpcomingItem {
+	key: string;
+	kind: 'stream' | 'service';
+	memorialId: string;
+	memorialName: string;
+	memorialFullSlug: string;
+	title: string;
+	startTime: string;
+	timeTbd: boolean;
+	sourceType?: 'rtmp' | 'upload';
+	videoReady?: boolean;
+	issue: null | 'no_stream' | 'stream_unscheduled';
+}
+
+/**
  * Heavy Firestore work, isolated so it can be streamed to the client. The page
  * shell + sidebar render immediately while this resolves in the background.
  */
@@ -70,7 +95,8 @@ async function loadDashboardData(canViewUsers: boolean) {
 			liveStreams,
 			soonStreams,
 			weekStreams,
-			readyStreams // status 'ready' == no start time set yet
+			readyStreams, // status 'ready' == no start time set yet
+			weekServices
 		] = await Promise.all([
 			adminDb.collection('memorials').orderBy('createdAt', 'desc').limit(50).get(),
 			adminDb.collection('memorials').count().get(),
@@ -79,7 +105,8 @@ async function loadDashboardData(canViewUsers: boolean) {
 			listLive(),
 			listScheduledBetween(nowIso, soonCutoff.toISOString()),
 			listScheduledBetween(nowIso, weekCutoff.toISOString()),
-			listAllStreams({ status: 'ready', limit: 100 })
+			listAllStreams({ status: 'ready', limit: 100 }),
+			listWithMainServiceBetween(businessDate(now), businessDate(weekCutoff))
 		]);
 
 		let owners = new Map<string, any>();
@@ -195,10 +222,60 @@ async function loadDashboardData(canViewUsers: boolean) {
 		];
 
 		// Next 7 days: everything scheduled this week that isn't already in the
-		// On Air strip above.
-		const next7Days: TriageStream[] = weekStreams
+		// On Air strip above, plus memorials whose main service is this week but
+		// have no stream scheduled for it (flagged so someone sets one up).
+		const streamItems: UpcomingItem[] = weekStreams
 			.filter((s) => !liveNowIds.has(s.id) && !soonIds.has(s.id))
-			.map(toTriageStream);
+			.map((s) => {
+				const t = toTriageStream(s);
+				return {
+					key: t.id,
+					kind: 'stream',
+					memorialId: t.memorialId,
+					memorialName: t.memorialName,
+					memorialFullSlug: t.memorialFullSlug,
+					title: t.title,
+					startTime: t.scheduledStartTime!,
+					timeTbd: false,
+					sourceType: t.sourceType,
+					videoReady: t.videoReady,
+					issue: null
+				};
+			});
+
+		const scheduledMemorialIds = new Set(allTouchedStreams.map((s) => s.memorialId));
+		const serviceCutoff = now.getTime() - 3 * 60 * 60 * 1000; // hide services that already ended
+		const serviceItems: UpcomingItem[] = (
+			await Promise.all(
+				weekServices
+					.filter((m) => !scheduledMemorialIds.has(m.id))
+					.map(async (m): Promise<UpcomingItem | null> => {
+						const start = serviceStart(m.serviceTime);
+						if (!start || start.start.getTime() < serviceCutoff) return null;
+						let streams: Awaited<ReturnType<typeof listStreamsByMemorial>> = [];
+						try {
+							streams = (await listStreamsByMemorial(m.id)).filter((s) => !s.isDeleted);
+						} catch (err) {
+							log.error('Failed to load streams for upcoming service', err);
+						}
+						return {
+							key: `svc-${m.id}`,
+							kind: 'service',
+							memorialId: m.id,
+							memorialName: m.lovedOneName,
+							memorialFullSlug: m.fullSlug,
+							title: 'Main service',
+							startTime: start.start.toISOString(),
+							timeTbd: start.timeTbd,
+							issue: streams.length === 0 ? 'no_stream' : 'stream_unscheduled'
+						};
+					})
+			)
+		).filter((i): i is UpcomingItem => i !== null);
+
+		const next7Days = [...streamItems, ...serviceItems].sort((a, b) =>
+			a.startTime.localeCompare(b.startTime)
+		);
 
 		// Needs setup before showtime:
 		// 1. Streams with no start time set (status === 'ready').

@@ -6,7 +6,16 @@
  */
 
 export interface Permission {
-	resource: 'memorial' | 'stream' | 'user' | 'funeral_director' | 'blog' | 'audit_log' | 'system' | '*';
+	resource:
+		| 'memorial'
+		| 'stream'
+		| 'invoice'
+		| 'user'
+		| 'funeral_director'
+		| 'blog'
+		| 'audit_log'
+		| 'system'
+		| '*';
 	action: 'read' | 'create' | 'update' | 'delete' | 'approve' | 'export' | '*';
 	scope?: 'own' | 'team' | 'all';
 	conditions?: PermissionCondition[];
@@ -55,6 +64,7 @@ export const ADMIN_ROLES: Record<string, Role> = {
 		permissions: [
 			{ resource: 'memorial', action: '*', scope: 'all' },
 			{ resource: 'stream', action: '*', scope: 'all' },
+			{ resource: 'invoice', action: '*', scope: 'all' },
 			{ resource: 'blog', action: '*', scope: 'all' },
 			{ resource: 'user', action: 'read', scope: 'all' },
 			{ resource: 'user', action: 'update', scope: 'all' },
@@ -79,6 +89,7 @@ export const ADMIN_ROLES: Record<string, Role> = {
 					{ field: 'action', operator: 'in', value: ['markPaid', 'markUnpaid', 'editPaymentNotes'] }
 				]
 			},
+			{ resource: 'invoice', action: '*', scope: 'all' },
 			{ resource: 'audit_log', action: 'read', scope: 'all' },
 			{ resource: 'audit_log', action: 'export', scope: 'all' }
 		]

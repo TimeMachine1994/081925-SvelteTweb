@@ -8,6 +8,8 @@ import { dev } from '$app/environment';
 import { generateUniqueMemorialSlug } from '$lib/utils/memorial-slug';
 import { selectDisplayRecordings, type MuxRecordingLike } from '$lib/utils/recording-selection';
 import { getMuxAssetMp4Status } from '$lib/server/mux';
+import { listByMemorial as listInvoicesByMemorial } from '$lib/server/db/repos/invoices';
+import type { Invoice } from '$lib/types/invoice';
 
 // Helper function to convert Timestamps and Dates to strings
 function sanitizeData(data: any): any {
@@ -116,6 +118,41 @@ async function attachDownloadableRecordings(
 	);
 }
 
+export interface OwnerInvoice {
+	id: string;
+	status: Invoice['status'];
+	total: number; // cents
+	items: Array<{ name: string; quantity: number; total: number }>;
+	createdAt: string;
+	paidAt: string | null;
+}
+
+async function attachOwnerInvoices(
+	memorials: Array<Memorial & { invoices?: OwnerInvoice[] }>
+): Promise<void> {
+	await Promise.all(
+		memorials.map(async (memorial) => {
+			if (!memorial.id) return;
+			try {
+				const invoices = await listInvoicesByMemorial(memorial.id);
+				memorial.invoices = invoices
+					.filter((i) => i.status === 'pending' || i.status === 'paid')
+					.map((i) => ({
+						id: i.id,
+						status: i.status,
+						total: i.total,
+						items: (i.items || []).map((it) => ({ name: it.name, quantity: it.quantity, total: it.total })),
+						createdAt: i.createdAt,
+						paidAt: i.paidAt ?? null
+					}));
+			} catch (err) {
+				console.error('❌ [PROFILE_SERVER] Failed to load invoices for memorial:', memorial.id, err);
+				memorial.invoices = [];
+			}
+		})
+	);
+}
+
 export const load: PageServerLoad = async ({ locals }) => {
 	try {
 		if (!locals.user) {
@@ -189,6 +226,12 @@ export const load: PageServerLoad = async ({ locals }) => {
 		// memorial without the public memorial page needing one at all.
 		if (memorials.length && (role === 'owner' || role === 'funeral_director')) {
 			await attachDownloadableRecordings(memorials);
+		}
+
+		// Owners see their memorials' invoices (pay links / receipts). Only the
+		// public-safe fields — no internal notes, creator, or Stripe ids.
+		if (memorials.length && role === 'owner') {
+			await attachOwnerInvoices(memorials);
 		}
 
 		return {

@@ -310,6 +310,7 @@
 					customerEmail: customerEmail.trim(),
 					customerName: customerName.trim() || undefined,
 					memorialId: memorial.id,
+					kind: 'booking',
 					sendEmail,
 					items: bookingItems.map((item) => ({
 						name: item.name,

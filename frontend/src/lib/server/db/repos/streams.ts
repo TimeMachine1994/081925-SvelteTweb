@@ -1,5 +1,6 @@
-import { FieldValue } from 'firebase-admin/firestore';
+import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import type { MuxRecording, Stream } from '$lib/types/stream';
+import { parseScheduleTime } from '$lib/utils/scheduleTime';
 import { adminDb, normalizeDoc, stripUndefined } from './_shared';
 
 const COLLECTION = 'streams';
@@ -49,25 +50,54 @@ export async function listLive(): Promise<StreamRecord[]> {
 }
 
 /**
- * Streams scheduled to start within `[fromIso, toIso]` — a single-field
- * range + orderBy on `scheduledStartTime`, which Firestore serves from its
- * automatic per-field index (no composite index needed). Deleted streams are
- * filtered out in JS rather than adding a second `where`, which would force
- * a composite index.
+ * Streams scheduled to start within `[fromIso, toIso]`.
+ *
+ * `scheduledStartTime` is stored inconsistently: UTC ISO strings, timezone-less
+ * wall-clock strings in business time (`2026-11-13T08:30:00`), and sometimes
+ * Firestore Timestamps. Comparing those as raw strings against a UTC bound
+ * shifts wall-clock values by the UTC offset, so we fetch a padded window with
+ * single-field range queries (served by Firestore's automatic per-field index,
+ * no composite index needed), parse each value with `parseScheduleTime`, and
+ * filter precisely in JS. Returned `scheduledStartTime` values are normalized
+ * to UTC ISO strings.
  */
 export async function listScheduledBetween(fromIso: string, toIso: string): Promise<StreamRecord[]> {
-	try {
-		const snap = await adminDb
-			.collection(COLLECTION)
-			.where('scheduledStartTime', '>=', fromIso)
-			.where('scheduledStartTime', '<=', toIso)
-			.orderBy('scheduledStartTime', 'asc')
-			.get();
-		return snap.docs.map((d) => mapStream(d.id, d.data())).filter((s) => !(s as any).isDeleted);
-	} catch (err) {
-		console.error('[streams.listScheduledBetween] Query failed:', err);
-		return [];
+	const from = new Date(fromIso);
+	const to = new Date(toIso);
+	const DAY = 24 * 60 * 60 * 1000;
+	const padFrom = new Date(from.getTime() - DAY);
+	const padTo = new Date(to.getTime() + DAY);
+
+	const run = async (label: string, lo: unknown, hi: unknown) => {
+		try {
+			const snap = await adminDb
+				.collection(COLLECTION)
+				.where('scheduledStartTime', '>=', lo)
+				.where('scheduledStartTime', '<=', hi)
+				.get();
+			return snap.docs;
+		} catch (err) {
+			console.error(`[streams.listScheduledBetween] ${label} query failed:`, err);
+			return [];
+		}
+	};
+
+	const [stringDocs, timestampDocs] = await Promise.all([
+		run('string', padFrom.toISOString().slice(0, 10), `${padTo.toISOString().slice(0, 10)}\uf8ff`),
+		run('timestamp', Timestamp.fromDate(padFrom), Timestamp.fromDate(padTo))
+	]);
+
+	const byId = new Map<string, StreamRecord>();
+	for (const doc of [...stringDocs, ...timestampDocs]) {
+		const data = doc.data();
+		if (data.isDeleted) continue;
+		const start = parseScheduleTime(data.scheduledStartTime);
+		if (!start || start < from || start > to) continue;
+		byId.set(doc.id, { ...mapStream(doc.id, data), scheduledStartTime: start.toISOString() });
 	}
+	return [...byId.values()].sort((a, b) =>
+		String(a.scheduledStartTime).localeCompare(String(b.scheduledStartTime))
+	);
 }
 
 /** Used by the Mux webhook to resolve a live stream event to our stream document. */

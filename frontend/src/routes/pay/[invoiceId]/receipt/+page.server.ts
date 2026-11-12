@@ -1,5 +1,6 @@
 import type { PageServerLoad } from './$types';
-import { getInvoice, markPaid } from '$lib/server/db/repos/invoices';
+import { getInvoice } from '$lib/server/db/repos/invoices';
+import { applyInvoicePaid } from '$lib/server/invoicePayments';
 import { stripe } from '$lib/server/stripe';
 
 export const load: PageServerLoad = async ({ params, url }) => {
@@ -28,14 +29,22 @@ export const load: PageServerLoad = async ({ params, url }) => {
 			try {
 				const session = await stripe.checkout.sessions.retrieve(sessionId);
 
-				if (session.payment_status === 'paid') {
+				// The session must belong to THIS invoice and cover its full amount —
+				// otherwise any paid session id could mark any invoice paid.
+				const matchesInvoice =
+					session.metadata?.invoiceId === invoiceId && session.amount_total === invoice.total;
+
+				if (session.payment_status === 'paid' && !matchesInvoice) {
+					console.warn(`⚠️ Receipt: session ${sessionId} does not match invoice ${invoiceId}`);
+				}
+
+				if (session.payment_status === 'paid' && matchesInvoice) {
 					const paymentIntentId =
 						typeof session.payment_intent === 'string'
 							? session.payment_intent
 							: session.payment_intent?.id;
 
-					// Update invoice status
-					await markPaid(invoiceId, { paymentIntentId });
+					await applyInvoicePaid(invoice, { paymentIntentId, stripeSessionId: session.id });
 
 					invoice.status = 'paid';
 					invoice.paidAt = new Date().toISOString();

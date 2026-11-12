@@ -8,11 +8,9 @@
 	import DevQuickLogin from '$lib/components/DevQuickLogin.svelte';
 	import NavProgress from '$lib/components/NavProgress.svelte';
 	import { getTheme } from '$lib/design-tokens/minimal-modern-theme';
-	import { initCrazyEggSurveyBlocker } from '$lib/utils/suppressCrazyEggSurvey';
 
 	import { user } from '$lib/auth';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
 	import type { LayoutData } from './$types';
 	import type { Snippet } from 'svelte';
 
@@ -23,19 +21,10 @@
 	$effect(() => {
 		user.set(data.user);
 	});
-
-	onMount(() => {
-		initCrazyEggSurveyBlocker();
-	});
 </script>
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
-	<script
-		type="text/javascript"
-		src="//script.crazyegg.com/pages/scripts/0130/3684.js"
-		async
-	></script>
 </svelte:head>
 
 <NavProgress />

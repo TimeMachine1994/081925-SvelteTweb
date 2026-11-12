@@ -12,7 +12,7 @@
 
 ## Third-party scripts
 
-- CrazyEgg (account `0130`, script `3684`, loaded in `frontend/src/routes/+layout.svelte`) is installed site-wide for heatmaps/recordings. Its remotely-configured "Surveys" add-on shows a "How can we improve this page?" popup; we don't currently have CrazyEgg dashboard access to disable it at the source, so `frontend/src/lib/utils/suppressCrazyEggSurvey.ts` (invoked from `+layout.svelte`'s `onMount`) is a best-effort client-side stopgap that detects and hides the survey widget. Once dashboard access is recovered, disable the survey under Add-ons -> Surveys — that's the authoritative fix, and the stopgap can then be removed (or left as a harmless safety net).
+- CrazyEgg was removed site-wide (Nov 2026) — its survey popup was hurting the site, especially on mobile. Do not re-add third-party heatmap/survey scripts without approval.
 - reCAPTCHA v3 (`frontend/src/lib/components/RecaptchaProvider.svelte`) is loaded globally but skips loading/hides its badge under `/admin/**`, since no admin route calls `executeRecaptcha` (only `/register`, `/register/loved-one`, `/contact`, `/book-demo`, `/profile` do). If a future admin feature needs reCAPTCHA, remove the `/admin` exclusion there.
 
 ## Database (Firestore -> Turso migration in progress)

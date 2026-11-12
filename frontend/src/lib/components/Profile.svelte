@@ -61,6 +61,9 @@
 		mounted = true;
 	});
 
+	const formatInvoiceAmount = (cents: number) =>
+		new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(cents / 100);
+
 	function getRoleInfo(role: string) {
 		switch (role) {
 			case 'admin':
@@ -361,6 +364,53 @@
 												{/if}
 											</div>
 										</div>
+
+										{#if userRole === 'owner' && memorial.invoices?.length}
+											<div class="mt-4 border-t border-gray-200 pt-4">
+												<h4 class="mb-2 text-sm font-semibold text-gray-700">Invoices</h4>
+												<ul class="flex flex-col gap-2">
+													{#each memorial.invoices as invoice (invoice.id)}
+														<li
+															class="flex flex-col gap-2 rounded-xl border border-gray-200 bg-white/70 p-3 sm:flex-row sm:items-center sm:justify-between"
+														>
+															<div class="min-w-0">
+																<div class="flex flex-wrap items-center gap-2">
+																	<span class="font-semibold text-gray-900">
+																		{formatInvoiceAmount(invoice.total)}
+																	</span>
+																	<span
+																		class="rounded-full px-2 py-0.5 text-xs font-medium {invoice.status === 'paid'
+																			? 'bg-green-100 text-green-800'
+																			: 'bg-amber-100 text-amber-800'}"
+																	>
+																		{invoice.status === 'paid' ? 'Paid' : 'Payment due'}
+																	</span>
+																</div>
+																<div class="truncate text-xs text-gray-500">
+																	{new Date(invoice.paidAt || invoice.createdAt).toLocaleDateString()} •
+																	{invoice.items.map((i: { name: string }) => i.name).join(', ')}
+																</div>
+															</div>
+															{#if invoice.status === 'pending'}
+																<a
+																	href={`/pay/${invoice.id}`}
+																	class="flex min-h-[44px] items-center justify-center rounded-xl bg-green-600 px-4 py-2 font-medium text-white transition-all duration-300 hover:shadow-lg"
+																>
+																	Pay now
+																</a>
+															{:else}
+																<a
+																	href={`/pay/${invoice.id}/receipt`}
+																	class="flex min-h-[44px] items-center justify-center rounded-xl border border-gray-300 bg-white px-4 py-2 font-medium text-gray-700 transition-all duration-300 hover:bg-gray-50"
+																>
+																	View receipt
+																</a>
+															{/if}
+														</li>
+													{/each}
+												</ul>
+											</div>
+										{/if}
 									</div>
 								{/each}
 							</div>

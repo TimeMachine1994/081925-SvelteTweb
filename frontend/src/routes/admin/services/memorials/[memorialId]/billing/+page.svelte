@@ -3,6 +3,7 @@
 	import CustomPricingEditor from '$lib/components/admin/CustomPricingEditor.svelte';
 	import AdminScheduleEditor from '$lib/components/admin/AdminScheduleEditor.svelte';
 	import ScheduleRequestsPanel from '$lib/components/admin/ScheduleRequestsPanel.svelte';
+	import MemorialInvoicesPanel from '$lib/components/admin/MemorialInvoicesPanel.svelte';
 	import { Card, SectionHeader, Button, Badge } from '$lib/components/admin/ui';
 	import { adminToast } from '$lib/stores/adminToast';
 
@@ -148,6 +149,8 @@
 		</div>
 	{/if}
 </Card>
+
+<MemorialInvoicesPanel memorial={data.memorial} invoices={data.invoices} />
 
 <ScheduleRequestsPanel requests={scheduleRequests} />
 

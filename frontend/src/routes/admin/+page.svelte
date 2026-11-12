@@ -20,6 +20,7 @@
 	import { adminToast } from '$lib/stores/adminToast';
 	import { createLogger } from '$lib/admin/logger';
 	import { memorialPublicUrl } from '$lib/utils/memorial-url';
+	import { BUSINESS_TIMEZONE } from '$lib/utils/scheduleTime';
 
 	const log = createLogger('DashboardPage');
 
@@ -83,17 +84,37 @@
 	function dayLabel(iso: string | null): string {
 		if (!iso) return 'Date TBD';
 		return new Date(iso).toLocaleDateString(undefined, {
+			timeZone: BUSINESS_TIMEZONE,
 			weekday: 'long',
 			month: 'long',
 			day: 'numeric'
 		});
 	}
 
-	// Groups an ascending-sorted stream list by calendar day for display.
-	function groupByDay<T extends { scheduledStartTime: string | null }>(items: T[]) {
+	// Upcoming times are shown in business (Eastern) time so they match what
+	// families booked, regardless of where the admin's browser is.
+	function formatUpcomingTime(iso: string, timeTbd: boolean): string {
+		const d = new Date(iso);
+		const day = d.toLocaleDateString(undefined, {
+			timeZone: BUSINESS_TIMEZONE,
+			weekday: 'short',
+			month: 'short',
+			day: 'numeric'
+		});
+		if (timeTbd) return `${day} • Time TBD`;
+		const time = d.toLocaleTimeString(undefined, {
+			timeZone: BUSINESS_TIMEZONE,
+			hour: 'numeric',
+			minute: '2-digit'
+		});
+		return `${day}, ${time} ET`;
+	}
+
+	// Groups an ascending-sorted list by business-local calendar day for display.
+	function groupByDay<T extends { startTime: string | null }>(items: T[]) {
 		const groups: { label: string; items: T[] }[] = [];
 		for (const item of items) {
-			const label = dayLabel(item.scheduledStartTime);
+			const label = dayLabel(item.startTime);
 			const last = groups[groups.length - 1];
 			if (last && last.label === label) {
 				last.items.push(item);
@@ -197,22 +218,34 @@
 								{group.label}
 							</h3>
 							<div class="flex flex-col gap-2">
-								{#each group.items as stream (stream.id)}
+								{#each group.items as item (item.key)}
 									<a
-										href={`/admin/services/memorials/${stream.memorialId}/broadcast`}
-										class="flex flex-col gap-1 rounded-md border border-slate-200 p-3 hover:border-sky-300 hover:bg-sky-50 sm:flex-row sm:items-center sm:justify-between"
+										href={`/admin/services/memorials/${item.memorialId}/broadcast`}
+										class="flex flex-col gap-1 rounded-md border p-3 hover:border-sky-300 hover:bg-sky-50 sm:flex-row sm:items-center sm:justify-between {item.issue ===
+										'no_stream'
+											? 'border-red-200 bg-red-50/40'
+											: 'border-slate-200'}"
 									>
 										<div class="min-w-0">
-											<div class="font-medium text-slate-800">{stream.memorialName}</div>
+											<div class="font-medium text-slate-800">{item.memorialName}</div>
 											<div class="text-xs text-slate-500">
-												{formatTime(stream.scheduledStartTime)} • {stream.sourceType === 'upload'
-													? 'Premiere'
-													: 'Live broadcast'}
+												{formatUpcomingTime(item.startTime, item.timeTbd)} •
+												{#if item.kind === 'stream'}
+													{item.sourceType === 'upload' ? 'Premiere' : 'Live broadcast'}
+												{:else}
+													Service date (from booking)
+												{/if}
 											</div>
 										</div>
-										<Badge variant={stream.videoReady ? 'success' : 'warning'}>
-											{stream.videoReady ? 'Ready' : 'Not ready'}
-										</Badge>
+										{#if item.issue === 'no_stream'}
+											<Badge variant="danger">No livestream set up</Badge>
+										{:else if item.issue === 'stream_unscheduled'}
+											<Badge variant="warning">Stream time not set</Badge>
+										{:else}
+											<Badge variant={item.videoReady ? 'success' : 'warning'}>
+												{item.videoReady ? 'Ready' : 'Not ready'}
+											</Badge>
+										{/if}
 									</a>
 								{/each}
 							</div>

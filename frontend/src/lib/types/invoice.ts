@@ -5,6 +5,14 @@ export interface InvoiceItem {
 	total: number; // quantity * price in cents
 }
 
+/**
+ * - `booking`: the main package invoice for a memorial (created from
+ *   Schedule & Billing). Paying it marks the memorial paid.
+ * - `additional`: add-on / custom charges. Does not change the memorial's paid flag.
+ * Legacy invoices with no `kind` are treated as `booking`.
+ */
+export type InvoiceKind = 'booking' | 'additional';
+
 export interface Invoice {
 	id: string;
 	items: InvoiceItem[];
@@ -12,6 +20,8 @@ export interface Invoice {
 	customerEmail: string;
 	customerName?: string;
 	status: 'pending' | 'paid' | 'expired' | 'cancelled';
+	kind?: InvoiceKind;
+	note?: string; // Internal admin note
 	createdAt: string; // ISO string
 	paidAt?: string; // ISO string
 	createdBy: string; // Admin UID who created it
@@ -19,6 +29,9 @@ export interface Invoice {
 	stripeSessionId?: string;
 	paymentIntentId?: string;
 	expiresAt?: string; // Optional expiration date (ISO string)
+	cancelledAt?: string;
+	cancelledBy?: string;
+	lastSentAt?: string;
 }
 
 export interface CreateInvoiceRequest {
@@ -27,6 +40,8 @@ export interface CreateInvoiceRequest {
 	customerName?: string;
 	memorialId?: string;
 	sendEmail?: boolean; // Whether to send invoice email
+	kind?: InvoiceKind;
+	note?: string;
 }
 
 export interface CreateInvoiceResponse {
@@ -42,4 +57,8 @@ export interface InvoicePublicData {
 	customerName?: string;
 	status: Invoice['status'];
 	createdAt: string; // ISO string for public
+}
+
+export function invoiceKind(invoice: Pick<Invoice, 'kind'>): InvoiceKind {
+	return invoice.kind ?? 'booking';
 }
